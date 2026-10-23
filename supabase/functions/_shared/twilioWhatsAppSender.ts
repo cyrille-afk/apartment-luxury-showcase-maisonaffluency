@@ -24,6 +24,7 @@ export interface WhatsAppSendResult {
 
 export interface WhatsAppSendOptions {
   body: string;
+  recipients?: string[];
   /** Twilio Content SID for approved WhatsApp templates. */
   contentSid?: string;
   /** Variables paired with ContentSid. */
@@ -137,7 +138,7 @@ export async function sendAdminWhatsApp(
   const from = Deno.env.get("TWILIO_WHATSAPP_FROM")?.trim();
   const lovableKey = Deno.env.get("LOVABLE_API_KEY")?.trim();
   const twilioKey = Deno.env.get("TWILIO_API_KEY")?.trim();
-  const recipients = await getAdminWhatsAppRecipients();
+  const recipients = opts.recipients ?? await getAdminWhatsAppRecipients();
 
   if (!recipients.length || !from || !lovableKey || !twilioKey) {
     return {
@@ -207,6 +208,7 @@ export async function sendTradeRequestWhatsApp(opts: {
   applicant: string;
   email: string;
   phone: string;
+  recipients?: string[];
 }): Promise<WhatsAppSendResult & { usedTemplate: boolean; templateStatus: string }> {
   const clean = (v?: string | null) => (v ?? "").replace(/\s+/g, " ").trim();
   const statusCallback = getWhatsAppStatusCallback();
@@ -214,6 +216,7 @@ export async function sendTradeRequestWhatsApp(opts: {
   if (templateStatus === "approved") {
     const r = await sendAdminWhatsApp({
       body: opts.body,
+      recipients: opts.recipients,
       contentSid: TRADE_REQUEST_TEMPLATE_SID,
       contentVariables: {
         "1": clean(opts.studio) || "Not provided",
@@ -224,9 +227,9 @@ export async function sendTradeRequestWhatsApp(opts: {
       statusCallback,
     });
     if (r.ok) return { ...r, usedTemplate: true, templateStatus };
-    const fb = await sendAdminWhatsApp({ body: opts.body, statusCallback });
+    const fb = await sendAdminWhatsApp({ body: opts.body, statusCallback, recipients: opts.recipients });
     return { ...fb, error: [r.error, fb.error].filter(Boolean).join(" | ") || null, usedTemplate: false, templateStatus };
   }
-  const r = await sendAdminWhatsApp({ body: opts.body, statusCallback });
+  const r = await sendAdminWhatsApp({ body: opts.body, statusCallback, recipients: opts.recipients });
   return { ...r, usedTemplate: false, templateStatus };
 }

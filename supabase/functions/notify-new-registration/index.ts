@@ -1,93 +1,67 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { sendLovableEmail } from "../_shared/lovableEmail.ts";
+import { createClient } from "npm:@supabase/supabase-js@2";
+import { requireCronOrAdmin } from "../_shared/auth.ts";
+import { getAdminWhatsAppRecipients, sendTradeRequestWhatsApp } from "../_shared/twilioWhatsAppSender.ts";
+import { alertCopy, pendingRecipients, ADMIN_EMAILS } from "./rules.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
-
-const ADMIN_EMAILS = [
-  "cyrille@maisonaffluency.com",
-  "gregoire@maisonaffluency.com",
-];
-
-/** Escape HTML special characters to prevent injection in admin email bodies. */
-function escapeHtml(input: unknown): string {
-  if (input === null || input === undefined) return "";
-  return String(input)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
-serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+const headers = { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" };
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers });
+  if (req.method !== "POST") return Response.json({ error: "Method not allowed" }, { status: 405 });
+  const auth = await requireCronOrAdmin(req, "notify-new-registration");
+  if (!auth.ok) return Response.json(auth.body, { status: auth.status, headers });
+  const url = Deno.env.get("SUPABASE_URL");
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !key) return Response.json({ error: "Configuration unavailable" }, { status: 503 });
+  const db = createClient(url, key, { auth: { persistSession: false }, global: { fetch: (input, init) => {
+    const h = new Headers(init?.headers);
+    if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) h.delete("Authorization");
+    h.set("apikey", key);
+    return fetch(input, { ...init, headers: h });
+  } } });
+  const { data: events, error } = await db.rpc("claim_registration_alerts");
+  if (error) return Response.json({ error: "Could not claim alerts" }, { status: 503 });
+  for (const event of events ?? []) {
+    const errors: string[] = [];
+    const emailDone = event.email_done ?? {};
+    const waDone = event.whatsapp_done ?? {};
+    try {
+      if (!["profiles", "trade_accounts", "trade_applications"].includes(event.source_table)) throw new Error("Invalid source");
+      const result = await db.from(event.source_table).select("*").eq("id", event.source_id).maybeSingle();
+      if (result.error || !result.data) throw new Error("Saved submission unavailable");
+      let row = result.data;
+      if (event.source_table === "profiles") {
+        const { data, error: authError } = await db.auth.admin.getUserById(event.source_id);
+        if (authError || !data.user) throw new Error("Saved account unavailable");
+        row = { ...row, ...data.user.user_metadata, email: data.user.email };
+      } else if (event.source_table === "trade_applications" && row.user_id) {
+        const { data: profile } = await db.from("profiles").select("email,first_name,last_name").eq("id", row.user_id).maybeSingle();
+        row = { ...profile, ...row };
+      }
+      const copy = alertCopy(event.event_type, row);
+      for (const recipient of pendingRecipients(ADMIN_EMAILS, emailDone)) {
+        const res = await db.functions.invoke("send-transactional-email", { body: {
+          templateName: "inquiry-notification", recipientEmail: recipient,
+          idempotencyKey: `registration-alert-${event.id}-${recipient}`,
+          templateData: { name: copy.name, company: copy.studio, email: copy.email, phone: copy.phone, subject: copy.title, message: copy.text },
+        } });
+        if (res.error || res.data?.error) errors.push(`Email enqueue failed: ${recipient}`);
+        else emailDone[recipient] = true;
+        const saved = await db.from("registration_alert_events").update({ email_done: emailDone }).eq("id", event.id);
+        if (saved.error) throw new Error("Could not save email acknowledgement");
+      }
+      const recipients = await getAdminWhatsAppRecipients();
+      if (!recipients.length) errors.push("No WhatsApp recipients configured");
+      for (const recipient of pendingRecipients(recipients, waDone)) {
+        const result = await sendTradeRequestWhatsApp({ body: copy.text, studio: event.event_type === "new_account" ? `Account registration — ${copy.studio}` : copy.studio, applicant: copy.name, email: copy.email, phone: copy.phone, recipients: [recipient] });
+        if (result.ok) waDone[recipient] = result.sid || true;
+        else errors.push(result.error || "WhatsApp failed");
+        const saved = await db.from("registration_alert_events").update({ whatsapp_done: waDone }).eq("id", event.id);
+        if (saved.error) throw new Error("Could not save WhatsApp acknowledgement");
+        await db.from("admin_alert_log").insert({ channel: "twilio_whatsapp", event: event.event_type, status: result.ok ? "queued" : "failed", provider_message_id: result.sid, payload: { alert_event_id: event.id, source_id: event.source_id }, error: result.error });
+      }
+    } catch (e) { errors.push(e instanceof Error ? e.message : "Alert failed"); }
+    await db.from("registration_alert_events").update({ email_done: emailDone, whatsapp_done: waDone, status: errors.length ? (event.attempts >= 5 ? "failed" : "pending") : "sent", lease_until: null, next_attempt_at: new Date(Date.now() + 60000).toISOString(), last_error: errors.join(" | ").slice(0, 2000) || null }).eq("id", event.id);
   }
-
-  // Require service-role bearer (the database trigger that legitimately calls
-  // this function passes it). Blocks unauthenticated callers from spamming
-  // admins or injecting HTML through the registration notification path.
-  const authHeader = req.headers.get("Authorization") || "";
-  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-  if (!serviceKey || authHeader !== `Bearer ${serviceKey}`) {
-    return new Response(
-      JSON.stringify({ error: "Unauthorized" }),
-      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
-  }
-
-  try {
-    const { email, first_name, last_name, company } = await req.json();
-
-    const displayNameRaw = [first_name, last_name].filter(Boolean).join(" ") || "Unknown";
-    const displayName = escapeHtml(displayNameRaw);
-    const emailSafe = escapeHtml(email || "N/A");
-    const companySafe = company ? escapeHtml(company) : "";
-    const subjectName = String(displayNameRaw).replace(/[\r\n]+/g, " ").slice(0, 120);
-
-    const html = `
-      <div style="font-family: 'Georgia', serif; max-width: 600px; margin: 0 auto; padding: 32px; background: #faf9f7;">
-        <h2 style="font-family: 'Georgia', serif; font-size: 20px; color: #1a1a1a; margin-bottom: 24px;">
-          New User Registration
-        </h2>
-        <div style="background: #ffffff; border: 1px solid #e8e5e0; border-radius: 4px; padding: 24px;">
-          <p style="font-size: 14px; color: #444; line-height: 1.6; margin: 0 0 12px;">
-            A new user has just registered on Maison Affluency:
-          </p>
-          <table style="width: 100%; font-size: 14px; color: #333; line-height: 1.8;">
-            <tr><td style="font-weight: 600; width: 100px; vertical-align: top;">Name</td><td>${displayName}</td></tr>
-            <tr><td style="font-weight: 600; vertical-align: top;">Email</td><td>${emailSafe}</td></tr>
-            ${companySafe ? `<tr><td style="font-weight: 600; vertical-align: top;">Company</td><td>${companySafe}</td></tr>` : ""}
-          </table>
-        </div>
-        <p style="font-size: 11px; color: #999; margin-top: 24px; text-align: center;">
-          Maison Affluency — Admin Notification
-        </p>
-      </div>
-    `;
-
-    const emailResult = await sendLovableEmail({
-      to: ADMIN_EMAILS,
-      subject: `New Registration: ${subjectName}`,
-      html,
-      label: "new-registration-notification",
-    });
-
-    const errors = emailResult.failed.map((f) => `${f.email}: ${f.error}`);
-
-    return new Response(
-      JSON.stringify({ success: true, errors }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
-  } catch (error: any) {
-    console.error("Error in notify-new-registration:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
-  }
+  // Stop the retry timer only after drain; never recursively dispatch here.
+  return Response.json({ processed: events?.length ?? 0 }, { headers });
 });
