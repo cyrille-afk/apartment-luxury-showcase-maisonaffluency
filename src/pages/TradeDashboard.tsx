@@ -8,6 +8,7 @@ import {
   Clock, FileDown, MapPin, Box, Users, Sparkles, Clapperboard, Play, ArrowUpRight,
 } from "lucide-react";
 import { startFelixTour } from "@/components/trade/felixTourUtils";
+import { DashboardWelcomeGuide } from "@/components/trade/DashboardWelcomeGuide";
 import { WhiteLabelTourBanner } from "@/components/trade/WhiteLabelTourBanner";
 import { ActivityRowSkeleton, BrandFolderSkeleton } from "@/components/trade/skeletons";
 import { MostPopularProducts } from "@/components/trade/MostPopularProducts";
@@ -432,6 +433,8 @@ const TradeDashboard = () => {
           })()}
         </div>
       </div>
+
+      <DashboardWelcomeGuide />
 
       <nav aria-label="Dashboard quick actions" data-trade-sensitive className="mb-8 grid grid-cols-2 gap-2 md:hidden">
         {[
