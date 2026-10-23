@@ -184,6 +184,9 @@ function RootShell({ children }: { children: ReactNode }) {
           rel="stylesheet"
           href={appCss}
           media={isHome && !hydrated ? "print" : undefined}
+          // React 19 hoists stylesheet links by precedence; without it the
+          // client reorders this tag vs the SSR head and hydration fails.
+          precedence="default"
           suppressHydrationWarning
         />
         {isHome && (
