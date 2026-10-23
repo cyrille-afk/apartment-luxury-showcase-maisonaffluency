@@ -30,6 +30,10 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import {
+  SignOutConfirmDialog,
+  useSignOutConfirmation,
+} from "@/components/trade/SignOutConfirmDialog";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { categoryUrl } from "@/lib/categorySlugs";
@@ -396,6 +400,11 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
     await signOut();
     navigate("/trade/login", { replace: true });
   };
+  const {
+    open: signOutConfirmOpen,
+    setOpen: setSignOutConfirmOpen,
+    requestSignOut: requestTradeSignOut,
+  } = useSignOutConfirmation(() => closeMobileMenu());
   const visibleLeftNavItems = leftNavItems;
   const { items: pinItems, setIsComparing } = useCompare();
   const [authGateOpen, setAuthGateOpen] = useState(false);
@@ -1080,7 +1089,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                         My Quotes
                       </button>
                       <button
-                        onClick={() => { closeMobileMenu(); void handleTradeSignOut(); }}
+                        onClick={requestTradeSignOut}
                         className="flex min-h-[48px] items-center gap-3 text-left font-body text-[15px] text-destructive transition-colors"
                       >
                         <LogOut className="h-4 w-4 shrink-0" />
@@ -1521,6 +1530,11 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
         <AuthGateDialog open={authGateOpen} onClose={() => setAuthGateOpen(false)} action="access your account" initialMode={authGateMode} />
       </React.Suspense>
     )}
+    <SignOutConfirmDialog
+      open={signOutConfirmOpen}
+      onOpenChange={setSignOutConfirmOpen}
+      onConfirm={() => void handleTradeSignOut()}
+    />
     </>;
 };
 export default Navigation;

@@ -16,6 +16,7 @@ import { TRADE_SANDBOX_ONLY } from "@/lib/tradeSandboxOnly";
 import { Scan } from "lucide-react";
 import { useProjects, pushRecentProject } from "@/hooks/useProjects";
 import { projectDefaultUrl, useProjectBoardTree } from "@/hooks/useProjectBoardTree";
+import { SignOutConfirmDialog, useSignOutConfirmation } from "@/components/trade/SignOutConfirmDialog";
 
 const coreItems = [
   { title: "Dashboard", url: "/trade", icon: LayoutDashboard, end: true },
@@ -66,8 +67,13 @@ export function TradeMobileMenu({ open, onOpenChange }: TradeMobileMenuProps) {
     setTimeout(() => navigate(url), 150);
   };
 
-  const handleSignOut = async () => {
-    onOpenChange(false);
+  const {
+    open: confirmOpen,
+    setOpen: setConfirmOpen,
+    requestSignOut,
+  } = useSignOutConfirmation(() => onOpenChange(false));
+
+  const confirmSignOut = async () => {
     await signOut();
     navigate("/trade/login");
   };
@@ -225,7 +231,7 @@ export function TradeMobileMenu({ open, onOpenChange }: TradeMobileMenuProps) {
               </div>
             )}
             <button
-              onClick={handleSignOut}
+              onClick={requestSignOut}
               className="flex items-center gap-3 w-full py-3 font-body text-[15px] tracking-wide text-muted-foreground hover:text-foreground transition-colors"
             >
               <LogOut className="h-4 w-4 shrink-0" />
@@ -234,6 +240,11 @@ export function TradeMobileMenu({ open, onOpenChange }: TradeMobileMenuProps) {
           </div>
         </div>
       </SheetContent>
+      <SignOutConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        onConfirm={() => void confirmSignOut()}
+      />
     </Sheet>
   );
 }
