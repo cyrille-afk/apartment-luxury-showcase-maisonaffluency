@@ -1058,7 +1058,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   >
                     <span className="flex items-center gap-2">
                       Trade
-                      <span aria-hidden="true" className="rounded-full border border-[hsl(var(--gold))]/25 bg-[hsl(var(--gold))]/10 px-1.5 py-[2px] font-body text-[9px] font-medium uppercase leading-none tracking-[0.15em] text-[hsl(var(--gold))]">PRO</span>
+                      <span aria-hidden="true" className="rounded-full border border-[hsl(var(--gold))]/30 bg-[hsl(var(--gold))]/15 px-1.5 py-[2px] font-body text-[9px] font-medium uppercase leading-none tracking-[0.15em] text-[hsl(var(--gold))]">PRO</span>
                     </span>
 
                     <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${mobileTradeExpanded ? "rotate-90" : ""}`} />
