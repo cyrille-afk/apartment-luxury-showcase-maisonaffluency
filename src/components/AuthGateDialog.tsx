@@ -120,6 +120,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
       password,
       options: {
         data: {
+          registration_origin: "public_account",
           first_name: firstName,
           last_name: lastName,
           is_designer: isDesigner,
