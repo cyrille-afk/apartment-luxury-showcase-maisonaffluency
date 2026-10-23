@@ -333,7 +333,8 @@ function BackToTopButton() {
 }
 
 const TradeLayout = () => {
-  const { user, loading, sessionExpired, applicationStatus, isAdmin, isTradeUser, profile, rolesLoaded } = useAuth();
+  const { user, loading, sessionExpired, applicationStatus, isAdmin, isTradeUser, profile, rolesLoaded, lookupFailed, refreshRoles, signOut } = useAuth();
+  const [retryingRecovery, setRetryingRecovery] = useState(false);
   // Once the shell has rendered, never unmount it again for a transient auth
   // re-check (tab focus fires SIGNED_IN/TOKEN_REFRESHED, flipping `loading`).
   // Unmounting the Outlet here destroyed open editors mid-edit.
@@ -591,6 +592,47 @@ const TradeLayout = () => {
             </div>
           </header>
           <main className={`trade-editorial-main flex-1 ${presentation && (productRoute || designerRoute) ? "p-0" : fullBleed ? "min-h-0 overflow-hidden p-0" : "p-4 md:p-8 lg:p-12 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-10 lg:pb-14"}`}>
+            {lookupFailed && (
+              <div role="alert" className="mb-6 rounded-md border border-accent/40 bg-accent/10 px-5 py-4">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="min-w-0 max-w-xl">
+                    <p className="font-body text-sm font-semibold text-foreground">We couldn't load your trade settings</p>
+                    <p className="mt-1 font-body text-sm text-muted-foreground">
+                      This is usually a brief connection hiccup. Try again — if it persists, refresh the page or sign in again. Your account, tier and projects are safe.
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 flex-wrap items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="default"
+                      size="sm"
+                      disabled={retryingRecovery}
+                      onClick={async () => {
+                        setRetryingRecovery(true);
+                        try { await refreshRoles(); } finally { setRetryingRecovery(false); }
+                      }}
+                    >
+                      {retryingRecovery ? "Retrying…" : "Try again"}
+                    </Button>
+                    <Button type="button" variant="outline" size="sm" onClick={() => window.location.reload()}>
+                      Refresh page
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={async () => {
+                        await signOut();
+                        const next = `${window.location.pathname}${window.location.search}`;
+                        window.location.href = `/trade/login?next=${encodeURIComponent(next)}`;
+                      }}
+                    >
+                      Sign in again
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
             <ToolsBreadcrumbProvider>
               {!fullBleed && !presentation && location.pathname.replace(/\/+$/, "") !== "/trade/the-collection" && (
                  <div data-trade-sensitive className="relative md:sticky md:top-16 z-20 -mx-4 md:-mx-8 lg:-mx-12 -mt-4 md:-mt-8 lg:-mt-12 mb-4 bg-background/95 backdrop-blur-sm px-4 md:px-8 lg:px-12 pt-4 md:pt-5 pb-3 border-b border-border/40">
