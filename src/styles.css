@@ -58,7 +58,19 @@ html[data-felix-tour-step="projects"] [data-tour-sidebar-anchor="projects"]::aft
   50% { opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) {
-  [data-tour-sidebar-anchor]::after { animation: none !important; }
+  [data-tour-sidebar-anchor]::after { animation: none !important; opacity: 0.65; }
+  [data-felix-tour-card], [data-felix-tour-card] *, [data-felix-spotlight], [data-felix-spotlight] * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+html[data-felix-reduced-motion="true"] [data-tour-sidebar-anchor]::after {
+  animation: none !important;
+  opacity: 0.65;
+}
+html[data-felix-reduced-motion="true"] :is([data-felix-tour-card], [data-felix-tour-card] *, [data-felix-spotlight], [data-felix-spotlight] *) {
+  animation: none !important;
+  transition: none !important;
 }
 
 /* Trade routes never mount or expose the third-party floating WhatsApp launcher.

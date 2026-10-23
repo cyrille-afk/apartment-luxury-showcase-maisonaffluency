@@ -12,6 +12,7 @@ import { useTierVolumeLocale, type TierVolumeModel } from "@/hooks/useTierVolume
 import { useStudio } from "@/hooks/useStudio";
 import { onboardingProjectForMarket } from "@/lib/onboardingProject";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { useDesktopTradeTour } from "./useDesktopTradeTour";
 
 /** Format a tier discount fraction (0.15) as "15%". */
@@ -341,6 +342,26 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const [open, setOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [systemReducedMotion, setSystemReducedMotion] = useState(false);
+  const [motionPreference, setMotionPreference] = useState(false);
+  const reducedMotion = systemReducedMotion || motionPreference;
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setSystemReducedMotion(media.matches);
+    sync();
+    try { setMotionPreference(localStorage.getItem("ma-felix-reduced-motion-v1") === "true"); } catch { /* storage unavailable */ }
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
+  const changeMotionPreference = (value: boolean) => {
+    setMotionPreference(value);
+    try { localStorage.setItem("ma-felix-reduced-motion-v1", String(value)); } catch { /* storage unavailable */ }
+  };
+  useLayoutEffect(() => {
+    if (open && reducedMotion) document.documentElement.dataset.felixReducedMotion = "true";
+    else delete document.documentElement.dataset.felixReducedMotion;
+    return () => { delete document.documentElement.dataset.felixReducedMotion; };
+  }, [open, reducedMotion]);
   const [position, setPosition] = useState<{ step: number; path: string; rect: Rect; anchor: Rect | null } | null>(null);
   const [viewport, setViewport] = useState({ w: 0, h: 0 });
   const [settled, setSettled] = useState(false);
@@ -502,7 +523,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       }
       if (targets.length && !didScroll) {
         didScroll = true;
-        targets[0].scrollIntoView({ block: current.id === "quotes" ? "nearest" : "center", behavior: ["collection", "quotes", "margin-protection"].includes(current.id) || window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+        targets[0].scrollIntoView({ block: current.id === "quotes" ? "nearest" : "center", behavior: ["collection", "quotes", "margin-protection"].includes(current.id) || document.documentElement.dataset.felixReducedMotion === "true" || window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
       }
       const sidebarTargets = routeReady && current.sidebarAnchor
         ? Array.from(document.querySelectorAll(`[data-tour-sidebar-anchor="${current.sidebarAnchor}"]`))
@@ -703,7 +724,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       setIsPaused(false);
       setCurrentStep((s) => Math.max(0, Math.min(s + direction, FELIX_STEPS.length - 1)));
       transitionTimer.current = null;
-    }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 80);
+    }, reducedMotion || window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 80);
   };
   const next = () => {
     if (!stepDone || !settled || transitioning) return;
@@ -876,6 +897,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         ref={cardRef}
         role="dialog"
         aria-modal="false"
+        data-felix-tour-card
         tabIndex={-1}
         aria-label={`${guideName} — Your Curatorial Guide, step ${currentStep + 1} of ${FELIX_STEPS.length}: ${step.title}`}
         className={cn(
@@ -913,6 +935,11 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
             >
               <X className="h-4 w-4" />
             </button>
+          </div>
+
+          <div className="mt-3 flex items-center justify-between gap-3 border-t border-border pt-3">
+            <label htmlFor="felix-reduced-motion" className="font-body text-xs text-muted-foreground">Reduce motion</label>
+            <Switch id="felix-reduced-motion" aria-label="Reduce motion" checked={reducedMotion} disabled={systemReducedMotion} onCheckedChange={changeMotionPreference} title={systemReducedMotion ? "Enabled by your device preference" : "Reduce tour animation"} />
           </div>
 
           {/* Progress */}
