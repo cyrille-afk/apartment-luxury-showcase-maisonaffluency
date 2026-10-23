@@ -39,10 +39,14 @@ export function quoteDayKey(createdAt: string): string {
 
 export function quoteMatchesFilters(quote: FilterableQuote, f: QuoteFilterState): boolean {
   if (f.status !== "all" && quote.status !== f.status) return false;
-  const day = quoteDayKey(quote.created_at);
-  if (!day) return false;
-  if (f.from && day < f.from) return false;
-  if (f.to && day > f.to) return false;
+  // Only a date bound needs the calendar day; a status-only filter still
+  // reaches rows whose timestamp can't be read.
+  if (f.from || f.to) {
+    const day = quoteDayKey(quote.created_at);
+    if (!day) return false;
+    if (f.from && day < f.from) return false;
+    if (f.to && day > f.to) return false;
+  }
   return true;
 }
 

@@ -50,6 +50,16 @@ const statusConfig: Record<string, { label: string; icon: typeof Clock; classNam
   cancelled: { label: "Cancelled", icon: XCircle, className: "bg-destructive/10 text-destructive" },
 };
 
+const filterPillClass = (active: boolean) =>
+  `inline-flex min-h-[38px] items-center gap-1.5 rounded-full border px-3.5 font-body text-[10px] uppercase tracking-[0.15em] transition-colors ${
+    active
+      ? "border-foreground bg-foreground text-background"
+      : "border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground"
+  }`;
+
+const filterDateInputClass =
+  "min-h-[38px] rounded-md border border-border bg-background px-2.5 py-1 font-body text-xs normal-case tracking-normal text-foreground focus:border-foreground focus:outline-none";
+
 const TradeQuotes = () => {
   const { user } = useAuth();
   const { currentStudio, canEdit } = useStudio();
