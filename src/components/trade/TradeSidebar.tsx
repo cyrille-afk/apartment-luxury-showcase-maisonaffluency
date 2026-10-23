@@ -209,7 +209,19 @@ export function TradeSidebar() {
                           ? "collection"
                           : item.url === "/trade/quotes"
                             ? "quotes"
-                            : undefined
+                            : item.url === "/trade"
+                              ? "dashboard"
+                              : item.url === "/trade/concierge"
+                                ? "concierge"
+                                : item.url === "/trade/tools"
+                                  ? "tools"
+                                  : item.url === "/trade/settings"
+                                    ? "settings"
+                                    : item.url === "/trade/extension-sync"
+                                      ? "extension-sync"
+                                      : item.url === "/trade/beta-feedboard"
+                                        ? "beta-feedboard"
+                                        : undefined
                       }
                       data-felix-target={
                         item.url === "/trade/the-collection"
