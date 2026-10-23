@@ -5,16 +5,19 @@ const storageKey = process.env.LOVABLE_BROWSER_SUPABASE_STORAGE_KEY;
 
 test.use({ viewport: { width: 1946, height: 1181 }, trace: "off", video: "off" });
 
-test("Step 6 to 7 waits for a slow product before declaring its price unavailable", async ({ page }) => {
+for (const loading of ["module", "data"] as const) {
+test(`Step 6 to 7 waits for slow product ${loading} before declaring its price unavailable`, async ({ page }) => {
   test.skip(!session || !storageKey, "Requires a managed trade session.");
   if (!session || !storageKey) return;
   test.setTimeout(120_000);
   let releaseProduct: (() => void) | undefined;
   const productReady = new Promise<void>(resolve => { releaseProduct = resolve; });
-  await page.route("**/src/pages/TradeProductPage.tsx*", async route => {
-    await productReady;
-    await route.continue();
-  });
+  if (loading === "module") {
+    await page.route("**/src/pages/TradeProductPage.tsx*", async route => {
+      await productReady;
+      await route.continue();
+    });
+  }
   await page.goto("/");
   await page.evaluate(([key, value]) => {
     localStorage.setItem(key, value);
@@ -26,6 +29,12 @@ test("Step 6 to 7 waits for a slow product before declaring its price unavailabl
   await page.goto("/trade/the-collection");
   const card = page.locator("[data-felix-tour-card]");
   await expect(card.filter({ hasText: "Client-Safe Presentations" })).toBeVisible({ timeout: 60_000 });
+  if (loading === "data") {
+    await page.route("**/rest/v1/**", async route => {
+      if (route.request().method() === "GET") await productReady;
+      await route.continue();
+    });
+  }
   await card.getByRole("button", { name: "Next", exact: true }).click();
   await expect(page).toHaveURL(/praia-da-granja-coffee-table$/);
   await expect(page.locator("[data-trade-page-loading]").first()).toBeVisible();
@@ -38,6 +47,7 @@ test("Step 6 to 7 waits for a slow product before declaring its price unavailabl
   await expect(card.filter({ hasText: "Professional Quote Generation" })).toBeVisible({ timeout: 30_000 });
   await expect(page.locator('[data-felix-target="quotes-create"]')).toBeVisible();
 });
+}
 
 test("Margin Protection continues into both quote steps without crashing", async ({ page }) => {
   test.skip(!session || !storageKey, "Requires a managed trade session.");
