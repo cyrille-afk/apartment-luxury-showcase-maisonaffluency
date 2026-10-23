@@ -16,7 +16,7 @@ function randomToken(): string {
 
 /** Desktop: mint a one-time token for the signed-in caller (verified from their access token). */
 export const issueMobileSyncToken = createServerFn({ method: "POST" })
-  .inputValidator(z.object({ accessToken: z.string().min(20).max(4096) }))
+  .validator(z.object({ accessToken: z.string().min(20).max(4096) }))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: claims, error } = await supabaseAdmin.auth.getClaims(data.accessToken);
@@ -42,7 +42,7 @@ export const issueMobileSyncToken = createServerFn({ method: "POST" })
 
 /** Phone: atomically consume the token and return a one-time Auth token hash to verify client-side. */
 export const redeemMobileSyncToken = createServerFn({ method: "POST" })
-  .inputValidator(z.object({ token: z.string().min(20).max(128).regex(/^[A-Za-z0-9_-]+$/) }))
+  .validator(z.object({ token: z.string().min(20).max(128).regex(/^[A-Za-z0-9_-]+$/) }))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row } = await supabaseAdmin

@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { Smartphone } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { supabase } from "@/integrations/supabase/client";
+import { issueMobileSyncToken, MOBILE_SYNC_TTL_SECONDS } from "@/lib/mobileSync.functions";
 
 type InstallPromptEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<unknown> };
 
@@ -113,9 +115,9 @@ export function SidebarPwaBadge({ collapsed }: { collapsed: boolean }) {
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
       >
-        <PwaQr size={160} className="mx-auto" />
+        <PwaQr size={160} className="mx-auto" signedIn={open} />
         <p className="mt-3 font-body text-[11px] leading-snug text-muted-foreground">
-          Scan to install Maison Affluency PWA instantly
+          Scan to sign in on your phone instantly — code refreshes every 2 minutes
         </p>
       </PopoverContent>
     </Popover>
