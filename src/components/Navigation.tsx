@@ -1250,11 +1250,11 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                         <p className="font-body text-xs text-muted-foreground truncate">{user.email}</p>
                       </div>
                       <DropdownMenuItem
-                        onClick={() => navigate("/trade")}
+                        onClick={() => navigate("/favorites")}
                         className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
                       >
-                        <User className="h-4 w-4 text-primary" />
-                        <span className="font-body text-sm">My Account</span>
+                        <Heart className="h-4 w-4 text-primary" />
+                        <span className="font-body text-sm">My Favorites &amp; Folders</span>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
@@ -1284,11 +1284,11 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        onClick={() => handleNavClick("/trade-program")}
+                        onClick={() => navigate("/favorites")}
                         className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
                       >
-                        <Briefcase className="h-4 w-4 text-[hsl(var(--gold))]" />
-                        <span className="font-body text-sm">Trade Program</span>
+                        <Heart className="h-4 w-4 text-primary" />
+                        <span className="font-body text-sm">My Favorites &amp; Folders</span>
                       </DropdownMenuItem>
                     </>
                   )}
