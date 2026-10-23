@@ -354,7 +354,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     else delete document.documentElement.dataset.felixReducedMotion;
     return () => { delete document.documentElement.dataset.felixReducedMotion; };
   }, [open, reducedMotion]);
-  const [position, setPosition] = useState<{ step: number; path: string; rect: Rect; anchor: Rect | null; secondary: Rect | null; obstacles: TourRect[] } | null>(null);
+  const [position, setPosition] = useState<{ step: number; path: string; rect: Rect; anchor: Rect | null; secondary: Rect | null; obstacles: TourRect[]; softObstacles: TourRect[] } | null>(null);
   const [viewport, setViewport] = useState({ w: 0, h: 0 });
   const [measuredCardHeight, setMeasuredCardHeight] = useState(0);
   const [settled, setSettled] = useState(false);
@@ -601,7 +601,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         lastSecondary = secondaryNext;
         lastObstacles = obstacleKey;
         setPosition((previous) => previous?.step === currentStep && previous.path === location.pathname && sameRect(previous.rect, r) && !anchorChanged && !secondaryChanged && !obstaclesChanged
-          ? previous : { step: currentStep, path: location.pathname, rect: r, anchor, secondary: secondaryNext, obstacles });
+          ? previous : { step: currentStep, path: location.pathname, rect: r, anchor, secondary: secondaryNext, obstacles, softObstacles });
         setViewport((previous) => previous.w === window.innerWidth && previous.h === window.innerHeight
           ? previous : { w: window.innerWidth, h: window.innerHeight });
         fallback = r.width === 0 && r.height === 0 && !next;
@@ -912,11 +912,15 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
   // Clamp every placement branch, leaving clearance for the arrow and shadow.
   cardLeft = clampX(cardLeft);
   cardTop = clampY(cardTop);
-  const placement = placeTourCard({
-    viewport, obstacles: position?.obstacles ?? [], width: cardW,
+  const placementArgs = {
+    viewport, width: cardW,
     height: cardRef.current?.firstElementChild?.scrollHeight ? cardRef.current.firstElementChild.scrollHeight + 2 : cardH,
     preferred: { left: cardLeft, top: cardTop },
-  });
+  };
+  // Retry without the sidebar obstacle when the full set leaves no space
+  // (short viewports): overlapping dimmed navigation beats hiding the tour.
+  const placement = placeTourCard({ ...placementArgs, obstacles: position?.obstacles ?? [] })
+    ?? placeTourCard({ ...placementArgs, obstacles: position?.softObstacles ?? [] });
   // Last resort on short viewports where every free space is shallower than
   // the solver's floor: keep the tour operable with a floating bottom-right
   // card. A hidden card strands the member with no way to continue or skip.
