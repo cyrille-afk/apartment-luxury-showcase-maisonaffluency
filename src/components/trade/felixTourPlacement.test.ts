@@ -76,7 +76,7 @@ describe("tour card obstacle-set selection", () => {
     // With every section heading protected only the band below the last one
     // fits, which is where the card used to end up.
     expect(placeTourCard({ ...args, obstacles: strict })?.top).toBe(830);
-    const chosen = chooseTourCardPlacement({ ...args, sets: [strict, [spot, anchor, sidebar]] });
+    const chosen = chooseTourCardPlacement({ ...args, tiers: [[strict, [spot, anchor, sidebar]]] });
     expect(chosen).not.toBeNull();
     if (!chosen) return;
     expect(chosen.top).toBe(492);
@@ -89,7 +89,7 @@ describe("tour card obstacle-set selection", () => {
     const chosen = chooseTourCardPlacement({
       ...args,
       preferred: { left: 271, top: 850 },
-      sets: [strict, [spot, anchor, sidebar]],
+      tiers: [[strict, [spot, anchor, sidebar]]],
     });
     expect(chosen).not.toBeNull();
     if (!chosen) return;
@@ -99,9 +99,38 @@ describe("tour card obstacle-set selection", () => {
 
   it("falls through to a looser set when the strict one leaves no space", () => {
     const blocked = [{ left: 0, top: 0, width: 1946, height: 1181 }];
-    const chosen = chooseTourCardPlacement({ ...args, sets: [blocked, [spot, anchor, sidebar]] });
+    const chosen = chooseTourCardPlacement({ ...args, tiers: [[blocked], [[spot, anchor, sidebar]]] });
     expect(chosen).not.toBeNull();
     if (!chosen) return;
+    expect(overlaps(chosen, spot)).toBe(false);
+  });
+});
+
+describe("tour card navigation protection", () => {
+  const vp = { w: 1946, h: 1181 };
+  const sidebar = { left: 0, top: 0, width: 255, height: 1181 };
+  const spot = { left: 515, top: 287, width: 1172, height: 162 };
+  const headings = [
+    { left: 525, top: 113, width: 1152, height: 36 },
+    { left: 525, top: 297, width: 1152, height: 20 },
+    { left: 525, top: 479, width: 1152, height: 20 },
+    { left: 525, top: 798, width: 1152, height: 20 },
+  ];
+
+  it("never trades the sidebar for a nearer placement while space remains", () => {
+    // The step's preferred spot is under the sidebar. Dropping the sidebar
+    // would land the card exactly there, so the tier that protects it must win.
+    const chosen = chooseTourCardPlacement({
+      viewport: vp,
+      width: 380,
+      height: 336,
+      preferred: { left: 40, top: 500 },
+      tiers: [[[spot, ...headings, sidebar]], [[spot]]],
+    });
+    expect(chosen).not.toBeNull();
+    if (!chosen) return;
+    expect(chosen.top).toBe(830);
+    expect(overlaps(chosen, sidebar)).toBe(false);
     expect(overlaps(chosen, spot)).toBe(false);
   });
 });

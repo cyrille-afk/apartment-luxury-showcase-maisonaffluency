@@ -924,27 +924,17 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     height: cardRef.current?.firstElementChild?.scrollHeight ? cardRef.current.firstElementChild.scrollHeight + 2 : cardH,
     preferred: { left: cardLeft, top: cardTop },
   };
-  // Nearest placement wins: full heading protection first, then progressively
-  // looser sets (drop page headings, drop the sidebar) so a card whose
-  // highlight leaves no nearby space still sits beside it instead of in a far
-  // band. A looser set only wins when it lands clearly closer.
+  // Tier 1 keeps the sidebar protected and lets a dimmed section heading be
+  // uncovered when that is what lands the card beside its highlight; tier 2
+  // only applies on short viewports where nothing fits without overlapping
+  // navigation.
   const placement = chooseTourCardPlacement({
     ...placementArgs,
-    sets: [
-      position?.obstacles ?? [],
-      position?.featureObstacles ?? [],
-      position?.softObstacles ?? [],
-      position?.bareObstacles ?? [],
+    tiers: [
+      [position?.obstacles ?? [], position?.featureObstacles ?? []],
+      [position?.softObstacles ?? [], position?.bareObstacles ?? []],
     ],
   });
-  if (typeof document !== "undefined") {
-    document.documentElement.dataset.felixDebug = JSON.stringify({
-      preferred: placementArgs.preferred,
-      height: placementArgs.height,
-      placement,
-      sets: (position ? [position.obstacles, position.featureObstacles, position.softObstacles, position.bareObstacles] : []).map((s) => s.map((r) => [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)])),
-    });
-  }
   // Last resort on short viewports where every free space is shallower than
   // the solver's floor: keep the tour operable with a floating bottom-right
   // card. A hidden card strands the member with no way to continue or skip.
