@@ -9,6 +9,7 @@ import { ensureStorageHeadroom } from "@/lib/storageReclaim";
 import { useToast } from "@/hooks/use-toast";
 import { recordEmailPortalClick } from "@/lib/emailPortalClick";
 import { Button } from "@/components/ui/button";
+import { MobileTradeTourNotice } from "@/components/trade/MobileTradeTourNotice";
 import { clearGoogleAttempt, readGoogleAttempt, startGoogleAttempt } from "@/lib/googleSignInRecovery";
 
 // Monochrome Google "G" — single-path glyph rendered in currentColor so it
@@ -198,6 +199,7 @@ const TradeLogin = () => {
             Trade Program Sign In
           </h1>
 
+          <div className="mb-6"><MobileTradeTourNotice /></div>
           <form onSubmit={handleLogin} className="space-y-5">
             <input
               type="text"
