@@ -5,25 +5,25 @@
 /* The v3 `short` raw screen (max-height: 780px), re-expressed as a v4 variant. */
 @custom-variant short (@media (max-height: 780px));
 
-/* Felix AI assistant identity: the one shared treatment — the same warm bronze
-   the Mobile App Workspace card already wears — so every AI feature reads as
-   Felix from a single palette value instead of a new color in the system. */
+/* Felix AI assistant identity: one quiet bronze treatment — a hairline outline
+   with bronze ink, never a filled block — so AI affordances read as elegant and
+   clearly interactive without dominating the ivory canvas. */
 @utility felix-surface {
   /* The outline button variant ships border/bg/hover classes that would win the
      cascade, so the Felix treatment asserts its own values. */
-  background-color: hsl(var(--felix-bronze)) !important;
-  border: 1px solid hsl(var(--felix-bronze-edge) / 0.55) !important;
-  color: hsl(var(--felix-on-bronze)) !important;
-  /* Hover keeps the exact bronze (darkening it would drop text contrast) and
-     signals with a deeper edge and a soft lift instead. */
+  background-color: transparent !important;
+  border: 1px solid hsl(var(--felix-bronze-deep)) !important;
+  color: hsl(var(--felix-bronze-ink)) !important;
+  transition: background-color 220ms ease, border-color 220ms ease, color 220ms ease;
+  /* Hover fades in a washed bronze tint — no solid fill, no lift — so the
+     button warms up instead of taking over the page. */
   &:hover {
-    background-color: hsl(var(--felix-bronze)) !important;
-    border-color: hsl(var(--felix-on-bronze) / 0.6) !important;
-    color: hsl(var(--felix-on-bronze)) !important;
-    box-shadow: 0 2px 10px -4px hsl(var(--felix-on-bronze) / 0.45);
+    background-color: hsl(var(--felix-bronze) / 0.12) !important;
+    border-color: hsl(var(--felix-bronze-deep)) !important;
+    color: hsl(var(--felix-bronze-ink)) !important;
   }
   &:focus-visible {
-    outline: 2px solid hsl(var(--felix-on-bronze));
+    outline: 2px solid hsl(var(--felix-bronze-deep));
     outline-offset: 2px;
   }
 }
@@ -254,9 +254,11 @@ All colors MUST be HSL.
     --felix-bronze: 38 60% 66%;
     --felix-bronze-deep: 34 52% 43%;
     --felix-bronze-edge: var(--gold-bright);
-    /* Deep espresso ink: ~7:1 on the bronze (ivory only reached ~2.6:1). */
+    /* Bronze ink for text and icons: ~5:1 on the ivory canvas. The exact bronze
+       only reached ~1.8:1 there, so it stays a surface/dot colour, never text. */
+    --felix-bronze-ink: 34 55% 36%;
     --felix-on-bronze: 30 45% 9%;
-    --felix-mark-text: 32 60% 26%;
+    --felix-mark-text: var(--felix-bronze-ink);
     
     /* Shadows */
     --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -330,6 +332,7 @@ All colors MUST be HSL.
        needs a dark value of its own. */
     --felix-bronze: 36 42% 64%;
     --felix-bronze-deep: 36 40% 52%;
+    --felix-bronze-ink: var(--felix-bronze);
     --warm-gray: 32 8% 60%;
     --product-canvas: 34 18% 18%;
     --collection-card-canvas: 34 18% 18%;
