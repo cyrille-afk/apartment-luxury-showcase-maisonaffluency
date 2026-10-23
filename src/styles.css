@@ -28,25 +28,41 @@ html[data-felix-tour-step="client-safe-presentations"] .trade-editorial-header {
 }
 
 /* Reuse the tour's lifecycle-owned root state, so close/pause/unmount cannot
-   leave sidebar highlights behind. Page overview spotlights remain intact. */
-html:is([data-felix-tour-step="quotes"], [data-felix-tour-step="projects"], [data-felix-tour-step="quote-generation"]) .trade-editorial-sidebar {
+   leave sidebar highlights behind. Page overview spotlights remain intact.
+   The active step's sidebar item comes from the global step → sidebar map
+   (felixTourSidebarMap.ts), published as <html data-felix-tour-sidebar>. */
+html[data-felix-tour-sidebar] .trade-editorial-sidebar {
   z-index: 132;
 }
-html:is([data-felix-tour-step="quotes"], [data-felix-tour-step="projects"], [data-felix-tour-step="quote-generation"]) .trade-portal-shell > :has([data-trade-sidebar]) {
+html[data-felix-tour-sidebar] .trade-portal-shell > :has([data-trade-sidebar]) {
   position: relative;
   z-index: 132;
 }
-html[data-felix-tour-step="quotes"] [data-tour-sidebar-anchor="collection"],
-html[data-felix-tour-step="projects"] [data-tour-sidebar-anchor="projects"],
-html[data-felix-tour-step="quote-generation"] [data-tour-sidebar-anchor="quotes"] {
+html[data-felix-tour-sidebar="dashboard"] [data-tour-sidebar-anchor="dashboard"],
+html[data-felix-tour-sidebar="collection"] [data-tour-sidebar-anchor="collection"],
+html[data-felix-tour-sidebar="quotes"] [data-tour-sidebar-anchor="quotes"],
+html[data-felix-tour-sidebar="projects"] [data-tour-sidebar-anchor="projects"],
+html[data-felix-tour-sidebar="tools"] [data-tour-sidebar-anchor="tools"],
+html[data-felix-tour-sidebar="settings"] [data-tour-sidebar-anchor="settings"],
+html[data-felix-tour-sidebar="concierge"] [data-tour-sidebar-anchor="concierge"],
+html[data-felix-tour-sidebar="extension-sync"] [data-tour-sidebar-anchor="extension-sync"],
+html[data-felix-tour-sidebar="beta-feedboard"] [data-tour-sidebar-anchor="beta-feedboard"],
+html[data-felix-tour-sidebar="pwa"] [data-tour-sidebar-anchor="pwa"] {
   position: relative;
   background: hsl(var(--accent) / 0.12);
   outline: 1px solid hsl(var(--accent) / 0.45);
   outline-offset: -1px;
 }
-html[data-felix-tour-step="quotes"] [data-tour-sidebar-anchor="collection"]::after,
-html[data-felix-tour-step="projects"] [data-tour-sidebar-anchor="projects"]::after,
-html[data-felix-tour-step="quote-generation"] [data-tour-sidebar-anchor="quotes"]::after {
+html[data-felix-tour-sidebar="dashboard"] [data-tour-sidebar-anchor="dashboard"]::after,
+html[data-felix-tour-sidebar="collection"] [data-tour-sidebar-anchor="collection"]::after,
+html[data-felix-tour-sidebar="quotes"] [data-tour-sidebar-anchor="quotes"]::after,
+html[data-felix-tour-sidebar="projects"] [data-tour-sidebar-anchor="projects"]::after,
+html[data-felix-tour-sidebar="tools"] [data-tour-sidebar-anchor="tools"]::after,
+html[data-felix-tour-sidebar="settings"] [data-tour-sidebar-anchor="settings"]::after,
+html[data-felix-tour-sidebar="concierge"] [data-tour-sidebar-anchor="concierge"]::after,
+html[data-felix-tour-sidebar="extension-sync"] [data-tour-sidebar-anchor="extension-sync"]::after,
+html[data-felix-tour-sidebar="beta-feedboard"] [data-tour-sidebar-anchor="beta-feedboard"]::after,
+html[data-felix-tour-sidebar="pwa"] [data-tour-sidebar-anchor="pwa"]::after {
   content: "";
   position: absolute;
   inset: 0;
