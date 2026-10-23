@@ -144,4 +144,12 @@ describe("installed app startup handshake", () => {
     await screen.findByRole("alert");
     expect(screen.queryByRole("button", { name: /try again/i })).toBeNull();
   });
+  it("retries automatically with the same code when the connection returns", async () => {
+    mocks.redeem.mockRejectedValueOnce(new Error("offline"));
+    renderGate();
+    expect(await screen.findByText(/retry automatically/i)).toBeInTheDocument();
+    await act(async () => { window.dispatchEvent(new Event("online")); });
+    await waitFor(() => expect(mocks.redeem).toHaveBeenCalledTimes(2));
+    expect(mocks.redeem).toHaveBeenLastCalledWith({ data: { token: "a".repeat(43) } });
+  });
 });
