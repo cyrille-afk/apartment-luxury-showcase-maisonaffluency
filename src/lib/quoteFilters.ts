@@ -83,10 +83,10 @@ export function yearToDateRange(today: Date = new Date()): QuoteFilterState {
   };
 }
 
-/** True when the picked range is exactly the given preset (for pill highlighting). */
-export function rangeMatchesPreset(
+/** True when the picked dates are exactly the given preset (status is ignored). */
+export function isRangePresetActive(
   f: QuoteFilterState,
   preset: { from: string; to: string },
 ): boolean {
-  return f.status === "all" && f.from === preset.from && f.to === preset.to;
+  return f.from === preset.from && f.to === preset.to;
 }

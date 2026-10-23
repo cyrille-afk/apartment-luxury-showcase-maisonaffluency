@@ -7,15 +7,11 @@ import {
   quoteDayKey,
   quoteMatchesFilters,
   quoteStatusCounts,
-  rangeMatchesPreset,
+  isRangePresetActive,
   yearToDateRange,
   type FilterableQuote,
 } from "./quoteFilters";
 
-const at = (day: string): FilterableQuote => ({
-  status: "draft",
-  created_at: `${day}T12:00:00.000Z`,
-});
 
 const rows: FilterableQuote[] = [
   { status: "draft", created_at: "2026-10-01T12:00:00.000Z" },
@@ -74,10 +70,11 @@ describe("quoteFilters", () => {
     expect(yearToDateRange(today)).toEqual({ status: "all", from: "2026-01-01", to: "2026-10-23" });
   });
 
-  it("highlights a preset only when the range is exactly that preset", () => {
+  it("highlights a quick range only when the dates match exactly", () => {
     const preset = { from: "2026-10-17", to: "2026-10-23" };
-    expect(rangeMatchesPreset({ status: "all", ...preset }, preset)).toBe(true);
-    expect(rangeMatchesPreset({ status: "all", ...preset, from: "2026-10-18" }, preset)).toBe(false);
-    expect(rangeMatchesPreset({ status: "draft", ...preset }, preset)).toBe(false);
+    expect(isRangePresetActive({ status: "all", ...preset }, preset)).toBe(true);
+    expect(isRangePresetActive({ status: "all", ...preset, from: "2026-10-18" }, preset)).toBe(false);
+    // A status picked alongside the range must not clear the highlight.
+    expect(isRangePresetActive({ status: "draft", ...preset }, preset)).toBe(true);
   });
 });
