@@ -30,4 +30,10 @@ describe("global tour step → sidebar map", () => {
     expect(FELIX_STEP_SIDEBAR["quote-generation"].anchor).toBe("quotes");
     expect(FELIX_STEP_SIDEBAR["direct-client-billing"].anchor).toBe("quotes");
   });
+  it("points the Custom Requests step at Tools, not Projects", () => {
+    // The Custom Requests workspace lives under Tools → Custom Requests;
+    // sending members to Projects & Interventions was a wrong reference.
+    expect(FELIX_STEP_SIDEBAR["bespoke-commissions"].anchor).toBe("tools");
+    expect(FELIX_STEP_SIDEBAR["bespoke-commissions"].label).toContain("Custom Requests");
+  });
 });
