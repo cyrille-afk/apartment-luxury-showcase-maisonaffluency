@@ -861,11 +861,12 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       }
     } else if (step.id === "client-view") {
       // Step 15: never below the switch (it would cover the product photo).
-      // Right of the switch, top-aligned so the action banner at the top of
-      // the card reads in line with the highlighted toggle row; else above.
+      // Right of the switch, offset so the action banner pinned at the top of
+      // the card (~88px below the card edge) reads in line with the
+      // highlighted toggle row; else above.
       if (rightX + cardW <= viewport.w - 16) {
         cardLeft = rightX;
-        cardTop = clampY(rect.top - 6);
+        cardTop = clampY(rect.top + rect.height / 2 - 88);
       } else {
         cardLeft = centerX;
         cardTop = Math.max(16, rect.top - cardH - PAD - 8);

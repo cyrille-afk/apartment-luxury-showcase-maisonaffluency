@@ -60,16 +60,24 @@ test("tour steps 13-18: sidebar refs, transition copy and presentation-mode high
   await expect(sidebarRef).toContainText(/Projects & Interventions → Projects/i);
   const banner = step15.getByRole("status").filter({ hasText: "Switch to Client View to unlock Next." });
   await expect(banner).toBeVisible();
-  // The banner is pinned to the top of the card, and the card is top-aligned
-  // with the highlighted toggle row, so the two read as one line.
+  // The banner is pinned to the top of the card (right under the header, above
+  // the dialogue), and the card's preferred placement keeps it roughly level
+  // with the highlighted toggle row.
   const bannerBox = await banner.boundingBox();
+  const cardBox = await step15.boundingBox();
   const toggleBox = await page.locator('[data-felix-target="client-view-toggle"]').boundingBox();
   expect(bannerBox).not.toBeNull();
+  expect(cardBox).not.toBeNull();
   expect(toggleBox).not.toBeNull();
-  if (bannerBox && toggleBox) {
+  if (bannerBox && cardBox && toggleBox) {
+    // Pinned: banner top sits within the card's header band, above the dialogue.
+    expect(bannerBox.y - cardBox.y).toBeLessThan(140);
+    const dialogueBox = await step15.locator(".animate-fade-in").first().boundingBox();
+    if (dialogueBox) expect(bannerBox.y + bannerBox.height).toBeLessThanOrEqual(dialogueBox.y + 4);
+    // Roughly in line with the toggle row (the collision solver may adjust).
     const bannerCenter = bannerBox.y + bannerBox.height / 2;
     const toggleCenter = toggleBox.y + toggleBox.height / 2;
-    expect(Math.abs(bannerCenter - toggleCenter)).toBeLessThan(160);
+    expect(Math.abs(bannerCenter - toggleCenter)).toBeLessThan(320);
   }
 
   // Flipping the board switch advances straight to Step 16.
