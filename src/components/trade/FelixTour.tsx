@@ -800,6 +800,11 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     if (sidebarAnchor) {
       cardLeft = clampX(sidebarAnchor.left + sidebarAnchor.width + 24);
       cardTop = clampY(sidebarAnchor.top - 20);
+      if (step.id === "quotes") {
+        // Sidebar alignment must never override the Collection's clear window.
+        // Keep the card beside the sidebar, but below the heading AND both tabs.
+        cardTop = clampY(rect.top + rect.height + PAD + 8);
+      }
     } else if (step.id === "client-view") {
       // Step 8: never below the switch (it would cover the product photo).
       // Right of the switch, bottom-aligned so the card grows upwards; else above.
@@ -883,6 +888,12 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         {rect && settled && !transitioning && targetUnavailable && <div className="absolute inset-0 bg-foreground/40" />}
       </div>}
       {ring}
+      {sidebarAnchor && step.id === "quotes" && settled && !transitioning && (
+        <svg aria-hidden="true" className="pointer-events-none fixed inset-0 z-[140] h-full w-full fill-none stroke-accent" strokeWidth="1.5">
+          <path d={`M ${sidebarAnchor.left + sidebarAnchor.width + 8} ${sidebarAnchor.top + sidebarAnchor.height / 2} H ${cardLeft - 12} V ${cardTop + 28} H ${cardLeft}`} />
+          <path data-felix-sidebar-arrow d={`M ${sidebarAnchor.left + sidebarAnchor.width + 13} ${sidebarAnchor.top + sidebarAnchor.height / 2 - 5} l -5 5 l 5 5`} />
+        </svg>
+      )}
 
       {/* The card is not mounted until this step's actual target is measured. */}
       {/* Screen-reader announcement for each step change */}
@@ -902,7 +913,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         )}
         style={{ width: cardW, left: 0, top: 0, transform: `translate3d(${cardLeft}px, ${cardTop}px, 0)`, visibility: settled && !transitioning ? "visible" : "hidden", pointerEvents: settled && !transitioning ? "auto" : "none" }}
       >
-        {sidebarAnchor && <span
+        {sidebarAnchor && step.id !== "quotes" && <span
           data-felix-sidebar-arrow
           aria-hidden="true"
           className="pointer-events-none absolute -left-2 h-4 w-4 rotate-45 border-b border-l border-accent/50 bg-card"
