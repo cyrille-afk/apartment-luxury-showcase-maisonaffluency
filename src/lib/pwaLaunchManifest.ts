@@ -31,10 +31,12 @@ export function launchManifestResponse(request: Request): Response {
 export function takeLaunchToken(): string | null {
   if (typeof window === "undefined") return null;
   const url = new URL(window.location.href);
-  if (url.pathname !== "/" || url.searchParams.get("source") !== "pwa") return null;
-  const token = url.searchParams.get("token");
+  const syncRoute = url.pathname === "/auth/sync";
+  if (!syncRoute && (url.pathname !== "/" || url.searchParams.get("source") !== "pwa")) return null;
+  const token = syncRoute ? url.searchParams.get("t") ?? url.searchParams.get("token") : url.searchParams.get("token");
   if (token === null) return null;
   url.searchParams.delete("token");
+  if (syncRoute) url.searchParams.delete("t");
   window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
   return isLaunchToken(token) ? token : null;
 }

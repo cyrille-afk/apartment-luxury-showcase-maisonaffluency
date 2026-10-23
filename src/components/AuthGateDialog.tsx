@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { ensureStorageHeadroom } from "@/lib/storageReclaim";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 /**
  * Consumer mailboxes that must never be fast-tracked into trade access.
@@ -55,6 +56,7 @@ function describeSignUpError(message: string): string {
 
 export default function AuthGateDialog({ open, onClose, action = "download this document", initialMode = "prompt" }: AuthGateDialogProps) {
   const navigate = useNavigate();
+  const { isPwaBooting } = useAuth();
   const { toast } = useToast();
   const [mode, setMode] = useState<"prompt" | "signup" | "login">(initialMode);
   const [email, setEmail] = useState("");
@@ -69,7 +71,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
 
   useEffect(() => { if (open) setMode(initialMode); }, [open, initialMode]);
 
-  if (!open) return null;
+  if (!open || isPwaBooting) return null;
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);

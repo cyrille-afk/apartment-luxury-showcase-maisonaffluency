@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
 /**
@@ -7,13 +7,14 @@ import { useAuth } from "@/hooks/useAuth";
  * If not, opens the AuthGateDialog.
  */
 export function useAuthGate() {
-  const { user, loading } = useAuth();
+  const { user, loading, isPwaBooting } = useAuth();
   const [gateOpen, setGateOpen] = useState(false);
   const [gateAction, setGateAction] = useState<string>("download this document");
+  useEffect(() => { if (isPwaBooting || user) setGateOpen(false); }, [isPwaBooting, user]);
 
   const requireAuth = useCallback(
     (callback: () => void, actionLabel?: string) => {
-      if (loading) return; // still loading, ignore
+      if (loading || isPwaBooting) return; // startup owns authentication
       if (user) {
         callback();
       } else {
@@ -21,12 +22,12 @@ export function useAuthGate() {
         setGateOpen(true);
       }
     },
-    [user, loading]
+    [user, loading, isPwaBooting]
   );
 
   return {
     requireAuth,
-    gateOpen,
+    gateOpen: gateOpen && !isPwaBooting,
     gateAction,
     closeGate: () => setGateOpen(false),
   };
