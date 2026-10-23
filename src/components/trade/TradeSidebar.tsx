@@ -251,7 +251,7 @@ export function TradeSidebar() {
                         return (
                           <span className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1">
                             <span>{label.slice(0, open)}</span>
-                            <span className="felix-capsule rounded-full px-2 py-[3px] text-[8px] font-medium uppercase leading-none tracking-[0.12em]">
+                            <span className="felix-capsule px-2 py-[3px] text-[8px] font-medium uppercase leading-none tracking-[0.12em]" style={{ borderRadius: 9999 }}>
                               {label.slice(open + 2).replace(/\)$/, "")}
                             </span>
                           </span>
