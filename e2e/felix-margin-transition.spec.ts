@@ -31,7 +31,7 @@ test(`Step 6 to 7 waits for slow product ${loading} before declaring its price u
   await expect(card.filter({ hasText: "Client-Safe Presentations" })).toBeVisible({ timeout: 60_000 });
   if (loading === "data") {
     await page.route("**/rest/v1/**", async route => {
-      if (route.request().method() === "GET") await productReady;
+      if (route.request().method() !== "OPTIONS") await productReady;
       await route.continue();
     });
   }
