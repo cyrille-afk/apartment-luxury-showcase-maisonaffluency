@@ -17,6 +17,11 @@ test(`Step 6 to 7 waits for slow product ${loading} before declaring its price u
       await productReady;
       await route.continue();
     });
+  } else {
+    await page.route("**/rest/v1/designers*", async route => {
+      if (new URL(route.request().url()).searchParams.get("slug") === "eq.sebastian-herkner-man-of-parts") await productReady;
+      await route.continue();
+    });
   }
   await page.goto("/");
   await page.evaluate(([key, value]) => {
@@ -29,12 +34,6 @@ test(`Step 6 to 7 waits for slow product ${loading} before declaring its price u
   await page.goto("/trade/the-collection");
   const card = page.locator("[data-felix-tour-card]");
   await expect(card.filter({ hasText: "Client-Safe Presentations" })).toBeVisible({ timeout: 60_000 });
-  if (loading === "data") {
-    await page.route("**/rest/v1/**", async route => {
-      if (route.request().method() !== "OPTIONS") await productReady;
-      await route.continue();
-    });
-  }
   await card.getByRole("button", { name: "Next", exact: true }).click();
   await expect(page).toHaveURL(/praia-da-granja-coffee-table$/);
   await expect(page.locator("[data-trade-page-loading]").first()).toBeVisible();
