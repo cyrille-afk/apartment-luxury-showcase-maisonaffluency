@@ -217,6 +217,7 @@ function RootComponent() {
                       <RouteScrollLockFailsafe />
                       <ScrollToTopOnNavigate />
                       <PreviewViewContinuity />
+                      <PwaPendingAuthConsumer />
                       <TradeCopilotProvider>
                         <VisualiserMaterialProvider>
                           <ProjectInventoryProvider>
