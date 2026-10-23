@@ -39,6 +39,17 @@ async function setup() {
 }
 
 describe("confirmed dashboard session loss", () => {
+  it("does not demote or expire auth while standalone validation owns startup", async () => {
+    const result = await setup();
+    act(() => { result.current.setIsPwaBooting(true); mock.current = null; mock.listener?.("SIGNED_OUT", null); });
+    await act(async () => { await new Promise(resolve => setTimeout(resolve, 10)); });
+    expect(result.current.isPwaBooting).toBe(true);
+    expect(result.current.user?.id).toBe("member-1");
+    expect(result.current.sessionExpired).toBe(false);
+    act(() => result.current.setIsPwaBooting(false));
+    act(() => mock.listener?.("SIGNED_OUT", null));
+    await waitFor(() => expect(result.current.sessionExpired).toBe(true));
+  });
   it("marks involuntary expiry and clears member permissions", async () => {
     const result = await setup();
     expect(result.current.isTradeUser).toBe(true);

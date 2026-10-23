@@ -9,10 +9,11 @@ const mocks = vi.hoisted(() => ({
   pending: "a".repeat(43) as string | null,
   navigate: vi.fn(async () => {}),
   clear: vi.fn(),
+  booting: vi.fn(),
   getSession: vi.fn(), redeem: vi.fn(), verify: vi.fn(),
 }));
 vi.mock("@tanstack/react-router", () => ({ useNavigate: () => mocks.navigate }));
-vi.mock("@/hooks/useAuth", () => ({ useAuth: () => mocks.auth }));
+vi.mock("@/hooks/useAuth", () => ({ useAuth: () => ({ ...mocks.auth, setIsPwaBooting: mocks.booting }) }));
 vi.mock("@/lib/pwaMode", () => ({ isInstalledPwaDisplay: () => mocks.standalone }));
 vi.mock("@/lib/pwaPendingAuth", () => ({ readPendingAuthToken: () => mocks.pending, clearPendingAuthToken: mocks.clear, storePendingAuthToken: vi.fn((token) => { mocks.pending = token; }) }));
 vi.mock("@/lib/mobileSync.functions", () => ({ redeemMobileSyncToken: mocks.redeem, MOBILE_SYNC_TTL_SECONDS: 120 }));
@@ -31,6 +32,29 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("installed app startup handshake", () => {
+  it("keeps shared boot state active until validation, roles and navigation finish", async () => {
+    let resolve: ((value: { ok: true; tokenHash: string }) => void) | undefined;
+    mocks.redeem.mockReturnValue(new Promise(r => { resolve = r; }));
+    const view = renderGate();
+    await waitFor(() => expect(mocks.redeem).toHaveBeenCalled());
+    expect(mocks.booting).toHaveBeenLastCalledWith(true);
+    expect(mocks.navigate).not.toHaveBeenCalled();
+    expect(screen.queryByRole("alert")).toBeNull();
+    await act(async () => resolve?.({ ok: true, tokenHash: "verified-hash" }));
+    expect(mocks.booting).toHaveBeenLastCalledWith(true);
+    mocks.auth = { loading: false, user: { id: "member" }, rolesLoaded: true };
+    view.rerender(<PwaPendingAuthConsumer><div data-testid="dashboard" /></PwaPendingAuthConsumer>);
+    await waitFor(() => expect(mocks.booting).toHaveBeenLastCalledWith(false));
+    expect(screen.getByTestId("dashboard")).toBeInTheDocument();
+  });
+  it("uses the root splash for a direct standalone sync link", async () => {
+    mocks.pending = null;
+    window.history.replaceState({}, "", `/auth/sync?t=${"c".repeat(43)}`);
+    renderGate();
+    await waitFor(() => expect(mocks.redeem).toHaveBeenCalledWith({ data: { token: "c".repeat(43) } }));
+    expect(screen.queryByTestId("dashboard")).toBeNull();
+    expect(window.location.search).toBe("");
+  });
   it("redeems a manifest launch code even with no Safari storage", async () => {
     mocks.pending = null;
     const token = "b".repeat(43);
@@ -88,6 +112,7 @@ describe("installed app startup handshake", () => {
     mocks.redeem.mockResolvedValue({ ok: false, reason: "expired" });
     renderGate();
     await waitFor(() => expect(screen.getByRole("alert")).toBeInTheDocument());
+    expect(mocks.booting).toHaveBeenLastCalledWith(false);
     expect(screen.queryByTestId("dashboard")).toBeNull();
     expect(mocks.verify).not.toHaveBeenCalled();
     expect(mocks.clear).toHaveBeenCalled();
