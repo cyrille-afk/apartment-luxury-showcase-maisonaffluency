@@ -786,8 +786,11 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const sidebarAnchor = rect && !targetUnavailable ? position?.anchor : null;
   // Card placement: right of the target, else left, below, or above.
   const cardW = Math.max(0, Math.min(step.id === "welcome" ? 410 : 380, viewport.w - 48));
+  const collectionCardLimit = sidebarAnchor && rect && step.id === "quotes"
+    ? Math.max(80, viewport.h - (rect.top + rect.height + PAD + 8) - 16)
+    : null;
   // Step 1 carries the tier breakdown and needs a taller placement box.
-  const cardH = Math.min(measuredCardHeight || (step.id === "welcome" ? 545 : 380), Math.max(0, viewport.h - 32));
+  const cardH = Math.min(measuredCardHeight || (step.id === "welcome" ? 545 : 380), collectionCardLimit ?? Math.max(0, viewport.h - 32));
   const clampX = (x: number) => Math.min(Math.max(x, 24), Math.max(viewport.w - cardW - 24, 24));
   const clampY = (y: number) => Math.min(Math.max(y, 16), Math.max(viewport.h - cardH - 16, 16));
   let cardLeft = 0;
@@ -919,7 +922,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
           className="pointer-events-none absolute -left-2 h-4 w-4 rotate-45 border-b border-l border-accent/50 bg-card"
           style={{ top: Math.max(24, Math.min(cardH - 24, sidebarAnchor.top + sidebarAnchor.height / 2 - cardTop)) }}
         />}
-        <div className="max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-2xl p-5">
+        <div className="max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-2xl p-5" style={collectionCardLimit === null ? undefined : { maxHeight: collectionCardLimit - 2 }}>
           {/* Header */}
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
