@@ -97,6 +97,7 @@ export function SidebarPwaBadge({ collapsed }: { collapsed: boolean }) {
           className={`mt-3 inline-flex items-center gap-2 rounded-lg border border-[hsl(var(--gold)/0.35)] border-l-2 border-l-[hsl(var(--gold))] bg-gradient-to-r from-[hsl(var(--gold)/0.16)] to-[hsl(var(--gold)/0.04)] px-2.5 py-1.5 font-body text-[9px] uppercase tracking-[0.18em] text-foreground shadow-sm transition-all hover:from-[hsl(var(--gold)/0.24)] hover:to-[hsl(var(--gold)/0.08)] ${collapsed ? "justify-center" : ""}`}
           aria-label="Mobile app workspace"
           data-felix-target="sidebar-pwa"
+          data-tour-sidebar-anchor="pwa"
         >
           <Smartphone className="h-3.5 w-3.5 shrink-0 text-[hsl(var(--gold))]" strokeWidth={1.75} shapeRendering="geometricPrecision" />
           {!collapsed && (
