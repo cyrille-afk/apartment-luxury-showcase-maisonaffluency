@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams, useSearchParams } from "@/lib/router-compat";
 import { useProjectFilter } from "@/hooks/useProjectFilter";
 import { useDesignerDisplayName } from "@/hooks/useDesignerDisplayName";
@@ -15,6 +15,16 @@ import { InvoiceStatusDrawer } from "@/components/trade/InvoiceStatusDrawer";
 import ActiveFilterChips from "@/components/trade/ActiveFilterChips";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
 import { getConciergeSession, updateConciergeSession } from "@/hooks/useConciergeSession";
+import {
+  applyQuoteFilters,
+  emptyQuoteFilters,
+  isQuoteFilterActive,
+  isRangePresetActive,
+  lastNDaysRange,
+  quoteStatusCounts,
+  yearToDateRange,
+  type QuoteFilterState,
+} from "@/lib/quoteFilters";
 
 interface Quote {
   id: string;
@@ -40,6 +50,16 @@ const statusConfig: Record<string, { label: string; icon: typeof Clock; classNam
   cancelled: { label: "Cancelled", icon: XCircle, className: "bg-destructive/10 text-destructive" },
 };
 
+const filterPillClass = (active: boolean) =>
+  `inline-flex min-h-[38px] items-center gap-1.5 rounded-full border px-3.5 font-body text-[10px] uppercase tracking-[0.15em] transition-colors ${
+    active
+      ? "border-foreground bg-foreground text-background"
+      : "border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground"
+  }`;
+
+const filterDateInputClass =
+  "min-h-[38px] rounded-md border border-border bg-background px-2.5 py-1 font-body text-xs normal-case tracking-normal text-foreground focus:border-foreground focus:outline-none";
+
 const TradeQuotes = () => {
   const { user } = useAuth();
   const { currentStudio, canEdit } = useStudio();
@@ -64,6 +84,35 @@ const TradeQuotes = () => {
   const [creating, setCreating] = useState(false);
   const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Status + date filters over the quotes already loaded for this studio.
+  const [quoteFilters, setQuoteFilters] = useState<QuoteFilterState>(emptyQuoteFilters);
+  const today = useMemo(() => new Date(), []);
+  const quoteRangePresets = useMemo(
+    () => [
+      { label: "Last 7 days", ...lastNDaysRange(7, today) },
+      { label: "Last 30 days", ...lastNDaysRange(30, today) },
+      { label: "This year", ...yearToDateRange(today) },
+    ],
+    [today],
+  );
+  const statusCounts = useMemo(() => quoteStatusCounts(quotes), [quotes]);
+  const statusOptions = useMemo(
+    () => Object.keys(statusConfig).filter((s) => (statusCounts[s] || 0) > 0),
+    [statusCounts],
+  );
+  const filteredQuotes = useMemo(
+    () => applyQuoteFilters(quotes, quoteFilters),
+    [quotes, quoteFilters],
+  );
+  const visibleQuotes = useMemo(
+    () =>
+      designerFilter && matchingQuoteIds
+        ? filteredQuotes.filter((q) => matchingQuoteIds.has(q.id))
+        : filteredQuotes,
+    [filteredQuotes, designerFilter, matchingQuoteIds],
+  );
+  const filtersActive = isQuoteFilterActive(quoteFilters);
 
   const isDrawerQuote = (id?: string | null) =>
     typeof id === "string" && id.toLowerCase().startsWith("200169");
@@ -427,10 +476,103 @@ const TradeQuotes = () => {
       <TradeBreadcrumb current="Quotes & Proformas" currentProjectTab="quotes" />
       <ActiveFilterChips className="mb-4" confirmClearAll />
 
+      <section
+        aria-label="Filter quotes by status and date"
+        className="mb-6 rounded-lg border border-border bg-background p-4 space-y-3"
+      >
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="mr-1 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            Status
+          </span>
+          {[
+            { key: "all", label: "All", count: quotes.length },
+            ...statusOptions.map((s) => ({
+              key: s,
+              label: statusConfig[s].label,
+              count: statusCounts[s] || 0,
+            })),
+          ].map((opt) => {
+            const active = quoteFilters.status === opt.key;
+            return (
+              <button
+                key={opt.key}
+                type="button"
+                aria-pressed={active}
+                onClick={() => setQuoteFilters((f) => ({ ...f, status: opt.key }))}
+                className={filterPillClass(active)}
+              >
+                {opt.label}
+                <span
+                  className={`font-mono text-[9px] tabular-nums ${
+                    active ? "text-background/70" : "text-muted-foreground"
+                  }`}
+                >
+                  {opt.count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="mr-1 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            Date
+          </span>
+          {quoteRangePresets.map((preset) => (
+            <button
+              key={preset.label}
+              type="button"
+              aria-pressed={isRangePresetActive(quoteFilters, preset)}
+              onClick={() =>
+                setQuoteFilters((f) => ({ ...f, from: preset.from, to: preset.to }))
+              }
+              className={filterPillClass(isRangePresetActive(quoteFilters, preset))}
+            >
+              {preset.label}
+            </button>
+          ))}
+          <div className="flex w-full flex-wrap items-center gap-2 sm:ml-auto sm:w-auto">
+          <label className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            From
+            <input
+              type="date"
+              value={quoteFilters.from}
+              max={quoteFilters.to || undefined}
+              onChange={(e) => setQuoteFilters((f) => ({ ...f, from: e.target.value }))}
+              className={filterDateInputClass}
+            />
+          </label>
+          <label className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            To
+            <input
+              type="date"
+              value={quoteFilters.to}
+              min={quoteFilters.from || undefined}
+              onChange={(e) => setQuoteFilters((f) => ({ ...f, to: e.target.value }))}
+              className={filterDateInputClass}
+            />
+          </label>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-3 border-t border-border/60 pt-3">
+          <p aria-live="polite" className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            Showing {visibleQuotes.length} of {quotes.length}{" "}
+            {quotes.length === 1 ? "quote" : "quotes"}
+          </p>
+          {filtersActive && (
+            <button
+              type="button"
+              onClick={() => setQuoteFilters(emptyQuoteFilters)}
+              className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground"
+            >
+              Clear filters
+            </button>
+          )}
+        </div>
+      </section>
+
       {(() => {
-        const visibleQuotes = designerFilter && matchingQuoteIds
-          ? quotes.filter((q) => matchingQuoteIds.has(q.id))
-          : quotes;
         return loading ? (
         <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, i) => <QuoteCardSkeleton key={i} />)}
@@ -441,16 +583,27 @@ const TradeQuotes = () => {
           <p className="font-body text-sm text-muted-foreground mb-4">
             {designerFilter
               ? `No quotes contain ${designerLabel}.`
-              : "No quotes yet. Create your first quote to start building a product selection."}
+              : filtersActive
+                ? "No quotes match these filters. Widen the date range or pick another status."
+                : "No quotes yet. Create your first quote to start building a product selection."}
           </p>
-          <button
-            onClick={handleCreateQuote}
-            disabled={creating}
-            className="inline-flex items-center gap-2 px-5 py-2.5 border border-foreground text-foreground font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-foreground hover:text-background transition-colors"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            Create First Quote
-          </button>
+          {filtersActive ? (
+            <button
+              onClick={() => setQuoteFilters(emptyQuoteFilters)}
+              className="inline-flex items-center gap-2 px-5 py-2.5 border border-foreground text-foreground font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-foreground hover:text-background transition-colors"
+            >
+              Clear filters
+            </button>
+          ) : (
+            <button
+              onClick={handleCreateQuote}
+              disabled={creating}
+              className="inline-flex items-center gap-2 px-5 py-2.5 border border-foreground text-foreground font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-foreground hover:text-background transition-colors"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Create First Quote
+            </button>
+          )}
         </div>
       ) : (
         <div className="space-y-3">
