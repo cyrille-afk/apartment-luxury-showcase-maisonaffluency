@@ -37,7 +37,7 @@ test("tour steps 13-18: sidebar refs, transition copy and presentation-mode high
   const step13 = page.getByRole("dialog").filter({ hasText: "Bespoke & Custom Commissions" });
   await expect(step13).toHaveCSS("opacity", "1", { timeout: 60000 });
   await expect(page).toHaveURL(/\/trade\/custom-requests/);
-  await expect(sidebarRef).toContainText("TOOLS → CUSTOM REQUESTS");
+  await expect(sidebarRef).toContainText(/Tools → Custom Requests/i);
   expect(await pulsing("tools")).toContain("sidebar-tour-pulse");
   expect(await pulsing("projects")).not.toContain("sidebar-tour-pulse");
 
@@ -46,7 +46,7 @@ test("tour steps 13-18: sidebar refs, transition copy and presentation-mode high
   const step14 = page.getByRole("dialog").filter({ hasText: "Your Personal Concierge" });
   await expect(step14).toHaveCSS("opacity", "1", { timeout: 60000 });
   await expect(page).toHaveURL(/\/trade\/concierge/);
-  await expect(sidebarRef).toContainText("TRADE CONCIERGE");
+  await expect(sidebarRef).toContainText(/Trade Concierge/i);
   expect(await pulsing("concierge")).toContain("sidebar-tour-pulse");
 
   // Step 15 — The Transition to Collaboration: bridges the jump from the
@@ -57,7 +57,7 @@ test("tour steps 13-18: sidebar refs, transition copy and presentation-mode high
   await expect(page).toHaveURL(/\/trade\/boards\//);
   await expect(step15).toContainText("We now leave the Concierge and open one of your project boards");
   await expect(step15).toContainText("Projects & Interventions → Projects");
-  await expect(sidebarRef).toContainText("PROJECTS & INTERVENTIONS → PROJECTS");
+  await expect(sidebarRef).toContainText(/Projects await expect(sidebarRef).toContainText("PROJECTS & INTERVENTIONS → PROJECTS"); Interventions → Projects/i);
   const banner = step15.getByRole("status").filter({ hasText: "Switch to Client View to unlock Next." });
   await expect(banner).toBeVisible();
   // The banner is pinned to the top of the card, and the card is top-aligned
@@ -81,7 +81,7 @@ test("tour steps 13-18: sidebar refs, transition copy and presentation-mode high
 
   // The top-right switch keeps its own outline while the sidebar is hidden.
   const headerToggle = page.locator('[data-felix-target="header-presentation-toggle"]');
-  await expect(headerToggle).toContainText("CLIENT EDITORIAL PRESENTATION");
+  await expect(headerToggle).toContainText(/Client Editorial Presentation/i);
   const secondaryRing = page.locator("[data-felix-spotlight-secondary]");
   await expect(secondaryRing).toBeVisible();
   const ringBox = await secondaryRing.boundingBox();
