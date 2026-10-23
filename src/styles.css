@@ -14,7 +14,9 @@
 @utility felix-capsule {
   background-image: var(--gradient-felix);
   color: hsl(var(--felix-on-gradient));
-  border-radius: 9999px;
+  /* The global `* { border-radius: 0 !important }` reset outranks plain classes
+     and inline styles, so the capsule needs matching importance. */
+  border-radius: 9999px !important;
 }
 
 /* Tailwind v3 compatibility: v4 defaults borders to currentColor. */
