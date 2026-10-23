@@ -26,16 +26,26 @@ export function placeTourCard({ viewport, obstacles, width, height, preferred }:
     // Remove contained rectangles to bound work on pages with many headings.
     spaces = next.filter((a, i) => !next.some((b, j) => j !== i && b.left <= a.left && b.top <= a.top && b.right >= a.right && b.bottom >= a.bottom && (j < i || b.left < a.left || b.top < a.top || b.right > a.right || b.bottom > a.bottom)));
   }
-  let best: TourRect | null = null;
-  let bestScore = Infinity;
-  for (const space of spaces) {
-    const w = Math.min(width, space.right - space.left);
-    const h = Math.min(height, space.bottom - space.top);
-    if (w < Math.min(220, width) || h < Math.min(160, height)) continue;
-    const left = Math.max(space.left, Math.min(preferred.left, space.right - w));
-    const top = Math.max(space.top, Math.min(preferred.top, space.bottom - h));
-    const score = (width - w) * 20 + (height - h) * 4 + Math.hypot(left - preferred.left, top - preferred.top);
-    if (score < bestScore) { bestScore = score; best = { left, top, width: w, height: h }; }
-  }
-  return best;
+  // A card squeezed below its content height crops the dialogue behind the
+  // sticky controls and reads as broken. Prefer a space that fits the full
+  // height even when it sits further away; fall back to a ≥320px card, and
+  // only then to the best shallow band.
+  const pick = (minHeight: number, fullHeight = false): TourRect | null => {
+    let best: TourRect | null = null;
+    let bestScore = Infinity;
+    for (const space of spaces) {
+      const w = Math.min(width, space.right - space.left);
+      const h = Math.min(height, space.bottom - space.top);
+      // Full-height spaces must also keep a readable width; a 240px column
+      // wraps the controls row into unreadability.
+      if (w < Math.min(fullHeight ? 300 : 220, width)) continue;
+      if (fullHeight ? h < height : h < Math.min(minHeight, height)) continue;
+      const left = Math.max(space.left, Math.min(preferred.left, space.right - w));
+      const top = Math.max(space.top, Math.min(preferred.top, space.bottom - h));
+      const score = (width - w) * 20 + (height - h) * 4 + Math.hypot(left - preferred.left, top - preferred.top);
+      if (score < bestScore) { bestScore = score; best = { left, top, width: w, height: h }; }
+    }
+    return best;
+  };
+  return pick(height, true) ?? pick(320) ?? pick(160);
 }
