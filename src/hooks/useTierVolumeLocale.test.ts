@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { REGIONAL_TIERS, tierVolumeCurrency, tierVolumeModel } from "./useTierVolumeLocale";
-import { resolveTierTokens } from "@/components/trade/FelixTour";
+import { resolveTierTokens } from "@/components/trade/felixTourUtils";
 import type { TradeTier, TierConfigRow } from "./useTradeDiscount";
 
 describe("localized tier volume presentation", () => {
