@@ -1506,7 +1506,7 @@ const TradeProductPage: React.FC = () => {
   });
 
   if (isLoading) {
-    return <div className="pt-8"><ProductDetailSkeleton variant="page" /></div>;
+    return <div data-trade-page-loading role="status" aria-label="Loading product" className="pt-8"><ProductDetailSkeleton variant="page" /></div>;
   }
 
   if (!data) {

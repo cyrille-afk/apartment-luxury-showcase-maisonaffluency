@@ -597,9 +597,9 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         const pageLoading = !routeReady || Array.from(document.querySelectorAll('[data-trade-page-loading]'))
           .some((el) => (el as HTMLElement).offsetParent !== null);
         if (pageLoading) {
-          missingSince = 0;
           if (!loadingSince) loadingSince = now;
           if (now - loadingSince < 30000) {
+            missingSince = 0;
             frame = requestAnimationFrame(tick);
             return;
           }
