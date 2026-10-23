@@ -49,6 +49,23 @@ test("all 23 tour steps keep cards inside the viewport and outside protected fea
     }
     await page.setViewportSize({ width: 1946, height: 1181 });
     await expect(card).toBeVisible();
+    if (number === 10) {
+      // The Tools page Discover row spans nearly the full content width: the
+      // card must sit directly beneath it, not strand in a band at the bottom
+      // of the page where nothing on screen points back to it.
+      const near = await page.evaluate(() => {
+        const card = document.querySelector<HTMLElement>("[data-felix-tour-card]");
+        const spot = document.querySelector<HTMLElement>("[data-felix-spotlight]");
+        if (!card || !spot) return null;
+        const c = card.getBoundingClientRect();
+        const s = spot.getBoundingClientRect();
+        return { below: c.top - s.bottom, across: c.left < s.right && c.right > s.left };
+      });
+      expect(near).not.toBeNull();
+      expect(near!.below).toBeGreaterThanOrEqual(0);
+      expect(near!.below).toBeLessThanOrEqual(60);
+      expect(near!.across).toBe(true);
+    }
     if (number === 2) await page.locator('[data-felix-target="nav-collection"]').click();
     else if (number === 15) {
       const toggle = page.getByRole("switch", { name: "Toggle client editorial presentation" });

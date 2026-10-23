@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { placeTourCard, type TourRect } from "./felixTourPlacement";
+import { chooseTourCardPlacement, placeTourCard, type TourRect } from "./felixTourPlacement";
 
 const overlaps = (a: TourRect, b: TourRect) => a.left < b.left + b.width && a.left + a.width > b.left && a.top < b.top + b.height && a.top + a.height > b.top;
 
