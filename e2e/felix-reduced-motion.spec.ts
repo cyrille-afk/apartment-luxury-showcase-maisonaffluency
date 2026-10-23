@@ -30,7 +30,8 @@ for (const source of ["toggle", "device"] as const) {
       const card = page.locator("[data-felix-tour-card]");
       await expect(card).toHaveCSS("opacity", "1");
       await expect(card).toHaveCSS("transition-duration", "0s");
-      await expect(card.locator("[data-felix-sidebar-arrow]")).toBeVisible();
+      // The arrow SVG is a sibling of the card in the tour portal, not a child.
+      await expect(page.locator("[data-felix-sidebar-arrow]")).toBeVisible();
       const styles = await page.locator(`[data-tour-sidebar-anchor="${anchor}"]`).evaluateAll(nodes => nodes.map(node => ({
         animation: getComputedStyle(node, "::after").animationName,
         opacity: getComputedStyle(node, "::after").opacity,
