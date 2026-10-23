@@ -541,7 +541,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         .filter((el) => el.isConnected && ((el as HTMLElement).offsetParent !== null || getComputedStyle(el).position === "fixed") && getComputedStyle(el).visibility !== "hidden");
       if (current.id === "quotes" && live.length) {
         const heading = live[0].getBoundingClientRect();
-        if (heading.top < 72 || heading.bottom > window.innerHeight - 24) {
+        if (heading.top < 72 || heading.bottom > window.innerHeight - 24 || (heading.top > 100 && window.innerHeight < 750)) {
           window.scrollBy({ top: heading.top - 96, behavior: "instant" });
         }
       }
@@ -562,7 +562,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         height: Math.max(...boxes.map((r) => r.bottom)) - Math.min(...boxes.map((r) => r.top)),
       } : null;
       // Protect all visible page headings/tabs, not just this step's spotlight.
-      const protectedElements = Array.from(document.querySelectorAll('h1, h2, [role="tab"], [data-felix-target="collection-overview"]'))
+      const protectedElements = Array.from(document.querySelectorAll('h1, h2, h3, [role="heading"], [role="tab"], div.border-b > button, [data-felix-target="collection-overview"]'))
         .filter((el) => !el.closest('[data-felix-tour-card]') && (el as HTMLElement).offsetParent !== null);
       const obstacles = [...boxes, ...anchorBoxes, ...protectedElements.map((el) => el.getBoundingClientRect())]
         .filter((r) => r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < window.innerHeight && r.right > 0 && r.left < window.innerWidth)
@@ -926,7 +926,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         tabIndex={-1}
         aria-label={`${guideName} — Your Curatorial Guide, step ${currentStep + 1} of ${FELIX_STEPS.length}: ${step.title}`}
         className={cn(
-          "fixed z-[140] isolate print:hidden rounded-2xl border border-border bg-card text-card-foreground shadow-2xl transition-transform duration-200 ease-out motion-reduce:transition-none outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2",
+          "fixed z-[140] isolate print:hidden rounded-2xl border border-border bg-card text-card-foreground shadow-2xl outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2",
         )}
         style={{ width: placement?.width ?? cardW, left: 0, top: 0, transform: `translate3d(${cardLeft}px, ${cardTop}px, 0)`, visibility: settled && !transitioning && placement ? "visible" : "hidden", pointerEvents: settled && !transitioning && placement ? "auto" : "none" }}
       >
