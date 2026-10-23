@@ -537,6 +537,14 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         height: Math.max(...anchorBoxes.map((r) => r.bottom)) - Math.min(...anchorBoxes.map((r) => r.top)),
       } : null;
       const anchorChanged = anchor ? !lastAnchor || !sameRect(lastAnchor, anchor) : lastAnchor !== null;
+      // Orientation aid: a subtly outlined secondary element (e.g. the
+      // top-right Presentation Mode switch while the sidebar is hidden).
+      const secondaryEls = routeReady && current.secondaryTarget
+        ? Array.from(document.querySelectorAll(`[data-felix-target="${current.secondaryTarget}"]`))
+            .filter((el) => (el as HTMLElement).offsetParent !== null)
+        : [];
+      const secondaryNext = secondaryEls.length ? secondaryEls[0].getBoundingClientRect() : null;
+      const secondaryChanged = secondaryNext ? !lastSecondary || !sameRect(lastSecondary, secondaryNext) : lastSecondary !== null;
       const watchedNow = [...targets, ...sidebarTargets, ...targets.map((el) => el.parentElement).filter((el): el is HTMLElement => el !== null)];
       if (watchedNow.length !== watched.length || watchedNow.some((el, i) => el !== watched[i])) {
         resizeObserver.disconnect();
