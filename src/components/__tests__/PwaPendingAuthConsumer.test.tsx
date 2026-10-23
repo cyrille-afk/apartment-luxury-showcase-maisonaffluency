@@ -1,6 +1,7 @@
 import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PwaPendingAuthConsumer } from "../PwaPendingAuthConsumer";
+import { storePendingAuthToken } from "@/lib/pwaPendingAuth";
 
 const mocks = vi.hoisted(() => ({
   auth: { loading: false, user: null as null | { id: string }, rolesLoaded: false },
@@ -13,13 +14,14 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@tanstack/react-router", () => ({ useNavigate: () => mocks.navigate }));
 vi.mock("@/hooks/useAuth", () => ({ useAuth: () => mocks.auth }));
 vi.mock("@/lib/pwaMode", () => ({ isInstalledPwaDisplay: () => mocks.standalone }));
-vi.mock("@/lib/pwaPendingAuth", () => ({ readPendingAuthToken: () => mocks.pending, clearPendingAuthToken: mocks.clear }));
-vi.mock("@/lib/mobileSync.functions", () => ({ redeemMobileSyncToken: mocks.redeem }));
+vi.mock("@/lib/pwaPendingAuth", () => ({ readPendingAuthToken: () => mocks.pending, clearPendingAuthToken: mocks.clear, storePendingAuthToken: vi.fn((token) => { mocks.pending = token; }) }));
+vi.mock("@/lib/mobileSync.functions", () => ({ redeemMobileSyncToken: mocks.redeem, MOBILE_SYNC_TTL_SECONDS: 120 }));
 vi.mock("@/integrations/supabase/client", () => ({ supabase: { auth: { getSession: mocks.getSession, verifyOtp: mocks.verify } } }));
 
 const renderGate = () => render(<PwaPendingAuthConsumer><div data-testid="dashboard" /></PwaPendingAuthConsumer>);
 beforeEach(() => {
   vi.clearAllMocks();
+  window.history.replaceState({}, "", "/");
   mocks.auth = { loading: false, user: null, rolesLoaded: false };
   mocks.standalone = true; mocks.pending = "a".repeat(43);
   mocks.getSession.mockResolvedValue({ data: { session: null }, error: null });
@@ -29,6 +31,16 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("installed app startup handshake", () => {
+  it("redeems a manifest launch code even with no Safari storage", async () => {
+    mocks.pending = null;
+    const token = "b".repeat(43);
+    window.history.replaceState({}, "", `/?source=pwa&token=${token}`);
+    renderGate();
+    await waitFor(() => expect(mocks.redeem).toHaveBeenCalledWith({ data: { token } }));
+    expect(storePendingAuthToken).toHaveBeenCalledWith(token, 120);
+    expect(window.location.search).toBe("?source=pwa");
+    expect(screen.queryByTestId("dashboard")).toBeNull();
+  });
   it("holds route children until OTP and roles are ready, then enters the dashboard", async () => {
     const view = renderGate();
     await waitFor(() => expect(mocks.verify).toHaveBeenCalledWith({ token_hash: "verified-hash", type: "magiclink" }));
