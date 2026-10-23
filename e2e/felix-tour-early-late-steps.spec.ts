@@ -158,12 +158,12 @@ test("tour steps 1-12: sidebar references, copy and highlights", async ({ page, 
   });
   await step11.getByRole("button", { name: "Next", exact: true }).click();
 
-  // Step 12 — Studio Portfolio Management
+  // Step 12 — Studio Portfolio Management (the project switcher refs Projects)
   const step12 = await expectStep(page, {
     title: "Studio Portfolio Management",
     copy: "active project context",
-    anchor: "dashboard",
-    ref: /Dashboard/i,
+    anchor: "projects",
+    ref: /Projects & Interventions → Projects/i,
   });
   await step12.getByRole("button", { name: "Skip tour", exact: true }).click();
   await expect(page.locator("html[data-felix-tour-step]")).toHaveCount(0);
