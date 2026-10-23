@@ -7,7 +7,7 @@ import { takeLaunchToken } from "@/lib/pwaLaunchManifest";
 import { isInstalledPwaDisplay } from "@/lib/pwaMode";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Loader2, LogIn } from "lucide-react";
+import { Loader2, LogIn, RotateCw } from "lucide-react";
 
 /**
  * Runs once at app start inside the installed PWA. If the mobile browser
@@ -115,9 +115,14 @@ export function PwaPendingAuthConsumer({ children }: { children: ReactNode }) {
         <p className="font-display text-xl uppercase mb-10">Maison Affluency</p>
         {phase === "failed" ? (
           <section role="alert" className="space-y-6">
-            <h1 className="font-display text-2xl">Please sign in again</h1>
+            <h1 className="font-display text-2xl">{retryable ? "Connection interrupted" : "Please sign in again"}</h1>
             <p className="font-body text-sm leading-relaxed text-muted-foreground">{failure}</p>
-            <Button onClick={() => { clearPendingAuthToken(); setPhase("ready"); void navigate({ to: "/trade/login", search: { next: "/trade" }, replace: true }); }}>
+            {retryable && (
+              <Button onClick={retry} className="w-full">
+                <RotateCw aria-hidden="true" /> Try again
+              </Button>
+            )}
+            <Button variant={retryable ? "outline" : "default"} onClick={() => { clearPendingAuthToken(); setPhase("ready"); void navigate({ to: "/trade/login", search: { next: "/trade" }, replace: true }); }}>
               <LogIn aria-hidden="true" /> Sign in
             </Button>
           </section>
