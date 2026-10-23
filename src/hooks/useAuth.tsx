@@ -13,6 +13,8 @@ interface AuthContextType {
   isSuperAdmin: boolean;
   /** Roles have been successfully read for the signed-in user. */
   rolesLoaded: boolean;
+  /** Role/profile lookup failed after all retries — surfaces a recovery state. */
+  lookupFailed: boolean;
   profile: { first_name: string; last_name: string; company: string; email: string; trade_status?: string | null; has_seen_trade_intro?: boolean | null; concierge_name?: string | null } | null;
   /** Vetting state from public.profiles.trade_status: approved | pending_review | rejected */
   tradeStatus: "approved" | "pending_review" | "rejected" | null;
@@ -52,6 +54,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // True once roles were actually read for the current user. Admin gates must
   // wait for this instead of treating "lookup failed / not yet run" as "not admin".
   const [rolesLoaded, setRolesLoaded] = useState(false);
+  const [lookupFailed, setLookupFailed] = useState(false);
   const explicitSignOutRef = useRef(false);
   const [profile, setProfile] = useState<AuthContextType["profile"]>(null);
   const [applicationStatus, setApplicationStatus] = useState<AuthContextType["applicationStatus"]>("none");
