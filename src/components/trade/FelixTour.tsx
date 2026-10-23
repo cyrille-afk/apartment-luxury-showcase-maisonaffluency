@@ -589,9 +589,10 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       const obstaclesChanged = obstacleKey !== lastObstacles;
       const commit = (r: Rect) => {
         lastAnchor = anchor;
+        lastSecondary = secondaryNext;
         lastObstacles = obstacleKey;
-        setPosition((previous) => previous?.step === currentStep && previous.path === location.pathname && sameRect(previous.rect, r) && !anchorChanged && !obstaclesChanged
-          ? previous : { step: currentStep, path: location.pathname, rect: r, anchor, obstacles });
+        setPosition((previous) => previous?.step === currentStep && previous.path === location.pathname && sameRect(previous.rect, r) && !anchorChanged && !secondaryChanged && !obstaclesChanged
+          ? previous : { step: currentStep, path: location.pathname, rect: r, anchor, secondary: secondaryNext, obstacles });
         setViewport((previous) => previous.w === window.innerWidth && previous.h === window.innerHeight
           ? previous : { w: window.innerWidth, h: window.innerHeight });
         fallback = r.width === 0 && r.height === 0 && !next;
@@ -639,7 +640,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         last = next; stableSince = now;
       } else if (ready) {
         // Already shown: redraw immediately on any movement so the box never lags.
-        if (!last || !sameRect(last, next) || anchorChanged || obstaclesChanged) { last = next; commit(next); }
+        if (!last || !sameRect(last, next) || anchorChanged || secondaryChanged || obstaclesChanged) { last = next; commit(next); }
       } else if (["collection", "quotes", "margin-protection"].includes(current.id)) {
         // Client View may reflow in the same paint: commit the validated
         // client price immediately instead of waiting for the stability timer.
