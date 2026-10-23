@@ -1278,7 +1278,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                       <span
                         aria-hidden="true"
                         className={cn(
-                          "pointer-events-none inline-flex items-center rounded-full border px-1.5 py-0.5 font-body text-[8px] font-semibold uppercase leading-none tracking-[0.15em] transition-all duration-300",
+                          "pointer-events-none absolute top-0 rounded-full border px-1.5 py-0.5 font-body text-[8px] font-semibold uppercase leading-none tracking-[0.15em] transition-all duration-300",
                           "border-[hsl(var(--gold))]/30 bg-[hsl(var(--gold))]/10 text-[hsl(var(--gold))] opacity-90",
                           "group-hover/trade:border-[hsl(var(--gold))]/50 group-hover/trade:bg-[hsl(var(--gold))]/20 group-hover/trade:opacity-100",
                           tradeMenuOpen && "border-[hsl(var(--gold))]/50 bg-[hsl(var(--gold))]/20 opacity-100"
