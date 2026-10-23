@@ -27,7 +27,7 @@ export function StudioSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-9 gap-2 px-2 max-w-[180px] md:max-w-[240px]">
+        <Button variant="ghost" size="sm" aria-label="Switch studio" className="h-11 md:h-9 min-w-0 gap-1.5 md:gap-2 px-2 max-w-[132px] md:max-w-[240px]">
           <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
           <span className="truncate text-sm font-medium">
             {currentStudio?.name ?? "Select studio"}
@@ -41,7 +41,7 @@ export function StudioSwitcher() {
           <DropdownMenuItem
             key={s.id}
             onClick={() => setCurrentStudioId(s.id)}
-            className="flex items-center justify-between gap-2"
+            className="flex min-h-11 md:min-h-0 items-center justify-between gap-2"
           >
             <div className="flex items-center gap-2 min-w-0">
               <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />

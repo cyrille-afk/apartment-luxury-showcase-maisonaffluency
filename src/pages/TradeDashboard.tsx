@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Image, FileText, FolderOpen, FolderClosed,
-  Clock, FileDown, MapPin, Box, Users, Sparkles, Clapperboard, Play,
+  Clock, FileDown, MapPin, Box, Users, Sparkles, Clapperboard, Play, ArrowUpRight,
 } from "lucide-react";
 import { startFelixTour } from "@/components/trade/FelixTour";
 import { WhiteLabelTourBanner } from "@/components/trade/WhiteLabelTourBanner";
@@ -383,10 +383,10 @@ const TradeDashboard = () => {
     <div className="trade-dashboard w-full max-w-[1500px] mx-auto">
       <NewInquiriesAlert />
       {desktopTour && <WhiteLabelTourBanner />}
-      <div className="mb-10 md:mb-14 lg:mb-16 border-b border-border pb-7 md:pb-9">
+      <div className="mb-6 md:mb-14 lg:mb-16 border-b border-border pb-6 md:pb-9">
         <div className="flex items-start justify-between gap-4">
-          <div data-felix-target="greeting">
-            <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-normal text-foreground leading-none">
+          <div className="min-w-0" data-felix-target="greeting">
+            <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-normal text-foreground leading-tight md:leading-none break-words">
                {firstWelcome ? "Welcome to the Trade Program" : "Welcome back"}{profile?.first_name ? `, ${profile.first_name}` : ""}
             </h1>
             {profile?.company && showTradePrice && (
@@ -433,7 +433,20 @@ const TradeDashboard = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 content-start items-start gap-x-5 gap-y-14 md:gap-y-20">
+      <nav aria-label="Dashboard quick actions" data-trade-sensitive className="mb-8 grid grid-cols-2 gap-2 md:hidden">
+        {[
+          { title: "Projects", to: "/trade/projects", icon: FolderOpen },
+          { title: "Quotes", to: "/trade/quotes", icon: FileText },
+          { title: "Designers & Ateliers", to: "/trade/designers", icon: Users },
+          { title: "Resources", to: "/trade/documents", icon: FileDown },
+        ].map((action) => (
+          <Button key={action.to} asChild variant="outline" className="h-auto min-h-14 min-w-0 justify-start gap-2 px-3 py-3 font-body text-xs whitespace-normal text-left">
+            <Link to={action.to}><action.icon aria-hidden="true" /><span className="min-w-0 flex-1 break-words">{action.title}</span><ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" /></Link>
+          </Button>
+        ))}
+      </nav>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 content-start items-start gap-x-5 gap-y-5 md:gap-y-20">
         {DASH_CARDS.map((card, index) => (
           <Link
             key={card.to}
@@ -441,7 +454,7 @@ const TradeDashboard = () => {
             data-felix-target={card.key === "dash-showroom" ? "dashboard-showroom" : undefined}
             data-tour-target={card.key === "dash-designers" ? "designers" : card.key === "dash-library" ? "resources" : undefined}
             data-tap-preview={card.key === "dash-ai-walkthrough" ? "true" : undefined}
-            className={`group ${card.key === "dash-showroom" ? "group/radar" : ""} flex h-full flex-col pb-2 md:pb-4 tour-target ${index === 0 ? "lg:col-span-7" : index === 1 ? "lg:col-span-5" : "lg:col-span-4"}`}
+            className={`group ${card.key === "dash-showroom" ? "group/radar flex flex-col" : "grid grid-cols-[104px_minmax(0,1fr)] gap-4 sm:flex sm:flex-col sm:gap-0"} min-w-0 h-full pb-2 md:pb-4 tour-target ${index === 0 ? "lg:col-span-7" : index === 1 ? "lg:col-span-5" : "lg:col-span-4"}`}
             onClickCapture={(e) => {
               // Touch devices: first tap on the walkthrough card previews the video
               // instead of navigating; the second tap opens the page.
@@ -451,7 +464,7 @@ const TradeDashboard = () => {
               }
             }}
           >
-            <div className={`relative overflow-hidden bg-muted ${index === 0 ? "aspect-[16/9]" : index === 1 ? "aspect-[10/9]" : "aspect-[4/3]"}`}>
+            <div className={`relative overflow-hidden bg-muted ${index === 0 ? "aspect-[16/9]" : index === 1 ? "aspect-square sm:aspect-[10/9]" : "aspect-square sm:aspect-[4/3]"}`}>
               {getCardImage(card) ? (
                 <img
                   src={getCardImage(card)}
@@ -485,10 +498,10 @@ const TradeDashboard = () => {
                 </span>
               )}
             </div>
-            <div className="mt-3 min-h-[92px] border-t border-border pt-4 md:min-h-[104px]">
+            <div className={`min-w-0 border-t border-border ${index === 0 ? "mt-3 min-h-[92px] pt-4" : "pt-2 sm:mt-3 sm:min-h-[92px] sm:pt-4"} md:min-h-[104px]`}>
               <p className="trade-micro-label text-muted-foreground mb-1">0{index + 1} — Collection</p>
               <h3 className="font-display text-lg md:text-xl text-foreground mb-1">{card.title}</h3>
-              <p className="trade-card-description font-body text-[11px] md:text-xs leading-relaxed">{card.description}</p>
+              <p className="trade-card-description font-body text-xs leading-relaxed">{card.description}</p>
             </div>
           </Link>
         ))}
@@ -496,9 +509,9 @@ const TradeDashboard = () => {
 
       {activeProjects.length > 0 && (
         <section className="mt-14 border-t border-border pt-6 md:mt-20" aria-label="Active workspace projects">
-          <div className="mb-5 flex items-baseline justify-between gap-4">
+          <div className="mb-5 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:items-baseline sm:justify-between">
             <h2 className="font-display text-2xl text-foreground">Projects & Interventions</h2>
-            <Link to="/trade/projects" className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground">View all projects →</Link>
+            <Button asChild variant="ghost" className="h-auto min-h-11 shrink-0 px-2 text-xs font-body"><Link to="/trade/projects" aria-label="View all projects">View all <ArrowUpRight aria-hidden="true" /></Link></Button>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {activeProjects.slice(0, 4).map((project, index) => (
@@ -512,7 +525,7 @@ const TradeDashboard = () => {
                 </div>
                 <div className="mt-6">
                   <p className="trade-micro-label text-muted-foreground">{String(index + 1).padStart(2, "0")} — Active project</p>
-                  <Link to={projectDefaultUrl(project.id, projectBoards)} className="block hover:underline">
+                  <Link to={projectDefaultUrl(project.id, projectBoards)} className="block min-h-11 py-2 sm:py-0 hover:underline">
                     <h3 className="mt-1 font-display text-lg text-foreground">{project.name}</h3>
                   </Link>
                   {project.location && <p className="mt-1 font-body text-xs text-muted-foreground">{project.location}</p>}
@@ -623,7 +636,7 @@ const TradeDashboard = () => {
                   ) : (
                     <FolderOpen className="h-8 w-8 text-accent group-hover:text-foreground transition-colors" />
                   )}
-                  <span className="font-body text-xs text-foreground text-center leading-tight truncate w-full">
+                  <span className="font-body text-xs text-foreground text-center leading-relaxed break-words w-full">
                     {brand.brand_name}
                   </span>
                   <span className={`font-body text-[10px] ${isEmpty ? "text-muted-foreground/50" : "text-muted-foreground"}`}>
