@@ -417,7 +417,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [user, sbClient, fetchUserData]);
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, sessionExpired, isPwaBooting, setIsPwaBooting, isTradeUser, isAdmin, isSuperAdmin, rolesLoaded, profile, tradeStatus, applicationStatus, signOut, refreshRoles }}>
+    <AuthContext.Provider value={{ user, session, loading, sessionExpired, isPwaBooting, setIsPwaBooting, isTradeUser, isAdmin, isSuperAdmin, rolesLoaded, lookupFailed, profile, tradeStatus, applicationStatus, signOut, refreshRoles }}>
       {children}
     </AuthContext.Provider>
   );
