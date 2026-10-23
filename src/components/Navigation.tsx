@@ -1065,9 +1065,9 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     aria-expanded={mobileTradeExpanded}
                     className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold"
                   >
-                    <span className="flex items-center gap-2">
+                    <span className="flex items-center gap-1.5">
                       {tradePartner ? "Trade Dashboard" : "Trade"}
-                      <span aria-hidden="true" className="rounded-full border border-[hsl(var(--gold))]/30 bg-[hsl(var(--gold))]/15 px-1.5 py-[2px] font-body text-[9px] font-medium uppercase leading-none tracking-[0.15em] text-[hsl(var(--gold))]">PRO</span>
+                      <span aria-hidden="true" className="inline-flex items-center rounded-full border border-[hsl(var(--gold))]/30 bg-[hsl(var(--gold))]/10 px-1.5 py-0.5 font-body text-[8px] font-semibold uppercase leading-none tracking-[0.15em] text-[hsl(var(--gold))]">PRO</span>
                     </span>
 
                     <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${mobileTradeExpanded ? "rotate-90" : ""}`} />
@@ -1269,17 +1269,17 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     aria-expanded={tradeMenuOpen}
                     data-utility-trade
                     onClick={openTradeMenu}
-                    className={cn("group/trade relative h-auto rounded-none p-0 font-body text-[12px] uppercase tracking-[0.2em] font-medium text-muted-foreground hover:bg-transparent hover:text-foreground transition-colors whitespace-nowrap py-2", tradePartner && "text-primary border-b border-primary")}
+                    className={cn("group/trade relative flex h-auto items-center gap-1.5 rounded-none p-0 font-body text-[12px] uppercase tracking-[0.2em] font-medium text-muted-foreground hover:bg-transparent hover:text-foreground transition-colors whitespace-nowrap py-2", tradePartner && "text-primary border-b border-primary")}
                   >
                     <span className="link-underline-grow">{tradePartner ? "Trade Dashboard" : "Trade"}</span>
-                    {/* Micro "PRO" capsule: a quiet B2B marker that brightens in step
-                        with the dropdown it opens. */}
+                    {/* Inline "PRO" capsule on the same line as the word: a quiet B2B marker
+                        that brightens in step with the dropdown it opens. */}
                     {!tradePartner && (
                       <span
                         aria-hidden="true"
                         className={cn(
-                          "pointer-events-none absolute right-0 top-0 -translate-y-1/2 translate-x-[38%] whitespace-nowrap rounded-full border px-1.5 py-[2px] font-body text-[9px] font-medium uppercase leading-none tracking-[0.15em] transition-all duration-300",
-                          "border-[hsl(var(--gold))]/30 bg-[hsl(var(--gold))]/15 text-[hsl(var(--gold))] opacity-90",
+                          "pointer-events-none inline-flex items-center rounded-full border px-1.5 py-0.5 font-body text-[8px] font-semibold uppercase leading-none tracking-[0.15em] transition-all duration-300",
+                          "border-[hsl(var(--gold))]/30 bg-[hsl(var(--gold))]/10 text-[hsl(var(--gold))] opacity-90",
                           "group-hover/trade:border-[hsl(var(--gold))]/50 group-hover/trade:bg-[hsl(var(--gold))]/20 group-hover/trade:opacity-100",
                           tradeMenuOpen && "border-[hsl(var(--gold))]/50 bg-[hsl(var(--gold))]/20 opacity-100"
                         )}
