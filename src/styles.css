@@ -243,7 +243,8 @@ All colors MUST be HSL.
        text. Never a copy of the tier gold/bronze values. */
     --felix-ink: 222 22% 12%;
     --felix-ink-lift: 222 18% 19%;
-    --felix-champagne: 41 42% 74%;
+    /* Deep enough to read on the cream canvas, still muted rather than bright. */
+    --felix-champagne: 38 34% 52%;
     --felix-on-ink: 40 30% 96%;
     
     /* Shadows */
