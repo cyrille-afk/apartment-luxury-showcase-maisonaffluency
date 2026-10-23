@@ -1,14 +1,14 @@
-import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "@/lib/router-compat";
 import { motion, AnimatePresence } from "framer-motion";
-import { LayoutDashboard, MapPin, Heart, FileText, Image, Scan } from "lucide-react";
+import { LayoutDashboard, MapPin, Heart, FileText, FolderOpen, Scan } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { TRADE_SANDBOX_ONLY } from "@/lib/tradeSandboxOnly";
 
 const fullNavItems = [
   { id: "/trade", label: "Home", icon: LayoutDashboard, end: true },
   { id: "/trade/the-collection", label: "Collection", icon: MapPin },
-  { id: "/trade/gallery", label: "Gallery", icon: Image },
+  { id: "/trade/projects", label: "Projects", icon: FolderOpen },
   { id: "/trade/favorites", label: "Favorites", icon: Heart },
   { id: "/trade/quotes", label: "Quotes", icon: FileText },
 ];
@@ -20,26 +20,13 @@ const navItems = TRADE_SANDBOX_ONLY
 const TradeBottomNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
-
-  // Hide on scroll down, show on scroll up
-  useEffect(() => {
-    const onScroll = () => {
-      const currentY = window.scrollY;
-      setIsVisible(currentY < lastScrollY || currentY < 100);
-      setLastScrollY(currentY);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [lastScrollY]);
 
   const isActive = (url: string, end?: boolean) =>
     end ? location.pathname === url : location.pathname.startsWith(url);
 
   return (
     <AnimatePresence>
-      {isVisible && (
+      {(
         <motion.nav
           initial={{ y: 80, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -49,15 +36,17 @@ const TradeBottomNav = () => {
           aria-label="Trade navigation"
         >
           <div className="bg-card border-t border-border">
-            <div className="flex items-center justify-around px-1 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+            <div className={`grid ${TRADE_SANDBOX_ONLY ? "grid-cols-1" : "grid-cols-5"} px-2 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))]`}>
               {navItems.map(({ id, label, icon: Icon, end }) => {
                 const active = isActive(id, end);
                 return (
-                  <button
+                   <Button
+                    type="button"
+                    variant="ghost"
                     key={id}
                     onClick={() => navigate(id)}
                     className={cn(
-                      "flex flex-col items-center gap-0.5 px-2 py-1.5 transition-colors duration-200 touch-manipulation min-w-[3.5rem] relative",
+                      "h-12 min-w-0 flex flex-col items-center justify-center gap-1 px-1 py-1.5 rounded-none transition-colors duration-200 touch-manipulation relative",
                       active
                         ? "text-primary"
                         : "text-muted-foreground active:text-foreground"
@@ -66,7 +55,7 @@ const TradeBottomNav = () => {
                     aria-current={active ? "page" : undefined}
                   >
                     <Icon className="h-4 w-4" strokeWidth={active ? 2.5 : 1.5} />
-                    <span className={cn("text-[10px] leading-tight font-body", active && "font-medium")}>
+                    <span className={cn("text-[11px] leading-tight font-body", active && "font-medium")}>
                       {label}
                     </span>
                     {active && (
@@ -76,7 +65,7 @@ const TradeBottomNav = () => {
                         transition={{ type: "spring", stiffness: 500, damping: 30 }}
                       />
                     )}
-                  </button>
+                  </Button>
                 );
               })}
             </div>
