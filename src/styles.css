@@ -32,6 +32,10 @@ html[data-felix-tour-step="client-safe-presentations"] .trade-editorial-header {
 html:is([data-felix-tour-step="quotes"], [data-felix-tour-step="projects"]) .trade-editorial-sidebar {
   z-index: 131;
 }
+html:is([data-felix-tour-step="quotes"], [data-felix-tour-step="projects"]) .trade-portal-shell > :has([data-trade-sidebar]) {
+  position: relative;
+  z-index: 131;
+}
 html[data-felix-tour-step="quotes"] [data-tour-sidebar-anchor="collection"],
 html[data-felix-tour-step="projects"] [data-tour-sidebar-anchor="projects"] {
   position: relative;
