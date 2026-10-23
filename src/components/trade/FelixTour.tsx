@@ -63,16 +63,16 @@ const FELIX_STEPS: FelixStep[] = [
   },
   {
     id: "collection",
-    title: "Interactive Sourcing",
-    target: "dashboard-showroom",
+    title: "The Collection",
+    target: "nav-collection",
     route: "/trade",
     dialogue:
-      "Explore pieces in real residential settings through the Curated Showroom. Your Silver Tier gives you a {silverPct} trade discount on eligible pieces. Click the Curated Showroom card to enter The Collection and see your pricing in context.",
+      "Open **The Collection** from your sidebar. Explore rooms in the **Interactive Gallery**, or browse **Designers & Ateliers** to access each designer’s product pages. Your Silver Tier gives you a {silverPct} trade discount on eligible pieces.",
   },
   {
     id: "quotes",
     title: "Transparent Project Margins",
-    target: "collection-gallery",
+    target: "collection-overview",
     route: "/trade/the-collection",
     dialogue:
       "In The Collection, explore each room of the Interactive Gallery and open a product tag, or browse Designers & Ateliers and open any designer’s product pages, to see your pricing. Your Silver Tier's {silverPct} trade discount is reflected in eligible product pricing, so you can plan your project margins with clarity. Keep building your cumulative project volume toward the {goldVolume} Gold Tier threshold.",
@@ -344,10 +344,8 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
 
   const step = FELIX_STEPS[currentStep];
   const isLast = currentStep === FELIX_STEPS.length - 1;
-  const [collectionArrived, setCollectionArrived] = useState(false);
-  // The showroom card advances the step before navigation; do not redirect
-  // away while its Link takes the member into the gallery.
-  const stepRoute = step.id === "quotes" && collectionArrived ? location.pathname : step.route;
+  // Collection navigation always resolves to the actual Collection route.
+  const stepRoute = step.route;
   const stepTarget = step.target;
 
   const measure = useCallback(() => {
@@ -372,7 +370,6 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     const entered = clientSafe && !previousClientSafe.current;
     previousClientSafe.current = clientSafe;
     if (entered && open && currentStep === 5) {
-      setCollectionArrived(false);
       setCurrentStep(6);
     }
   }, [clientSafe, open, currentStep]);
@@ -399,10 +396,9 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   useEffect(() => {
     if (!open || isPaused) return;
     const onClick = (e: MouseEvent) => {
-      const el = (e.target as HTMLElement | null)?.closest?.(`[data-felix-target="${stepTarget}"]`);
+      const el = (e.target as HTMLElement | null)?.closest?.(`[data-felix-target="${stepTarget}"]${step.id === "collection" ? ', [data-felix-target="dashboard-showroom"]' : ''}`);
       if (el && step.id === "collection") {
         flushSync(() => {
-          setCollectionArrived(true);
           setCurrentStep(2);
         });
         return;
@@ -482,7 +478,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       }
       if (targets.length && !didScroll) {
         didScroll = true;
-        targets[0].scrollIntoView({ block: "center", behavior: current.id === "margin-protection" || window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+        targets[0].scrollIntoView({ block: current.id === "quotes" ? "nearest" : "center", behavior: ["collection", "quotes", "margin-protection"].includes(current.id) || window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
       }
       const watchedNow = [...targets, ...targets.map((el) => el.parentElement).filter((el): el is HTMLElement => el !== null)];
       if (watchedNow.length !== watched.length || watchedNow.some((el, i) => el !== watched[i])) {
@@ -551,7 +547,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       } else if (ready) {
         // Already shown: redraw immediately on any movement so the box never lags.
         if (!last || !sameRect(last, next)) { last = next; commit(next); }
-      } else if (current.id === "margin-protection") {
+      } else if (["collection", "quotes", "margin-protection"].includes(current.id)) {
         // Client View may reflow in the same paint: commit the validated
         // client price immediately instead of waiting for the stability timer.
         last = next;
@@ -559,7 +555,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       } else if (!last || !sameRect(last, next)) {
         last = next;
         stableSince = now;
-      } else if (now - stableSince >= (current.id === "quotes" ? 350 : 80)) {
+      } else if (now - stableSince >= 80) {
         // The galleries restore their own scroll after mounting; wait it out
         // so Step 3 never appears on the pre-scroll position first.
         commit(next);
@@ -619,7 +615,6 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       try { localStorage.removeItem(PROGRESS_KEY); } catch {}
       setTransitioning(false);
       setCurrentStep(0);
-      setCollectionArrived(false);
       setIsPaused(false);
       setOpen(true);
     };
@@ -659,7 +654,6 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     setTransitioning(true);
     transitionTimer.current = window.setTimeout(() => {
       setIsPaused(false);
-      setCollectionArrived(false);
       setCurrentStep((s) => Math.max(0, Math.min(s + direction, FELIX_STEPS.length - 1)));
       transitionTimer.current = null;
     }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 80);
@@ -670,7 +664,6 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     // The next frame (including route fallbacks) must already be client-safe.
     if (step.id === "client-safe-presentations") {
       setClientSafeMode(true);
-      setCollectionArrived(false);
       setCurrentStep(6);
       return;
     }
@@ -818,7 +811,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
         className={cn("fixed inset-0 z-[130] overflow-hidden print:hidden", rect ? "pointer-events-none" : "pointer-events-auto")}
         onClick={rect ? undefined : () => close(false)}
       >
-        {(!rect || !settled || transitioning) && <div className="absolute inset-0 bg-foreground/40" />}
+        {rect && settled && !transitioning && targetUnavailable && <div className="absolute inset-0 bg-foreground/40" />}
       </div>}
       {ring}
 
@@ -1025,7 +1018,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
              <div role="status" className="mt-3 flex items-center gap-3 rounded-md bg-primary px-4 py-3 text-primary-foreground">
                {step.id === "collection" || step.id === "client-view" ? <ArrowLeft className="h-5 w-5 shrink-0" aria-hidden="true" /> : <ArrowRight className="h-5 w-5 shrink-0" aria-hidden="true" />}
                <p className="font-body text-sm font-semibold leading-snug">
-                 {step.id === "collection" ? "Click on the Curated Showroom card to continue." : step.id === "white-label" ? "Turn on ‘Use studio branding only’ below to unlock Next." : step.id === "client-view" ? "Switch to Client View to unlock Next." : "Use the highlighted control to continue."}
+                 {step.id === "collection" ? "Open The Collection to continue." : step.id === "white-label" ? "Turn on ‘Use studio branding only’ below to unlock Next." : step.id === "client-view" ? "Switch to Client View to unlock Next." : "Use the highlighted control to continue."}
                </p>
              </div>
            )}
