@@ -7860,6 +7860,51 @@ export type Database = {
         }
         Relationships: []
       }
+      registration_alert_events: {
+        Row: {
+          attempts: number
+          created_at: string
+          email_done: Json
+          event_type: string
+          id: string
+          last_error: string | null
+          lease_until: string | null
+          next_attempt_at: string
+          source_id: string
+          source_table: string
+          status: string
+          whatsapp_done: Json
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          email_done?: Json
+          event_type: string
+          id?: string
+          last_error?: string | null
+          lease_until?: string | null
+          next_attempt_at?: string
+          source_id: string
+          source_table: string
+          status?: string
+          whatsapp_done?: Json
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          email_done?: Json
+          event_type?: string
+          id?: string
+          last_error?: string | null
+          lease_until?: string | null
+          next_attempt_at?: string
+          source_id?: string
+          source_table?: string
+          status?: string
+          whatsapp_done?: Json
+        }
+        Relationships: []
+      }
       room_planner_projects: {
         Row: {
           created_at: string
@@ -12686,6 +12731,29 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      claim_registration_alerts: {
+        Args: never
+        Returns: {
+          attempts: number
+          created_at: string
+          email_done: Json
+          event_type: string
+          id: string
+          last_error: string | null
+          lease_until: string | null
+          next_attempt_at: string
+          source_id: string
+          source_table: string
+          status: string
+          whatsapp_done: Json
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "registration_alert_events"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       claim_webhook_events: {
         Args: { batch_size?: number }
         Returns: {
@@ -12780,6 +12848,7 @@ export type Database = {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
       }
+      dispatch_registration_alerts: { Args: never; Returns: undefined }
       effective_product_availability: {
         Args: { _product_id: string }
         Returns: {
