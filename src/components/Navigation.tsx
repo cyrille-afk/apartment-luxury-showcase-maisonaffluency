@@ -6,6 +6,7 @@ import TradeServicesRequestModal from "@/components/trade/TradeServicesRequestMo
 import { useWishlist } from "@/contexts/WishlistContext";
 import { useCompare } from "@/contexts/CompareContext";
 import { useAuth } from "@/hooks/useAuth";
+import { useQueryClient } from "@tanstack/react-query";
 import { trackCTA } from "@/lib/analytics";
 import { deferHashScrollUntilSheetClosed } from "@/lib/mobileHashNavigation";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
@@ -385,7 +386,16 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
     return () => window.clearTimeout(id);
   }, []);
   useDbCuratorPicks({ enabled: catalogWarm });
-  const { user, isTradeUser } = useAuth();
+  const { user, isTradeUser, rolesLoaded, signOut } = useAuth();
+  const tradePartner = Boolean(user && rolesLoaded && isTradeUser);
+  const queryClient = useQueryClient();
+  const handleTradeSignOut = async () => {
+    setTradeMenuOpen(false);
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await signOut();
+    navigate("/trade/login", { replace: true });
+  };
   const visibleLeftNavItems = leftNavItems;
   const { items: pinItems, setIsComparing } = useCompare();
   const [authGateOpen, setAuthGateOpen] = useState(false);
@@ -892,11 +902,23 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                 "relative z-10 flex items-center justify-end gap-1 w-[88px] xsp:w-[96px] shrink-0"
               )}
             >
-              <button
+              {tradePartner ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="font-body text-xs text-primary">Studio</Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-background border border-border">
+                    <DropdownMenuItem onClick={() => navigate("/trade")} className="font-body cursor-pointer">Go to Studio</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/trade/quotes")} className="font-body cursor-pointer">My Quotes</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => void handleTradeSignOut()} className="font-body cursor-pointer text-destructive">Sign Out</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : <button
                 type="button"
                 onClick={() => {
                   if (user) {
-                    navigate("/trade");
+                    navigate("/favorites");
                   } else {
                     setAuthGateMode("login");
                     setAuthGateOpen(true);
@@ -906,7 +928,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                 className="relative flex items-center justify-center w-10 h-10 text-foreground hover:text-primary transition-colors"
               >
                 <User className="w-[20px] h-[20px]" strokeWidth={1.5} />
-              </button>
+              </button>}
               <CartNavButton iconClassName="w-[20px] h-[20px] text-foreground" />
               {isContactRoute && (
                 <button
@@ -1037,24 +1059,30 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     Trade
                     <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${mobileTradeExpanded ? "rotate-90" : ""}`} />
                   </button>
-                  {mobileTradeExpanded && (
+                  {mobileTradeExpanded && (tradePartner ? (
+                    <div className="ml-4 mb-1 border-l border-border/30 pl-4 flex flex-col">
+                      <Button variant="ghost" onClick={() => { closeMobileMenu(); navigate("/trade"); }} className="justify-start font-body text-xs">Go to Studio</Button>
+                      <Button variant="ghost" onClick={() => { closeMobileMenu(); navigate("/trade/quotes"); }} className="justify-start font-body text-xs">My Quotes</Button>
+                      <Button variant="ghost" onClick={() => { closeMobileMenu(); void handleTradeSignOut(); }} className="justify-start font-body text-xs text-destructive">Sign Out</Button>
+                    </div>
+                  ) : (
                     <div className="ml-4 mb-1 border-l border-border/30 pl-4 flex flex-col">
                       <button onClick={() => { closeMobileMenu(); handleNavClick("/trade/login"); }} className="text-left font-body text-[12px] uppercase tracking-[0.15em] text-muted-foreground hover:text-primary transition-colors py-2 font-semibold">Sign-In</button>
                       <button onClick={() => { closeMobileMenu(); handleNavClick("/trade-program?intent=apply"); }} className="text-left font-body text-[12px] uppercase tracking-[0.15em] text-muted-foreground hover:text-primary transition-colors py-2 font-semibold">Join</button>
                       <button onClick={() => { closeMobileMenu(); setServicesOpen(true); }} className="text-left font-body text-[12px] uppercase tracking-[0.15em] text-muted-foreground hover:text-primary transition-colors py-2 font-semibold">Request Services</button>
                     </div>
-                  )}
+                  ))}
                 </div>
               </div>
 
               {/* Sticky bottom toolbar — My Account / Wishlist / Contact Us */}
               <div className="mt-auto sticky bottom-0 border-t border-border bg-muted/50 backdrop-blur-sm grid grid-cols-3 py-3">
                 <button
-                  onClick={() => { closeMobileMenu(); user ? navigate("/trade") : setAuthGateOpen(true); }}
+                  onClick={() => { closeMobileMenu(); user ? navigate(tradePartner ? "/trade" : "/favorites") : setAuthGateOpen(true); }}
                   className="flex flex-col items-center gap-1 text-foreground hover:text-primary transition-colors"
                 >
-                  <User className="h-5 w-5" />
-                  <span className="font-body text-[9px] uppercase tracking-[0.15em] font-semibold">My Account</span>
+                  {tradePartner ? <Briefcase className="h-5 w-5" /> : <User className="h-5 w-5" />}
+                  <span className="font-body text-[9px] uppercase tracking-[0.15em] font-semibold">{tradePartner ? "Studio" : "My Account"}</span>
                 </button>
                 <button
                   onClick={() => { closeMobileMenu(); navigate("/favorites"); }}
@@ -1188,7 +1216,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
             </div>
 
             <div className="relative z-20 flex shrink-0 items-center gap-5">
-              {isContactRoute ? (
+              {isContactRoute && !tradePartner ? (
                 <button
                   type="button"
                   onClick={closeContactView}
@@ -1203,16 +1231,17 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   onMouseEnter={openTradeMenu}
                   onMouseLeave={scheduleTradeMenuClose}
                 >
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
                     aria-haspopup="menu"
                     aria-expanded={tradeMenuOpen}
                     data-utility-trade
-                    onClick={() => setTradeMenuOpen((o) => !o)}
-                    className="font-body text-[12px] uppercase tracking-[0.2em] font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap py-2"
+                    onClick={openTradeMenu}
+                    className={cn("h-auto rounded-none p-0 font-body text-[12px] uppercase tracking-[0.2em] font-medium text-muted-foreground hover:bg-transparent hover:text-foreground transition-colors whitespace-nowrap py-2", tradePartner && "text-primary border-b border-primary")}
                   >
-                    <span className="link-underline-grow">Trade</span>
-                  </button>
+                    <span className="link-underline-grow">{tradePartner ? "Trade Dashboard" : "Trade"}</span>
+                  </Button>
                   <div
                     role="menu"
                     className={cn(
@@ -1224,6 +1253,13 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     )}
                   >
                     <div className="w-[300px] border border-border bg-background py-6 px-8 shadow-lg flex flex-col gap-4">
+                      {tradePartner ? (
+                        <>
+                          <Button variant="ghost" role="menuitem" onClick={() => { setTradeMenuOpen(false); navigate("/trade"); }} className="h-auto justify-start rounded-none p-0 text-left font-body text-sm text-foreground hover:bg-transparent hover:text-muted-foreground">Go to Studio</Button>
+                          <Button variant="ghost" role="menuitem" onClick={() => { setTradeMenuOpen(false); navigate("/trade/quotes"); }} className="h-auto justify-start rounded-none p-0 text-left font-body text-sm text-foreground hover:bg-transparent hover:text-muted-foreground">My Quotes</Button>
+                          <Button variant="ghost" role="menuitem" onClick={() => void handleTradeSignOut()} className="h-auto justify-start rounded-none p-0 text-left font-body text-sm text-foreground hover:bg-transparent hover:text-muted-foreground">Sign Out</Button>
+                        </>
+                      ) : <>
                       <button role="menuitem" onClick={() => { setTradeMenuOpen(false); setMegaMenuOpen(false); handleNavClick("/trade/login"); }} className="text-left font-body text-sm text-foreground hover:text-muted-foreground transition-colors">
                         Affluency Trade Program Sign-In
                       </button>
@@ -1233,12 +1269,13 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                       <button role="menuitem" onClick={() => { setTradeMenuOpen(false); setServicesOpen(true); }} className="text-left font-body text-sm text-foreground hover:text-muted-foreground transition-colors">
                         Request Affluency Trade Services
                       </button>
+                      </>}
                     </div>
                   </div>
                 </div>
               )}
 
-              <DropdownMenu onOpenChange={(o) => setAccountMenuOpen(o)}>
+              {!tradePartner && <DropdownMenu onOpenChange={(o) => setAccountMenuOpen(o)}>
                 <DropdownMenuTrigger aria-label="Account menu" title="Account" className="relative group p-1 outline-hidden">
                   <span className="sr-only">Account menu</span>
                   <User className="w-[16px] h-[16px] text-muted-foreground group-hover:text-foreground transition-colors" strokeWidth={1.25} />
@@ -1293,7 +1330,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     </>
                   )}
                 </DropdownMenuContent>
-              </DropdownMenu>
+              </DropdownMenu>}
 
               <React.Suspense fallback={favoritesButton}>
                 <FavoritesHoverPreview favCount={favCount}>
