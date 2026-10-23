@@ -105,6 +105,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return fetchUserData(userId, client, attempt + 1);
       }
       console.warn("Role lookup failed after retries; keeping existing permissions.", lookupError);
+      setLookupFailed(true);
       // Last-resort background retry for a flaky connection at page load —
       // without it an admin would stay stuck in public-only mode all session.
       if (lookupRetryTimerRef.current) window.clearTimeout(lookupRetryTimerRef.current);
@@ -113,6 +114,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }, 8000);
       return false;
     }
+
+    setLookupFailed(false);
 
     if (rolesRes.data) {
       const roles = rolesRes.data.map((r: any) => r.role);
