@@ -7,6 +7,7 @@ import { lovable } from "@/integrations/lovable";
 import { ensureStorageHeadroom } from "@/lib/storageReclaim";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
 
 /**
  * Consumer mailboxes that must never be fast-tracked into trade access.
@@ -58,7 +59,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
   const navigate = useNavigate();
   const { isPwaBooting } = useAuth();
   const { toast } = useToast();
-  const [mode, setMode] = useState<"prompt" | "signup" | "login">(initialMode);
+  const [mode, setMode] = useState<"prompt" | "signup" | "login" | "success">(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -69,7 +70,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
   const [googleLoading, setGoogleLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  useEffect(() => { if (open) setMode(initialMode); }, [open, initialMode]);
+  useEffect(() => { if (open) { setMode(initialMode); setFormError(null); } }, [open, initialMode]);
 
   if (!open || isPwaBooting) return null;
 
@@ -99,12 +100,23 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setFormError(null);
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      setFormError("Please enter a valid email address. Your account has not been created.");
+      return;
+    }
+    if (password.length < 8 || !/[a-z]/i.test(password) || !/[0-9]/.test(password) || !/[^a-z0-9]/i.test(password)) {
+      setFormError("Your account has not been created. Use at least 8 characters with letters, numbers and a symbol.");
+      return;
+    }
     setLoading(true);
-    const domain = email.split("@")[1]?.trim().toLowerCase() || "";
+    try {
+    const domain = normalizedEmail.split("@")[1] || "";
     const isPersonalDomain = PERSONAL_EMAIL_DOMAINS.has(domain);
     const { data: signUpData, error } = await supabase.auth.signUp({
-      email,
+      email: normalizedEmail,
       password,
       options: {
         data: {
@@ -124,36 +136,23 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
         emailRedirectTo: window.location.origin,
       },
     });
-    setLoading(false);
     if (error) {
       setFormError(describeSignUpError(error.message));
       return;
     }
-    // Send welcome email (fire-and-forget)
-    if (signUpData?.user?.id) {
-      supabase.functions.invoke('send-transactional-email', {
-        body: {
-          templateName: 'welcome-registration',
-          recipientEmail: email,
-          idempotencyKey: `welcome-reg-${signUpData.user.id}`,
-          templateData: { firstName, recipientEmail: email },
-        },
-      }).catch(() => {});
+    if (!signUpData?.user?.id) {
+      setFormError("We couldn't confirm your account was created. Please try again.");
+      return;
     }
-    toast({
-      title: "Check your email",
-      description: isDesigner
-        ? "We've sent a confirmation link. Next: complete your trade application."
-        : "We've sent you a confirmation link. Please verify your email to continue.",
-    });
-    onClose();
-    if (isDesigner) {
-      const qs = new URLSearchParams({
-        email,
-        first_name: firstName,
-        last_name: lastName,
-      });
-      navigate(`/trade-program?${qs.toString()}`);
+    // Confirmation delivery belongs to Cloud Auth. Do not call a protected
+    // welcome-email endpoint before confirmation or imply Trade was submitted.
+    setEmail(normalizedEmail);
+    setPassword("");
+    setMode("success");
+    } catch {
+      setFormError("We couldn't confirm your signup because the connection was interrupted. Please try again with the same email.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -196,9 +195,9 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
   );
 
   const content = (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4" onClick={onClose}>
-      <div className={`bg-background border border-border rounded-lg p-6 w-full shadow-xl relative ${mode === "signup" ? "max-w-lg" : "max-w-sm"}`} onClick={(e) => e.stopPropagation()}>
-        <button onClick={onClose} className="absolute top-3 right-3 text-muted-foreground hover:text-foreground">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4" onClick={() => { if (!loading) onClose(); }}>
+      <div role="dialog" aria-modal="true" aria-label="Account registration" className={`bg-background border border-border rounded-lg p-6 w-full shadow-xl relative ${mode === "signup" ? "max-w-lg" : "max-w-sm"}`} onClick={(e) => e.stopPropagation()}>
+        <button aria-label="Close" disabled={loading} onClick={onClose} className="absolute top-3 right-3 text-muted-foreground hover:text-foreground">
           <X size={16} />
         </button>
 
@@ -259,7 +258,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
             {googleButton}
             {divider}
 
-            <form onSubmit={handleSignUp} className="space-y-4">
+            <form noValidate onSubmit={handleSignUp} className="space-y-4">
               {/* Architect / Designer question */}
               <div className="flex items-center justify-between">
                 <span className="font-body text-sm text-foreground">Are you an architect or an interior designer?</span>
@@ -319,10 +318,10 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
                 <span className="font-body text-sm text-foreground">Subscribe me to the newsletter</span>
               </label>
 
-              <button type="submit" disabled={loading}
+              <Button type="submit" disabled={loading}
                 className="w-full py-3 bg-foreground text-background font-body text-xs uppercase tracking-[0.15em] hover:opacity-90 transition-opacity disabled:opacity-50">
                 {loading ? "Creating..." : "Register"}
-              </button>
+              </Button>
             </form>
 
             {isDesigner && (
@@ -335,6 +334,23 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
               </p>
             )}
           </>
+        )}
+
+        {mode === "success" && (
+          <div role="status" className="space-y-4">
+            <h2 className="font-display text-xl text-foreground">Check your email</h2>
+            <p className="font-body text-sm text-muted-foreground break-words">
+              Your signup was accepted for {email}. Check your inbox and spam folder for the confirmation link before signing in.
+              If you already registered, sign in or reset your password instead.
+            </p>
+            {isDesigner && <p className="font-body text-sm text-muted-foreground">Your Trade application has not been submitted yet. Complete the application to send it for review.</p>}
+            {isDesigner && <Button className="w-full" onClick={() => {
+              const qs = new URLSearchParams({ email, name: [firstName, lastName].filter(Boolean).join(" "), intent: "apply", source: "public_signup" });
+              onClose();
+              navigate(`/trade-program?${qs.toString()}`);
+            }}>Complete Trade application</Button>}
+            <Button variant="outline" className="w-full" onClick={() => setMode("login")}>Go to sign in</Button>
+          </div>
         )}
 
         {mode === "login" && (
