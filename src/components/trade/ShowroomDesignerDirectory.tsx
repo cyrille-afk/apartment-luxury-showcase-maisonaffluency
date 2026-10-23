@@ -49,18 +49,35 @@ const ShowroomDesignerDirectory = ({
     queryFn: async () => {
       // Only makers that actually carry showroom pieces. The inner join also
       // gives us each designer's curated product imagery for the hover reveal.
-      const { data, error } = await supabase
-        .from("designers")
-        .select("id, name, slug, image_url, specialty, designer_curator_picks!inner(id, image_url)")
-        .eq("is_published", true)
-        .not("slug", "is", null)
-        .range(0, 9999);
-      if (error) throw error;
+      const [withPicks, allPublished] = await Promise.all([
+        supabase
+          .from("designers")
+          .select("id, name, slug, image_url, specialty, founder, designer_curator_picks!inner(id, image_url)")
+          .eq("is_published", true)
+          .not("slug", "is", null)
+          .range(0, 9999),
+        // Parent houses (e.g. Ecart) file their pieces under child designers
+        // whose `founder` names the house — include them too.
+        supabase
+          .from("designers")
+          .select("id, name, slug, image_url, specialty")
+          .eq("is_published", true)
+          .not("slug", "is", null)
+          .range(0, 9999),
+      ]);
+      if (withPicks.error) throw withPicks.error;
+      if (allPublished.error) throw allPublished.error;
+      const data = withPicks.data;
       const byId = new Map<string, DirectoryDesigner>();
+      const houseImage = new Map<string, string>();
       (data || []).forEach((d: any) => {
         if (byId.has(d.id)) return;
         const productImage =
           (d.designer_curator_picks || []).find((p: any) => p.image_url)?.image_url || null;
+        const founderKey = (d.founder || "").trim().toLowerCase();
+        if (founderKey && founderKey !== d.name.trim().toLowerCase() && productImage && !houseImage.has(founderKey)) {
+          houseImage.set(founderKey, productImage);
+        }
         byId.set(d.id, {
           id: d.id,
           name: d.name,
@@ -70,6 +87,19 @@ const ShowroomDesignerDirectory = ({
           productImageUrl: d.slug === "gilles-boissier"
             ? "https://res.cloudinary.com/dif1oamtj/image/upload/v1792116642/Screen_Shot_2026-10-16_at_10.09.56_AM_db4xmh.png"
             : productImage,
+        });
+      });
+      (allPublished.data || []).forEach((d: any) => {
+        if (byId.has(d.id)) return;
+        const img = houseImage.get(d.name.trim().toLowerCase());
+        if (!img) return;
+        byId.set(d.id, {
+          id: d.id,
+          name: d.name,
+          slug: d.slug,
+          image_url: d.image_url,
+          specialty: d.specialty,
+          productImageUrl: img,
         });
       });
       return Array.from(byId.values()).sort((a, b) =>
