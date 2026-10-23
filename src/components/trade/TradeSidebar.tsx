@@ -21,7 +21,6 @@ import { StudioBridgeSidebar } from "@/components/trade/StudioBridgeSidebar";
 import { pushRecentProject, useProjects } from "@/hooks/useProjects";
 import { projectDefaultUrl, useProjectBoardTree } from "@/hooks/useProjectBoardTree";
 import { Button } from "@/components/ui/button";
-import { SidebarPwaBadge } from "@/components/trade/PwaInstall";
 import { useClientTierUpgrades } from "@/hooks/useClientTierUpgrades";
 import { TRADE_SANDBOX_ONLY } from "@/lib/tradeSandboxOnly";
 import { Scan } from "lucide-react";
@@ -192,7 +191,6 @@ export function TradeSidebar() {
               </>
             )}
           </NavLink>
-          <SidebarPwaBadge collapsed={collapsed} />
         </div>
 
         <SidebarGroup>
