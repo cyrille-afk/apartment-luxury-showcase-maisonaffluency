@@ -558,13 +558,6 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
     doc.setFontSize(48);
     doc.setTextColor(...ink);
     doc.text(input.designerName, marginX, blockTop + 58, { maxWidth: contentWidth });
-
-    if (input.specialty) {
-      doc.setFont("times", "italic");
-      doc.setFontSize(14);
-      doc.setTextColor(...inkSoft);
-      doc.text(input.specialty, marginX, blockTop + 86, { maxWidth: contentWidth });
-    }
   } else {
     // Fallback (no hero image) — cream cover with dark text
     doc.setFillColor(252, 250, 246);
@@ -583,12 +576,6 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
     doc.setFontSize(40);
     doc.setTextColor(...ink);
     doc.text(input.designerName, marginX, titleBlockTop + 50, { maxWidth: contentWidth });
-    if (input.specialty) {
-      doc.setFont("times", "italic");
-      doc.setFontSize(13);
-      doc.setTextColor(...inkSoft);
-      doc.text(input.specialty, marginX, titleBlockTop + 76, { maxWidth: contentWidth });
-    }
     if (recipient || input.downloadedAt) {
       doc.setFont("helvetica", "italic");
       doc.setFontSize(9);

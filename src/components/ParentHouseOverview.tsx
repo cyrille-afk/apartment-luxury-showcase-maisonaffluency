@@ -137,11 +137,6 @@ export function ParentHouseOverview({ parentName }: { parentName: string }) {
                   <span className="font-display text-base md:text-lg text-foreground group-hover:text-foreground/80 transition-colors truncate">
                     {d.name}
                   </span>
-                  {d.specialty && (
-                    <span className="hidden sm:inline font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70 truncate">
-                      {d.specialty}
-                    </span>
-                  )}
                 </span>
                 <ChevronDown
                   className={cn(
@@ -173,11 +168,6 @@ export function ParentHouseOverview({ parentName }: { parentName: string }) {
                       </Link>
                     )}
                     <div className="min-w-0 flex-1">
-                      {d.specialty && (
-                        <p className="sm:hidden font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70 mb-1">
-                          {d.specialty}
-                        </p>
-                      )}
                       {d.bioExcerpt && (
                         <p className="font-body text-sm leading-relaxed text-foreground/80 line-clamp-3">
                           {d.bioExcerpt}

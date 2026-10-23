@@ -96,9 +96,6 @@ const DesignerCard = ({ brand, navigate }: { brand: EnrichedDesigner; navigate: 
           </div>
         )}
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
-          {brand.specialty && (
-            <p className="font-body text-[11px] text-white/85 text-center leading-relaxed line-clamp-3 mb-4 max-w-[90%]">{brand.specialty}</p>
-          )}
           <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">Discover Portrait</span>
         </div>
         {brand.source === "collectible" && (

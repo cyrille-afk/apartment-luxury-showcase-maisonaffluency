@@ -314,7 +314,7 @@ const TradeAtelierProfile = () => {
               {name}
             </h1>
             <p className="mt-1 font-body text-[10px] md:text-[11px] uppercase tracking-[0.32em] text-foreground/60">
-              {designer.specialty || "The Full Portrait"}
+              The Full Portrait
             </p>
           </header>
           <EditorialBiographyColumns
@@ -322,7 +322,7 @@ const TradeAtelierProfile = () => {
             biography={designer.biography}
             biographyImages={designer.biography_images || []}
             designerName={designer.name}
-            eyebrow={designer.specialty || "The Full Portrait"}
+            eyebrow="The Full Portrait"
             footer={
               <div className="h-auto text-foreground">
                 {(designer as any).hero_photo_credit && (
@@ -378,7 +378,7 @@ const TradeAtelierProfile = () => {
               sharePageOnWhatsApp(
                 `/trade/designers/${slug}`,
                 name,
-                designer.specialty || undefined,
+                undefined,
                 { directUrlPath: `/${slug}-og.html` }
               );
             }}
@@ -421,9 +421,6 @@ const TradeAtelierProfile = () => {
                               <span className="font-body text-sm md:text-base text-white/75 ml-2 font-normal">{DESIGNER_DATES[slug]}</span>
                             )}
                           </h1>
-                          {designer.specialty && (
-                            <p className="font-body text-xs md:text-sm text-white/80 mt-1 tracking-wide">{designer.specialty}</p>
-                          )}
                         </div>
                         <WhatsAppShareButton
                           hideOn="mobile"
@@ -432,7 +429,7 @@ const TradeAtelierProfile = () => {
                             sharePageOnWhatsApp(
                               `/trade/designers/${slug}`,
                               name,
-                              designer.specialty || undefined,
+                              undefined,
                               { directUrlPath: `/${slug}-og.html` }
                             );
                           }}
@@ -503,9 +500,6 @@ const TradeAtelierProfile = () => {
                       <h1 className="font-display text-2xl md:text-4xl tracking-wide text-white drop-shadow-md">
                         {name}
                       </h1>
-                    )}
-                    {designer.specialty && (
-                      <p className="font-body text-sm md:text-base text-white/80 mt-1.5 font-medium tracking-wide">{designer.specialty}</p>
                     )}
                   </motion.div>
                 </div>

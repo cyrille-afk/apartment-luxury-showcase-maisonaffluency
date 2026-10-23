@@ -925,7 +925,7 @@ const PublicDesignerProfile = ({ presentation = false }: { presentation?: boolea
             biography={displayBiography || editorialBio || ""}
             biographyImages={displayBiographyImages || []}
             designerName={designer.name}
-            eyebrow={designer.specialty || "The Full Portrait"}
+            eyebrow="The Full Portrait"
             footer={
               <div className="h-auto text-foreground">
                 {designer.hero_photo_credit && (
@@ -1019,9 +1019,6 @@ const PublicDesignerProfile = ({ presentation = false }: { presentation?: boolea
                     <h1 className="font-display text-4xl lg:text-[3rem] leading-[1.05] tracking-[-0.01em] text-foreground">
                       {name}
                     </h1>
-                    <p className="mt-3 font-body text-[10px] lg:text-[11px] uppercase tracking-[0.32em] text-foreground/60">
-                      {designer.specialty || "Timeless Scandinavian Design"}
-                    </p>
                   </div>
 
                   {/* Right — narrative */}
@@ -1294,9 +1291,6 @@ const PublicDesignerProfile = ({ presentation = false }: { presentation?: boolea
                 <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6 flex items-end justify-between gap-4">
                   <div>
                     <h1 className="font-display text-xl md:text-2xl tracking-wide text-white drop-shadow-md">{name}</h1>
-                    {designer.specialty && (
-                      <p className="font-body text-xs md:text-sm text-white/80 mt-1 tracking-wide">{designer.specialty}</p>
-                    )}
                   </div>
                   <div className="hidden md:block">
                     <ShareMenu
@@ -1319,9 +1313,6 @@ const PublicDesignerProfile = ({ presentation = false }: { presentation?: boolea
               <div className="md:hidden flex items-start justify-between gap-3 pt-1 pb-1">
                 <div className="min-w-0">
                   <h1 className="font-display text-2xl tracking-wide text-foreground">{name}</h1>
-                  {designer.specialty && (
-                    <p className="mt-1 font-body text-xs leading-relaxed tracking-wide text-muted-foreground">{designer.specialty}</p>
-                  )}
                 </div>
                 <ShareMenu
                   url={designerOgUrl}
@@ -1346,9 +1337,6 @@ const PublicDesignerProfile = ({ presentation = false }: { presentation?: boolea
               <div className="md:hidden flex items-start justify-between gap-3 pt-1 pb-1">
                 <div className="min-w-0">
                   <h1 className="font-display text-2xl tracking-wide text-foreground">{name}</h1>
-                  {designer.specialty && (
-                    <p className="font-body text-xs text-muted-foreground mt-1 tracking-wide">{designer.specialty}</p>
-                  )}
                   {designer.collab_brands && designer.collab_brands.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {designer.collab_brands.map((brand) => (
@@ -1386,11 +1374,6 @@ const PublicDesignerProfile = ({ presentation = false }: { presentation?: boolea
                   <h1 className="font-display text-4xl lg:text-6xl leading-[1.05] tracking-[-0.01em] text-foreground">
                     {name}
                   </h1>
-                  {designer.specialty && (
-                    <p className="font-body text-base lg:text-lg text-muted-foreground mt-4 leading-relaxed max-w-[38ch]">
-                      {designer.specialty}
-                    </p>
-                  )}
                   {designer.collab_brands && designer.collab_brands.length > 0 && (
                     <div className="mt-5 flex flex-wrap gap-1.5">
                       {designer.collab_brands.map((brand) => (
