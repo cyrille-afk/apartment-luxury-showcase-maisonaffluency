@@ -909,7 +909,7 @@ const StudioGallery = () => {
                   )}
                    <ProductCardDescriptionOverlay description={product.description} />
                    {creditsDesigner(product, "Emma Donnersberg") && product.edition && (
-                     <p data-testid="gallery-collab-label" className="pointer-events-none absolute left-3 top-3 z-10 max-w-[70%] rounded-sm bg-background/85 px-2 py-1 font-sans text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased backdrop-blur-sm">{product.edition}</p>
+                     <p data-testid="gallery-collab-label" className="pointer-events-none absolute left-3 top-3 z-10 max-w-[calc(100%-3.5rem)] truncate whitespace-nowrap rounded-sm bg-background/85 px-2 py-1 font-sans text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased backdrop-blur-sm">{product.edition}</p>
                    )}
                    <div className={cn("absolute left-2 z-10", creditsDesigner(product, "Emma Donnersberg") && product.edition ? "top-11" : "top-2")}>
                      <TradeFavoriteFolderPicker
