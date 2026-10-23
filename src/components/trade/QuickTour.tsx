@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { loadLang } from "@/components/trade/conciergeGreeting";
 import { localizeTourStep, tourChromeCopy } from "@/lib/conciergeI18n";
 import { trackTour } from "@/lib/analytics";
+import { useDesktopTradeTour } from "./useDesktopTradeTour";
 
 type Step = {
   id: string;
@@ -38,6 +39,11 @@ const STORAGE_KEY = "trade_quick_tour_step";
 export const TOUR_DONE_KEY = "trade_quick_tour_done";
 
 export function QuickTour() {
+  const desktop = useDesktopTradeTour();
+  return desktop ? <DesktopQuickTour /> : null;
+}
+
+function DesktopQuickTour() {
   const navigate = useNavigate();
   const location = useLocation();
   const [active, setActive] = useState(false);

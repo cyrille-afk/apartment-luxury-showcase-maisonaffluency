@@ -18,6 +18,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { loadName, DEFAULT_NAME } from "@/components/trade/conciergeGreeting";
 import { useAIGuideName } from "@/hooks/useAIGuideName";
+import { useDesktopTradeTour } from "@/components/trade/useDesktopTradeTour";
+import { MobileTradeTourNotice } from "@/components/trade/MobileTradeTourNotice";
 import { useProjects } from "@/hooks/useProjects";
 import { useDashboardDataSync } from "@/hooks/useDashboardDataSync";
 import { projectDefaultUrl, useProjectBoardTree } from "@/hooks/useProjectBoardTree";
@@ -190,6 +192,7 @@ if (typeof window !== "undefined") { setTimeout(() => { void import("./TradeShow
 
 const TradeDashboard = () => {
   const guideName = useAIGuideName();
+  const desktopTour = useDesktopTradeTour();
   const { profile, user } = useAuth();
   const { canEdit } = useStudio();
   const [firstWelcome, setFirstWelcome] = useState(() => {
@@ -379,7 +382,7 @@ const TradeDashboard = () => {
       <Helmet><title>Dashboard — Trade Portal — Maison Affluency</title></Helmet>
     <div className="trade-dashboard w-full max-w-[1500px] mx-auto">
       <NewInquiriesAlert />
-      <WhiteLabelTourBanner />
+      {desktopTour && <WhiteLabelTourBanner />}
       <div className="mb-10 md:mb-14 lg:mb-16 border-b border-border pb-7 md:pb-9">
         <div className="flex items-start justify-between gap-4">
           <div data-felix-target="greeting">
@@ -391,14 +394,16 @@ const TradeDashboard = () => {
                 {profile.company} • {tierLabel} partner
               </p>
             )}
-            <button
+            {desktopTour && <Button
               type="button"
+              variant="outline"
               onClick={startFelixTour}
               className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               <Sparkles className="h-3 w-3" />
               Meet {guideName}
-            </button>
+            </Button>}
+            <MobileTradeTourNotice />
           </div>
           {spendCents !== null && tier !== "platinum" && tierConfig.gold.min_spend_cents > 0 && (() => {
             const nextCfg = tier === "silver" ? tierConfig.gold : tierConfig.platinum;
