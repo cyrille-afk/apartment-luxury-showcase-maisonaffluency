@@ -1569,6 +1569,13 @@
       "when": 1792726639805,
       "tag": "0223_registration_alert_outbox",
       "breakpoints": true
+    },
+    {
+      "idx": 224,
+      "version": "7",
+      "when": 1792726853186,
+      "tag": "0224_registration_bell_only_legacy_trigger",
+      "breakpoints": true
     }
   ]
 }
