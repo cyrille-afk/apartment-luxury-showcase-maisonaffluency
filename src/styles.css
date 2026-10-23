@@ -248,9 +248,10 @@ All colors MUST be HSL.
     --gradient-warm: linear-gradient(180deg, hsl(32 20% 97%) 0%, hsl(32 15% 92%) 100%);
     --gradient-overlay: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 100%);
 
-    /* Felix AI assistant identity — the warm bronze of the Mobile App Workspace
-       card, aliased once so the button and the sidebar mark never drift apart. */
-    --felix-bronze: var(--gold);
+    /* Felix AI assistant identity — a dedicated lighter warm bronze (the user
+       found the workspace card's exact gold too dark on a button surface),
+       aliased once so the button and the sidebar mark never drift apart. */
+    --felix-bronze: 38 60% 66%;
     --felix-bronze-deep: 34 52% 43%;
     --felix-bronze-edge: var(--gold-bright);
     /* Deep espresso ink: ~7:1 on the bronze (ivory only reached ~2.6:1). */
@@ -327,6 +328,7 @@ All colors MUST be HSL.
     --felix-mark-text: var(--felix-bronze);
     /* Bronze lifts off the dark jade canvas on its own; only the hover depth
        needs a dark value of its own. */
+    --felix-bronze: 36 42% 64%;
     --felix-bronze-deep: 36 40% 52%;
     --warm-gray: 32 8% 60%;
     --product-canvas: 34 18% 18%;
