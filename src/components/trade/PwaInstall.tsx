@@ -32,8 +32,43 @@ export function usePwaQr(size = 200) {
   return src;
 }
 
-function PwaQr({ size, className }: { size: number; className?: string }) {
-  const src = usePwaQr(size * 2);
+/**
+ * Signed-in QR: a one-time, 2-minute token at /auth/sync so scanning signs the
+ * phone straight in. Refreshes while shown; falls back to the static launch QR.
+ */
+function useSyncQr(size: number, active: boolean) {
+  const [src, setSrc] = useState<string | null>(null);
+  useEffect(() => {
+    if (!active) return;
+    let cancelled = false;
+    let timer: number | undefined;
+    const mint = async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        const accessToken = data.session?.access_token;
+        if (!accessToken) return;
+        const { token } = await issueMobileSyncToken({ data: { accessToken } });
+        const url = `${PWA_ORIGIN}/auth/sync?t=${encodeURIComponent(token)}`;
+        const img = await QRCode.toDataURL(url, {
+          margin: 1, width: size, errorCorrectionLevel: "M",
+          color: { dark: "#1a1a1a", light: "#ffffff" },
+        });
+        if (!cancelled) setSrc(img);
+      } catch {
+        /* keep static fallback */
+      }
+      if (!cancelled) timer = window.setTimeout(mint, (MOBILE_SYNC_TTL_SECONDS - 20) * 1000);
+    };
+    mint();
+    return () => { cancelled = true; window.clearTimeout(timer); };
+  }, [size, active]);
+  return src;
+}
+
+function PwaQr({ size, className, signedIn = false }: { size: number; className?: string; signedIn?: boolean }) {
+  const fallback = usePwaQr(size * 2);
+  const synced = useSyncQr(size * 2, signedIn);
+  const src = synced ?? fallback;
   return src ? (
     <img src={src} alt="QR code to install the Maison Affluency app" width={size} height={size} className={className} />
   ) : (
