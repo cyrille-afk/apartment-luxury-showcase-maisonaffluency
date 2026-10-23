@@ -6,7 +6,7 @@ import { guardStudioSetupRoute } from "@/lib/studioSetupRouteGuard";
 // Shown when the trade route's beforeLoad (session/studio/role reads) fails
 // after its own retries — e.g. a dropped connection or a brief outage. Gives
 // the member a clear way forward instead of the generic app crash screen.
-function TradeRouteRecovery({ reset }: { reset: () => void }) {
+function TradeRouteRecovery() {
   const next = `${window.location.pathname}${window.location.search}`;
   return (
     <div role="alert" className="min-h-screen bg-background flex items-center justify-center px-6">
@@ -20,7 +20,7 @@ function TradeRouteRecovery({ reset }: { reset: () => void }) {
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <button
             type="button"
-            onClick={reset}
+            onClick={() => window.location.reload()}
             className="inline-flex items-center justify-center rounded-full bg-foreground px-6 py-2.5 font-body text-[11px] uppercase tracking-[0.2em] text-background transition-opacity hover:opacity-90"
           >
             Try again
