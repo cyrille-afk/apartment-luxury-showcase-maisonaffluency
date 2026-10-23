@@ -22,6 +22,7 @@ const ProductDetailSkeleton = ({ variant = "page", heroImage }: ProductDetailSke
 
   return (
     <div
+      data-trade-page-loading={isModal ? undefined : ""}
       role="status"
       aria-busy="true"
       aria-live="polite"
