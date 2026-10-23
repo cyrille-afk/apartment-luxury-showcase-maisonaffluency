@@ -22,6 +22,8 @@ type FelixStep = {
   id: string;
   title: string;
   target: string; // data-felix-target selector value
+  /** Secondary element outlined subtly as an orientation aid (no dim cutout). */
+  secondaryTarget?: string;
   /** Sidebar destination anchoring the card; page spotlight remains intact. */
   sidebarAnchor?: "collection" | "projects";
   dialogue: string;
@@ -173,12 +175,13 @@ const FELIX_STEPS: FelixStep[] = [
     route: "board",
     done: () => switchOn('[aria-label="Toggle client editorial presentation"]'),
     dialogue:
-      "Exceptional sourcing is only the first step; bringing your client along on the journey is where projects come to life. Switch on **Client Editorial Presentation** to show this board without the internal trade calculations.",
+      "We now leave the Concierge and open one of your project boards — the same boards listed under **Projects & Interventions → Projects** in your sidebar. Exceptional sourcing is only the first step; bringing your client along on the journey is where projects come to life. Switch on **Client Editorial Presentation** to show this board without the internal trade calculations.",
   },
   {
     id: "branding-panel",
     title: "Unlocking Client Portal Branding",
     target: "branding-panel",
+    secondaryTarget: "header-presentation-toggle",
     route: "board",
     pulse: true,
     onEnter: () => {
@@ -186,12 +189,13 @@ const FELIX_STEPS: FelixStep[] = [
       if (d && !d.open) d.open = true;
     },
     dialogue:
-      "The **Client Portal Branding** panel is open for you. Configure the studio name and logo your clients will see, and review the client-facing preview before sharing your board.",
+      "You are now in **Client Editorial Presentation** — your sidebar is hidden so your client sees only the board. The **Presentation Mode** switch outlined at the top right returns you to Studio Mode at any time. The **Client Portal Branding** panel is open for you: configure the studio name and logo your clients will see, and review the client-facing preview before sharing your board.",
   },
   {
     id: "white-label",
     title: "Turn on studio branding",
     target: "branding-whitelabel",
+    secondaryTarget: "header-presentation-toggle",
     route: "board",
     pulse: true,
     onEnter: () => {
@@ -206,6 +210,7 @@ const FELIX_STEPS: FelixStep[] = [
     id: "invite",
     title: "Activating the Viral Loop",
     target: "invite-collaborator",
+    secondaryTarget: "header-presentation-toggle",
     route: "board",
     dialogue:
       "Open **Invite Collaborator** to enter your client's or contractor's email and choose their role. Review the invitation before sending it, or copy its secure portal link. Client feedback and finish requests appear on your board for review; opening this control does not send an invitation.",
