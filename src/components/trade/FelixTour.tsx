@@ -907,7 +907,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       {ring}
       {sidebarAnchor && placement && settled && !transitioning && (
         <svg aria-hidden="true" className="pointer-events-none fixed inset-0 z-[140] h-full w-full fill-none stroke-accent" strokeWidth="1.5">
-          <path d={`M ${sidebarAnchor.left + sidebarAnchor.width + 8} ${sidebarAnchor.top + sidebarAnchor.height / 2} H ${cardLeft - 12} V ${cardTop + 28} H ${cardLeft}`} />
+          <path d={`M ${sidebarAnchor.left + sidebarAnchor.width + 8} ${sidebarAnchor.top + sidebarAnchor.height / 2} H ${Math.max(sidebarAnchor.left + sidebarAnchor.width + 12, cardLeft - 12)} V ${cardTop + 28} H ${Math.max(cardLeft, sidebarAnchor.left + sidebarAnchor.width + 12)}`} />
           <path data-felix-sidebar-arrow d={`M ${sidebarAnchor.left + sidebarAnchor.width + 13} ${sidebarAnchor.top + sidebarAnchor.height / 2 - 5} l -5 5 l 5 5`} />
         </svg>
       )}
@@ -1132,7 +1132,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
           )}
 
           {/* Controls */}
-          <div className="mt-4 flex items-center justify-between gap-2">
+          <div className="sticky bottom-0 -mx-5 -mb-5 mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border bg-card px-5 py-3">
             <button
               onClick={() => close(false)}
               className="font-body text-[11px] uppercase tracking-widest text-muted-foreground underline-offset-4 hover:text-foreground hover:underline rounded-sm outline-hidden focus-visible:ring-2 focus-visible:ring-accent"
