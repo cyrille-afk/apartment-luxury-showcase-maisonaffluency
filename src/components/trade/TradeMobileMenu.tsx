@@ -7,7 +7,7 @@ import {
   FileText, Settings, Shield, Wrench, UserCircle, Image, Users, Inbox, Sparkles,
   TrendingDown,
 } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { usePendingInquiryCount } from "@/hooks/usePendingInquiryCount";
@@ -22,6 +22,9 @@ const coreItems = [
   { title: "Dashboard", url: "/trade", icon: LayoutDashboard, end: true },
   { title: "My Dashboard", url: "/trade/me", icon: UserCircle },
   { title: "The Collection", url: "/trade/the-collection", icon: MapPin },
+  { title: "Full Catalogue", url: "/trade/gallery", icon: Image },
+  { title: "Designers & Ateliers", url: "/trade/designers", icon: Users },
+  { title: "Resources", url: "/trade/documents", icon: FolderKanban },
   { title: "Favorites", url: "/trade/favorites", icon: Heart },
   { title: "Trade Concierge (Powered by Felix)", url: "/trade/concierge", icon: Sparkles },
   { title: "AI Extension Sync", url: "/trade/extension-sync", icon: LayoutDashboard },
@@ -81,56 +84,56 @@ export function TradeMobileMenu({ open, onOpenChange }: TradeMobileMenuProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-10 w-10 md:hidden" aria-label="Toggle menu">
+        <Button variant="ghost" size="icon" className="h-11 w-11 md:hidden" aria-label="Toggle menu">
           {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </Button>
       </SheetTrigger>
 
-      <SheetContent side="left" className="w-full overflow-y-auto p-0" aria-describedby={undefined}>
-        <div className="sr-only"><h2>Trade Portal Menu</h2></div>
+      <SheetContent side="left" className="w-full h-dvh overflow-y-auto overscroll-contain p-0 motion-reduce:transition-none [&>button]:h-11 [&>button]:w-11" aria-describedby={undefined}>
+        <SheetTitle className="sr-only">Trade Portal Menu</SheetTitle>
 
         <div className="flex flex-col items-center pt-6 pb-4 border-b border-border/30 mb-2 px-6">
-          <button onClick={() => handleNav("/trade")} className="group cursor-pointer">
+          <Button variant="ghost" onClick={() => handleNav("/trade")} className="group cursor-pointer">
             <span className="font-display text-base text-foreground tracking-wide block text-center">Maison Affluency</span>
             <span className="font-body text-[9px] text-muted-foreground uppercase tracking-[0.2em] block text-center">Trade Portal</span>
-          </button>
+          </Button>
         </div>
 
         <div className="flex flex-col px-6 pb-32">
-          {items.map((item, idx) => {
+          {items.map((item) => {
             const active = isActive(item.url, item.end);
             return (
               <Fragment key={item.url}>
-              <button
+              <Button variant="ghost"
                 onClick={() => handleNav(item.url)}
                 className={cn(
-                  "font-body text-[15px] tracking-wide text-left transition-colors py-3 w-full flex items-center justify-between animate-fade-in opacity-0",
-                  active ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
+                  "font-body text-sm text-left transition-colors min-h-12 h-auto px-2 py-3 w-full grid grid-cols-[minmax(0,1fr)_auto] gap-2 whitespace-normal rounded-none",
+                  active ? "bg-muted text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
                 )}
-                style={{ animationDelay: `${idx * 50}ms`, animationFillMode: "forwards" }}
+                aria-current={active ? "page" : undefined}
               >
-                <span className="flex items-center gap-3">
+                <span className="flex min-w-0 items-center gap-3">
                   <item.icon className="h-4 w-4 shrink-0" />
                   {item.title.replace(/\bFelix\b/g, guideName)}
                 </span>
-                <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
-              </button>
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50" />
+              </Button>
               {item.url === "/trade/projects" && activeProjects.length > 0 && (
                 <div className="ml-7 border-l border-border pl-3 pb-2 font-body text-xs text-muted-foreground">
                   {activeProjects.map((project) => {
                     const expanded = expandedProjects.includes(project.id);
                     return <div key={project.id}>
                       <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label={`${expanded ? "Collapse" : "Expand"} ${project.name}`} aria-expanded={expanded} onClick={() => setExpandedProjects((ids) => expanded ? ids.filter((id) => id !== project.id) : [...ids, project.id])}>
+                        <Button variant="ghost" size="icon" className="h-11 w-11 shrink-0" aria-label={`${expanded ? "Collapse" : "Expand"} ${project.name}`} aria-expanded={expanded} onClick={() => setExpandedProjects((ids) => expanded ? ids.filter((id) => id !== project.id) : [...ids, project.id])}>
                           <ChevronRight className={`h-3 w-3 ${expanded ? "rotate-90" : ""}`} />
                         </Button>
-                        <Button variant="ghost" className="min-w-0 flex-1 justify-start truncate text-xs font-normal" onClick={() => { pushRecentProject(project.id); handleNav(projectDefaultUrl(project.id, projectBoards)); }}>{project.name}</Button>
+                        <Button variant="ghost" className="h-11 min-w-0 flex-1 justify-start truncate text-xs font-normal" onClick={() => { pushRecentProject(project.id); handleNav(projectDefaultUrl(project.id, projectBoards)); }}>{project.name}</Button>
                       </div>
                       {expanded && <div className="ml-4 border-l border-border pl-4">
-                        <Button variant="ghost" className="block h-8 w-full truncate text-left text-xs font-normal" onClick={() => handleNav(`/trade/projects/${project.id}?tab=boards`)}>Folders & Drafts</Button>
-                        {projectBoards.filter((board) => board.project_id === project.id).map((board) => <Button key={board.id} variant="ghost" className="block h-8 w-full truncate pl-6 text-left text-xs font-normal" onClick={() => handleNav(`/trade/boards/${board.id}?project=${project.id}`)}>{board.title}</Button>)}
-                        <Button variant="ghost" className="block h-8 w-full text-left text-xs font-normal" onClick={() => handleNav(`/trade/projects/${project.id}?tab=tearsheets`)}>Tearsheets</Button>
-                        <Button variant="ghost" className="block h-8 w-full text-left text-xs font-normal" onClick={() => handleNav(`/trade/projects/${project.id}/studio`)}>Project Studio</Button>
+                        <Button variant="ghost" className="block h-11 w-full truncate text-left text-xs font-normal" onClick={() => handleNav(`/trade/projects/${project.id}?tab=boards`)}>Folders & Drafts</Button>
+                        {projectBoards.filter((board) => board.project_id === project.id).map((board) => <Button key={board.id} variant="ghost" className="block h-11 w-full truncate pl-6 text-left text-xs font-normal" onClick={() => handleNav(`/trade/boards/${board.id}?project=${project.id}`)}>{board.title}</Button>)}
+                        <Button variant="ghost" className="block h-11 w-full text-left text-xs font-normal" onClick={() => handleNav(`/trade/projects/${project.id}?tab=tearsheets`)}>Tearsheets</Button>
+                        <Button variant="ghost" className="block h-11 w-full text-left text-xs font-normal" onClick={() => handleNav(`/trade/projects/${project.id}/studio`)}>Project Studio</Button>
                       </div>}
                     </div>;
                   })}
@@ -144,29 +147,27 @@ export function TradeMobileMenu({ open, onOpenChange }: TradeMobileMenuProps) {
             <>
               <div className="border-t border-border/30 my-3" />
               <span className="font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground mb-1 mt-2">Admin</span>
-              <button
+              <Button variant="ghost"
                 onClick={() => handleNav("/trade/admin-dashboard")}
                 className={cn(
-                  "font-body text-[15px] tracking-wide text-left transition-colors py-3 w-full flex items-center justify-between animate-fade-in opacity-0",
+                  "font-body text-sm text-left transition-colors min-h-12 h-auto px-2 py-3 w-full grid grid-cols-[minmax(0,1fr)_auto] gap-2 whitespace-normal rounded-none",
                   isActive("/trade/admin-dashboard") ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
                 )}
-                style={{ animationDelay: `${(coreItems.length + 1) * 50}ms`, animationFillMode: "forwards" }}
               >
-                <span className="flex items-center gap-3">
+                <span className="flex min-w-0 items-center gap-3">
                   <Shield className="h-4 w-4 shrink-0" />
                   Admin Dashboard
                 </span>
-                <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
-              </button>
-              <button
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50" />
+              </Button>
+              <Button variant="ghost"
                 onClick={() => handleNav("/trade/admin/inquiries")}
                 className={cn(
-                  "font-body text-[15px] tracking-wide text-left transition-colors py-3 w-full flex items-center justify-between animate-fade-in opacity-0",
+                  "font-body text-sm text-left transition-colors min-h-12 h-auto px-2 py-3 w-full grid grid-cols-[minmax(0,1fr)_auto] gap-2 whitespace-normal rounded-none",
                   isActive("/trade/admin/inquiries") ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
                 )}
-                style={{ animationDelay: `${(coreItems.length + 2) * 50}ms`, animationFillMode: "forwards" }}
               >
-                <span className="flex items-center gap-3">
+                <span className="flex min-w-0 items-center gap-3">
                   <span className="relative">
                     <Inbox className="h-4 w-4 shrink-0" />
                     {pendingInquiryCount > 0 && (
@@ -185,34 +186,32 @@ export function TradeMobileMenu({ open, onOpenChange }: TradeMobileMenuProps) {
                     )}
                   </span>
                 </span>
-                <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
-              </button>
-              <button
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50" />
+              </Button>
+              <Button variant="ghost"
                 onClick={() => handleNav("/trade/admin/sales-funnel")}
                 className={cn(
-                  "font-body text-[15px] tracking-wide text-left transition-colors py-3 w-full flex items-center justify-between animate-fade-in opacity-0",
+                  "font-body text-sm text-left transition-colors min-h-12 h-auto px-2 py-3 w-full grid grid-cols-[minmax(0,1fr)_auto] gap-2 whitespace-normal rounded-none",
                   isActive("/trade/admin/sales-funnel") ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
                 )}
-                style={{ animationDelay: `${(coreItems.length + 3) * 50}ms`, animationFillMode: "forwards" }}
               >
-                <span className="flex items-center gap-3">
+                <span className="flex min-w-0 items-center gap-3">
                   <TrendingDown className="h-4 w-4 shrink-0" />
                   Sales Funnel
                 </span>
-                <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
-              </button>
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50" />
+              </Button>
               <a
                 href="/designers-hero-lock"
                 className={cn(
-                  "font-body text-[15px] tracking-wide text-left transition-colors py-3 w-full flex items-center justify-between animate-fade-in opacity-0 text-muted-foreground hover:text-foreground"
+                  "font-body text-[15px] tracking-wide text-left transition-colors min-h-12 py-3 w-full flex items-center justify-between text-muted-foreground hover:text-foreground"
                 )}
-                style={{ animationDelay: `${(coreItems.length + 2) * 50}ms`, animationFillMode: "forwards" }}
               >
-                <span className="flex items-center gap-3">
+                <span className="flex min-w-0 items-center gap-3">
                   <Image className="h-4 w-4 shrink-0" />
                   Locked Layout Gallery
                 </span>
-                <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50" />
               </a>
             </>
           )}
@@ -230,13 +229,13 @@ export function TradeMobileMenu({ open, onOpenChange }: TradeMobileMenuProps) {
                 </p>
               </div>
             )}
-            <button
+            <Button variant="ghost"
               onClick={requestSignOut}
-              className="flex items-center gap-3 w-full py-3 font-body text-[15px] tracking-wide text-muted-foreground hover:text-foreground transition-colors"
+              className="flex justify-start items-center gap-3 w-full min-h-12 py-3 font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               <LogOut className="h-4 w-4 shrink-0" />
               Sign Out
-            </button>
+            </Button>
           </div>
         </div>
       </SheetContent>

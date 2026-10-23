@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { Bell, X, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -120,10 +121,12 @@ export function NotificationBell() {
 
   return (
     <div className="relative">
-      <button
+      <Button variant="ghost"
         onClick={() => setOpen(!open)}
-        className="relative p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+        className="relative h-11 w-11 md:h-8 md:w-8 p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
         title="Notifications"
+        aria-label="Notifications"
+        aria-expanded={open}
       >
         <Bell className="w-4 h-4" />
         {unreadCount > 0 && (
@@ -131,7 +134,7 @@ export function NotificationBell() {
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
-      </button>
+      </Button>
 
       {open && (
         <>
@@ -139,29 +142,30 @@ export function NotificationBell() {
             className="fixed inset-0 z-40"
             onClick={() => setOpen(false)}
           />
-          <div className="absolute right-0 top-full mt-2 w-96 bg-background border border-border rounded-lg shadow-lg z-50 overflow-hidden">
+          <div className="fixed inset-x-3 top-[calc(4rem+env(safe-area-inset-top))] md:absolute md:inset-x-auto md:right-0 md:top-full mt-2 md:w-96 bg-background border border-border rounded-lg shadow-lg z-50 overflow-hidden">
             <div className="flex items-center justify-between px-4 py-3 border-b border-border">
               <h3 className="font-display text-sm text-foreground">
                 Notifications
               </h3>
               <div className="flex items-center gap-2">
                 {unreadCount > 0 && (
-                  <button
+                  <Button variant="ghost"
                     onClick={markAllRead}
-                    className="font-body text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                    className="min-h-11 md:min-h-0 h-auto px-2 font-body text-xs md:text-[10px] text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Mark all read
-                  </button>
+                  </Button>
                 )}
-                <button
+                <Button variant="ghost"
                   onClick={() => setOpen(false)}
-                  className="p-1 text-muted-foreground hover:text-foreground"
+                  aria-label="Close notifications"
+                  className="h-11 w-11 md:h-7 md:w-7 p-1 text-muted-foreground hover:text-foreground"
                 >
                   <X className="w-3.5 h-3.5" />
-                </button>
+                </Button>
               </div>
             </div>
-            <div className="max-h-96 overflow-y-auto">
+            <div className="max-h-[min(24rem,calc(100dvh-10rem))] overflow-y-auto overscroll-contain">
               {notifications.length === 0 ? (
                 <p className="px-4 py-8 text-center font-body text-xs text-muted-foreground">
                   No notifications yet
@@ -184,9 +188,9 @@ export function NotificationBell() {
                         !n.is_read ? "bg-primary/5" : ""
                       }`}
                     >
-                      <button
+                      <Button variant="ghost"
                         onClick={() => goTo(n, actionHref)}
-                        className="w-full text-left"
+                        className="w-full h-auto justify-start p-0 whitespace-normal text-left"
                       >
                         <div className="flex items-start gap-2">
                           {!n.is_read && (
@@ -244,24 +248,24 @@ export function NotificationBell() {
                             </p>
                           </div>
                         </div>
-                      </button>
+                      </Button>
 
                       {actionHref && (
                         <div className="mt-2 flex items-center gap-2 pl-3.5">
-                          <button
+                          <Button variant="ghost"
                             onClick={() => goTo(n, actionHref)}
-                            className="inline-flex items-center gap-1 px-2 py-1 rounded border border-border text-[10px] font-body text-foreground hover:bg-muted transition-colors"
+                            className="inline-flex min-h-11 md:min-h-0 h-auto items-center gap-1 px-2 py-1 rounded border border-border text-[10px] font-body text-foreground hover:bg-muted transition-colors"
                           >
                             {actionLabel}
                             <ArrowRight className="w-3 h-3" />
-                          </button>
+                          </Button>
                           {!n.is_read && (
-                            <button
+                            <Button variant="ghost"
                               onClick={() => markAsRead(n.id)}
-                              className="text-[10px] font-body text-muted-foreground hover:text-foreground transition-colors"
+                              className="min-h-11 md:min-h-0 h-auto px-2 text-xs md:text-[10px] font-body text-muted-foreground hover:text-foreground transition-colors"
                             >
                               Mark read
-                            </button>
+                            </Button>
                           )}
                         </div>
                       )}
