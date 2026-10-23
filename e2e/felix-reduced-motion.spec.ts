@@ -48,6 +48,8 @@ for (const source of ["toggle", "device"] as const) {
     const folders = page.getByRole("dialog").filter({ hasText: "Client Project Folders" });
     await expect(folders).toHaveCSS("opacity", "1");
     await verifyStatic("projects");
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await expect(folders.getByRole("button", { name: "Back", exact: true })).toBeInViewport();
     await folders.getByRole("button", { name: "Back", exact: true }).click();
     await expect(margin).toHaveCSS("opacity", "1");
     await verifyStatic("collection");
