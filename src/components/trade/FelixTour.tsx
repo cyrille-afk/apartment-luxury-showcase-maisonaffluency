@@ -433,7 +433,8 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     let observedTarget: Element | null = null;
     let revealFrame = 0;
     let lastSample = 0;
-    const resizeObserver = new ResizeObserver(() => { stableSince = 0; });
+    let wake = true;
+    const resizeObserver = new ResizeObserver(() => { stableSince = 0; wake = true; });
     // React may replace a sidebar item or workspace control during navigation.
     // Wake the stability check when that specific target changes, not whenever
     // unrelated page content mutates.
@@ -447,11 +448,13 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
         ready = false;
         setSettled(false);
         setPosition(null);
+        wake = true;
       }
     });
     mutationObserver.observe(document.body, { childList: true, subtree: true });
     const onChange = () => {
       stableSince = 0;
+      wake = true;
       // A viewport change can alter the tooltip's available space even when
       // the target itself retains exactly the same bounding rectangle.
       setViewport((previous) => previous.w === window.innerWidth && previous.h === window.innerHeight
@@ -461,11 +464,12 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       // Sampling every frame forced style/layout recalculation 60x/s and made
       // the whole portal lag while the tour was open. Discovery samples at
       // ~20fps; once shown, ~8fps plus immediate resize/scroll wake-ups.
-      if (now - lastSample < (ready ? 120 : 50) && stableSince !== 0) {
+      if (now - lastSample < (ready ? 120 : 50) && !wake) {
         frame = requestAnimationFrame(tick);
         return;
       }
       lastSample = now;
+      wake = false;
       if (routeReady && current.prepare && now - preparedAt >= 1000) {
         preparedAt = now;
         current.prepare();
