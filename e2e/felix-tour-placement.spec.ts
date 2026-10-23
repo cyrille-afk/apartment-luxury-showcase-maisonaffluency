@@ -4,7 +4,8 @@ const session = process.env.LOVABLE_BROWSER_SUPABASE_SESSION_JSON;
 const storageKey = process.env.LOVABLE_BROWSER_SUPABASE_STORAGE_KEY;
 test.use({ viewport: { width: 1946, height: 1181 }, trace: "off", video: "off" });
 
-test("all 23 tour steps keep cards inside the viewport and outside protected features", async ({ page }) => {
+test("all 23 tour steps keep cards inside the viewport and outside protected features", async ({ page, isMobile }) => {
+  test.skip(isMobile, "Desktop-only tour.");
   test.skip(!session || !storageKey, "Requires a managed Trade session.");
   if (!session || !storageKey) return;
   test.setTimeout(240_000);
