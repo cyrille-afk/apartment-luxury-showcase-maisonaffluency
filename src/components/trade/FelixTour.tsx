@@ -937,6 +937,14 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       position?.bareObstacles ?? [],
     ],
   });
+  if (typeof document !== "undefined") {
+    document.documentElement.dataset.felixDebug = JSON.stringify({
+      preferred: placementArgs.preferred,
+      height: placementArgs.height,
+      placement,
+      sets: (position ? [position.obstacles, position.featureObstacles, position.softObstacles, position.bareObstacles] : []).map((s) => s.map((r) => [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)])),
+    });
+  }
   // Last resort on short viewports where every free space is shallower than
   // the solver's floor: keep the tour operable with a floating bottom-right
   // card. A hidden card strands the member with no way to continue or skip.
