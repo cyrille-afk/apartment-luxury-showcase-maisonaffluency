@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useDesktopTradeTour } from "./useDesktopTradeTour";
 import { fmtPct, resolveTierTokens } from "./felixTourUtils";
+import { FELIX_STEP_SIDEBAR } from "./felixTourSidebarMap";
 import { placeTourCard, type TourRect } from "./felixTourPlacement";
 
 type FelixStep = {
@@ -656,9 +657,20 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
   }, [open, currentStep, location.pathname, stepRoute, stepTarget, targetRetry]);
 
   useLayoutEffect(() => {
-    if (open && !isPaused) document.documentElement.dataset.felixTourStep = step.id;
-    else delete document.documentElement.dataset.felixTourStep;
-    return () => { delete document.documentElement.dataset.felixTourStep; };
+    const sidebarRef = FELIX_STEP_SIDEBAR[step.id];
+    if (open && !isPaused) {
+      document.documentElement.dataset.felixTourStep = step.id;
+      // Global step → sidebar map: styles.css pulses the matching nav item.
+      if (sidebarRef) document.documentElement.dataset.felixTourSidebar = sidebarRef.anchor;
+      else delete document.documentElement.dataset.felixTourSidebar;
+    } else {
+      delete document.documentElement.dataset.felixTourStep;
+      delete document.documentElement.dataset.felixTourSidebar;
+    }
+    return () => {
+      delete document.documentElement.dataset.felixTourStep;
+      delete document.documentElement.dataset.felixTourSidebar;
+    };
   }, [open, isPaused, step.id]);
 
   useEffect(() => () => {
