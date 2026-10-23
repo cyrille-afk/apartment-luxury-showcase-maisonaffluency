@@ -193,7 +193,9 @@ if (typeof window !== "undefined") { setTimeout(() => { void import("./TradeShow
 const TradeDashboard = () => {
   const guideName = useAIGuideName();
   const desktopTour = useDesktopTradeTour();
-  const { profile, user } = useAuth();
+  const { profile, user, sessionExpired, lookupFailed, refreshRoles, signOut } = useAuth();
+  const [retryingRecovery, setRetryingRecovery] = useState(false);
+  const needsRecovery = !!user && (sessionExpired || lookupFailed);
   const { canEdit } = useStudio();
   const [firstWelcome, setFirstWelcome] = useState(() => {
     try {

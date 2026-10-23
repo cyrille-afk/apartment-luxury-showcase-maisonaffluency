@@ -366,6 +366,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setIsAdmin(false);
           setIsSuperAdmin(false);
           setRolesLoaded(false);
+          setLookupFailed(false);
           setProfile(null);
           setTradeStatus(null);
           setApplicationStatus("none");
