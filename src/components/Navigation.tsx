@@ -1390,7 +1390,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
           </div>
 
           {/* ROW 2 — primary navigation bar */}
-          <nav ref={desktopRoomNavRef} className="relative mx-auto flex min-h-12 w-full max-w-[1400px] items-center justify-center gap-10 px-2 py-2 lg:gap-14 lg:px-6 xl:gap-20 xl:px-0">
+          <nav ref={desktopRoomNavRef} className="relative mx-auto flex min-h-12 w-full max-w-[1400px] items-center justify-center gap-10 px-2 py-2 lg:gap-8 lg:px-6 xl:gap-18 xl:px-0 2xl:gap-20">
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/gallery"); }}
                 className={cn(
