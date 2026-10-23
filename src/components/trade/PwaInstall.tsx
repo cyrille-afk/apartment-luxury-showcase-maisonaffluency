@@ -57,11 +57,18 @@ export function SidebarPwaBadge({ collapsed }: { collapsed: boolean }) {
           type="button"
           onMouseEnter={() => setOpen(true)}
           onMouseLeave={() => setOpen(false)}
-          className={`mt-3 inline-flex items-center gap-1.5 border border-border px-2 py-1 font-body text-[9px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground ${collapsed ? "justify-center" : ""}`}
+          className={`mt-3 inline-flex items-center gap-2 rounded-lg border border-[hsl(var(--gold)/0.35)] border-l-2 border-l-[hsl(var(--gold))] bg-gradient-to-r from-[hsl(var(--gold)/0.16)] to-[hsl(var(--gold)/0.04)] px-2.5 py-1.5 font-body text-[9px] uppercase tracking-[0.18em] text-foreground shadow-sm transition-all hover:from-[hsl(var(--gold)/0.24)] hover:to-[hsl(var(--gold)/0.08)] ${collapsed ? "justify-center" : ""}`}
           aria-label="Mobile app workspace"
         >
-          <Smartphone className="h-3 w-3" />
-          {!collapsed && "Mobile App Workspace"}
+          <Smartphone className="h-3.5 w-3.5 shrink-0 text-[hsl(var(--gold))]" strokeWidth={1.75} shapeRendering="geometricPrecision" />
+          {!collapsed && (
+            <>
+              <span>Mobile App Workspace</span>
+              <span className="rounded-sm bg-[hsl(var(--gold))] px-1 py-px text-[7px] font-semibold leading-none tracking-[0.12em] text-background">
+                PWA
+              </span>
+            </>
+          )}
         </button>
       </PopoverTrigger>
       <PopoverContent
