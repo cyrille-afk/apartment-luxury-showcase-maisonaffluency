@@ -38,7 +38,7 @@ export const FELIX_STEP_SIDEBAR: Record<string, TourSidebarRef> = {
   tools: { anchor: "tools", label: "Tools" },
   settings: { anchor: "settings", label: "Settings" },
   "portfolio-management": { anchor: "projects", label: "Projects & Interventions → Projects" },
-  "bespoke-commissions": { anchor: "projects", label: "Projects & Interventions → Projects" },
+  "bespoke-commissions": { anchor: "tools", label: "Tools → Custom Requests" },
   "felix-chat": { anchor: "concierge", label: "Trade Concierge" },
   "client-view": { anchor: "projects", label: "Projects & Interventions → Projects" },
   "branding-panel": { anchor: "projects", label: "Projects & Interventions → Projects" },
