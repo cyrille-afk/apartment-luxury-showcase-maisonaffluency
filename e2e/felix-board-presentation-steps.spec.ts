@@ -57,7 +57,7 @@ test("tour steps 13-18: sidebar refs, transition copy and presentation-mode high
   await expect(page).toHaveURL(/\/trade\/boards\//);
   await expect(step15).toContainText("We now leave the Concierge and open one of your project boards");
   await expect(step15).toContainText("Projects & Interventions → Projects");
-  await expect(sidebarRef).toContainText(/Projects await expect(sidebarRef).toContainText("PROJECTS & INTERVENTIONS → PROJECTS"); Interventions → Projects/i);
+  await expect(sidebarRef).toContainText(/Projects & Interventions → Projects/i);
   const banner = step15.getByRole("status").filter({ hasText: "Switch to Client View to unlock Next." });
   await expect(banner).toBeVisible();
   // The banner is pinned to the top of the card, and the card is top-aligned
