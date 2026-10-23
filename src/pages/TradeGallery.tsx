@@ -997,8 +997,8 @@ const StudioGallery = () => {
                      {product.product_name}
                    </h3>
                    {product.hidden_in_trade && <p className="font-body text-xs text-muted-foreground" data-trade-sensitive>Public listing · Hidden in Trade</p>}
-                   {creditsDesigner(product, "Emma Donnersberg") && (
-                     <p className="font-sans text-[10px] uppercase tracking-wider text-muted-foreground">{product.edition}</p>
+                    {creditsDesigner(product, "Emma Donnersberg") && (
+                     <p className="mt-1.5 inline-flex w-fit rounded-sm border border-border bg-muted/50 px-2 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))]">{product.edition}</p>
                    )}
                    {isAdmin && !product.hidden_in_trade && (
                      <div className="mt-auto flex flex-col items-start gap-1.5 pt-3">
@@ -1041,7 +1041,7 @@ const StudioGallery = () => {
                    <h3 className="font-display text-sm text-foreground truncate hover:text-primary transition-colors">{product.product_name}</h3>
                    {product.hidden_in_trade && <p className="font-body text-xs text-muted-foreground" data-trade-sensitive>Public listing · Hidden in Trade</p>}
                    {creditsDesigner(product, "Emma Donnersberg") && (
-                     <p className="font-sans text-[10px] uppercase tracking-wider text-muted-foreground">{product.edition}</p>
+                     <p className="mt-1 inline-flex w-fit rounded-sm border border-border bg-muted/50 px-2 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))]">{product.edition}</p>
                    )}
                 </div>
                 {product.hidden_in_trade ? <span className="font-body text-xs text-muted-foreground">Price upon Request</span> : isAdmin ? (
