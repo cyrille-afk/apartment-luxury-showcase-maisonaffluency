@@ -324,6 +324,7 @@ All colors MUST be HSL.
     --gold: 36 38% 60%;
     --gold-bright: 38 62% 76%;
     --cream: 32 15% 90%;
+    --felix-mark-text: var(--felix-bronze);
     /* Bronze lifts off the dark jade canvas on its own; only the hover depth
        needs a dark value of its own. */
     --felix-bronze-deep: 36 40% 52%;

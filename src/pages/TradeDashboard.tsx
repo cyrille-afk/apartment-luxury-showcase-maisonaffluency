@@ -398,9 +398,9 @@ const TradeDashboard = () => {
               type="button"
               variant="outline"
               onClick={startFelixTour}
-              className="felix-surface mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 font-body text-[10px] uppercase tracking-[0.15em]"
+              className="felix-surface mt-4 inline-flex min-h-9 items-center gap-2 px-4 py-2 font-body text-xs font-semibold uppercase tracking-[0.14em]"
             >
-              <Sparkles className="h-3 w-3 text-[hsl(var(--felix-on-bronze))]" />
+              <Sparkles aria-hidden className="h-3.5 w-3.5 text-[hsl(var(--felix-on-bronze))]" />
               Meet {guideName}
             </Button>}
             <MobileTradeTourNotice />
