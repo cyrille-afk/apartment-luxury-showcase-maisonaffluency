@@ -108,10 +108,11 @@ test("tour steps 13-18: sidebar refs, transition copy and presentation-mode high
   const step17 = page.getByRole("dialog").filter({ hasText: "Turn on studio branding" });
   await expect(step17).toHaveCSS("opacity", "1", { timeout: 60000 });
   await expect(secondaryRing).toBeVisible();
-  await expect(step17.getByRole("status").filter({ hasText: "Use studio branding only" })).toBeVisible();
-  // Satisfy the step's action gate if the switch is not already on.
+  // The action banner only renders while the step is incomplete; if studio
+  // branding is already on, Next is immediately enabled and no banner shows.
   const next17 = step17.getByRole("button", { name: "Next", exact: true });
   if (await next17.isDisabled()) {
+    await expect(step17.getByRole("status").filter({ hasText: "Use studio branding only" })).toBeVisible();
     await page.locator("#hide-maison").click();
     await expect(next17).toBeEnabled();
   }
