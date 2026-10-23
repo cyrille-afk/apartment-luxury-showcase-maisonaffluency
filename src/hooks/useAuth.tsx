@@ -5,6 +5,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  sessionExpired: boolean;
   isTradeUser: boolean;
   isAdmin: boolean;
   isSuperAdmin: boolean;
@@ -36,6 +37,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sessionExpired, setSessionExpired] = useState(false);
   const [isTradeUser, setIsTradeUser] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
@@ -274,6 +276,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       if (sess?.user) {
+        setSessionExpired(false);
         setSession(sess);
         setUser(sess.user);
         scheduleTokenRefresh(sess);
@@ -333,6 +336,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const explicit = explicitSignOutRef.current;
         explicitSignOutRef.current = false;
         const finishSignOut = () => {
+          const expired = !explicit && userIdRef.current !== null;
+          setSessionExpired(expired);
           userIdRef.current = null;
           setSession(null);
           setUser(null);
@@ -345,7 +350,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setApplicationStatus("none");
           setLoading(false);
           const path = window.location.pathname;
-          if (path.startsWith("/trade") && path !== "/trade/login" && path !== "/trade-program") {
+          if (!expired && path.startsWith("/trade") && path !== "/trade/login" && path !== "/trade-program") {
             const next = `${path}${window.location.search}`;
             window.location.href = `/trade/login?next=${encodeURIComponent(next)}`;
           }
@@ -391,7 +396,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [user, sbClient, fetchUserData]);
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, isTradeUser, isAdmin, isSuperAdmin, rolesLoaded, profile, tradeStatus, applicationStatus, signOut, refreshRoles }}>
+    <AuthContext.Provider value={{ user, session, loading, sessionExpired, isTradeUser, isAdmin, isSuperAdmin, rolesLoaded, profile, tradeStatus, applicationStatus, signOut, refreshRoles }}>
       {children}
     </AuthContext.Provider>
   );

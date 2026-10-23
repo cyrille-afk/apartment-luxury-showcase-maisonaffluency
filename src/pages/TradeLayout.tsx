@@ -1,7 +1,8 @@
 import { lazy, Suspense, useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { LayoutDashboard, ChevronUp } from "lucide-react";
+import { LayoutDashboard, ChevronUp, LogIn } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Outlet, Navigate, useLocation, Link } from "@/lib/router-compat";
 import { TRADE_SANDBOX_ONLY } from "@/lib/tradeSandboxOnly";
 import { Helmet } from "react-helmet-async";
@@ -331,7 +332,7 @@ function BackToTopButton() {
 }
 
 const TradeLayout = () => {
-  const { user, loading, applicationStatus, isAdmin, isTradeUser, profile, rolesLoaded } = useAuth();
+  const { user, loading, sessionExpired, applicationStatus, isAdmin, isTradeUser, profile, rolesLoaded } = useAuth();
   // Once the shell has rendered, never unmount it again for a transient auth
   // re-check (tab focus fires SIGNED_IN/TOKEN_REFRESHED, flipping `loading`).
   // Unmounting the Outlet here destroyed open editors mid-edit.
@@ -452,6 +453,27 @@ const TradeLayout = () => {
   }
 
   if (!user) {
+    if (sessionExpired) {
+      const search = location.search.replace(/^\?+/, "");
+      const next = `${location.pathname}${search ? `?${search}` : ""}`;
+      return (
+        <main className="min-h-screen bg-background text-foreground flex flex-col px-6 sm:px-10">
+          <header className="w-full max-w-6xl mx-auto border-b border-border py-7 sm:py-9">
+            <Link to="/" className="font-display uppercase text-lg sm:text-xl">Maison Affluency</Link>
+          </header>
+          <section role="alert" aria-labelledby="session-expired-title" className="w-full max-w-6xl mx-auto flex-1 flex flex-col justify-center py-20">
+            <p className="font-body text-xs uppercase text-primary mb-6">Trade Studio</p>
+            <h1 id="session-expired-title" className="font-display text-4xl sm:text-5xl leading-tight mb-6">Your session has expired</h1>
+            <p className="font-body text-base text-muted-foreground leading-relaxed max-w-lg mb-8">
+              Please sign in again to continue. Your saved projects, quotes and studio settings are still here.
+            </p>
+            <Button asChild size="lg" className="self-start font-body">
+              <Link to={`/trade/login?next=${encodeURIComponent(next)}`}><LogIn aria-hidden="true" />Sign in</Link>
+            </Button>
+          </section>
+        </main>
+      );
+    }
     const publicGatePath = location.pathname.replace(/\/$/, "") || "/trade";
     if (TRADE_GATE_COPY[publicGatePath]) return <TradePublicGate path={publicGatePath} />;
     return <Navigate to={`/trade/login?next=${encodeURIComponent(`${location.pathname}${location.search}`)}`} replace />;
