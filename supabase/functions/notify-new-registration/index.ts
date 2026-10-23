@@ -48,9 +48,10 @@ Deno.serve(async (req) => {
       }
       const recipients = await getAdminWhatsAppRecipients();
       const templateApproved = await getTemplateApprovalStatus(CUSTOMER_ACCOUNT_TEMPLATE_SID) === "approved";
+      if (!templateApproved && pendingRecipients(recipients, waDone).length) errors.push("Customer WhatsApp template awaiting approval; email sent independently");
       if (!recipients.length) errors.push("No WhatsApp recipients configured");
-      for (const recipient of pendingRecipients(recipients, waDone)) {
-        const result = await sendAdminWhatsApp({ body: copy.text, recipients: [recipient], statusCallback: getWhatsAppStatusCallback(), ...(templateApproved ? { contentSid: CUSTOMER_ACCOUNT_TEMPLATE_SID, contentVariables: { "1": copy.name, "2": copy.email } } : {}) });
+      for (const recipient of templateApproved ? pendingRecipients(recipients, waDone) : []) {
+        const result = await sendAdminWhatsApp({ body: copy.text, recipients: [recipient], statusCallback: getWhatsAppStatusCallback(), contentSid: CUSTOMER_ACCOUNT_TEMPLATE_SID, contentVariables: { "1": copy.name, "2": copy.email } });
         if (result.ok) waDone[recipient] = result.sid || true;
         else errors.push(result.error || "WhatsApp failed");
         const saved = await db.from("registration_alert_events").update({ whatsapp_done: waDone }).eq("id", event.id);
