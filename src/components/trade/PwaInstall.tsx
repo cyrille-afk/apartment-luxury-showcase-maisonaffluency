@@ -44,7 +44,14 @@ function PwaQr({ size, className }: { size: number; className?: string }) {
 export function SidebarPwaBadge({ collapsed }: { collapsed: boolean }) {
   const [open, setOpen] = useState(false);
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <>
+      {open && (
+        <div
+          aria-hidden
+          className="pointer-events-none fixed inset-0 z-40 bg-background/40 backdrop-blur-sm"
+        />
+      )}
+      <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
           type="button"
