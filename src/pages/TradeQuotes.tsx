@@ -531,7 +531,8 @@ const TradeQuotes = () => {
               {preset.label}
             </button>
           ))}
-          <label className="ml-auto inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          <div className="flex w-full flex-wrap items-center gap-2 sm:ml-auto sm:w-auto">
+          <label className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
             From
             <input
               type="date"
@@ -551,6 +552,7 @@ const TradeQuotes = () => {
               className={filterDateInputClass}
             />
           </label>
+          </div>
         </div>
 
         <div className="flex items-center justify-between gap-3 border-t border-border/60 pt-3">
