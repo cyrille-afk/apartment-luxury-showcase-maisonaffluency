@@ -10,8 +10,8 @@
  *
  * Note: Android Chrome shares storage between the browser and the installed
  * PWA, so the token carries over. iOS keeps Safari and Home Screen storage
- * separate; there the bridge page simply never consumes the token, leaving
- * "Continue in browser" as the working path.
+ * separate; a per-install manifest launch URL carries the one-time code into
+ * a new container instead. Existing installations may retain their old launch URL.
  */
 
 export const PENDING_AUTH_STORAGE_KEY = "ma_pwa_pending_auth_token";

@@ -18,6 +18,7 @@ export const Route = createFileRoute("/auth/sync")({
       { title: "You're signed in — Maison Affluency" },
       { name: "description", content: "Secure desktop-to-mobile sign-in for Maison Affluency trade members." },
       { name: "robots", content: "noindex, nofollow" },
+      { name: "referrer", content: "no-referrer" },
       { property: "og:title", content: "You're signed in — Maison Affluency" },
       { property: "og:description", content: "Secure desktop-to-mobile sign-in for Maison Affluency trade members." },
       { property: "og:type", content: "website" },
@@ -133,7 +134,7 @@ function AuthSync() {
               <Check className="mx-auto h-6 w-6 text-emerald-400" />
               <h1 className="font-display text-2xl">You're signed in</h1>
               <p className="font-body text-sm text-white/70">
-                Add Maison Affluency to your home screen — your sign-in carries over automatically.
+                Add Maison Affluency to your home screen, then open it within two minutes to complete your sign-in.
               </p>
             </div>
 

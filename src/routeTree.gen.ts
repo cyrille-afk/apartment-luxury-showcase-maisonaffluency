@@ -32,6 +32,7 @@ import { Route as HomeRouteImport } from './routes/home'
 import { Route as IndexDothtmlRouteImport } from './routes/index[.]html'
 import { Route as IndexDotphpRouteImport } from './routes/index[.]php'
 import { Route as JournalRouteImport } from './routes/journal'
+import { Route as MobileManifestDotjsonRouteImport } from './routes/mobile-manifest[.]json'
 import { Route as MoodboardRouteImport } from './routes/moodboard'
 import { Route as NewInRouteImport } from './routes/new-in'
 import { Route as OrderConfirmationRouteImport } from './routes/order-confirmation'
@@ -373,6 +374,11 @@ const IndexDotphpRoute = IndexDotphpRouteImport.update({
 const JournalRoute = JournalRouteImport.update({
   id: '/journal',
   path: '/journal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MobileManifestDotjsonRoute = MobileManifestDotjsonRouteImport.update({
+  id: '/mobile-manifest.json',
+  path: '/mobile-manifest.json',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MoodboardRoute = MoodboardRouteImport.update({
@@ -1572,6 +1578,7 @@ export interface FileRoutesByFullPath {
   '/index.html': typeof IndexDothtmlRoute
   '/index.php': typeof IndexDotphpRoute
   '/journal': typeof JournalRoute
+  '/mobile-manifest.json': typeof MobileManifestDotjsonRoute
   '/moodboard': typeof MoodboardRoute
   '/new-in': typeof NewInRoute
   '/order-confirmation': typeof OrderConfirmationRoute
@@ -1824,6 +1831,7 @@ export interface FileRoutesByTo {
   '/index.html': typeof IndexDothtmlRoute
   '/index.php': typeof IndexDotphpRoute
   '/journal': typeof JournalRoute
+  '/mobile-manifest.json': typeof MobileManifestDotjsonRoute
   '/moodboard': typeof MoodboardRoute
   '/new-in': typeof NewInRoute
   '/order-confirmation': typeof OrderConfirmationRoute
@@ -2076,6 +2084,7 @@ export interface FileRoutesById {
   '/index.html': typeof IndexDothtmlRoute
   '/index.php': typeof IndexDotphpRoute
   '/journal': typeof JournalRoute
+  '/mobile-manifest.json': typeof MobileManifestDotjsonRoute
   '/moodboard': typeof MoodboardRoute
   '/new-in': typeof NewInRoute
   '/order-confirmation': typeof OrderConfirmationRoute
@@ -2330,6 +2339,7 @@ export interface FileRouteTypes {
     | '/index.html'
     | '/index.php'
     | '/journal'
+    | '/mobile-manifest.json'
     | '/moodboard'
     | '/new-in'
     | '/order-confirmation'
@@ -2582,6 +2592,7 @@ export interface FileRouteTypes {
     | '/index.html'
     | '/index.php'
     | '/journal'
+    | '/mobile-manifest.json'
     | '/moodboard'
     | '/new-in'
     | '/order-confirmation'
@@ -2833,6 +2844,7 @@ export interface FileRouteTypes {
     | '/index.html'
     | '/index.php'
     | '/journal'
+    | '/mobile-manifest.json'
     | '/moodboard'
     | '/new-in'
     | '/order-confirmation'
@@ -3086,6 +3098,7 @@ export interface RootRouteChildren {
   IndexDothtmlRoute: typeof IndexDothtmlRoute
   IndexDotphpRoute: typeof IndexDotphpRoute
   JournalRoute: typeof JournalRoute
+  MobileManifestDotjsonRoute: typeof MobileManifestDotjsonRoute
   MoodboardRoute: typeof MoodboardRoute
   NewInRoute: typeof NewInRoute
   OrderConfirmationRoute: typeof OrderConfirmationRoute
@@ -3327,6 +3340,13 @@ declare module '@tanstack/react-router' {
       path: '/journal'
       fullPath: '/journal'
       preLoaderRoute: typeof JournalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mobile-manifest.json': {
+      id: '/mobile-manifest.json'
+      path: '/mobile-manifest.json'
+      fullPath: '/mobile-manifest.json'
+      preLoaderRoute: typeof MobileManifestDotjsonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/moodboard': {
@@ -5262,6 +5282,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexDothtmlRoute: IndexDothtmlRoute,
   IndexDotphpRoute: IndexDotphpRoute,
   JournalRoute: JournalRoute,
+  MobileManifestDotjsonRoute: MobileManifestDotjsonRoute,
   MoodboardRoute: MoodboardRoute,
   NewInRoute: NewInRoute,
   OrderConfirmationRoute: OrderConfirmationRoute,

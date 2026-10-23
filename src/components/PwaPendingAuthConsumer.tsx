@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { redeemMobileSyncToken } from "@/lib/mobileSync.functions";
-import { readPendingAuthToken, clearPendingAuthToken } from "@/lib/pwaPendingAuth";
+import { redeemMobileSyncToken, MOBILE_SYNC_TTL_SECONDS } from "@/lib/mobileSync.functions";
+import { readPendingAuthToken, clearPendingAuthToken, storePendingAuthToken } from "@/lib/pwaPendingAuth";
+import { takeLaunchToken } from "@/lib/pwaLaunchManifest";
 import { isInstalledPwaDisplay } from "@/lib/pwaMode";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ export function PwaPendingAuthConsumer({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const { loading, user, rolesLoaded } = useAuth();
   const ran = useRef(false);
+  const launchCaptured = useRef(false);
   const [phase, setPhase] = useState<"checking" | "signing-in" | "ready" | "failed">("checking");
   const [failure, setFailure] = useState("This sign-in code has expired or already been used. Scan a fresh code from your desktop, or sign in here.");
   const [verified, setVerified] = useState(false);
@@ -29,6 +31,11 @@ export function PwaPendingAuthConsumer({ children }: { children: ReactNode }) {
       ran.current = true;
       setPhase("ready");
       return;
+    }
+    if (!launchCaptured.current) {
+      launchCaptured.current = true;
+      const launchToken = takeLaunchToken();
+      if (launchToken) storePendingAuthToken(launchToken, MOBILE_SYNC_TTL_SECONDS);
     }
     // Let restoration finish first so its older null session cannot overwrite
     // the new OTP session. The AuthProvider remains mounted above this gate.

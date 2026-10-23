@@ -19,6 +19,7 @@ import HmrStatusBanner from "@/components/dev/HmrStatusBanner";
 import BuildUpdateBanner from "@/components/BuildUpdateBanner";
 import AppRecoveryBoundary from "@/components/AppRecoveryBoundary";
 import { PwaPendingAuthConsumer } from "@/components/PwaPendingAuthConsumer";
+import { mobileManifestHref } from "@/lib/pwaLaunchManifest";
 import {
   AuthProvider,
   CheckoutFormProvider,
@@ -112,7 +113,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", type: "image/png", sizes: "512x512", href: "/favicon.png" },
       { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
-      { rel: "manifest", href: "/manifest.json" },
       { rel: "preconnect", href: "https://res.cloudinary.com", crossOrigin: "anonymous" },
       { rel: "dns-prefetch", href: "https://res.cloudinary.com" },
       { rel: "preconnect", href: "https://dcrauiygaezoduwdjmsm.supabase.co", crossOrigin: "anonymous" },
@@ -163,11 +163,22 @@ const HOME_CSS_SWAP =
 
 function RootShell({ children }: { children: ReactNode }) {
   const isHome = useRouterState({ select: (s) => s.location.pathname === "/" });
+  const manifestLocation = useRouterState({ select: (s) => ({ pathname: s.location.pathname, search: s.location.searchStr }) });
+  const currentManifestHref = mobileManifestHref(manifestLocation.pathname, manifestLocation.search);
+  const [manifestHref, setManifestHref] = useState(currentManifestHref);
+  useEffect(() => {
+    // The bridge scrubs browser history before installation. Retain this
+    // mount's personalized manifest until the user actually leaves the bridge.
+    if (currentManifestHref !== "/manifest.json" || manifestLocation.pathname !== "/auth/sync") {
+      setManifestHref(currentManifestHref);
+    }
+  }, [currentManifestHref, manifestLocation.pathname]);
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="manifest" href={manifestHref} />
         <link
           id="app-css"
           rel="stylesheet"
