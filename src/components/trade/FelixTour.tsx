@@ -344,9 +344,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
 
   const step = FELIX_STEPS[currentStep];
   const isLast = currentStep === FELIX_STEPS.length - 1;
-  const [collectionArrived, setCollectionArrived] = useState(false);
-  // The showroom card advances the step before navigation; do not redirect
-  // away while its Link takes the member into the gallery.
+  // Collection navigation always resolves to the actual Collection route.
   const stepRoute = step.route;
   const stepTarget = step.target;
 
@@ -372,7 +370,6 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     const entered = clientSafe && !previousClientSafe.current;
     previousClientSafe.current = clientSafe;
     if (entered && open && currentStep === 5) {
-      setCollectionArrived(false);
       setCurrentStep(6);
     }
   }, [clientSafe, open, currentStep]);
@@ -402,7 +399,6 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       const el = (e.target as HTMLElement | null)?.closest?.(`[data-felix-target="${stepTarget}"]${step.id === "collection" ? ', [data-felix-target="dashboard-showroom"]' : ''}`);
       if (el && step.id === "collection") {
         flushSync(() => {
-          setCollectionArrived(true);
           setCurrentStep(2);
         });
         return;
@@ -482,7 +478,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       }
       if (targets.length && !didScroll) {
         didScroll = true;
-        targets[0].scrollIntoView({ block: current.id === "quotes" ? "start" : "center", behavior: ["collection", "quotes", "margin-protection"].includes(current.id) || window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+        targets[0].scrollIntoView({ block: current.id === "quotes" ? "nearest" : "center", behavior: ["collection", "quotes", "margin-protection"].includes(current.id) || window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
       }
       const watchedNow = [...targets, ...targets.map((el) => el.parentElement).filter((el): el is HTMLElement => el !== null)];
       if (watchedNow.length !== watched.length || watchedNow.some((el, i) => el !== watched[i])) {
@@ -619,7 +615,6 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       try { localStorage.removeItem(PROGRESS_KEY); } catch {}
       setTransitioning(false);
       setCurrentStep(0);
-      setCollectionArrived(false);
       setIsPaused(false);
       setOpen(true);
     };
@@ -659,7 +654,6 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     setTransitioning(true);
     transitionTimer.current = window.setTimeout(() => {
       setIsPaused(false);
-      setCollectionArrived(false);
       setCurrentStep((s) => Math.max(0, Math.min(s + direction, FELIX_STEPS.length - 1)));
       transitionTimer.current = null;
     }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 80);
@@ -670,7 +664,6 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     // The next frame (including route fallbacks) must already be client-safe.
     if (step.id === "client-safe-presentations") {
       setClientSafeMode(true);
-      setCollectionArrived(false);
       setCurrentStep(6);
       return;
     }
