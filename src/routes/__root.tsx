@@ -163,7 +163,16 @@ const HOME_CSS_SWAP =
 
 function RootShell({ children }: { children: ReactNode }) {
   const isHome = useRouterState({ select: (s) => s.location.pathname === "/" });
-  const manifestHref = useRouterState({ select: (s) => mobileManifestHref(s.location.pathname, s.location.searchStr) });
+  const manifestLocation = useRouterState({ select: (s) => ({ pathname: s.location.pathname, search: s.location.searchStr }) });
+  const currentManifestHref = mobileManifestHref(manifestLocation.pathname, manifestLocation.search);
+  const [manifestHref, setManifestHref] = useState(currentManifestHref);
+  useEffect(() => {
+    // The bridge scrubs browser history before installation. Retain this
+    // mount's personalized manifest until the user actually leaves the bridge.
+    if (currentManifestHref !== "/manifest.json" || manifestLocation.pathname !== "/auth/sync") {
+      setManifestHref(currentManifestHref);
+    }
+  }, [currentManifestHref, manifestLocation.pathname]);
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
   return (
