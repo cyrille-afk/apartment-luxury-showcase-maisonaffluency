@@ -117,7 +117,7 @@ export function PwaPendingAuthConsumer({ children }: { children: ReactNode }) {
     return () => { active = false; };
   }, [verified, loading, user, rolesLoaded, navigate, setIsPwaBooting]);
 
-  if (phase === "ready") return children;
+  if (phase === "ready" || phase === "checking") return children;
   return (
     <main className="min-h-[100dvh] bg-background text-foreground flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-sm text-center">
