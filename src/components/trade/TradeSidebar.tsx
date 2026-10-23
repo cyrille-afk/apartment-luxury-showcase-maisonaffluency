@@ -244,7 +244,19 @@ export function TradeSidebar() {
                       activeClassName="text-foreground font-medium border-foreground"
                     >
                       <item.icon className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span>{item.title.replace(/\bFelix\b/g, guideName)}</span>}
+                      {!collapsed && (() => {
+                        const label = item.title.replace(/\bFelix\b/g, guideName);
+                        const open = label.indexOf(" (");
+                        if (open === -1) return <span>{label}</span>;
+                        return (
+                          <span className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1">
+                            <span>{label.slice(0, open)}</span>
+                            <span className="felix-capsule px-2 py-[3px] text-[8px] font-medium uppercase leading-none tracking-[0.12em]">
+                              {label.slice(open + 2).replace(/\)$/, "")}
+                            </span>
+                          </span>
+                        );
+                      })()}
                       {item.url === "/trade/beta-feedboard" && (
                         <span className="relative ml-auto flex h-2 w-2" aria-hidden>
                           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500/60" />
