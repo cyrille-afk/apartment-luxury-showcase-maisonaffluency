@@ -1237,7 +1237,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     aria-haspopup="menu"
                     aria-expanded={tradeMenuOpen}
                     data-utility-trade
-                    onClick={() => setTradeMenuOpen((o) => !o)}
+                    onClick={openTradeMenu}
                     className={cn("h-auto rounded-none p-0 font-body text-[12px] uppercase tracking-[0.2em] font-medium text-muted-foreground hover:bg-transparent hover:text-foreground transition-colors whitespace-nowrap py-2", tradePartner && "text-primary border-b border-primary")}
                   >
                     <span className="link-underline-grow">{tradePartner ? "Trade Dashboard" : "Trade"}</span>
