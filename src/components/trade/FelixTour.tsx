@@ -772,7 +772,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       if (completed) localStorage.removeItem(PROGRESS_KEY);
       else localStorage.setItem(PROGRESS_KEY, String(currentStep));
     } catch {}
-  }, [currentStep]);
+  }, [currentStep, navigate, location.pathname]);
 
   const changeStep = (direction: number) => {
     if (transitioning) return;
