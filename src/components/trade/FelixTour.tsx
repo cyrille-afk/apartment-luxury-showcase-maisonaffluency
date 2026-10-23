@@ -189,7 +189,7 @@ const FELIX_STEPS: FelixStep[] = [
       if (d && !d.open) d.open = true;
     },
     dialogue:
-      "You are now in **Client Editorial Presentation** — your sidebar is hidden so your client sees only the board. The **Presentation Mode** switch outlined at the top right returns you to Studio Mode at any time. The **Client Portal Branding** panel is open for you: configure the studio name and logo your clients will see, and review the client-facing preview before sharing your board.",
+      "You are now in **Client Editorial Presentation** — your sidebar is hidden so your client sees only the board. The **Client Editorial Presentation** switch outlined at the top right returns you to Studio Mode at any time. The **Client Portal Branding** panel is open for you: configure the studio name and logo your clients will see, and review the client-facing preview before sharing your board.",
   },
   {
     id: "white-label",
