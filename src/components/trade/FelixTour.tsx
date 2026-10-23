@@ -22,6 +22,8 @@ type FelixStep = {
   id: string;
   title: string;
   target: string; // data-felix-target selector value
+  /** Secondary element outlined subtly as an orientation aid (no dim cutout). */
+  secondaryTarget?: string;
   /** Sidebar destination anchoring the card; page spotlight remains intact. */
   sidebarAnchor?: "collection" | "projects";
   dialogue: string;
@@ -173,12 +175,13 @@ const FELIX_STEPS: FelixStep[] = [
     route: "board",
     done: () => switchOn('[aria-label="Toggle client editorial presentation"]'),
     dialogue:
-      "Exceptional sourcing is only the first step; bringing your client along on the journey is where projects come to life. Switch on **Client Editorial Presentation** to show this board without the internal trade calculations.",
+      "We now leave the Concierge and open one of your project boards — the same boards listed under **Projects & Interventions → Projects** in your sidebar. Exceptional sourcing is only the first step; bringing your client along on the journey is where projects come to life. Switch on **Client Editorial Presentation** to show this board without the internal trade calculations.",
   },
   {
     id: "branding-panel",
     title: "Unlocking Client Portal Branding",
     target: "branding-panel",
+    secondaryTarget: "header-presentation-toggle",
     route: "board",
     pulse: true,
     onEnter: () => {
@@ -186,12 +189,13 @@ const FELIX_STEPS: FelixStep[] = [
       if (d && !d.open) d.open = true;
     },
     dialogue:
-      "The **Client Portal Branding** panel is open for you. Configure the studio name and logo your clients will see, and review the client-facing preview before sharing your board.",
+      "You are now in **Client Editorial Presentation** — your sidebar is hidden so your client sees only the board. The **Presentation Mode** switch outlined at the top right returns you to Studio Mode at any time. The **Client Portal Branding** panel is open for you: configure the studio name and logo your clients will see, and review the client-facing preview before sharing your board.",
   },
   {
     id: "white-label",
     title: "Turn on studio branding",
     target: "branding-whitelabel",
+    secondaryTarget: "header-presentation-toggle",
     route: "board",
     pulse: true,
     onEnter: () => {
@@ -206,6 +210,7 @@ const FELIX_STEPS: FelixStep[] = [
     id: "invite",
     title: "Activating the Viral Loop",
     target: "invite-collaborator",
+    secondaryTarget: "header-presentation-toggle",
     route: "board",
     dialogue:
       "Open **Invite Collaborator** to enter your client's or contractor's email and choose their role. Review the invitation before sending it, or copy its secure portal link. Client feedback and finish requests appear on your board for review; opening this control does not send an invitation.",
@@ -349,7 +354,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     else delete document.documentElement.dataset.felixReducedMotion;
     return () => { delete document.documentElement.dataset.felixReducedMotion; };
   }, [open, reducedMotion]);
-  const [position, setPosition] = useState<{ step: number; path: string; rect: Rect; anchor: Rect | null; obstacles: TourRect[] } | null>(null);
+  const [position, setPosition] = useState<{ step: number; path: string; rect: Rect; anchor: Rect | null; secondary: Rect | null; obstacles: TourRect[] } | null>(null);
   const [viewport, setViewport] = useState({ w: 0, h: 0 });
   const [measuredCardHeight, setMeasuredCardHeight] = useState(0);
   const [settled, setSettled] = useState(false);
@@ -442,6 +447,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     let frame = 0;
     let last: Rect | null = null;
     let lastAnchor: Rect | null = null;
+    let lastSecondary: Rect | null = null;
     let lastObstacles = "";
     let stableSince = 0;
     let ready = false;
@@ -531,6 +537,14 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         height: Math.max(...anchorBoxes.map((r) => r.bottom)) - Math.min(...anchorBoxes.map((r) => r.top)),
       } : null;
       const anchorChanged = anchor ? !lastAnchor || !sameRect(lastAnchor, anchor) : lastAnchor !== null;
+      // Orientation aid: a subtly outlined secondary element (e.g. the
+      // top-right Presentation Mode switch while the sidebar is hidden).
+      const secondaryEls = routeReady && current.secondaryTarget
+        ? Array.from(document.querySelectorAll(`[data-felix-target="${current.secondaryTarget}"]`))
+            .filter((el) => (el as HTMLElement).offsetParent !== null)
+        : [];
+      const secondaryNext = secondaryEls.length ? secondaryEls[0].getBoundingClientRect() : null;
+      const secondaryChanged = secondaryNext ? !lastSecondary || !sameRect(lastSecondary, secondaryNext) : lastSecondary !== null;
       const watchedNow = [...targets, ...sidebarTargets, ...targets.map((el) => el.parentElement).filter((el): el is HTMLElement => el !== null)];
       if (watchedNow.length !== watched.length || watchedNow.some((el, i) => el !== watched[i])) {
         resizeObserver.disconnect();
@@ -575,9 +589,10 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       const obstaclesChanged = obstacleKey !== lastObstacles;
       const commit = (r: Rect) => {
         lastAnchor = anchor;
+        lastSecondary = secondaryNext;
         lastObstacles = obstacleKey;
-        setPosition((previous) => previous?.step === currentStep && previous.path === location.pathname && sameRect(previous.rect, r) && !anchorChanged && !obstaclesChanged
-          ? previous : { step: currentStep, path: location.pathname, rect: r, anchor, obstacles });
+        setPosition((previous) => previous?.step === currentStep && previous.path === location.pathname && sameRect(previous.rect, r) && !anchorChanged && !secondaryChanged && !obstaclesChanged
+          ? previous : { step: currentStep, path: location.pathname, rect: r, anchor, secondary: secondaryNext, obstacles });
         setViewport((previous) => previous.w === window.innerWidth && previous.h === window.innerHeight
           ? previous : { w: window.innerWidth, h: window.innerHeight });
         fallback = r.width === 0 && r.height === 0 && !next;
@@ -625,7 +640,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         last = next; stableSince = now;
       } else if (ready) {
         // Already shown: redraw immediately on any movement so the box never lags.
-        if (!last || !sameRect(last, next) || anchorChanged || obstaclesChanged) { last = next; commit(next); }
+        if (!last || !sameRect(last, next) || anchorChanged || secondaryChanged || obstaclesChanged) { last = next; commit(next); }
       } else if (["collection", "quotes", "margin-protection"].includes(current.id)) {
         // Client View may reflow in the same paint: commit the validated
         // client price immediately instead of waiting for the stability timer.
@@ -821,6 +836,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
 
   // No stale step or route geometry may be used while the new target mounts.
   const rect = position?.step === currentStep && position.path === location.pathname ? position.rect : null;
+  const secondaryRect = rect && !targetUnavailable ? (position?.secondary ?? null) : null;
   const sidebarAnchor = rect && !targetUnavailable ? position?.anchor : null;
   // Card placement: right of the target, else left, below, or above.
   const cardW = Math.max(0, Math.min(step.id === "welcome" ? 410 : 380, viewport.w - 48));
@@ -844,11 +860,12 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         cardTop = clampY(rect.top + rect.height + PAD + 8);
       }
     } else if (step.id === "client-view") {
-      // Step 8: never below the switch (it would cover the product photo).
-      // Right of the switch, bottom-aligned so the card grows upwards; else above.
+      // Step 15: never below the switch (it would cover the product photo).
+      // Right of the switch, top-aligned so the action banner at the top of
+      // the card reads in line with the highlighted toggle row; else above.
       if (rightX + cardW <= viewport.w - 16) {
         cardLeft = rightX;
-        cardTop = clampY(rect.top + rect.height - cardH);
+        cardTop = clampY(rect.top - 6);
       } else {
         cardLeft = centerX;
         cardTop = Math.max(16, rect.top - cardH - PAD - 8);
@@ -910,6 +927,27 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     >{step.pulse && <span className="absolute inset-0 rounded-md border-2 border-accent animate-pulse motion-reduce:animate-none" />}</div>
   );
 
+  // Orientation ring: outlines the secondary target (e.g. the top-right
+  // Presentation Mode switch) without a dim cutout of its own. Painted after
+  // the main ring so the dim layer never covers it.
+  const secondaryRing = secondaryRect && !isPaused && (
+    <div
+      aria-hidden="true"
+      data-felix-spotlight-secondary
+      className="pointer-events-none fixed z-[131] rounded-md border-2 border-accent/80 motion-reduce:!transition-none"
+      style={{
+        top: 0,
+        left: 0,
+        transform: `translate3d(${secondaryRect.left - 6}px, ${secondaryRect.top - 6}px, 0)`,
+        width: secondaryRect.width + 12,
+        height: secondaryRect.height + 12,
+        opacity: settled && !transitioning ? 1 : 0,
+        transition: SPOTLIGHT_EASE,
+        boxShadow: "0 0 18px hsl(var(--accent) / 0.45)",
+      }}
+    />
+  );
+
   if (isPaused) return createPortal(
     <button
       type="button"
@@ -932,6 +970,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         {rect && settled && !transitioning && targetUnavailable && <div className="absolute inset-0 bg-foreground/40" />}
       </div>}
       {ring}
+      {secondaryRing}
       {sidebarAnchor && placement && settled && !transitioning && (
         <svg aria-hidden="true" className="pointer-events-none fixed inset-0 z-[140] h-full w-full fill-none stroke-accent" strokeWidth="1.5">
           <path d={`M ${sidebarAnchor.left + sidebarAnchor.width + 8} ${sidebarAnchor.top + sidebarAnchor.height / 2} H ${Math.max(sidebarAnchor.left + sidebarAnchor.width + 12, cardLeft - 12)} V ${cardTop + 28} H ${Math.max(cardLeft, sidebarAnchor.left + sidebarAnchor.width + 12)}`} />
@@ -980,6 +1019,18 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
               <X className="h-4 w-4" />
             </button>
           </div>
+
+          {/* Required action — pinned to the top of the card so it reads in
+              line with the highlighted control instead of floating below the
+              dialogue. */}
+          {!stepDone && !isPaused && !targetUnavailable && (
+            <div role="status" className="mt-3 flex items-center gap-3 rounded-md bg-primary px-4 py-3 text-primary-foreground">
+              {step.id === "collection" || step.id === "client-view" ? <ArrowLeft className="h-5 w-5 shrink-0" aria-hidden="true" /> : <ArrowRight className="h-5 w-5 shrink-0" aria-hidden="true" />}
+              <p className="font-body text-sm font-semibold leading-snug">
+                {step.id === "collection" ? "Open The Collection to continue." : step.id === "white-label" ? "Turn on ‘Use studio branding only’ below to unlock Next." : step.id === "client-view" ? "Switch to Client View to unlock Next." : "Use the highlighted control to continue."}
+              </p>
+            </div>
+          )}
 
           <div className="mt-3 flex items-center justify-between gap-3 border-t border-border pt-3">
             <label htmlFor="felix-reduced-motion" className="font-body text-xs text-muted-foreground">Reduce motion</label>
@@ -1153,15 +1204,6 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
             </div>
           )}
 
-
-           {!stepDone && !isPaused && !targetUnavailable && (
-             <div role="status" className="mt-3 flex items-center gap-3 rounded-md bg-primary px-4 py-3 text-primary-foreground">
-               {step.id === "collection" || step.id === "client-view" ? <ArrowLeft className="h-5 w-5 shrink-0" aria-hidden="true" /> : <ArrowRight className="h-5 w-5 shrink-0" aria-hidden="true" />}
-               <p className="font-body text-sm font-semibold leading-snug">
-                 {step.id === "collection" ? "Open The Collection to continue." : step.id === "white-label" ? "Turn on ‘Use studio branding only’ below to unlock Next." : step.id === "client-view" ? "Switch to Client View to unlock Next." : "Use the highlighted control to continue."}
-               </p>
-             </div>
-           )}
 
           {isPaused && (
             <p className="mt-3 font-body text-[10px] uppercase tracking-[0.18em] text-accent">
