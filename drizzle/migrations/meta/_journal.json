@@ -1548,6 +1548,13 @@
       "when": 1792646485722,
       "tag": "0220_order_reads_require_verified_ownership",
       "breakpoints": true
+    },
+    {
+      "idx": 221,
+      "version": "7",
+      "when": 1792716796481,
+      "tag": "0221_sync_trade_registration_contact_to_profiles",
+      "breakpoints": true
     }
   ]
 }
