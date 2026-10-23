@@ -1,8 +1,13 @@
 -- Execute the production trigger on a temporary profile row, using read-only
 -- approved registration sources. No real account writes, signup or emails.
 BEGIN;
+-- Sandbox cannot execute private production triggers; clone the exact deployed
+-- function body as an invoker-only temporary function using read-only sources.
+SELECT replace(replace(pg_get_functiondef('public.fill_trade_registration_profile_contacts()'::regprocedure),
+ 'public.fill_trade_registration_profile_contacts()', 'pg_temp.fill_trade_registration_profile_contacts()'),
+ 'SECURITY DEFINER', 'SECURITY INVOKER') \gexec
 CREATE TEMP TABLE contact_probe (id uuid, first_name text,last_name text,company text,phone text,country text);
-CREATE TRIGGER contact_probe_fill BEFORE INSERT OR UPDATE ON contact_probe FOR EACH ROW EXECUTE FUNCTION public.fill_trade_registration_profile_contacts();
+CREATE TRIGGER contact_probe_fill BEFORE INSERT OR UPDATE ON contact_probe FOR EACH ROW EXECUTE FUNCTION pg_temp.fill_trade_registration_profile_contacts();
 DO $$
 DECLARE uid uuid; source public.trade_accounts%ROWTYPE; actual record; parts text[];
 BEGIN
