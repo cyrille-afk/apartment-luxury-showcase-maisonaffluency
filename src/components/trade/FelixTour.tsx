@@ -836,6 +836,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
 
   // No stale step or route geometry may be used while the new target mounts.
   const rect = position?.step === currentStep && position.path === location.pathname ? position.rect : null;
+  const secondaryRect = rect && !targetUnavailable ? (position?.secondary ?? null) : null;
   const sidebarAnchor = rect && !targetUnavailable ? position?.anchor : null;
   // Card placement: right of the target, else left, below, or above.
   const cardW = Math.max(0, Math.min(step.id === "welcome" ? 410 : 380, viewport.w - 48));
@@ -859,11 +860,12 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         cardTop = clampY(rect.top + rect.height + PAD + 8);
       }
     } else if (step.id === "client-view") {
-      // Step 8: never below the switch (it would cover the product photo).
-      // Right of the switch, bottom-aligned so the card grows upwards; else above.
+      // Step 15: never below the switch (it would cover the product photo).
+      // Right of the switch, top-aligned so the action banner at the top of
+      // the card reads in line with the highlighted toggle row; else above.
       if (rightX + cardW <= viewport.w - 16) {
         cardLeft = rightX;
-        cardTop = clampY(rect.top + rect.height - cardH);
+        cardTop = clampY(rect.top - 6);
       } else {
         cardLeft = centerX;
         cardTop = Math.max(16, rect.top - cardH - PAD - 8);
