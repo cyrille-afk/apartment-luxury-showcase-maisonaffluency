@@ -204,6 +204,7 @@ export function TradeSidebar() {
                     <NavLink
                       to={item.url}
                       end={item.end}
+                      data-tour-sidebar-anchor={item.url === "/trade/the-collection" ? "collection" : undefined}
                       data-felix-target={
                         item.url === "/trade/the-collection"
                           ? "nav-collection"
@@ -241,7 +242,7 @@ export function TradeSidebar() {
         </SidebarGroup>
 
         <SidebarGroup data-felix-target="nav-projects">
-          <SidebarGroupLabel className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+          <SidebarGroupLabel data-tour-sidebar-anchor="projects" className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
             {!collapsed && "PROJECTS & INTERVENTIONS"}
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -258,6 +259,7 @@ export function TradeSidebar() {
                         to={item.url}
                         end={item.end}
                         data-felix-target={isProjects ? "nav-custom-requests" : undefined}
+                        data-tour-sidebar-anchor={isProjects ? "projects" : undefined}
                         className="flex items-center gap-3 px-3 py-3 font-body text-xs text-muted-foreground hover:text-foreground transition-colors border-l border-transparent"
                         activeClassName="text-foreground font-medium border-foreground"
                       >

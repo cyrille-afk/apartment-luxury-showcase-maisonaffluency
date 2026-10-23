@@ -36,6 +36,8 @@ type FelixStep = {
   id: string;
   title: string;
   target: string; // data-felix-target selector value
+  /** Sidebar destination anchoring the card; page spotlight remains intact. */
+  sidebarAnchor?: "collection" | "projects";
   dialogue: string;
   route: string; // "board" = user's most recent board
   /** Step is complete only when this returns true (user action required). */
@@ -74,6 +76,7 @@ const FELIX_STEPS: FelixStep[] = [
     id: "quotes",
     title: "Transparent Project Margins",
     target: "collection-overview",
+    sidebarAnchor: "collection",
     route: "/trade/the-collection",
     dialogue:
       "In The Collection, explore each room of the Interactive Gallery and open a product tag, or browse Designers & Ateliers and open any designer’s product pages, to see your pricing. Your Silver Tier's {silverPct} trade discount is reflected in eligible product pricing, so you can plan your project margins with clarity. Keep building your cumulative project volume toward the {goldVolume} Gold Tier threshold.",
@@ -82,6 +85,7 @@ const FELIX_STEPS: FelixStep[] = [
     id: "projects",
     title: "Client Project Folders",
     target: "projects-workspace",
+    sidebarAnchor: "projects",
     route: "/trade/projects",
     dialogue:
       "Every engagement lives in its own isolated workspace. Each folder you create maps its collections, layouts, quotes and client documentation together. Use Projects & Interventions to structure each client engagement end to end.",
@@ -337,7 +341,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const [open, setOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [position, setPosition] = useState<{ step: number; path: string; rect: Rect } | null>(null);
+  const [position, setPosition] = useState<{ step: number; path: string; rect: Rect; anchor: Rect | null } | null>(null);
   const [viewport, setViewport] = useState({ w: 0, h: 0 });
   const [settled, setSettled] = useState(false);
   const [targetUnavailable, setTargetUnavailable] = useState(false);
@@ -428,6 +432,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       : location.pathname === stepRoute;
     let frame = 0;
     let last: Rect | null = null;
+    let lastAnchor: Rect | null = null;
     let stableSince = 0;
     let ready = false;
     let didEnter = false;
@@ -499,7 +504,23 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         didScroll = true;
         targets[0].scrollIntoView({ block: current.id === "quotes" ? "nearest" : "center", behavior: ["collection", "quotes", "margin-protection"].includes(current.id) || window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
       }
-      const watchedNow = [...targets, ...targets.map((el) => el.parentElement).filter((el): el is HTMLElement => el !== null)];
+      const sidebarTargets = routeReady && current.sidebarAnchor
+        ? Array.from(document.querySelectorAll(`[data-tour-sidebar-anchor="${current.sidebarAnchor}"]`))
+            .filter((el) => (el as HTMLElement).offsetParent !== null)
+        : [];
+      if (sidebarTargets.length) {
+        const first = sidebarTargets[0].getBoundingClientRect();
+        if (first.top < 16 || first.bottom > window.innerHeight - 24) sidebarTargets[0].scrollIntoView({ block: "nearest", behavior: "instant" });
+      }
+      const anchorBoxes = sidebarTargets.map((el) => el.getBoundingClientRect());
+      const anchor = anchorBoxes.length ? {
+        top: Math.min(...anchorBoxes.map((r) => r.top)),
+        left: Math.min(...anchorBoxes.map((r) => r.left)),
+        width: Math.max(...anchorBoxes.map((r) => r.right)) - Math.min(...anchorBoxes.map((r) => r.left)),
+        height: Math.max(...anchorBoxes.map((r) => r.bottom)) - Math.min(...anchorBoxes.map((r) => r.top)),
+      } : null;
+      const anchorChanged = anchor ? !lastAnchor || !sameRect(lastAnchor, anchor) : lastAnchor !== null;
+      const watchedNow = [...targets, ...sidebarTargets, ...targets.map((el) => el.parentElement).filter((el): el is HTMLElement => el !== null)];
       if (watchedNow.length !== watched.length || watchedNow.some((el, i) => el !== watched[i])) {
         resizeObserver.disconnect();
         watchedNow.forEach((el) => resizeObserver.observe(el));
@@ -528,8 +549,9 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         height: Math.max(...boxes.map((r) => r.bottom)) - Math.min(...boxes.map((r) => r.top)),
       } : null;
       const commit = (r: Rect) => {
-        setPosition((previous) => previous?.step === currentStep && previous.path === location.pathname && sameRect(previous.rect, r)
-          ? previous : { step: currentStep, path: location.pathname, rect: r });
+        lastAnchor = anchor;
+        setPosition((previous) => previous?.step === currentStep && previous.path === location.pathname && sameRect(previous.rect, r) && !anchorChanged
+          ? previous : { step: currentStep, path: location.pathname, rect: r, anchor });
         setViewport((previous) => previous.w === window.innerWidth && previous.h === window.innerHeight
           ? previous : { w: window.innerWidth, h: window.innerHeight });
         fallback = r.width === 0 && r.height === 0 && !next;
@@ -565,7 +587,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         last = next; stableSince = now;
       } else if (ready) {
         // Already shown: redraw immediately on any movement so the box never lags.
-        if (!last || !sameRect(last, next)) { last = next; commit(next); }
+        if (!last || !sameRect(last, next) || anchorChanged) { last = next; commit(next); }
       } else if (["collection", "quotes", "margin-protection"].includes(current.id)) {
         // Client View may reflow in the same paint: commit the validated
         // client price immediately instead of waiting for the stability timer.
@@ -597,10 +619,10 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
   }, [open, currentStep, location.pathname, stepRoute, stepTarget, targetRetry]);
 
   useLayoutEffect(() => {
-    if (open) document.documentElement.dataset.felixTourStep = step.id;
+    if (open && !isPaused) document.documentElement.dataset.felixTourStep = step.id;
     else delete document.documentElement.dataset.felixTourStep;
     return () => { delete document.documentElement.dataset.felixTourStep; };
-  }, [open, step.id]);
+  }, [open, isPaused, step.id]);
 
   useEffect(() => () => {
     if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current);
@@ -741,6 +763,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
 
   // No stale step or route geometry may be used while the new target mounts.
   const rect = position?.step === currentStep && position.path === location.pathname ? position.rect : null;
+  const sidebarAnchor = rect && !targetUnavailable ? position?.anchor : null;
   // Card placement: right of the target, else left, below, or above.
   const cardW = Math.min(step.id === "welcome" ? 410 : 380, viewport.w - 32);
   // Step 1 carries the tier breakdown and needs a taller placement box.
@@ -754,7 +777,10 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     const centerX = clampX(rect.left + rect.width / 2 - cardW / 2);
     const rightX = rect.left + rect.width + PAD + 8;
     const leftX = rect.left - PAD - 8 - cardW;
-    if (step.id === "client-view") {
+    if (sidebarAnchor) {
+      cardLeft = clampX(sidebarAnchor.left + sidebarAnchor.width + 24);
+      cardTop = clampY(sidebarAnchor.top - 20);
+    } else if (step.id === "client-view") {
       // Step 8: never below the switch (it would cover the product photo).
       // Right of the switch, bottom-aligned so the card grows upwards; else above.
       if (rightX + cardW <= viewport.w - 16) {
@@ -847,11 +873,17 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         tabIndex={-1}
         aria-label={`${guideName} — Your Curatorial Guide, step ${currentStep + 1} of ${FELIX_STEPS.length}: ${step.title}`}
         className={cn(
-          "fixed z-[132] print:hidden rounded-2xl border border-border bg-background text-foreground shadow-2xl transition-opacity duration-150 ease-out motion-reduce:transition-none outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2",
+          "fixed z-[132] print:hidden rounded-2xl border border-border bg-background text-foreground shadow-2xl transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2",
           isPaused && "opacity-90",
         )}
         style={{ width: cardW, left: 0, top: 0, transform: `translate3d(${cardLeft}px, ${cardTop}px, 0)`, opacity: settled && !transitioning ? 1 : 0, pointerEvents: settled && !transitioning ? "auto" : "none" }}
       >
+        {sidebarAnchor && <span
+          data-felix-sidebar-arrow
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-2 h-4 w-4 rotate-45 border-b border-l border-accent/50 bg-background"
+          style={{ top: Math.max(24, Math.min(cardH - 24, sidebarAnchor.top + sidebarAnchor.height / 2 - cardTop)) }}
+        />}
         <div className="p-5">
           {/* Header */}
           <div className="flex items-start justify-between gap-3">

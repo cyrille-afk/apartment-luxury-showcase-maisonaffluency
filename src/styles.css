@@ -27,6 +27,36 @@ html[data-felix-tour-step="client-safe-presentations"] .trade-editorial-header {
   z-index: 133;
 }
 
+/* Reuse the tour's lifecycle-owned root state, so close/pause/unmount cannot
+   leave sidebar highlights behind. Page overview spotlights remain intact. */
+html:is([data-felix-tour-step="quotes"], [data-felix-tour-step="projects"]) .trade-editorial-sidebar {
+  z-index: 131;
+}
+html[data-felix-tour-step="quotes"] [data-tour-sidebar-anchor="collection"],
+html[data-felix-tour-step="projects"] [data-tour-sidebar-anchor="projects"] {
+  position: relative;
+  background: hsl(var(--accent) / 0.12);
+  outline: 1px solid hsl(var(--accent) / 0.45);
+  outline-offset: -1px;
+}
+html[data-felix-tour-step="quotes"] [data-tour-sidebar-anchor="collection"]::after,
+html[data-felix-tour-step="projects"] [data-tour-sidebar-anchor="projects"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: hsl(var(--accent) / 0.14);
+  border-left: 2px solid hsl(var(--accent) / 0.75);
+  animation: sidebar-tour-pulse 2s ease-in-out infinite;
+}
+@keyframes sidebar-tour-pulse {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-tour-sidebar-anchor]::after { animation: none !important; }
+}
+
 /* Trade routes never mount or expose the third-party floating WhatsApp launcher.
    The data attribute is also applied to launchers injected after React mounts. */
 html.hide-whatsapp-widget #whatsapp-floating-widget,
