@@ -1,48 +1,100 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { redeemMobileSyncToken } from "@/lib/mobileSync.functions";
 import { readPendingAuthToken, clearPendingAuthToken } from "@/lib/pwaPendingAuth";
-import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
+import { isInstalledPwaDisplay } from "@/lib/pwaMode";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { Loader2, LogIn } from "lucide-react";
 
 /**
  * Runs once at app start inside the installed PWA. If the mobile browser
  * bridge parked a one-time sign-in token (ma_pwa_pending_auth_token), redeem
  * it here, establish the session, and land on the trade dashboard. Expired or
- * absent tokens are cleared/ignored silently.
+ * absent tokens fall back to normal routing. Route children remain unmounted
+ * during the handshake so sign-in pages cannot flash or redirect prematurely.
  */
-export function PwaPendingAuthConsumer() {
+export function PwaPendingAuthConsumer({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
+  const { loading, user, rolesLoaded } = useAuth();
   const ran = useRef(false);
+  const [phase, setPhase] = useState<"checking" | "signing-in" | "ready" | "failed">("checking");
+  const [failure, setFailure] = useState("This sign-in code has expired or already been used. Scan a fresh code from your desktop, or sign in here.");
+  const [verified, setVerified] = useState(false);
 
   useEffect(() => {
     if (ran.current) return;
+    if (!isInstalledPwaDisplay() || window.location.pathname === "/auth/sync") {
+      ran.current = true;
+      setPhase("ready");
+      return;
+    }
+    // Let restoration finish first so its older null session cannot overwrite
+    // the new OTP session. The AuthProvider remains mounted above this gate.
+    if (loading) return;
     ran.current = true;
-    if (!isPwaStandaloneDisplay()) return;
-
     const token = readPendingAuthToken();
-    if (!token) return;
+    if (!token) { setPhase("ready"); return; }
+    setPhase("signing-in");
 
     (async () => {
       try {
-        const { data } = await supabase.auth.getSession();
-        if (data.session) {
+        const { data, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) throw sessionError;
+        if (data.session?.expires_at && data.session.expires_at * 1000 > Date.now()) {
           clearPendingAuthToken();
+          setVerified(true);
           return;
         }
         const res = await redeemMobileSyncToken({ data: { token } });
         if (!res.ok) {
           clearPendingAuthToken();
+          setPhase("failed");
           return;
         }
-        const { error } = await supabase.auth.verifyOtp({ token_hash: res.tokenHash, type: "magiclink" });
+        const { data: signedIn, error } = await supabase.auth.verifyOtp({ token_hash: res.tokenHash, type: "magiclink" });
         clearPendingAuthToken();
-        if (!error) navigate({ to: "/trade", replace: true });
+        if (error || !signedIn.session) { setPhase("failed"); return; }
+        setVerified(true);
       } catch {
-        clearPendingAuthToken();
+        // A network failure may precede consumption: retain the short-lived
+        // token for a reload, never turn a failed handshake into a login loop.
+        setFailure("We couldn't complete your sign-in. Check your connection and try again, or scan a fresh code from your desktop.");
+        setPhase("failed");
       }
     })();
-  }, [navigate]);
+  }, [loading]);
 
-  return null;
+  useEffect(() => {
+    if (!verified || loading || !user || !rolesLoaded) return;
+    let active = true;
+    void navigate({ to: "/trade", replace: true }).then(() => {
+      if (active) setPhase("ready");
+    }).catch(() => { if (active) setPhase("failed"); });
+    return () => { active = false; };
+  }, [verified, loading, user, rolesLoaded, navigate]);
+
+  if (phase === "ready") return children;
+  return (
+    <main className="min-h-[100dvh] bg-background text-foreground flex items-center justify-center px-6 py-12">
+      <div className="w-full max-w-sm text-center">
+        <p className="font-display text-xl uppercase mb-10">Maison Affluency</p>
+        {phase === "failed" ? (
+          <section role="alert" className="space-y-6">
+            <h1 className="font-display text-2xl">Please sign in again</h1>
+            <p className="font-body text-sm leading-relaxed text-muted-foreground">{failure}</p>
+            <Button onClick={() => { clearPendingAuthToken(); setPhase("ready"); void navigate({ to: "/trade/login", search: { next: "/trade" }, replace: true }); }}>
+              <LogIn aria-hidden="true" /> Sign in
+            </Button>
+          </section>
+        ) : (
+          <div role="status" aria-live="polite" className="space-y-5">
+            <Loader2 aria-hidden="true" className="mx-auto h-8 w-8 text-primary motion-safe:animate-spin" />
+            <p className="font-body text-sm text-muted-foreground">Opening your Trade Studio…</p>
+          </div>
+        )}
+      </div>
+    </main>
+  );
 }

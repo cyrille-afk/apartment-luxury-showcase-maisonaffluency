@@ -5,6 +5,7 @@
 - Approved-account activation resends reuse the branded review drawer with one fresh idempotency key per opened resend, retained on retries; never change approval to resend.
 - Felix advances before gallery load; greeting tracks tour state. Share regional tiers; eligibility stays EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Installed-app pending-token startup gates route/provider children beneath AuthProvider until restoration, one-time redemption, OTP verification and role hydration finish; actual standalone detection excludes preview URL hints, and Safari /auth/sync keeps its static bridge — prevents login flashes and competing handshakes without claiming shared iOS storage.
 - Confirmed involuntary auth loss sets AuthProvider.sessionExpired and unmounts the protected trade shell in favor of its sign-in notice; valid stored sessions still win the deferred SIGNED_OUT recheck, and intentional sign-outs never show expiry — prevents stale dashboard content and misleading logout notices.
 - Approved registration contact handoffs use profile/account/application triggers keyed only by stored user IDs, filling blank contact fields from linked records without replacing user edits or changing roles — Account Settings must read saved profile details, not rely on client-only prefills or email-based identity matching.
 - GlobalCanonical is the sole canonical-link owner; page metadata must not duplicate it and no observer may detach React-owned head nodes — React 19 suspension otherwise crashes navigation when removing an already-detached resource.
