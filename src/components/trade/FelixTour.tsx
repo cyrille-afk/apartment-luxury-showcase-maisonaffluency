@@ -261,6 +261,8 @@ const CLIENT_VIEW_PASSTHROUGH_STEPS = new Set(["client-view", "branding-panel", 
 const TOUR_ROUTE_CHUNKS = [
   () => import("@/pages/TradeDashboard"),
   () => import("@/pages/TradeShowroom"),
+  () => import("@/pages/ProductPageContainer"),
+  () => import("@/pages/TradeProductPage"),
   () => import("@/pages/TradeProjects"),
   () => import("@/pages/TradeQuotes"),
   () => import("@/pages/TradeTools"),
@@ -446,6 +448,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     let didScroll = false;
     let preparedAt = 0;
     let missingSince = 0;
+    let loadingSince = 0;
     let fallback = false;
     let watched: Element[] = [];
     let observedTarget: Element | null = null;
@@ -589,6 +592,18 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       if (!next || next.width < 1 || next.height < 1) {
         last = null;
         stableSince = 0;
+        // A pending route or Suspense/data skeleton is not a missing feature.
+        // Start the feature-discovery budget only after the page has rendered.
+        const pageLoading = !routeReady || Array.from(document.querySelectorAll('[data-trade-page-loading]'))
+          .some((el) => (el as HTMLElement).offsetParent !== null);
+        if (pageLoading) {
+          if (!loadingSince) loadingSince = now;
+          if (now - loadingSince < 30000) {
+            missingSince = 0;
+            frame = requestAnimationFrame(tick);
+            return;
+          }
+        } else loadingSince = 0;
         // Never invent a spotlight for a missing feature. Offer explicit
         // retry/skip while retaining discovery if the real control loads later.
         if (!missingSince) missingSince = now;
