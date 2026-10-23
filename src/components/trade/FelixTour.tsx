@@ -12,6 +12,7 @@ import { useTierVolumeLocale, type TierVolumeModel } from "@/hooks/useTierVolume
 import { useStudio } from "@/hooks/useStudio";
 import { onboardingProjectForMarket } from "@/lib/onboardingProject";
 import { Button } from "@/components/ui/button";
+import { useDesktopTradeTour } from "./useDesktopTradeTour";
 
 /** Format a tier discount fraction (0.15) as "15%". */
 const fmtPct = (fraction: number) => {
@@ -307,6 +308,11 @@ const sameRect = (a: Rect, b: Rect) =>
   Math.abs(a.width - b.width) < 0.5 && Math.abs(a.height - b.height) < 0.5;
 
 export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
+  const desktop = useDesktopTradeTour();
+  return desktop ? <DesktopFelixTour autoStart={autoStart} /> : null;
+}
+
+function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const guideName = useAIGuideName();
   const { clientSafe } = useClientSafeMode();
   const projectExampleByCurrency = {
