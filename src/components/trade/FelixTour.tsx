@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useDesktopTradeTour } from "./useDesktopTradeTour";
 import { fmtPct, resolveTierTokens } from "./felixTourUtils";
+import { placeTourCard, type TourRect } from "./felixTourPlacement";
 
 type FelixStep = {
   id: string;
@@ -345,7 +346,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     else delete document.documentElement.dataset.felixReducedMotion;
     return () => { delete document.documentElement.dataset.felixReducedMotion; };
   }, [open, reducedMotion]);
-  const [position, setPosition] = useState<{ step: number; path: string; rect: Rect; anchor: Rect | null } | null>(null);
+  const [position, setPosition] = useState<{ step: number; path: string; rect: Rect; anchor: Rect | null; obstacles: TourRect[] } | null>(null);
   const [viewport, setViewport] = useState({ w: 0, h: 0 });
   const [measuredCardHeight, setMeasuredCardHeight] = useState(0);
   const [settled, setSettled] = useState(false);
@@ -438,6 +439,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     let frame = 0;
     let last: Rect | null = null;
     let lastAnchor: Rect | null = null;
+    let lastObstacles = "";
     let stableSince = 0;
     let ready = false;
     let didEnter = false;
@@ -559,10 +561,19 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         width: Math.max(...boxes.map((r) => r.right)) - Math.min(...boxes.map((r) => r.left)),
         height: Math.max(...boxes.map((r) => r.bottom)) - Math.min(...boxes.map((r) => r.top)),
       } : null;
+      // Protect all visible page headings/tabs, not just this step's spotlight.
+      const protectedElements = Array.from(document.querySelectorAll('h1, h2, [role="tab"], [data-felix-target="collection-overview"]'))
+        .filter((el) => !el.closest('[data-felix-tour-card]') && (el as HTMLElement).offsetParent !== null);
+      const obstacles = [...boxes, ...anchorBoxes, ...protectedElements.map((el) => el.getBoundingClientRect())]
+        .filter((r) => r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < window.innerHeight && r.right > 0 && r.left < window.innerWidth)
+        .map((r) => ({ left: r.left, top: r.top, width: r.width, height: r.height }));
+      const obstacleKey = JSON.stringify(obstacles.map((r) => [r.left, r.top, r.width, r.height].map(Math.round)));
+      const obstaclesChanged = obstacleKey !== lastObstacles;
       const commit = (r: Rect) => {
         lastAnchor = anchor;
-        setPosition((previous) => previous?.step === currentStep && previous.path === location.pathname && sameRect(previous.rect, r) && !anchorChanged
-          ? previous : { step: currentStep, path: location.pathname, rect: r, anchor });
+        lastObstacles = obstacleKey;
+        setPosition((previous) => previous?.step === currentStep && previous.path === location.pathname && sameRect(previous.rect, r) && !anchorChanged && !obstaclesChanged
+          ? previous : { step: currentStep, path: location.pathname, rect: r, anchor, obstacles });
         setViewport((previous) => previous.w === window.innerWidth && previous.h === window.innerHeight
           ? previous : { w: window.innerWidth, h: window.innerHeight });
         fallback = r.width === 0 && r.height === 0 && !next;
@@ -598,7 +609,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         last = next; stableSince = now;
       } else if (ready) {
         // Already shown: redraw immediately on any movement so the box never lags.
-        if (!last || !sameRect(last, next) || anchorChanged) { last = next; commit(next); }
+        if (!last || !sameRect(last, next) || anchorChanged || obstaclesChanged) { last = next; commit(next); }
       } else if (["collection", "quotes", "margin-protection"].includes(current.id)) {
         // Client View may reflow in the same paint: commit the validated
         // client price immediately instead of waiting for the stability timer.
@@ -786,11 +797,8 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const sidebarAnchor = rect && !targetUnavailable ? position?.anchor : null;
   // Card placement: right of the target, else left, below, or above.
   const cardW = Math.max(0, Math.min(step.id === "welcome" ? 410 : 380, viewport.w - 48));
-  const collectionCardLimit = sidebarAnchor && rect && step.id === "quotes"
-    ? Math.max(80, viewport.h - (rect.top + rect.height + PAD + 8) - 16)
-    : null;
   // Step 1 carries the tier breakdown and needs a taller placement box.
-  const cardH = Math.min(measuredCardHeight || (step.id === "welcome" ? 545 : 380), collectionCardLimit ?? Math.max(0, viewport.h - 32));
+  const cardH = Math.min(measuredCardHeight || (step.id === "welcome" ? 545 : 380), Math.max(0, viewport.h - 32));
   const clampX = (x: number) => Math.min(Math.max(x, 24), Math.max(viewport.w - cardW - 24, 24));
   const clampY = (y: number) => Math.min(Math.max(y, 16), Math.max(viewport.h - cardH - 16, 16));
   let cardLeft = 0;
@@ -850,6 +858,12 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
   // Clamp every placement branch, leaving clearance for the arrow and shadow.
   cardLeft = clampX(cardLeft);
   cardTop = clampY(cardTop);
+  const placement = placeTourCard({
+    viewport, obstacles: position?.obstacles ?? [], width: cardW,
+    height: cardRef.current?.firstElementChild?.scrollHeight ? cardRef.current.firstElementChild.scrollHeight + 2 : cardH,
+    preferred: { left: cardLeft, top: cardTop },
+  });
+  if (placement) { cardLeft = placement.left; cardTop = placement.top; }
 
   const ring = rect && !targetUnavailable && !isPaused && (
     <div
@@ -891,7 +905,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         {rect && settled && !transitioning && targetUnavailable && <div className="absolute inset-0 bg-foreground/40" />}
       </div>}
       {ring}
-      {sidebarAnchor && step.id === "quotes" && settled && !transitioning && (
+      {sidebarAnchor && placement && settled && !transitioning && (
         <svg aria-hidden="true" className="pointer-events-none fixed inset-0 z-[140] h-full w-full fill-none stroke-accent" strokeWidth="1.5">
           <path d={`M ${sidebarAnchor.left + sidebarAnchor.width + 8} ${sidebarAnchor.top + sidebarAnchor.height / 2} H ${cardLeft - 12} V ${cardTop + 28} H ${cardLeft}`} />
           <path data-felix-sidebar-arrow d={`M ${sidebarAnchor.left + sidebarAnchor.width + 13} ${sidebarAnchor.top + sidebarAnchor.height / 2 - 5} l -5 5 l 5 5`} />
@@ -914,15 +928,9 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         className={cn(
           "fixed z-[140] isolate print:hidden rounded-2xl border border-border bg-card text-card-foreground shadow-2xl transition-transform duration-200 ease-out motion-reduce:transition-none outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2",
         )}
-        style={{ width: cardW, left: 0, top: 0, transform: `translate3d(${cardLeft}px, ${cardTop}px, 0)`, visibility: settled && !transitioning ? "visible" : "hidden", pointerEvents: settled && !transitioning ? "auto" : "none" }}
+        style={{ width: placement?.width ?? cardW, left: 0, top: 0, transform: `translate3d(${cardLeft}px, ${cardTop}px, 0)`, visibility: settled && !transitioning && placement ? "visible" : "hidden", pointerEvents: settled && !transitioning && placement ? "auto" : "none" }}
       >
-        {sidebarAnchor && step.id !== "quotes" && <span
-          data-felix-sidebar-arrow
-          aria-hidden="true"
-          className="pointer-events-none absolute -left-2 h-4 w-4 rotate-45 border-b border-l border-accent/50 bg-card"
-          style={{ top: Math.max(24, Math.min(cardH - 24, sidebarAnchor.top + sidebarAnchor.height / 2 - cardTop)) }}
-        />}
-        <div className="max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-2xl p-5" style={collectionCardLimit === null ? undefined : { maxHeight: collectionCardLimit - 2 }}>
+        <div className="max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-2xl p-5" style={{ maxHeight: placement ? placement.height - 2 : viewport.h - 34 }}>
           {/* Header */}
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
