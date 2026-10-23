@@ -1,7 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { requireCronOrAdmin } from "../_shared/auth.ts";
-import { getAdminWhatsAppRecipients, sendTradeRequestWhatsApp } from "../_shared/twilioWhatsAppSender.ts";
-import { alertCopy, pendingRecipients, ADMIN_EMAILS } from "./rules.ts";
+import { getAdminWhatsAppRecipients, sendAdminWhatsApp, getWhatsAppStatusCallback, getTemplateApprovalStatus } from "../_shared/twilioWhatsAppSender.ts";
+import { alertCopy, pendingRecipients, ADMIN_EMAILS, CUSTOMER_ACCOUNT_TEMPLATE_SID, isPublicAccountAlert } from "./rules.ts";
 
 const headers = { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" };
 Deno.serve(async (req) => {
@@ -25,19 +25,16 @@ Deno.serve(async (req) => {
     const emailDone = event.email_done ?? {};
     const waDone = event.whatsapp_done ?? {};
     try {
-      if (!["profiles", "trade_accounts", "trade_applications"].includes(event.source_table)) throw new Error("Invalid source");
-      const result = await db.from(event.source_table).select("*").eq("id", event.source_id).maybeSingle();
-      if (result.error || !result.data) throw new Error("Saved submission unavailable");
-      let row = result.data;
-      if (event.source_table === "profiles") {
-        const { data, error: authError } = await db.auth.admin.getUserById(event.source_id);
-        if (authError || !data.user) throw new Error("Saved account unavailable");
-        row = { ...row, ...data.user.user_metadata, email: data.user.email };
-      } else if (event.source_table === "trade_applications" && row.user_id) {
-        const { data: profile } = await db.from("profiles").select("email,first_name,last_name").eq("id", row.user_id).maybeSingle();
-        row = { ...profile, ...row };
+      const { data, error: authError } = await db.auth.admin.getUserById(event.source_id);
+      if (!isPublicAccountAlert(event.event_type, event.source_table, data.user?.user_metadata ?? {})) {
+        await db.from("registration_alert_events").update({ status: "cancelled", lease_until: null, last_error: "Not a public account signup" }).eq("id", event.id);
+        continue;
       }
-      const copy = alertCopy(event.event_type, row);
+      if (authError || !data.user) throw new Error("Saved account unavailable");
+      const result = await db.from("profiles").select("*").eq("id", event.source_id).maybeSingle();
+      if (result.error || !result.data) throw new Error("Saved submission unavailable");
+      const row = { ...result.data, ...data.user.user_metadata, email: data.user.email };
+      const copy = alertCopy(row);
       for (const recipient of pendingRecipients(ADMIN_EMAILS, emailDone)) {
         const res = await db.functions.invoke("send-transactional-email", { body: {
           templateName: "inquiry-notification", recipientEmail: recipient,
@@ -50,9 +47,10 @@ Deno.serve(async (req) => {
         if (saved.error) throw new Error("Could not save email acknowledgement");
       }
       const recipients = await getAdminWhatsAppRecipients();
+      const templateApproved = await getTemplateApprovalStatus(CUSTOMER_ACCOUNT_TEMPLATE_SID) === "approved";
       if (!recipients.length) errors.push("No WhatsApp recipients configured");
       for (const recipient of pendingRecipients(recipients, waDone)) {
-        const result = await sendTradeRequestWhatsApp({ body: copy.text, studio: event.event_type === "new_account" ? `Account registration — ${copy.studio}` : copy.studio, applicant: copy.name, email: copy.email, phone: copy.phone, recipients: [recipient] });
+        const result = await sendAdminWhatsApp({ body: copy.text, recipients: [recipient], statusCallback: getWhatsAppStatusCallback(), ...(templateApproved ? { contentSid: CUSTOMER_ACCOUNT_TEMPLATE_SID, contentVariables: { "1": copy.name, "2": copy.email } } : {}) });
         if (result.ok) waDone[recipient] = result.sid || true;
         else errors.push(result.error || "WhatsApp failed");
         const saved = await db.from("registration_alert_events").update({ whatsapp_done: waDone }).eq("id", event.id);
@@ -62,6 +60,7 @@ Deno.serve(async (req) => {
     } catch (e) { errors.push(e instanceof Error ? e.message : "Alert failed"); }
     await db.from("registration_alert_events").update({ email_done: emailDone, whatsapp_done: waDone, status: errors.length ? (event.attempts >= 5 ? "failed" : "pending") : "sent", lease_until: null, next_attempt_at: new Date(Date.now() + 60000).toISOString(), last_error: errors.join(" | ").slice(0, 2000) || null }).eq("id", event.id);
   }
-  // Stop the retry timer only after drain; never recursively dispatch here.
+  // Immediate event-driven dispatch only. Failed recipients retain their
+  // acknowledgement state for an explicit retry, without a polling timer.
   return Response.json({ processed: events?.length ?? 0 }, { headers });
 });
