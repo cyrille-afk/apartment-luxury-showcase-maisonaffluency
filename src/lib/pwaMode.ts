@@ -1,5 +1,12 @@
 const PWA_SESSION_KEY = "__ma_pwa_standalone_session";
 
+/** Actual installed container detection, without URL/preview hints. Call after hydration. */
+export function isInstalledPwaDisplay(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia?.("(display-mode: standalone)").matches === true ||
+    (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+}
+
 /**
  * Detects an installed/standalone app session, including iOS where the first
  * launch is marked by `?source=pwa` and later in-app route changes lose it.
@@ -10,9 +17,7 @@ export function isPwaStandaloneDisplay(): boolean {
   const params = new URLSearchParams(window.location.search);
   const explicitPwaLaunch = params.get("source") === "pwa";
   const compactViewport = window.matchMedia?.("(max-width: 767px)").matches ?? false;
-  const standaloneDisplay =
-    window.matchMedia?.("(display-mode: standalone)").matches ||
-    (window.navigator as { standalone?: boolean }).standalone === true;
+  const standaloneDisplay = isInstalledPwaDisplay();
 
   // Real installed PWAs must win regardless of viewport. The preview/mobile
   // simulator can also append ?source=pwa; only persist that hint on compact

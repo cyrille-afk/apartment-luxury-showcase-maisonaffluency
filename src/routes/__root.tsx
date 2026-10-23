@@ -204,6 +204,7 @@ function RootComponent() {
     <AppRecoveryBoundary>
       <HelmetProvider>
         <AuthProvider>
+          <PwaPendingAuthConsumer>
           <ClientCurrencyDetection />
           <RealtimeMultiplexerProvider>
             <StudioProvider>
@@ -218,7 +219,6 @@ function RootComponent() {
                       <RouteScrollLockFailsafe />
                       <ScrollToTopOnNavigate />
                       <PreviewViewContinuity />
-                      <PwaPendingAuthConsumer />
                       <TradeCopilotProvider>
                         <VisualiserMaterialProvider>
                           <ProjectInventoryProvider>
@@ -251,6 +251,7 @@ function RootComponent() {
               </CompareProvider>
             </StudioProvider>
           </RealtimeMultiplexerProvider>
+          </PwaPendingAuthConsumer>
         </AuthProvider>
       </HelmetProvider>
       <BuildUpdateBanner />
