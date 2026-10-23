@@ -7,7 +7,7 @@ import { takeLaunchToken } from "@/lib/pwaLaunchManifest";
 import { isInstalledPwaDisplay } from "@/lib/pwaMode";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Loader2, LogIn } from "lucide-react";
+import { Loader2, LogIn, RotateCw } from "lucide-react";
 
 /**
  * Runs once at app start inside the installed PWA. If the mobile browser
@@ -24,6 +24,7 @@ export function PwaPendingAuthConsumer({ children }: { children: ReactNode }) {
   const [phase, setPhase] = useState<"checking" | "signing-in" | "ready" | "fading" | "failed">("checking");
   const [failure, setFailure] = useState("This sign-in code has expired or already been used. Scan a fresh code from your desktop, or sign in here.");
   const [verified, setVerified] = useState(false);
+  const [retryable, setRetryable] = useState(false);
 
   useEffect(() => {
     if (ran.current) return;
@@ -44,35 +45,50 @@ export function PwaPendingAuthConsumer({ children }: { children: ReactNode }) {
     ran.current = true;
     const token = readPendingAuthToken();
     if (!token) { setIsPwaBooting(false); setPhase("ready"); return; }
-    setPhase("signing-in");
-
-    (async () => {
-      try {
-        const { data, error: sessionError } = await supabase.auth.getSession();
-        if (sessionError) throw sessionError;
-        if (data.session?.expires_at && data.session.expires_at * 1000 > Date.now()) {
-          clearPendingAuthToken();
-          setVerified(true);
-          return;
-        }
-        const res = await redeemMobileSyncToken({ data: { token } });
-        if (!res.ok) {
-          clearPendingAuthToken();
-          setPhase("fading");
-          return;
-        }
-        const { data: signedIn, error } = await supabase.auth.verifyOtp({ token_hash: res.tokenHash, type: "magiclink" });
-        clearPendingAuthToken();
-        if (error || !signedIn.session) { setPhase("fading"); return; }
-        setVerified(true);
-      } catch {
-        // A network failure may precede consumption: retain the short-lived
-        // token for a reload, never turn a failed handshake into a login loop.
-        setFailure("We couldn't complete your sign-in. Check your connection and try again, or scan a fresh code from your desktop.");
-        setPhase("fading");
-      }
-    })();
+    void runHandshake(token);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, setIsPwaBooting]);
+
+  async function runHandshake(token: string) {
+    setRetryable(false);
+    setPhase("signing-in");
+    try {
+      const { data, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+      if (data.session?.expires_at && data.session.expires_at * 1000 > Date.now()) {
+        clearPendingAuthToken();
+        setVerified(true);
+        return;
+      }
+      const res = await redeemMobileSyncToken({ data: { token } });
+      if (!res.ok) {
+        clearPendingAuthToken();
+        setPhase("fading");
+        return;
+      }
+      const { data: signedIn, error } = await supabase.auth.verifyOtp({ token_hash: res.tokenHash, type: "magiclink" });
+      clearPendingAuthToken();
+      if (error || !signedIn.session) { setPhase("fading"); return; }
+      setVerified(true);
+    } catch {
+      // A network failure may precede consumption: retain the short-lived
+      // token so the user can retry, never turn a failed handshake into a login loop.
+      setRetryable(readPendingAuthToken() !== null);
+      setFailure("We couldn't complete your sign-in. Check your connection and try again, or scan a fresh code from your desktop.");
+      setPhase("fading");
+    }
+  }
+
+  const retry = () => {
+    const token = readPendingAuthToken();
+    if (!token) {
+      setRetryable(false);
+      setFailure("This sign-in code has expired. Scan a fresh code from your desktop, or sign in here.");
+      return;
+    }
+    setIsPwaBooting(true);
+    void runHandshake(token);
+  };
 
   useEffect(() => {
     if (phase !== "fading") return;
@@ -99,9 +115,14 @@ export function PwaPendingAuthConsumer({ children }: { children: ReactNode }) {
         <p className="font-display text-xl uppercase mb-10">Maison Affluency</p>
         {phase === "failed" ? (
           <section role="alert" className="space-y-6">
-            <h1 className="font-display text-2xl">Please sign in again</h1>
+            <h1 className="font-display text-2xl">{retryable ? "Connection interrupted" : "Please sign in again"}</h1>
             <p className="font-body text-sm leading-relaxed text-muted-foreground">{failure}</p>
-            <Button onClick={() => { clearPendingAuthToken(); setPhase("ready"); void navigate({ to: "/trade/login", search: { next: "/trade" }, replace: true }); }}>
+            {retryable && (
+              <Button onClick={retry} className="w-full">
+                <RotateCw aria-hidden="true" /> Try again
+              </Button>
+            )}
+            <Button variant={retryable ? "outline" : "default"} onClick={() => { clearPendingAuthToken(); setPhase("ready"); void navigate({ to: "/trade/login", search: { next: "/trade" }, replace: true }); }}>
               <LogIn aria-hidden="true" /> Sign in
             </Button>
           </section>
