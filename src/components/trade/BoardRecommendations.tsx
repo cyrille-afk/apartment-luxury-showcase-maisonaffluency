@@ -102,6 +102,10 @@ export function BoardRecommendations() {
   const generateRecommendations = async (ids: string[]) => {
     setRefreshing(true);
     try {
+      // Never fire the call without a live session: a stale/expired sign-in
+      // only produces a 401 noise failure, and the strip should stay hidden.
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) return;
       const { data, error } = await invokeWithAuthRetry("board-recommendations", { product_ids: ids, source: "mood_board" });
       if (error) {
         console.warn("Recommendations unavailable:", error.message);

@@ -36,6 +36,9 @@ export default class AppRecoveryBoundary extends Component<Props, State> {
   }
 
   private onUnhandledRejection = (event: PromiseRejectionEvent) => {
+    // clientBoot's handler already swallowed this rejection (defaultPrevented):
+    // it is a handled background failure, not a crash — never blank the page for it.
+    if (event.defaultPrevented) return;
     if (!isEdgeFailure(event.reason) || this.state.failed) return;
     // A background request must not replace a healthy page. Wait for React to
     // settle, then recover only when nothing has rendered inside the app root.
