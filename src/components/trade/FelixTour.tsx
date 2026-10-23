@@ -8,30 +8,13 @@ import { cn } from "@/lib/utils";
 import { useAIGuideName } from "@/hooks/useAIGuideName";
 import { useTierConfig, type TradeTier, type TierConfigRow } from "@/hooks/useTradeDiscount";
 import { setClientSafeMode, useClientSafeMode } from "@/lib/clientSafeMode";
-import { useTierVolumeLocale, type TierVolumeModel } from "@/hooks/useTierVolumeLocale";
+import { useTierVolumeLocale } from "@/hooks/useTierVolumeLocale";
 import { useStudio } from "@/hooks/useStudio";
 import { onboardingProjectForMarket } from "@/lib/onboardingProject";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useDesktopTradeTour } from "./useDesktopTradeTour";
-
-/** Format a tier discount fraction (0.15) as "15%". */
-const fmtPct = (fraction: number) => {
-  const pct = fraction * 100;
-  return `${pct % 1 === 0 ? pct.toFixed(0) : pct.toFixed(1)}%`;
-};
-
-/**
- * Discounts follow live tier configuration; volume thresholds use the same
- * fixed regional presentation model as the Step 1 table and Step 5 tracker.
- */
-export const resolveTierTokens = (text: string, cfg: Record<TradeTier, TierConfigRow>, volume: TierVolumeModel) =>
-  text
-    .replace(/\{silverPct\}/g, fmtPct(cfg.silver.discount_pct))
-    .replace(/\{goldPct\}/g, fmtPct(cfg.gold.discount_pct))
-    .replace(/\{platinumPct\}/g, fmtPct(cfg.platinum.discount_pct))
-    .replace(/\{goldVolume\}/g, volume.format(volume.amount(cfg.gold.min_spend_cents)))
-    .replace(/\{platinumVolume\}/g, volume.format(volume.amount(cfg.platinum.min_spend_cents)));
+import { fmtPct, resolveTierTokens } from "./felixTourUtils";
 
 type FelixStep = {
   id: string;
@@ -802,10 +785,10 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const rect = position?.step === currentStep && position.path === location.pathname ? position.rect : null;
   const sidebarAnchor = rect && !targetUnavailable ? position?.anchor : null;
   // Card placement: right of the target, else left, below, or above.
-  const cardW = Math.min(step.id === "welcome" ? 410 : 380, viewport.w - 32);
+  const cardW = Math.max(0, Math.min(step.id === "welcome" ? 410 : 380, viewport.w - 48));
   // Step 1 carries the tier breakdown and needs a taller placement box.
-  const cardH = measuredCardHeight || (step.id === "welcome" ? 545 : 380);
-  const clampX = (x: number) => Math.min(Math.max(x, 16), Math.max(viewport.w - cardW - 16, 16));
+  const cardH = Math.min(measuredCardHeight || (step.id === "welcome" ? 545 : 380), Math.max(0, viewport.h - 32));
+  const clampX = (x: number) => Math.min(Math.max(x, 24), Math.max(viewport.w - cardW - 24, 24));
   const clampY = (y: number) => Math.min(Math.max(y, 16), Math.max(viewport.h - cardH - 16, 16));
   let cardLeft = 0;
   let cardTop = 0;
@@ -855,6 +838,10 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       cardTop = clampY(rect.top - cardH - PAD - 8);
     }
   }
+
+  // Clamp every placement branch, leaving clearance for the arrow and shadow.
+  cardLeft = clampX(cardLeft);
+  cardTop = clampY(cardTop);
 
   const ring = rect && !targetUnavailable && !isPaused && (
     <div
@@ -911,19 +898,17 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         tabIndex={-1}
         aria-label={`${guideName} — Your Curatorial Guide, step ${currentStep + 1} of ${FELIX_STEPS.length}: ${step.title}`}
         className={cn(
-          "fixed z-[132] print:hidden rounded-2xl border border-border bg-background text-foreground shadow-2xl transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2",
-          sidebarAnchor && "z-[133]",
-          isPaused && "opacity-90",
+          "fixed z-[140] isolate print:hidden rounded-2xl border border-border bg-card text-card-foreground shadow-2xl transition-transform duration-200 ease-out motion-reduce:transition-none outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2",
         )}
-        style={{ width: cardW, left: 0, top: 0, transform: `translate3d(${cardLeft}px, ${cardTop}px, 0)`, opacity: settled && !transitioning ? 1 : 0, pointerEvents: settled && !transitioning ? "auto" : "none" }}
+        style={{ width: cardW, left: 0, top: 0, transform: `translate3d(${cardLeft}px, ${cardTop}px, 0)`, visibility: settled && !transitioning ? "visible" : "hidden", pointerEvents: settled && !transitioning ? "auto" : "none" }}
       >
         {sidebarAnchor && <span
           data-felix-sidebar-arrow
           aria-hidden="true"
-          className="pointer-events-none absolute -left-2 h-4 w-4 rotate-45 border-b border-l border-accent/50 bg-background"
+          className="pointer-events-none absolute -left-2 h-4 w-4 rotate-45 border-b border-l border-accent/50 bg-card"
           style={{ top: Math.max(24, Math.min(cardH - 24, sidebarAnchor.top + sidebarAnchor.height / 2 - cardTop)) }}
         />}
-        <div className="p-5">
+        <div className="max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-2xl p-5">
           {/* Header */}
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
@@ -1160,10 +1145,6 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         </div>
       </div>}
     </>,
-    step.sidebarAnchor ? document.getElementById("root") ?? document.body : document.body,
+    document.getElementById("root") ?? document.body,
   );
 }
-
-export const startFelixTour = () => {
-  window.dispatchEvent(new Event("felix-tour:start"));
-};

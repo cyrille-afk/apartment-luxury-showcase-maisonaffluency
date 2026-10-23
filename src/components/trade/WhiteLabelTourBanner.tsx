@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Sparkles, X } from "lucide-react";
-import { startFelixTour } from "@/components/trade/FelixTour";
+import { startFelixTour } from "@/components/trade/felixTourUtils";
 import { useAIGuideName } from "@/hooks/useAIGuideName";
 
 const TOUR_SEEN_KEY = "felix_dashboard_tour_seen_v1";
