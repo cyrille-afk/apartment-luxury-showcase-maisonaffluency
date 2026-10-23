@@ -1252,7 +1252,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                         aria-hidden="true"
                         className={cn(
                           "pointer-events-none absolute right-0 top-0 -translate-y-1/2 translate-x-[38%] whitespace-nowrap rounded-full border px-1.5 py-[2px] font-body text-[9px] font-medium uppercase leading-none tracking-[0.15em] transition-all duration-300",
-                          "border-[hsl(var(--gold))]/25 bg-[hsl(var(--gold))]/10 text-[hsl(var(--gold))] opacity-75",
+                          "border-[hsl(var(--gold))]/30 bg-[hsl(var(--gold))]/15 text-[hsl(var(--gold))] opacity-90",
                           "group-hover/trade:border-[hsl(var(--gold))]/50 group-hover/trade:bg-[hsl(var(--gold))]/20 group-hover/trade:opacity-100",
                           tradeMenuOpen && "border-[hsl(var(--gold))]/50 bg-[hsl(var(--gold))]/20 opacity-100"
                         )}
