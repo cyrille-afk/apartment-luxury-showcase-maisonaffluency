@@ -37,9 +37,10 @@ describe("per-install launch handoff", () => {
     expect(saved.expiresAt - Date.now()).toBeGreaterThan(119000);
     expect(saved.expiresAt - Date.now()).toBeLessThanOrEqual(120000);
   });
-  it("does not intercept unrelated browser links", () => {
+  it("captures direct installed sync links through the same startup owner", () => {
     window.history.replaceState({}, "", `/auth/sync?token=${token}`);
-    expect(takeLaunchToken()).toBeNull();
+    expect(takeLaunchToken()).toBe(token);
     expect(window.location.pathname).toBe("/auth/sync");
+    expect(window.location.search).toBe("");
   });
 });

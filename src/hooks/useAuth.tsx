@@ -6,6 +6,8 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   sessionExpired: boolean;
+  isPwaBooting: boolean;
+  setIsPwaBooting: (booting: boolean) => void;
   isTradeUser: boolean;
   isAdmin: boolean;
   isSuperAdmin: boolean;
@@ -38,6 +40,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [sessionExpired, setSessionExpired] = useState(false);
+  const [isPwaBooting, setPwaBooting] = useState(false);
+  const pwaBootingRef = useRef(false);
+  const setIsPwaBooting = useCallback((booting: boolean) => {
+    pwaBootingRef.current = booting;
+    setPwaBooting(booting);
+  }, []);
   const [isTradeUser, setIsTradeUser] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
@@ -247,7 +255,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // to /trade/me?restricted=1.
         await fetchUserData(resolved.user.id, sbClient);
         const oauthReturnPath = sessionStorage.getItem("maison:oauth-return-path");
-        if (oauthReturnPath && oauthReturnPath.startsWith("/") && !oauthReturnPath.startsWith("//") && !oauthReturnPath.startsWith("/trade/login")) {
+        if (!pwaBootingRef.current && oauthReturnPath && oauthReturnPath.startsWith("/") && !oauthReturnPath.startsWith("//") && !oauthReturnPath.startsWith("/trade/login")) {
           sessionStorage.removeItem("maison:oauth-return-path");
           const p = window.location.pathname;
           // Only redirect from the landing/sign-in screens — never yank a
@@ -268,6 +276,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     //    already handled it.
     const { data: { subscription } } = sbClient.auth.onAuthStateChange((event: string, sess: Session | null) => {
       if (event === "INITIAL_SESSION") return; // already handled above
+      if (pwaBootingRef.current && event === "SIGNED_OUT" && !sess) {
+        // Restoration can expire an old session during the one-time handshake.
+        // The startup owner decides the outcome; never redirect it to login.
+        setLoading(false);
+        return;
+      }
 
       if (!sess && event !== "SIGNED_OUT") {
         console.warn("Ignoring transient empty auth session event; keeping current auth state.", event);
@@ -313,7 +327,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             // destination the sign-in page asked for.
             try {
               const returnPath = sessionStorage.getItem("maison:oauth-return-path");
-              if (returnPath && returnPath.startsWith("/") && !returnPath.startsWith("//") && !returnPath.startsWith("/trade/login")) {
+              if (!pwaBootingRef.current && returnPath && returnPath.startsWith("/") && !returnPath.startsWith("//") && !returnPath.startsWith("/trade/login")) {
                 sessionStorage.removeItem("maison:oauth-return-path");
                 const p = window.location.pathname;
                 const alreadyInPortal = p.startsWith("/trade") && !p.startsWith("/trade/login");
@@ -336,6 +350,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const explicit = explicitSignOutRef.current;
         explicitSignOutRef.current = false;
         const finishSignOut = () => {
+          if (pwaBootingRef.current) { setLoading(false); return; }
           const expired = !explicit && userIdRef.current !== null;
           setSessionExpired(expired);
           userIdRef.current = null;
@@ -396,7 +411,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [user, sbClient, fetchUserData]);
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, sessionExpired, isTradeUser, isAdmin, isSuperAdmin, rolesLoaded, profile, tradeStatus, applicationStatus, signOut, refreshRoles }}>
+    <AuthContext.Provider value={{ user, session, loading, sessionExpired, isPwaBooting, setIsPwaBooting, isTradeUser, isAdmin, isSuperAdmin, rolesLoaded, profile, tradeStatus, applicationStatus, signOut, refreshRoles }}>
       {children}
     </AuthContext.Provider>
   );
