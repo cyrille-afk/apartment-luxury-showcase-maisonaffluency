@@ -1,0 +1,70 @@
+import { test, expect } from "@playwright/test";
+
+const session = process.env.LOVABLE_BROWSER_SUPABASE_SESSION_JSON;
+const storageKey = process.env.LOVABLE_BROWSER_SUPABASE_STORAGE_KEY;
+test.use({ viewport: { width: 1946, height: 1181 }, trace: "off", video: "off" });
+
+test("margin and project steps anchor to sidebar and clean up on pause, close and skip", async ({ page }) => {
+  test.skip(!session || !storageKey, "Requires a managed Trade session.");
+  if (!session || !storageKey) return;
+  test.setTimeout(120000);
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/");
+  await page.evaluate(([key, value]) => {
+    localStorage.setItem(key, value);
+    localStorage.removeItem("felix_dashboard_tour_seen_v1");
+    localStorage.setItem("felix_tour_progress_v1", "2");
+    localStorage.setItem("trade_quick_tour_done", "1");
+    localStorage.removeItem("trade_quick_tour_step");
+  }, [storageKey, session]);
+  await page.goto("/trade");
+  const margin = page.getByRole("dialog").filter({ hasText: "Transparent Project Margins" });
+  await expect(margin).toHaveCSS("opacity", "1", { timeout: 60000 });
+  const collection = page.locator('[data-tour-sidebar-anchor="collection"]');
+  const projects = page.locator('[data-tour-sidebar-anchor="projects"]');
+  const animated = (selector: string) => page.locator(selector).evaluateAll(nodes => nodes.map(node => getComputedStyle(node, "::after").animationName));
+  const verifyAnchor = async (card: typeof margin, anchors: typeof collection) => {
+    const boxes = await anchors.evaluateAll(nodes => nodes.map(node => {
+      const r = node.getBoundingClientRect(); return { x: r.x, y: r.y, right: r.right, bottom: r.bottom };
+    }));
+    const box = await card.boundingBox();
+    const arrow = await card.locator("[data-felix-sidebar-arrow]").boundingBox();
+    expect(box).not.toBeNull(); expect(arrow).not.toBeNull();
+    if (!box || !arrow) return;
+    expect(box.x - Math.max(...boxes.map(b => b.right))).toBeGreaterThanOrEqual(16);
+    expect(box.x - Math.max(...boxes.map(b => b.right))).toBeLessThanOrEqual(32);
+    expect(arrow.y).toBeGreaterThanOrEqual(Math.min(...boxes.map(b => b.y)) - 12);
+    expect(arrow.y).toBeLessThanOrEqual(Math.max(...boxes.map(b => b.bottom)));
+  };
+  expect(await animated('[data-tour-sidebar-anchor="collection"]')).toEqual(["sidebar-tour-pulse"]);
+  expect(await animated('[data-tour-sidebar-anchor="projects"]')).toEqual(["none", "none"]);
+  await verifyAnchor(margin, collection);
+  await margin.screenshot({ path: "/tmp/browser/felix-sidebar-margin.png" });
+  await margin.getByRole("button", { name: "Next", exact: true }).click();
+  const folders = page.getByRole("dialog").filter({ hasText: "Client Project Folders" });
+  await expect(folders).toHaveCSS("opacity", "1");
+  expect(await animated('[data-tour-sidebar-anchor="collection"]')).toEqual(["none"]);
+  expect(await animated('[data-tour-sidebar-anchor="projects"]')).toEqual(["sidebar-tour-pulse", "sidebar-tour-pulse"]);
+  await verifyAnchor(folders, projects);
+  await folders.getByRole("button", { name: "Pause", exact: true }).click();
+  await expect(page.locator("html[data-felix-tour-step]")).toHaveCount(0);
+  expect(await animated('[data-tour-sidebar-anchor="projects"]')).toEqual(["none", "none"]);
+  await page.getByRole("button", { name: /Resume .* tour/ }).click();
+  await expect(folders).toHaveCSS("opacity", "1");
+  await folders.getByRole("button", { name: "Back", exact: true }).click();
+  await expect(margin).toHaveCSS("opacity", "1");
+  await verifyAnchor(margin, collection);
+  await margin.getByRole("button", { name: "Close tour" }).click();
+  await expect(page.locator("html[data-felix-tour-step]")).toHaveCount(0);
+  expect(await animated('[data-tour-sidebar-anchor="collection"]')).toEqual(["none"]);
+  await page.evaluate(() => localStorage.removeItem("felix_dashboard_tour_seen_v1"));
+  await page.reload();
+  await expect(margin).toHaveCSS("opacity", "1", { timeout: 60000 });
+  await margin.getByRole("button", { name: "Next", exact: true }).click();
+  await expect(folders).toHaveCSS("opacity", "1");
+  await folders.getByRole("button", { name: "Skip tour", exact: true }).click();
+  await expect(page.locator("html[data-felix-tour-step]")).toHaveCount(0);
+  expect(await animated('[data-tour-sidebar-anchor="projects"]')).toEqual(["none", "none"]);
+  expect(errors).toEqual([]);
+});
