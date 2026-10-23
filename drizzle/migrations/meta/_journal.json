@@ -1555,6 +1555,13 @@
       "when": 1792716796481,
       "tag": "0221_sync_trade_registration_contact_to_profiles",
       "breakpoints": true
+    },
+    {
+      "idx": 222,
+      "version": "7",
+      "when": 1792717425326,
+      "tag": "0222_mobile_sync_tokens",
+      "breakpoints": true
     }
   ]
 }

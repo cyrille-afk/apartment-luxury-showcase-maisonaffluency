@@ -62,6 +62,7 @@ import { Route as AdminPrivacyRequestsRouteImport } from './routes/admin_.privac
 import { Route as AdminQueueRouteImport } from './routes/admin_.queue'
 import { Route as AdminTradeApplicationsRouteImport } from './routes/admin_.trade-applications'
 import { Route as AdminTradeReviewRouteImport } from './routes/admin_.trade-review'
+import { Route as AuthSyncRouteImport } from './routes/auth.sync'
 import { Route as BoardTokenRouteImport } from './routes/board_.$token'
 import { Route as CartIdentifyRouteImport } from './routes/cart_.identify'
 import { Route as CatalogSplatRouteImport } from './routes/catalog_.$'
@@ -522,6 +523,11 @@ const AdminTradeApplicationsRoute = AdminTradeApplicationsRouteImport.update({
 const AdminTradeReviewRoute = AdminTradeReviewRouteImport.update({
   id: '/admin_/trade-review',
   path: '/admin/trade-review',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthSyncRoute = AuthSyncRouteImport.update({
+  id: '/auth/sync',
+  path: '/auth/sync',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BoardTokenRoute = BoardTokenRouteImport.update({
@@ -1596,6 +1602,7 @@ export interface FileRoutesByFullPath {
   '/admin/queue': typeof AdminQueueRoute
   '/admin/trade-applications': typeof AdminTradeApplicationsRoute
   '/admin/trade-review': typeof AdminTradeReviewRoute
+  '/auth/sync': typeof AuthSyncRoute
   '/board/$token': typeof BoardTokenRoute
   '/cart/identify': typeof CartIdentifyRoute
   '/catalog/$': typeof CatalogSplatRoute
@@ -1846,6 +1853,7 @@ export interface FileRoutesByTo {
   '/admin/queue': typeof AdminQueueRoute
   '/admin/trade-applications': typeof AdminTradeApplicationsRoute
   '/admin/trade-review': typeof AdminTradeReviewRoute
+  '/auth/sync': typeof AuthSyncRoute
   '/board/$token': typeof BoardTokenRoute
   '/cart/identify': typeof CartIdentifyRoute
   '/catalog/$': typeof CatalogSplatRoute
@@ -2098,6 +2106,7 @@ export interface FileRoutesById {
   '/admin_/queue': typeof AdminQueueRoute
   '/admin_/trade-applications': typeof AdminTradeApplicationsRoute
   '/admin_/trade-review': typeof AdminTradeReviewRoute
+  '/auth/sync': typeof AuthSyncRoute
   '/board_/$token': typeof BoardTokenRoute
   '/cart_/identify': typeof CartIdentifyRoute
   '/catalog_/$': typeof CatalogSplatRoute
@@ -2351,6 +2360,7 @@ export interface FileRouteTypes {
     | '/admin/queue'
     | '/admin/trade-applications'
     | '/admin/trade-review'
+    | '/auth/sync'
     | '/board/$token'
     | '/cart/identify'
     | '/catalog/$'
@@ -2601,6 +2611,7 @@ export interface FileRouteTypes {
     | '/admin/queue'
     | '/admin/trade-applications'
     | '/admin/trade-review'
+    | '/auth/sync'
     | '/board/$token'
     | '/cart/identify'
     | '/catalog/$'
@@ -2852,6 +2863,7 @@ export interface FileRouteTypes {
     | '/admin_/queue'
     | '/admin_/trade-applications'
     | '/admin_/trade-review'
+    | '/auth/sync'
     | '/board_/$token'
     | '/cart_/identify'
     | '/catalog_/$'
@@ -3104,6 +3116,7 @@ export interface RootRouteChildren {
   AdminQueueRoute: typeof AdminQueueRoute
   AdminTradeApplicationsRoute: typeof AdminTradeApplicationsRoute
   AdminTradeReviewRoute: typeof AdminTradeReviewRoute
+  AuthSyncRoute: typeof AuthSyncRoute
   BoardTokenRoute: typeof BoardTokenRoute
   CartIdentifyRoute: typeof CartIdentifyRoute
   CatalogSplatRoute: typeof CatalogSplatRoute
@@ -3524,6 +3537,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/trade-review'
       fullPath: '/admin/trade-review'
       preLoaderRoute: typeof AdminTradeReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/sync': {
+      id: '/auth/sync'
+      path: '/auth/sync'
+      fullPath: '/auth/sync'
+      preLoaderRoute: typeof AuthSyncRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/board_/$token': {
@@ -5272,6 +5292,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminQueueRoute: AdminQueueRoute,
   AdminTradeApplicationsRoute: AdminTradeApplicationsRoute,
   AdminTradeReviewRoute: AdminTradeReviewRoute,
+  AuthSyncRoute: AuthSyncRoute,
   BoardTokenRoute: BoardTokenRoute,
   CartIdentifyRoute: CartIdentifyRoute,
   CatalogSplatRoute: CatalogSplatRoute,

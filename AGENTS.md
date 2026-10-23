@@ -103,3 +103,4 @@
 - gallery_hotspots RLS: blocked names via `_hotspot_blocked_designer_names()` once per query (per-row scans were slow).
 - Designer link previews are guarded by `scripts/verify-designer-og.ts` in `.github/workflows/designer-og-check.yml` (push, PR, nightly) — keep the script and toOgImage in sync when changing designer head tags.
 - Browser start-up: `src/client.tsx` is a tiny entry that dynamically imports `src/app/hydrateClient.tsx` (after first paint on "/"), and the site stylesheet is linked from `RootShell` (non-blocking on "/" with #root hidden until it loads) — keeps the homepage's first paint off the start-up JS/CSS so the mobile Lighthouse gate passes.
+- Desktop→phone QR sign-in uses one-time 2-minute tokens (hashed in mobile_sync_tokens, service-role only) via src/lib/mobileSync.functions.ts and /auth/sync — the QR never carries a reusable session or long-lived magic link.
