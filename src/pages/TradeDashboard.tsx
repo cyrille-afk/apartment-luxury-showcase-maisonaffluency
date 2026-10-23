@@ -383,6 +383,53 @@ const TradeDashboard = () => {
     <>
       <Helmet><title>Dashboard — Trade Portal — Maison Affluency</title></Helmet>
     <div className="trade-dashboard w-full max-w-[1500px] mx-auto">
+      {needsRecovery && (
+        <div role="alert" className="mb-6 rounded-md border border-accent/40 bg-accent/10 px-5 py-4">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="min-w-0 max-w-xl">
+              <p className="font-body text-sm font-semibold text-foreground">
+                {sessionExpired ? "Your session has expired" : "We couldn't load your trade settings"}
+              </p>
+              <p className="mt-1 font-body text-sm text-muted-foreground">
+                {sessionExpired
+                  ? "For your security, signed-in sessions end after a period of inactivity. Sign in again to restore your trade pricing, tier and projects."
+                  : "This is usually a brief connection hiccup. Try again — if it persists, refresh the page or sign in again. Your account, tier and projects are safe."}
+              </p>
+            </div>
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
+              {!sessionExpired && (
+                <Button
+                  type="button"
+                  variant="default"
+                  size="sm"
+                  disabled={retryingRecovery}
+                  onClick={async () => {
+                    setRetryingRecovery(true);
+                    try { await refreshRoles(); } finally { setRetryingRecovery(false); }
+                  }}
+                >
+                  {retryingRecovery ? "Retrying…" : "Try again"}
+                </Button>
+              )}
+              <Button type="button" variant="outline" size="sm" onClick={() => window.location.reload()}>
+                Refresh page
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  await signOut();
+                  const next = `${window.location.pathname}${window.location.search}`;
+                  window.location.href = `/trade/login?next=${encodeURIComponent(next)}`;
+                }}
+              >
+                Sign in again
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       <NewInquiriesAlert />
       {desktopTour && <WhiteLabelTourBanner />}
       <div className="mb-6 md:mb-14 lg:mb-16 border-b border-border pb-6 md:pb-9">
