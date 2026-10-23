@@ -599,7 +599,7 @@ const TradeLayout = () => {
                 </div>
               )}
               <Suspense fallback={
-                <div className="flex items-center justify-center py-20">
+                <div data-trade-page-loading role="status" aria-label="Loading workspace" className="flex items-center justify-center py-20">
                   <DotCircleLoader size="sm" className="text-muted-foreground" />
                 </div>
               }>
