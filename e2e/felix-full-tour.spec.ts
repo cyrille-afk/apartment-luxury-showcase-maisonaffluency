@@ -22,6 +22,7 @@ test("Full Felix tour runs start to finish with correct highlights", async ({ pa
     localStorage.removeItem("trade_quick_tour_step");
   }, [storageKey, session]);
   await page.goto("/trade");
+  await page.waitForTimeout(6000);
   await page.getByRole("button", { name: /meet felix/i }).click();
   const timings: string[] = [];
   for (let i = 1; i <= 23; i++) {
