@@ -85,7 +85,7 @@ export default function PublicDesignerBiography() {
             {name}
           </h1>
           <p className="mt-1 font-body text-[10px] md:text-[11px] uppercase tracking-[0.32em] text-foreground/60">
-            {designer.specialty || "The Full Portrait"}
+            The Full Portrait
           </p>
         </header>
 

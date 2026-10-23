@@ -20,7 +20,6 @@ interface DirectoryDesigner {
   name: string;
   slug: string;
   image_url: string | null;
-  specialty: string | null;
   productImageUrl: string | null;
 }
 
@@ -52,7 +51,7 @@ const ShowroomDesignerDirectory = ({
       const [withPicks, allPublished] = await Promise.all([
         supabase
           .from("designers")
-          .select("id, name, slug, image_url, specialty, founder, designer_curator_picks!inner(id, image_url)")
+          .select("id, name, slug, image_url, founder, designer_curator_picks!inner(id, image_url)")
           .eq("is_published", true)
           .not("slug", "is", null)
           .range(0, 9999),
@@ -60,7 +59,7 @@ const ShowroomDesignerDirectory = ({
         // whose `founder` names the house — include them too.
         supabase
           .from("designers")
-          .select("id, name, slug, image_url, specialty")
+          .select("id, name, slug, image_url")
           .eq("is_published", true)
           .not("slug", "is", null)
           .range(0, 9999),
@@ -83,7 +82,6 @@ const ShowroomDesignerDirectory = ({
           name: d.name,
           slug: d.slug,
           image_url: d.image_url,
-          specialty: d.specialty,
           productImageUrl: d.slug === "gilles-boissier"
             ? "https://res.cloudinary.com/dif1oamtj/image/upload/v1792116642/Screen_Shot_2026-10-16_at_10.09.56_AM_db4xmh.png"
             : productImage,
@@ -98,7 +96,6 @@ const ShowroomDesignerDirectory = ({
           name: d.name,
           slug: d.slug,
           image_url: d.image_url,
-          specialty: d.specialty,
           productImageUrl: img,
         });
       });
@@ -203,9 +200,6 @@ const ShowroomDesignerDirectory = ({
               <h3 className="font-display text-lg font-light mt-4 leading-snug text-foreground line-clamp-1">
                 {displayDesignerName(d.name)}
               </h3>
-              <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70 mt-1.5 line-clamp-1 min-h-[15px]">
-                {d.specialty || " "}
-              </p>
             </button>
           ))}
         </div>
