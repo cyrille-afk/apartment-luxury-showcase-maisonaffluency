@@ -251,8 +251,8 @@ export function TradeSidebar() {
                         return (
                           <span className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1">
                             <span>{label.slice(0, open)}</span>
-                            <span className="felix-mark inline-flex items-center gap-1 font-serif text-[10px] font-medium uppercase leading-none tracking-[0.12em]">
-                              <span aria-hidden className="felix-mark-dot h-[3px] w-[3px] shrink-0 bg-current opacity-80" />
+                            <span className="felix-mark inline-flex items-center gap-1.5 font-serif text-[11px] font-semibold uppercase leading-none tracking-[0.1em]">
+                              <span aria-hidden className="felix-mark-dot h-1 w-1 shrink-0" />
                               {label.slice(open + 2).replace(/\)$/, "")}
                             </span>
                           </span>
