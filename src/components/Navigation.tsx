@@ -30,6 +30,16 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { categoryUrl } from "@/lib/categorySlugs";
@@ -396,6 +406,21 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
     await signOut();
     navigate("/trade/login", { replace: true });
   };
+  // The mobile Trade Dashboard sheet closes before the confirmation opens, so
+  // its exit animation and return-focus never fight the dialog's focus trap.
+  const [signOutConfirmOpen, setSignOutConfirmOpen] = useState(false);
+  const signOutConfirmTimer = useRef<number | null>(null);
+  const requestTradeSignOut = () => {
+    closeMobileMenu();
+    if (signOutConfirmTimer.current) window.clearTimeout(signOutConfirmTimer.current);
+    signOutConfirmTimer.current = window.setTimeout(() => setSignOutConfirmOpen(true), 320);
+  };
+  useEffect(
+    () => () => {
+      if (signOutConfirmTimer.current) window.clearTimeout(signOutConfirmTimer.current);
+    },
+    [],
+  );
   const visibleLeftNavItems = leftNavItems;
   const { items: pinItems, setIsComparing } = useCompare();
   const [authGateOpen, setAuthGateOpen] = useState(false);
@@ -1080,7 +1105,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                         My Quotes
                       </button>
                       <button
-                        onClick={() => { closeMobileMenu(); void handleTradeSignOut(); }}
+                        onClick={requestTradeSignOut}
                         className="flex min-h-[48px] items-center gap-3 text-left font-body text-[15px] text-destructive transition-colors"
                       >
                         <LogOut className="h-4 w-4 shrink-0" />
@@ -1521,6 +1546,30 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
         <AuthGateDialog open={authGateOpen} onClose={() => setAuthGateOpen(false)} action="access your account" initialMode={authGateMode} />
       </React.Suspense>
     )}
+    <AlertDialog open={signOutConfirmOpen} onOpenChange={setSignOutConfirmOpen}>
+      <AlertDialogContent className="max-w-[420px] rounded-none border-border/60 bg-background px-6 py-7 sm:rounded-none">
+        <span aria-hidden="true" className="absolute left-0 top-0 h-full w-px bg-[hsl(var(--gold))]/50" />
+        <AlertDialogHeader className="space-y-2.5 text-left">
+          <AlertDialogTitle className="font-brand text-lg font-normal tracking-[0.06em] text-foreground">
+            Sign out of your studio?
+          </AlertDialogTitle>
+          <AlertDialogDescription className="font-body text-sm leading-relaxed text-muted-foreground">
+            Your studio, project folders, quotes and saved pieces stay exactly as they are. You can sign back in at any time.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="mt-4 flex-col-reverse gap-2 sm:flex-col sm:space-x-0">
+          <AlertDialogAction
+            onClick={() => void handleTradeSignOut()}
+            className="h-12 w-full justify-center rounded-none border border-destructive/40 bg-destructive/10 font-body text-[12px] font-semibold uppercase tracking-[0.15em] text-destructive hover:bg-destructive/15 hover:text-destructive"
+          >
+            Sign Out
+          </AlertDialogAction>
+          <AlertDialogCancel className="h-12 w-full justify-center rounded-none border-border font-body text-[12px] font-semibold uppercase tracking-[0.15em] text-foreground hover:bg-muted">
+            Stay signed in
+          </AlertDialogCancel>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
     </>;
 };
 export default Navigation;
