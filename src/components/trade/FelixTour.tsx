@@ -246,10 +246,10 @@ const FELIX_STEPS: FelixStep[] = [
   {
     id: "pwa-install",
     title: "TAKE YOUR STUDIO ON SITE",
-    target: "pwa-banner",
+    target: "sidebar-pwa",
     route: "/trade",
     dialogue:
-      "Scan this QR code with your phone, or tap **Install Applicable App** to open the installation prompt or instructions supported by your browser. Add your Mobile Studio Concierge to your home screen and sign in to continue working with your projects on site.",
+      "Hover **Mobile App Workspace** in the sidebar and scan the QR code with your phone. It signs your phone straight into your studio — add it to your home screen to keep working on your projects on site.",
   },
   {
     id: "beta-feedboard",
@@ -432,7 +432,9 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     let watched: Element[] = [];
     let observedTarget: Element | null = null;
     let revealFrame = 0;
-    const resizeObserver = new ResizeObserver(() => { stableSince = 0; });
+    let lastSample = 0;
+    let wake = true;
+    const resizeObserver = new ResizeObserver(() => { stableSince = 0; wake = true; });
     // React may replace a sidebar item or workspace control during navigation.
     // Wake the stability check when that specific target changes, not whenever
     // unrelated page content mutates.
@@ -446,17 +448,28 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
         ready = false;
         setSettled(false);
         setPosition(null);
+        wake = true;
       }
     });
     mutationObserver.observe(document.body, { childList: true, subtree: true });
     const onChange = () => {
       stableSince = 0;
+      wake = true;
       // A viewport change can alter the tooltip's available space even when
       // the target itself retains exactly the same bounding rectangle.
       setViewport((previous) => previous.w === window.innerWidth && previous.h === window.innerHeight
         ? previous : { w: window.innerWidth, h: window.innerHeight });
     };
     const tick = (now: number) => {
+      // Sampling every frame forced style/layout recalculation 60x/s and made
+      // the whole portal lag while the tour was open. Discovery samples at
+      // ~20fps; once shown, ~8fps plus immediate resize/scroll wake-ups.
+      if (now - lastSample < (ready ? 120 : 50) && !wake) {
+        frame = requestAnimationFrame(tick);
+        return;
+      }
+      lastSample = now;
+      wake = false;
       if (routeReady && current.prepare && now - preparedAt >= 1000) {
         preparedAt = now;
         current.prepare();
