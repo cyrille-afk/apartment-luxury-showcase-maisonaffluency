@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
           idempotencyKey: `registration-alert-${event.id}-${recipient}`,
           templateData: { name: copy.name, company: copy.studio, email: copy.email, phone: copy.phone, subject: copy.title, message: copy.text },
         } });
-        if (res.error || res.data?.error) errors.push(`Email enqueue failed: ${recipient}`);
+        if (res.error || res.data?.error || res.data?.success !== true) errors.push(`Email enqueue failed or suppressed: ${recipient}`);
         else emailDone[recipient] = true;
         const saved = await db.from("registration_alert_events").update({ email_done: emailDone }).eq("id", event.id);
         if (saved.error) throw new Error("Could not save email acknowledgement");
