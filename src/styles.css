@@ -5,25 +5,25 @@
 /* The v3 `short` raw screen (max-height: 780px), re-expressed as a v4 variant. */
 @custom-variant short (@media (max-height: 780px));
 
-/* Felix AI assistant identity: the one shared treatment — deep slate ink with a
-   champagne hairline — kept deliberately separate from the tier gold/bronze so
-   AI features read as Felix without shouting over the editorial layout. */
+/* Felix AI assistant identity: the one shared treatment — the same warm bronze
+   the Mobile App Workspace card already wears — so every AI feature reads as
+   Felix from a single palette value instead of a new color in the system. */
 @utility felix-surface {
   /* The outline button variant ships border/bg/hover classes that would win the
      cascade, so the Felix treatment asserts its own values. */
-  background-color: hsl(var(--felix-ink)) !important;
-  border: 1px solid hsl(var(--felix-champagne) / 0.5) !important;
-  color: hsl(var(--felix-on-ink)) !important;
+  background-color: hsl(var(--felix-bronze)) !important;
+  border: 1px solid hsl(var(--felix-bronze-edge) / 0.55) !important;
+  color: hsl(var(--felix-on-bronze)) !important;
   &:hover {
-    background-color: hsl(var(--felix-ink-lift)) !important;
-    border-color: hsl(var(--felix-champagne) / 0.9) !important;
-    color: hsl(var(--felix-on-ink)) !important;
+    background-color: hsl(var(--felix-bronze-deep)) !important;
+    border-color: hsl(var(--felix-bronze-edge) / 0.9) !important;
+    color: hsl(var(--felix-on-bronze)) !important;
   }
 }
 
-/* The whisper-quiet champagne mark that flags a Felix feature in navigation. */
+/* The quiet bronze mark that flags a Felix feature in navigation. */
 @utility felix-mark {
-  color: hsl(var(--felix-champagne));
+  color: hsl(var(--felix-bronze));
 }
 
 /* Tailwind v3 compatibility: v4 defaults borders to currentColor. */
@@ -239,13 +239,12 @@ All colors MUST be HSL.
     --gradient-warm: linear-gradient(180deg, hsl(32 20% 97%) 0%, hsl(32 15% 92%) 100%);
     --gradient-overlay: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 100%);
 
-    /* Felix AI assistant identity — deep slate ink, champagne hairline, ivory
-       text. Never a copy of the tier gold/bronze values. */
-    --felix-ink: 222 22% 12%;
-    --felix-ink-lift: 222 18% 19%;
-    /* Deep enough to read on the cream canvas, still muted rather than bright. */
-    --felix-champagne: 38 34% 52%;
-    --felix-on-ink: 40 30% 96%;
+    /* Felix AI assistant identity — the warm bronze of the Mobile App Workspace
+       card, aliased once so the button and the sidebar mark never drift apart. */
+    --felix-bronze: var(--gold);
+    --felix-bronze-deep: 34 52% 43%;
+    --felix-bronze-edge: var(--gold-bright);
+    --felix-on-bronze: 40 30% 96%;
     
     /* Shadows */
     --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -314,10 +313,9 @@ All colors MUST be HSL.
     --gold: 36 38% 60%;
     --gold-bright: 38 62% 76%;
     --cream: 32 15% 90%;
-    /* Felix lifts off the dark jade canvas; the champagne stays muted, never bright. */
-    --felix-ink: 222 14% 20%;
-    --felix-ink-lift: 222 12% 26%;
-    --felix-champagne: 41 32% 68%;
+    /* Bronze lifts off the dark jade canvas on its own; only the hover depth
+       needs a dark value of its own. */
+    --felix-bronze-deep: 36 40% 52%;
     --warm-gray: 32 8% 60%;
     --product-canvas: 34 18% 18%;
     --collection-card-canvas: 34 18% 18%;
