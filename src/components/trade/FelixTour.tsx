@@ -354,7 +354,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     else delete document.documentElement.dataset.felixReducedMotion;
     return () => { delete document.documentElement.dataset.felixReducedMotion; };
   }, [open, reducedMotion]);
-  const [position, setPosition] = useState<{ step: number; path: string; rect: Rect; anchor: Rect | null; secondary: Rect | null; obstacles: TourRect[] } | null>(null);
+  const [position, setPosition] = useState<{ step: number; path: string; rect: Rect; anchor: Rect | null; secondary: Rect | null; obstacles: TourRect[]; softObstacles: TourRect[] } | null>(null);
   const [viewport, setViewport] = useState({ w: 0, h: 0 });
   const [measuredCardHeight, setMeasuredCardHeight] = useState(0);
   const [settled, setSettled] = useState(false);
@@ -582,9 +582,18 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       // Protect all visible page headings/tabs, not just this step's spotlight.
       const protectedElements = Array.from(document.querySelectorAll('h1, h2, h3, [role="heading"], [role="tab"], div.border-b > button, [data-felix-target="collection-overview"]'))
         .filter((el) => !el.closest('[data-felix-tour-card]') && (el as HTMLElement).offsetParent !== null);
-      const obstacles = [...boxes, ...anchorBoxes, ...protectedElements.map((el) => el.getBoundingClientRect())]
-        .filter((r) => r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < window.innerHeight && r.right > 0 && r.left < window.innerWidth)
-        .map((r) => ({ left: r.left, top: r.top, width: r.width, height: r.height }));
+      // The sidebar is a hard obstacle when space allows, but on short
+      // viewports a card may legitimately overlap it as a last resort.
+      const sidebarBoxes = Array.from(document.querySelectorAll('[data-sidebar="sidebar"]'))
+        .filter((el) => (el as HTMLElement).offsetParent !== null)
+        .map((el) => el.getBoundingClientRect());
+      const inView = (r: { width: number; height: number; bottom: number; top: number; right: number; left: number }) =>
+        r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < window.innerHeight && r.right > 0 && r.left < window.innerWidth;
+      const toRect = (r: DOMRect) => ({ left: r.left, top: r.top, width: r.width, height: r.height });
+      const softObstacles = [...boxes, ...anchorBoxes, ...protectedElements.map((el) => el.getBoundingClientRect())]
+        .filter(inView)
+        .map(toRect);
+      const obstacles = [...softObstacles, ...sidebarBoxes.filter(inView).map(toRect)];
       const obstacleKey = JSON.stringify(obstacles.map((r) => [r.left, r.top, r.width, r.height].map(Math.round)));
       const obstaclesChanged = obstacleKey !== lastObstacles;
       const commit = (r: Rect) => {
@@ -592,7 +601,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         lastSecondary = secondaryNext;
         lastObstacles = obstacleKey;
         setPosition((previous) => previous?.step === currentStep && previous.path === location.pathname && sameRect(previous.rect, r) && !anchorChanged && !secondaryChanged && !obstaclesChanged
-          ? previous : { step: currentStep, path: location.pathname, rect: r, anchor, secondary: secondaryNext, obstacles });
+          ? previous : { step: currentStep, path: location.pathname, rect: r, anchor, secondary: secondaryNext, obstacles, softObstacles });
         setViewport((previous) => previous.w === window.innerWidth && previous.h === window.innerHeight
           ? previous : { w: window.innerWidth, h: window.innerHeight });
         fallback = r.width === 0 && r.height === 0 && !next;
@@ -903,12 +912,25 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
   // Clamp every placement branch, leaving clearance for the arrow and shadow.
   cardLeft = clampX(cardLeft);
   cardTop = clampY(cardTop);
-  const placement = placeTourCard({
-    viewport, obstacles: position?.obstacles ?? [], width: cardW,
+  const placementArgs = {
+    viewport, width: cardW,
     height: cardRef.current?.firstElementChild?.scrollHeight ? cardRef.current.firstElementChild.scrollHeight + 2 : cardH,
     preferred: { left: cardLeft, top: cardTop },
-  });
-  if (placement) { cardLeft = placement.left; cardTop = placement.top; }
+  };
+  // Retry without the sidebar obstacle when the full set leaves no space
+  // (short viewports): overlapping dimmed navigation beats hiding the tour.
+  const placement = placeTourCard({ ...placementArgs, obstacles: position?.obstacles ?? [] })
+    ?? placeTourCard({ ...placementArgs, obstacles: position?.softObstacles ?? [] });
+  // Last resort on short viewports where every free space is shallower than
+  // the solver's floor: keep the tour operable with a floating bottom-right
+  // card. A hidden card strands the member with no way to continue or skip.
+  const effectivePlacement = placement ?? (rect ? {
+    left: clampX(viewport.w - cardW - 24),
+    top: clampY(viewport.h - Math.min(cardH, 420) - 16),
+    width: cardW,
+    height: Math.min(cardH, 420),
+  } : null);
+  if (effectivePlacement) { cardLeft = effectivePlacement.left; cardTop = effectivePlacement.top; }
 
   const ring = rect && !targetUnavailable && !isPaused && (
     <div
@@ -972,7 +994,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       </div>}
       {ring}
       {secondaryRing}
-      {sidebarAnchor && placement && settled && !transitioning && (
+      {sidebarAnchor && effectivePlacement && settled && !transitioning && (
         <svg aria-hidden="true" className="pointer-events-none fixed inset-0 z-[140] h-full w-full fill-none stroke-accent" strokeWidth="1.5">
           <path d={`M ${sidebarAnchor.left + sidebarAnchor.width + 8} ${sidebarAnchor.top + sidebarAnchor.height / 2} H ${Math.max(sidebarAnchor.left + sidebarAnchor.width + 12, cardLeft - 12)} V ${cardTop + 28} H ${Math.max(cardLeft, sidebarAnchor.left + sidebarAnchor.width + 12)}`} />
           <path data-felix-sidebar-arrow d={`M ${sidebarAnchor.left + sidebarAnchor.width + 13} ${sidebarAnchor.top + sidebarAnchor.height / 2 - 5} l -5 5 l 5 5`} />
@@ -995,9 +1017,9 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         className={cn(
           "fixed z-[140] isolate print:hidden rounded-2xl border border-border bg-card text-card-foreground shadow-2xl outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2",
         )}
-        style={{ width: placement?.width ?? cardW, left: 0, top: 0, transform: `translate3d(${cardLeft}px, ${cardTop}px, 0)`, visibility: settled && !transitioning && placement ? "visible" : "hidden", pointerEvents: settled && !transitioning && placement ? "auto" : "none" }}
+        style={{ width: effectivePlacement?.width ?? cardW, left: 0, top: 0, transform: `translate3d(${cardLeft}px, ${cardTop}px, 0)`, visibility: settled && !transitioning && effectivePlacement ? "visible" : "hidden", pointerEvents: settled && !transitioning && effectivePlacement ? "auto" : "none" }}
       >
-        <div className="max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-2xl p-5" style={{ maxHeight: placement ? placement.height - 2 : viewport.h - 34 }}>
+        <div className="max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-2xl px-5 pt-5 pb-0" style={{ maxHeight: effectivePlacement ? effectivePlacement.height - 2 : viewport.h - 34 }}>
           {/* Header */}
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
@@ -1213,7 +1235,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
           )}
 
           {/* Controls */}
-          <div className="sticky bottom-0 -mx-5 -mb-5 mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border bg-card px-5 py-3">
+          <div className="sticky bottom-0 -mx-5 mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border bg-card px-5 pb-5 pt-3">
             <button
               onClick={() => close(false)}
               className="font-body text-[11px] uppercase tracking-widest text-muted-foreground underline-offset-4 hover:text-foreground hover:underline rounded-sm outline-hidden focus-visible:ring-2 focus-visible:ring-accent"

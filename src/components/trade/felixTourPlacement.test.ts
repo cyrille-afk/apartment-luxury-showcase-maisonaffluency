@@ -30,4 +30,31 @@ describe("tour protected-space placement", () => {
   it("returns no placement rather than covering an entirely blocked viewport", () => {
     expect(placeTourCard({ viewport: { w: 1024, h: 600 }, obstacles: [{ left: 0, top: 0, width: 1024, height: 600 }], width: 380, height: 400, preferred: { left: 24, top: 16 } })).toBeNull();
   });
+  it("prefers a full-height side column over a shallow band between section headings", () => {
+    // Tools page (step 19): full-width section headings slice the space right
+    // of the Resources tile into a 275px band; the card must keep a readable
+    // height in the open left column instead of shrinking into the band.
+    const obstacles = [
+      { left: 1107, top: 333, width: 279, height: 106 }, // Resources tile (target)
+      { left: 525, top: 113, width: 1152, height: 36 }, // H1 Tools
+      { left: 525, top: 297, width: 1152, height: 20 }, // H2 Discover
+      { left: 525, top: 479, width: 1152, height: 20 }, // H2 Specification
+      { left: 525, top: 798, width: 1152, height: 20 }, // H2 Procurement
+    ];
+    const card = placeTourCard({ viewport: { w: 1946, h: 1181 }, obstacles, width: 380, height: 439, preferred: { left: 1404, top: 350 } });
+    expect(card).not.toBeNull();
+    if (!card) return;
+    expect(card.height).toBe(439);
+    for (const obstacle of obstacles) expect(overlaps(card, obstacle)).toBe(false);
+  });
+  it("still allows a short card when no taller space exists", () => {
+    // Viewport fully banded by headings every ~260px: only ~210px bands
+    // remain, so the solver falls back to the best short placement.
+    const obstacles = [100, 360, 620, 880].map((top) => ({ left: 0, top, width: 1946, height: 24 }));
+    const card = placeTourCard({ viewport: { w: 1946, h: 1000 }, obstacles, width: 380, height: 439, preferred: { left: 700, top: 400 } });
+    expect(card).not.toBeNull();
+    if (!card) return;
+    expect(card.height).toBeLessThan(320);
+    for (const obstacle of obstacles) expect(overlaps(card, obstacle)).toBe(false);
+  });
 });
