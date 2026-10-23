@@ -354,7 +354,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     else delete document.documentElement.dataset.felixReducedMotion;
     return () => { delete document.documentElement.dataset.felixReducedMotion; };
   }, [open, reducedMotion]);
-  const [position, setPosition] = useState<{ step: number; path: string; rect: Rect; anchor: Rect | null; obstacles: TourRect[] } | null>(null);
+  const [position, setPosition] = useState<{ step: number; path: string; rect: Rect; anchor: Rect | null; secondary: Rect | null; obstacles: TourRect[] } | null>(null);
   const [viewport, setViewport] = useState({ w: 0, h: 0 });
   const [measuredCardHeight, setMeasuredCardHeight] = useState(0);
   const [settled, setSettled] = useState(false);
@@ -447,6 +447,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     let frame = 0;
     let last: Rect | null = null;
     let lastAnchor: Rect | null = null;
+    let lastSecondary: Rect | null = null;
     let lastObstacles = "";
     let stableSince = 0;
     let ready = false;
