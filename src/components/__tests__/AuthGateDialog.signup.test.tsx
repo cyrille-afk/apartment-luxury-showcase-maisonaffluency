@@ -44,7 +44,7 @@ describe("public signup persistence", () => {
     mocks.signup.mockResolvedValue({ error: null, data: { user: { id: "new-user" }, session: null } });
     const close = setup(); fireEvent.click(screen.getByRole("radio", { name: "Yes" })); submit();
     await screen.findByRole("status");
-    expect(mocks.signup).toHaveBeenCalledWith(expect.objectContaining({ email: "signup@example.com" }));
+    expect(mocks.signup).toHaveBeenCalledWith(expect.objectContaining({ email: "signup@example.com", options: expect.objectContaining({ data: expect.objectContaining({ registration_origin: "public_account" }) }) }));
     expect(close).not.toHaveBeenCalled(); expect(mocks.navigate).not.toHaveBeenCalled(); expect(mocks.invoke).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Complete Trade application" }));
     await waitFor(() => expect(mocks.navigate).toHaveBeenCalledWith(expect.stringContaining("intent=apply")));
