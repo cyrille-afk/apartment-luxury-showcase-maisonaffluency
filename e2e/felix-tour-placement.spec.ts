@@ -4,7 +4,8 @@ const session = process.env.LOVABLE_BROWSER_SUPABASE_SESSION_JSON;
 const storageKey = process.env.LOVABLE_BROWSER_SUPABASE_STORAGE_KEY;
 test.use({ viewport: { width: 1946, height: 1181 }, trace: "off", video: "off" });
 
-test("all 23 tour steps keep cards inside the viewport and outside protected features", async ({ page }) => {
+test("all 23 tour steps keep cards inside the viewport and outside protected features", async ({ page, isMobile }) => {
+  test.skip(isMobile, "Desktop-only tour.");
   test.skip(!session || !storageKey, "Requires a managed Trade session.");
   if (!session || !storageKey) return;
   test.setTimeout(240_000);
@@ -30,15 +31,42 @@ test("all 23 tour steps keep cards inside the viewport and outside protected fea
         if (!card) return false;
         const box = card.getBoundingClientRect();
         const overlap = (r: DOMRect) => box.left < r.right && box.right > r.left && box.top < r.bottom && box.bottom > r.top;
-        const elements = [...document.querySelectorAll<HTMLElement>('h1, h2, h3, [role="heading"], [role="tab"], div.border-b > button, [data-felix-target="collection-overview"], [data-felix-spotlight]')]
-          .filter(el => !el.closest("[data-felix-tour-card]") && (el.offsetParent !== null || el.hasAttribute("data-felix-spotlight")));
-        const anchor = document.documentElement.dataset.felixTourStep === "quotes" ? "collection" : document.documentElement.dataset.felixTourStep === "projects" ? "projects" : null;
-        if (anchor) elements.push(...document.querySelectorAll<HTMLElement>(`[data-tour-sidebar-anchor="${anchor}"]`));
+        const hits = (a: DOMRect, b: DOMRect) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+        // The spotlight and the heading it contains must stay clear. An
+        // unrelated section heading may be covered, but only when that is what
+        // keeps the card beside the feature it is explaining.
+        const spot = document.querySelector<HTMLElement>("[data-felix-spotlight]");
+        const sr = spot?.getBoundingClientRect();
+        const own = [...document.querySelectorAll<HTMLElement>('h1, h2, h3, [role="heading"], [role="tab"], div.border-b > button, [data-felix-target="collection-overview"]')]
+          .filter(el => !el.closest("[data-felix-tour-card]") && el.offsetParent !== null && sr && hits(el.getBoundingClientRect(), sr));
+        const anchorKey = document.documentElement.dataset.felixTourSidebar;
+        const elements: HTMLElement[] = [
+          ...(spot ? [spot] : []),
+          ...own,
+          ...(anchorKey ? [...document.querySelectorAll<HTMLElement>(`[data-tour-sidebar-anchor="${anchorKey}"]`)] : []),
+        ];
         return getComputedStyle(card).visibility === "visible" && box.left >= 24 && box.right <= innerWidth - 24 && box.top >= 16 && box.bottom <= innerHeight - 16 && elements.every(el => !overlap(el.getBoundingClientRect()));
       })).toBe(true);
     }
     await page.setViewportSize({ width: 1946, height: 1181 });
     await expect(card).toBeVisible();
+    if (number === 10) {
+      // The Tools page Discover row spans nearly the full content width: the
+      // card must sit directly beneath it, not strand in a band at the bottom
+      // of the page where nothing on screen points back to it.
+      const near = await page.evaluate(() => {
+        const card = document.querySelector<HTMLElement>("[data-felix-tour-card]");
+        const spot = document.querySelector<HTMLElement>("[data-felix-spotlight]");
+        if (!card || !spot) return null;
+        const c = card.getBoundingClientRect();
+        const s = spot.getBoundingClientRect();
+        return { below: c.top - s.bottom, across: c.left < s.right && c.right > s.left };
+      });
+      expect(near).not.toBeNull();
+      expect(near!.below).toBeGreaterThanOrEqual(0);
+      expect(near!.below).toBeLessThanOrEqual(60);
+      expect(near!.across).toBe(true);
+    }
     if (number === 2) await page.locator('[data-felix-target="nav-collection"]').click();
     else if (number === 15) {
       const toggle = page.getByRole("switch", { name: "Toggle client editorial presentation" });

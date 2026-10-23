@@ -16,7 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { useDesktopTradeTour } from "./useDesktopTradeTour";
 import { fmtPct, resolveTierTokens } from "./felixTourUtils";
 import { FELIX_STEP_SIDEBAR } from "./felixTourSidebarMap";
-import { placeTourCard, type TourRect } from "./felixTourPlacement";
+import { chooseTourCardPlacement, type TourRect } from "./felixTourPlacement";
 
 type FelixStep = {
   id: string;
@@ -354,7 +354,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     else delete document.documentElement.dataset.felixReducedMotion;
     return () => { delete document.documentElement.dataset.felixReducedMotion; };
   }, [open, reducedMotion]);
-  const [position, setPosition] = useState<{ step: number; path: string; rect: Rect; anchor: Rect | null; secondary: Rect | null; obstacles: TourRect[]; softObstacles: TourRect[] } | null>(null);
+  const [position, setPosition] = useState<{ step: number; path: string; rect: Rect; anchor: Rect | null; secondary: Rect | null; obstacles: TourRect[]; softObstacles: TourRect[]; featureObstacles: TourRect[]; bareObstacles: TourRect[] } | null>(null);
   const [viewport, setViewport] = useState({ w: 0, h: 0 });
   const [measuredCardHeight, setMeasuredCardHeight] = useState(0);
   const [settled, setSettled] = useState(false);
@@ -590,10 +590,17 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       const inView = (r: { width: number; height: number; bottom: number; top: number; right: number; left: number }) =>
         r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < window.innerHeight && r.right > 0 && r.left < window.innerWidth;
       const toRect = (r: DOMRect) => ({ left: r.left, top: r.top, width: r.width, height: r.height });
+      const featureOnly = [...boxes, ...anchorBoxes].filter(inView).map(toRect);
       const softObstacles = [...boxes, ...anchorBoxes, ...protectedElements.map((el) => el.getBoundingClientRect())]
         .filter(inView)
         .map(toRect);
       const obstacles = [...softObstacles, ...sidebarBoxes.filter(inView).map(toRect)];
+      // A wide spotlight under full-width section headings can leave only a far
+      // band, stranding the card away from the feature it explains. Keep the
+      // highlighted feature, its sidebar link and the sidebar protected so the
+      // card can still be placed beside them.
+      const featureObstacles = [...featureOnly, ...sidebarBoxes.filter(inView).map(toRect)];
+      const bareObstacles = featureOnly;
       const obstacleKey = JSON.stringify(obstacles.map((r) => [r.left, r.top, r.width, r.height].map(Math.round)));
       const obstaclesChanged = obstacleKey !== lastObstacles;
       const commit = (r: Rect) => {
@@ -601,7 +608,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         lastSecondary = secondaryNext;
         lastObstacles = obstacleKey;
         setPosition((previous) => previous?.step === currentStep && previous.path === location.pathname && sameRect(previous.rect, r) && !anchorChanged && !secondaryChanged && !obstaclesChanged
-          ? previous : { step: currentStep, path: location.pathname, rect: r, anchor, secondary: secondaryNext, obstacles, softObstacles });
+          ? previous : { step: currentStep, path: location.pathname, rect: r, anchor, secondary: secondaryNext, obstacles, softObstacles, featureObstacles, bareObstacles });
         setViewport((previous) => previous.w === window.innerWidth && previous.h === window.innerHeight
           ? previous : { w: window.innerWidth, h: window.innerHeight });
         fallback = r.width === 0 && r.height === 0 && !next;
@@ -917,10 +924,17 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     height: cardRef.current?.firstElementChild?.scrollHeight ? cardRef.current.firstElementChild.scrollHeight + 2 : cardH,
     preferred: { left: cardLeft, top: cardTop },
   };
-  // Retry without the sidebar obstacle when the full set leaves no space
-  // (short viewports): overlapping dimmed navigation beats hiding the tour.
-  const placement = placeTourCard({ ...placementArgs, obstacles: position?.obstacles ?? [] })
-    ?? placeTourCard({ ...placementArgs, obstacles: position?.softObstacles ?? [] });
+  // Tier 1 keeps the sidebar protected and lets a dimmed section heading be
+  // uncovered when that is what lands the card beside its highlight; tier 2
+  // only applies on short viewports where nothing fits without overlapping
+  // navigation.
+  const placement = chooseTourCardPlacement({
+    ...placementArgs,
+    tiers: [
+      [position?.obstacles ?? [], position?.featureObstacles ?? []],
+      [position?.softObstacles ?? [], position?.bareObstacles ?? []],
+    ],
+  });
   // Last resort on short viewports where every free space is shallower than
   // the solver's floor: keep the tour operable with a floating bottom-right
   // card. A hidden card strands the member with no way to continue or skip.
