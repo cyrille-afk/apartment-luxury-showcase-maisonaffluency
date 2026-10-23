@@ -532,6 +532,12 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       // Only measure nodes that are actually mounted and laid out.
       const live = targets.filter((el) => el === stepTargetRef.current || current.id !== "margin-protection")
         .filter((el) => el.isConnected && ((el as HTMLElement).offsetParent !== null || getComputedStyle(el).position === "fixed") && getComputedStyle(el).visibility !== "hidden");
+      if (current.id === "quotes" && live.length) {
+        const heading = live[0].getBoundingClientRect();
+        if (heading.top < 72 || heading.bottom > window.innerHeight - 24) {
+          window.scrollBy({ top: heading.top - 96, behavior: "instant" });
+        }
+      }
       // Gallery imagery may restore its previous scroll position after mount.
       // Keep the Step 7 client price within the viewport instead of spotlighting
       // a valid but offscreen bounding box.
