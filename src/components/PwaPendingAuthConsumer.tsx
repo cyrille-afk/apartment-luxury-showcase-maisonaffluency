@@ -99,6 +99,15 @@ export function PwaPendingAuthConsumer({ children }: { children: ReactNode }) {
 
   useEffect(() => () => setIsPwaBooting(false), [setIsPwaBooting]);
 
+  // Auto-retry with the same retained code once the device reconnects.
+  useEffect(() => {
+    if (phase !== "failed" || !retryable) return;
+    const onOnline = () => retry();
+    window.addEventListener("online", onOnline);
+    return () => window.removeEventListener("online", onOnline);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, retryable]);
+
   useEffect(() => {
     if (!verified || loading || !user || !rolesLoaded) return;
     let active = true;
@@ -117,6 +126,11 @@ export function PwaPendingAuthConsumer({ children }: { children: ReactNode }) {
           <section role="alert" className="space-y-6">
             <h1 className="font-display text-2xl">{retryable ? "Connection interrupted" : "Please sign in again"}</h1>
             <p className="font-body text-sm leading-relaxed text-muted-foreground">{failure}</p>
+            {retryable && (
+              <p role="status" aria-live="polite" className="font-body text-xs uppercase tracking-[0.15em] text-muted-foreground">
+                Waiting for connection — we'll retry automatically
+              </p>
+            )}
             {retryable && (
               <Button onClick={retry} className="w-full">
                 <RotateCw aria-hidden="true" /> Try again
