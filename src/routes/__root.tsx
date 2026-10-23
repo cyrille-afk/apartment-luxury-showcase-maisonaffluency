@@ -18,6 +18,7 @@ import { bootClient } from "@/lib/clientBoot";
 import HmrStatusBanner from "@/components/dev/HmrStatusBanner";
 import BuildUpdateBanner from "@/components/BuildUpdateBanner";
 import AppRecoveryBoundary from "@/components/AppRecoveryBoundary";
+import { PwaPendingAuthConsumer } from "@/components/PwaPendingAuthConsumer";
 import {
   AuthProvider,
   CheckoutFormProvider,
