@@ -927,6 +927,27 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     >{step.pulse && <span className="absolute inset-0 rounded-md border-2 border-accent animate-pulse motion-reduce:animate-none" />}</div>
   );
 
+  // Orientation ring: outlines the secondary target (e.g. the top-right
+  // Presentation Mode switch) without a dim cutout of its own. Painted after
+  // the main ring so the dim layer never covers it.
+  const secondaryRing = secondaryRect && !isPaused && (
+    <div
+      aria-hidden="true"
+      data-felix-spotlight-secondary
+      className="pointer-events-none fixed z-[131] rounded-md border-2 border-accent/80 motion-reduce:!transition-none"
+      style={{
+        top: 0,
+        left: 0,
+        transform: `translate3d(${secondaryRect.left - 6}px, ${secondaryRect.top - 6}px, 0)`,
+        width: secondaryRect.width + 12,
+        height: secondaryRect.height + 12,
+        opacity: settled && !transitioning ? 1 : 0,
+        transition: SPOTLIGHT_EASE,
+        boxShadow: "0 0 18px hsl(var(--accent) / 0.45)",
+      }}
+    />
+  );
+
   if (isPaused) return createPortal(
     <button
       type="button"
@@ -949,6 +970,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         {rect && settled && !transitioning && targetUnavailable && <div className="absolute inset-0 bg-foreground/40" />}
       </div>}
       {ring}
+      {secondaryRing}
       {sidebarAnchor && placement && settled && !transitioning && (
         <svg aria-hidden="true" className="pointer-events-none fixed inset-0 z-[140] h-full w-full fill-none stroke-accent" strokeWidth="1.5">
           <path d={`M ${sidebarAnchor.left + sidebarAnchor.width + 8} ${sidebarAnchor.top + sidebarAnchor.height / 2} H ${Math.max(sidebarAnchor.left + sidebarAnchor.width + 12, cardLeft - 12)} V ${cardTop + 28} H ${Math.max(cardLeft, sidebarAnchor.left + sidebarAnchor.width + 12)}`} />
