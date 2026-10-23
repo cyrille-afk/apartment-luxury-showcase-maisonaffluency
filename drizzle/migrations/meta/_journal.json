@@ -1583,6 +1583,13 @@
       "when": 1792727717497,
       "tag": "0225_retail_only_registration_alerts",
       "breakpoints": true
+    },
+    {
+      "idx": 226,
+      "version": "7",
+      "when": 1792784739622,
+      "tag": "0226_grant_profiles_select_to_authenticated",
+      "breakpoints": true
     }
   ]
 }
