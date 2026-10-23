@@ -29,7 +29,7 @@ test("margin and project steps anchor to sidebar and clean up on pause, close an
       const r = node.getBoundingClientRect(); return { x: r.x, y: r.y, right: r.right, bottom: r.bottom };
     }));
     const box = await card.boundingBox();
-    const arrow = await card.locator("[data-felix-sidebar-arrow]").boundingBox();
+    const arrow = await page.locator("[data-felix-sidebar-arrow]").boundingBox();
     expect(box).not.toBeNull(); expect(arrow).not.toBeNull();
     if (!box || !arrow) return;
     expect(box.x - Math.max(...boxes.map(b => b.right))).toBeGreaterThanOrEqual(16);

@@ -786,8 +786,11 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const sidebarAnchor = rect && !targetUnavailable ? position?.anchor : null;
   // Card placement: right of the target, else left, below, or above.
   const cardW = Math.max(0, Math.min(step.id === "welcome" ? 410 : 380, viewport.w - 48));
+  const collectionCardLimit = sidebarAnchor && rect && step.id === "quotes"
+    ? Math.max(80, viewport.h - (rect.top + rect.height + PAD + 8) - 16)
+    : null;
   // Step 1 carries the tier breakdown and needs a taller placement box.
-  const cardH = Math.min(measuredCardHeight || (step.id === "welcome" ? 545 : 380), Math.max(0, viewport.h - 32));
+  const cardH = Math.min(measuredCardHeight || (step.id === "welcome" ? 545 : 380), collectionCardLimit ?? Math.max(0, viewport.h - 32));
   const clampX = (x: number) => Math.min(Math.max(x, 24), Math.max(viewport.w - cardW - 24, 24));
   const clampY = (y: number) => Math.min(Math.max(y, 16), Math.max(viewport.h - cardH - 16, 16));
   let cardLeft = 0;
@@ -800,6 +803,11 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     if (sidebarAnchor) {
       cardLeft = clampX(sidebarAnchor.left + sidebarAnchor.width + 24);
       cardTop = clampY(sidebarAnchor.top - 20);
+      if (step.id === "quotes") {
+        // Sidebar alignment must never override the Collection's clear window.
+        // Keep the card beside the sidebar, but below the heading AND both tabs.
+        cardTop = clampY(rect.top + rect.height + PAD + 8);
+      }
     } else if (step.id === "client-view") {
       // Step 8: never below the switch (it would cover the product photo).
       // Right of the switch, bottom-aligned so the card grows upwards; else above.
@@ -883,6 +891,12 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         {rect && settled && !transitioning && targetUnavailable && <div className="absolute inset-0 bg-foreground/40" />}
       </div>}
       {ring}
+      {sidebarAnchor && step.id === "quotes" && settled && !transitioning && (
+        <svg aria-hidden="true" className="pointer-events-none fixed inset-0 z-[140] h-full w-full fill-none stroke-accent" strokeWidth="1.5">
+          <path d={`M ${sidebarAnchor.left + sidebarAnchor.width + 8} ${sidebarAnchor.top + sidebarAnchor.height / 2} H ${cardLeft - 12} V ${cardTop + 28} H ${cardLeft}`} />
+          <path data-felix-sidebar-arrow d={`M ${sidebarAnchor.left + sidebarAnchor.width + 13} ${sidebarAnchor.top + sidebarAnchor.height / 2 - 5} l -5 5 l 5 5`} />
+        </svg>
+      )}
 
       {/* The card is not mounted until this step's actual target is measured. */}
       {/* Screen-reader announcement for each step change */}
@@ -902,13 +916,13 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         )}
         style={{ width: cardW, left: 0, top: 0, transform: `translate3d(${cardLeft}px, ${cardTop}px, 0)`, visibility: settled && !transitioning ? "visible" : "hidden", pointerEvents: settled && !transitioning ? "auto" : "none" }}
       >
-        {sidebarAnchor && <span
+        {sidebarAnchor && step.id !== "quotes" && <span
           data-felix-sidebar-arrow
           aria-hidden="true"
           className="pointer-events-none absolute -left-2 h-4 w-4 rotate-45 border-b border-l border-accent/50 bg-card"
           style={{ top: Math.max(24, Math.min(cardH - 24, sidebarAnchor.top + sidebarAnchor.height / 2 - cardTop)) }}
         />}
-        <div className="max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-2xl p-5">
+        <div className="max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-2xl p-5" style={collectionCardLimit === null ? undefined : { maxHeight: collectionCardLimit - 2 }}>
           {/* Header */}
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">

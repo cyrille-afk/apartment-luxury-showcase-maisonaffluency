@@ -38,8 +38,10 @@ test("Collection tour remains visible without images and preserves both browsing
   await expect(step3).toHaveCSS("opacity", "1", { timeout: 15_000 });
   const verifyTargets = async () => {
     const ring = await page.locator("[data-felix-spotlight]").boundingBox();
+    const card = await step3.boundingBox();
     expect(ring).not.toBeNull();
-    if (!ring) return;
+    expect(card).not.toBeNull();
+    if (!ring || !card) return;
     const targets = page.locator('[data-felix-target="collection-overview"]');
     await expect(targets).toHaveCount(3);
     for (const target of await targets.all()) {
@@ -51,6 +53,12 @@ test("Collection tour remains visible without images and preserves both browsing
       expect(box.y).toBeGreaterThanOrEqual(ring.y);
       expect(box.x + box.width).toBeLessThanOrEqual(ring.x + ring.width);
       expect(box.y + box.height).toBeLessThanOrEqual(ring.y + ring.height);
+      expect(card.x >= box.x + box.width || card.x + card.width <= box.x || card.y >= box.y + box.height || card.y + card.height <= box.y).toBe(true);
+      expect(await target.evaluate(el => {
+        const r = el.getBoundingClientRect();
+        const top = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+        return top === el || (top !== null && el.contains(top));
+      })).toBe(true);
     }
   };
   await verifyTargets();
