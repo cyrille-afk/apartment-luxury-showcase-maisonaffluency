@@ -126,4 +126,22 @@ describe("installed app startup handshake", () => {
     expect(mocks.clear).not.toHaveBeenCalled();
     expect(screen.queryByTestId("dashboard")).toBeNull();
   });
+  it("retries a temporary failure with the same code and enters the dashboard", async () => {
+    mocks.redeem.mockRejectedValueOnce(new Error("offline"));
+    const view = renderGate();
+    const retry = await screen.findByRole("button", { name: /try again/i });
+    expect(mocks.clear).not.toHaveBeenCalled();
+    await act(async () => retry.click());
+    await waitFor(() => expect(mocks.redeem).toHaveBeenCalledTimes(2));
+    expect(mocks.redeem).toHaveBeenLastCalledWith({ data: { token: "a".repeat(43) } });
+    mocks.auth = { loading: false, user: { id: "member" }, rolesLoaded: true };
+    view.rerender(<PwaPendingAuthConsumer><div data-testid="dashboard" /></PwaPendingAuthConsumer>);
+    await waitFor(() => expect(screen.getByTestId("dashboard")).toBeInTheDocument());
+  });
+  it("offers no retry when the code was rejected", async () => {
+    mocks.redeem.mockResolvedValue({ ok: false });
+    renderGate();
+    await screen.findByRole("alert");
+    expect(screen.queryByRole("button", { name: /try again/i })).toBeNull();
+  });
 });
