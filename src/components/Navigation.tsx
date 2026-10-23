@@ -1057,7 +1057,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold"
                   >
                     <span className="flex items-center gap-2">
-                      Trade
+                      {tradePartner ? "Trade Dashboard" : "Trade"}
                       <span aria-hidden="true" className="rounded-full border border-[hsl(var(--gold))]/30 bg-[hsl(var(--gold))]/15 px-1.5 py-[2px] font-body text-[9px] font-medium uppercase leading-none tracking-[0.15em] text-[hsl(var(--gold))]">PRO</span>
                     </span>
 
@@ -1065,9 +1065,27 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   </button>
                   {mobileTradeExpanded && (tradePartner ? (
                     <div className="ml-4 mb-1 border-l border-border/30 pl-4 flex flex-col">
-                      <Button variant="ghost" onClick={() => { closeMobileMenu(); navigate("/trade"); }} className="justify-start font-body text-xs">Go to Studio</Button>
-                      <Button variant="ghost" onClick={() => { closeMobileMenu(); navigate("/trade/quotes"); }} className="justify-start font-body text-xs">My Quotes</Button>
-                      <Button variant="ghost" onClick={() => { closeMobileMenu(); void handleTradeSignOut(); }} className="justify-start font-body text-xs text-destructive">Sign Out</Button>
+                      <button
+                        onClick={() => { closeMobileMenu(); navigate("/trade"); }}
+                        className="flex min-h-[48px] items-center gap-3 text-left font-body text-[15px] text-foreground transition-colors active:text-primary"
+                      >
+                        <Briefcase className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        Studio
+                      </button>
+                      <button
+                        onClick={() => { closeMobileMenu(); navigate("/trade/quotes"); }}
+                        className="flex min-h-[48px] items-center gap-3 text-left font-body text-[15px] text-foreground transition-colors active:text-primary"
+                      >
+                        <BookOpen className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        My Quotes
+                      </button>
+                      <button
+                        onClick={() => { closeMobileMenu(); void handleTradeSignOut(); }}
+                        className="flex min-h-[48px] items-center gap-3 text-left font-body text-[15px] text-destructive transition-colors"
+                      >
+                        <LogOut className="h-4 w-4 shrink-0" />
+                        Sign Out
+                      </button>
                     </div>
                   ) : (
                     <div className="ml-4 mb-1 border-l border-border/30 pl-4 flex flex-col">
