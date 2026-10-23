@@ -49,3 +49,34 @@ export function placeTourCard({ viewport, obstacles, width, height, preferred }:
   };
   return pick(height, true) ?? pick(320) ?? pick(160);
 }
+/**
+ * Pick the placement nearest the step's highlight.
+ *
+ * Sets are tried strictest first — every visible heading protected, then only
+ * the highlighted feature and navigation. A looser set wins only when it lands
+ * the card clearly nearer its target; otherwise the better-protected position
+ * is kept. Without this, a wide spotlight such as the Tools page Discover row
+ * leaves only a far bottom band and the card strands away from the feature it
+ * is explaining.
+ */
+export function chooseTourCardPlacement({ viewport, width, height, preferred, sets, tolerance = 48 }: {
+  viewport: { w: number; h: number };
+  width: number;
+  height: number;
+  preferred: { left: number; top: number };
+  sets: TourRect[][];
+  tolerance?: number;
+}): TourRect | null {
+  let best: TourRect | null = null;
+  let bestDistance = Infinity;
+  for (const obstacles of sets) {
+    const card = placeTourCard({ viewport, width, height, preferred, obstacles });
+    if (!card) continue;
+    const distance = Math.hypot(card.left - preferred.left, card.top - preferred.top);
+    if (!best || distance < bestDistance - tolerance) {
+      best = card;
+      bestDistance = distance;
+    }
+  }
+  return best;
+}

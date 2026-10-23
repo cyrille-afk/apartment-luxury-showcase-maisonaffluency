@@ -58,3 +58,50 @@ describe("tour protected-space placement", () => {
     for (const obstacle of obstacles) expect(overlaps(card, obstacle)).toBe(false);
   });
 });
+describe("tour card obstacle-set selection", () => {
+  const vp = { w: 1946, h: 1181 };
+  const sidebar = { left: 0, top: 0, width: 255, height: 1181 };
+  const spot = { left: 515, top: 287, width: 1172, height: 162 };
+  const anchor = { left: 8, top: 512, width: 239, height: 40 };
+  const headings = [
+    { left: 525, top: 113, width: 1152, height: 36 },
+    { left: 525, top: 297, width: 1152, height: 20 },
+    { left: 525, top: 479, width: 1152, height: 20 },
+    { left: 525, top: 798, width: 1152, height: 20 },
+  ];
+  const args = { viewport: vp, width: 380, height: 336, preferred: { left: 271, top: 492 } };
+
+  it("keeps the card beside its spotlight instead of stranding it in a far band", () => {
+    const strict = [spot, anchor, ...headings, sidebar];
+    // With every section heading protected only the band below the last one
+    // fits, which is where the card used to end up.
+    expect(placeTourCard({ ...args, obstacles: strict })?.top).toBe(830);
+    const chosen = chooseTourCardPlacement({ ...args, sets: [strict, [spot, anchor, sidebar]] });
+    expect(chosen).not.toBeNull();
+    if (!chosen) return;
+    expect(chosen.top).toBe(492);
+    expect(chosen.left).toBe(271);
+    for (const obstacle of [spot, anchor, sidebar]) expect(overlaps(chosen, obstacle)).toBe(false);
+  });
+
+  it("keeps the fully protected placement when it is already the nearest", () => {
+    const strict = [spot, anchor, ...headings, sidebar];
+    const chosen = chooseTourCardPlacement({
+      ...args,
+      preferred: { left: 271, top: 850 },
+      sets: [strict, [spot, anchor, sidebar]],
+    });
+    expect(chosen).not.toBeNull();
+    if (!chosen) return;
+    expect(chosen.top).toBe(830);
+    for (const obstacle of strict) expect(overlaps(chosen, obstacle)).toBe(false);
+  });
+
+  it("falls through to a looser set when the strict one leaves no space", () => {
+    const blocked = [{ left: 0, top: 0, width: 1946, height: 1181 }];
+    const chosen = chooseTourCardPlacement({ ...args, sets: [blocked, [spot, anchor, sidebar]] });
+    expect(chosen).not.toBeNull();
+    if (!chosen) return;
+    expect(overlaps(chosen, spot)).toBe(false);
+  });
+});
