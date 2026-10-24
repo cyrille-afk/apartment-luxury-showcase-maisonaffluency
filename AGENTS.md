@@ -1,5 +1,5 @@
 - Trade owns breadcrumbs; Collection opens top; `/trade/gallery/:slug` shares the public profile header; shortcuts use latest.
-- Google sign-in surfaces share GoogleAccessNotice for organisation-block guidance and access requests; provider access is distinct from Trade approval, and Google-hosted error pages cannot be changed by app UI.
+- Google sign-in surfaces share GoogleAccessNotice for organisation-block guidance and access requests; provider access is distinct from Trade approval, and Google-hosted error pages cannot be changed by app UI. Sign-in surfaces never quote Google's or the auth backend's raw error wording — every rejection maps to one plain, actionable sentence.
 - Google access requests reuse the validated, bot-protected send-inquiry endpoint with fixed contact-form context and no account/role writes; inquiries remain the admin review source and existing staff notification pipeline owns delivery.
 - Studio creators have an owner-scoped SELECT policy alongside member visibility so INSERT RETURNING succeeds before AFTER-trigger membership becomes visible; creation retains created_by = auth.uid() and automatic owner membership.
 - Felix/Benefits: max-w-[1500px] px-6; Felix left, results right, one useMoodboardSourcing; Benefits 50/50, text left.

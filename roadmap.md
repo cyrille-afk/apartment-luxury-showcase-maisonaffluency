@@ -1,5 +1,9 @@
 # Roadmap — Automatic Visual Search Indexing
 
+## Sign-in modal premium redesign
+- [x] Put the credential form first, a plain "or" separator below it, Google last as an alternative, the muted internal-staff helper line under Google and one footer application link; remove Google's raw error wording everywhere.
+- [x] Live verified on /spec-sheets/joseph-dirand: order email → password → Sign In → or → Google → helper → footer, 448px card, wrong password shows "We couldn’t sign you in…" with no raw auth message; /trade/login carries the same copy with one application link; five component tests pass and the build is clean.
+
 ## Sign-in lightbox rewrite
 - [x] Put email and password first with padded bordered fields, move Google below an "Or sign in with" rule, and replace the dense Google disclaimer with the approved one-line note.
 - [x] Live verified: field order (email 748px, password 843px, Google 1003px), 16px/12px input padding, one Trade application link, no request-access accordion in the lightbox, wrong password keeps the dialog open and shows "Login Failed — Invalid login credentials".
