@@ -1,5 +1,9 @@
 # Roadmap — Automatic Visual Search Indexing
 
+## Quote review before client sending
+- [ ] Add a selected-piece, quantity and trade-price review step using the editor's existing calculations and client-send checks.
+- [ ] Verify the review on a saved quote and run focused tests.
+
 ## Studio creation access failure
 - [x] Reproduce Gregoire's non-admin INSERT RETURNING failure; add creator-only studio read policy and verify creation plus automatic owner membership.
 

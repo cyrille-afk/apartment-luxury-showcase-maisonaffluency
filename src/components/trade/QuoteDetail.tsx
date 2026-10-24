@@ -24,6 +24,8 @@ import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown, CheckCircle, CreditCard, Loader2, Edit3, XCircle, FileSpreadsheet, Lock, FolderOpen, Layers, Eye, ExternalLink, Mail, History as HistoryIcon, Copy, AlertTriangle, Info, RefreshCw } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import QuoteReviewSummary from "@/components/trade/QuoteReviewSummary";
 import { Link, useNavigate } from "@/lib/router-compat";
 import { QuoteItemSkeleton } from "@/components/trade/skeletons";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
@@ -453,6 +455,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [emailPreviewOpen, setEmailPreviewOpen] = useState(false);
   const [emailPreviewUrl, setEmailPreviewUrl] = useState<string | null>(null);
   const [emailPreviewLoading, setEmailPreviewLoading] = useState(false);
+  const [quoteReviewOpen, setQuoteReviewOpen] = useState(false);
+  const [quoteReviewArgs, setQuoteReviewArgs] = useState<QuotePdfArgs | null>(null);
+  const [reviewLineDiscounts, setReviewLineDiscounts] = useState<number[]>([]);
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
   const [submittingQuote, setSubmittingQuote] = useState(false);
@@ -2861,31 +2866,13 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             );
           })()}
           {(() => {
-            const hasClient = !!clientId;
-            const hasEmail = !!clientApproval.email;
-            const isApproved = clientApproval.approved;
-            const disabled = items.length === 0 || !hasClient || !hasEmail || !isApproved;
-            const title = !hasClient
-              ? "Link a client first"
-              : !hasEmail
-              ? "No contact email on file for this client"
-              : !isApproved
-              ? `Client's trade application is ${clientApproval.status ?? "not submitted"} — approve it before emailing`
-              : `Email this quote to ${clientApproval.email}`;
             const openPreview = async () => {
-              if (disabled || emailPreviewLoading) return;
+              if (items.length === 0 || emailPreviewLoading) return;
               setEmailPreviewLoading(true);
               try {
                 const args = await buildPdfArgs();
-                if (!(await runPreSendChecks(args))) return;
-                const url = await previewQuotePdfUrl(args);
-                setEmailPreviewUrl(url);
-                // Publish the same PDF privately so client emails can link to it.
-                try {
-                  await publishQuotePdf(quoteId, args);
-                } catch (pubErr) {
-                  console.warn("Could not publish quote PDF", pubErr);
-                }
+                setQuoteReviewArgs(args);
+                setReviewLineDiscounts(lineDiscounts.map((line) => line.discountCents));
                 setEmailSubject(`Quote ${quoteNumber} from Maison Affluency${projectName ? ` — ${projectName}` : ""}`);
                 setEmailBody(
                   `Dear ${(displayNameForContact(clientName, shipTo.email) || "Client").split(" ")[0]},\n\n` +
@@ -2893,7 +2880,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   `Do let us know if you have any questions or would like to proceed.\n\n` +
                   `With kind regards,\nMaison Affluency`
                 );
-                setEmailPreviewOpen(true);
+                setQuoteReviewOpen(true);
               } catch (err: any) {
                 toast({ title: "Preview failed", description: err?.message || "Could not build preview.", variant: "destructive" });
               } finally {
@@ -2901,16 +2888,15 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               }
             };
             return (
-              <button
+              <Button variant="outline" size="sm"
                 onClick={openPreview}
-                disabled={disabled || sendingEmail || emailPreviewLoading}
-                className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                title={title}
+                disabled={items.length === 0 || sendingEmail || emailPreviewLoading}
+                className="font-body text-xs"
+                title="Review selected pieces, quantities and pricing"
               >
-                {disabled && !isApproved && hasClient ? <Lock className="h-3.5 w-3.5" /> : <Mail className="h-3.5 w-3.5" />}
-                <span className="hidden sm:inline">Email to Client</span>
-                <span className="sm:hidden">Email</span>
-              </button>
+                {emailPreviewLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Eye className="h-3.5 w-3.5" />}
+                Review quote
+              </Button>
             );
           })()}
           {emailLog.length > 0 && (
@@ -5395,6 +5381,43 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             >
               Download
             </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={quoteReviewOpen} onOpenChange={setQuoteReviewOpen}>
+        <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] p-0 flex flex-col">
+          <DialogHeader className="px-5 py-4 border-b border-border">
+            <DialogTitle className="font-display text-xl">Review quote · {quoteNumber}</DialogTitle>
+          </DialogHeader>
+          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
+            {quoteReviewArgs && <QuoteReviewSummary args={quoteReviewArgs} lineDiscounts={reviewLineDiscounts} clientSafe={clientSafe} />}
+          </div>
+          <div className="px-5 py-4 border-t border-border space-y-3">
+            {(!clientId || !clientApproval.email || !clientApproval.approved) && (
+              <p role="status" className="font-body text-xs text-muted-foreground">
+                {!clientId ? "Select a client in the quote editor before sending." : !clientApproval.email ? "Add a contact email for this client before sending." : "This client's Trade application must be approved before sending."}
+              </p>
+            )}
+            <div className="flex flex-wrap justify-end gap-2">
+              <Button variant="outline" size="sm" onClick={() => setQuoteReviewOpen(false)}><Edit3 className="h-3.5 w-3.5" />Back to editing</Button>
+              <Button size="sm" disabled={!quoteReviewArgs || !clientId || !clientApproval.email || !clientApproval.approved || emailPreviewLoading} onClick={async () => {
+                if (!quoteReviewArgs || emailPreviewLoading) return;
+                setEmailPreviewLoading(true);
+                try {
+                  if (!(await runPreSendChecks(quoteReviewArgs))) return;
+                  const url = await previewQuotePdfUrl(quoteReviewArgs);
+                  setEmailPreviewUrl(url);
+                  try { await publishQuotePdf(quoteId, quoteReviewArgs); } catch (error) { console.warn("Could not publish quote PDF", error); }
+                  setQuoteReviewOpen(false);
+                  setEmailPreviewOpen(true);
+                } catch (error) {
+                  toast({ title: "Preview failed", description: error instanceof Error ? error.message : "Could not build preview.", variant: "destructive" });
+                } finally { setEmailPreviewLoading(false); }
+              }}>
+                {emailPreviewLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Mail className="h-3.5 w-3.5" />}Continue to client email
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
