@@ -1,6 +1,6 @@
 # Roadmap — Automatic Visual Search Indexing
 
-- [ ] Add minimum visual-match and maximum result controls; verify tuning against a real uploaded room photo.
+- [x] Add minimum visual-match and maximum result controls; verified default 8, expanded 12, 100% empty state and 74% filtered results against a real uploaded room photo; five tests pass.
 
 - [x] Existing real Visual Search, catalogue backfill and distinct-room checks completed.
 - [x] Add durable image-change queue, secure event wake, leases and bounded retry recovery.
