@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
-import { Heart, Trash2, ShoppingCart, Search, Wand2 } from "lucide-react";
+import { Heart, Trash2, ShoppingCart, Search, Wand2, FolderPlus, Pencil } from "lucide-react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuCheckboxItem, DropdownMenuSeparator, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -578,6 +579,34 @@ export default function TradeFavorites() {
                   >
                     <Wand2 className="w-3.5 h-3.5" />
                   </button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        onClick={(e) => e.stopPropagation()}
+                        title="Add to folder"
+                        aria-label="Add to folder"
+                        className="absolute left-2 bottom-2 z-10 flex items-center justify-center rounded-full bg-background/70 p-1.5 text-muted-foreground opacity-0 transition-all hover:bg-background/90 hover:text-foreground group-hover:opacity-100 focus:opacity-100 data-[state=open]:opacity-100"
+                      >
+                        <FolderPlus className="w-3.5 h-3.5" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" onClick={(e) => e.stopPropagation()}>
+                      <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.14em]">Folders</DropdownMenuLabel>
+                      {folders.map((f) => (
+                        <DropdownMenuCheckboxItem
+                          key={f.id}
+                          checked={(folderAssignments[fav.favoriteId] ?? []).includes(f.id)}
+                          onSelect={(e) => { e.preventDefault(); toggleInFolder(fav.favoriteId, f.id); }}
+                        >
+                          {f.name}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                      {folders.length > 0 && <DropdownMenuSeparator />}
+                      <DropdownMenuItem onSelect={() => createFolder()}>
+                        <FolderPlus className="w-3.5 h-3.5 mr-2" /> New folder
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                   <button
                     onClick={(e) => { e.stopPropagation(); removeFavorite(fav.favoriteId); }}
                     disabled={removing === fav.favoriteId}
