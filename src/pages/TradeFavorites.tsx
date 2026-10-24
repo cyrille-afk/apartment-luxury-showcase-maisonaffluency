@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
-import { Heart, Trash2, ShoppingCart, Search, Wand2 } from "lucide-react";
+import { Heart, Trash2, ShoppingCart, Search, Wand2, FolderPlus, Pencil } from "lucide-react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuCheckboxItem, DropdownMenuSeparator, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -218,7 +219,48 @@ export default function TradeFavorites() {
     }
   }, [user]);
 
+
+  const notifyFolders = () => window.dispatchEvent(new Event(TRADE_FAVORITE_FOLDERS_EVENT));
+
+  const createFolder = async () => {
+    if (!user) return;
+    const name = window.prompt("Name your folder (a room, project or design concept)", "Living Room")?.trim();
+    if (!name) return;
+    const { data, error } = await supabase.from("favorite_folders").insert({ user_id: user.id, name: name.slice(0, 80) }).select("id").single();
+    if (error) { toast({ title: "Folder not created", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Folder created", description: name });
+    await fetchFolders(); notifyFolders();
+    if (data?.id) setActiveFolder(data.id);
+  };
+
+  const renameFolder = async (id: string, current: string) => {
+    const name = window.prompt("Rename folder", current)?.trim();
+    if (!name || name === current) return;
+    const { error } = await supabase.from("favorite_folders").update({ name: name.slice(0, 80) }).eq("id", id);
+    if (error) { toast({ title: "Folder not renamed", description: error.message, variant: "destructive" }); return; }
+    await fetchFolders(); notifyFolders();
+  };
+
+  const deleteFolder = async (id: string, name: string) => {
+    if (!window.confirm(`Delete the folder "${name}"? Saved pieces stay in your favorites.`)) return;
+    await supabase.from("favorite_folder_items").delete().eq("folder_id", id);
+    const { error } = await supabase.from("favorite_folders").delete().eq("id", id);
+    if (error) { toast({ title: "Folder not deleted", description: error.message, variant: "destructive" }); return; }
+    setActiveFolder(null);
+    await fetchFolders(); notifyFolders();
+  };
+
+  const toggleInFolder = async (favoriteId: string, folderId: string) => {
+    const inFolder = (folderAssignments[favoriteId] ?? []).includes(folderId);
+    const { error } = inFolder
+      ? await supabase.from("favorite_folder_items").delete().eq("folder_id", folderId).eq("favorite_id", favoriteId)
+      : await supabase.from("favorite_folder_items").insert({ folder_id: folderId, favorite_id: favoriteId });
+    if (error) { toast({ title: "Could not update folder", description: error.message, variant: "destructive" }); return; }
+    await fetchFolders(); notifyFolders();
+  };
+
   useEffect(() => { fetchFavorites(); }, [fetchFavorites]);
+
   useEffect(() => { fetchFolders(); }, [fetchFolders]);
 
   useEffect(() => {
@@ -455,6 +497,22 @@ export default function TradeFavorites() {
                 </button>
               );
             })}
+            <button
+              onClick={createFolder}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full font-body text-[11px] uppercase tracking-[0.12em] border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-foreground/40"
+            >
+              <FolderPlus className="w-3 h-3" /> New folder
+            </button>
+            {activeFolder && (() => {
+              const f = folders.find((x) => x.id === activeFolder);
+              if (!f) return null;
+              return (
+                <span className="inline-flex items-center gap-1 ml-1">
+                  <button onClick={() => renameFolder(f.id, f.name)} title="Rename folder" aria-label="Rename folder" className="p-1.5 text-muted-foreground hover:text-foreground"><Pencil className="w-3.5 h-3.5" /></button>
+                  <button onClick={() => deleteFolder(f.id, f.name)} title="Delete folder" aria-label="Delete folder" className="p-1.5 text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
+                </span>
+              );
+            })()}
           </div>
         )}
 
@@ -521,6 +579,34 @@ export default function TradeFavorites() {
                   >
                     <Wand2 className="w-3.5 h-3.5" />
                   </button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        onClick={(e) => e.stopPropagation()}
+                        title="Add to folder"
+                        aria-label="Add to folder"
+                        className="absolute left-2 bottom-2 z-10 flex items-center justify-center rounded-full bg-background/70 p-1.5 text-muted-foreground opacity-0 transition-all hover:bg-background/90 hover:text-foreground group-hover:opacity-100 focus:opacity-100 data-[state=open]:opacity-100"
+                      >
+                        <FolderPlus className="w-3.5 h-3.5" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" onClick={(e) => e.stopPropagation()}>
+                      <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.14em]">Folders</DropdownMenuLabel>
+                      {folders.map((f) => (
+                        <DropdownMenuCheckboxItem
+                          key={f.id}
+                          checked={(folderAssignments[fav.favoriteId] ?? []).includes(f.id)}
+                          onSelect={(e) => { e.preventDefault(); toggleInFolder(fav.favoriteId, f.id); }}
+                        >
+                          {f.name}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                      {folders.length > 0 && <DropdownMenuSeparator />}
+                      <DropdownMenuItem onSelect={() => createFolder()}>
+                        <FolderPlus className="w-3.5 h-3.5 mr-2" /> New folder
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                   <button
                     onClick={(e) => { e.stopPropagation(); removeFavorite(fav.favoriteId); }}
                     disabled={removing === fav.favoriteId}
