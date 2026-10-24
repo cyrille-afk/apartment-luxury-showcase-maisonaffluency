@@ -1,8 +1,8 @@
 # Roadmap — Automatic Visual Search Indexing
 
 ## Reviewed quote client PDF export
-- [ ] Add a client-ready PDF download to quote review using the shared branded document and existing checks.
-- [ ] Verify snapshot preparation tests and download a real saved quote; inspect the exported PDF.
+- [x] Add a client-ready PDF download to quote review using the shared branded document and existing checks; export does not publish, email or change status.
+- [x] Passed snapshot preparation, check-blocking and stale-document tests; downloaded QU-9F86D9 on Cyrille's Trade account (120,250 bytes, 3 A4 pages). Inspected all pages and confirmed SGD 13,314.93 subtotal / SGD 16,444.35 total match review, existing Draft marking preserved and no browser errors.
 
 ## Favorites product opening and registration password
 - [x] Replace Favorites' legacy product overlay with the shared full product destination; live verified Ondas then Dais in Presentation, Ondas in Studio, Technical List navigation and browser Back, with no page errors.
