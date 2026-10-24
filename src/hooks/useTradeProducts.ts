@@ -52,7 +52,7 @@ async function fetchHiddenProductKeys(): Promise<{ keys: Set<string>; tradeKeys:
     supabase
       .from("designer_curator_picks")
       .select("title, designers(name)")
-      .eq("is_hidden", true),
+      .or("is_hidden.eq.true,hidden_in_studio.eq.true"),
     supabase
       .from("trade_products")
       .select("product_name, brand_name")
@@ -109,6 +109,7 @@ async function fetchLiveProducts(): Promise<{ products: LiveTradeProduct[]; hidd
         designers(name, founder, slug, is_published, trade_only)
       `)
       .eq("is_hidden", false)
+      .eq("hidden_in_studio", false)
       .order("sort_order", { ascending: true }),
     supabase
       .from("trade_products")
