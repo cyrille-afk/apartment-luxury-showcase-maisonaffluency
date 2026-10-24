@@ -4,6 +4,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { Camera, Loader2, Plus, RefreshCw, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { DEFAULT_VISUAL_RESULTS, MAX_VISUAL_RESULTS, selectVisualMatches, visualMatchPercent } from "@/lib/visualSearchResults";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -51,6 +53,9 @@ export default function VisualSearchPanel() {
   const [preview, setPreview] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const [matches, setMatches] = useState<VisualSearchMatch[]>([]);
+  const [minimumMatch, setMinimumMatch] = useState(0);
+  const [resultCount, setResultCount] = useState(DEFAULT_VISUAL_RESULTS);
+  const visibleMatches = selectVisualMatches(matches, minimumMatch, resultCount);
   const [selected, setSelected] = useState<VisualSearchMatch | null>(null);
   const [saving, setSaving] = useState(false);
   const [indexing, setIndexing] = useState(false);
@@ -178,6 +183,23 @@ export default function VisualSearchPanel() {
         </div>
       )}
 
+      <div className="grid gap-8 border-b border-border pb-6 sm:grid-cols-2">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between gap-4 font-body text-xs text-muted-foreground">
+            <span title="Image similarity score, not a probability of an exact product match.">Minimum visual match</span>
+            <output className="tabular-nums text-foreground">{minimumMatch}%</output>
+          </div>
+          <Slider thumbLabel="Minimum visual match" min={0} max={100} step={1} value={[minimumMatch]} onValueChange={([value]) => setMinimumMatch(value ?? 0)} />
+        </div>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between gap-4 font-body text-xs text-muted-foreground">
+            <span>Maximum results</span>
+            <output className="tabular-nums text-foreground">{resultCount}</output>
+          </div>
+          <Slider thumbLabel="Maximum results" min={1} max={MAX_VISUAL_RESULTS} step={1} value={[resultCount]} onValueChange={([value]) => setResultCount(value ?? DEFAULT_VISUAL_RESULTS)} />
+        </div>
+      </div>
+
       <div
         onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
         onDragLeave={() => setDragging(false)}
@@ -220,9 +242,10 @@ export default function VisualSearchPanel() {
 
       <div className={cn("grid transition-all duration-500 ease-out", phase === "results" ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")}>
         <div className="overflow-hidden">
-          <p className="mb-4 font-body text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Curated Matches</p>
+          <p aria-live="polite" className="mb-4 font-body text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Curated Matches — {visibleMatches.length} results</p>
+          {phase === "results" && visibleMatches.length === 0 && <p className="mb-6 font-display text-base text-muted-foreground">No catalogue pieces meet this minimum visual match.</p>}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {matches.map((m) => (
+            {visibleMatches.map((m) => (
               <div key={m.pick_id} className="bg-card p-3">
                 <div className="flex aspect-[4/5] items-center justify-center overflow-hidden bg-background">
                   {m.image_url && <img src={optimizeImageUrl(m.image_url, "w_500,c_limit,q_auto,f_auto")} alt={m.title ?? "Catalogue piece"} loading="lazy" className="h-full w-full object-contain" />}
@@ -233,7 +256,7 @@ export default function VisualSearchPanel() {
                 </div>
                 <p className="px-1 pt-1 font-display text-sm text-foreground">{m.title}</p>
                 <p className="px-1 pt-0.5 font-body text-[10px] tracking-[0.1em] text-muted-foreground/70">
-                  {Math.round(Math.max(0, Math.min(1, m.similarity)) * 100)}% visual match
+                  {visualMatchPercent(m.similarity)}% visual match
                 </p>
                 <button type="button" onClick={() => setSelected(m)} className="mt-2 inline-flex items-center px-1 font-body text-[10px] uppercase tracking-[0.25em] text-foreground underline-offset-4 hover:underline">
                   <Plus className="mr-1 size-3" />Stage to Project
