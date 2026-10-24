@@ -282,7 +282,7 @@ export default function TradeAnnotations() {
             >
               <ImageIcon className="h-10 w-10 text-muted-foreground/40 mb-3" />
               <p className="font-body text-sm text-muted-foreground">Browse product photos</p>
-              <p className="font-body text-xs text-muted-foreground/60 mt-1">From your showroom database</p>
+              <p className="font-body text-xs text-muted-foreground/60 mt-1">From your Gallery database</p>
             </button>
           </div>
         ) : (

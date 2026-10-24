@@ -313,7 +313,7 @@ const ProductPage = () => {
                 <p className="font-body text-xs uppercase tracking-[0.15em] text-muted-foreground">Price upon Request</p>
                 {product.isInShowroom && (
                   <p className="font-body text-xs text-muted-foreground">
-                    Visit our Singapore showroom to experience this piece in person
+                    Visit our Singapore Gallery to experience this piece in person
                   </p>
                 )}
                 <div className="flex flex-col sm:flex-row gap-3">
@@ -341,7 +341,7 @@ const ProductPage = () => {
                   <p>Brand: {product.brand_name}</p>
                   {product.materials && <p>Materials: {product.materials}</p>}
                   {product.dimensions && <p>Dimensions: {product.dimensions}</p>}
-                  <p>Book a private viewing at our Singapore showroom — concierge@maisonaffluency.com</p>
+                  <p>Book a private viewing at our Singapore Gallery — concierge@maisonaffluency.com</p>
                 </div>
               </noscript>
             </div>

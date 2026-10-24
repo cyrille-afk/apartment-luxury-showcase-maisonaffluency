@@ -185,7 +185,7 @@ PWA_CHECKLIST = {
         {"title": "What this guide is for", "blocks": [
             ("p", "Maison Affluency can be added to your phone's home screen and opened like any other app — no App Store, no download. This is what's called a <b>PWA</b> (Progressive Web App): a website that, once \"Added to Home Screen\", runs full-screen with its own icon, exactly like a native app."),
             ("p", "This guide walks you through <b>how to install it</b> on iPhone and Android, and gives you a short <b>visual checklist</b> to make sure everything looks right on your device — no overlapping menus, no text hidden behind the notch or the bottom gesture bar, no clipped buttons."),
-            ("p", "It's particularly useful for designers and architects who consult the Maison Affluency catalogue on site visits, in showrooms or in client meetings, where the app needs to look polished and behave like a real app — not a browser tab."),
+            ("p", "It's particularly useful for designers and architects who consult the Maison Affluency catalogue on site visits, in Galleries or in client meetings, where the app needs to look polished and behave like a real app — not a browser tab."),
             ("callout", "Share this with your team",
                 "Print it, forward it to your design partners, or pin it in the studio handbook so anyone reviewing the app on a phone knows what \"good\" looks like — and how to flag anything that isn't."),
         ]},

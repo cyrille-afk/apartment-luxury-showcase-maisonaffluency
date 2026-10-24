@@ -192,10 +192,10 @@ export const conciergeCopy = (lang: Lang) => ({
 export const conciergeStatusCopy = (kind: "tour" | "brief", lang: Lang) => {
   const copy = {
     tour: {
-      en: "Starting your guided tour — I'll walk you through the Showroom, Designers & Ateliers, brief setup, and your specification toolkit. You can skip at any time.",
-      id: "Memulai tur terpandu — saya akan memandu Anda melalui Showroom, Designers & Ateliers, pengaturan brief, dan toolkit spesifikasi Anda. Anda dapat melewati kapan saja.",
-      th: "กำลังเริ่มทัวร์แบบมีไกด์ — ฉันจะพาคุณผ่าน Showroom, Designers & Ateliers, การตั้งค่าบรีฟ และชุดเครื่องมือสเปก คุณสามารถข้ามได้ทุกเมื่อ",
-      zh: "正在开始导览 — 我会带您浏览 Showroom、Designers & Ateliers、brief 设置以及规格工具包。您可以随时跳过。",
+      en: "Starting your guided tour — I'll walk you through the Gallery, Designers & Ateliers, brief setup, and your specification toolkit. You can skip at any time.",
+      id: "Memulai tur terpandu — saya akan memandu Anda melalui Gallery, Designers & Ateliers, pengaturan brief, dan toolkit spesifikasi Anda. Anda dapat melewati kapan saja.",
+      th: "กำลังเริ่มทัวร์แบบมีไกด์ — ฉันจะพาคุณผ่าน Gallery, Designers & Ateliers, การตั้งค่าบรีฟ และชุดเครื่องมือสเปก คุณสามารถข้ามได้ทุกเมื่อ",
+      zh: "正在开始导览 — 我会带您浏览 Gallery、Designers & Ateliers、brief 设置以及规格工具包。您可以随时跳过。",
     },
     brief: {
       en: "Let's scope your project — five quick questions and I'll create your starting brief.",
@@ -212,17 +212,17 @@ export const localizeTourStep = <T extends { id: string; title: string; body: st
   const localized: Record<string, Partial<Record<Exclude<Lang, "en">, Pick<T, "title" | "body" | "ctaLabel">>>> = {
     showroom: {
       id: {
-        title: "1. Jelajahi Showroom",
+        title: "1. Jelajahi Gallery",
         body: "Mulai di sini untuk mengeksplorasi ruang kurasi secara in situ. Klik hotspot pada foto untuk membuka detail karya, melihat spesifikasi, harga trade, dan menambahkannya ke tearsheet.",
         ctaLabel: "Berikutnya: Designers",
       } as Pick<T, "title" | "body" | "ctaLabel">,
       th: {
-        title: "1. สำรวจ Showroom",
+        title: "1. สำรวจ Gallery",
         body: "เริ่มที่นี่เพื่อสำรวจห้องที่คัดสรรในบริบทจริง คลิกฮอตสปอตบนภาพเพื่อเปิดชิ้นงาน ดูสเปก ราคา trade และเพิ่มลงในทีอร์ชีต",
         ctaLabel: "ถัดไป: Designers",
       } as Pick<T, "title" | "body" | "ctaLabel">,
       zh: {
-        title: "1. 浏览 Showroom",
+        title: "1. 浏览 Gallery",
         body: "从这里开始探索实景策展空间。点击照片中的热点即可打开作品，查看规格、trade pricing，并添加到 tearsheet。",
         ctaLabel: "下一步：Designers",
       } as Pick<T, "title" | "body" | "ctaLabel">,

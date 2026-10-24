@@ -485,7 +485,7 @@ export default function TradeFavorites() {
                 onClick={() => navigate("/trade/the-collection")}
                 className="mt-8 font-mono text-[10px] uppercase tracking-[0.15em] text-foreground hover:text-muted-foreground transition-colors"
               >
-                [ BROWSE SHOWROOM COLLECTION → ]
+                [ BROWSE GALLERY COLLECTION → ]
               </button>
             )}
             </div>

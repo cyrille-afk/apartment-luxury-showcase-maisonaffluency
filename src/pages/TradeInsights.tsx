@@ -199,7 +199,7 @@ export default function TradeInsights() {
     insights.push({
       icon: Lightbulb,
       title: "3D Studio Awareness Gap",
-      description: "Most trade users haven't tried the 3D Studio. Consider adding a contextual prompt in the Showroom linking to axonometric generation from product pages.",
+      description: "Most trade users haven't tried the 3D Studio. Consider adding a contextual prompt in the Gallery linking to axonometric generation from product pages.",
       type: "idea",
     });
   }

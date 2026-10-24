@@ -172,7 +172,7 @@ export function designerSeoDescription(args: { name: string; founder?: string | 
     : [
         ` Collectible furniture, lighting and limited editions — Maison Affluency, Singapore.`,
         ` Curated by Maison Affluency Singapore for trade and private collectors worldwide.`,
-        ` Apartment-showroom and trade catalogue — Maison Affluency, Singapore.`,
+        ` Apartment Gallery and trade catalogue — Maison Affluency, Singapore.`,
       ];
   const tail = tailOptions[slugIndex(args.slug, tailOptions.length)];
   return clamp160(`${lead}${tail}`);

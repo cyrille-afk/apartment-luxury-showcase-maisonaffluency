@@ -274,7 +274,7 @@ Deno.serve(async (req) => {
       <h2>Explore</h2>
       <nav>
         <ul>
-          <li><a href="${SITE}/#gallery">Gallery — Curated interiors &amp; showroom</a></li>
+          <li><a href="${SITE}/#gallery">Gallery — Curated interiors</a></li>
           <li><a href="${SITE}/designers">Featured Designers &amp; Makers</a></li>
           <li><a href="${SITE}/journal">Journal — Design Insights</a></li>
           <li><a href="${SITE}/#collectibles">Collectible Design Pieces</a></li>

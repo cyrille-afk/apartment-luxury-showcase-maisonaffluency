@@ -112,7 +112,7 @@ export const WeeklyDigestEmail = ({
 
         <Hr style={sectionDivider} />
         <Link href={`${siteUrl}/trade/showroom`} style={button}>
-          Browse Showroom
+          Browse Gallery
         </Link>
 
         <Text style={footer}>

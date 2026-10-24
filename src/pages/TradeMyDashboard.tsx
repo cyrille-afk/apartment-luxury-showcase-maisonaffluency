@@ -283,7 +283,7 @@ export default function TradeMyDashboard() {
                       <MapPin className="h-5 w-5 text-foreground" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-display text-base text-foreground">Studios Showroom</h3>
+                      <h3 className="font-display text-base text-foreground">Studios Gallery</h3>
                       <p className="font-body text-xs text-muted-foreground mt-0.5">Explore featured ateliers and studios</p>
                     </div>
                     <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
