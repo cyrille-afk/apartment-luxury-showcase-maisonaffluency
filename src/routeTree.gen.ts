@@ -174,6 +174,7 @@ import { Route as DesignersStephaneCgProductSlugRouteImport } from './routes/des
 import { Route as ProductsCategoryCategorySlugSubcategorySlugRouteImport } from './routes/products-category_.$categorySlug_.$subcategorySlug'
 import { Route as SharedBoardTokenRouteImport } from './routes/shared_.board_.$token'
 import { Route as StudiosSlugInsightsRouteImport } from './routes/studios_.$slug_.insights'
+import { Route as TradeAdminAccountIdentitiesRouteImport } from './routes/trade.admin_.account-identities'
 import { Route as TradeAdminAcquisitionsRouteImport } from './routes/trade.admin_.acquisitions'
 import { Route as TradeAdminAiUsageRouteImport } from './routes/trade.admin_.ai-usage'
 import { Route as TradeAdminAxonometricCadQaRouteImport } from './routes/trade.admin_.axonometric-cad-qa'
@@ -1095,6 +1096,12 @@ const StudiosSlugInsightsRoute = StudiosSlugInsightsRouteImport.update({
   path: '/studios/$slug/insights',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TradeAdminAccountIdentitiesRoute =
+  TradeAdminAccountIdentitiesRouteImport.update({
+    id: '/admin_/account-identities',
+    path: '/admin/account-identities',
+    getParentRoute: () => TradeRoute,
+  } as any)
 const TradeAdminAcquisitionsRoute = TradeAdminAcquisitionsRouteImport.update({
   id: '/admin_/acquisitions',
   path: '/admin/acquisitions',
@@ -1727,6 +1734,7 @@ export interface FileRoutesByFullPath {
   '/products-category/$categorySlug/$subcategorySlug': typeof ProductsCategoryCategorySlugSubcategorySlugRoute
   '/shared/board/$token': typeof SharedBoardTokenRoute
   '/studios/$slug/insights': typeof StudiosSlugInsightsRoute
+  '/trade/admin/account-identities': typeof TradeAdminAccountIdentitiesRoute
   '/trade/admin/acquisitions': typeof TradeAdminAcquisitionsRoute
   '/trade/admin/ai-usage': typeof TradeAdminAiUsageRoute
   '/trade/admin/axonometric-cad-qa': typeof TradeAdminAxonometricCadQaRoute
@@ -1980,6 +1988,7 @@ export interface FileRoutesByTo {
   '/products-category/$categorySlug/$subcategorySlug': typeof ProductsCategoryCategorySlugSubcategorySlugRoute
   '/shared/board/$token': typeof SharedBoardTokenRoute
   '/studios/$slug/insights': typeof StudiosSlugInsightsRoute
+  '/trade/admin/account-identities': typeof TradeAdminAccountIdentitiesRoute
   '/trade/admin/acquisitions': typeof TradeAdminAcquisitionsRoute
   '/trade/admin/ai-usage': typeof TradeAdminAiUsageRoute
   '/trade/admin/axonometric-cad-qa': typeof TradeAdminAxonometricCadQaRoute
@@ -2235,6 +2244,7 @@ export interface FileRoutesById {
   '/products-category_/$categorySlug_/$subcategorySlug': typeof ProductsCategoryCategorySlugSubcategorySlugRoute
   '/shared_/board_/$token': typeof SharedBoardTokenRoute
   '/studios_/$slug_/insights': typeof StudiosSlugInsightsRoute
+  '/trade/admin_/account-identities': typeof TradeAdminAccountIdentitiesRoute
   '/trade/admin_/acquisitions': typeof TradeAdminAcquisitionsRoute
   '/trade/admin_/ai-usage': typeof TradeAdminAiUsageRoute
   '/trade/admin_/axonometric-cad-qa': typeof TradeAdminAxonometricCadQaRoute
@@ -2491,6 +2501,7 @@ export interface FileRouteTypes {
     | '/products-category/$categorySlug/$subcategorySlug'
     | '/shared/board/$token'
     | '/studios/$slug/insights'
+    | '/trade/admin/account-identities'
     | '/trade/admin/acquisitions'
     | '/trade/admin/ai-usage'
     | '/trade/admin/axonometric-cad-qa'
@@ -2744,6 +2755,7 @@ export interface FileRouteTypes {
     | '/products-category/$categorySlug/$subcategorySlug'
     | '/shared/board/$token'
     | '/studios/$slug/insights'
+    | '/trade/admin/account-identities'
     | '/trade/admin/acquisitions'
     | '/trade/admin/ai-usage'
     | '/trade/admin/axonometric-cad-qa'
@@ -2998,6 +3010,7 @@ export interface FileRouteTypes {
     | '/products-category_/$categorySlug_/$subcategorySlug'
     | '/shared_/board_/$token'
     | '/studios_/$slug_/insights'
+    | '/trade/admin_/account-identities'
     | '/trade/admin_/acquisitions'
     | '/trade/admin_/ai-usage'
     | '/trade/admin_/axonometric-cad-qa'
@@ -4350,6 +4363,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudiosSlugInsightsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/trade/admin_/account-identities': {
+      id: '/trade/admin_/account-identities'
+      path: '/admin/account-identities'
+      fullPath: '/trade/admin/account-identities'
+      preLoaderRoute: typeof TradeAdminAccountIdentitiesRouteImport
+      parentRoute: typeof TradeRoute
+    }
     '/trade/admin_/acquisitions': {
       id: '/trade/admin_/acquisitions'
       path: '/admin/acquisitions'
@@ -5040,6 +5060,7 @@ interface TradeRouteChildren {
   TradeToolsRoute: typeof TradeToolsRoute
   TradeVisualiserRoute: typeof TradeVisualiserRoute
   TradeIndexRoute: typeof TradeIndexRoute
+  TradeAdminAccountIdentitiesRoute: typeof TradeAdminAccountIdentitiesRoute
   TradeAdminAcquisitionsRoute: typeof TradeAdminAcquisitionsRoute
   TradeAdminAiUsageRoute: typeof TradeAdminAiUsageRoute
   TradeAdminAxonometricCadQaRoute: typeof TradeAdminAxonometricCadQaRoute
@@ -5191,6 +5212,7 @@ const TradeRouteChildren: TradeRouteChildren = {
   TradeToolsRoute: TradeToolsRoute,
   TradeVisualiserRoute: TradeVisualiserRoute,
   TradeIndexRoute: TradeIndexRoute,
+  TradeAdminAccountIdentitiesRoute: TradeAdminAccountIdentitiesRoute,
   TradeAdminAcquisitionsRoute: TradeAdminAcquisitionsRoute,
   TradeAdminAiUsageRoute: TradeAdminAiUsageRoute,
   TradeAdminAxonometricCadQaRoute: TradeAdminAxonometricCadQaRoute,
