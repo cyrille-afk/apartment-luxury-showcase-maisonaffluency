@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { lazy, Suspense } from "react";
 import CloudUpload from "@/components/trade/CloudUpload";
 import LegendPreview from "@/components/admin/LegendPreview";
@@ -268,6 +269,19 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
       return next;
     });
   }, [expandedPickStorageKey]);
+
+  // Bulk Studio Mode visibility: per-row selection + one UPDATE for the set.
+  const [selectedPickIds, setSelectedPickIds] = useState<Set<string>>(new Set());
+  const [bulkStudioBusy, setBulkStudioBusy] = useState(false);
+
+  const togglePickSelected = useCallback((id: string, checked: boolean) => {
+    setSelectedPickIds((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  }, []);
 
   const loadPicks = useCallback(async () => {
     const { data, error } = await applyCuratorPickOrder(
