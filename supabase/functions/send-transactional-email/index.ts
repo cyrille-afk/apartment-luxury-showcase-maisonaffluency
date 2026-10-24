@@ -289,6 +289,7 @@ Deno.serve(async (req) => {
       template_name: templateName,
       recipient_email: effectiveRecipient,
       status: 'suppressed',
+      metadata: { idempotency_key: idempotencyKey },
     })
 
     console.log('Email suppressed', { templateName })
@@ -405,6 +406,7 @@ Deno.serve(async (req) => {
       status: 'suppressed',
       error_message:
         'Unsubscribe token used but email missing from suppressed list',
+      metadata: { idempotency_key: idempotencyKey },
     })
     return new Response(
       JSON.stringify({ success: false, reason: 'email_suppressed' }),
