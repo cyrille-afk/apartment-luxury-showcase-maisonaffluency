@@ -13488,6 +13488,19 @@ export type Database = {
         Args: { _state: string; _studio_id: string }
         Returns: boolean
       }
+      studio_invitation_list: {
+        Args: { _studio_id: string }
+        Returns: {
+          accepted_at: string
+          created_at: string
+          email: string
+          email_status: string
+          expires_at: string
+          id: string
+          role: Database["public"]["Enums"]["studio_role"]
+          status: string
+        }[]
+      }
       studio_invite_link_status: { Args: { _invite_id: string }; Returns: Json }
       submit_board_feedback: {
         Args: {
