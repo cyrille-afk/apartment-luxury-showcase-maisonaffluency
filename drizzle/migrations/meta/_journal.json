@@ -1639,6 +1639,13 @@
       "when": 1792829285777,
       "tag": "0233_account_identity_reviews",
       "breakpoints": true
+    },
+    {
+      "idx": 234,
+      "version": "7",
+      "when": 1792830666089,
+      "tag": "0234_fix_quote_pricing_tier_compare",
+      "breakpoints": true
     }
   ]
 }
