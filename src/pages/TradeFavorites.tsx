@@ -460,9 +460,9 @@ export default function TradeFavorites() {
 
         {/* Content */}
         {loading ? (
-          favoritesViewMode === "grid" ? <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          favoritesViewMode === "grid" ? <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:gap-x-6 md:grid-cols-3 lg:gap-x-8 lg:gap-y-8">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="aspect-[4/5] w-full animate-pulse bg-muted" />
+              <div key={i} className="aspect-square w-full animate-pulse bg-muted" />
             ))}
           </div> : <div className="border-t border-border">
             {Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-16 animate-pulse border-b border-border bg-muted/40" />)}
@@ -491,19 +491,19 @@ export default function TradeFavorites() {
             </div>
           </div>
         ) : favoritesViewMode === "grid" ? (
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:gap-x-6 md:grid-cols-3 lg:gap-x-8 lg:gap-y-8">
             {filtered.map((fav) => (
               <article
                 key={fav.favoriteId}
-                className="group flex flex-col cursor-pointer"
+                className="group relative min-w-0 flex flex-col cursor-pointer"
                 onClick={() => { setAddedToQuote(false); setLightboxProduct(favToLightboxItem(fav)); }}
               >
                 <div className={cn(
-                  "relative aspect-[4/5] w-full overflow-hidden bg-background",
+                  "relative aspect-square w-full overflow-hidden bg-[hsl(var(--product-canvas))]",
                   selectedFor3D.has(fav.productId) && "outline outline-1 outline-foreground outline-offset-4"
                 )}>
                   {fav.image_url ? (
-                    <img src={fav.image_url} alt={fav.product_name} width={800} height={1000} decoding="async" className="h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.015]" loading="lazy" />
+                    <img src={fav.image_url} alt={fav.product_name} width={800} height={1000} decoding="async" className="absolute inset-0 h-full w-full object-contain object-center mix-blend-multiply p-6 transition-all duration-700 group-hover:scale-105" loading="lazy" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
                       <Heart className="w-8 h-8" />
@@ -512,10 +512,10 @@ export default function TradeFavorites() {
                   <button
                     onClick={(e) => { e.stopPropagation(); toggle3D(fav.productId); }}
                     className={cn(
-                       "absolute left-3 top-3 flex h-8 w-8 items-center justify-center bg-background/90 backdrop-blur-sm transition-all",
+                       "absolute left-2 top-2 z-10 flex items-center justify-center rounded-full p-1.5 transition-all",
                       selectedFor3D.has(fav.productId)
-                         ? "text-foreground"
-                         : "text-muted-foreground opacity-0 group-hover:opacity-100 focus:opacity-100"
+                         ? "bg-background/90 text-foreground shadow-md"
+                         : "bg-background/70 text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-background/90 focus:opacity-100"
                     )}
                     title="Select for 3D Studio"
                   >
@@ -524,14 +524,21 @@ export default function TradeFavorites() {
                   <button
                     onClick={(e) => { e.stopPropagation(); removeFavorite(fav.favoriteId); }}
                     disabled={removing === fav.favoriteId}
-                    className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center bg-background/90 text-muted-foreground opacity-0 backdrop-blur-sm transition-opacity hover:text-destructive group-hover:opacity-100 focus:opacity-100"
+                    className="absolute right-2 top-2 z-10 flex items-center justify-center rounded-full bg-background/70 p-1.5 text-muted-foreground opacity-0 transition-all hover:bg-background/90 hover:text-destructive group-hover:opacity-100 focus:opacity-100"
                   >
                     {removing === fav.favoriteId ? <DotCircleLoader size="sm" className="w-3.5 h-3.5" /> : <Trash2 className="w-3.5 h-3.5" />}
                   </button>
                 </div>
-                <div className="flex flex-col items-center pt-4">
-                  <p className="font-display text-[15px] font-light leading-snug text-foreground line-clamp-2 min-h-[2.75rem]">{fav.product_name}</p>
-                  <p className="font-display text-xs font-light text-muted-foreground mt-1.5">{fav.brand_name}</p>
+                <div className="flex flex-col pt-2 pb-1 text-left">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <p className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted-foreground line-clamp-1">{fav.brand_name}</p>
+                    <span className="font-sans text-[10px] uppercase tracking-[0.14em] text-muted-foreground shrink-0 text-right" data-trade-sensitive>
+                      {displayPriceCents(fav)
+                        ? formatPriceConverted(displayPriceCents(fav) as number, fav.currency, currency, rates)
+                        : "Price upon Request"}
+                    </span>
+                  </div>
+                  <h3 className="mt-1.5 min-h-[2.5rem] font-display text-[14px] leading-snug text-foreground sm:text-[15px] line-clamp-2">{fav.product_name}</h3>
                 </div>
               </article>
             ))}
