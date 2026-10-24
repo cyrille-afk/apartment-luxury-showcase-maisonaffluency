@@ -1,8 +1,8 @@
 # Roadmap — Automatic Visual Search Indexing
 
 ## Repeated redirect blank page
-- [ ] Verify the reported repeat-visit failure and keep pending-navigation remount protection.
-- [ ] Fix confirmed redirect deduplication and verify immediate repeat navigation without blank pages.
+- [x] Reproduced an empty /public-piece page on immediate repeat navigation in a real TanStack router test before fixing the guard.
+- [x] Scope deduplication to router/resolved visit and release settled attempts; all five redirect tests pass. Signed-in Ondas public-to-Trade visits both render, second in 0.78 seconds with no browser errors; current app build is clean.
 
 ## Reviewed quote client PDF export
 - [x] Add a client-ready PDF download to quote review using the shared branded document and existing checks; export does not publish, email or change status.
