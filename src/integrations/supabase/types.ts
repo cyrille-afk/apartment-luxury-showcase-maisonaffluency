@@ -3360,6 +3360,7 @@ export type Database = {
           gallery_captions: Json | null
           gallery_images: string[] | null
           height_mm: number | null
+          hidden_in_studio: boolean
           hover_image_url: string | null
           hs_code: string | null
           hs_code_rules: Json
@@ -3437,6 +3438,7 @@ export type Database = {
           gallery_captions?: Json | null
           gallery_images?: string[] | null
           height_mm?: number | null
+          hidden_in_studio?: boolean
           hover_image_url?: string | null
           hs_code?: string | null
           hs_code_rules?: Json
@@ -3514,6 +3516,7 @@ export type Database = {
           gallery_captions?: Json | null
           gallery_images?: string[] | null
           height_mm?: number | null
+          hidden_in_studio?: boolean
           hover_image_url?: string | null
           hs_code?: string | null
           hs_code_rules?: Json
