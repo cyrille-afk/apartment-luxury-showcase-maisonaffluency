@@ -1,5 +1,8 @@
 # Roadmap — Automatic Visual Search Indexing
 
+## Studio creation access failure
+- [ ] Reproduce non-admin studio creation, correct the failing access rule and verify ownership plus read-back.
+
 ## Google Trade access requests
 - [x] Add name/email submission through the existing validated inquiry handler, admin-visible storage and staff notifications; no account or approval changes.
 - [x] Verify signed-in real submission, admin read-back, sent notification logs and six validation/recovery tests; remove test inquiry.
