@@ -35,7 +35,7 @@ interface ProductPageContainerProps {
 export default function ProductPageContainer({
   isInsideTradePortal,
 }: ProductPageContainerProps) {
-  const { pathname, search } = useLocation();
+  const { pathname, search, state } = useLocation();
   const { slug: designerSlug, productSlug } = useParams<{ slug?: string; productSlug?: string }>();
   const { user, isTradeUser, isAdmin, isSuperAdmin, tradeStatus, rolesLoaded } = useAuth();
   const { clientSafe } = useClientSafeMode();
@@ -68,6 +68,7 @@ export default function ProductPageContainer({
     return (
       <Navigate
         to={`${pathname.replace(/\/[^/]*$/, "")}/${legacyCanonical}${search}`}
+        state={state}
         replace
       />
     );
@@ -76,7 +77,7 @@ export default function ProductPageContainer({
   if (user && !rolesLoaded && !routeInsideTradePortal) return <PageLoadingSkeleton />;
   if (!routeInsideTradePortal && tradeSessionLatched && !designerSlug && productSlug) {
     if (shortRouteProduct.data?.product?.id) {
-      return <Navigate to={`/trade/products/${shortRouteProduct.data.product.id}${search}`} replace />;
+      return <Navigate to={`/trade/products/${shortRouteProduct.data.product.id}${search}`} state={state} replace />;
     }
     if (shortRouteProduct.isLoading) return <PageLoadingSkeleton />;
   }
@@ -88,6 +89,7 @@ export default function ProductPageContainer({
     return (
       <Navigate
         to={`/trade/products/${designerSlug}/${productSlug}${search}`}
+        state={state}
         replace
       />
     );
