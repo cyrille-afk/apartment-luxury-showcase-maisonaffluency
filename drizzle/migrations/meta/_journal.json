@@ -1625,6 +1625,13 @@
       "when": 1792827244794,
       "tag": "0231_automatic_catalogue_image_queue",
       "breakpoints": true
+    },
+    {
+      "idx": 232,
+      "version": "7",
+      "when": 1792828652243,
+      "tag": "0232_studio_creator_returning_visibility",
+      "breakpoints": true
     }
   ]
 }
