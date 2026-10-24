@@ -6,8 +6,9 @@
 @custom-variant short (@media (max-height: 780px));
 
 /* Felix AI assistant identity: one quiet bronze treatment — a hairline outline
-   with bronze ink, never a filled block — so AI affordances read as elegant and
-   clearly interactive without dominating the ivory canvas. */
+   with bronze ink, or a bare bronze text link, never a filled block — so AI
+   affordances read as elegant and clearly interactive without dominating the
+   ivory canvas. */
 @utility felix-surface {
   /* The outline button variant ships border/bg/hover classes that would win the
      cascade, so the Felix treatment asserts its own values. */
@@ -33,6 +34,32 @@
 @utility felix-mark {
   color: hsl(var(--felix-mark-text));
   & .felix-mark-dot { background-color: hsl(var(--felix-bronze)); }
+}
+
+/* Felix inline identity: the assistant's name as an editorial text link —
+   no box, no fill, no padding. The underline is painted on the label only,
+   so the icon never sits on a rule. */
+@utility felix-inline {
+  background-color: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  color: hsl(var(--felix-bronze-ink)) !important;
+  transition: color 220ms ease;
+  & .felix-inline-text {
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.34em;
+    text-decoration-color: transparent;
+    transition: text-decoration-color 220ms ease;
+  }
+  &:hover .felix-inline-text,
+  &:focus-visible .felix-inline-text {
+    text-decoration-color: hsl(var(--felix-bronze-deep));
+  }
+  &:focus-visible {
+    outline: 1px solid hsl(var(--felix-bronze-deep));
+    outline-offset: 4px;
+  }
 }
 
 /* Tailwind v3 compatibility: v4 defaults borders to currentColor. */
