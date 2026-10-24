@@ -395,18 +395,35 @@ const TradeDashboard = () => {
                 {profile.company} • {tierLabel} partner
               </p>
             )}
-            {desktopTour && <Button
-              type="button"
-              variant="outline"
-              onClick={startFelixTour}
-              aria-label={firstWelcome ? `Meet ${guideName}` : "Replay the onboarding tour"}
-              className="felix-surface mt-4 inline-flex min-h-9 items-center gap-2 px-4 py-2 font-body text-xs font-semibold uppercase tracking-[0.14em]"
-            >
-              {firstWelcome
-                ? <Sparkles aria-hidden className="h-3.5 w-3.5" />
-                : <RotateCcw aria-hidden className="h-3.5 w-3.5" />}
-              {firstWelcome ? `Meet ${guideName}` : "Replay the onboarding tour"}
-            </Button>}
+            {desktopTour && (firstWelcome ? (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={startFelixTour}
+                aria-label={`Meet ${guideName}`}
+                className="felix-surface mt-4 inline-flex min-h-9 items-center gap-2 px-4 py-2 font-body text-xs font-semibold uppercase tracking-[0.14em]"
+              >
+                <Sparkles aria-hidden className="h-3.5 w-3.5" />
+                {`Meet ${guideName}`}
+              </Button>
+            ) : (
+              <button
+                type="button"
+                onClick={startFelixTour}
+                aria-label="Replay the onboarding tour"
+                className="felix-surface group/replay relative mt-4 inline-flex min-h-9 items-center gap-2 rounded-md px-4 py-2 font-body text-xs font-semibold tracking-[0.1em]"
+              >
+                <RotateCcw aria-hidden className="h-3 w-3 transition-transform duration-300 group-hover/replay:-rotate-180" />
+                <span>Meet Felix</span>
+                <span
+                  role="tooltip"
+                  aria-hidden="true"
+                  className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 -translate-x-1/2 whitespace-nowrap rounded-sm border border-[hsl(var(--felix-bronze-deep)/0.35)] bg-background px-3 py-1.5 font-body text-[10px] uppercase tracking-[0.16em] text-[hsl(var(--felix-bronze-ink))] opacity-0 shadow-sm transition-opacity duration-200 group-hover/replay:opacity-100"
+                >
+                  Replay the Onboarding Tour
+                </span>
+              </button>
+            ))}
             <MobileTradeTourNotice />
           </div>
           {spendCents !== null && tier !== "platinum" && tierConfig.gold.min_spend_cents > 0 && (() => {
