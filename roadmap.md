@@ -1,5 +1,9 @@
 # Roadmap — Automatic Visual Search Indexing
 
+## Google Trade access requests
+- [ ] Add protected name/email submission, durable admin-visible storage and staff notification using existing request pipeline.
+- [ ] Verify real submission, saved record, notification outcome and validation tests.
+
 - [x] Add minimum visual-match and maximum result controls; verified default 8, expanded 12, 100% empty state and 74% filtered results against a real uploaded room photo; five tests pass.
 
 - [x] Existing real Visual Search, catalogue backfill and distinct-room checks completed.
