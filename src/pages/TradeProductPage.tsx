@@ -52,7 +52,7 @@ import { useProjectInventory } from "@/contexts/ProjectInventoryContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
 import { updateConciergeSession } from "@/hooks/useConciergeSession";
-import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
+import TradeFavoriteFolderPicker from "@/components/trade/TradeFavoriteFolderPicker";
 
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -2334,17 +2334,11 @@ const TradeProductPage: React.FC = () => {
               <button type="button" aria-label="Open full-screen gallery" title="Full screen" onClick={() => setFsStart(asset === "3d" ? 0 : (r3d ? 1 : 0) + (photoIdx ?? 0))} className="flex h-9 w-9 items-center justify-center rounded-full border border-border/40 bg-background/80 text-foreground/80 backdrop-blur-md hover:text-foreground">
                 <FsIcon className="h-4 w-4" strokeWidth={1.5} />
               </button>
-              <CornerTooltip label={favorited ? "Saved to Project" : "Add to Project"} side="bottom" align="end">
-                <AddToProjectPopover
-                  productId={favoriteId}
-                  productName={product.title}
-                  onAdded={async () => { if (!isFavorited(favoriteId)) await toggleFavorite(favoriteId); }}
-                >
+              <TradeFavoriteFolderPicker productId={favoriteId} productName={product.title} align="end">
                   <button type="button" aria-label="Add to Project" className="flex h-9 w-9 items-center justify-center rounded-full border border-border/40 bg-background/80 text-foreground/80 backdrop-blur-md">
                     <Heart className={cn("h-4 w-4", favorited && "fill-current")} strokeWidth={1.5} />
                   </button>
-                </AddToProjectPopover>
-              </CornerTooltip>
+                </TradeFavoriteFolderPicker>
             </div>
           </div>
         </div>
@@ -2446,17 +2440,7 @@ const TradeProductPage: React.FC = () => {
                   </button>
                   {/* Description now reads as Curator Notes below the gallery,
                       matching the public product page. */}
-                  <CornerTooltip label={favorited ? "Saved to Project" : "Add to Project"} side="bottom" align="end">
-                    <AddToProjectPopover
-                      productId={favoriteId}
-                      productName={product.title}
-                      onAdded={async () => {
-                        if (!isFavorited(favoriteId)) {
-                          await toggleFavorite(favoriteId);
-                        }
-                      }}
-                      align="end"
-                    >
+                  <TradeFavoriteFolderPicker productId={favoriteId} productName={product.title} align="end">
                       <button
                         onClick={(e) => e.stopPropagation()}
                         aria-label={favorited ? "Saved to favorites" : "Add to favorites"}
@@ -2464,8 +2448,7 @@ const TradeProductPage: React.FC = () => {
                       >
                         <Heart size={18} strokeWidth={1.5} className={cn(favorited ? "fill-destructive text-destructive" : "text-foreground/80")} />
                       </button>
-                    </AddToProjectPopover>
-                  </CornerTooltip>
+                    </TradeFavoriteFolderPicker>
                 </div>
               }
               bottomRightOverlay={(() => {
