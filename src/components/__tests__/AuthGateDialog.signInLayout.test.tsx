@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, cleanup } from "@testing-library/react";
+import { act, fireEvent, render, screen, cleanup } from "@testing-library/react";
 import AuthGateDialog from "../AuthGateDialog";
 
 const toast = vi.hoisted(() => vi.fn());
@@ -106,8 +106,9 @@ describe("Sign-in modal layout and copy", () => {
     fireEvent.change(dialog.querySelector('input[type="password"]') as HTMLInputElement, {
       target: { value: "wrongpassword1!" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /^Sign In$/ }));
-
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /^Sign In$/ }));
+    });
     await vi.waitFor(() => expect(toast).toHaveBeenCalled());
     expect(toast).toHaveBeenCalledWith(
       expect.objectContaining({
