@@ -1187,7 +1187,7 @@ const PublicDesignerProfile = ({ presentation = false }: { presentation?: boolea
         )}>
           <div className={cn("flex items-center justify-between")}>
             {presentation ? (
-              <Link to={tradeGalleryReturnPath()} className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground font-body text-[11px] uppercase"><ArrowLeft className="h-3.5 w-3.5" />{tradeGalleryReturnPath().startsWith("/trade/gallery") ? "Back to Gallery" : "The Collection"}</Link>
+              <Link to={tradeGalleryReturnPath(location.pathname)} className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground font-body text-[11px] uppercase"><ArrowLeft className="h-3.5 w-3.5" />{tradeGalleryReturnPath(location.pathname).startsWith("/trade/gallery") ? "Back to Gallery" : "The Collection"}</Link>
             ) : fromProduct ? (
               <Link
                 to={fromProduct}

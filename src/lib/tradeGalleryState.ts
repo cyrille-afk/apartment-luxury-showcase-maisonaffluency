@@ -22,10 +22,13 @@ export function saveTradeGalleryState(path: string, state: TradeGalleryState, se
     sessionStorage.setItem(PREFIX + "return", path + search);
   } catch { /* Storage may be disabled. */ }
 }
-export function tradeGalleryReturnPath() {
+export function tradeGalleryReturnPath(currentPath?: string) {
   try {
     const path = sessionStorage.getItem(PREFIX + "return");
-    if (path && isTradeGalleryListing(path.split("?")[0])) return path;
+    if (path && isTradeGalleryListing(path.split("?")[0])) {
+      if (currentPath && path.split("?")[0].replace(/\/$/, "") === currentPath.split("?")[0].replace(/\/$/, "")) return "/trade/gallery";
+      return path;
+    }
   } catch { /* Use the normal Trade entry. */ }
-  return "/trade/the-collection?tab=designers";
+  return currentPath && isTradeGalleryListing(currentPath.split("?")[0]) ? "/trade/gallery" : "/trade/the-collection?tab=designers";
 }
