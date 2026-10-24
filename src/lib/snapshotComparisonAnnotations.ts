@@ -5,9 +5,9 @@ import { z } from 'zod';
 
 const annotationsSchema = z.object({
   summary: z.string().max(1200).optional(),
-  notes: z.record(z.string().max(600)).optional(),
+  notes: z.record(z.string(), z.string().max(600)).optional(),
   highlightChanges: z.boolean().optional(),
-  photos: z.record(z.array(z.string().max(2200000).regex(/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/)).max(3)).optional(),
+  photos: z.record(z.string(), z.array(z.string().max(2200000).regex(/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/)).max(3)).optional(),
 });
 export function validateComparisonAnnotations(value: unknown): ComparisonAnnotations {
   const parsed = annotationsSchema.parse(value);

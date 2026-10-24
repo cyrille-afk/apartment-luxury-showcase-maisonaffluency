@@ -6,7 +6,7 @@ const presentationSchema = z.object({
   title: z.string().min(1).max(120), studioName: z.string(),
   studioLogo: z.union([hostedUrl, z.literal("")]).nullable().transform(value => value || null),
   floorPlanUrl: hostedUrl.nullable(),
-  views: z.array(z.object({ id: z.string().uuid(), name: z.string(), created_at: z.string(),
+  views: z.array(z.object({ id: z.string().guid(), name: z.string(), created_at: z.string(),
     floorPlanUrl: hostedUrl.nullable(), bounds: z.object({ width: z.number().positive().max(100), depth: z.number().positive().max(100), height: z.number().positive().max(100) }),
     scene: z.unknown(),
   })).max(20),

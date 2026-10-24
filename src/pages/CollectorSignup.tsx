@@ -59,7 +59,7 @@ const CollectorSignup = () => {
     const parsed = schema.safeParse(form);
     if (!parsed.success) {
       const fieldErrs: Record<string, string> = {};
-      parsed.error.errors.forEach((er) => {
+      parsed.error.issues.forEach((er) => {
         if (er.path[0]) fieldErrs[String(er.path[0])] = er.message;
       });
       setErrors(fieldErrs);

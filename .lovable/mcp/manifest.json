@@ -27,42 +27,42 @@
           "openWorldHint": false
         },
         "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
           "properties": {
             "query": {
+              "description": "Free-text query matched against title, subtitle, materials, and tags.",
               "type": "string",
-              "maxLength": 200,
-              "description": "Free-text query matched against title, subtitle, materials, and tags."
+              "maxLength": 200
             },
             "designer_slug": {
+              "description": "Restrict to a specific designer by slug.",
               "type": "string",
-              "maxLength": 120,
-              "description": "Restrict to a specific designer by slug."
+              "maxLength": 120
             },
             "category": {
+              "description": "Top-level category, e.g. 'Seating', 'Lighting', 'Tables'.",
               "type": "string",
-              "maxLength": 80,
-              "description": "Top-level category, e.g. 'Seating', 'Lighting', 'Tables'."
+              "maxLength": 80
             },
             "subcategory": {
+              "description": "Subcategory, e.g. 'Sofa', 'Pendant', 'Console'.",
               "type": "string",
-              "maxLength": 80,
-              "description": "Subcategory, e.g. 'Sofa', 'Pendant', 'Console'."
+              "maxLength": 80
             },
             "material": {
+              "description": "Material substring, e.g. 'bronze', 'walnut'.",
               "type": "string",
-              "maxLength": 80,
-              "description": "Material substring, e.g. 'bronze', 'walnut'."
+              "maxLength": 80
             },
             "limit": {
+              "description": "Max results. Server enforces a minimum of 10; default 20.",
               "type": "integer",
               "minimum": 1,
-              "maximum": 50,
-              "description": "Max results. Server enforces a minimum of 10; default 20."
+              "maximum": 50
             }
           },
-          "additionalProperties": false,
-          "$schema": "http://json-schema.org/draft-07/schema#"
+          "additionalProperties": false
         },
         "outputSchema": null
       },
@@ -76,19 +76,20 @@
           "openWorldHint": false
         },
         "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
           "properties": {
             "pick_id": {
               "type": "string",
               "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
               "description": "The curator pick id returned by search_curator_picks."
             }
           },
           "required": [
             "pick_id"
           ],
-          "additionalProperties": false,
-          "$schema": "http://json-schema.org/draft-07/schema#"
+          "additionalProperties": false
         },
         "outputSchema": null
       },
@@ -102,17 +103,17 @@
           "openWorldHint": false
         },
         "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
           "properties": {
             "limit": {
+              "description": "Maximum number of active project folders to return. Defaults to all active folders.",
               "type": "integer",
               "minimum": 1,
-              "maximum": 100,
-              "description": "Maximum number of active project folders to return. Defaults to all active folders."
+              "maximum": 100
             }
           },
-          "additionalProperties": false,
-          "$schema": "http://json-schema.org/draft-07/schema#"
+          "additionalProperties": false
         },
         "outputSchema": null
       },
@@ -126,11 +127,13 @@
           "openWorldHint": false
         },
         "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
           "properties": {
             "productId": {
               "type": "string",
               "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
               "description": "Stable id of the catalogue product to stage, as returned by search_curator_picks."
             },
             "productName": {
@@ -151,8 +154,7 @@
             "productName",
             "targetWorkflow"
           ],
-          "additionalProperties": false,
-          "$schema": "http://json-schema.org/draft-07/schema#"
+          "additionalProperties": false
         },
         "outputSchema": null
       },
@@ -166,6 +168,7 @@
           "openWorldHint": false
         },
         "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
           "properties": {
             "totalRetailValue": {
@@ -174,6 +177,8 @@
               "description": "Total retail (RRP) value of the selection, in any single currency."
             },
             "tradeDiscountPercentage": {
+              "default": 15,
+              "description": "Trade discount percentage off retail, or a Maison Affluency tier name. Defaults to 15 (Platinum Tier). Tiers: 'Platinum Tier' = 15%, 'Gold Tier' = 12%, 'Silver Tier' = 10%.",
               "anyOf": [
                 {
                   "type": "number"
@@ -186,29 +191,26 @@
                     "Silver Tier"
                   ]
                 }
-              ],
-              "default": 15,
-              "description": "Trade discount percentage off retail, or a Maison Affluency tier name. Defaults to 15 (Platinum Tier). Tiers: 'Platinum Tier' = 15%, 'Gold Tier' = 12%, 'Silver Tier' = 10%."
+              ]
             },
             "logisticsFeePercentage": {
+              "default": 5,
+              "description": "Logistics/delivery fee as a percentage of the net trade cost. Defaults to 5 (Singapore delivery).",
               "type": "number",
               "minimum": 0,
-              "maximum": 100,
-              "default": 5,
-              "description": "Logistics/delivery fee as a percentage of the net trade cost. Defaults to 5 (Singapore delivery)."
+              "maximum": 100
             },
             "clientMarkupPercentage": {
+              "description": "Designer's markup percentage on top of total cost, to derive the suggested client price. Optional; omit for cost-only breakdown.",
               "type": "number",
               "minimum": 0,
-              "maximum": 500,
-              "description": "Designer's markup percentage on top of total cost, to derive the suggested client price. Optional; omit for cost-only breakdown."
+              "maximum": 500
             }
           },
           "required": [
             "totalRetailValue"
           ],
-          "additionalProperties": false,
-          "$schema": "http://json-schema.org/draft-07/schema#"
+          "additionalProperties": false
         },
         "outputSchema": null
       }
