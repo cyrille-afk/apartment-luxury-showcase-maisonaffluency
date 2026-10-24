@@ -1,6 +1,16 @@
 export type TourRect = { top: number; left: number; width: number; height: number };
 type Bounds = { left: number; top: number; right: number; bottom: number };
 
+/** Reserve the full explanation above a wide panel, rather than centering only the panel. */
+export function tourPanelLandingScrollDelta({ target, cardHeight, viewportHeight }: {
+  target: TourRect;
+  cardHeight: number;
+  viewportHeight: number;
+}): number {
+  const desiredTop = Math.min(cardHeight + 28, Math.max(28, viewportHeight - target.height - 24));
+  return target.top - desiredTop;
+}
+
 /** Find empty viewport space first; never clamp a card back over a protected feature. */
 export function placeTourCard({ viewport, obstacles, width, height, preferred }: {
   viewport: { w: number; h: number };
