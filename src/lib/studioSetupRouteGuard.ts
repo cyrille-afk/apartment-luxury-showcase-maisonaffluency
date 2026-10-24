@@ -1,5 +1,6 @@
 import { redirect } from "@tanstack/react-router";
 import { isStudioSettingsPath, STUDIO_SETUP_PATH, studioSetupComplete } from "./studioSetup";
+import { isStudioInvitationPath } from "./studioInvitationLink";
 
 // Invoked only by the client-only trade layout's beforeLoad. No provider effects
 // are required to resolve these reads on a fresh direct visit.
@@ -34,10 +35,10 @@ export async function readRouteStudioSetup() {
 }
 
 export async function guardStudioSetupRoute(
-  { pathname, preload }: { pathname: string; preload: boolean },
+  { pathname, preload, search = "" }: { pathname: string; preload: boolean; search?: string },
   readSetup: () => Promise<boolean | null> = readRouteStudioSetup,
 ) {
-  if (preload || isStudioSettingsPath(pathname)) return;
+  if (preload || isStudioSettingsPath(pathname) || isStudioInvitationPath(pathname, search)) return;
   // Transient role/studio lookup failures must never become a false completion
   // or a false "incomplete" redirect. Retry, then let the route error UI retry.
   let complete: boolean | null = null;

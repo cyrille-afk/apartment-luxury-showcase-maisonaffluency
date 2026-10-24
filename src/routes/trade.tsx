@@ -39,7 +39,7 @@ function TradeRouteRecovery() {
 
 export const Route = createFileRoute("/trade")({
   ssr: false,
-  beforeLoad: ({ location, preload }) => guardStudioSetupRoute({ pathname: location.pathname, preload }),
+  beforeLoad: ({ location, preload }) => guardStudioSetupRoute({ pathname: location.pathname, search: location.searchStr, preload }),
   errorComponent: TradeRouteRecovery,
   component: () => (
     <Suspense fallback={null}><TradeErrorBoundary><TradeLayout /></TradeErrorBoundary></Suspense>

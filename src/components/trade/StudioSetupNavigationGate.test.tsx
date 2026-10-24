@@ -8,6 +8,12 @@ vi.mock("@/lib/router-compat", () => ({ useLocation: () => ({ pathname: mocks.pa
 afterEach(cleanup);
 beforeEach(() => { mocks.path = "/settings/studio"; mocks.search = ""; vi.clearAllMocks(); });
 describe("studio navigation focus", () => {
+  it("renders recipient acceptance while setup is locked or still loading", () => {
+    mocks.path = "/trade/me"; mocks.search = "?studioInvite=11111111-1111-4111-8111-111111111111";
+    render(<StudioSetupNavigationGate locked ready={false}><span>Invitation acceptance</span></StudioSetupNavigationGate>);
+    expect(screen.getByText("Invitation acceptance")).toBeInTheDocument();
+    expect(screen.queryByTestId("redirect")).toBeNull();
+  });
   it.each(["?studioSetup=required", "??studioSetup=required"])("consumes direct-entry reminder marker %s", search => {
     mocks.search = search;
     render(<StudioSetupNavigationGate locked ready>Settings</StudioSetupNavigationGate>);

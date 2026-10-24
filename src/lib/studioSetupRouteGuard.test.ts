@@ -2,6 +2,12 @@ import { describe, expect, it, vi } from "vitest";
 import { guardStudioSetupRoute } from "./studioSetupRouteGuard";
 
 describe("direct trade route setup guard", () => {
+  it("lets an incomplete member reach their exact invitation without unlocking workspace pages", async () => {
+    const read = vi.fn(async () => false);
+    await guardStudioSetupRoute({ pathname: "/trade/me", search: "?studioInvite=11111111-1111-4111-8111-111111111111", preload: false }, read);
+    expect(read).not.toHaveBeenCalled();
+    await expect(guardStudioSetupRoute({ pathname: "/trade/me", search: "?studioInvite=invalid", preload: false }, read)).rejects.toMatchObject({ options: { to: "/settings/studio" } });
+  });
   it.each(["/trade", "/trade/dashboard", "/trade/the-collection", "/trade/visualiser", "/trade/quotes", "/trade/projects/first-project/studio"])("redirects incomplete direct entry %s before loading", async pathname => {
     await expect(guardStudioSetupRoute({ pathname, preload: false }, async () => false)).rejects.toMatchObject({ options: { to: "/settings/studio", search: { studioSetup: "required" }, replace: true } });
   });

@@ -1,5 +1,12 @@
 const INVITATION_ORIGIN = 'https://www.maisonaffluency.com';
 
+/** Only the recipient invitation screen bypasses setup; redemption still requires the verified-email RPC. */
+export function isStudioInvitationPath(pathname: string, search = ''): boolean {
+  if (pathname.replace(/\/+$/, '') !== '/trade/me') return false;
+  const id = new URLSearchParams(search.replace(/^\?+/, '')).get('studioInvite') || '';
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+}
+
 export function studioInvitationLink(inviteId: string): string {
   const destination = `/trade/me?studioInvite=${encodeURIComponent(inviteId)}`;
   const url = new URL('/trade/login', INVITATION_ORIGIN);
