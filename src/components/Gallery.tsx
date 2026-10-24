@@ -1,4 +1,5 @@
 import { useNavigate } from "@/lib/router-compat";
+import { useNavigate as useProductNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "framer-motion";
 import React, { useRef, useState, useMemo, useEffect, useCallback } from "react";
@@ -559,10 +560,10 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     return [...byKey.values()];
   }, [dbCuratorPicks, manifest]);
 
-  const resolveHotspotPick = useCallback((productName: string, designerName: string, mappedPickId?: string | null): PublicLightboxItem | null => {
+  const resolveHotspotPick = useCallback((productName: string, designerName: string, mappedPickId?: string | null, candidates = allCuratorPicks): PublicLightboxItem | null => {
     // Manual override — admin-picked exact catalog item wins over fuzzy matching.
     if (mappedPickId) {
-      const forced = allCuratorPicks.find((p) => p.id === mappedPickId);
+      const forced = candidates.find((p) => p.id === mappedPickId);
       if (forced) return forced;
     }
     const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
@@ -603,7 +604,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     let bestNoDesigner: PublicLightboxItem | null = null;
     let bestNoDesignerScore = 0;
 
-    for (const item of allCuratorPicks) {
+    for (const item of candidates) {
       const itemName = norm(item.title);
       const itemBrand = norm(item.brand_name);
       const itemTokens = tokenize(itemName);
@@ -665,18 +666,25 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   }, [resolveHotspotPick, navigate, manifest]);
 
   /** Trade mode: hotspot CTA navigates straight to the full product page. */
+  const navigateProduct = useProductNavigate();
   const handleHotspotViewFullProduct = useCallback((productName: string, designerName: string, linkUrl?: string | null, mappedPickId?: string | null) => {
-    const best = resolveHotspotPick(productName, designerName, mappedPickId);
+    // Live catalogue identities take priority over shorter, static editorial
+    // names, which have no owning designer slug and cannot open a product page.
+    const best = resolveHotspotPick(productName, designerName, mappedPickId, dbCuratorPicks)
+      ?? resolveHotspotPick(productName, designerName, mappedPickId);
     if (best?.designer_slug) {
-      const slug = slugifyProduct(best.title + (best.subtitle ? `-${best.subtitle}` : ""));
-      navigate(`/designers/${best.designer_slug}/${slug}`, {
-        state: { from: window.location.pathname + window.location.search },
+      const slug = best.slug || slugifyProduct(best.title + (best.subtitle ? `-${best.subtitle}` : ""));
+      setLightboxOpen(false);
+      navigateProduct({
+        to: "/trade/products/$slug/$productSlug",
+        params: { slug: best.designer_slug, productSlug: slug },
+        state: (previous) => ({ ...previous, from: window.location.pathname + window.location.search }),
       });
       return;
     }
     // No resolvable product page — fall back to the lightbox / link behavior.
     handleHotspotViewProduct(productName, designerName, linkUrl, mappedPickId);
-  }, [resolveHotspotPick, navigate, handleHotspotViewProduct]);
+  }, [resolveHotspotPick, dbCuratorPicks, navigateProduct, handleHotspotViewProduct]);
 
   // Pulsing hotspot hint — always visible on first card of each section
   const showHotspotHint = true;
