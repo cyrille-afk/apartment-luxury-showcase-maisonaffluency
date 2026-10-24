@@ -203,10 +203,30 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
 
 // ---------- Navigate ----------
 
+// One-shot redirect. A <Navigate> that remounts while its target route is
+// still loading (Suspense/auth re-renders) would otherwise re-fire on every
+// mount, cancel the pending navigation and loop until the tab freezes. The
+// module-level guard makes repeat mounts for the same target a no-op.
+const recentRedirects = new Map<string, number>();
+const REDIRECT_DEDUPE_MS = 4000;
+export function shouldFireRedirect(key: string, now = Date.now()): boolean {
+  const last = recentRedirects.get(key);
+  if (last !== undefined && now - last < REDIRECT_DEDUPE_MS) return false;
+  recentRedirects.set(key, now);
+  return true;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function Navigate({ to, replace, state }: { to: To; replace?: boolean; state?: any }) {
   const { pathname, search, hash } = parseTo(to);
-  return <TSNavigate to={pathname as never} search={search as never} hash={hash} state={state as never} replace={replace} />;
+  const nav = tsNavigate();
+  const key = `${pathname}?${JSON.stringify(search ?? {})}#${hash ?? ""}`;
+  useEffect(() => {
+    if (!shouldFireRedirect(key)) return;
+    void nav({ to: pathname as never, search: search as never, hash, state: state as never, replace });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  return null;
 }
 
 // ---------- Outlet ----------
