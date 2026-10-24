@@ -1,5 +1,9 @@
 # Roadmap — Automatic Visual Search Indexing
 
+## Reviewed quote client PDF export
+- [ ] Add a client-ready PDF download to quote review using the shared branded document and existing checks.
+- [ ] Verify snapshot preparation tests and download a real saved quote; inspect the exported PDF.
+
 ## Favorites product opening and registration password
 - [x] Replace Favorites' legacy product overlay with the shared full product destination; live verified Ondas then Dais in Presentation, Ondas in Studio, Technical List navigation and browser Back, with no page errors.
 - [ ] Identify the password-change screen referred to as step 6 and verify its save response; activation, reset and settings code all await the auth update and handle errors. Blocked on identifying the user's screen; no password changed.
