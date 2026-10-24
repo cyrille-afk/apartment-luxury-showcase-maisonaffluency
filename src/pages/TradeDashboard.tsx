@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Image, FileText, FolderOpen, FolderClosed,
-  Clock, FileDown, MapPin, Box, Users, Sparkles, Clapperboard, Play, ArrowUpRight,
+  Clock, FileDown, MapPin, Box, Users, Sparkles, Clapperboard, Play, ArrowUpRight, RotateCcw,
 } from "lucide-react";
 import { startFelixTour } from "@/components/trade/felixTourUtils";
 import { DashboardWelcomeGuide } from "@/components/trade/DashboardWelcomeGuide";
@@ -399,10 +399,13 @@ const TradeDashboard = () => {
               type="button"
               variant="outline"
               onClick={startFelixTour}
+              aria-label={firstWelcome ? `Meet ${guideName}` : "Replay the onboarding tour"}
               className="felix-surface mt-4 inline-flex min-h-9 items-center gap-2 px-4 py-2 font-body text-xs font-semibold uppercase tracking-[0.14em]"
             >
-              <Sparkles aria-hidden className="h-3.5 w-3.5" />
-              Meet {guideName}
+              {firstWelcome
+                ? <Sparkles aria-hidden className="h-3.5 w-3.5" />
+                : <RotateCcw aria-hidden className="h-3.5 w-3.5" />}
+              {firstWelcome ? `Meet ${guideName}` : "Replay the onboarding tour"}
             </Button>}
             <MobileTradeTourNotice />
           </div>
