@@ -17,3 +17,10 @@ it("rejects external return destinations", () => {
   sessionStorage.setItem("ma-trade-gallery-v1:return", "https://example.com");
   expect(tradeGalleryReturnPath()).toBe("/trade/the-collection?tab=designers");
 });
+it("returns to the parent gallery when Studio Mode saved the current designer as the return destination", () => {
+  sessionStorage.setItem("ma-trade-gallery-v1:return", "/trade/gallery/eric-schmitt-studio?category=Living");
+  expect(tradeGalleryReturnPath("/trade/gallery/eric-schmitt-studio")).toBe("/trade/gallery");
+});
+it("direct designer visits return to the parent gallery", () => {
+  expect(tradeGalleryReturnPath("/trade/gallery/eric-schmitt-studio")).toBe("/trade/gallery");
+});
