@@ -1,4 +1,5 @@
 - Trade owns breadcrumbs; Collection opens top; `/trade/gallery/:slug` shares the public profile header; shortcuts use latest.
+- Google sign-in surfaces share GoogleAccessNotice for organisation-block guidance and access requests; provider access is distinct from Trade approval, and Google-hosted error pages cannot be changed by app UI.
 - Felix/Benefits: max-w-[1500px] px-6; Felix left, results right, one useMoodboardSourcing; Benefits 50/50, text left.
 - Admin application actions save review metadata before app-email sends; decline-and-delete queues the notice before deleting, with stable per-application/template idempotency keys — failures must not erase the record.
 - Approve/decline open a side-effect-free draft review; only confirmation runs actions; one shared plain-text copy/parser feeds preview and escaped templates — no HTML.

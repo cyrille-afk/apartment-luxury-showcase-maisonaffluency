@@ -11,6 +11,7 @@ import { recordEmailPortalClick } from "@/lib/emailPortalClick";
 import { Button } from "@/components/ui/button";
 import { MobileTradeTourNotice } from "@/components/trade/MobileTradeTourNotice";
 import { clearGoogleAttempt, readGoogleAttempt, startGoogleAttempt } from "@/lib/googleSignInRecovery";
+import { GoogleAccessNotice } from "@/components/GoogleAccessNotice";
 
 // Monochrome Google "G" — single-path glyph rendered in currentColor so it
 // stays charcoal/grayscale and reads as part of the brand, not a vendor badge.
@@ -242,6 +243,7 @@ const TradeLogin = () => {
             <GoogleGlyph className="w-4 h-4 text-foreground/80" />
             {googleLoading ? "Connecting" : "Continue with Google"}
           </button>
+          <GoogleAccessNotice />
 
           {/* Persistent Google sign-in error with retry — a toast alone
               disappears and leaves the member with no way forward. */}
@@ -257,17 +259,9 @@ const TradeLogin = () => {
               <p className="mt-1.5 font-body text-sm text-foreground/80">
                 {googleLoading ? "Waiting for Google sign-in to complete. Finish signing in in the Google window."
                   : googleSucceeded ? "Opening your requested page."
-                    : "Google sign-in did not complete. Your Lovable session may have expired; you can retry or use email and password."}
+                    : "Google sign-in did not complete. If Google showed ‘Access blocked’ or ‘org_internal’, request access using the email above. Otherwise, retry or use your approved account’s email and password."}
               </p>
               {!googleLoading && !googleSucceeded && <>
-              <ol className="mt-3 list-decimal pl-4 space-y-2 font-body text-sm text-foreground/80">
-                <li>Open Lovable in this browser and sign in to your Lovable account.</li>
-                <li>Return here and retry Google sign-in.</li>
-              </ol>
-              <p className="mt-3 font-body text-sm text-foreground/80">Or sign in with your email address and password above.</p>
-              <Button asChild variant="link" className="mt-2 h-auto px-0 text-foreground">
-                <a href="https://lovable.dev/login" target="_blank" rel="noopener noreferrer">Sign in to Lovable</a>
-              </Button>
               <Button
                 variant="outline"
                 type="button"
