@@ -10,7 +10,6 @@ import {
   useSearch as tsSearch,
   useRouter,
   Link as TSLink,
-  Navigate as TSNavigate,
   Outlet as TSOutlet,
   RouterProvider,
   RouterContextProvider,
