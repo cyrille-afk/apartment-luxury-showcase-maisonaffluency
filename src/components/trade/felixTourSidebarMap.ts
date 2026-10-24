@@ -23,6 +23,8 @@ export interface TourSidebarRef {
   anchor: TourSidebarAnchor;
   /** Human label shown inside the tour card ("Find it later in your sidebar"). */
   label: string;
+  /** "header" = the control lives in the top-right header, not the sidebar (no sidebar pulse). */
+  where?: "sidebar" | "header";
 }
 
 export const FELIX_STEP_SIDEBAR: Record<string, TourSidebarRef> = {
@@ -31,8 +33,8 @@ export const FELIX_STEP_SIDEBAR: Record<string, TourSidebarRef> = {
   quotes: { anchor: "collection", label: "The Collection" },
   projects: { anchor: "projects", label: "Projects & Interventions → Projects" },
   "tier-tracking": { anchor: "dashboard", label: "Dashboard" },
-  "client-safe-presentations": { anchor: "collection", label: "The Collection" },
-  "margin-protection": { anchor: "collection", label: "The Collection" },
+  "client-safe-presentations": { anchor: "collection", label: "Client Editorial Presentation", where: "header" },
+  "margin-protection": { anchor: "collection", label: "Client Editorial Presentation", where: "header" },
   "quote-generation": { anchor: "quotes", label: "Quotes & Proformas" },
   "direct-client-billing": { anchor: "quotes", label: "Quotes & Proformas" },
   tools: { anchor: "tools", label: "Tools" },
