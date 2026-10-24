@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
+import { resolveSampleProductId } from "@/lib/sampleRequestProduct";
 
 interface SampleRequest {
   id: string;
@@ -127,6 +128,16 @@ const TradeSamples = () => {
     if (!user || !productName.trim() || !brandName.trim()) return;
     setSubmitting(true);
 
+    try {
+    const linkedProductId = await resolveSampleProductId(productId, async id => {
+      const { data: direct, error: directError } = await supabase.from("trade_products").select("id").eq("id", id).maybeSingle();
+      if (directError) throw directError;
+      if (direct) return direct.id;
+      const { data: linked, error: linkedError } = await supabase.from("trade_products").select("id").eq("source_pick_id", id).maybeSingle();
+      if (linkedError) throw linkedError;
+      return linked?.id ?? null;
+    });
+
     let imageUrl: string | null = null;
 
     // Upload image if a file was selected, otherwise use pre-filled URL
@@ -150,7 +161,7 @@ const TradeSamples = () => {
 
     const { data: inserted, error } = await supabase.from("trade_sample_requests").insert({
       user_id: user.id,
-      product_id: productId,
+      product_id: linkedProductId,
       product_name: productName.trim(),
       brand_name: brandName.trim(),
       client_name: clientName.trim(),
@@ -182,7 +193,12 @@ const TradeSamples = () => {
     }
     resetForm();
     setShowForm(false);
+    await fetchRequests();
+    } catch {
+      toast.error("Unable to submit your sample request. Your details are kept; please try again.");
+    } finally {
     setSubmitting(false);
+    }
   };
 
   const activeRequests = requests.filter(r => !["returned", "cancelled"].includes(r.status));
