@@ -986,6 +986,23 @@ body {
 }
 
 /* ─────────────────────────────────────────────
+   Sign-in dialogs: the browser's autofill used to
+   paint the credential fields solid blue, which
+   made the form look pre-filled and unreadable.
+   Hold the field on the card colour instead.
+   ───────────────────────────────────────────── */
+[role="dialog"] input:-webkit-autofill,
+[role="dialog"] input:-webkit-autofill:hover,
+[role="dialog"] input:-webkit-autofill:focus,
+[role="dialog"] input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px hsl(var(--background)) inset;
+  box-shadow: 0 0 0 1000px hsl(var(--background)) inset;
+  -webkit-text-fill-color: hsl(var(--foreground));
+  caret-color: hsl(var(--foreground));
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* ─────────────────────────────────────────────
    Mobile/PWA designer profile: tighten the gap
    between the truncated bio / "View full portrait"
    link and the product grid below it.

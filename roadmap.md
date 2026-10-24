@@ -1,5 +1,10 @@
 # Roadmap — Automatic Visual Search Indexing
 
+## Sign-in lightbox rewrite
+- [x] Put email and password first with padded bordered fields, move Google below an "Or sign in with" rule, and replace the dense Google disclaimer with the approved one-line note.
+- [x] Live verified: field order (email 748px, password 843px, Google 1003px), 16px/12px input padding, one Trade application link, no request-access accordion in the lightbox, wrong password keeps the dialog open and shows "Login Failed — Invalid login credentials".
+
+
 ## Repeated redirect blank page
 - [x] Reproduced an empty /public-piece page on immediate repeat navigation in a real TanStack router test before fixing the guard.
 - [x] Scope deduplication to router/resolved visit and release settled attempts; all five redirect tests pass. Signed-in Ondas public-to-Trade visits both render, second in 0.78 seconds with no browser errors; current app build is clean.
