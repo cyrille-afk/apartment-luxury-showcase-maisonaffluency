@@ -9,7 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "@/lib/router-compat";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Save, ChevronDown, ChevronUp, ExternalLink, Eye, EyeOff, Plus, Trash2, GripVertical, BookOpen, Monitor, Smartphone, AlertTriangle, Instagram, Wand2, Loader2, X, FileDown, ArrowUp, ArrowDown, Copy, Gem, Lock, LockOpen } from "lucide-react";
+import { Search, Save, ChevronDown, ChevronUp, ExternalLink, Eye, EyeOff, Plus, Trash2, GripVertical, BookOpen, Monitor, Smartphone, AlertTriangle, Instagram, Wand2, Loader2, X, FileDown, ArrowUp, ArrowDown, Copy, Gem, Lock, LockOpen, PanelsTopLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -230,6 +230,7 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
     title: string; subtitle: string | null; category: string | null; subcategory: string | null;
     materials: string | null; materials_description: string | null; dimensions: string | null; description: string | null;
     edition: string | null; photo_credit: string | null; pdf_url: string | null; trade_only: boolean;
+    hidden_in_studio: boolean;
     pdf_filename: string | null; pdf_urls: PdfEntry[] | null; currency: string; trade_price_cents: number | null;
     price_per_sqm_cents: number | null;
     price_prefix: string | null; sort_order: number; created_at: string;
@@ -459,7 +460,7 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
       if (error) {
         toast({ title: "Save failed", description: error.message, variant: "destructive" });
         await loadPicks();
-      } else if (["sort_order", "image_url", "hover_image_url"].includes(field)) {
+      } else if (["sort_order", "image_url", "hover_image_url", "is_hidden", "hidden_in_studio", "trade_only"].includes(field)) {
         queryClient.invalidateQueries({ queryKey: ["designer-picks"] });
         queryClient.invalidateQueries({ queryKey: ["designer-grouped-picks"] });
         queryClient.invalidateQueries({ queryKey: ["designer-attributed-picks"] });
@@ -623,6 +624,7 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
               <span className="text-xs font-medium flex-1 truncate">
                 {pick.title || "Untitled"}
                 {(pick as any).is_hidden && <span className="ml-2 text-[10px] uppercase tracking-wider text-muted-foreground">(hidden)</span>}
+                {(pick as any).hidden_in_studio && !(pick as any).is_hidden && <span className="ml-2 text-[10px] uppercase tracking-wider text-muted-foreground">(studio off)</span>}
               </span>
               {(pick.pdf_url || (pick.pdf_urls && pick.pdf_urls.length > 0)) && (
                 <Badge variant="outline" className="text-[10px] border-[hsl(var(--pdf-red))]/40 text-[hsl(var(--pdf-red))]">
@@ -673,6 +675,13 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
                 className={`transition-colors p-1 ${pick.trade_only ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
               >
                 {pick.trade_only ? <Lock className="w-3.5 h-3.5" /> : <LockOpen className="w-3 h-3" />}
+              </button>
+              <button
+                onClick={() => updateField(pick.id, "hidden_in_studio", !(pick as any).hidden_in_studio)}
+                title={(pick as any).hidden_in_studio ? "Hidden from Studio Mode (click to show)" : "Visible in Studio Mode (click to hide)"}
+                className={`transition-colors p-1 ${(pick as any).hidden_in_studio ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                <PanelsTopLeft className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={() => setExpandedPickId(expandedPickId === pick.id ? null : pick.id)}
