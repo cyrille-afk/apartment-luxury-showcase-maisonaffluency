@@ -1,13 +1,14 @@
 import { usePublishedMakerCount } from "@/hooks/usePublishedMakerCount";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Helmet } from "react-helmet-async";
-import { ShoppingCart, MapPin, Grid3X3 } from "lucide-react";
+import { ShoppingCart, MapPin, Grid3X3, Search } from "lucide-react";
 import { useSearchParams, useNavigate } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import Gallery from "@/components/Gallery";
+import VisualSearchPanel from "@/components/trade/VisualSearchPanel";
 import ShowroomDesignerDirectory from "@/components/trade/ShowroomDesignerDirectory";
 import { cn } from "@/lib/utils";
 import GallerySkeleton from "@/components/trade/GallerySkeleton";
@@ -18,10 +19,7 @@ interface DraftQuote {
   created_at: string;
 }
 
-// Visual Search is temporarily deactivated: matching is still mocked, so the
-// tab is hidden until real image matching ships (panel kept in
-// src/components/trade/VisualSearchPanel.tsx).
-type ViewTab = "gallery" | "designers";
+type ViewTab = "gallery" | "designers" | "search";
 
 const TradeShowroom = () => {
   const makerCount = usePublishedMakerCount();
@@ -33,7 +31,11 @@ const TradeShowroom = () => {
   const tabParam = searchParams.get("tab");
 
   const [activeTab, setActiveTab] = useState<ViewTab>(
-    tabParam === "designers" ? "designers" : "gallery",
+    tabParam === "designers"
+      ? "designers"
+      : tabParam === "search"
+        ? "search"
+        : "gallery",
   );
 
   const [draftQuotes, setDraftQuotes] = useState<DraftQuote[]>([]);
@@ -156,6 +158,7 @@ const TradeShowroom = () => {
           {([
             { id: "gallery", label: "Interactive Gallery", Icon: MapPin },
             { id: "designers", label: "Designers & Ateliers", Icon: Grid3X3 },
+            { id: "search", label: "Visual Search", Icon: Search },
           ] as const).map(({ id, label, Icon }) => (
             <button
               key={id}
@@ -179,7 +182,7 @@ const TradeShowroom = () => {
           <GalleryWithSkeleton>
             <Gallery onHotspotAddToQuote={handleHotspotAddToQuote} hideIntro />
           </GalleryWithSkeleton>
-        ) : (
+        ) : activeTab === "designers" ? (
           <ShowroomDesignerDirectory
             onSelectDesigner={(designer) => {
               navigate(`/trade/gallery/${designer.slug}`, {
@@ -187,6 +190,8 @@ const TradeShowroom = () => {
               });
             }}
           />
+        ) : (
+          <VisualSearchPanel />
         )}
       </div>
 
