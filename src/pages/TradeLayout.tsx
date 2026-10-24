@@ -131,7 +131,7 @@ const TRADE_GATE_COPY: Record<string, { title: string; description: string; h1: 
   "/trade/the-collection": {
     title: "The Collection | Maison Affluency",
     h1: "The Collection",
-    description: "Browse curated showroom collections with trade pricing and project tools available after sign-in.",
+    description: "Browse curated Gallery collections with trade pricing and project tools available after sign-in.",
   },
   "/trade/samples": {
     title: "Trade Samples | Maison Affluency",

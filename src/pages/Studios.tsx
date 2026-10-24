@@ -306,7 +306,7 @@ export default function Studios() {
           <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-3 text-sm">
             <li><Link to="/designers" className="text-foreground hover:underline">Represented designers A–Z</Link> <span className="text-muted-foreground">— atelier-level makers we represent.</span></li>
             <li><Link to="/new-in" className="text-foreground hover:underline">New arrivals</Link> <span className="text-muted-foreground">— latest additions to the catalogue.</span></li>
-            <li><Link to="/gallery" className="text-foreground hover:underline">Showroom gallery</Link> <span className="text-muted-foreground">— pieces in situ.</span></li>
+            <li><Link to="/gallery" className="text-foreground hover:underline">Gallery</Link> <span className="text-muted-foreground">— pieces in situ.</span></li>
             <li><Link to="/journal" className="text-foreground hover:underline">Journal</Link> <span className="text-muted-foreground">— essays on craft and provenance.</span></li>
             <li><Link to="/apartment-tour" className="text-foreground hover:underline">Private apartment tour</Link> <span className="text-muted-foreground">— a realised Singapore commission.</span></li>
             <li><Link to="/trade-program" className="text-foreground hover:underline">Trade programme</Link> <span className="text-muted-foreground">— net pricing for studios.</span></li>

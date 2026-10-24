@@ -169,7 +169,7 @@ const ApartmentTour = () => {
             sofas are bespoke; the lighting is sculptural; the case goods are signed
             works by independent ateliers we represent. The result is an interior that
             reads as a private collection — quiet, layered, deeply personal — rather
-            than a showroom.
+            than a Gallery.
           </p>
           <h3 className="font-display text-lg md:text-xl text-[#f5f0eb] tracking-wide pt-4">
             How Maison Affluency works
@@ -219,7 +219,7 @@ const ApartmentTour = () => {
           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[14px] md:text-[15px]">
             <li>
               <Link to="/gallery" className="text-[#d4bea0] hover:text-[#f5f0eb] underline underline-offset-4">
-                The showroom gallery
+                The Gallery
               </Link>
               <span className="text-[#d4bea0]/50"> — pieces in situ.</span>
             </li>

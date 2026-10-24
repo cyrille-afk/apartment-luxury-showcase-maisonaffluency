@@ -42,7 +42,7 @@ const buildStudioPrefill = (s: PickerStudio) => {
 const PROFESSION_OPTIONS = [
   "Interior Designer",
   "Architect",
-  "Showroom",
+  "Gallery",
   "FF&E Procurement Contractor",
   "Property Developer",
   "Other",
@@ -291,7 +291,7 @@ const ContactInquiry = () => {
                 To get started, please fill out the form below to help us get to know you and your studio.
               </p>
               <p className="mt-4 font-body text-sm text-muted-foreground max-w-2xl mx-auto">
-                We reserve Trade Accounts for interior design and architect studios, showrooms and FF&amp;E procurement contractors.
+                We reserve Trade Accounts for interior design and architect studios, Galleries and FF&amp;E procurement contractors.
               </p>
             </>
           ) : (

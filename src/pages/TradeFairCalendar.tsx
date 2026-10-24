@@ -87,7 +87,7 @@ export default function TradeFairCalendar() {
 
   return (
     <>
-      <Helmet><title>Showroom & Trade Fair Calendar — Trade Portal</title></Helmet>
+      <Helmet><title>Gallery & Trade Fair Calendar — Trade Portal</title></Helmet>
       <div className="max-w-5xl space-y-8">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
@@ -97,7 +97,7 @@ export default function TradeFairCalendar() {
             </span>
           </div>
           <h1 className="font-display text-2xl md:text-3xl text-foreground tracking-wide">
-            Showroom & Trade Fair Calendar
+            Gallery & Trade Fair Calendar
           </h1>
           <p className="font-body text-sm text-muted-foreground mt-1.5 max-w-2xl">
             Salone, Maison&Objet, PAD, Design Miami — every key date for collectible design. Add any event to your personal calendar.

@@ -1,6 +1,6 @@
 # Maison Affluency
 
-> Singapore's premier destination for museum-grade, investment-worthy collectible furniture from world-class European designers. Private showroom in District 9.
+> Singapore's premier destination for museum-grade, investment-worthy collectible furniture from world-class European designers. Private Gallery in District 9.
 
 ## About
 
@@ -16,7 +16,7 @@ Maison Affluency is a curated luxury design gallery based in Singapore, speciali
 
 ## Services
 
-- **Private Showroom**: By-appointment curated viewing experience
+- **Private Gallery**: By-appointment curated viewing experience
 - **Trade Program**: Exclusive B2B programme for architects, interior designers, and luxury hospitality professionals — trade pricing, dedicated client advisors, bespoke quotations, custom sourcing, samples & swatches, and consolidated insured shipping
 - **Provenance Certificates**: Documentation of authenticity and provenance for collectible pieces
 - **Custom Requests**: Global connections to specialist workshops and renowned designers for bespoke solutions
@@ -35,7 +35,7 @@ Collectible furniture, lighting, decorative objects, bespoke interiors, contempo
 - [Designers & Ateliers](https://www.maisonaffluency.com/designers): Directory of featured designers, makers, and ateliers.
 - [Collectibles](https://www.maisonaffluency.com/collectibles): Museum-grade collectible furniture and objects.
 - [Gallery](https://www.maisonaffluency.com/gallery): Curated apartment showcase rooms and vignettes.
-- [Apartment Tour](https://www.maisonaffluency.com/apartment-tour): Virtual walkthrough of the Singapore showroom.
+- [Apartment Tour](https://www.maisonaffluency.com/apartment-tour): Virtual walkthrough of the Singapore Gallery.
 - [New In](https://www.maisonaffluency.com/new-in): Latest additions to the catalogue.
 - [Journal](https://www.maisonaffluency.com/journal): Editorials, designer interviews, and collection stories.
 - [Studios](https://www.maisonaffluency.com/studios): Featured interior design studios and projects.

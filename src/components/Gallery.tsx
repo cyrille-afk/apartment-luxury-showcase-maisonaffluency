@@ -1294,7 +1294,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
               Experience the Apartment in Person
             </h3>
             <p className="font-body text-sm text-muted-foreground max-w-xl mx-auto mb-6">
-              Our Singapore showroom is open for private viewings. Arrange a guided tour with our curators.
+              Our Singapore Gallery is open for private viewings. Arrange a guided tour with our curators.
             </p>
             <button
               onClick={() => setTourDialogOpen(true)}

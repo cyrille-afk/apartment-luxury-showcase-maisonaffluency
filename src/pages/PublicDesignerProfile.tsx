@@ -183,8 +183,8 @@ function buildThinContentFallback(args: {
         `Work moves between furniture, lighting and decorative objects, each piece conceived as a collectible rather than a catalogue item.`,
       ];
   const closes = [
-    `Each work is selected for material integrity, authorship and the way it ages — qualities we present in person at the Maison Affluency apartment-showroom in Singapore and to trade clients worldwide.`,
-    `Maison Affluency offers trade pricing, lead times and full specification on request — meet the work in our Singapore apartment-showroom or via virtual presentation.`,
+    `Each work is selected for material integrity, authorship and the way it ages — qualities we present in person at the Maison Affluency apartment Gallery in Singapore and to trade clients worldwide.`,
+    `Maison Affluency offers trade pricing, lead times and full specification on request — meet the work in our Singapore apartment Gallery or via virtual presentation.`,
     `Available to interior designers, architects and private collectors through Maison Affluency Singapore, with white-label documentation and worldwide delivery.`,
   ];
   const i = slugIndex(args.slug, 3);

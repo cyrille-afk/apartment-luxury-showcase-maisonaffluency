@@ -46,7 +46,7 @@ export const TOOL_ROUTES: Record<string, [string, string]> = {
   "/trade/currency-converter": ["Procurement", "Currency Converter"],
   // Learn
   "/trade/custom-requests": ["Learn", "Custom Requests"],
-  "/trade/calendar": ["Learn", "Showroom & Fair Calendar"],
+  "/trade/calendar": ["Learn", "Gallery & Fair Calendar"],
   "/trade/guides": ["Learn", "Guides"],
   "/trade/learn": ["Learn", "Learn"],
   "/trade/cpd": ["Learn", "CPD & Education"],

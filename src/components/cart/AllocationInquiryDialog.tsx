@@ -149,7 +149,7 @@ export function AllocationInquiryDialog({
                 id="alloc-use"
                 value={intendedUse}
                 onChange={(e) => setIntendedUse(e.target.value)}
-                placeholder="Private residence, hospitality project, showroom…"
+                placeholder="Private residence, hospitality project, Gallery…"
               />
             </div>
             <div className="space-y-1.5">

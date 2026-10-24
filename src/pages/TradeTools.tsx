@@ -54,7 +54,7 @@ const categories: ToolCategory[] = [
     label: "Learn",
     tools: [
       { title: "Custom Requests", description: "Bespoke dimensions, finishes & COM/COL fabric", url: "/trade/custom-requests", icon: Wand2 },
-      { title: "Showroom & Fair Calendar", description: "Salone, Maison&Objet, PAD, Design Miami — with .ics export", url: "/trade/calendar", icon: CalendarDays },
+      { title: "Gallery & Fair Calendar", description: "Salone, Maison&Objet, PAD, Design Miami — with .ics export", url: "/trade/calendar", icon: CalendarDays },
       { title: "Guides", description: "Studio playbooks for using the Trade Portal", url: "/trade/guides", icon: BookOpen },
       { title: "CPD & Education", description: "Webinars, workshops & CPD tracking", url: "/trade/cpd", icon: GraduationCap },
       { title: "3D Studio", description: "3ds Max + Corona/V-Ray rendering pipeline", url: "/trade/axonometric-requests", icon: Box },

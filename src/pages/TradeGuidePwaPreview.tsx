@@ -70,7 +70,7 @@ export default function TradeGuidePwaPreview() {
           ]}
         />
         <Callout title="When this matters most">
-          On site visits, in showrooms, or during client presentations where you
+          On site visits, in Galleries, or during client presentations where you
           need fast, distraction-free access to quotes, boards and product
           pages.
         </Callout>
