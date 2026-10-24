@@ -7,7 +7,7 @@ import {
   TrendingDown, Lock, Wallet, Activity, ShieldCheck, Target, BarChart3, ChevronDown, ChevronRight, FolderOpen, Clapperboard,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useNavigate, useLocation } from "@/lib/router-compat";
+import { useNavigate, useLocation, useSearchParams } from "@/lib/router-compat";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -135,7 +135,8 @@ export function TradeSidebar() {
   const boards = useProjectBoardTree(activeProjects.map((project) => project.id));
   const [expandedProjects, setExpandedProjects] = useState<string[]>([]);
   const currentBoard = location.pathname.match(/^\/trade\/boards\/([^/]+)/)?.[1];
-  const selectedProjectId = new URLSearchParams(location.search).get("project");
+  const [projectParams] = useSearchParams();
+  const selectedProjectId = projectParams.get("project");
   const currentProject = activeProjects.find((project) => project.id === selectedProjectId || location.pathname.startsWith(`/trade/projects/${project.id}`) || boards.some((board) => board.id === currentBoard && board.project_id === project.id));
   useEffect(() => {
     if (currentProject) setExpandedProjects((ids) => ids.includes(currentProject.id) ? ids : [...ids, currentProject.id]);
