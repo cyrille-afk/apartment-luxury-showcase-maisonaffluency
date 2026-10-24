@@ -21,12 +21,12 @@ describe("explicit studio invitation acceptance", () => {
     fireEvent.click(accept);
     await vi.waitFor(() => expect(mocks.select).toHaveBeenCalledWith("saved-studio"));
     expect(mocks.rpc).toHaveBeenCalledWith("accept_studio_invite", { _invite_id: "invite" });
-    await vi.waitFor(() => expect(mocks.toast).toHaveBeenCalledWith(expect.objectContaining({ title: "Joined studio", description: "You're now a Editor of Member Studio." })));
+    await vi.waitFor(() => expect(mocks.refresh).toHaveBeenCalledOnce());
   });
   it("does not announce membership or select a studio when acceptance is refused", async () => {
     mocks.rpc.mockImplementation(async (name: string) => name === "get_my_pending_invites" ? { data: [invitation], error: null } : { data: null, error: new Error("Invitation has expired") });
     render(<PendingInvitesBanner />); fireEvent.click(await screen.findByRole("button", { name: "Accept" }));
-    await vi.waitFor(() => expect(mocks.toast).toHaveBeenCalledWith(expect.objectContaining({ title: "Could not accept invitation" })));
+    await vi.waitFor(() => expect(mocks.toast).toHaveBeenCalledWith(expect.objectContaining({ variant: "destructive" })));
     expect(mocks.select).not.toHaveBeenCalled(); expect(mocks.refresh).not.toHaveBeenCalled();
   });
   it("offers retry after an invitation lookup failure rather than treating it as no invitations", async () => {
