@@ -11,11 +11,6 @@ import { createServerFn } from "@tanstack/react-start";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const AI_GATEWAY = "https://ai.gateway.lovable.dev/v1";
-const EMBED_MODEL = "google/gemini-embedding-2";
-const EMBED_DIMENSIONS = 3072;
-const BACKFILL_BATCH = 12;
-const EMBED_CONCURRENCY = 3;
 // ~2.5 MB base64 payload ceiling (the client resizes to <=1024px JPEG).
 const MAX_IMAGE_CHARS = 3_500_000;
 
@@ -25,48 +20,6 @@ export interface VisualSearchMatch {
   designer_name: string | null;
   image_url: string | null;
   similarity: number;
-}
-
-async function embedImageContent(
-  apiKey: string,
-  imageUrl: string,
-  caption: string,
-): Promise<number[]> {
-  const res = await fetch(`${AI_GATEWAY}/embeddings`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Lovable-API-Key": apiKey,
-      "X-Lovable-AIG-SDK": "fetch",
-    },
-    body: JSON.stringify({
-      model: EMBED_MODEL,
-      input: [
-        {
-          content: [
-            { type: "text", text: caption },
-            { type: "image_url", image_url: { url: imageUrl } },
-          ],
-        },
-      ],
-      encoding_format: "float",
-    }),
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    const err = new Error(`AI gateway ${res.status}: ${text.slice(0, 200)}`) as Error & {
-      status?: number;
-    };
-    err.status = res.status;
-    throw err;
-  }
-  const data = await res.json();
-  const embedding = data?.data?.[0]?.embedding as number[] | undefined;
-  if (!embedding?.length) throw new Error("No embedding returned");
-  if (embedding.length !== EMBED_DIMENSIONS) {
-    throw new Error(`Unexpected embedding dimensions: ${embedding.length}`);
-  }
-  return embedding;
 }
 
 /** Embed an uploaded photo and return the nearest catalogue pieces. */
@@ -87,6 +40,7 @@ export const searchCatalogueByImage = createServerFn({ method: "POST" })
     const apiKey = process.env["LOVABLE_API_KEY"];
     if (!apiKey) throw new Error("Visual search is not configured");
 
+    const { embedImageContent } = await import("./imageEmbedding.server");
     const embedding = await embedImageContent(
       apiKey,
       data.image,
@@ -106,6 +60,9 @@ export interface ImageEmbeddingStatus {
   total: number;
   embedded: number;
   missing: number;
+  paused: boolean;
+  pauseReason: string | null;
+  failed: number;
 }
 
 async function countImageEmbeddingCoverage(
@@ -119,15 +76,13 @@ async function countImageEmbeddingCoverage(
     .not("image_url", "is", null)
     .neq("image_url", "");
   if (e1) throw e1;
-  const { count: embedded, error: e2 } = await supabaseAdmin
-    .from("product_image_embeddings")
-    .select("pick_id", { count: "exact", head: true });
-  if (e2) throw e2;
-  return {
-    total: total ?? 0,
-    embedded: embedded ?? 0,
-    missing: Math.max((total ?? 0) - (embedded ?? 0), 0),
-  };
+  const { data: picks } = await supabaseAdmin.from("designer_curator_picks").select("id,image_url").eq("is_hidden", false).not("image_url", "is", null).neq("image_url", "").throwOnError();
+  const { data: vectors } = await supabaseAdmin.from("product_image_embeddings").select("pick_id,image_url").throwOnError();
+  const indexed = new Map((vectors ?? []).map((r) => [r.pick_id, r.image_url]));
+  const embedded = (picks ?? []).filter((p) => indexed.get(p.id) === p.image_url).length;
+  const { data: state } = await supabaseAdmin.from("product_image_worker").select("paused,pause_reason").eq("id", true).maybeSingle().throwOnError();
+  const { count: failed } = await supabaseAdmin.from("product_image_jobs").select("pick_id", { count: "exact", head: true }).eq("status", "failed").throwOnError();
+  return { total: total ?? 0, embedded, missing: Math.max((total ?? 0) - embedded, 0), paused: state?.paused ?? false, pauseReason: state?.pause_reason ?? null, failed: failed ?? 0 };
 }
 
 async function requireAdmin(context: { supabase: any; userId: string }) {
@@ -153,89 +108,16 @@ export interface ImageBackfillResult extends ImageEmbeddingStatus {
   failed: number;
 }
 
-/** Admin: embed one batch of catalogue product images. Call until missing = 0. */
+/** Explicit owner recovery; automatic callbacks never clear a provider block. */
 export const backfillProductImageEmbeddings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<ImageBackfillResult> => {
     await requireAdmin(context);
-    const apiKey = process.env["LOVABLE_API_KEY"];
-    if (!apiKey) throw new Error("Visual search is not configured");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    const { data: existing, error: exErr } = await supabaseAdmin
-      .from("product_image_embeddings")
-      .select("pick_id");
-    if (exErr) throw exErr;
-    const done = new Set((existing ?? []).map((r) => r.pick_id as string));
-
-    const { data: picks, error: pErr } = await supabaseAdmin
-      .from("designer_curator_picks")
-      .select("id, title, image_url, designer_id")
-      .neq("is_hidden", true)
-      .not("image_url", "is", null)
-      .neq("image_url", "")
-      .order("created_at", { ascending: true })
-      .limit(2000);
-    if (pErr) throw pErr;
-
-    const pending = (picks ?? []).filter((p) => !done.has(p.id)).slice(0, BACKFILL_BATCH);
-    if (!pending.length) {
-      return { processed: 0, succeeded: 0, failed: 0, ...(await countImageEmbeddingCoverage(supabaseAdmin)) };
-    }
-
-    const designerIds = [...new Set(pending.map((p) => p.designer_id).filter(Boolean))] as string[];
-    const nameById = new Map<string, string>();
-    if (designerIds.length) {
-      const { data: designers } = await supabaseAdmin
-        .from("designers")
-        .select("id, name, display_name")
-        .in("id", designerIds);
-      (designers ?? []).forEach((d) => {
-        nameById.set(d.id, d.display_name || d.name || "Unattributed");
-      });
-    }
-
-    let succeeded = 0;
-    let failed = 0;
-    // Bounded parallelism: the workspace shares one AI rate-limit budget.
-    for (let i = 0; i < pending.length; i += EMBED_CONCURRENCY) {
-      const slice = pending.slice(i, i + EMBED_CONCURRENCY);
-      const settled = await Promise.allSettled(
-        slice.map(async (p) => {
-          const designerName = (p.designer_id && nameById.get(p.designer_id)) || "Unattributed";
-          const title = p.title?.trim() || "Untitled";
-          const embedding = await embedImageContent(
-            apiKey,
-            p.image_url!,
-            `Product photograph of ${title} by ${designerName}, luxury collectible furniture and lighting catalogue piece.`,
-          );
-          const { error: upErr } = await supabaseAdmin.from("product_image_embeddings").upsert(
-            {
-              pick_id: p.id,
-              designer_name: designerName,
-              title,
-              image_url: p.image_url,
-              embedding: JSON.stringify(embedding),
-              updated_at: new Date().toISOString(),
-            },
-            { onConflict: "pick_id" },
-          );
-          if (upErr) throw upErr;
-        }),
-      );
-      for (const r of settled) {
-        if (r.status === "fulfilled") succeeded += 1;
-        else {
-          failed += 1;
-          console.error("image embed failed:", r.reason);
-        }
-      }
-    }
-
-    return {
-      processed: pending.length,
-      succeeded,
-      failed,
-      ...(await countImageEmbeddingCoverage(supabaseAdmin)),
-    };
+    await supabaseAdmin.from("product_image_worker").update({ paused: false, pause_reason: null, pause_status: null }).eq("id", true).throwOnError();
+    await supabaseAdmin.from("product_image_jobs").update({ status: "pending", attempts: 0, next_attempt_at: new Date().toISOString() }).eq("status", "failed").throwOnError();
+    const { processProductImageJobs } = await import("./productImageWorker.server");
+    const result = await processProductImageJobs();
+    await supabaseAdmin.rpc("dispatch_product_image_jobs").throwOnError();
+    return { ...result, ...(await countImageEmbeddingCoverage(supabaseAdmin)) };
   });

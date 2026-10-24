@@ -1,8 +1,7 @@
-# Roadmap — Real Visual Search
+# Roadmap — Automatic Visual Search Indexing
 
-- [ ] 1. Migration: product_image_embeddings table (vector 3072, gemini-embedding-2) + match_product_images RPC
-- [ ] 2. Edge function embed-product-images (admin-gated batch backfill of catalogue image embeddings)
-- [ ] 3. Edge function visual-search (auth; embeds uploaded photo, returns top matches)
-- [ ] 4. Rewire VisualSearchPanel to real matching; re-enable tab in TradeShowroom
-- [ ] 5. Backfill all catalogue image embeddings
-- [ ] 6. Live verification: two different room photos return different, plausible matches
+- [x] Existing real Visual Search, catalogue backfill and distinct-room checks completed.
+- [x] Add durable image-change queue, secure event wake, leases and bounded retry recovery.
+- [x] Share the image embedding request between search and automatic processing; expose paused status and explicit recovery.
+- [x] Verify replacement enqueue, persisted vectors, private callback rejection, queue drain and 15 failure/duplicate tests. Restore the test photo; all 764 images remain indexed.
+- [ ] Publish the new server route to activate unattended production callbacks; the database currently queues safely, but published callback delivery cannot be verified before publishing.

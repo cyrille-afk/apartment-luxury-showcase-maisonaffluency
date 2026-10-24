@@ -1618,6 +1618,13 @@
       "when": 1792824905614,
       "tag": "0230_create_product_image_embeddings",
       "breakpoints": true
+    },
+    {
+      "idx": 231,
+      "version": "7",
+      "when": 1792827244794,
+      "tag": "0231_automatic_catalogue_image_queue",
+      "breakpoints": true
     }
   ]
 }

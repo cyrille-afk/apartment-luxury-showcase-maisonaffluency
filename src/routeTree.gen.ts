@@ -166,6 +166,7 @@ import { Route as TradeRegisterRouteImport } from './routes/trade_.register'
 import { Route as TradeSpecSheetRouteImport } from './routes/trade_.spec-sheet'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable_.oauth_.consent'
 import { Route as AdminComplianceSubProcessorsRouteImport } from './routes/admin_.compliance_.sub-processors'
+import { Route as ApiPublicCatalogueImagesRouteImport } from './routes/api/public/catalogue-images'
 import { Route as DesignersSlugProductSlugRouteImport } from './routes/designers_.$slug_.$productSlug'
 import { Route as DesignersSlugBiographyRouteImport } from './routes/designers_.$slug_.biography'
 import { Route as DesignersAlexanderLamontUntitledPieceRouteImport } from './routes/designers_.alexander-lamont_.untitled-piece'
@@ -1049,6 +1050,12 @@ const AdminComplianceSubProcessorsRoute =
     path: '/admin/compliance/sub-processors',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicCatalogueImagesRoute =
+  ApiPublicCatalogueImagesRouteImport.update({
+    id: '/api/public/catalogue-images',
+    path: '/api/public/catalogue-images',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const DesignersSlugProductSlugRoute =
   DesignersSlugProductSlugRouteImport.update({
     id: '/designers_/$slug_/$productSlug',
@@ -1712,6 +1719,7 @@ export interface FileRoutesByFullPath {
   '/trade/': typeof TradeIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/admin/compliance/sub-processors': typeof AdminComplianceSubProcessorsRoute
+  '/api/public/catalogue-images': typeof ApiPublicCatalogueImagesRoute
   '/designers/$slug/$productSlug': typeof DesignersSlugProductSlugRoute
   '/designers/$slug/biography': typeof DesignersSlugBiographyRoute
   '/designers/alexander-lamont/untitled-piece': typeof DesignersAlexanderLamontUntitledPieceRoute
@@ -1964,6 +1972,7 @@ export interface FileRoutesByTo {
   '/trade': typeof TradeIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/admin/compliance/sub-processors': typeof AdminComplianceSubProcessorsRoute
+  '/api/public/catalogue-images': typeof ApiPublicCatalogueImagesRoute
   '/designers/$slug/$productSlug': typeof DesignersSlugProductSlugRoute
   '/designers/$slug/biography': typeof DesignersSlugBiographyRoute
   '/designers/alexander-lamont/untitled-piece': typeof DesignersAlexanderLamontUntitledPieceRoute
@@ -2218,6 +2227,7 @@ export interface FileRoutesById {
   '/trade/': typeof TradeIndexRoute
   '/.lovable_/oauth_/consent': typeof DotlovableOauthConsentRoute
   '/admin_/compliance_/sub-processors': typeof AdminComplianceSubProcessorsRoute
+  '/api/public/catalogue-images': typeof ApiPublicCatalogueImagesRoute
   '/designers_/$slug_/$productSlug': typeof DesignersSlugProductSlugRoute
   '/designers_/$slug_/biography': typeof DesignersSlugBiographyRoute
   '/designers_/alexander-lamont_/untitled-piece': typeof DesignersAlexanderLamontUntitledPieceRoute
@@ -2473,6 +2483,7 @@ export interface FileRouteTypes {
     | '/trade/'
     | '/.lovable/oauth/consent'
     | '/admin/compliance/sub-processors'
+    | '/api/public/catalogue-images'
     | '/designers/$slug/$productSlug'
     | '/designers/$slug/biography'
     | '/designers/alexander-lamont/untitled-piece'
@@ -2725,6 +2736,7 @@ export interface FileRouteTypes {
     | '/trade'
     | '/.lovable/oauth/consent'
     | '/admin/compliance/sub-processors'
+    | '/api/public/catalogue-images'
     | '/designers/$slug/$productSlug'
     | '/designers/$slug/biography'
     | '/designers/alexander-lamont/untitled-piece'
@@ -2978,6 +2990,7 @@ export interface FileRouteTypes {
     | '/trade/'
     | '/.lovable_/oauth_/consent'
     | '/admin_/compliance_/sub-processors'
+    | '/api/public/catalogue-images'
     | '/designers_/$slug_/$productSlug'
     | '/designers_/$slug_/biography'
     | '/designers_/alexander-lamont_/untitled-piece'
@@ -3166,6 +3179,7 @@ export interface RootRouteChildren {
   TradeSpecSheetRoute: typeof TradeSpecSheetRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   AdminComplianceSubProcessorsRoute: typeof AdminComplianceSubProcessorsRoute
+  ApiPublicCatalogueImagesRoute: typeof ApiPublicCatalogueImagesRoute
   DesignersSlugProductSlugRoute: typeof DesignersSlugProductSlugRoute
   DesignersSlugBiographyRoute: typeof DesignersSlugBiographyRoute
   DesignersAlexanderLamontUntitledPieceRoute: typeof DesignersAlexanderLamontUntitledPieceRoute
@@ -4280,6 +4294,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminComplianceSubProcessorsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/catalogue-images': {
+      id: '/api/public/catalogue-images'
+      path: '/api/public/catalogue-images'
+      fullPath: '/api/public/catalogue-images'
+      preLoaderRoute: typeof ApiPublicCatalogueImagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/designers_/$slug_/$productSlug': {
       id: '/designers_/$slug_/$productSlug'
       path: '/designers/$slug/$productSlug'
@@ -5350,6 +5371,7 @@ const rootRouteChildren: RootRouteChildren = {
   TradeSpecSheetRoute: TradeSpecSheetRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   AdminComplianceSubProcessorsRoute: AdminComplianceSubProcessorsRoute,
+  ApiPublicCatalogueImagesRoute: ApiPublicCatalogueImagesRoute,
   DesignersSlugProductSlugRoute: DesignersSlugProductSlugRoute,
   DesignersSlugBiographyRoute: DesignersSlugBiographyRoute,
   DesignersAlexanderLamontUntitledPieceRoute:

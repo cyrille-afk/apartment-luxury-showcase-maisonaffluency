@@ -64,6 +64,8 @@ export default function VisualSearchPanel() {
     enabled: isAdmin,
     queryFn: () => runStatus(),
     staleTime: 30_000,
+    refetchInterval: 30_000,
+    retry: false,
   });
 
   const ids = matches.map((m) => m.pick_id);
@@ -108,16 +110,10 @@ export default function VisualSearchPanel() {
     if (indexing) return;
     setIndexing(true);
     try {
-      // Loop batches until every catalogue image is embedded.
-      for (let guard = 0; guard < 200; guard++) {
-        const r = await runBackfill();
-        refetchCoverage();
-        if (r.missing === 0 || r.processed === 0) {
-          toast.success(`Catalogue imagery indexed — ${r.embedded} of ${r.total} pieces searchable.`);
-          return;
-        }
-      }
-      toast.message("Indexing paused — click again to continue.");
+      const result = await runBackfill();
+      await refetchCoverage();
+      if (result.paused) toast.error(result.pauseReason || "Automatic indexing is paused.");
+      else toast.success("Automatic indexing resumed.");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Indexing failed.");
     } finally {
@@ -166,7 +162,8 @@ export default function VisualSearchPanel() {
           <p className="font-body text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
             Catalogue imagery indexed: {coverage.embedded} / {coverage.total}
           </p>
-          {coverage.missing > 0 && (
+          {coverage.paused && <p role="alert" className="text-sm text-destructive">{coverage.pauseReason}</p>}
+          {(coverage.paused || coverage.failed > 0) && (
             <Button
               variant="outline"
               size="sm"
@@ -175,7 +172,7 @@ export default function VisualSearchPanel() {
               className="h-7 rounded-none font-body text-[10px] uppercase tracking-[0.2em]"
             >
               {indexing ? <Loader2 className="mr-1 size-3 animate-spin" /> : <RefreshCw className="mr-1 size-3" />}
-              {indexing ? "Indexing…" : `Index ${coverage.missing} remaining`}
+              {indexing ? "Resuming…" : "Resume indexing"}
             </Button>
           )}
         </div>
