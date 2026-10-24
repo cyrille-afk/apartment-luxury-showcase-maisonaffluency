@@ -141,7 +141,7 @@ serve(async (req: Request) => {
           },
         });
       } catch (e) {
-        console.error(`Failed to enqueue email to ${email}:`, e);
+        console.error("Failed to enqueue admin notification email:", e);
       }
     }
 

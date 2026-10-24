@@ -58,7 +58,7 @@ export async function notifyInternalPaymentReceived(supabase: Supa, args: Intern
           templateData,
         },
       });
-      if (error) console.error(`[PAYMENT-ALERTS] internal payment notify failed for ${recipient}:`, error);
+      if (error) console.error("[PAYMENT-ALERTS] internal payment notify failed for an internal recipient:", error);
     }
   } catch (e) {
     console.error("[PAYMENT-ALERTS] notifyInternalPaymentReceived error:", e);

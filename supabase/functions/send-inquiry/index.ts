@@ -330,7 +330,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
 
-    console.log("Received inquiry from:", name, email);
+    console.log("Received inquiry submission");
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
