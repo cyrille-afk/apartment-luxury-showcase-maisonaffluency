@@ -1,4 +1,5 @@
 import { Link } from "@/lib/router-compat";
+import { GoogleAccessRequestForm } from "@/components/GoogleAccessRequestForm";
 
 export function GoogleAccessNotice() {
   return (
@@ -19,6 +20,10 @@ export function GoogleAccessNotice() {
       <Link to="/trade-program?intent=apply" className="inline-block text-foreground underline underline-offset-4">
         New to the Trade Program? Apply for a Trade Account
       </Link>
+      <details className="pt-2">
+        <summary className="cursor-pointer text-sm text-foreground underline underline-offset-4">Request Trade Access</summary>
+        <div className="pt-3"><GoogleAccessRequestForm /></div>
+      </details>
     </div>
   );
 }
