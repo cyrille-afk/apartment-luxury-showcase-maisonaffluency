@@ -56,6 +56,18 @@ function describeSignUpError(message: string): string {
   return message;
 }
 
+/** Hairline rule with a centred label — separates the primary credential
+ *  path from the secondary Google path so the order reads clearly. */
+function Divider({ label = "or" }: { label?: string }) {
+  return (
+    <div className="relative flex items-center gap-4 py-1">
+      <div className="flex-1 border-t border-border" />
+      <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">{label}</span>
+      <div className="flex-1 border-t border-border" />
+    </div>
+  );
+}
+
 export default function AuthGateDialog({ open, onClose, action = "download this document", initialMode = "prompt" }: AuthGateDialogProps) {
   const navigate = useNavigate();
   const { isPwaBooting } = useAuth();
@@ -191,18 +203,11 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
       </svg>
       {googleLoading ? "Connecting..." : "Continue with Google"}
     </button>
-    {googleError && <p role="alert" className="mt-3 font-body text-sm text-destructive">Google sign-in did not complete. If your account was blocked, request access below or use email and password.</p>}
-    <GoogleAccessNotice />
+    {googleError && <p role="alert" className="mt-3 font-body text-sm text-destructive">Google sign-in did not complete. Try again, or continue with email and password.</p>}
     </>
   );
 
-  const divider = (
-    <div className="relative flex items-center gap-4 py-1">
-      <div className="flex-1 border-t border-border" />
-      <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">or</span>
-      <div className="flex-1 border-t border-border" />
-    </div>
-  );
+  const divider = <Divider />;
 
   const content = (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4" onClick={() => { if (!loading) onClose(); }}>
