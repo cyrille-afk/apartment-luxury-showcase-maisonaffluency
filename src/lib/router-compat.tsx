@@ -233,7 +233,15 @@ export function Navigate({ to, replace, state }: { to: To; replace?: boolean; st
     const source = router.state.resolvedLocation ?? router.state.location;
     const visit = `${source.href}:${source.state.__TSR_key ?? source.state.key ?? ""}`;
     if (!shouldFireRedirect(router, visit, key)) return;
-    void nav({ to: pathname as never, search: search as never, hash, state: state as never, replace });
+    const bucket = recentRedirects.get(router);
+    const attempt = bucket?.targets.get(key);
+    void nav({ to: pathname as never, search: search as never, hash, state: state as never, replace }).finally(() => {
+      // Release this attempt when it settles, not after an arbitrary cooldown.
+      // A cancelled older attempt must not release a newer pending redirect.
+      if (bucket && recentRedirects.get(router) === bucket && bucket.targets.get(key) === attempt) {
+        bucket.targets.delete(key);
+      }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
   return null;
