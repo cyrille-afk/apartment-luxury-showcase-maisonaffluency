@@ -1,0 +1,1 @@
+CREATE POLICY "Creators can read their own studios" ON public.studios FOR SELECT TO authenticated USING (created_by = auth.uid());
