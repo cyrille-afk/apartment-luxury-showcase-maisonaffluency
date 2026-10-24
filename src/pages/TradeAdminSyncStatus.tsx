@@ -244,7 +244,7 @@ export default function TradeAdminSyncStatus() {
             <h1 className="font-display text-3xl mt-2">Curator Picks ↔ Trade Products Sync</h1>
             <p className="font-body text-sm text-muted-foreground mt-1 max-w-2xl">
               Compares each curator pick (Designer Editor) with its matching <code>trade_products</code> row
-              (used by quotes & showroom). Matched by designer name + product title.
+              (used by quotes & Gallery). Matched by designer name + product title.
             </p>
           </div>
           <Button variant="outline" size="sm" onClick={refetch} disabled={isLoading}>
@@ -347,7 +347,7 @@ export default function TradeAdminSyncStatus() {
 
         <p className="font-body text-xs text-muted-foreground">
           Tip: To force a re-sync of a row, open it in the Designer Editor and save (a no-op edit re-fires the trigger).
-          Orphan trade rows are normal for ad-hoc quote items added directly from the showroom.
+          Orphan trade rows are normal for ad-hoc quote items added directly from the Gallery.
         </p>
       </div>
     </>

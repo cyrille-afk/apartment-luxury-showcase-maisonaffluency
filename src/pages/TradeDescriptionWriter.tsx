@@ -396,7 +396,7 @@ export default function TradeDescriptionWriter() {
               className="w-full rounded-md border border-border bg-background px-3 py-2 font-body text-sm text-foreground focus:outline-hidden focus:ring-1 focus:ring-foreground/20"
             >
               <option value="curator_picks">Curator Picks (Gallery)</option>
-              <option value="trade_products">Trade Products (Showroom)</option>
+              <option value="trade_products">Trade Products (Gallery)</option>
             </select>
           </div>
 
