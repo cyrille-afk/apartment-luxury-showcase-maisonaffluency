@@ -415,6 +415,8 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
               </div>
             </div>
           )}
+        </div>
+
         <div className="border-t border-border">
           <p className="px-4 pt-3 pb-1 font-body text-[10px] uppercase tracking-wider text-muted-foreground">Project folders</p>
           <div className="max-h-44 overflow-y-auto pb-1">
