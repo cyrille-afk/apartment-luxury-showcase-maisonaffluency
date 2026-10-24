@@ -458,6 +458,18 @@ const TradeVisualiser = () => {
         for (const product of page) merged.set(product.id, product);
         if (page.length < 500) break;
       }
+      // Pieces flagged "hidden in Studio Mode" stay out of the 3D catalogue.
+      const { data: studioHiddenPicks } = await supabase
+        .from("designer_curator_picks")
+        .select("id")
+        .eq("hidden_in_studio", true);
+      if (cancelled) return;
+      const studioHiddenIds = new Set(((studioHiddenPicks ?? []) as { id: string }[]).map((p) => p.id));
+      if (studioHiddenIds.size > 0) {
+        for (const [id, product] of merged) {
+          if (product.source_pick_id && studioHiddenIds.has(product.source_pick_id)) merged.delete(id);
+        }
+      }
       const hydrated = await hydrateCatalogueDimensions([...merged.values()]);
       if (cancelled) return;
       setProducts(hydrated);
