@@ -8,6 +8,7 @@ import { ensureStorageHeadroom } from "@/lib/storageReclaim";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import { GoogleAccessNotice } from "@/components/GoogleAccessNotice";
 
 /**
  * Consumer mailboxes that must never be fast-tracked into trade access.
@@ -68,14 +69,16 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
   const [newsletter, setNewsletter] = useState(true);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [googleError, setGoogleError] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  useEffect(() => { if (open) { setMode(initialMode); setFormError(null); } }, [open, initialMode]);
+  useEffect(() => { if (open) { setMode(initialMode); setFormError(null); setGoogleError(false); } }, [open, initialMode]);
 
   if (!open || isPwaBooting) return null;
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
+    setGoogleError(false);
     try {
       ensureStorageHeadroom();
       const result = await lovable.auth.signInWithOAuth("google", {
@@ -83,6 +86,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
       });
       if (result.redirected) return; // browser is navigating to Google
       if (result.error) {
+        setGoogleError(true);
         toast({ title: "Google Sign-In Failed", description: result.error.message, variant: "destructive" });
         return;
       }
@@ -92,6 +96,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
       window.location.reload();
 
     } catch (err) {
+      setGoogleError(true);
       toast({ title: "Google Sign-In Failed", description: err instanceof Error ? err.message : "Unexpected error", variant: "destructive" });
     } finally {
       setGoogleLoading(false);
@@ -171,6 +176,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
   };
 
   const googleButton = (
+    <>
     <button
       type="button"
       onClick={handleGoogleSignIn}
@@ -185,6 +191,9 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
       </svg>
       {googleLoading ? "Connecting..." : "Continue with Google"}
     </button>
+    {googleError && <p role="alert" className="mt-3 font-body text-sm text-destructive">Google sign-in did not complete. If your account was blocked, request access below or use email and password.</p>}
+    <GoogleAccessNotice />
+    </>
   );
 
   const divider = (
