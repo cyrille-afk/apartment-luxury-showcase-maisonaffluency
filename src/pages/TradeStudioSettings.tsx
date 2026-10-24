@@ -257,8 +257,8 @@ export default function TradeStudioSettings() {
 
   const handleSaveBrand = async () => {
     if (!currentStudio || !isAdmin || savingBrand || uploadingLogo) return;
-    if (!isStudioSetupComplete && (!hasRealStudioName(studioName) || !displayName.trim() || !logoUrl.trim() || (projectFolderCount === 0 && !firstProjectName.trim() && !savedSetupProject.current))) {
-      toast({ title: "Finish your studio identity", description: "Add your studio name, display name, logo and first project folder before saving.", variant: "destructive" });
+    if (!isStudioSetupComplete && (!hasRealStudioName(studioName) || !displayName.trim() || (projectFolderCount === 0 && !firstProjectName.trim() && !savedSetupProject.current))) {
+      toast({ title: "Finish your studio identity", description: "Add your studio name, display name and first project folder before saving. Your logo is optional.", variant: "destructive" });
       return;
     }
     const value = Number(markup);

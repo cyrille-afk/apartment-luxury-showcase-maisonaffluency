@@ -13,6 +13,7 @@ import { useStudio } from "@/hooks/useStudio";
 import { onboardingProjectForMarket } from "@/lib/onboardingProject";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { StudioInitialization } from "./StudioInitialization";
 import { useDesktopTradeTour } from "./useDesktopTradeTour";
 import { fmtPct, resolveTierTokens, hasPendingTourStart, clearTourStartRequest, markTourCompleted } from "./felixTourUtils";
 import { FELIX_STEP_SIDEBAR } from "./felixTourSidebarMap";
@@ -249,11 +250,12 @@ const FELIX_STEPS: FelixStep[] = [
   },
   {
     id: "beta-feedboard",
-    title: "FOUND A BUG OR HAVE AN IDEA?",
-    target: "feedback-board",
-    route: "/trade/beta-feedboard",
+    title: "Your studio begins here",
+    target: "greeting",
+    route: "/trade",
+    cta: "Initialize Studio Workspace",
     dialogue:
-      "Use **Log an entry** in the appropriate feedback lane to report a bug, suggest a refinement, or share a co-pilot idea. Add your observations and an optional screenshot. Your account, submission time, viewport, browser, and operating system are recorded with the entry.",
+      "You’ve explored your workspace. Now make it your own: confirm your **studio identity**, invite your **team**, and name your **first project folder**. Your new project will be ready on the dashboard. You can share feedback anytime from the Beta Feedboard.",
   },
 ];
 
@@ -332,6 +334,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const location = useLocation();
   const [stepDone, setStepDone] = useState(true);
   const [open, setOpen] = useState(false);
+  const [initializing, setInitializing] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [systemReducedMotion, setSystemReducedMotion] = useState(false);
@@ -792,7 +795,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
   };
   const next = () => {
     if (!stepDone || !settled || transitioning) return;
-    if (isLast) { close(true); return; }
+    if (isLast) { setOpen(false); clearTourStartRequest(); setInitializing(true); return; }
     // The next frame (including route fallbacks) must already be client-safe.
     if (step.id === "client-safe-presentations") {
       setClientSafeMode(true);
@@ -859,6 +862,11 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     if (settled && !transitioning) cardRef.current?.focus({ preventScroll: true });
   }, [open, currentStep, settled, transitioning, isPaused]);
 
+  if (initializing) return <StudioInitialization onSkip={() => { setInitializing(false); close(true); }} onComplete={projectId => {
+    setInitializing(false);
+    close(true);
+    navigate(`/trade?project=${encodeURIComponent(projectId)}`, { replace: true });
+  }} />;
   if (!open || typeof document === "undefined") return null;
 
   // No stale step or route geometry may be used while the new target mounts.
@@ -1058,14 +1066,14 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
                 <h4 className="font-display text-base text-foreground leading-snug">{step.title}</h4>
               </div>
             </div>
-            <button
+            {!isLast && <button
               onClick={() => close(false)}
               className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted -mr-1 -mt-1 shrink-0 outline-hidden focus-visible:ring-2 focus-visible:ring-accent"
               aria-label="Close tour"
               title="Close tour"
             >
               <X className="h-4 w-4" />
-            </button>
+            </button>}
           </div>
 
           {/* Required action — pinned to the top of the card so it reads in
@@ -1285,14 +1293,15 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
               {isPaused ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />}
               {isPaused ? "Resume" : "Pause"}
             </button>
-            <button
+            <Button variant="outline"
               onClick={next}
                disabled={!stepDone || !settled || transitioning}
-              className="disabled:opacity-30 disabled:cursor-not-allowed inline-flex items-center gap-1.5 rounded-full bg-foreground px-3.5 py-1.5 font-body text-[11px] uppercase tracking-widest text-background hover:opacity-90 outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+              className="h-auto gap-1.5 rounded-none px-3.5 py-1.5 font-body text-[11px] uppercase"
             >
               {step.cta ?? (isLast ? "Finish" : "Next")}
               {isLast ? <Check className="h-3 w-3" /> : <ArrowRight className="h-3 w-3" />}
-            </button>
+            </Button>
+            {isLast && <Button variant="link" onClick={() => close(true)} className="h-auto w-full p-0 pt-2 font-body text-[11px] text-muted-foreground">Skip to Dashboard</Button>}
           </div>
         </div>
       </div>}
