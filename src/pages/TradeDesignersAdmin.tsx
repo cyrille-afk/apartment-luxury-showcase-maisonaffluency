@@ -554,6 +554,29 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
     toast({ title: `Applied ${field} to all ${picks.length} picks` });
   };
 
+  const bulkSetStudioHidden = async (hidden: boolean) => {
+    const ids = Array.from(selectedPickIds);
+    if (ids.length === 0 || bulkStudioBusy) return;
+    setBulkStudioBusy(true);
+    const { error } = await supabase
+      .from("designer_curator_picks")
+      .update({ hidden_in_studio: hidden } as any)
+      .in("id", ids);
+    setBulkStudioBusy(false);
+    if (error) {
+      toast({ title: "Bulk update failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    setPicks((prev) => prev.map((p) => (selectedPickIds.has(p.id) ? { ...p, hidden_in_studio: hidden } : p)));
+    setSelectedPickIds(new Set());
+    queryClient.invalidateQueries({ queryKey: ["trade-live-products"] });
+    toast({
+      title: hidden
+        ? `${ids.length} piece${ids.length > 1 ? "s" : ""} hidden from Studio Mode`
+        : `${ids.length} piece${ids.length > 1 ? "s" : ""} visible in Studio Mode`,
+    });
+  };
+
 
   const movePick = async (id: string, direction: -1 | 1) => {
     const idx = picks.findIndex((p) => p.id === id);
@@ -628,10 +651,67 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
           </span>
         )}
       </label>
+      {picks.length > 0 && (
+        <div className="mb-2 flex flex-wrap items-center gap-2">
+          <label className="flex cursor-pointer items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+            <Checkbox
+              checked={
+                selectedPickIds.size === 0
+                  ? false
+                  : selectedPickIds.size === picks.length
+                    ? true
+                    : "indeterminate"
+              }
+              onCheckedChange={(c) =>
+                setSelectedPickIds(c === true ? new Set(picks.map((p) => p.id)) : new Set())
+              }
+            />
+            Select all
+          </label>
+          {selectedPickIds.size > 0 && (
+            <>
+              <span className="text-[10px] text-muted-foreground">
+                {selectedPickIds.size} selected
+              </span>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-6 px-2 text-[10px]"
+                disabled={bulkStudioBusy}
+                onClick={() => bulkSetStudioHidden(false)}
+              >
+                Show in Studio Mode
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-6 px-2 text-[10px]"
+                disabled={bulkStudioBusy}
+                onClick={() => bulkSetStudioHidden(true)}
+              >
+                Hide from Studio Mode
+              </Button>
+              <button
+                type="button"
+                className="text-[10px] text-muted-foreground transition-colors hover:text-foreground"
+                onClick={() => setSelectedPickIds(new Set())}
+              >
+                Clear
+              </button>
+            </>
+          )}
+        </div>
+      )}
       <div className="mt-2 space-y-2">
         {visiblePicks.map((pick) => (
           <div key={pick.id} data-pick-row-id={pick.id} className={`rounded-md border border-border/60 p-2 ${(pick as any).is_hidden ? "opacity-60" : ""}`}>
             <div className="flex items-center gap-2">
+              <Checkbox
+                checked={selectedPickIds.has(pick.id)}
+                onCheckedChange={(c) => togglePickSelected(pick.id, c === true)}
+                aria-label={`Select ${pick.title || "piece"}`}
+                className="shrink-0"
+              />
               {pick.image_url && (
                 <img src={pick.image_url} alt="" className="w-10 h-10 object-cover rounded shrink-0" />
               )}
