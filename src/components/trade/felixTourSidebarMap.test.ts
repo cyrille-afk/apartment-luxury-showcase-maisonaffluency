@@ -36,4 +36,10 @@ describe("global tour step → sidebar map", () => {
     expect(FELIX_STEP_SIDEBAR["bespoke-commissions"].anchor).toBe("tools");
     expect(FELIX_STEP_SIDEBAR["bespoke-commissions"].label).toContain("Custom Requests");
   });
+  it("points both Client View steps at the top-right header control, not the sidebar", () => {
+    for (const id of ["client-safe-presentations", "margin-protection"]) {
+      expect(FELIX_STEP_SIDEBAR[id].where).toBe("header");
+      expect(FELIX_STEP_SIDEBAR[id].label).toBe("Client Editorial Presentation");
+    }
+  });
 });

@@ -692,7 +692,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     if (open && !isPaused) {
       document.documentElement.dataset.felixTourStep = step.id;
       // Global step → sidebar map: styles.css pulses the matching nav item.
-      if (sidebarRef) document.documentElement.dataset.felixTourSidebar = sidebarRef.anchor;
+      if (sidebarRef && sidebarRef.where !== "header") document.documentElement.dataset.felixTourSidebar = sidebarRef.anchor;
       else delete document.documentElement.dataset.felixTourSidebar;
     } else {
       delete document.documentElement.dataset.felixTourStep;
@@ -1156,7 +1156,9 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
             <p data-felix-sidebar-ref className="mt-3 flex items-center gap-2 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
               <PanelLeft className="h-3.5 w-3.5 shrink-0 text-accent" aria-hidden />
               <span>
-                Find it later in your sidebar:{" "}
+                {FELIX_STEP_SIDEBAR[step.id].where === "header"
+                  ? "Find it later in the top-right of the header:"
+                  : "Find it later in your sidebar:"}{" "}
                 <span className="text-foreground">{FELIX_STEP_SIDEBAR[step.id].label}</span>
               </span>
             </p>
