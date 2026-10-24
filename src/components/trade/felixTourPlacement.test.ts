@@ -1,7 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { chooseTourCardPlacement, placeTourCard, type TourRect } from "./felixTourPlacement";
+import { chooseTourCardPlacement, placeTourCard, tourPanelLandingScrollDelta, type TourRect } from "./felixTourPlacement";
 
 const overlaps = (a: TourRect, b: TourRect) => a.left < b.left + b.width && a.left + a.width > b.left && a.top < b.top + b.height && a.top + a.height > b.top;
+
+describe("branding panel landing", () => {
+  it("scrolls back to reserve the entire explanation above the panel", () => {
+    const target = { left: 24, top: 368.5, width: 1898, height: 443.5 };
+    const delta = tourPanelLandingScrollDelta({ target, cardHeight: 484, viewportHeight: 1181 });
+    expect(delta).toBe(-143.5);
+    const landedTarget = { ...target, top: target.top - delta };
+    const card = placeTourCard({ viewport: { w: 1946, h: 1181 }, obstacles: [landedTarget], width: 380, height: 484, preferred: { left: 783, top: 16 } });
+    expect(card?.height).toBe(484);
+    if (card) expect(overlaps(card, landedTarget)).toBe(false);
+  });
+  it("keeps the panel within a short viewport when both cannot fit in full", () => {
+    expect(tourPanelLandingScrollDelta({ target: { left: 24, top: 100, width: 976, height: 443.5 }, cardHeight: 484, viewportHeight: 600 })).toBe(-32.5);
+  });
+});
 
 describe("tour protected-space placement", () => {
   for (const viewport of [{ w: 1946, h: 1181 }, { w: 1280, h: 900 }, { w: 1024, h: 600 }]) {

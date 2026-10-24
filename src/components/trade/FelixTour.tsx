@@ -17,7 +17,7 @@ import { StudioInitialization } from "./StudioInitialization";
 import { useDesktopTradeTour } from "./useDesktopTradeTour";
 import { fmtPct, resolveTierTokens, hasPendingTourStart, clearTourStartRequest, markTourCompleted } from "./felixTourUtils";
 import { FELIX_STEP_SIDEBAR } from "./felixTourSidebarMap";
-import { chooseTourCardPlacement, type TourRect } from "./felixTourPlacement";
+import { chooseTourCardPlacement, tourPanelLandingScrollDelta, type TourRect } from "./felixTourPlacement";
 
 type FelixStep = {
   id: string;
@@ -456,6 +456,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     let ready = false;
     let didEnter = false;
     let didScroll = false;
+    let didPanelLanding = false;
     let preparedAt = 0;
     let missingSince = 0;
     let loadingSince = 0;
@@ -560,6 +561,23 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       // Only measure nodes that are actually mounted and laid out.
       const live = targets.filter((el) => el === stepTargetRef.current || current.id !== "margin-protection")
         .filter((el) => el.isConnected && ((el as HTMLElement).offsetParent !== null || getComputedStyle(el).position === "fixed") && getComputedStyle(el).visibility !== "hidden");
+      // Opening Presentation Mode hides the sidebar and expands this panel.
+      // Centering the panel alone leaves a shallow band that crops the dialogue.
+      // Once the hidden card is mounted, reserve its natural content height
+      // above the panel before revealing the final landing.
+      const panelCardContent = cardRef.current?.firstElementChild;
+      if (current.id === "branding-panel" && live.length && panelCardContent && !didPanelLanding) {
+        didPanelLanding = true;
+        const delta = tourPanelLandingScrollDelta({ target: live[0].getBoundingClientRect(), cardHeight: panelCardContent.scrollHeight + 2, viewportHeight: window.innerHeight });
+        if (Math.abs(delta) > 1) {
+          cancelAnimationFrame(revealFrame);
+          setSettled(false);
+          ready = false;
+          last = null;
+          stableSince = now;
+          window.scrollBy({ top: delta, behavior: "instant" });
+        }
+      }
       if (current.id === "quotes" && live.length) {
         const heading = live[0].getBoundingClientRect();
         if (heading.top < 72 || heading.bottom > window.innerHeight - 24 || (heading.top > 100 && window.innerHeight < 750)) {
