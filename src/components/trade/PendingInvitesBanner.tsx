@@ -38,6 +38,7 @@ export function PendingInvitesBanner() {
   const [invites, setInvites] = useState<PendingInvite[]>([]);
   const [loading, setLoading] = useState(true);
   const [acceptingId, setAcceptingId] = useState<string | null>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   const [linkStatus, setLinkStatus] = useState<{ status: InviteLinkStatus; studio_id?: string; studio_name?: string; is_member?: boolean } | null>(null);
 
@@ -56,9 +57,9 @@ export function PendingInvitesBanner() {
     if (showLoading) setLoading(true);
     const { data, error } = await supabase.rpc("get_my_pending_invites");
     if (error) {
-      console.warn("get_my_pending_invites failed", error);
-      setInvites([]);
+      setLoadFailed(true);
     } else {
+      setLoadFailed(false);
       setInvites((data ?? []) as PendingInvite[]);
     }
     setLoading(false);
@@ -83,23 +84,24 @@ export function PendingInvitesBanner() {
   const handleAccept = async (inv: PendingInvite) => {
     if (!user || inv.is_expired) return;
     setAcceptingId(inv.id);
-    const { error } = await supabase.rpc("accept_studio_invite", { _invite_id: inv.id });
-    if (error) {
-      toast({ title: "Could not accept invitation", description: error.message, variant: "destructive" });
-      setAcceptingId(null);
-      return;
-    }
-    toast({
-      title: "Joined studio",
-      description: `You're now a ${ROLE_LABEL[inv.role] ?? inv.role} of ${inv.studio_name ?? "the studio"}.`,
-    });
+    try {
+    const { data, error } = await supabase.rpc("accept_studio_invite", { _invite_id: inv.id });
+    if (error) throw error;
+    const accepted = data as { studio_id?: string; role?: string } | null;
+    if (!accepted?.studio_id || !accepted.role || !ROLE_LABEL[accepted.role]) throw new Error("Your membership could not be confirmed. Please try again.");
+    setCurrentStudioId(accepted.studio_id);
     await refresh();
-    setCurrentStudioId(inv.studio_id);
-    setAcceptingId(null);
+    toast({ title: "Joined studio", description: `You're now a ${ROLE_LABEL[accepted.role]} of ${inv.studio_name ?? "the studio"}.` });
     await load(false);
+    } catch (error) {
+      toast({ title: "Could not accept invitation", description: error instanceof Error ? error.message : "Please try again.", variant: "destructive" });
+    } finally {
+      setAcceptingId(null);
+    }
   };
 
   if (loading) return null;
+  if (loadFailed) return <div role="alert" className="border border-border p-4 space-y-3"><p className="text-sm text-muted-foreground">Your studio invitations could not be loaded.</p><Button variant="outline" size="sm" onClick={() => void load(true)}>Try again</Button></div>;
   const visibleInvites = linkedInviteId ? invites.filter(inv => inv.id === linkedInviteId) : invites;
   const usable = visibleInvites.some(inv => !inv.is_expired);
   if (linkedInviteId && !usable) {
@@ -111,7 +113,7 @@ export function PendingInvitesBanner() {
         <div className="flex items-center gap-2 text-sm font-medium"><AlertTriangle className="h-4 w-4 text-muted-foreground" />{guidance.title}</div>
         <p className="text-sm text-muted-foreground">{guidance.body}</p>
         {guidance.action === "studio" && linkStatus.studio_id && (
-          <Button size="sm" variant="outline" onClick={() => setCurrentStudioId(linkStatus.studio_id!)}>Open {linkStatus.studio_name ?? "studio"}</Button>
+          <Button size="sm" variant="outline" onClick={() => { if (linkStatus.studio_id) setCurrentStudioId(linkStatus.studio_id); }}>Open {linkStatus.studio_name ?? "studio"}</Button>
         )}
       </div>
     );
