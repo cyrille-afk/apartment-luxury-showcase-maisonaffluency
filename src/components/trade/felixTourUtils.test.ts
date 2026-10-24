@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { startFelixTour, hasPendingTourStart, clearTourStartRequest, TOUR_PENDING_KEY } from "./felixTourUtils";
+import { startFelixTour, hasPendingTourStart, clearTourStartRequest, TOUR_PENDING_KEY, markTourCompleted, consumeTourCompletion, TOUR_COMPLETED_KEY } from "./felixTourUtils";
 
 describe("tour launch handoff", () => {
   it("notifies the mounted tour without importing its React module", () => {

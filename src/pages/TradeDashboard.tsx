@@ -455,6 +455,7 @@ const TradeDashboard = () => {
         </div>
       </div>
 
+      <TourCompletionNote />
       <DashboardWelcomeGuide />
 
       <nav aria-label="Dashboard quick actions" data-trade-sensitive className="mb-8 grid grid-cols-2 gap-2 md:hidden">
