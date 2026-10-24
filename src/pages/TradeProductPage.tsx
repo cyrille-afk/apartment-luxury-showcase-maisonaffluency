@@ -2119,7 +2119,7 @@ const TradeProductPage: React.FC = () => {
   };
 
   // Sample request deep-link to Procurement
-  const sampleRequestUrl = `/trade/samples?product=${encodeURIComponent(product.title)}&brand=${encodeURIComponent(designerDisplay)}&productId=${encodeURIComponent(product.id)}`;
+  const sampleRequestUrl = `/trade/samples?product=${encodeURIComponent(product.title)}&brand=${encodeURIComponent(designerDisplay)}&productId=${encodeURIComponent(tradeProductId || product.id)}`;
 
   const resolve3d = () => {
     const norm = (v: string | null | undefined) => (v || "").trim().toLowerCase().replace(/\s+/g, " ");
