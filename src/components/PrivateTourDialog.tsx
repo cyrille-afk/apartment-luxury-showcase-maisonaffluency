@@ -162,7 +162,7 @@ const PrivateTourDialog = ({ open, onOpenChange }: PrivateTourDialogProps) => {
             </h2>
           </div>
           <p className="font-body text-xs md:text-sm text-muted-foreground text-center mb-4 md:mb-8">
-            Visit our Singapore showroom by appointment
+            Visit our Singapore Gallery by appointment
           </p>
 
           <div className="space-y-4 md:space-y-5">
