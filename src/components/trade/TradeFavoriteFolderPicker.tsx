@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Check, FolderPlus, Heart, Loader2, Trash2 } from "lucide-react";
+import { Check, FolderOpen, FolderPlus, Heart, Loader2, Plus, Trash2 } from "lucide-react";
+import { useStudio } from "@/hooks/useStudio";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -24,14 +25,21 @@ interface Props {
   children: React.ReactNode;
   align?: "start" | "center" | "end";
   side?: "top" | "right" | "bottom" | "left";
+  /** Product name used in project-folder confirmations. */
+  productName?: string;
 }
 
 /**
  * Artemest-style folder picker for trade users.
  * Persists folders + assignments in `favorite_folders` / `favorite_folder_items`.
  */
-const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", side = "bottom" }: Props) => {
+const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", side = "bottom", productName }: Props) => {
   const { user } = useAuth();
+  const { currentStudio } = useStudio();
+  const [boards, setBoards] = useState<{ id: string; title: string }[]>([]);
+  const [inBoards, setInBoards] = useState<Set<string>>(new Set());
+  const [creatingBoard, setCreatingBoard] = useState(false);
+  const [newBoardName, setNewBoardName] = useState("");
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [favoriteId, setFavoriteId] = useState<string | null>(null); // trade_favorites.id
@@ -76,6 +84,19 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
       .order("created_at", { ascending: true });
     setFolders((fdata || []) as Folder[]);
 
+    // Project folders (client boards) for the current studio
+    let bq = supabase.from("client_boards").select("id, title").order("created_at", { ascending: false });
+    bq = currentStudio
+      ? bq.or(`studio_id.eq.${currentStudio.id},and(studio_id.is.null,user_id.eq.${user.id})`)
+      : bq.eq("user_id", user.id);
+    const { data: bdata } = await bq;
+    const blist = (bdata || []) as { id: string; title: string }[];
+    setBoards(blist);
+    if (blist.length) {
+      const { data: bi } = await supabase.from("client_board_items").select("board_id").in("board_id", blist.map((b) => b.id)).eq("product_id", realId);
+      setInBoards(new Set((bi || []).map((r: any) => r.board_id)));
+    } else setInBoards(new Set());
+
     // Load assignments for this favorite
     if (fid) {
       const { data: items } = await supabase
@@ -86,7 +107,7 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
     } else {
       setSelected(new Set());
     }
-  }, [user, resolveRealId]);
+  }, [user, resolveRealId, currentStudio?.id]);
 
   useEffect(() => {
     if (open) refresh();
@@ -206,6 +227,47 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
     }
   };
 
+  const addToBoard = async (boardId: string, title: string) => {
+    if (!user || inBoards.has(boardId)) return;
+    setBusy(true);
+    try {
+      const realId = await resolveRealId();
+      if (!realId) { toast.error("Could not add to project folder"); return; }
+      const { data: last } = await supabase.from("client_board_items").select("sort_order").eq("board_id", boardId).order("sort_order", { ascending: false }).limit(1);
+      const next = last && last.length ? ((last[0] as any).sort_order ?? 0) + 1 : 0;
+      const { error } = await supabase.from("client_board_items").insert({ board_id: boardId, product_id: realId, sort_order: next });
+      if (error) { toast.error("Could not add to project folder", { description: error.message }); return; }
+      setInBoards((prev) => new Set(prev).add(boardId));
+      await ensureFavoriteRow();
+      toast.success("Added to project folder", { description: `${productName || meta?.product_name || "Piece"} → ${title}` });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleCreateBoard = async () => {
+    if (!user) return;
+    const title = newBoardName.trim();
+    if (!title) { setCreatingBoard(false); return; }
+    setBusy(true);
+    let board: { id: string; title: string } | null = null;
+    try {
+      const { data, error } = await supabase
+        .from("client_boards")
+        .insert({ user_id: user.id, studio_id: currentStudio?.id ?? null, title, client_name: "" } as any)
+        .select("id, title")
+        .single();
+      if (error || !data) { toast.error("Could not create project folder"); return; }
+      board = data as { id: string; title: string };
+      setBoards((prev) => [board!, ...prev]);
+      setNewBoardName("");
+      setCreatingBoard(false);
+    } finally {
+      setBusy(false);
+    }
+    if (board) await addToBoard(board.id, board.title);
+  };
+
   const handleDeleteFolder = async (folderId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!confirm("Delete this folder? Pieces saved in it will remain in your favorites.")) return;
@@ -254,7 +316,7 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
             {busy && <Loader2 size={12} className="animate-spin text-muted-foreground" />}
           </p>
           <p className="font-body text-[11px] text-muted-foreground mt-0.5">
-            Organize favorites by project, room, or mood.
+            Favorite folders for mood and rooms; project folders for client work.
           </p>
         </div>
 
@@ -271,6 +333,7 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
         </button>
 
         <div className="max-h-56 overflow-y-auto">
+          <p className="px-4 pt-3 pb-1 font-body text-[10px] uppercase tracking-wider text-muted-foreground">Favorite folders</p>
           {folders.length === 0 && !creating && (
             <p className="px-4 py-4 text-center font-body text-[11px] text-muted-foreground">
               No folders yet. Create one to group pieces.
@@ -318,7 +381,7 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
               className="w-full flex items-center gap-2 px-4 py-2.5 hover:bg-muted/50 transition-colors animate-in slide-in-from-bottom-2 fade-in duration-200 disabled:opacity-50"
             >
               <FolderPlus size={14} className="text-foreground" />
-              <span className="font-body text-xs text-foreground">New folder</span>
+              <span className="font-body text-xs text-foreground">New favorite folder</span>
             </button>
           ) : (
             <div className="px-4 py-3 animate-in slide-in-from-bottom-4 fade-in duration-200">
@@ -349,6 +412,56 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
                 >
                   Cancel
                 </button>
+              </div>
+            </div>
+          )}
+        <div className="border-t border-border">
+          <p className="px-4 pt-3 pb-1 font-body text-[10px] uppercase tracking-wider text-muted-foreground">Project folders</p>
+          <div className="max-h-44 overflow-y-auto pb-1">
+            {boards.length === 0 && !creatingBoard && (
+              <p className="px-4 py-2 font-body text-[11px] text-muted-foreground">No project folders yet.</p>
+            )}
+            {boards.map((b) => {
+              const done = inBoards.has(b.id);
+              return (
+                <button
+                  key={b.id}
+                  onClick={() => addToBoard(b.id, b.title)}
+                  disabled={busy || done}
+                  className="w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-muted/50 transition-colors disabled:cursor-default"
+                >
+                  {done ? <Check size={14} className="text-foreground shrink-0" /> : <FolderOpen size={14} className="text-muted-foreground shrink-0" />}
+                  <span className="font-body text-xs text-foreground truncate">{b.title}</span>
+                </button>
+              );
+            })}
+          </div>
+          {!creatingBoard ? (
+            <button
+              onClick={() => setCreatingBoard(true)}
+              disabled={busy}
+              className="w-full flex items-center gap-2 px-4 py-2.5 border-t border-border hover:bg-muted/50 transition-colors disabled:opacity-50"
+            >
+              <Plus size={14} className="text-[hsl(var(--gold))]" />
+              <span className="font-body text-xs text-foreground">New project folder</span>
+            </button>
+          ) : (
+            <div className="px-4 py-3 border-t border-border">
+              <input
+                autoFocus
+                value={newBoardName}
+                onChange={(e) => setNewBoardName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleCreateBoard();
+                  if (e.key === "Escape") { setCreatingBoard(false); setNewBoardName(""); }
+                }}
+                placeholder="e.g., New Residential Project"
+                maxLength={60}
+                className="w-full bg-transparent border-b border-border focus:border-foreground outline-hidden font-body text-xs py-1 placeholder:font-serif placeholder:italic placeholder:text-xs placeholder:text-muted-foreground/60"
+              />
+              <div className="mt-3 flex items-center gap-3">
+                <button onClick={handleCreateBoard} disabled={busy || !newBoardName.trim()} className="font-body text-[11px] uppercase tracking-wider text-background bg-foreground px-3 py-1.5 rounded-sm hover:bg-foreground/85 transition-colors disabled:opacity-40">Create</button>
+                <button onClick={() => { setCreatingBoard(false); setNewBoardName(""); }} className="font-body text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors">Cancel</button>
               </div>
             </div>
           )}
