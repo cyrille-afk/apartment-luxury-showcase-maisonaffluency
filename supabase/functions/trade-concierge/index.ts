@@ -1251,7 +1251,7 @@ ${planDirective}
 You must ONLY mention designers, ateliers, pieces, brands, and works that appear in the CURATION DATA sections below.
 - NEVER invent, guess, or recall designer names, piece titles, product names, or brand names from your general training knowledge. This includes — but is not limited to — well-known designers like Kelly Wearstler, John Pawson, Roberto Lazzeroni, Vincent Van Duysen, Patricia Urquiola, Piero Lissoni, Jean-Michel Frank, etc. If the name is NOT a literal substring of the CURATION DATA sections below, you may NOT name it. Period.
 - NEVER describe a fictional piece ("a stunning oval table in polished metal with figured wood top by [designer]"). Every concrete piece you mention MUST have a matching row in CURATED PIECES with that exact title.
-- NEVER suggest that a designer or brand is "available in the Showroom" unless they explicitly appear in the SHOWROOM BRANDS list below.
+- NEVER suggest that a designer or brand is "available in the Gallery" unless they explicitly appear in the GALLERY BRANDS list below.
 - If the user asks about a designer or brand NOT in the lists below, say: "I don't currently have [name] in the Maison Affluency Curation. Would you like me to suggest similar designers from our curated selection, or shall I connect you with the team?"
 - Do NOT fabricate piece names, even for designers that ARE in the Curation. Only mention specific pieces listed in CURATED PIECES below.
 - NO GENERIC PLACEHOLDER PIECES: never answer with an unnamed or invented concept presented as if it were stock — e.g. "The Volcanic Monolith Sofa (Sourced via Maison Affluency Registry)", "A bespoke cast-glass pendant cascade", "a travertine-block lounge configuration". A piece exists ONLY if it has a literal row in CURATED PIECES with an exact title, designer, and pick_id. Parenthetical sourcing phrases like "(Sourced via Maison Affluency Registry)" or "(from our registry)" are FORBIDDEN — they launder fabricated concepts into apparent catalogue stock. If the brief cannot be filled by real CURATED PIECES rows, follow the ZERO-MATCH protocol: state plainly which axis has no match and ask what to relax — never fill the gap with an invented piece.
@@ -1701,17 +1701,17 @@ Worked example B: "I'm looking for a 340cm oak dining table" → scan every line
 
 ${piecesList}
 
-## SHOWROOM BRANDS
-These are the ONLY brands with products currently browsable in the Showroom:
+## GALLERY BRANDS
+These are the ONLY brands with products currently browsable in the Gallery:
 ${showroomBrands}
 
-If a brand is in DESIGNERS but NOT in SHOWROOM BRANDS, tell the user: "We represent [name] but their pieces are currently available by inquiry only — I can connect you with the team."
+If a brand is in DESIGNERS but NOT in GALLERY BRANDS, tell the user: "We represent [name] but their pieces are currently available by inquiry only — I can connect you with the team."
 
 ## What you can help with
 - **Product discovery**: Suggest designers or pieces FROM THE MAISON AFFLUENCY CURATION ABOVE that match a client brief.
 - **Designer knowledge**: Share background on designers listed above — their philosophy, materials, craftsmanship.
 - **Specification guidance**: Advise on materials, dimensions, lead times, and care for curated pieces.
-- **Trade portal navigation**: Guide users to Showroom, Gallery, Quote Builder, Sample Requests, Resources, 3D Studio, or Project Folders.
+- **Trade portal navigation**: Guide users to the Curated Gallery, Full Catalogue, Quote Builder, Sample Requests, Resources, 3D Studio, or Project Folders.
 - **Tearsheet drafting**: Create new tearsheets or append to existing ones via the tools above.
 
 You do NOT have live pricing or stock data. For specific pricing, direct users to the Quote Builder.
@@ -1974,7 +1974,7 @@ async function loadCatalogContext(
     piecesList: includePieces
       ? (pieceLines.join("\n") || "No pieces currently loaded.")
       : "(Pieces list omitted to keep the prompt lean. The user has not yet named a designer, category, or asked for recommendations. If they do, reply with: \"Want me to pull up matching pieces from the catalog?\" — the next turn will load the full list.)",
-    showroomBrands: showroomBrandLines.join("\n") || "No showroom brands currently loaded.",
+    showroomBrands: showroomBrandLines.join("\n") || "No Gallery brands currently loaded.",
   };
 }
 

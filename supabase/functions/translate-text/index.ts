@@ -74,7 +74,7 @@ serve(async (req) => {
 RULES:
 - Preserve all Markdown formatting (line breaks, italics with _underscores_, bold, lists).
 - Preserve all template placeholders exactly as written, including: {first_name_comma}, {first_name}, {concierge_name}. Do not translate or modify them.
-- Keep brand names like "Maison Affluency", "AI Trade Concierge", "Concierge", "tearsheet", "brief", "Showroom" in the original language unless naturally translated.
+- Keep brand names like "Maison Affluency", "AI Trade Concierge", "Concierge", "tearsheet", "brief", "Gallery" in the original language unless naturally translated.
 - Output ONLY the translated text — no quotes, no commentary, no preamble.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
