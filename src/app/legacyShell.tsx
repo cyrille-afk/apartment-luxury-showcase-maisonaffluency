@@ -563,9 +563,18 @@ export function PreviewViewContinuity() {
   return null;
 }
 
+/** Browser Back/Forward onto "/" must land on the homepage, never the
+ *  remembered last page — only fresh loads and refreshes restore it. */
+export function isHistoryTraversalLoad(entries: Array<{ type?: string }> | undefined): boolean {
+  return entries?.[0]?.type === "back_forward";
+}
+
 export function restorePreviewLocationBeforeRouter() {
   if (previewLocationRestored || !isPreviewOrDev() || typeof window === "undefined") return;
   previewLocationRestored = true;
+  try {
+    if (isHistoryTraversalLoad(performance.getEntriesByType?.("navigation") as Array<{ type?: string }>)) return;
+  } catch { /* noop */ }
 
   try {
     const raw = localStorage.getItem(PREVIEW_VIEW_STATE_KEY);
