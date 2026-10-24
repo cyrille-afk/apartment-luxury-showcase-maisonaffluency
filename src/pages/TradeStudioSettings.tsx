@@ -4,7 +4,7 @@ import { toast as felixToast } from "sonner";
 import { loadName, DEFAULT_NAME } from "@/components/trade/conciergeGreeting";
 import { hasRealStudioName, studioSetupComplete } from "@/lib/studioSetup";
 import { useSearchParams } from "@/lib/router-compat";
-import { Building2, Copy, Mail, Trash2, UserPlus, Users, Plus } from "lucide-react";
+import { Building2, Mail, Trash2, UserPlus, Users, Plus } from "lucide-react";
 import { copyTextToClipboard } from "@/lib/clipboard";
 import { studioInvitationLink } from "@/lib/studioInvitationLink";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,6 +30,7 @@ import { StudioBrand } from "@/components/trade/StudioBrand";
 import { PendingInvitesBanner } from "@/components/trade/PendingInvitesBanner";
 import { BrandedPdfPreview } from "@/components/trade/settings/BrandedPdfPreview";
 import { PDF_LOCALE_LABELS, PDF_LOCALE_PRESETS, normalizePdfLocale, type PdfLocalePreset } from "@/lib/pdfFormatting";
+import { StudioInvitationList, canResendInvitation, type StudioInvitation } from "@/components/trade/StudioInvitationList";
 
 interface Member {
   id: string;
@@ -39,17 +40,7 @@ interface Member {
   profile?: { email: string | null; first_name: string | null; last_name: string | null };
 }
 
-interface Invite {
-  id: string;
-  email: string;
-  role: StudioRole;
-  created_at: string;
-  expires_at: string;
-  accepted_at: string | null;
-}
-
-const inviteExpired = (inv: Invite) => new Date(inv.expires_at).getTime() <= Date.now();
-const inviteDate = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+type Invite = StudioInvitation;
 
 const ROLE_DESC: Record<StudioRole, string> = {
   owner: "Full control including billing & deletion",
@@ -80,6 +71,8 @@ export default function TradeStudioSettings() {
   const [members, setMembers] = useState<Member[]>([]);
   const [invites, setInvites] = useState<Invite[]>([]);
   const [loading, setLoading] = useState(true);
+  const [invitesFailed, setInvitesFailed] = useState(false);
+  const requestId = useRef(0);
 
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<StudioRole>("editor");
@@ -129,21 +122,18 @@ export default function TradeStudioSettings() {
 
   const fetchData = async () => {
     if (!currentStudio) return;
+    const request = ++requestId.current;
     setLoading(true);
 
-    const [{ data: memberRows }, { data: inviteRows }] = await Promise.all([
+    const [{ data: memberRows }, { data: inviteRows, error: inviteError }] = await Promise.all([
       supabase
         .from("studio_members")
         .select("id, user_id, role, joined_at")
         .eq("studio_id", currentStudio.id)
         .order("joined_at"),
-      supabase
-        .from("studio_invites")
-        .select("id, email, role, created_at, expires_at, accepted_at")
-        .eq("studio_id", currentStudio.id)
-        .is("accepted_at", null)
-        .order("created_at", { ascending: false }),
+      isAdmin ? supabase.rpc("studio_invitation_list", { _studio_id: currentStudio.id }) : Promise.resolve({ data: [], error: null }),
     ]);
+    if (request !== requestId.current) return;
 
     if (memberRows) {
       const userIds = memberRows.map((m) => m.user_id);
@@ -160,13 +150,17 @@ export default function TradeStudioSettings() {
         }))
       );
     }
-    if (inviteRows) setInvites(inviteRows.map((i) => ({ ...i, role: i.role as StudioRole })));
+    if (request !== requestId.current) return;
+    setInvitesFailed(!!inviteError);
+    if (inviteRows) setInvites(inviteRows as Invite[]);
     setLoading(false);
   };
 
   useEffect(() => {
+    setInvites([]);
     fetchData();
-  }, [currentStudio?.id]);
+    return () => { requestId.current++; };
+  }, [currentStudio?.id, isAdmin]);
 
   const handleInvite = async () => {
     if (!currentStudio || !inviteEmail.trim() || !user) return;
@@ -177,7 +171,7 @@ export default function TradeStudioSettings() {
     }
     setInviting(true);
     try {
-      const existing = invites.find((invite) => invite.email.toLowerCase() === email);
+      const existing = invites.find((invite) => !invite.accepted_at && invite.email.toLowerCase() === email);
       let inviteId = existing?.id;
       if (!inviteId) {
         const { data, error } = await supabase.from("studio_invites").insert({
@@ -209,6 +203,7 @@ export default function TradeStudioSettings() {
   };
 
   const handleResendInvite = async (invite: Invite) => {
+    if (!isAdmin || !canResendInvitation(invite) || sendingInviteId) return;
     setSendingInviteId(invite.id);
     try { await sendInviteEmail(invite.id, invite.email); }
     catch (error) { toast({ title: "Email not sent", description: error instanceof Error ? error.message : "Please retry", variant: "destructive" }); }
@@ -496,42 +491,7 @@ export default function TradeStudioSettings() {
               {ROLE_DESC[inviteRole]}. They'll receive an email and can accept the invitation after signing in.
             </p>
 
-            {invites.length > 0 && (
-              <div className="mt-4">
-                <div className="text-sm font-medium mb-2">Pending invites</div>
-                <div className="divide-y border rounded-md">
-                  {invites.map((inv) => (
-                    <div key={inv.id} className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="min-w-0">
-                        <div className="text-sm truncate">{inv.email}</div>
-                        <div className="text-xs text-muted-foreground">{inv.role}</div>
-                        <div className="mt-0.5 flex items-center gap-1.5">
-                          <Badge variant={inviteExpired(inv) ? "destructive" : "secondary"} className="text-[10px] uppercase tracking-wide">
-                            {inviteExpired(inv) ? "Expired" : "Valid"}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">
-                            {inviteExpired(inv)
-                              ? `since ${inviteDate(inv.expires_at)} — link no longer works`
-                              : `until ${inviteDate(inv.expires_at)} — link still works`}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex shrink-0 flex-wrap items-center gap-1">
-                      <Button variant="outline" size="sm" title={new Date(inv.expires_at).getTime() <= Date.now() ? "Resend to renew this expired invitation" : "Copy invitation link"} onClick={() => handleCopyInvite(inv)} disabled={new Date(inv.expires_at).getTime() <= Date.now()}>
-                        <Copy className="mr-2 h-4 w-4" />Copy invitation link
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleResendInvite(inv)} disabled={inviting || sendingInviteId !== null}>
-                        <Mail className="mr-2 h-4 w-4" />{sendingInviteId === inv.id ? "Sending…" : "Resend invite"}
-                      </Button>
-                      <Button variant="ghost" size="sm" disabled={sendingInviteId !== null} onClick={() => handleRevokeInvite(inv.id)}>
-                        Revoke
-                      </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            <StudioInvitationList invites={invites} loading={loading} failed={invitesFailed} sendingId={sendingInviteId} disabled={inviting} onRefresh={() => void fetchData()} onResend={invite => void handleResendInvite(invite)} onCopy={invite => void handleCopyInvite(invite)} onRevoke={id => void handleRevokeInvite(id)} />
           </CardContent>
         </Card>
       )}
