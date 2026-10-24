@@ -13,7 +13,6 @@ import { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/compon
 
 const CURRENCY_OPTIONS: DisplayCurrency[] = ["original", "SGD", "EUR", "USD", "GBP", "CHF", "AED", "HKD", "AUD"];
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
-import TradeProductLightbox, { type TradeProductLightboxItem } from "@/components/trade/TradeProductLightbox";
 import { cn } from "@/lib/utils";
 import { prefillLineShippingFromCatalog } from "@/lib/prefillLineShipping";
 import { TRADE_FAVORITE_FOLDERS_EVENT } from "@/components/trade/TradeFavoriteFolderPicker";
@@ -66,9 +65,6 @@ export default function TradeFavorites() {
   const rates = useFxRates();
   const [removing, setRemoving] = useState<string | null>(null);
   const [selectedFor3D, setSelectedFor3D] = useState<Set<string>>(new Set());
-  const [lightboxProduct, setLightboxProduct] = useState<TradeProductLightboxItem | null>(null);
-  const [addingToQuote, setAddingToQuote] = useState(false);
-  const [addedToQuote, setAddedToQuote] = useState(false);
   const [folders, setFolders] = useState<FolderItem[]>([]);
   const [activeFolder, setActiveFolder] = useState<string | null>(() => searchParams.get("folder"));
   const [folderAssignments, setFolderAssignments] = useState<Record<string, string[]>>({});
@@ -76,64 +72,11 @@ export default function TradeFavorites() {
   const displayPriceCents = (fav: FavoritedProduct) =>
     showTradePrice ? fav.trade_price_cents : fav.rrp_price_cents;
 
-  const favToLightboxItem = (fav: FavoritedProduct): TradeProductLightboxItem => ({
-    id: fav.productId,
-    product_name: fav.product_name,
-    image_url: fav.image_url,
-    brand_name: fav.brand_name,
-    materials: fav.materials,
-    materials_description: fav.materials_description,
-    dimensions: fav.dimensions,
-    lead_time: fav.lead_time,
-    origin: fav.origin,
-    category: fav.category || undefined,
-    subcategory: fav.subcategory || undefined,
-    price: displayPriceCents(fav)
-      ? formatPriceConverted(displayPriceCents(fav) as number, fav.currency, currency, rates)
-      : undefined,
-  });
-
-  const handleLightboxAddToQuote = useCallback(async (product: TradeProductLightboxItem) => {
-    if (!user) return;
-    setAddingToQuote(true);
-    try {
-      let { data: drafts } = await supabase
-        .from("trade_quotes")
-        .select("id")
-        .eq("user_id", user.id)
-        .eq("status", "draft")
-        .order("created_at", { ascending: false })
-        .limit(1);
-
-      let quoteId: string;
-      if (drafts && drafts.length > 0) {
-        quoteId = drafts[0].id;
-      } else {
-        const { data: newQuote, error } = await supabase
-          .from("trade_quotes")
-          .insert({ user_id: user.id })
-          .select("id")
-          .single();
-        if (error || !newQuote) throw error || new Error("Failed");
-        quoteId = newQuote.id;
-      }
-
-      const { data: inserted } = await supabase.from("trade_quote_items").insert({
-        quote_id: quoteId,
-        product_id: product.id,
-        quantity: 1,
-      }).select("id");
-      const insertedIds = (inserted || []).map((r: any) => r.id);
-      await prefillLineShippingFromCatalog(insertedIds);
-
-      setAddedToQuote(true);
-      toast({ title: "Added to quote", description: product.product_name });
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
-    } finally {
-      setAddingToQuote(false);
-    }
-  }, [user, toast]);
+  const openProduct = (fav: FavoritedProduct) => {
+    navigate(`/trade/products/${fav.productId}`, {
+      state: { from: location.pathname + location.search },
+    });
+  };
 
   const fetchFavorites = useCallback(async () => {
     if (!user) return;
@@ -554,7 +497,7 @@ export default function TradeFavorites() {
               <article
                 key={fav.favoriteId}
                 className="group relative min-w-0 flex flex-col cursor-pointer"
-                onClick={() => { setAddedToQuote(false); setLightboxProduct(favToLightboxItem(fav)); }}
+                onClick={() => openProduct(fav)}
               >
                 <div className={cn(
                   "relative aspect-square w-full overflow-hidden bg-[hsl(var(--product-canvas))]",
@@ -646,7 +589,7 @@ export default function TradeFavorites() {
               <div
                 key={fav.favoriteId}
                 className="group grid min-h-16 grid-cols-[40px_minmax(100px,0.75fr)_minmax(170px,1.45fr)_minmax(140px,1.1fr)_minmax(155px,1fr)_minmax(110px,0.8fr)_minmax(105px,0.8fr)_28px] items-center gap-x-5 border-b border-border py-3.5 text-left cursor-pointer transition-colors hover:bg-background/60"
-                onClick={() => { setAddedToQuote(false); setLightboxProduct(favToLightboxItem(fav)); }}
+                onClick={() => openProduct(fav)}
               >
                 <div className="h-10 w-10 overflow-hidden bg-background">
                   {fav.image_url ? <img src={fav.image_url} alt="" width={96} height={120} decoding="async" className="h-full w-full object-cover" loading="lazy" /> : <Heart className="m-3 h-4 w-4 text-muted-foreground/30" />}
@@ -676,14 +619,7 @@ export default function TradeFavorites() {
       </div>
       </div>
 
-      <TradeProductLightbox
-        product={lightboxProduct}
-        onClose={() => setLightboxProduct(null)}
-        onAddToQuote={handleLightboxAddToQuote}
-        isAdding={addingToQuote}
-        isAdded={addedToQuote}
-        onSelectRelated={(rp) => setLightboxProduct(rp)}
-      />
+
     </>
   );
 }
