@@ -50,5 +50,5 @@ export const FELIX_STEP_SIDEBAR: Record<string, TourSidebarRef> = {
   "priority-concierge": { anchor: "concierge", label: "Trade Concierge" },
   "ai-extension-sync": { anchor: "extension-sync", label: "AI Extension Sync" },
   "pwa-install": { anchor: "pwa", label: "Mobile App Workspace" },
-  "beta-feedboard": { anchor: "beta-feedboard", label: "Beta Feedboard" },
+  "beta-feedboard": { anchor: "projects", label: "Projects & Interventions → Projects" },
 };

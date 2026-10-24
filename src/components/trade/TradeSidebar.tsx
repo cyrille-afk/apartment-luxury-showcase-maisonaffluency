@@ -135,7 +135,8 @@ export function TradeSidebar() {
   const boards = useProjectBoardTree(activeProjects.map((project) => project.id));
   const [expandedProjects, setExpandedProjects] = useState<string[]>([]);
   const currentBoard = location.pathname.match(/^\/trade\/boards\/([^/]+)/)?.[1];
-  const currentProject = activeProjects.find((project) => location.pathname.startsWith(`/trade/projects/${project.id}`) || boards.some((board) => board.id === currentBoard && board.project_id === project.id));
+  const selectedProjectId = new URLSearchParams(location.search).get("project");
+  const currentProject = activeProjects.find((project) => project.id === selectedProjectId || location.pathname.startsWith(`/trade/projects/${project.id}`) || boards.some((board) => board.id === currentBoard && board.project_id === project.id));
   useEffect(() => {
     if (currentProject) setExpandedProjects((ids) => ids.includes(currentProject.id) ? ids : [...ids, currentProject.id]);
   }, [currentProject?.id]);
@@ -350,11 +351,11 @@ export function TradeSidebar() {
                            const projectBoards = boards.filter((board) => board.project_id === project.id);
                            return (
                              <li key={project.id}>
-                               <div className="flex min-w-0 items-center">
+                               <div data-active-project={project.id === currentProject?.id ? "true" : undefined} className={`flex min-w-0 items-center ${project.id === currentProject?.id ? "border-l border-accent bg-accent/10 text-accent" : ""}`}>
                                  <Button type="button" variant="ghost" size="icon" className="h-7 w-6 shrink-0" aria-label={`${expanded ? "Collapse" : "Expand"} ${project.name}`} aria-expanded={expanded} onClick={() => setExpandedProjects((ids) => expanded ? ids.filter((id) => id !== project.id) : [...ids, project.id])}>
                                    {expanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
                                  </Button>
-                                 <NavLink to={projectDefaultUrl(project.id, boards)} onClick={() => { pushRecentProject(project.id); setExpandedProjects((ids) => ids.includes(project.id) ? ids : [...ids, project.id]); }} className="block min-w-0 truncate py-1.5 font-body text-[11px] text-muted-foreground transition-colors hover:text-foreground" activeClassName="text-foreground font-medium" title={project.name}>{project.name}</NavLink>
+                                 <NavLink to={projectDefaultUrl(project.id, boards)} onClick={() => { pushRecentProject(project.id); setExpandedProjects((ids) => ids.includes(project.id) ? ids : [...ids, project.id]); }} className={`block min-w-0 truncate py-1.5 font-body text-[11px] transition-colors hover:text-foreground ${project.id === currentProject?.id ? "font-medium text-accent" : "text-muted-foreground"}`} activeClassName="text-foreground font-medium" title={project.name}>{project.name}</NavLink>
                                </div>
                                {expanded && (
                                  <ul className="ml-4 border-l border-border/70 pl-3 font-body text-[10px] text-muted-foreground">
