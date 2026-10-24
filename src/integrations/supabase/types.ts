@@ -6867,6 +6867,108 @@ export type Database = {
         }
         Relationships: []
       }
+      product_image_jobs: {
+        Row: {
+          attempts: number
+          designer_id: string | null
+          error: string | null
+          image_url: string
+          next_attempt_at: string
+          pick_id: string
+          revision: string
+          status: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          designer_id?: string | null
+          error?: string | null
+          image_url: string
+          next_attempt_at?: string
+          pick_id: string
+          revision?: string
+          status?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          designer_id?: string | null
+          error?: string | null
+          image_url?: string
+          next_attempt_at?: string
+          pick_id?: string
+          revision?: string
+          status?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_image_jobs_pick_id_fkey"
+            columns: ["pick_id"]
+            isOneToOne: true
+            referencedRelation: "curator_pick_slug_audit"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_image_jobs_pick_id_fkey"
+            columns: ["pick_id"]
+            isOneToOne: true
+            referencedRelation: "designer_curator_picks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_image_wakes: {
+        Row: {
+          expires_at: string
+          token_hash: string
+        }
+        Insert: {
+          expires_at?: string
+          token_hash: string
+        }
+        Update: {
+          expires_at?: string
+          token_hash?: string
+        }
+        Relationships: []
+      }
+      product_image_worker: {
+        Row: {
+          callback_url: string | null
+          id: boolean
+          last_error: string | null
+          lease_id: string | null
+          lease_until: string | null
+          pause_reason: string | null
+          pause_status: number | null
+          paused: boolean
+        }
+        Insert: {
+          callback_url?: string | null
+          id?: boolean
+          last_error?: string | null
+          lease_id?: string | null
+          lease_until?: string | null
+          pause_reason?: string | null
+          pause_status?: number | null
+          paused?: boolean
+        }
+        Update: {
+          callback_url?: string | null
+          id?: boolean
+          last_error?: string | null
+          lease_id?: string | null
+          lease_until?: string | null
+          pause_reason?: string | null
+          pause_status?: number | null
+          paused?: boolean
+        }
+        Relationships: []
+      }
       product_material_links: {
         Row: {
           created_at: string
@@ -12732,6 +12834,10 @@ export type Database = {
           id: string
         }[]
       }
+      claim_product_image_worker: {
+        Args: { wake_token?: string }
+        Returns: string
+      }
       claim_prospect_enrichment: {
         Args: { batch_size?: number }
         Returns: {
@@ -12881,6 +12987,7 @@ export type Database = {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
       }
+      dispatch_product_image_jobs: { Args: never; Returns: undefined }
       dispatch_registration_alerts: { Args: never; Returns: undefined }
       effective_product_availability: {
         Args: { _product_id: string }
@@ -12908,6 +13015,16 @@ export type Database = {
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
+      }
+      finish_product_image_job: {
+        Args: {
+          job_designer: string
+          job_embedding: string
+          job_pick: string
+          job_revision: string
+          worker_lease: string
+        }
+        Returns: boolean
       }
       get_admin_user_ids: {
         Args: never
@@ -13525,6 +13642,10 @@ export type Database = {
         Returns: string
       }
       scan_sec_query: { Args: { _sql: string }; Returns: Json[] }
+      settle_product_image_worker: {
+        Args: { worker_lease: string }
+        Returns: undefined
+      }
       slugify_text: { Args: { input: string }; Returns: string }
       strip_public_variant_prices: { Args: { _variants: Json }; Returns: Json }
       studio_has_resale_cert_for_state: {
