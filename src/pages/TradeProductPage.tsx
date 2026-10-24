@@ -52,7 +52,6 @@ import { useProjectInventory } from "@/contexts/ProjectInventoryContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
 import { updateConciergeSession } from "@/hooks/useConciergeSession";
-import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import TradeFavoriteFolderPicker from "@/components/trade/TradeFavoriteFolderPicker";
 
 import { useToast } from "@/hooks/use-toast";
