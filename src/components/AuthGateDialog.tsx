@@ -370,22 +370,34 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
 
         {mode === "login" && (
           <>
-            <h2 className="font-display text-lg text-foreground mb-4">Sign In</h2>
-            {googleButton}
-            {divider}
-            <form onSubmit={handleLogin} className="space-y-3">
-              <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email"
-                className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors text-[16px]" />
-              <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password"
-                className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors text-[16px]" />
+            <h2 className="font-display text-lg text-foreground">Sign In</h2>
+            <p className="font-body text-xs text-muted-foreground mt-1 mb-5">
+              Trade members: sign in with the email and password for your approved account.
+            </p>
+
+            <form onSubmit={handleLogin} className="space-y-4">
+              <label className="block">
+                <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Email</span>
+                <input type="email" placeholder="you@studio.com" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email"
+                  className="mt-1.5 w-full rounded-md border border-border bg-background px-4 py-3 font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors placeholder:text-muted-foreground/60 text-[16px]" />
+              </label>
+              <label className="block">
+                <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Password</span>
+                <input type="password" placeholder="Your password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password"
+                  className="mt-1.5 w-full rounded-md border border-border bg-background px-4 py-3 font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors placeholder:text-muted-foreground/60 text-[16px]" />
+              </label>
               <button type="submit" disabled={loading}
-                className="w-full py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.15em] rounded-full hover:opacity-90 transition-opacity disabled:opacity-50">
+                className="w-full py-3 bg-foreground text-background font-body text-xs uppercase tracking-[0.15em] rounded-full hover:opacity-90 transition-opacity disabled:opacity-50">
                 {loading ? "Signing in..." : "Sign In"}
               </button>
             </form>
-            <button onClick={() => setMode("signup")} className="w-full mt-3 font-body text-xs text-muted-foreground hover:text-foreground transition-colors text-center">
-              Don't have an account? <span className="underline underline-offset-2">Create one</span>
-            </button>
+
+            <div className="py-4">
+              <Divider label="Or sign in with" />
+            </div>
+
+            {googleButton}
+            <GoogleAccessNotice />
           </>
         )}
       </div>
