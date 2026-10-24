@@ -11,6 +11,7 @@ import { useNavigate } from "@/lib/router-compat";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import StudioMemoryCard from "@/components/trade/StudioMemoryCard";
 import { MobileHandoffDialog } from "@/components/trade/MobileHandoffDialog";
+import GoogleIdentityStatusCard from "@/components/trade/GoogleIdentityStatusCard";
 
 const COUNTRIES = [
   "Singapore", "Australia", "Canada", "China", "France", "Germany", "Hong Kong",
@@ -259,6 +260,8 @@ const TradeSettings = () => {
       <p className="font-body text-sm text-muted-foreground mb-6">
         Manage your trade account details and preferences.
       </p>
+
+      <GoogleIdentityStatusCard />
 
       {/* Trade tier badge */}
       <div className={`mb-8 flex items-center gap-3 px-4 py-3 rounded-lg border ${
