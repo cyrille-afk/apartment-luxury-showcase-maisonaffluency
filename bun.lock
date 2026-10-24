@@ -151,7 +151,7 @@
   },
   "overrides": {
     "dompurify": "3.4.17",
-    "image-size": "2.0.2",
+    "image-size": "2.0.4",
     "proxy-addr": "2.0.8",
     "rolldown": "1.2.1",
     "source-map-js": "1.2.2",
@@ -1617,7 +1617,7 @@
 
     "ignore": ["ignore@5.3.2", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/ignore/-/ignore-5.3.2.tgz", {}, "sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g=="],
 
-    "image-size": ["image-size@2.0.2", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/image-size/-/image-size-2.0.2.tgz", { "bin": { "image-size": "bin/image-size.js" } }, "sha512-IRqXKlaXwgSMAMtpNzZa1ZAe8m+Sa1770Dhk8VkSsP9LS+iHD62Zd8FQKs8fbPiagBE7BzoFX23cxFnwshpV6w=="],
+    "image-size": ["image-size@2.0.4", "", { "bin": { "image-size": "bin/image-size.js" } }, "sha512-QRUkFFsRV/6fuESxb9Vkq+a0LkSrgKXuc2NEqfikiXxxN/G3tjWt5EVUlMaImRBZRZK/jRBEbYvpPYZL8t08Zw=="],
 
     "image-ssim": ["image-ssim@0.2.0", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/image-ssim/-/image-ssim-0.2.0.tgz", {}, "sha512-W7+sO6/yhxy83L0G7xR8YAc5Z5QFtYEXXRV6EaE8tuYBZJnA3gVgp3q7X7muhLZVodeb9UfvjSbwt9VJwjIYAg=="],
 
