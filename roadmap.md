@@ -1,5 +1,9 @@
 # Roadmap — Automatic Visual Search Indexing
 
+## Favorites product opening and registration password
+- [ ] Replace Favorites' legacy product overlay with the shared full product destination; verify consecutive product openings and return.
+- [ ] Investigate the step-6 password save and fix any verified failure without changing the user's password.
+
 ## Quote review before client sending
 - [x] Add a selected-piece, quantity and trade-price review step using the editor's existing calculations and client-send checks.
 - [x] Verify review on a saved quote: one table, quantity 1, SGD 13,314.93 unit/subtotal and SGD 16,444.35 total match the editor; unapproved-client continuation stays blocked. All 24 focused tests passed; no client email sent.
