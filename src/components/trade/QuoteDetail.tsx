@@ -26,6 +26,7 @@ import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown, Ch
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import QuoteReviewSummary from "@/components/trade/QuoteReviewSummary";
+import ReviewedQuotePdfDownload from "@/components/trade/ReviewedQuotePdfDownload";
 import { Link, useNavigate } from "@/lib/router-compat";
 import { QuoteItemSkeleton } from "@/components/trade/skeletons";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
@@ -5401,6 +5402,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             )}
             <div className="flex flex-wrap justify-end gap-2">
               <Button variant="outline" size="sm" onClick={() => setQuoteReviewOpen(false)}><Edit3 className="h-3.5 w-3.5" />Back to editing</Button>
+              {quoteReviewArgs && <ReviewedQuotePdfDownload args={quoteReviewArgs} validate={runPreSendChecks} />}
               <Button size="sm" disabled={!quoteReviewArgs || !clientId || !clientApproval.email || !clientApproval.approved || emailPreviewLoading} onClick={async () => {
                 if (!quoteReviewArgs || emailPreviewLoading) return;
                 setEmailPreviewLoading(true);
