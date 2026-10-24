@@ -6837,6 +6837,36 @@ export type Database = {
           },
         ]
       }
+      product_image_embeddings: {
+        Row: {
+          created_at: string
+          designer_name: string | null
+          embedding: string | null
+          image_url: string | null
+          pick_id: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          designer_name?: string | null
+          embedding?: string | null
+          image_url?: string | null
+          pick_id: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          designer_name?: string | null
+          embedding?: string | null
+          image_url?: string | null
+          pick_id?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       product_material_links: {
         Row: {
           created_at: string
@@ -13227,6 +13257,16 @@ export type Database = {
           title: string
           trade_price_cents: number
           width_mm: number
+        }[]
+      }
+      match_product_images: {
+        Args: { match_count?: number; query_embedding: string }
+        Returns: {
+          designer_name: string
+          image_url: string
+          pick_id: string
+          similarity: number
+          title: string
         }[]
       }
       match_products: {
