@@ -12,7 +12,7 @@ afterEach(cleanup);
 describe("studio initialization saves", () => {
   it("creates an active studio-linked project without requiring a logo or invitations", async () => {
     const complete = vi.fn(); render(<StudioInitialization onComplete={complete} onSkip={vi.fn()} />);
-    fireEvent.click(screen.getByRole("button", { name: "Continue", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
     fireEvent.click(await screen.findByRole("button", { name: "Skip invitations" }));
     fireEvent.change(await screen.findByLabelText("Project folder name"), { target: { value: "New Residential Project" } });
     fireEvent.click(screen.getByRole("button", { name: "Open Studio Dashboard" }));
@@ -23,7 +23,7 @@ describe("studio initialization saves", () => {
   it("retains a saved invitation and its email key when delivery fails and is retried", async () => {
     mocks.send.mockResolvedValueOnce({ data: { success: false }, error: null });
     render(<StudioInitialization onComplete={vi.fn()} onSkip={vi.fn()} />);
-    fireEvent.click(screen.getByRole("button", { name: "Continue", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
     fireEvent.change(await screen.findByLabelText("Teammate email 1"), { target: { value: "teammate@example.com" } });
     fireEvent.click(screen.getByRole("button", { name: "Send invitations & Continue" }));
     await screen.findByRole("alert");
