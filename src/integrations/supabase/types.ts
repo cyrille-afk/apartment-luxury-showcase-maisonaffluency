@@ -71,6 +71,45 @@ export type Database = {
         }
         Relationships: []
       }
+      account_identity_reviews: {
+        Row: {
+          created_at: string
+          decision: string
+          duplicate_user_id: string
+          email_key: string
+          google_verified: boolean
+          id: string
+          notes: string | null
+          password_verified: boolean
+          primary_user_id: string
+          reviewed_by: string
+        }
+        Insert: {
+          created_at?: string
+          decision: string
+          duplicate_user_id: string
+          email_key: string
+          google_verified?: boolean
+          id?: string
+          notes?: string | null
+          password_verified?: boolean
+          primary_user_id: string
+          reviewed_by: string
+        }
+        Update: {
+          created_at?: string
+          decision?: string
+          duplicate_user_id?: string
+          email_key?: string
+          google_verified?: boolean
+          id?: string
+          notes?: string | null
+          password_verified?: boolean
+          primary_user_id?: string
+          reviewed_by?: string
+        }
+        Relationships: []
+      }
       acquisition_demo_bookings: {
         Row: {
           audit_status: string
