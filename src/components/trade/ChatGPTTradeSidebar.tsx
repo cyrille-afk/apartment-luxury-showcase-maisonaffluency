@@ -224,7 +224,8 @@ function TradeSidebarFeed({ optimistic = false }: { optimistic?: boolean }) {
       const [picks, designers] = await Promise.all([
         supabase.from("designer_curator_picks")
           .select("id, title, trade_price_cents, currency, price_prefix, size_variants, designers(name)")
-          .eq("is_hidden", false),
+          .eq("is_hidden", false)
+          .eq("hidden_in_studio", false),
         supabase.from("designers").select("name, display_name, slug").eq("is_published", true),
       ]);
       if (picks.error) throw picks.error;
