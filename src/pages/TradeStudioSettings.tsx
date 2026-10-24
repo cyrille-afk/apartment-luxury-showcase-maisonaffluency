@@ -8,6 +8,7 @@ import { Building2, Mail, Trash2, UserPlus, Users, Plus } from "lucide-react";
 import { copyTextToClipboard } from "@/lib/clipboard";
 import { studioInvitationLink } from "@/lib/studioInvitationLink";
 import { supabase } from "@/integrations/supabase/client";
+import { studioSaveErrorMessage } from "@/lib/studioCreationMessage";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio, StudioRole } from "@/hooks/useStudio";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
