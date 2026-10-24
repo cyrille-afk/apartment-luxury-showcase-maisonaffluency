@@ -397,29 +397,28 @@ const TradeDashboard = () => {
               </p>
             )}
             {desktopTour && (firstWelcome ? (
-              <Button
+              <button
                 type="button"
-                variant="outline"
                 onClick={startFelixTour}
                 aria-label={`Meet ${guideName}`}
-                className="felix-surface mt-4 inline-flex min-h-9 items-center gap-2 px-4 py-2 font-body text-xs font-semibold uppercase tracking-[0.14em]"
+                className="felix-inline group/felix trade-micro-label mt-2 inline-flex items-center gap-1.5 font-body uppercase"
               >
-                <Sparkles aria-hidden className="h-3.5 w-3.5" />
-                {`Meet ${guideName}`}
-              </Button>
+                <span className="felix-inline-text">Meet {guideName}</span>
+                <Sparkles aria-hidden className="h-3 w-3" strokeWidth={1.25} />
+              </button>
             ) : (
               <button
                 type="button"
                 onClick={startFelixTour}
                 aria-label="Replay the onboarding tour"
-                className="felix-surface group/replay relative mt-4 inline-flex min-h-9 items-center gap-2 rounded-md px-4 py-2 font-body text-xs font-semibold tracking-[0.1em]"
+                className="felix-inline group/replay trade-micro-label relative mt-2 inline-flex items-center gap-1.5 font-body uppercase"
               >
-                <RotateCcw aria-hidden className="h-3 w-3 transition-transform duration-300 group-hover/replay:-rotate-180" />
-                <span>Meet Felix</span>
+                <span className="felix-inline-text">Meet Felix</span>
+                <RotateCcw aria-hidden className="h-3 w-3 transition-transform duration-500 group-hover/replay:-rotate-180" strokeWidth={1.25} />
                 <span
                   role="tooltip"
                   aria-hidden="true"
-                  className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 -translate-x-1/2 whitespace-nowrap rounded-sm border border-[hsl(var(--felix-bronze-deep)/0.35)] bg-background px-3 py-1.5 font-body text-[10px] uppercase tracking-[0.16em] text-[hsl(var(--felix-bronze-ink))] opacity-0 shadow-sm transition-opacity duration-200 group-hover/replay:opacity-100"
+                  className="pointer-events-none absolute left-0 top-full z-20 mt-2 translate-y-1 whitespace-nowrap rounded-sm border border-[hsl(var(--felix-bronze-deep)/0.3)] bg-background px-2.5 py-1 font-display text-[11px] italic tracking-[0.01em] text-[hsl(var(--felix-bronze-ink))] opacity-0 transition-all duration-200 group-hover/replay:translate-y-0 group-hover/replay:opacity-100"
                 >
                   Replay the Onboarding Tour
                 </span>
