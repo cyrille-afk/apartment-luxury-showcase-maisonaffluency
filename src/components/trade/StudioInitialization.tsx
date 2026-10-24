@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { canInitializeStep, initializationEmails } from "./studioInitializationRules";
+import { studioSaveErrorMessage } from "@/lib/studioCreationMessage";
+import { toast } from "sonner";
 
 export function StudioInitialization({ onComplete, onSkip }: { onComplete: (projectId: string) => void; onSkip: () => void }) {
   const { user, profile } = useAuth();
@@ -43,7 +45,7 @@ export function StudioInitialization({ onComplete, onSkip }: { onComplete: (proj
         if (!hasRealStudioName(name)) throw new Error("Enter your studio’s name, rather than a default workspace name.");
         if (!studioId.current) {
           const { data, error } = await supabase.from("studios").insert({ name: name.trim(), created_by: user.id }).select("id").single();
-          if (error || !data) throw new Error("Your studio could not be created. Please try again.");
+          if (error || !data) { const m = studioSaveErrorMessage(error); throw new Error(`${m.title}. ${m.description}`); }
           studioId.current = data.id;
         }
         if (canManage) {
@@ -58,9 +60,11 @@ export function StudioInitialization({ onComplete, onSkip }: { onComplete: (proj
             logoUrl = uploaded.current?.url ?? logoUrl;
           }
           const { error } = await supabase.from("studios").update({ name: name.trim(), display_name: name.trim(), logo_url: logoUrl, pdf_cover_theme: normalizeCoverTheme(currentStudio?.pdf_cover_theme) }).eq("id", studioId.current).select("id").single();
-          if (error) throw new Error("Your studio details could not be saved. Please try again.");
+          if (error) { const m = studioSaveErrorMessage(error); throw new Error(`${m.title}. ${m.description}`); }
         }
-        setCurrentStudioId(studioId.current); await refresh(); setStep(2);
+        setCurrentStudioId(studioId.current); await refresh();
+        toast.success("Studio saved", { description: `“${name.trim()}” is ready.` });
+        setStep(2);
       } else if (step === 2) {
         if (!studioId.current) throw new Error("Return to Studio identity and save your studio first.");
         const recipients = skipInvites ? [] : initializationEmails(emails);

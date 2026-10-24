@@ -8,6 +8,7 @@ import { Building2, Mail, Trash2, UserPlus, Users, Plus } from "lucide-react";
 import { copyTextToClipboard } from "@/lib/clipboard";
 import { studioInvitationLink } from "@/lib/studioInvitationLink";
 import { supabase } from "@/integrations/supabase/client";
+import { studioSaveErrorMessage } from "@/lib/studioCreationMessage";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio, StudioRole } from "@/hooks/useStudio";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -296,7 +297,8 @@ export default function TradeStudioSettings() {
       .single();
     if (error || !data) {
       setCreatingStudio(false);
-      toast({ title: "Could not create studio", description: error?.message, variant: "destructive" });
+      const m = studioSaveErrorMessage(error);
+      toast({ title: m.title, description: m.description, variant: "destructive" });
       return;
     }
     setCreatingStudio(false);
@@ -304,7 +306,7 @@ export default function TradeStudioSettings() {
     setNewStudioName("");
     setParams({});
     refreshStudios();
-    toast({ title: "Studio created", description: data.name });
+    toast({ title: "Studio saved", description: `“${data.name}” was created and you are its owner.` });
   };
 
   if (!currentStudio) {
