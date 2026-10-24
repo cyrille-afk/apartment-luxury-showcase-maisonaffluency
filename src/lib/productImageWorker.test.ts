@@ -31,7 +31,10 @@ beforeEach(() => {
   vi.stubEnv("LOVABLE_API_KEY", "test-only");
   mocks.embed.mockReset(); mocks.rpc.mockReset(); mocks.writes.length = 0;
   mocks.jobs = [1, 2].map((n) => ({ pick_id: `pick-${n}`, revision: "revision", status: "pending", attempts: 0, image_url: "https://example.test/photo.jpg", title: "Piece", designer_id: null }));
-  mocks.rpc.mockImplementation(async (name: string) => ({ data: name === "claim_product_image_worker" ? "lease" : true, error: null }));
+  mocks.rpc.mockImplementation((name: string) => {
+    const result = { data: name === "claim_product_image_worker" ? "lease" : true, error: null };
+    return Object.assign(Promise.resolve(result), { throwOnError: async () => result });
+  });
 });
 it("a duplicate wake with no lease never calls the image provider", async () => {
   mocks.rpc.mockResolvedValue({ data: null, error: null });
