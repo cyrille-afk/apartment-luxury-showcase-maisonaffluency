@@ -56,13 +56,34 @@ function describeSignUpError(message: string): string {
   return message;
 }
 
+/** Google’s own wording (“Access blocked”, “org_internal”, raw OAuth codes) is
+ *  never quoted back to members — one plain sentence covers every case. */
+const GOOGLE_SIGN_IN_ERROR =
+  "Google sign-in didn’t complete. Try again, or continue with your email and password.";
+
+/** Auth rejects are reported as what the member can act on, never as the raw
+ *  backend message. */
+function describeLoginError(message: string): string {
+  const m = message.toLowerCase();
+  if (m.includes("invalid login credentials") || m.includes("invalid credentials")) {
+    return "We couldn’t sign you in. Check your email and password, then try again.";
+  }
+  if (m.includes("email not confirmed")) {
+    return "Your email address isn’t confirmed yet. Open the confirmation link we sent you, then sign in again.";
+  }
+  if (m.includes("too many") || m.includes("rate")) {
+    return "Too many attempts for the moment. Wait a minute, then try again.";
+  }
+  return "We couldn’t sign you in right now. Try again, or contact trade@maisonaffluency.com.";
+}
+
 /** Hairline rule with a centred label — separates the primary credential
  *  path from the secondary Google path so the order reads clearly. */
 function Divider({ label = "or" }: { label?: string }) {
   return (
     <div className="relative flex items-center gap-4 py-1">
       <div className="flex-1 border-t border-border" />
-      <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">{label}</span>
+      <span className="font-body text-[10px] text-muted-foreground/70 tracking-[0.18em]">{label}</span>
       <div className="flex-1 border-t border-border" />
     </div>
   );
@@ -99,7 +120,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
       if (result.redirected) return; // browser is navigating to Google
       if (result.error) {
         setGoogleError(true);
-        toast({ title: "Google Sign-In Failed", description: result.error.message, variant: "destructive" });
+        toast({ title: "Google sign-in", description: GOOGLE_SIGN_IN_ERROR, variant: "destructive" });
         return;
       }
       // Popup flow: tokens are set, so close the dialog and refresh the page
@@ -107,9 +128,9 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
       onClose();
       window.location.reload();
 
-    } catch (err) {
+    } catch {
       setGoogleError(true);
-      toast({ title: "Google Sign-In Failed", description: err instanceof Error ? err.message : "Unexpected error", variant: "destructive" });
+      toast({ title: "Google sign-in", description: GOOGLE_SIGN_IN_ERROR, variant: "destructive" });
     } finally {
       setGoogleLoading(false);
     }
@@ -180,7 +201,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
-      toast({ title: "Login Failed", description: error.message, variant: "destructive" });
+      toast({ title: "Sign in", description: describeLoginError(error.message), variant: "destructive" });
       return;
     }
     onClose();
@@ -203,7 +224,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
       </svg>
       {googleLoading ? "Connecting..." : "Continue with Google"}
     </button>
-    {googleError && <p role="alert" className="mt-3 font-body text-sm text-destructive">Google sign-in did not complete. Try again, or continue with email and password.</p>}
+    {googleError && <p role="alert" className="mt-3 font-body text-sm text-destructive">{GOOGLE_SIGN_IN_ERROR}</p>}
     </>
   );
 
@@ -211,7 +232,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
 
   const content = (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4" onClick={() => { if (!loading) onClose(); }}>
-      <div role="dialog" aria-modal="true" aria-label="Account registration" className={`bg-background border border-border rounded-lg p-6 w-full shadow-xl relative ${mode === "signup" ? "max-w-lg" : "max-w-sm"}`} onClick={(e) => e.stopPropagation()}>
+      <div role="dialog" aria-modal="true" aria-label="Account registration" className={`bg-background border border-border rounded-lg p-6 w-full shadow-xl relative ${mode === "signup" ? "max-w-lg" : mode === "login" ? "max-w-md" : "max-w-sm"}`} onClick={(e) => e.stopPropagation()}>
         <button aria-label="Close" disabled={loading} onClick={onClose} className="absolute top-3 right-3 text-muted-foreground hover:text-foreground">
           <X size={16} />
         </button>
@@ -392,8 +413,8 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
               </button>
             </form>
 
-            <div className="py-4">
-              <Divider label="Or sign in with" />
+            <div className="py-5">
+              <Divider />
             </div>
 
             {googleButton}

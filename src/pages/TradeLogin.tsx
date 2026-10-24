@@ -243,7 +243,7 @@ const TradeLogin = () => {
             <GoogleGlyph className="w-4 h-4 text-foreground/80" />
             {googleLoading ? "Connecting" : "Continue with Google"}
           </button>
-          <GoogleAccessNotice showAccessRequest />
+          <GoogleAccessNotice showAccessRequest showApplyLink={false} />
 
           {/* Persistent Google sign-in error with retry — a toast alone
               disappears and leaves the member with no way forward. */}
@@ -259,7 +259,7 @@ const TradeLogin = () => {
               <p className="mt-1.5 font-body text-sm text-foreground/80">
                 {googleLoading ? "Waiting for Google sign-in to complete. Finish signing in in the Google window."
                   : googleSucceeded ? "Opening your requested page."
-                    : "Google sign-in did not complete. If Google showed ‘Access blocked’ or ‘org_internal’, request access using the email above. Otherwise, retry or use your approved account’s email and password."}
+                    : "Google sign-in didn’t complete. Try again, or use your approved account’s email and password."}
               </p>
               {!googleLoading && !googleSucceeded && <>
               <Button
@@ -292,7 +292,7 @@ const TradeLogin = () => {
                 to="/trade-program?intent=apply"
                 className="font-body text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
               >
-                Apply for a Trade Account
+                Don’t have an account? Apply for the Trade Program.
               </Link>
             </p>
             <p>
