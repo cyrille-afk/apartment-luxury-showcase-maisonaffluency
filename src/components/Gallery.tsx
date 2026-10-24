@@ -674,17 +674,23 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
       ?? resolveHotspotPick(productName, designerName, mappedPickId);
     if (best?.designer_slug) {
       const slug = best.slug || slugifyProduct(best.title + (best.subtitle ? `-${best.subtitle}` : ""));
+      const from = window.location.pathname + window.location.search;
+      const imageIdentifier = galleryExperiences[currentSectionIndex]?.items[currentItemIndex]?.title;
+      try {
+        sessionStorage.setItem('trade_product_from_path', from);
+        if (imageIdentifier) sessionStorage.setItem('__gallery_hotspot_restore', JSON.stringify({ imageIdentifier, from }));
+      } catch { /* Router origin remains available when storage is blocked. */ }
       setLightboxOpen(false);
       navigateProduct({
         to: "/trade/products/$slug/$productSlug",
         params: { slug: best.designer_slug, productSlug: slug },
-        state: (previous) => ({ ...previous, from: window.location.pathname + window.location.search }),
+        state: (previous) => ({ ...previous, from }),
       });
       return;
     }
     // No resolvable product page — fall back to the lightbox / link behavior.
     handleHotspotViewProduct(productName, designerName, linkUrl, mappedPickId);
-  }, [resolveHotspotPick, dbCuratorPicks, navigateProduct, handleHotspotViewProduct]);
+  }, [resolveHotspotPick, dbCuratorPicks, navigateProduct, handleHotspotViewProduct, currentSectionIndex, currentItemIndex]);
 
   // Pulsing hotspot hint — always visible on first card of each section
   const showHotspotHint = true;
@@ -882,9 +888,10 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     const handleRestore = () => {
       const raw = sessionStorage.getItem('__gallery_hotspot_restore');
       if (!raw) return;
-      sessionStorage.removeItem('__gallery_hotspot_restore');
       try {
-        const { imageIdentifier } = JSON.parse(raw);
+        const { imageIdentifier, from } = JSON.parse(raw);
+        if (from && from !== window.location.pathname + window.location.search) return;
+        sessionStorage.removeItem('__gallery_hotspot_restore');
         for (let si = 0; si < galleryExperiences.length; si++) {
           const ii = galleryExperiences[si].items.findIndex(item => item.title === imageIdentifier);
           if (ii >= 0) {
@@ -894,6 +901,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
         }
       } catch {}
     };
+    handleRestore();
     window.addEventListener('gallery-hotspot-return', handleRestore);
     return () => window.removeEventListener('gallery-hotspot-return', handleRestore);
   }, []);
