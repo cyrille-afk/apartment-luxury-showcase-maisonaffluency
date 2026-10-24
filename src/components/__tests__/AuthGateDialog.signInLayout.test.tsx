@@ -50,8 +50,8 @@ afterEach(() => {
 describe("Sign-in modal layout and copy", () => {
   it("puts the credential form first, the separator next, then Google at the bottom", () => {
     const dialog = renderLogin();
-    const email = screen.getByAutoComplete("email");
-    const password = screen.getByAutoComplete("current-password");
+    const email = dialog.querySelector('input[type="email"]') as HTMLInputElement;
+    const password = dialog.querySelector('input[type="password"]') as HTMLInputElement;
     const submit = screen.getByRole("button", { name: /^Sign In$/ });
     const separator = screen.getByText("or");
     const google = screen.getByRole("button", { name: /Continue with Google/ });
@@ -99,11 +99,11 @@ describe("Sign-in modal layout and copy", () => {
       error: { message: "Invalid login credentials" },
       data: { session: null, user: null },
     });
-    renderLogin();
-    fireEvent.change(screen.getByAutoComplete("email"), {
+    const dialog = renderLogin();
+    fireEvent.change(dialog.querySelector('input[type="email"]') as HTMLInputElement, {
       target: { value: "member@studio.com" },
     });
-    fireEvent.change(screen.getByAutoComplete("current-password"), {
+    fireEvent.change(dialog.querySelector('input[type="password"]') as HTMLInputElement, {
       target: { value: "wrongpassword1!" },
     });
     fireEvent.click(screen.getByRole("button", { name: /^Sign In$/ }));
