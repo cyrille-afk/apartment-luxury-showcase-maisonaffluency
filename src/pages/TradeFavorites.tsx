@@ -218,7 +218,48 @@ export default function TradeFavorites() {
     }
   }, [user]);
 
+
+  const notifyFolders = () => window.dispatchEvent(new Event(TRADE_FAVORITE_FOLDERS_EVENT));
+
+  const createFolder = async () => {
+    if (!user) return;
+    const name = window.prompt("Name your folder (a room, project or design concept)", "Living Room")?.trim();
+    if (!name) return;
+    const { data, error } = await supabase.from("favorite_folders").insert({ user_id: user.id, name: name.slice(0, 80) }).select("id").single();
+    if (error) { toast({ title: "Folder not created", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Folder created", description: name });
+    await fetchFolders(); notifyFolders();
+    if (data?.id) setActiveFolder(data.id);
+  };
+
+  const renameFolder = async (id: string, current: string) => {
+    const name = window.prompt("Rename folder", current)?.trim();
+    if (!name || name === current) return;
+    const { error } = await supabase.from("favorite_folders").update({ name: name.slice(0, 80) }).eq("id", id);
+    if (error) { toast({ title: "Folder not renamed", description: error.message, variant: "destructive" }); return; }
+    await fetchFolders(); notifyFolders();
+  };
+
+  const deleteFolder = async (id: string, name: string) => {
+    if (!window.confirm(`Delete the folder "${name}"? Saved pieces stay in your favorites.`)) return;
+    await supabase.from("favorite_folder_items").delete().eq("folder_id", id);
+    const { error } = await supabase.from("favorite_folders").delete().eq("id", id);
+    if (error) { toast({ title: "Folder not deleted", description: error.message, variant: "destructive" }); return; }
+    setActiveFolder(null);
+    await fetchFolders(); notifyFolders();
+  };
+
+  const toggleInFolder = async (favoriteId: string, folderId: string) => {
+    const inFolder = (folderAssignments[favoriteId] ?? []).includes(folderId);
+    const { error } = inFolder
+      ? await supabase.from("favorite_folder_items").delete().eq("folder_id", folderId).eq("favorite_id", favoriteId)
+      : await supabase.from("favorite_folder_items").insert({ folder_id: folderId, favorite_id: favoriteId });
+    if (error) { toast({ title: "Could not update folder", description: error.message, variant: "destructive" }); return; }
+    await fetchFolders(); notifyFolders();
+  };
+
   useEffect(() => { fetchFavorites(); }, [fetchFavorites]);
+
   useEffect(() => { fetchFolders(); }, [fetchFolders]);
 
   useEffect(() => {
@@ -455,6 +496,22 @@ export default function TradeFavorites() {
                 </button>
               );
             })}
+            <button
+              onClick={createFolder}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full font-body text-[11px] uppercase tracking-[0.12em] border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-foreground/40"
+            >
+              <FolderPlus className="w-3 h-3" /> New folder
+            </button>
+            {activeFolder && (() => {
+              const f = folders.find((x) => x.id === activeFolder);
+              if (!f) return null;
+              return (
+                <span className="inline-flex items-center gap-1 ml-1">
+                  <button onClick={() => renameFolder(f.id, f.name)} title="Rename folder" aria-label="Rename folder" className="p-1.5 text-muted-foreground hover:text-foreground"><Pencil className="w-3.5 h-3.5" /></button>
+                  <button onClick={() => deleteFolder(f.id, f.name)} title="Delete folder" aria-label="Delete folder" className="p-1.5 text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
+                </span>
+              );
+            })()}
           </div>
         )}
 
