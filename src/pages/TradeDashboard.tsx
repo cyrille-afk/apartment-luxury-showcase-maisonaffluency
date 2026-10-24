@@ -418,7 +418,7 @@ const TradeDashboard = () => {
                 <span
                   role="tooltip"
                   aria-hidden="true"
-                  className="pointer-events-none absolute left-0 top-full z-20 mt-2 translate-y-1 whitespace-nowrap normal-case rounded-sm border border-[hsl(var(--felix-bronze-deep)/0.3)] bg-background px-2.5 py-1 font-display text-[11px] italic tracking-[0.01em] text-[hsl(var(--felix-bronze-ink))] opacity-0 transition-all duration-200 group-hover/replay:translate-y-0 group-hover/replay:opacity-100"
+                  className="pointer-events-none absolute left-0 top-full z-20 mt-3 translate-y-1 whitespace-nowrap normal-case rounded-sm border border-[hsl(var(--felix-bronze-deep)/0.3)] bg-background px-2.5 py-1 font-display text-[11px] italic tracking-[0.01em] text-[hsl(var(--felix-bronze-ink))] opacity-0 transition-all duration-200 group-hover/replay:translate-y-0 group-hover/replay:opacity-100"
                 >
                   Replay the Onboarding Tour
                 </span>
