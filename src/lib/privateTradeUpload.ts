@@ -23,8 +23,8 @@ export function isPrivateTradeUrl(url: string): boolean {
   return /\/storage\/v1\/object\/(?:sign|public|authenticated)\/trade-private\//.test(url);
 }
 
-/** Long-lived signed URL (5 years) so persisted references keep resolving. */
-const SIGNED_URL_TTL_SECONDS = 60 * 60 * 24 * 365 * 5;
+/** 7-day signed URL: bounds how long a leaked/retained link outlives revoked access; PrivateTradeImage re-signs on display. */
+const SIGNED_URL_TTL_SECONDS = 60 * 60 * 24 * 7;
 
 /**
  * Uploads a file to the private trade bucket and returns a signed URL.
