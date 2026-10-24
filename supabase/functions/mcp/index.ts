@@ -8,7 +8,7 @@ import { auth, defineMcp } from "npm:@lovable.dev/mcp-js@3.0.4";
 // src/lib/mcp/tools/search-curator-picks.ts
 import { defineTool } from "npm:@lovable.dev/mcp-js@3.0.4";
 import { PostgrestClient } from "npm:@supabase/postgrest-js@^2.116.0";
-import { z } from "npm:zod@^3.25.76";
+import { z } from "npm:zod@^4";
 var CLICK_ORIGIN = `${process.env.SUPABASE_URL}/functions/v1/mcp-click`;
 var trackProductUrl = (slug, pickId) => `${CLICK_ORIGIN}?to=product&slug=${encodeURIComponent(slug)}&pick=${pickId}`;
 var TRADE_SIGNUP_URL = `${CLICK_ORIGIN}?to=signup`;
@@ -178,7 +178,7 @@ var search_curator_picks_default = defineTool({
 // src/lib/mcp/tools/get-product.ts
 import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@3.0.4";
 import { PostgrestClient as PostgrestClient2 } from "npm:@supabase/postgrest-js@^2.116.0";
-import { z as z2 } from "npm:zod@^3.25.76";
+import { z as z2 } from "npm:zod@^4";
 var CLICK_ORIGIN2 = `${process.env.SUPABASE_URL}/functions/v1/mcp-click`;
 var trackProductUrl2 = (slug, pickId) => `${CLICK_ORIGIN2}?to=product&slug=${encodeURIComponent(slug)}&pick=${pickId}`;
 var TRADE_SIGNUP_URL2 = `${CLICK_ORIGIN2}?to=signup`;
@@ -279,7 +279,7 @@ var get_product_default = defineTool2({
 
 // src/lib/mcp/tools/calculate-trade-budget.ts
 import { defineTool as defineTool3 } from "npm:@lovable.dev/mcp-js@3.0.4";
-import { z as z3 } from "npm:zod@^3.25.76";
+import { z as z3 } from "npm:zod@^4";
 var round2 = (n) => Math.round(n * 100) / 100;
 var fmt = (n) => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 var calculate_trade_budget_default = defineTool3({
@@ -343,7 +343,7 @@ var calculate_trade_budget_default = defineTool3({
 
 // src/lib/mcp/tools/get-synced-projects.ts
 import { defineTool as defineTool4, ToolError } from "npm:@lovable.dev/mcp-js@3.0.4";
-import { z as z4 } from "npm:zod@^3.25.76";
+import { z as z4 } from "npm:zod@^4";
 var FUNCTIONS_ORIGIN = process.env.SUPABASE_URL;
 var SYNC_ENDPOINT = `${FUNCTIONS_ORIGIN}/functions/v1/extension-sync-projects`;
 var get_synced_projects_default = defineTool4({
@@ -391,7 +391,7 @@ Use the exact folder name as targetWorkflow when staging.` : "No active project 
 
 // src/lib/mcp/tools/stage-product-to-project.ts
 import { defineTool as defineTool5, ToolError as ToolError2 } from "npm:@lovable.dev/mcp-js@3.0.4";
-import { z as z5 } from "npm:zod@^3.25.76";
+import { z as z5 } from "npm:zod@^4";
 var FUNCTIONS_ORIGIN2 = process.env.SUPABASE_URL;
 var STAGE_ENDPOINT = `${FUNCTIONS_ORIGIN2}/functions/v1/extension-stage-product`;
 var stage_product_to_project_default = defineTool5({

@@ -16,7 +16,7 @@ const schema = z.object({
   email: z.string().trim().email("Invalid email").max(255),
   postal_code: z.string().trim().min(1, "Required").max(20),
   country: z.string().min(1, "Required"),
-  preferred_contact: z.enum(["Email", "Phone", "WhatsApp"], { errorMap: () => ({ message: "Required" }) }),
+  preferred_contact: z.enum(["Email", "Phone", "WhatsApp"], { error: "Required" }),
   service_type: z.string().min(1, "Required"),
 });
 type Form = Record<keyof z.infer<typeof schema>, string>;
