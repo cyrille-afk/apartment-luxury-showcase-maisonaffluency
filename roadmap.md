@@ -1,7 +1,7 @@
 # Roadmap — Automatic Visual Search Indexing
 
 ## Studio creation access failure
-- [ ] Reproduce non-admin studio creation, correct the failing access rule and verify ownership plus read-back.
+- [x] Reproduce Gregoire's non-admin INSERT RETURNING failure; add creator-only studio read policy and verify creation plus automatic owner membership.
 
 ## Google Trade access requests
 - [x] Add name/email submission through the existing validated inquiry handler, admin-visible storage and staff notifications; no account or approval changes.
