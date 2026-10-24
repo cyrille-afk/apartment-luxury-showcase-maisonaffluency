@@ -46,3 +46,36 @@ export const hasPendingTourStart = () => {
 export const clearTourStartRequest = () => {
   try { sessionStorage.removeItem(TOUR_PENDING_KEY); } catch { /* storage optional */ }
 };
+
+/**
+ * A completed walkthrough must say so once the member lands back on the
+ * dashboard. The marker is tab-scoped and short lived: it survives the hop to
+ * "/trade" (the dashboard may not be mounted yet when the tour closes) and is
+ * consumed on read, so a later refresh never repeats the confirmation.
+ */
+export const TOUR_COMPLETED_KEY = "felix_tour_completed_v1";
+export const TOUR_COMPLETED_WINDOW_MS = 60_000;
+
+/** In-session mirror so a dashboard remount still shows the note it already claimed. */
+let completionClaimed = false;
+
+export const markTourCompleted = () => {
+  try { sessionStorage.setItem(TOUR_COMPLETED_KEY, String(Date.now())); } catch { /* storage optional */ }
+};
+
+/** True when a walkthrough finished moments ago; the marker is cleared on read. */
+export const consumeTourCompletion = () => {
+  try {
+    const raw = sessionStorage.getItem(TOUR_COMPLETED_KEY);
+    if (!raw) return completionClaimed;
+    const completedAt = Number(raw);
+    sessionStorage.removeItem(TOUR_COMPLETED_KEY);
+    if (!Number.isFinite(completedAt) || Date.now() - completedAt > TOUR_COMPLETED_WINDOW_MS) return false;
+    completionClaimed = true;
+    return true;
+  } catch { return false; }
+};
+
+/** True when this tab already claimed a completion note (survives a remount, not a refresh). */
+export const tourCompletionWasClaimed = () => completionClaimed;
+
