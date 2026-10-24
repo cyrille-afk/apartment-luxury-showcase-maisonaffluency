@@ -1,5 +1,9 @@
 # Roadmap — Automatic Visual Search Indexing
 
+## Repeated redirect blank page
+- [ ] Verify the reported repeat-visit failure and keep pending-navigation remount protection.
+- [ ] Fix confirmed redirect deduplication and verify immediate repeat navigation without blank pages.
+
 ## Reviewed quote client PDF export
 - [x] Add a client-ready PDF download to quote review using the shared branded document and existing checks; export does not publish, email or change status.
 - [x] Passed snapshot preparation, check-blocking and stale-document tests; downloaded QU-9F86D9 on Cyrille's Trade account (120,250 bytes, 3 A4 pages). Inspected all pages and confirmed SGD 13,314.93 subtotal / SGD 16,444.35 total match review, existing Draft marking preserved and no browser errors.
