@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { startFelixTour, hasPendingTourStart, clearTourStartRequest, TOUR_PENDING_KEY } from "./felixTourUtils";
+import { startFelixTour, hasPendingTourStart, clearTourStartRequest, TOUR_PENDING_KEY, markTourCompleted, consumeTourCompletion, TOUR_COMPLETED_KEY } from "./felixTourUtils";
 
 describe("tour launch handoff", () => {
   it("notifies the mounted tour without importing its React module", () => {
@@ -28,5 +28,29 @@ describe("tour launch handoff", () => {
     sessionStorage.setItem(TOUR_PENDING_KEY, String(Date.now() - 60_000));
     expect(hasPendingTourStart()).toBe(false);
     expect(sessionStorage.getItem(TOUR_PENDING_KEY)).toBeNull();
+  });
+});
+
+describe("tour completion handoff", () => {
+  it("drops a completion marker that was never claimed", () => {
+    sessionStorage.setItem(TOUR_COMPLETED_KEY, String(Date.now() - 600_000));
+    expect(consumeTourCompletion()).toBe(false);
+    expect(sessionStorage.getItem(TOUR_COMPLETED_KEY)).toBeNull();
+  });
+
+  it("claims a finished walkthrough once and clears the marker", () => {
+    markTourCompleted();
+    expect(consumeTourCompletion()).toBe(true);
+    expect(sessionStorage.getItem(TOUR_COMPLETED_KEY)).toBeNull();
+  });
+
+  it("keeps the note across a dashboard remount", () => {
+    expect(consumeTourCompletion()).toBe(true);
+  });
+
+  it("does not repeat the confirmation after a refresh", async () => {
+    vi.resetModules();
+    const fresh = await import("./felixTourUtils");
+    expect(fresh.consumeTourCompletion()).toBe(false);
   });
 });
