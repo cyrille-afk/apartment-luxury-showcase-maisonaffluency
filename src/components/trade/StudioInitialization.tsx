@@ -100,7 +100,7 @@ export function StudioInitialization({ onComplete, onSkip }: { onComplete: (proj
   };
 
   return <Dialog open onOpenChange={open => { if (!open && !busy) onSkip(); }}>
-    <DialogContent hideClose overlayClassName="z-[150] bg-background/80 backdrop-blur-md" className="z-[151] w-[calc(100%-2rem)] max-w-xl max-h-[90dvh] overflow-y-auto rounded-none border-border p-8 shadow-none sm:rounded-none sm:p-10" onInteractOutside={event => event.preventDefault()}>
+    <DialogContent hideClose overlayClassName="z-[150] bg-background/60 backdrop-blur-md" className="z-[151] w-[calc(100%-2rem)] max-w-xl max-h-[90dvh] overflow-y-auto rounded-none border-border bg-background p-8 shadow-none sm:rounded-none sm:p-10" onInteractOutside={event => event.preventDefault()}>
       <p className="font-body text-[10px] uppercase text-accent">Maison Affluency · Studio Initialization · {step} / 3</p>
       <div className="flex gap-2" aria-hidden="true">{[1, 2, 3].map(value => <span key={value} className={`h-px flex-1 ${value <= step ? "bg-accent" : "bg-border"}`} />)}</div>
       <DialogTitle className="font-display text-3xl font-normal">{["Your studio identity", "Invite your team", "Your first project"][step - 1]}</DialogTitle>
