@@ -117,7 +117,9 @@ export function PwaPendingAuthConsumer({ children }: { children: ReactNode }) {
     return () => { active = false; };
   }, [verified, loading, user, rolesLoaded, navigate, setIsPwaBooting]);
 
-  if (phase === "ready" || phase === "checking") return children;
+  // SSR and ordinary browsers render children while checking (effects never
+  // run on the server); only the installed app holds them for the handshake.
+  if (phase === "ready" || (phase === "checking" && (typeof window === "undefined" || !isInstalledPwaDisplay()))) return children;
   return (
     <main className="min-h-[100dvh] bg-background text-foreground flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-sm text-center">
