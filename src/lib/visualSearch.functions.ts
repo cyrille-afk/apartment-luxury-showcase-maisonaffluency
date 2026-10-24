@@ -8,6 +8,7 @@
  * separate model/space and stay untouched.
  */
 import { createServerFn } from "@tanstack/react-start";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const AI_GATEWAY = "https://ai.gateway.lovable.dev/v1";
@@ -108,9 +109,8 @@ export interface ImageEmbeddingStatus {
 }
 
 async function countImageEmbeddingCoverage(
-  supabaseAdmin: typeof import("@/integrations/supabase/client.server") extends never
-    ? never
-    : any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabaseAdmin: SupabaseClient<any, any, any>,
 ): Promise<ImageEmbeddingStatus> {
   const { count: total, error: e1 } = await supabaseAdmin
     .from("designer_curator_picks")
