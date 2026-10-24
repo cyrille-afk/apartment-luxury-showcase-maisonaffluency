@@ -3,15 +3,16 @@ import { GoogleAccessRequestForm } from "@/components/GoogleAccessRequestForm";
 import { useState } from "react";
 
 /**
- * Guidance that sits beside the Google sign-in button.
+ * Guidance that sits under the Google sign-in button.
  *
- * The wording is deliberately one line: the earlier multi-paragraph
- * org_internal explanation read as technical filler and pushed the useful
- * links out of view. Google sign-in is an internal-team matter — everyone
- * else signs in with email and password.
+ * One short, muted line: the earlier multi-paragraph explanation quoted
+ * Google's own error wording and read as technical filler, so it is gone.
+ * Google sign-in is an internal-team matter — everyone else signs in with
+ * email and password.
  *
  * showAccessRequest keeps the inline request form on the full-page trade
- * sign-in only, so the sign-in lightbox stays clean.
+ * sign-in only, so the sign-in lightbox stays clean. showApplyLink is
+ * switched off where the page already carries its own footer link.
  */
 export function GoogleAccessNotice({
   showNote = true,
@@ -24,12 +25,18 @@ export function GoogleAccessNotice({
 }) {
   const [requestOpen, setRequestOpen] = useState(false);
   return (
-    <div className="mt-3 space-y-3 font-body text-xs leading-relaxed text-muted-foreground">
+    <div className="mt-3 space-y-2 font-body text-[11px] leading-relaxed text-muted-foreground/80">
       {showNote && (
-        <p className="border-l border-border pl-3">
-          <span className="font-semibold text-foreground">Note:</span>{" "}
-          Google Sign-In is restricted to internal Maison Affluency team members. External
-          partners and Trade accounts should log in using their email and password above.
+        <p>
+          Google Sign-In is for internal staff only. If you are a Trade Member
+          and prefer Google access, please contact{" "}
+          <a
+            href="mailto:trade@maisonaffluency.com"
+            className="underline underline-offset-2 hover:text-foreground transition-colors"
+          >
+            trade@maisonaffluency.com
+          </a>{" "}
+          to whitelist your email.
         </p>
       )}
       {showApplyLink && (
@@ -37,7 +44,7 @@ export function GoogleAccessNotice({
           to="/trade-program?intent=apply"
           className="inline-block text-foreground underline underline-offset-4"
         >
-          New to the Trade Program? Apply for a Trade Account
+          Don’t have an account? Apply for the Trade Program.
         </Link>
       )}
       {showAccessRequest && (
