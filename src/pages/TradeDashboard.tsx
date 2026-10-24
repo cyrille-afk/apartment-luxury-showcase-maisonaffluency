@@ -393,26 +393,27 @@ const TradeDashboard = () => {
             </h1>
             {profile?.company && showTradePrice && (
               <p className="trade-micro-label mt-4 font-body uppercase text-muted-foreground">
-                {profile.company} • {tierLabel} partner
+                {profile.company} — <span className="underline decoration-1 underline-offset-4">{tierLabel} partner</span>
               </p>
             )}
             {desktopTour && (firstWelcome ? (
-              <button
+               <button
                 type="button"
                 onClick={startFelixTour}
                 aria-label={`Meet ${guideName}`}
-                className="felix-inline group/felix trade-micro-label mt-2 inline-flex items-center gap-1.5 font-body uppercase"
+                className="felix-inline group/felix trade-micro-label mt-3 inline-flex items-center gap-1.5 font-body uppercase"
               >
-                <span className="felix-inline-text">Meet {guideName}</span>
                 <Sparkles aria-hidden className="h-3 w-3" strokeWidth={1.25} />
+                <span className="felix-inline-text">Meet {guideName}</span>
               </button>
             ) : (
-              <button
+               <button
                 type="button"
                 onClick={startFelixTour}
                 aria-label="Replay the onboarding tour"
-                className="felix-inline group/replay trade-micro-label relative mt-2 inline-flex items-center gap-1.5 font-body uppercase"
+                className="felix-inline group/replay trade-micro-label relative mt-3 inline-flex items-center gap-1.5 font-body uppercase"
               >
+                <Sparkles aria-hidden className="h-3 w-3" strokeWidth={1.25} />
                 <span className="felix-inline-text">Meet Felix</span>
                 <RotateCcw aria-hidden className="h-3 w-3 transition-transform duration-500 group-hover/replay:-rotate-180" strokeWidth={1.25} />
                 <span
