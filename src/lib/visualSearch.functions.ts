@@ -49,7 +49,7 @@ export const searchCatalogueByImage = createServerFn({ method: "POST" })
 
     const { data: matches, error } = await context.supabase.rpc("match_product_images", {
       query_embedding: JSON.stringify(embedding),
-      match_count: 8,
+      match_count: 24,
     } as never);
     if (error) throw new Error("Match lookup failed");
 
