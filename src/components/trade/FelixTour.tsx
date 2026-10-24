@@ -14,7 +14,7 @@ import { onboardingProjectForMarket } from "@/lib/onboardingProject";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useDesktopTradeTour } from "./useDesktopTradeTour";
-import { fmtPct, resolveTierTokens, hasPendingTourStart, clearTourStartRequest } from "./felixTourUtils";
+import { fmtPct, resolveTierTokens, hasPendingTourStart, clearTourStartRequest, markTourCompleted } from "./felixTourUtils";
 import { FELIX_STEP_SIDEBAR } from "./felixTourSidebarMap";
 import { chooseTourCardPlacement, type TourRect } from "./felixTourPlacement";
 
@@ -772,8 +772,11 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       localStorage.setItem(SEEN_KEY, String(Date.now()));
       // Remember where the member left off so the tour can resume there;
       // a finished tour clears any saved progress.
-      if (completed) localStorage.removeItem(PROGRESS_KEY);
-      else localStorage.setItem(PROGRESS_KEY, String(currentStep));
+      if (completed) {
+        localStorage.removeItem(PROGRESS_KEY);
+        // The dashboard claims this marker once and confirms the landing.
+        markTourCompleted();
+      } else localStorage.setItem(PROGRESS_KEY, String(currentStep));
       clearTourStartRequest();
     } catch {}
   }, [currentStep, navigate, location.pathname]);

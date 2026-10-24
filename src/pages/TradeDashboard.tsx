@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { startFelixTour } from "@/components/trade/felixTourUtils";
 import { DashboardWelcomeGuide } from "@/components/trade/DashboardWelcomeGuide";
+import { TourCompletionNote } from "@/components/trade/TourCompletionNote";
 import { WhiteLabelTourBanner } from "@/components/trade/WhiteLabelTourBanner";
 import { ActivityRowSkeleton, BrandFolderSkeleton } from "@/components/trade/skeletons";
 import { MostPopularProducts } from "@/components/trade/MostPopularProducts";
