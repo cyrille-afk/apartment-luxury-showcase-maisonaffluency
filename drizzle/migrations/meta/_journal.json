@@ -1611,6 +1611,13 @@
       "when": 1792823807530,
       "tag": "0229_add_hidden_in_studio_to_curator_picks",
       "breakpoints": true
+    },
+    {
+      "idx": 230,
+      "version": "7",
+      "when": 1792824905614,
+      "tag": "0230_create_product_image_embeddings",
+      "breakpoints": true
     }
   ]
 }

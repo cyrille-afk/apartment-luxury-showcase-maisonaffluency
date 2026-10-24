@@ -1,6 +1,7 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Camera, Plus, X } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { Camera, Loader2, Plus, RefreshCw, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
@@ -8,39 +9,64 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio } from "@/hooks/useStudio";
 import { useProjects, type Project } from "@/hooks/useProjects";
-import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import { cn } from "@/lib/utils";
-import type { TradeProduct } from "@/lib/tradeProducts";
+import {
+  backfillProductImageEmbeddings,
+  getImageEmbeddingStatus,
+  searchCatalogueByImage,
+  type VisualSearchMatch,
+} from "@/lib/visualSearch.functions";
 
 type Phase = "idle" | "loading" | "results";
 
 const fmt = (cents: number, currency: string) =>
   new Intl.NumberFormat("en-GB", { style: "currency", currency, maximumFractionDigits: 0 }).format(cents / 100);
 
-/** Visual Search: drop-zone + simulated match feedback (mock matching for now). */
+/** Downscale the upload to <=1024px JPEG so the embedding request stays small. */
+async function fileToResizedDataUrl(file: File, maxSide = 1024, quality = 0.85): Promise<string> {
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+  const w = Math.max(1, Math.round(bitmap.width * scale));
+  const h = Math.max(1, Math.round(bitmap.height * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas unavailable");
+  ctx.drawImage(bitmap, 0, 0, w, h);
+  bitmap.close();
+  return canvas.toDataURL("image/jpeg", quality);
+}
+
+/** Visual Search: real image matching — the uploaded photo is embedded with the same multimodal model as the catalogue imagery and ranked by vector similarity. */
 export default function VisualSearchPanel() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { currentStudio, canEdit } = useStudio();
   const { projects } = useProjects({ activeOnly: true });
-  const { allProducts } = useTradeProducts();
   const { showTradePrice, discountPct } = useTradePriceMode();
   const inputRef = useRef<HTMLInputElement>(null);
   const [phase, setPhase] = useState<Phase>("idle");
   const [preview, setPreview] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
-  const [selected, setSelected] = useState<TradeProduct | null>(null);
+  const [matches, setMatches] = useState<VisualSearchMatch[]>([]);
+  const [selected, setSelected] = useState<VisualSearchMatch | null>(null);
   const [saving, setSaving] = useState(false);
+  const [indexing, setIndexing] = useState(false);
 
-  // Mock curation: up to 4 Alexander Lamont pieces with imagery.
-  const matches = useMemo(() => {
-    const withImg = allProducts.filter((p) => p.image_url);
-    const al = withImg.filter((p) => /alexander lamont/i.test(p.brand_name));
-    return [...al, ...withImg].filter((p, i, a) => a.findIndex((x) => x.id === p.id) === i).slice(0, 4);
-  }, [allProducts]);
+  const runSearch = useServerFn(searchCatalogueByImage);
+  const runBackfill = useServerFn(backfillProductImageEmbeddings);
+  const runStatus = useServerFn(getImageEmbeddingStatus);
 
-  const ids = matches.map((m) => m.id);
+  const { data: coverage, refetch: refetchCoverage } = useQuery({
+    queryKey: ["image-embedding-coverage"],
+    enabled: isAdmin,
+    queryFn: () => runStatus(),
+    staleTime: 30_000,
+  });
+
+  const ids = matches.map((m) => m.pick_id);
   const { data: prices } = useQuery({
     queryKey: ["visual-search-prices", ids],
     enabled: ids.length > 0,
@@ -51,32 +77,61 @@ export default function VisualSearchPanel() {
     },
   });
 
-  const priceLabel = (p: TradeProduct) => {
-    const row = prices?.get(p.id);
+  const priceLabel = (pickId: string) => {
+    const row = prices?.get(pickId);
     const cents = Number(row?.trade_price_cents) || 0;
     if (!cents) return "Price upon Request";
     const cur = row?.currency || "EUR";
     return showTradePrice ? fmt(Math.round(cents * (1 - discountPct / 100)), cur) : fmt(cents, cur);
   };
 
-  const handleFile = useCallback((file?: File | null) => {
+  const handleFile = useCallback(async (file?: File | null) => {
     if (!file || !file.type.startsWith("image/")) { toast.error("Please choose an image file."); return; }
     setPreview((old) => { if (old) URL.revokeObjectURL(old); return URL.createObjectURL(file); });
     setPhase("loading");
-    window.setTimeout(() => setPhase("results"), 1400);
-  }, []);
+    setMatches([]);
+    try {
+      const dataUrl = await fileToResizedDataUrl(file);
+      const { matches: found } = await runSearch({ data: { image: dataUrl } });
+      setMatches(found);
+      setPhase("results");
+      if (found.length === 0) toast.message("No close visual matches found in the catalogue yet.");
+    } catch (e) {
+      setPhase("idle");
+      toast.error(e instanceof Error ? e.message : "Visual search failed. Please try again.");
+    }
+  }, [runSearch]);
 
-  const reset = () => { if (preview) URL.revokeObjectURL(preview); setPreview(null); setPhase("idle"); };
+  const reset = () => { if (preview) URL.revokeObjectURL(preview); setPreview(null); setPhase("idle"); setMatches([]); };
+
+  const indexCatalogue = async () => {
+    if (indexing) return;
+    setIndexing(true);
+    try {
+      // Loop batches until every catalogue image is embedded.
+      for (let guard = 0; guard < 200; guard++) {
+        const r = await runBackfill();
+        refetchCoverage();
+        if (r.missing === 0 || r.processed === 0) {
+          toast.success(`Catalogue imagery indexed — ${r.embedded} of ${r.total} pieces searchable.`);
+          return;
+        }
+      }
+      toast.message("Indexing paused — click again to continue.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Indexing failed.");
+    } finally {
+      setIndexing(false);
+      refetchCoverage();
+    }
+  };
 
   const stage = async (project: Project) => {
     if (!selected || !user || saving || !canEdit) return;
     setSaving(true);
     try {
-      let productId = selected.trade_product_id ?? null;
-      if (!productId) {
-        const { data } = await supabase.from("trade_products").select("id").eq("source_pick_id", selected.id).limit(1).maybeSingle();
-        productId = data?.id ?? null;
-      }
+      const { data } = await supabase.from("trade_products").select("id").eq("source_pick_id", selected.pick_id).limit(1).maybeSingle();
+      const productId = data?.id ?? null;
       if (!productId) throw new Error("This piece cannot be staged until it is in the trade catalogue.");
       const { data: board } = await supabase.from("client_boards").select("id")
         .eq("project_id", project.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
@@ -95,25 +150,47 @@ export default function VisualSearchPanel() {
         const { error } = await supabase.from("client_board_items").insert({ board_id: boardId, product_id: productId } as never);
         if (error) throw error;
       }
-      toast.success(`${selected.product_name} added to ${project.name}`);
+      toast.success(`${selected.title} added to ${project.name}`);
       setSelected(null);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not stage this piece.");
-    } finally { setSaving(false); }
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
     <div className="space-y-8">
+      {isAdmin && coverage && (
+        <div className="flex flex-wrap items-center gap-3 border border-border/60 bg-muted/20 px-4 py-2.5">
+          <p className="font-body text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+            Catalogue imagery indexed: {coverage.embedded} / {coverage.total}
+          </p>
+          {coverage.missing > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={indexing}
+              onClick={indexCatalogue}
+              className="h-7 rounded-none font-body text-[10px] uppercase tracking-[0.2em]"
+            >
+              {indexing ? <Loader2 className="mr-1 size-3 animate-spin" /> : <RefreshCw className="mr-1 size-3" />}
+              {indexing ? "Indexing…" : `Index ${coverage.missing} remaining`}
+            </Button>
+          )}
+        </div>
+      )}
+
       <div
         onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
         onDragLeave={() => setDragging(false)}
-        onDrop={(e) => { e.preventDefault(); setDragging(false); handleFile(e.dataTransfer.files?.[0]); }}
+        onDrop={(e) => { e.preventDefault(); setDragging(false); void handleFile(e.dataTransfer.files?.[0]); }}
         className={cn(
           "relative flex w-full flex-col items-center justify-center border border-dashed border-border/80 bg-muted/20 px-6 py-14 text-center transition-colors md:py-20",
           dragging && "border-foreground/50 bg-muted/40",
         )}
       >
-        <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { handleFile(e.target.files?.[0]); e.target.value = ""; }} />
+        <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { void handleFile(e.target.files?.[0]); e.target.value = ""; }} />
         {phase === "loading" ? (
           <div className="flex flex-col items-center gap-5" role="status" aria-live="polite">
             <div className="relative size-16">
@@ -148,17 +225,20 @@ export default function VisualSearchPanel() {
         <div className="overflow-hidden">
           <p className="mb-4 font-body text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Curated Matches</p>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {matches.map((p) => (
-              <div key={p.id} className="bg-card p-3">
+            {matches.map((m) => (
+              <div key={m.pick_id} className="bg-card p-3">
                 <div className="flex aspect-[4/5] items-center justify-center overflow-hidden bg-background">
-                  <img src={optimizeImageUrl(p.image_url!, "w_500,c_limit,q_auto,f_auto")} alt={p.product_name} loading="lazy" className="h-full w-full object-contain" />
+                  {m.image_url && <img src={optimizeImageUrl(m.image_url, "w_500,c_limit,q_auto,f_auto")} alt={m.title ?? "Catalogue piece"} loading="lazy" className="h-full w-full object-contain" />}
                 </div>
                 <div className="flex items-start justify-between gap-3 px-1 pt-3">
-                  <p className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{p.brand_name}</p>
-                  <p className="shrink-0 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">{priceLabel(p)}</p>
+                  <p className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{m.designer_name}</p>
+                  <p className="shrink-0 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">{priceLabel(m.pick_id)}</p>
                 </div>
-                <p className="px-1 pt-1 font-display text-sm text-foreground">{p.product_name}</p>
-                <button type="button" onClick={() => setSelected(p)} className="mt-2 inline-flex items-center px-1 font-body text-[10px] uppercase tracking-[0.25em] text-foreground underline-offset-4 hover:underline">
+                <p className="px-1 pt-1 font-display text-sm text-foreground">{m.title}</p>
+                <p className="px-1 pt-0.5 font-body text-[10px] tracking-[0.1em] text-muted-foreground/70">
+                  {Math.round(Math.max(0, Math.min(1, m.similarity)) * 100)}% visual match
+                </p>
+                <button type="button" onClick={() => setSelected(m)} className="mt-2 inline-flex items-center px-1 font-body text-[10px] uppercase tracking-[0.25em] text-foreground underline-offset-4 hover:underline">
                   <Plus className="mr-1 size-3" />Stage to Project
                 </button>
               </div>
