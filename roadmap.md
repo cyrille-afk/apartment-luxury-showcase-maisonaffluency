@@ -1,8 +1,8 @@
 # Roadmap — Automatic Visual Search Indexing
 
 ## Favorites product opening and registration password
-- [ ] Replace Favorites' legacy product overlay with the shared full product destination; verify consecutive product openings and return.
-- [ ] Investigate the step-6 password save and fix any verified failure without changing the user's password.
+- [x] Replace Favorites' legacy product overlay with the shared full product destination; live verified Ondas then Dais in Presentation, Ondas in Studio, Technical List navigation and browser Back, with no page errors.
+- [ ] Identify the password-change screen referred to as step 6 and verify its save response; activation, reset and settings code all await the auth update and handle errors. Blocked on identifying the user's screen; no password changed.
 
 ## Quote review before client sending
 - [x] Add a selected-piece, quantity and trade-price review step using the editor's existing calculations and client-send checks.
