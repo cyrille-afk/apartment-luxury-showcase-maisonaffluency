@@ -678,7 +678,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
       navigateProduct({
         to: "/trade/products/$slug/$productSlug",
         params: { slug: best.designer_slug, productSlug: slug },
-        state: { from: window.location.pathname + window.location.search },
+        state: (previous) => ({ ...previous, from: window.location.pathname + window.location.search }),
       });
       return;
     }
