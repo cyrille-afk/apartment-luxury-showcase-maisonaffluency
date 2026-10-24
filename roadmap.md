@@ -1,5 +1,10 @@
 # Roadmap — Automatic Visual Search Indexing
 
+## Google Trade access requests
+- [x] Add name/email submission through the existing validated inquiry handler, admin-visible storage and staff notifications; no account or approval changes.
+- [x] Verify signed-in real submission, admin read-back, sent notification logs and six validation/recovery tests; remove test inquiry.
+- [ ] Verify an unsigned visitor completes Turnstile and submits: the sandbox security widget did not provide a token. Guest submission stays disabled without verification.
+
 - [x] Add minimum visual-match and maximum result controls; verified default 8, expanded 12, 100% empty state and 74% filtered results against a real uploaded room photo; five tests pass.
 
 - [x] Existing real Visual Search, catalogue backfill and distinct-room checks completed.

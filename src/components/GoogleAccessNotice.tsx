@@ -1,6 +1,9 @@
 import { Link } from "@/lib/router-compat";
+import { GoogleAccessRequestForm } from "@/components/GoogleAccessRequestForm";
+import { useState } from "react";
 
 export function GoogleAccessNotice() {
+  const [requestOpen, setRequestOpen] = useState(false);
   return (
     <div className="mt-3 space-y-2 font-body text-xs leading-relaxed text-muted-foreground">
       <p>
@@ -19,6 +22,10 @@ export function GoogleAccessNotice() {
       <Link to="/trade-program?intent=apply" className="inline-block text-foreground underline underline-offset-4">
         New to the Trade Program? Apply for a Trade Account
       </Link>
+      <details className="pt-2" onToggle={event => setRequestOpen(event.currentTarget.open)}>
+        <summary className="cursor-pointer text-sm text-foreground underline underline-offset-4">Request Trade Access</summary>
+        {requestOpen && <div className="pt-3"><GoogleAccessRequestForm /></div>}
+      </details>
     </div>
   );
 }
