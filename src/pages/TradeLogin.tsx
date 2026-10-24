@@ -243,7 +243,7 @@ const TradeLogin = () => {
             <GoogleGlyph className="w-4 h-4 text-foreground/80" />
             {googleLoading ? "Connecting" : "Continue with Google"}
           </button>
-          <GoogleAccessNotice />
+          <GoogleAccessNotice showAccessRequest />
 
           {/* Persistent Google sign-in error with retry — a toast alone
               disappears and leaves the member with no way forward. */}
