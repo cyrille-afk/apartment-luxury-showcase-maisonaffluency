@@ -1,5 +1,9 @@
 # Roadmap — Automatic Visual Search Indexing
 
+## Repeated redirect blank page
+- [x] Reproduced an empty /public-piece page on immediate repeat navigation in a real TanStack router test before fixing the guard.
+- [x] Scope deduplication to router/resolved visit and release settled attempts; all five redirect tests pass. Signed-in Ondas public-to-Trade visits both render, second in 0.78 seconds with no browser errors; current app build is clean.
+
 ## Reviewed quote client PDF export
 - [x] Add a client-ready PDF download to quote review using the shared branded document and existing checks; export does not publish, email or change status.
 - [x] Passed snapshot preparation, check-blocking and stale-document tests; downloaded QU-9F86D9 on Cyrille's Trade account (120,250 bytes, 3 A4 pages). Inspected all pages and confirmed SGD 13,314.93 subtotal / SGD 16,444.35 total match review, existing Draft marking preserved and no browser errors.

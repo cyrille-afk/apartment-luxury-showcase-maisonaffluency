@@ -205,13 +205,19 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
 // One-shot redirect. A <Navigate> that remounts while its target route is
 // still loading (Suspense/auth re-renders) would otherwise re-fire on every
 // mount, cancel the pending navigation and loop until the tab freezes. The
-// module-level guard makes repeat mounts for the same target a no-op.
-const recentRedirects = new Map<string, number>();
+// router-scoped guard suppresses remounts only during the active resolved
+// visit. A new visit must be allowed to redirect to the same target at once.
+const recentRedirects = new WeakMap<object, { visit: string; targets: Map<string, number> }>();
 const REDIRECT_DEDUPE_MS = 4000;
-export function shouldFireRedirect(key: string, now = Date.now()): boolean {
-  const last = recentRedirects.get(key);
+export function shouldFireRedirect(router: object, visit: string, key: string, now = Date.now()): boolean {
+  let bucket = recentRedirects.get(router);
+  if (!bucket || bucket.visit !== visit) {
+    bucket = { visit, targets: new Map() };
+    recentRedirects.set(router, bucket);
+  }
+  const last = bucket.targets.get(key);
   if (last !== undefined && now - last < REDIRECT_DEDUPE_MS) return false;
-  recentRedirects.set(key, now);
+  bucket.targets.set(key, now);
   return true;
 }
 
@@ -219,10 +225,23 @@ export function shouldFireRedirect(key: string, now = Date.now()): boolean {
 export function Navigate({ to, replace, state }: { to: To; replace?: boolean; state?: any }) {
   const { pathname, search, hash } = parseTo(to);
   const nav = tsNavigate();
+  const router = useRouter();
   const key = `${pathname}?${JSON.stringify(search ?? {})}#${hash ?? ""}`;
   useEffect(() => {
-    if (!shouldFireRedirect(key)) return;
-    void nav({ to: pathname as never, search: search as never, hash, state: state as never, replace });
+    // location switches to the target while the source can still remount.
+    // resolvedLocation stays on the source until the navigation completes.
+    const source = router.state.resolvedLocation ?? router.state.location;
+    const visit = `${source.href}:${source.state.__TSR_key ?? source.state.key ?? ""}`;
+    if (!shouldFireRedirect(router, visit, key)) return;
+    const bucket = recentRedirects.get(router);
+    const attempt = bucket?.targets.get(key);
+    void nav({ to: pathname as never, search: search as never, hash, state: state as never, replace }).finally(() => {
+      // Release this attempt when it settles, not after an arbitrary cooldown.
+      // A cancelled older attempt must not release a newer pending redirect.
+      if (bucket && recentRedirects.get(router) === bucket && bucket.targets.get(key) === attempt) {
+        bucket.targets.delete(key);
+      }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
   return null;
