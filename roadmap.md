@@ -2,7 +2,7 @@
 
 ## Homepage logo return
 - [x] Limit the hidden homepage guard to initial loading and reconcile already-loaded styles on client-side return.
-- [ ] Verify sign-in logo and close return, direct homepage and repeated visits; run stylesheet handoff regressions.
+- [x] Verify sign-in logo and close return, direct homepage and repeated visits on desktop/mobile; stylesheet handoff regressions pass. Confirm only one headline remains after hydration.
 
 ## Sign-in return address stacking
 - [x] Stop the outgoing Trade layout from redirecting the incoming sign-in page, normalize query separators and repair existing nested return links.

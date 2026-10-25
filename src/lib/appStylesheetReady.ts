@@ -6,6 +6,9 @@ export function watchAppStylesheetReady(doc: Document): () => void {
     link.media = "all";
     doc.documentElement.classList.add("app-css");
     doc.documentElement.classList.remove("home-fouc");
+    // The shell's hydration render can restore this fallback after Hero's
+    // mount effect has hidden it. Never leave two copies of the headline.
+    doc.getElementById("static-hero-copy")?.style.setProperty("display", "none");
   };
   if (link.sheet) reveal();
   else link.addEventListener("load", reveal);

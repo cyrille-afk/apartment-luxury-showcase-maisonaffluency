@@ -176,7 +176,7 @@ function RootShell({ children }: { children: ReactNode }) {
   }, [currentManifestHref, manifestLocation.pathname]);
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
-  useEffect(() => watchAppStylesheetReady(document), [isHome]);
+  useEffect(() => watchAppStylesheetReady(document), [isHome, hydrated]);
   return (
     <html lang="en" suppressHydrationWarning>
       <head>

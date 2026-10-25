@@ -3,6 +3,7 @@ import { watchAppStylesheetReady } from "./appStylesheetReady";
 
 afterEach(() => {
   document.getElementById("app-css")?.remove();
+  document.getElementById("static-hero-copy")?.remove();
   document.documentElement.classList.remove("home-fouc", "app-css");
 });
 
@@ -19,10 +20,14 @@ function stylesheet(loaded: boolean) {
 describe("homepage stylesheet handoff", () => {
   it("reveals a return visit when CSS is already loaded but its boot marker is missing", () => {
     const link = stylesheet(true);
+    const copy = document.createElement("div");
+    copy.id = "static-hero-copy";
+    document.body.append(copy);
     watchAppStylesheetReady(document);
     expect(document.documentElement.classList.contains("home-fouc")).toBe(false);
     expect(document.documentElement.classList.contains("app-css")).toBe(true);
     expect(link.media).toBe("all");
+    expect(copy.style.display).toBe("none");
   });
   it("keeps the initial guard until delayed CSS loads, then releases it", () => {
     const link = stylesheet(false);
