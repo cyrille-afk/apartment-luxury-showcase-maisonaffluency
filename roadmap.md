@@ -1,5 +1,5 @@
 ## Structured comparator dimensions
-- [ ] Render labelled metric/imperial rows, handle common separators and auxiliary heights, and verify parser and signed-in comparison.
+- [x] Render labelled metric/imperial rows with common separator parsing and auxiliary heights; 48 regressions pass. Four real pieces verified signed-in on desktop/mobile, refresh retains rows, no overflow or browser errors. Preview only.
 
 ## Comparator material swatches
 - [x] Replaced bullets with 28px wrapping real linked texture samples or explicit hex colours; unavailable samples use named neutral placeholders. Six visible with +X more popover, hover/focus labels and reduced-motion interaction. Signed-in Salute/Ecusson verified: six loaded images, +11 opens eleven finishes, desktop/mobile no page overflow or errors; prevented automatic tooltip covering the popover heading. Nineteen regressions pass, preview clean; not published, GitHub sync needed.

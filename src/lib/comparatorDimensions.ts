@@ -59,6 +59,8 @@ export function comparatorDimensionGroups(raw: string | null | undefined): Compa
         });
       }
     }
+    const order = ["Width", "Length", "Depth", "Diameter", "Height", "Thickness", "Seat Height", "Arm Height"];
+    rows.sort((a, b) => order.indexOf(a.label) - order.indexOf(b.label));
     const signature = JSON.stringify(rows);
     if (rows.length && !signatures.has(`${name}:${signature}`)) {
       signatures.add(`${name}:${signature}`);
