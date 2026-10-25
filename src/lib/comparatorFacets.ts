@@ -15,11 +15,23 @@ const title = (v: string) => v.charAt(0).toUpperCase() + v.slice(1);
 const CANON: Record<string, string> = { gray: "grey", aluminum: "aluminium", matt: "matte", lacquer: "lacquered", glossy: "gloss", patina: "patinated", "boucle": "bouclé" };
 
 /** Classify recorded materials and linked finish names into material / finish / colour facet values. */
-export function comparatorFacets(materials: string | null | undefined, linked: ComparatorSwatch[] = []): ComparatorFacets {
+export type FinishFacetOverride = Partial<Record<ComparatorFacetKind, string | null>>;
+export const finishFacetKey = (name: string) => fold(name).replace(/\s+/g, " ").trim();
+export const FACET_VOCAB_OPTIONS: Record<ComparatorFacetKind, string[]> = Object.fromEntries((Object.keys(VOCAB) as ComparatorFacetKind[]).map(k => [k, [...new Set(VOCAB[k].map(t => title(CANON[fold(t)] ?? t)))].sort()])) as Record<ComparatorFacetKind, string[]>;
+
+/** Every distinct finish/material name for a piece, for admin categorisation. */
+export function comparatorFinishNames(materials: string | null | undefined, linked: ComparatorSwatch[] = []) {
+  return comparatorSwatches(materials, linked).map(s => s.name);
+}
+
+export function comparatorFacets(materials: string | null | undefined, linked: ComparatorSwatch[] = [], overrides?: Map<string, FinishFacetOverride>): ComparatorFacets {
   const out: Record<ComparatorFacetKind, Set<string>> = { material: new Set(), finish: new Set(), color: new Set() };
   for (const swatch of comparatorSwatches(materials, linked)) {
+    const override = overrides?.get(finishFacetKey(swatch.name));
+    for (const kind of Object.keys(VOCAB) as ComparatorFacetKind[]) { const v = override?.[kind]?.trim(); if (v) out[kind].add(title(v)); }
     const words = new Set(fold(swatch.name).split(/[^a-z]+/).filter(Boolean));
     for (const kind of Object.keys(VOCAB) as ComparatorFacetKind[]) {
+      if (override?.[kind]?.trim()) continue;
       for (const term of VOCAB[kind]) if (words.has(fold(term))) out[kind].add(title(CANON[fold(term)] ?? term));
     }
   }
