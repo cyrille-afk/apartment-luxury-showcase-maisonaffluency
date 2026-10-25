@@ -1,3 +1,6 @@
+## Project-first tearsheets
+- [ ] Require choosing or creating a project before working on tearsheets; save boards under that project and verify the complete flow.
+
 ## Curated Room Layout loading and freeze report
 - [x] Add page/catalogue/generation/curation loading states and coordinate competing actions; signed-in catalogue and generation indicators captured, five placement tests pass.
 - [x] Stop idle canvas rendering while retaining continuous rendering during walkthrough playback and dragging.
