@@ -16,6 +16,7 @@ import { comparatorDesignerGroups, comparatorPrices, comparatorDetails, fetchCom
 import { useAuth } from "@/hooks/useAuth";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import { useSearchParams } from "@/lib/router-compat";
+import { useComparatorDraft } from "@/hooks/useComparatorDraft";
 
 function ComparisonPrice({ product, net }: { product: TradeProduct | null; net: boolean }) {
   const { discountPct } = useTradePriceMode();
@@ -31,14 +32,19 @@ function ComparisonPrice({ product, net }: { product: TradeProduct | null; net: 
 }
 
 export default function TradeComparator() {
-  const [search, setSearch] = useState("");
-  const [compareList, setCompareList] = useState<TradeProduct[]>([]);
-  const [letter, setLetter] = useState("");
-  const [source, setSource] = useState<"catalogue" | "favorites">("catalogue");
-  const [openDesigners, setOpenDesigners] = useState<Set<string>>(new Set());
   const { user } = useAuth();
   const { liveProducts, isLoading: catalogueLoading } = useTradeProducts();
   const [params, setParams] = useSearchParams();
+  const requestedShortlist = params.get("shortlist");
+  const { draft, setDraft, ready: draftReady, hasStoredDraft } = useComparatorDraft(user?.id, requestedShortlist);
+  const { search, compareList, letter, source, shortlistName } = draft;
+  const openDesigners = new Set(draft.openDesigners);
+  const setSearch = (search: string) => setDraft(d => ({ ...d, search }));
+  const setLetter = (letter: string) => setDraft(d => ({ ...d, letter }));
+  const setSource = (source: "catalogue" | "favorites") => setDraft(d => ({ ...d, source }));
+  const setShortlistName = (shortlistName: string) => setDraft(d => ({ ...d, shortlistName }));
+  const setCompareList = (update: TradeProduct[] | ((list: TradeProduct[]) => TradeProduct[])) => setDraft(d => ({ ...d, compareList: typeof update === "function" ? update(d.compareList) : update }));
+  const setOpenDesigners = (update: (value: Set<string>) => Set<string>) => setDraft(d => ({ ...d, openDesigners: [...update(new Set(d.openDesigners))] }));
   const projectId = params.get("project");
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -77,7 +83,6 @@ export default function TradeComparator() {
 
   const queryClient = useQueryClient();
   const { discountPct } = useTradePriceMode();
-  const [shortlistName, setShortlistName] = useState("");
   const { data: shortlists = [], refetch: refetchShortlists } = useQuery({
     queryKey: ["comparator-shortlists", user?.id, projectId],
     enabled: !!user,
@@ -109,9 +114,9 @@ export default function TradeComparator() {
     await navigator.clipboard.writeText(`https://www.maisonaffluency.com/shortlist/${token}`);
     toast.success("Client link copied — shows pieces without prices");
   };
-  const requestedShortlist = params.get("shortlist");
   const [openedShortlist, setOpenedShortlist] = useState<string | null>(null);
   useEffect(() => {
+    if (!draftReady || hasStoredDraft) return;
     if (!requestedShortlist || requestedShortlist === openedShortlist || !details || catalogueLoading) return;
     const saved = shortlists.find(s => s.id === requestedShortlist);
     if (!saved || !Array.isArray(saved.items)) return;
@@ -121,7 +126,7 @@ export default function TradeComparator() {
       return product ? [product] : [];
     }).slice(0, 4));
     setOpenedShortlist(requestedShortlist);
-  }, [requestedShortlist, openedShortlist, shortlists, details, catalogueLoading, catalogue, favoriteProducts]);
+  }, [draftReady, hasStoredDraft, requestedShortlist, openedShortlist, shortlists, details, catalogueLoading, catalogue, favoriteProducts]);
   const deleteShortlist = async (id: string) => {
     await supabase.from("comparator_shortlists").delete().eq("id", id);
     refetchShortlists();
@@ -152,9 +157,9 @@ export default function TradeComparator() {
   };
 
   useEffect(() => {
-    if (!details) return;
+    if (!details || !draftReady) return;
     setCompareList(list => list.map(p => ({ ...p, ...details.get(p.id) })));
-  }, [details]);
+  }, [details, draftReady]);
 
   const comparisonSlots = Array.from({ length: 4 }, (_, index) => compareList[index] ?? null);
 

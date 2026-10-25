@@ -1,3 +1,6 @@
+## Comparator refresh persistence
+- [x] Preserve selected pieces and in-progress comparator controls across refresh with account-scoped price-free local drafts; live refresh retained Dais, Favorites and the unfinished name on Cyrille's account, removal stayed removed after a second refresh. No cloud shortlist created; 15 tests passed and preview build clean.
+
 ## Product comparator feedback
 - [x] Include recorded parent houses alongside child designers; Ecart and CC-Tapis verified. Favorites now load saved product records directly; both of Cyrille's two Favorites shown.
 - [x] Assign/save under accessible projects and reopen from project Boards; live Singapore project save and saved two-piece reload verified, temporary shortlist removed.
