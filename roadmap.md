@@ -1,4 +1,3 @@
-## Structured comparator dimensions
 ## Comparison PDF grid alignment
 - [ ] Consolidate landscape comparison, embed swatches, share structured dimensions/fonts and add numbered footers; verify actual exported pages visually.
 

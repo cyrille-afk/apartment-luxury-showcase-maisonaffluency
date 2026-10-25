@@ -715,6 +715,16 @@ html.public-product-canvas .product-page-root > main {
   isolation: auto;
 }
 
+/* Fixed paper palette for direct-image comparison PDF exports, independent of screen mode. */
+:root {
+  --comparison-pdf-paper: 0 0% 100%;
+  --comparison-pdf-ink: 0 0% 12%;
+  --comparison-pdf-muted: 0 0% 42%;
+  --comparison-pdf-rule: 0 0% 87%;
+  --comparison-pdf-image: 40 8% 97%;
+  --comparison-pdf-trade: 40 26% 95.5%;
+}
+
 /* Print styles for quote PDF export */
 @media print {
   /* Hide all navigation, sidebar, and UI chrome */
