@@ -6183,7 +6183,7 @@ serve(async (req) => {
 
     // Enumeration verb but no known designer matched — the model would otherwise
     // return an empty answer. Explain why and offer the nearest names.
-    if (isEnumerationRequest && !mentionsKnownDesigner) {
+    if (!layoutScheduleContinuation && isEnumerationRequest && !mentionsKnownDesigner) {
       const nearest = suggestNearestDesigners(lastUserMsg || "", 6);
       if (nearest.length > 0) {
         return sseTextResponse(
@@ -6196,7 +6196,7 @@ serve(async (req) => {
     }
 
 
-    if (hasScopedDesigners && parsedTypologyCats.length > 0 && /\bBlock\s+2\b|\bREFERENCES\s*:/i.test(userConversationText)) {
+    if (!layoutScheduleContinuation && hasScopedDesigners && parsedTypologyCats.length > 0 && /\bBlock\s+2\b|\bREFERENCES\s*:/i.test(userConversationText)) {
       const { data: designerRows } = await supabase
         .from("designers")
         .select("id, name, display_name")
