@@ -258,14 +258,27 @@ export default function TradeComparator() {
       if (!pending) { pending = comparisonImage(url, true); imageCache.set(url, pending); }
       return pending;
     };
+    const fx = fxRates.data ?? (await fxRates.refetch()).data ?? null;
+    let converted = false;
+    const priceText = (c: number | null, cur: string, prefix: string) => {
+      if (c == null) return "Price upon Request";
+      const original = `${prefix}${fmt(c, cur)}`;
+      if (cur === displayCurrency) return original;
+      const value = fx ? convertComparatorCents(c, cur, displayCurrency, fx.rates) : null;
+      if (value === null) return `${original}\n${displayCurrency} conversion unavailable`;
+      converted = true;
+      return `${prefix}${formatMoney(value, displayCurrency)}\nOriginal: ${original}`;
+    };
     const pieces = await Promise.all(exportList.map(async (p) => {
       const pricing = queryClient.getQueryData<any>(["trade-product-pricing", p.id]);
       const prices = pricing ? comparatorPrices(pricing, discountPct) : { retail: null, trade: null };
       const cur = pricing?.currency || "EUR";
+      const prefix = pricing?.price_prefix ? `${pricing.price_prefix} ` : "";
       const swatches = await Promise.all(comparatorSwatches(p.materials, linkedSwatches.get(p.id) ?? []).map(async s => ({ name: s.name, color: s.color, image: s.imageUrl ? await textureImage(s.imageUrl) : null })));
-      return { name: p.product_name, swatches, image: p.image_url ? await comparisonImage(p.image_url) : null, values: { brand_name: p.brand_name, category: p.category, dimensions: p.dimensions ?? "", materials: p.materials ?? "", lead_time: p.lead_time ?? "", designer_notes: draft.pieceNotes[p.id]?.trim() || "", rrp_price_cents: fmt(prices.retail, cur), trade_price_cents: fmt(prices.trade, cur) } };
+      return { name: p.product_name, swatches, image: p.image_url ? await comparisonImage(p.image_url) : null, values: { brand_name: p.brand_name, category: p.category, dimensions: p.dimensions ?? "", materials: p.materials ?? "", lead_time: p.lead_time ?? "", designer_notes: draft.pieceNotes[p.id]?.trim() || "", rrp_price_cents: priceText(prices.retail, cur, prefix), trade_price_cents: priceText(prices.trade, cur, prefix) } };
     }));
-    downloadBlob(await buildComparisonPdf(pieces, FIELDS, showTradePrice ? "Product Comparison (Trade)" : "Product Comparison", coverDetails), "product-comparison.pdf");
+    const fxNote = `Prices shown in ${displayCurrency}${converted ? ` using Maison Affluency's synced FX rates${fx?.updatedAt ? `, last updated ${new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short", timeZoneName: "short" }).format(fx.updatedAt)}` : ""}; original supplier prices shown beneath` : ""}.`;
+    downloadBlob(await buildComparisonPdf(pieces, FIELDS, showTradePrice ? "Product Comparison (Trade)" : "Product Comparison", { ...coverDetails, fxNote }), "product-comparison.pdf");
     } catch { toast.error("The PDF could not be prepared with all pictures. Please try again."); } finally { setExporting(false); }
   };
 
