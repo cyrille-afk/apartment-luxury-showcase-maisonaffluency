@@ -17,7 +17,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import { useSearchParams } from "@/lib/router-compat";
 import { useComparatorDraft } from "@/hooks/useComparatorDraft";
-import type { TradeProduct as DraftProduct } from "@/lib/tradeProducts";
 
 function ComparisonPrice({ product, net }: { product: TradeProduct | null; net: boolean }) {
   const { discountPct } = useTradePriceMode();
@@ -44,7 +43,7 @@ export default function TradeComparator() {
   const setLetter = (letter: string) => setDraft(d => ({ ...d, letter }));
   const setSource = (source: "catalogue" | "favorites") => setDraft(d => ({ ...d, source }));
   const setShortlistName = (shortlistName: string) => setDraft(d => ({ ...d, shortlistName }));
-  const setCompareList = (update: DraftProduct[] | ((list: DraftProduct[]) => DraftProduct[])) => setDraft(d => ({ ...d, compareList: typeof update === "function" ? update(d.compareList) : update }));
+  const setCompareList = (update: TradeProduct[] | ((list: TradeProduct[]) => TradeProduct[])) => setDraft(d => ({ ...d, compareList: typeof update === "function" ? update(d.compareList) : update }));
   const setOpenDesigners = (update: (value: Set<string>) => Set<string>) => setDraft(d => ({ ...d, openDesigners: [...update(new Set(d.openDesigners))] }));
   const projectId = params.get("project");
   const [saving, setSaving] = useState(false);

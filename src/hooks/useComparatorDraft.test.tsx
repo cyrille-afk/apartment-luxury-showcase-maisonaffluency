@@ -25,7 +25,8 @@ describe("comparator draft persistence", () => {
     const key = comparatorDraftKey("cyrille", null);
     const raw = JSON.stringify({ compareList: [product] });
     localStorage.setItem(key, raw);
-    const hook = renderHook(({ user }: { user: string | undefined }) => useComparatorDraft(user, null), { initialProps: { user: undefined } });
+    const initialProps: { user: string | undefined } = { user: undefined };
+    const hook = renderHook(({ user }: { user: string | undefined }) => useComparatorDraft(user, null), { initialProps });
     expect(localStorage.getItem(key)).toBe(raw);
     hook.rerender({ user: "cyrille" });
     expect(hook.result.current.draft.compareList[0]?.id).toBe("dais");
