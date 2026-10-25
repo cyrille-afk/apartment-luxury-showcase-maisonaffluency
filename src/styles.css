@@ -183,6 +183,7 @@ All colors MUST be HSL.
 }
 .spec-sheet-document { box-shadow: var(--shadow-document); }
 .spec-sheet-print-frame { position: fixed; width: 1px; height: 1px; left: -10000px; top: 0; border: 0; }
+.comparator-trade-row { background-color: hsl(var(--comparator-trade-row)); }
 
 @layer base {
   :root {
