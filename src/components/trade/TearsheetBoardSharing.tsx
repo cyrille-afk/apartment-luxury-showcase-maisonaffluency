@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Label } from "@/components/ui/label";
 import InviteCollaboratorDialog from "./procurement/InviteCollaboratorDialog";
 import { boardInvitationPermission, boardInvitationStatus, type BoardInvitation } from "./boardInvitationStatus";
+import ResendBoardInvitation from "./ResendBoardInvitation";
 
 type Invite = BoardInvitation;
 
@@ -78,6 +79,7 @@ export default function TearsheetBoardSharing({ projectId, projectName }: { proj
                     <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="break-all text-sm">{inv.email}</p><p className="mt-1 text-xs text-muted-foreground">{boardInvitationPermission(inv)} · {status} · Expires {new Date(inv.expires_at).toLocaleDateString("en-GB")}</p></div>
                       {!inactive && <Button size="icon" variant="ghost" aria-label={`Revoke access for ${inv.email}`} title="Revoke access" disabled={!!busy} onClick={() => setConfirmId(inv.id)}><Ban className="h-4 w-4" /></Button>}
                     </div>
+                    <ResendBoardInvitation projectId={projectId} boardId={selectedBoard.id} invite={inv} now={Date.now()} disabled={!!busy} onRenewed={refreshAccess} />
                     {confirmId === inv.id && <div className="flex flex-wrap items-center gap-2"><p className="text-xs text-muted-foreground">Remove this person’s access?</p><Button size="sm" variant="destructive" disabled={!!busy} onClick={() => void revoke(inv.id)}>{busy === inv.id ? "Revoking…" : "Revoke access"}</Button><Button size="sm" variant="ghost" disabled={!!busy} onClick={() => setConfirmId(null)}>Cancel</Button></div>}
                   </li>;
                 })}</ul>}

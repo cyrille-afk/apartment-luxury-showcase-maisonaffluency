@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { boardInvitationPermission, boardInvitationStatus } from "./boardInvitationStatus";
+import { boardInvitationPermission, boardInvitationStatus, canResendBoardInvitation } from "./boardInvitationStatus";
 
 const now = Date.parse("2026-10-25T07:51:00Z");
 const invite = { status: "pending", expires_at: "2026-10-27T07:51:00Z", last_seen_at: null };
@@ -24,5 +24,13 @@ describe("board invitation access status", () => {
     expect(boardInvitationPermission({ view_only: true, role: "client" })).toBe("View only");
     expect(boardInvitationPermission({ view_only: false, role: "client" })).toBe("Can comment / approve");
     expect(boardInvitationPermission({ view_only: false, role: "contractor" })).toBe("Can edit / add pieces");
+  });
+  it("allows resending expired invitations, including previously accepted access", () => {
+    expect(canResendBoardInvitation({ ...invite, status: "accepted", expires_at: "2026-10-25T07:51:00Z" }, now)).toBe(true);
+  });
+  it("does not offer resending revoked, current or unconfirmed invitations", () => {
+    expect(canResendBoardInvitation({ ...invite, status: "revoked", expires_at: "2026-10-24T00:00:00Z" }, now)).toBe(false);
+    expect(canResendBoardInvitation(invite, now)).toBe(false);
+    expect(canResendBoardInvitation({ ...invite, expires_at: "invalid" }, now)).toBe(false);
   });
 });
