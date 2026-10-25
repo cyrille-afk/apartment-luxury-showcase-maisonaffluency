@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "@/lib/router-compat";
-import { X, FileDown, UserPlus } from "lucide-react";
+import { X, FileDown, UserPlus, Eye, EyeOff, Loader2, CircleCheck, CircleAlert } from "lucide-react";
 import { createPortal } from "react-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
@@ -8,6 +8,7 @@ import { ensureStorageHeadroom } from "@/lib/storageReclaim";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import { signInErrorMessage } from "@/lib/signInFeedback";
 import { GoogleAccessNotice } from "@/components/GoogleAccessNotice";
 
 /**
@@ -63,20 +64,6 @@ const GOOGLE_SIGN_IN_ERROR =
 
 /** Auth rejects are reported as what the member can act on, never as the raw
  *  backend message. */
-function describeLoginError(message: string): string {
-  const m = message.toLowerCase();
-  if (m.includes("invalid login credentials") || m.includes("invalid credentials")) {
-    return "We couldn’t sign you in. Check your email and password, then try again.";
-  }
-  if (m.includes("email not confirmed")) {
-    return "Your email address isn’t confirmed yet. Open the confirmation link we sent you, then sign in again.";
-  }
-  if (m.includes("too many") || m.includes("rate")) {
-    return "Too many attempts for the moment. Wait a minute, then try again.";
-  }
-  return "We couldn’t sign you in right now. Try again, or contact trade@maisonaffluency.com.";
-}
-
 /** Hairline rule with a centred label — separates the primary credential
  *  path from the secondary Google path so the order reads clearly. */
 function Divider({ label = "or" }: { label?: string }) {
@@ -96,6 +83,8 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
   const [mode, setMode] = useState<"prompt" | "signup" | "login" | "success">(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginSucceeded, setLoginSucceeded] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [isDesigner, setIsDesigner] = useState(false);
@@ -105,11 +94,12 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
   const [googleError, setGoogleError] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  useEffect(() => { if (open) { setMode(initialMode); setFormError(null); setGoogleError(false); } }, [open, initialMode]);
+  useEffect(() => { if (open) { setMode(initialMode); setFormError(null); setGoogleError(false); setLoginSucceeded(false); setShowPassword(false); } }, [open, initialMode]);
 
   if (!open || isPwaBooting) return null;
 
   const handleGoogleSignIn = async () => {
+    if (loading || googleLoading || loginSucceeded) return;
     setGoogleLoading(true);
     setGoogleError(false);
     try {
@@ -197,23 +187,31 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading || googleLoading || loginSucceeded) return;
+    setFormError(null);
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (error) {
-      toast({ title: "Sign in", description: describeLoginError(error.message), variant: "destructive" });
-      return;
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+      if (error || !data?.session) {
+        setFormError(signInErrorMessage(error));
+        return;
+      }
+      setLoginSucceeded(true);
+      window.setTimeout(() => { onClose(); window.location.reload(); }, 700);
+    } catch {
+      setFormError("We can’t reach your account right now. Please try again shortly.");
+    } finally {
+      setLoading(false);
     }
-    onClose();
-    window.location.reload();
   };
 
   const googleButton = (
     <>
-    <button
+    <Button
+      variant="outline"
       type="button"
       onClick={handleGoogleSignIn}
-      disabled={googleLoading}
+      disabled={loading || googleLoading || loginSucceeded}
       className="w-full py-2.5 border border-border rounded-full font-body text-sm text-foreground hover:bg-muted transition-colors disabled:opacity-50 flex items-center justify-center gap-3"
     >
       <svg viewBox="0 0 24 24" className="w-4 h-4" aria-hidden="true">
@@ -223,7 +221,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
         <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
       </svg>
       {googleLoading ? "Connecting..." : "Continue with Google"}
-    </button>
+    </Button>
     {googleError && <p role="alert" className="mt-3 font-body text-sm text-destructive">{GOOGLE_SIGN_IN_ERROR}</p>}
     </>
   );
@@ -399,18 +397,28 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
             <form onSubmit={handleLogin} className="space-y-4">
               <label className="block">
                 <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Email</span>
-                <input type="email" placeholder="you@studio.com" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email"
+                <input type="email" placeholder="you@studio.com" value={email} onChange={(e) => { setEmail(e.target.value); setFormError(null); }} disabled={loading || googleLoading || loginSucceeded} required autoComplete="off"
                   className="mt-1.5 w-full rounded-md border border-border bg-background px-4 py-3 font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors placeholder:text-muted-foreground/60 text-[16px]" />
               </label>
-              <label className="block">
-                <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Password</span>
-                <input type="password" placeholder="Your password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password"
-                  className="mt-1.5 w-full rounded-md border border-border bg-background px-4 py-3 font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors placeholder:text-muted-foreground/60 text-[16px]" />
-              </label>
-              <button type="submit" disabled={loading}
+              <div>
+                <label htmlFor="modal-signin-password" className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Password</label>
+                <div className="relative mt-1.5">
+                  <input id="modal-signin-password" type={showPassword ? "text" : "password"} placeholder="Your password" value={password} onChange={(e) => { setPassword(e.target.value); setFormError(null); }} disabled={loading || googleLoading || loginSucceeded} required autoComplete="new-password"
+                    className="w-full rounded-md border border-border bg-background pl-4 pr-12 py-3 font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors placeholder:text-muted-foreground/60 text-[16px]" />
+                  <Button type="button" variant="ghost" size="icon" tabIndex={-1} aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword} disabled={loading || googleLoading || loginSucceeded} onClick={() => setShowPassword((value) => !value)} className="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground">
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </Button>
+                </div>
+              </div>
+              <Button type="submit" disabled={loading || googleLoading || loginSucceeded}
                 className="w-full py-3 bg-foreground text-background font-body text-xs uppercase tracking-[0.15em] rounded-full hover:opacity-90 transition-opacity disabled:opacity-50">
-                {loading ? "Signing in..." : "Sign In"}
-              </button>
+                {loading ? "Signing in..." : loginSucceeded ? "Signed in" : "Sign In"}
+              </Button>
+              <div aria-live="polite" className="min-h-16 font-body text-sm">
+                {loading && <p role="status" className="flex items-center gap-2 text-muted-foreground"><Loader2 size={16} className="animate-spin motion-reduce:animate-none" />Signing you in…</p>}
+                {loginSucceeded && <p role="status" className="flex items-center gap-2 text-foreground"><CircleCheck size={16} />Welcome back</p>}
+                {formError && <div role="alert" className="flex items-start gap-2 border border-destructive/40 bg-destructive/5 px-3 py-2 text-destructive"><CircleAlert size={16} className="mt-0.5 shrink-0" /><p>{formError} If you usually use Google, choose Continue with Google; your Google password is not your Maison Affluency password.</p></div>}
+              </div>
             </form>
 
             <div className="py-5">
