@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Bookmark, BookmarkPlus, ChevronDown, ChevronLeft, ChevronRight, ClipboardPaste, Loader2, Trash2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { BrandPicker } from "@/components/trade/concierge/BrandPicker";
 import { updateConciergeSession } from "@/hooks/useConciergeSession";
 import brandCategoriesRaw from "@/data/brandCategories.json";
@@ -364,7 +365,7 @@ function extractField(body: string, label: string): string | null {
   // Allow an optional leading bullet ("- ", "* ", "• ") and optional bold
   // markers ("**LABEL**:") so lines like "- ZONE: ..." are recognized.
   const regex = new RegExp(
-    `^\\s*(?:[-*•]\\s+)?\\*{0,2}${escapeRe(label)}\\*{0,2}\\s*:\\s*(.*)$`,
+    `^[ \t]*(?:[-*•][ \t]+)?\\*{0,2}${escapeRe(label)}\\*{0,2}[ \t]*:[ \t]*(.*)$`,
     "im"
   );
   const match = body.match(regex);
@@ -897,7 +898,6 @@ export const BriefBuilder = React.forwardRef<BriefBuilderHandle, {
     setSubmitError(
       `Complete the three required onboarding details before submitting. Missing: ${validation.missing.join(", ")}`,
     );
-    window.setTimeout(() => setSubmitError(null), 5000);
     const firstMissing = REQUIRED_FIELDS.find((f) => validation.missing.includes(f.label));
     if (firstMissing) {
       if (!expanded[firstMissing.block]) {
@@ -921,7 +921,8 @@ export const BriefBuilder = React.forwardRef<BriefBuilderHandle, {
   React.useImperativeHandle(ref, () => ({ focusFirstMissing }));
 
   const handleSubmit = async () => {
-    if (!onSubmit) return;
+    if (!onSubmit || isSubmitting) return;
+    if (focusFirstMissing()) return;
     const text = briefTextForSubmit();
     const validation = validateBriefDraft(text);
     if (!validation.valid) {
@@ -937,7 +938,6 @@ export const BriefBuilder = React.forwardRef<BriefBuilderHandle, {
     } catch {
       setIsSubmitting(false);
       setSubmitError("The brief could not be submitted. Please try again or send it from the composer.");
-      window.setTimeout(() => setSubmitError(null), 5000);
     }
   };
 
@@ -1452,13 +1452,13 @@ export const BriefBuilder = React.forwardRef<BriefBuilderHandle, {
       </div>
 
       {onSubmit && (
-        <div className="mt-4 flex flex-col items-end gap-2">
+        <div className="sticky bottom-0 z-10 mt-4 flex flex-col items-end gap-2 border-t border-border bg-background py-3">
           {submitError && (
-            <p className="max-w-md text-right font-body text-[11px] text-amber-600 dark:text-amber-400">
+            <p role="alert" className="w-full font-body text-xs text-destructive">
               {submitError}
             </p>
           )}
-          <button
+          <Button
             type="button"
             onClick={handleSubmit}
             disabled={isSubmitting}
@@ -1475,7 +1475,7 @@ export const BriefBuilder = React.forwardRef<BriefBuilderHandle, {
               <Loader2 className="h-3.5 w-3.5 animate-[spin_2s_linear_infinite] motion-reduce:animate-none" aria-hidden="true" />
             )}
             <span>{isSubmitting ? "CURATING ARCHITECTURAL LAYOUTS..." : "Submit Brief"}</span>
-          </button>
+          </Button>
         </div>
       )}
 

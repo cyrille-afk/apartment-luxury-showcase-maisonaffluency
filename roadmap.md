@@ -1,3 +1,8 @@
+## Brief submission and stalled concierge replies
+- [x] Keep missing-detail errors visible beside Submit Brief; validate live fields and stop blank lines consuming following labels. Signed-in incomplete submission verified after 5.5 seconds with no page errors.
+- [x] Re-arm inactivity protection on transport heartbeats; failed/aborted brief streams cannot mark onboarding complete. Recovery copy now describes an incomplete answer rather than invented spatial work.
+- [ ] Verify the user’s complete original brief and refinement end-to-end; original brief/thread not supplied. Backend logs available only for latest test request, so exact screenshot failure remains unconfirmed.
+
 # Roadmap — Automatic Visual Search Indexing
 
 ## Concierge pending reply

@@ -106,6 +106,20 @@ describe("tradeConciergeStream — event ordering", () => {
     expect(events[1].toolCallId).toBe(toolCallId);
   });
 
+  it("reports heartbeat activity without rendering it as answer text", async () => {
+    vi.mocked(globalThis.fetch).mockResolvedValue(makeSSEResponse([
+      ": heartbeat\n\n",
+      ":seq=1\n\n",
+      'data: {"choices":[{"delta":{"content":"Answer"}}]}\n\n',
+      sseDone(),
+    ]));
+    const activity = vi.fn();
+    const delta = vi.fn();
+    await streamConcierge({ messages: [{ role: "user", content: "Question" }], onActivity: activity, onDelta: delta, onDone: vi.fn(), onError: vi.fn() });
+    expect(activity).toHaveBeenCalledTimes(4);
+    expect(delta.mock.calls).toEqual([["Answer"]]);
+  });
+
   it("emits tool_start followed by proposal_blocked (no proposal) when the Inspector fails closed", async () => {
     const toolCallId = "tc-2";
     let blockedPayload: any = null;

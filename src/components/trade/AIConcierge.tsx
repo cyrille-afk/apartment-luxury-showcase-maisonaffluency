@@ -3507,6 +3507,7 @@ export function AIConcierge({
 
     let assistantSoFar = "";
     let assistantStarted = false;
+    let turnFailed = false;
     // Set when Guardrail 3 discards a freight-routing reply to a zone answer.
     let felixLogicDiscarded = false;
     const controller = new AbortController();
@@ -3518,6 +3519,7 @@ export function AIConcierge({
     const armStall = () => {
       clearStallTimer();
       stallTimerRef.current = setTimeout(() => {
+        turnFailed = true;
         try { controller.abort(); } catch {}
         setStreaming(false);
         clearStallTimer();
@@ -3658,6 +3660,7 @@ export function AIConcierge({
         lang: effectiveLang,
         onboardingGate: turnOnboardingGate,
         onDelta: upsertAssistant,
+        onActivity: armStall,
         onProposal: handleProposal,
         onStreamStart: (streamId) => {
           // Persist the stream id in the concierge session so hooks like
@@ -3846,6 +3849,7 @@ export function AIConcierge({
 
         },
         onError: (msg) => {
+          turnFailed = true;
           clearStallTimer();
           if (msg === "UNAUTHORIZED") {
             toast.error("Access restricted", {
@@ -3900,7 +3904,7 @@ export function AIConcierge({
         signal: controller.signal,
       });
       await saveActiveThreadNow(timelineRef.current);
-      builderSubmitOk = true;
+      builderSubmitOk = !turnFailed && !controller.signal.aborted;
     } catch {
       clearStallTimer();
       setStreaming(false);
@@ -5472,12 +5476,7 @@ export function AIConcierge({
               }
               if (item.kind === "retry") {
                 // Refined recovery line — Felix speaks, no raw system alert.
-                const profileLabel = hasRealBriefValue(verifiedFacts.projectProfile)
-                  ? verifiedFacts.projectProfile
-                  : "";
-                const recoveryLine = profileLabel
-                  ? `I encountered a momentary connection lag while compiling your spatial dimensions. Let's resume exactly where we left off with your ${profileLabel} layout dimensions.`
-                  : "I encountered a momentary connection lag while compiling your spatial dimensions. Let's resume exactly where we left off.";
+                const recoveryLine = "I couldn’t complete your answer. Your question and brief are saved here—choose Continue to try again.";
                 // Re-anchor the state machine to the stage the failure happened in.
                 const restoreStage = () => {
                   if (item.stage && onboardingGateRef.current.completed) setStageOverride(item.stage);
