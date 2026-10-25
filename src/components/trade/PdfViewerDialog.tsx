@@ -1,3 +1,4 @@
+import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Download, Loader2, Maximize2, Minimize2, PanelLeft, Search, X, ZoomIn, ZoomOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,8 @@ type Props = {
   open: boolean; onOpenChange: (open: boolean) => void; title: string; description?: string;
   /** Builds the PDF; re-run whenever `buildKey` changes while open. */
   build: () => Promise<Blob>; buildKey?: string; fileName: string;
+  /** Optional controls shown beneath the title (e.g. preview toggles that change buildKey). */
+  controls?: React.ReactNode;
 };
 
 export const MIN_ZOOM = 0.5, MAX_ZOOM = 4;
@@ -24,7 +27,7 @@ async function loadPdf(url: string): Promise<PdfDoc> {
 }
 
 /** Full multi-page PDF viewer with zoom, page navigation and a download of the exact previewed file. */
-export function PdfViewerDialog({ open, onOpenChange, title, description, build, buildKey = "", fileName }: Props) {
+export function PdfViewerDialog({ open, onOpenChange, title, description, build, buildKey = "", fileName, controls }: Props) {
   const [url, setUrl] = useState<string | null>(null);
   const [doc, setDoc] = useState<PdfDoc | null>(null);
   const [state, setState] = useState<"idle" | "building" | "error">("idle");
@@ -175,6 +178,7 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
     <DialogContent className={`flex flex-col ${full ? "h-screen w-screen max-w-none rounded-none border-none" : "h-[92vh] max-w-6xl"}`} onKeyDown={onKey}>
       <DialogHeader><DialogTitle>{title}</DialogTitle></DialogHeader>
       {description && <p className="text-xs text-muted-foreground">{description}</p>}
+      {controls}
       {doc && <div className="flex flex-wrap items-center justify-between gap-2 border-y border-border py-2" role="toolbar" aria-label="PDF controls">
         <div className="flex items-center gap-1">
           <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={thumbsOpen ? "Hide page thumbnails" : "Show page thumbnails"} aria-pressed={thumbsOpen} onClick={() => setThumbsOpen(o => !o)}><PanelLeft className="h-4 w-4" /></Button>

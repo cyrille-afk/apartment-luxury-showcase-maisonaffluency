@@ -7,7 +7,8 @@ import { comparatorSwatches } from "@/lib/comparatorSwatches";
 import { downloadBlob } from "@/lib/furnishingSchedulePdf";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useRef, useState } from "react";
-import { Search, X, Heart, ChevronDown, Bookmark, Link2, FileDown, Trash2, FolderOpen, FilePenLine } from "lucide-react";
+import { Search, X, Heart, ChevronDown, Bookmark, Link2, FileDown, Trash2, FolderOpen, FilePenLine, Eye } from "lucide-react";
+import { PdfViewerDialog } from "@/components/trade/PdfViewerDialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
@@ -232,16 +233,11 @@ export default function TradeComparator() {
     } catch { toast.error("The project's details could not be loaded. Please try again."); }
     finally { setCoverLoading(false); }
   };
-  const exportPdf = async () => {
-    if (exporting) return;
-    setExporting(true);
-    try {
+  const buildPdfBlob = async (coverOverride?: ComparisonCoverEdits): Promise<Blob> => {
     // Only the pieces currently visible after facet filtering are exported;
     // when no filter is active this is the full comparison list.
     const exportList = visiblePieces ?? compareList;
-    let coverDetails: ComparisonCoverEdits;
-    try { coverDetails = { ...await readCoverDetails(), ...draft.coverEdits[coverScope] }; }
-    catch { toast.error("The project's details could not be loaded. Please try again."); return; }
+    const coverDetails: ComparisonCoverEdits = coverOverride ?? { ...await readCoverDetails(), ...draft.coverEdits[coverScope] };
     const missingPricing = exportList.filter(p => !queryClient.getQueryData(["trade-product-pricing", p.id]));
     if (missingPricing.length) {
       const { data, error } = await supabase.functions.invoke("trade-catalog-pricing", { body: { pickIds: missingPricing.map(p => p.id) } });
@@ -281,7 +277,14 @@ export default function TradeComparator() {
       return { name: p.product_name, swatches, image: p.image_url ? await comparisonImage(p.image_url) : null, values: { brand_name: p.brand_name, category: p.category, dimensions: p.dimensions ?? "", materials: p.materials ?? "", lead_time: p.lead_time ?? "", designer_notes: draft.pieceNotes[p.id]?.trim() || "", rrp_price_cents: priceText(prices.retail, cur, prefix), trade_price_cents: priceText(prices.trade, cur, prefix) } };
     }));
     const fxNote = `Prices shown in ${displayCurrency}${converted ? ` using Maison Affluency's synced FX rates${fx?.updatedAt ? `, last updated ${new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short", timeZoneName: "short" }).format(fx.updatedAt)}` : ""}${showOriginalPrices ? "; original supplier prices shown beneath" : ""}` : ""}.`;
-    downloadBlob(await buildComparisonPdf(pieces, FIELDS, showTradePrice ? "Product Comparison (Trade)" : "Product Comparison", { ...coverDetails, fxNote }), "product-comparison.pdf");
+    return buildComparisonPdf(pieces, FIELDS, showTradePrice ? "Product Comparison (Trade)" : "Product Comparison", { ...coverDetails, fxNote });
+  };
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const exportPdf = async () => {
+    if (exporting) return;
+    setExporting(true);
+    try {
+      downloadBlob(await buildPdfBlob(), "product-comparison.pdf");
     } catch { toast.error("The PDF could not be prepared with all pictures. Please try again."); } finally { setExporting(false); }
   };
 
@@ -355,6 +358,7 @@ export default function TradeComparator() {
                 <div className="space-y-0.5">
                   <Label htmlFor="cover-originalPrices" className="text-xs font-medium text-muted-foreground">Show original supplier prices in the PDF</Label>
                   <p className="text-xs text-muted-foreground">When off, price rows show only the converted price.</p>
+                  <Button type="button" variant="outline" size="sm" className="mt-2" disabled={compareList.length === 0 || (visiblePieces !== null && visiblePieces.length === 0)} onClick={() => setPreviewOpen(true)}><Eye className="mr-2 h-3.5 w-3.5" />Preview PDF</Button>
                 </div>
               </div>
               {([
@@ -381,6 +385,14 @@ export default function TradeComparator() {
             </form>
           </DialogContent>
         </Dialog>
+
+        <PdfViewerDialog open={previewOpen} onOpenChange={setPreviewOpen} title="Comparison PDF preview"
+          description={`Prices in ${displayCurrency}. Uses the cover details on screen, including unsaved changes.`}
+          build={() => buildPdfBlob(coverForm)} buildKey={JSON.stringify([coverForm, displayCurrency, (visiblePieces ?? compareList).map(p => p.id)])} fileName="product-comparison.pdf"
+          controls={<div className="flex items-center gap-2 border-y border-border py-2">
+            <Checkbox id="preview-originalPrices" checked={coverForm.originalPrices !== "false"} onCheckedChange={checked => setCoverForm(form => ({ ...form, originalPrices: checked ? "true" : "false" }))} />
+            <Label htmlFor="preview-originalPrices" className="text-xs font-medium text-muted-foreground">Show original supplier prices beneath converted prices</Label>
+          </div>} />
 
         <ComparatorSelectionDrawer count={compareList.length}>
           <div className="flex flex-col gap-4 [@media(min-width:1440px)]:flex-row [@media(min-width:1440px)]:items-center">
