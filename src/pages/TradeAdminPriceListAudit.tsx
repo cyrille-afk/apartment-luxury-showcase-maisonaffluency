@@ -1,4 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
+import { useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { scanPriceListContent } from "@/lib/priceListContent.functions";
+import { currentContentCheck, type ContentInventory, type ContentCheck } from "@/lib/priceListContentPolicy";
 import { Navigate } from "@/lib/router-compat";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,13 +48,50 @@ function buildIssues(a: Audit, reach: Record<string, Reach>): Issue[] {
     }
   }
   for (const f of a.public_files) issues.push({ severity: "high", label: "Price-list-like file in public storage", detail: `${f.bucket}/${f.name}`, action: "Check it; delete it if it is a price list." });
-  const covers = a.records.filter((r) => r.cover_image_url).length;
-  if (covers) issues.push({ severity: "medium", label: `${covers} cover pictures are public`, detail: "First-page pictures used on Resources cards.", action: "Usually fine; replace any cover that shows prices." });
   return issues;
 }
 
 export default function TradeAdminPriceListAudit() {
   const { user, isAdmin, loading, rolesLoaded } = useAuth();
+  const stop = useRef(false);
+  const [scanning, setScanning] = useState(false);
+  const [scanLabel, setScanLabel] = useState("");
+  const [scanError, setScanError] = useState("");
+  const [newChecks, setNewChecks] = useState<ContentCheck[]>([]);
+  const content = useQuery({
+    queryKey: ["admin-price-list-content-inventory"], enabled: !!user && isAdmin,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("admin_price_list_content_inventory");
+      if (error) throw error;
+      return data as unknown as ContentInventory;
+    },
+  });
+  const checks = [...newChecks, ...(content.data?.checks ?? [])];
+  async function runContentScan(coversOnly: boolean) {
+    if (!content.data || scanning) return;
+    stop.current = false;
+    setScanning(true);
+    setScanError("");
+    const targets = content.data.targets.filter((target) => (!coversOnly || target.kind === "cover") && !currentContentCheck(target, checks));
+    try {
+      for (const [index, target] of targets.entries()) {
+        if (stop.current) break;
+        setScanLabel(`${index + 1} / ${targets.length} — ${target.label}`);
+        const check = await scanPriceListContent({ data: { key: target.key } });
+        setNewChecks((previous) => [check, ...previous.filter((item) => item.target_key !== check.target_key)]);
+        if (check.verdict === "unscanned") {
+          setScanError("An asset could not be inspected. The scan paused; completed results are saved.");
+          break;
+        }
+      }
+    } catch {
+      setScanError("Content inspection stopped. Completed results are saved; remaining assets are unchecked.");
+    } finally {
+      setScanning(false);
+      setScanLabel("");
+      void content.refetch();
+    }
+  }
   const q = useQuery({
     queryKey: ["admin-price-list-audit"],
     enabled: !!user && isAdmin,
@@ -69,6 +110,22 @@ export default function TradeAdminPriceListAudit() {
   if (!user || !isAdmin) return <Navigate to="/" replace />;
 
   const issues = q.data ? buildIssues(q.data.audit, q.data.reach) : [];
+  const targets = content.data?.targets ?? [];
+  const reviewed = targets.filter((target) => {
+    const check = currentContentCheck(target, checks);
+    return check && check.verdict !== "unscanned";
+  }).length;
+  for (const target of targets) {
+    const check = currentContentCheck(target, checks);
+    if (!check || check.verdict === "no_prices_detected") continue;
+    issues.push({
+      severity: check.verdict === "prices_detected" ? "high" : "medium",
+      label: check.verdict === "unscanned" ? "Content not inspected" : target.kind === "cover" ? "Cover picture may show prices" : "Public file may contain prices",
+      doc: target.label,
+      detail: check.evidence,
+      action: check.verdict === "unscanned" ? "Review this asset manually; it has not been cleared." : target.kind === "cover" ? "Review the picture and replace it with a price-free cover." : "Review this file; move any price list into private storage and remove the public copy.",
+    });
+  }
   const high = issues.filter((i) => i.severity === "high").length;
   const total = q.data?.audit.records.length ?? 0;
   const secured = q.data ? q.data.audit.records.filter((r) => r.storage_path && r.private_file_exists && !/^https?:/i.test(r.file_url)).length : 0;
@@ -80,10 +137,26 @@ export default function TradeAdminPriceListAudit() {
           <h1 className="font-display text-2xl text-foreground">Price List Security Audit</h1>
           <p className="font-body text-sm text-muted-foreground">Checks every price list record, private storage, public storage and old outside links.</p>
         </div>
-        <button onClick={() => q.refetch()} disabled={q.isFetching} className="rounded-md border border-border px-4 py-2 font-body text-xs uppercase tracking-[0.12em] text-foreground hover:bg-muted disabled:opacity-50">
+        <Button variant="outline" onClick={() => { void q.refetch(); void content.refetch(); }} disabled={q.isFetching || scanning}>
           {q.isFetching ? "Checking…" : "Run audit again"}
-        </button>
+        </Button>
       </div>
+
+      <section className="space-y-3 border-y border-border py-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-display text-lg">Content inspection</h2>
+          <span className="font-body text-sm text-muted-foreground">{reviewed} / {targets.length} assets inspected</span>
+        </div>
+        <p className="font-body text-sm text-muted-foreground">{targets.filter((target) => target.kind === "public_file").length} public files · {targets.filter((target) => target.kind === "cover").length} price-list covers · {targets.length - reviewed} not cleared</p>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" disabled={scanning || !content.data} onClick={() => void runContentScan(true)}>Inspect covers</Button>
+          <Button variant="outline" disabled={scanning || !content.data} onClick={() => void runContentScan(false)}>Inspect unchecked public files</Button>
+          {scanning && <Button variant="outline" onClick={() => { stop.current = true; }}>Stop after current file</Button>}
+        </div>
+        {scanning && <p role="status" className="break-all font-body text-sm text-muted-foreground">Inspecting {scanLabel}</p>}
+        {(scanError || content.error) && <p role="alert" className="font-body text-sm text-destructive">{scanError || "Public content inventory could not be loaded."}</p>}
+        {targets.length > reviewed && <p className="font-body text-xs text-muted-foreground">Content coverage is incomplete. Unchecked, unsupported and failed assets are not considered safe. Image and document inspections use AI credits.</p>}
+      </section>
 
       {q.isLoading ? (
         <div className="h-32 animate-pulse rounded-lg bg-muted/40" />
@@ -97,7 +170,7 @@ export default function TradeAdminPriceListAudit() {
             <Stat label="Last checked" value={new Date(q.data.audit.checked_at).toLocaleString()} />
           </div>
           {issues.length === 0 ? (
-            <p className="rounded-lg border border-border p-6 font-body text-sm text-foreground">Everything is secured. No public price list links or files were found.</p>
+            <p className="rounded-lg border border-border p-6 font-body text-sm text-foreground">No findings in completed checks.{reviewed < targets.length ? " Content inspection is incomplete." : " Automated checks still require human review."}</p>
           ) : (
             <ul className="divide-y divide-border rounded-lg border border-border">
               {issues.map((i, idx) => (

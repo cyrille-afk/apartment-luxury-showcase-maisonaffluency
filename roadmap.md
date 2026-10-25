@@ -99,3 +99,7 @@
 ## Price list audit admin link
 - [x] Add a "Price List Audit" link to the sidebar Admin group so the audit opens without typing its address.
 - [x] Live verified signed-in as cyrille@maisonaffluency.com: link present with the correct address, click lands on /trade/admin/price-list-audit and the report renders (57/57 secured, 5 needing securing) with no page errors.
+
+## Price-list content audit
+- [x] Inventory all public objects regardless of names and inspect document/image contents with saved revision-keyed results; flag covers with possible prices, keep incomplete coverage explicit.
+- [ ] Verify signed-in cover and unrelated-filename document inspection, private results and focused rules.
