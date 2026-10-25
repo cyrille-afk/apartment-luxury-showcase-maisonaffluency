@@ -2287,6 +2287,7 @@ export type Database = {
           id: string
           items: Json
           name: string
+          project_id: string | null
           room_slug: string | null
           share_token: string
           user_id: string
@@ -2296,6 +2297,7 @@ export type Database = {
           id?: string
           items?: Json
           name?: string
+          project_id?: string | null
           room_slug?: string | null
           share_token?: string
           user_id: string
@@ -2305,11 +2307,20 @@ export type Database = {
           id?: string
           items?: Json
           name?: string
+          project_id?: string | null
           room_slug?: string | null
           share_token?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "comparator_shortlists_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       competitor_designers: {
         Row: {

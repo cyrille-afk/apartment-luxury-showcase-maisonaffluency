@@ -1716,6 +1716,13 @@
       "when": 1792918375303,
       "tag": "0244_resend_expired_project_board_invitation",
       "breakpoints": true
+    },
+    {
+      "idx": 245,
+      "version": "7",
+      "when": 1792918746047,
+      "tag": "0245_comparator_project_shortlists",
+      "breakpoints": true
     }
   ]
 }
