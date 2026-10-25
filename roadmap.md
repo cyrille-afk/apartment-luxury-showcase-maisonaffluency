@@ -1,4 +1,8 @@
 ## Comparison PDF grid alignment
+## Comparator curator-pick labels
+- [ ] Restore shared edition/house labels from live catalogue metadata and verify Ecart Armchair, 1926 after refresh.
+
+## Comparison PDF grid alignment
 - [x] Consolidate images/specifications/prices on one landscape sheet with six visual swatches, shared dimensions, embedded editorial/body fonts and total-aware footers. Full finish names/textures remain in an aligned appendix. PDF skill visual QA found an overly long single-column appendix and condensed it to paired samples; all five final pages inspected, no clipping/overlap. Signed-in export downloaded; 22 tests pass and preview clean. Preview only, GitHub sync needed.
 
 ## Structured comparator dimensions

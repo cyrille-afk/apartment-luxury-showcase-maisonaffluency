@@ -2,6 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { applyTradeDiscount } from "@/lib/productPricing";
 import type { TradeProduct } from "@/lib/tradeProducts";
 import { withImperialPerLine } from "./formatDimensions";
+import { formatEditionLabel } from "./editionLabel";
 
 const fold = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
@@ -37,9 +38,9 @@ export function comparatorDetails(source: DetailSource) {
 }
 
 export async function fetchComparatorDetails() {
-  const { data, error } = await supabase.from("designer_curator_picks").select("id, dimensions, materials, width_mm, depth_mm, height_mm, size_variants, designers(founder)").eq("is_hidden", false).eq("hidden_in_studio", false);
+  const { data, error } = await supabase.from("designer_curator_picks").select("id, dimensions, materials, width_mm, depth_mm, height_mm, size_variants, edition, edition_number, edition_signing, tags, designers(founder)").eq("is_hidden", false).eq("hidden_in_studio", false);
   if (error) throw error;
-  return new Map((data ?? []).map(row => [row.id, { ...comparatorDetails(row as DetailSource), maker_name: row.designers?.founder }]));
+  return new Map((data ?? []).map(row => [row.id, { ...comparatorDetails(row as DetailSource), maker_name: row.designers?.founder, reedition_by: row.designers?.founder ?? undefined, edition: formatEditionLabel(row) ?? undefined, tags: row.tags ?? [] }]));
 }
 
 export function comparatorPrices(row: { trade_price_cents: number | null; rrp_price_cents: number | null }, discountPct: number) {

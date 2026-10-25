@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { FinishCategoryDialog } from "./FinishCategoryDialog";
 import { ComparatorDimensions } from "./ComparatorDimensions";
+import { comparatorEditionLabel } from "@/lib/comparatorEditionLabel";
 
 interface ComparisonField { key: string; label: string }
 interface Props {
@@ -82,8 +83,9 @@ export function ProductComparisonTable({ products: allProducts, fields, onRemove
                 </Button>
               </TooltipTrigger><TooltipContent>Remove {product.product_name}</TooltipContent></Tooltip>}
             </div>
-            <div className="aspect-[4/5] w-full overflow-hidden bg-muted">
+            <div className="relative aspect-[4/5] w-full overflow-hidden bg-muted">
               {product?.image_url ? <img src={product.image_url} alt={product.product_name} className="h-full w-full object-contain" /> : <div className="flex h-full items-center justify-center px-5 font-body text-xs font-normal text-muted-foreground">{product ? product.product_name : `Select product ${index + 1}`}</div>}
+              {product && comparatorEditionLabel(product) && <p className="absolute left-3 top-3 max-w-[85%] bg-background/85 px-2 py-1 text-left font-body text-[10px] font-semibold uppercase leading-snug text-foreground backdrop-blur-sm">{comparatorEditionLabel(product)}</p>}
             </div>
             <p className="mt-4 min-h-12 break-words text-left font-display text-base font-normal leading-snug text-foreground">{product?.product_name ?? "—"}</p>
           </th>)}

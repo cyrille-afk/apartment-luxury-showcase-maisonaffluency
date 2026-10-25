@@ -1,4 +1,5 @@
 # src/lib rules
+- Comparator edition labels reuse the curator-pick edition/house helpers and rehydrate live edition and house metadata after draft restore — keeps mixed-maker house attribution without storing prices or inventing edition copy.
 - Comparator dimension parsing is isolated in comparatorDimensions and converts only recorded length units into labelled metric/imperial rows; supplier inch duplicates are omitted and unknown text stays unconfirmed — avoids fabricated measurements and changes to PDF/product-page formatting.
 - Comparator difference classification normalizes whitespace/case and material-list order, ignores empty slots and excludes pricing; only populated differing specifications are highlighted — avoids false differences or new pricing calculations.
 - Comparator details read recorded variant dimensions/materials and explicit maker credits; parent and child groupings share pieces without changing identity. Comparison PDFs load pictures before download and retain full text — avoids blank exports or invented specifications.
