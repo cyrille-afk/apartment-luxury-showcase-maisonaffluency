@@ -1,3 +1,6 @@
+## Comparator material swatches
+- [ ] Replace material bullets with recorded texture/colour swatches, full-name tooltips and six-visible overflow popover; verify live.
+
 ## Comparison PDF cover
 - [x] Added shared jade/bronze branded cover with project/shortlist name and recorded client, location and style (blank fields omitted, no invented details or internal notes). Signed-in Singapore and two-piece Bangkok exports downloaded; every page visually inspected, corrected singular PIECE label, pictures/specifications retained, no overlap or clipping; 20 regressions pass and preview clean. Preview only.
 
