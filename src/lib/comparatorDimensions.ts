@@ -1,5 +1,3 @@
-import { formatDimensionsMultiline } from "./formatDimensions";
-
 export interface ComparatorDimension { label: string; metric: string; imperial: string }
 export interface ComparatorDimensionGroup { name: string; rows: ComparatorDimension[]; note: string }
 
@@ -22,7 +20,7 @@ function dimension(label: string, raw: string, unit: string): ComparatorDimensio
 
 /** Parse recorded lengths only; supplier inch duplicates and product-code numbers are not extra sizes. */
 export function comparatorDimensionGroups(raw: string | null | undefined): ComparatorDimensionGroup[] {
-  const lines = formatDimensionsMultiline(raw).split("\n").map(v => v.trim()).filter(Boolean);
+  const lines = (raw ?? "").split(/\n|\s*[,/]\s+(?=[^,:]*?:\s)/).map(v => v.trim()).filter(Boolean);
   const groups: ComparatorDimensionGroup[] = [];
   const signatures = new Set<string>();
   for (const line of lines) {
