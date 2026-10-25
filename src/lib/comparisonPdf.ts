@@ -12,6 +12,7 @@ export interface ComparisonPdfCover {
   location?: string | null;
   style?: string | null;
   layout?: string | null;
+  designerNotes?: string | null;
 }
 
 export const COMPARISON_COVER_LAYOUTS = [
@@ -91,6 +92,7 @@ function drawComparisonCover(doc: jsPDF, cover: ComparisonPdfCover, title: strin
     ["CLIENT", cover.clientName?.trim()],
     ["LOCATION", cover.location?.trim()],
     ["STYLE", cover.style?.trim()],
+    ["DESIGNER NOTES", cover.designerNotes?.trim()],
   ].filter((row): row is [string, string] => !!row[1]);
   // Each column paginates onto further branded pages rather than clipping.
   const drawPieces = (x: number, width: number, top = 52) => {
