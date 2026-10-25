@@ -109,13 +109,34 @@ describe("Sign-in modal layout and copy", () => {
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /^Sign In$/ }));
     });
-    await vi.waitFor(() => expect(toast).toHaveBeenCalled());
-    expect(toast).toHaveBeenCalledWith(
-      expect.objectContaining({
-        description: "We couldn’t sign you in. Check your email and password, then try again.",
-      }),
-    );
-    const passed = JSON.stringify(toast.mock.calls);
-    expect(passed).not.toContain("Invalid login credentials");
+    expect(screen.getByRole("alert").textContent).toContain("Check your email and password");
+    expect(screen.getByRole("alert").textContent).not.toContain("Invalid login credentials");
+  });
+
+  it("reveals and masks the same password without submitting", () => {
+    renderLogin();
+    const input = screen.getByLabelText("Password") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "Example-2026!" } });
+    fireEvent.click(screen.getByRole("button", { name: "Show password" }));
+    expect(input.type).toBe("text");
+    expect(input.value).toBe("Example-2026!");
+    fireEvent.click(screen.getByRole("button", { name: "Hide password" }));
+    expect(input.type).toBe("password");
+    expect(input.value).toBe("Example-2026!");
+    expect(signInWithPassword).not.toHaveBeenCalled();
+  });
+
+  it("blocks competing sign-in while pending and permits retry after a thrown request", async () => {
+    let rejectRequest: (error: Error) => void = () => {};
+    signInWithPassword.mockImplementation(() => new Promise((_resolve, reject) => { rejectRequest = reject; }));
+    const dialog = renderLogin();
+    fireEvent.change(dialog.querySelector('input[type="email"]') as HTMLInputElement, { target: { value: "member@studio.com" } });
+    fireEvent.change(screen.getByLabelText("Password"), { target: { value: "Example-2026!" } });
+    fireEvent.click(screen.getByRole("button", { name: /^Sign In$/ }));
+    expect((screen.getByRole("button", { name: "Continue with Google" }) as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByRole("status").textContent).toContain("Signing you in");
+    await act(async () => rejectRequest(new Error("connection failed")));
+    expect(screen.getByRole("alert").textContent).toContain("Please try again shortly");
+    expect((screen.getByRole("button", { name: /^Sign In$/ }) as HTMLButtonElement).disabled).toBe(false);
   });
 });
