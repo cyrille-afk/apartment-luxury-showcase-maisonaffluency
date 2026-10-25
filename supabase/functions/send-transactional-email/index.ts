@@ -151,7 +151,7 @@ Deno.serve(async (req) => {
       if (!m || !/^[0-9a-f]{48}$/.test(token)) return deny(403, 'Forbidden')
       const { data: inv } = await svc
         .from('board_invites')
-        .select('board_id, email, role, token_hash, invited_by, created_at, board:client_boards(title, studio_name, studio_logo_url, hide_maison_branding, studio_id, project_id)')
+        .select('board_id, email, role, view_only, token_hash, invited_by, created_at, board:client_boards(title, studio_name, studio_logo_url, hide_maison_branding, studio_id, project_id)')
         .eq('id', m[1]).maybeSingle()
       const hash = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token))))
         .map((b) => b.toString(16).padStart(2, '0')).join('')
@@ -175,7 +175,7 @@ Deno.serve(async (req) => {
         studioName: studioName || 'Your designer', studioLogoUrl,
         hideMaisonBranding: board.hide_maison_branding !== false,
         projectName: projectName || board.title || 'Project portfolio',
-        boardTitle: board.title || 'Curated selection', role: inv.role,
+        boardTitle: board.title || 'Curated selection', role: inv.role, viewOnly: inv.view_only,
         link: `https://www.maisonaffluency.com/shared/board/${slug || token}`,
       }
     } else if (!privileged) {
