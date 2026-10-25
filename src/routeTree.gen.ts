@@ -212,6 +212,7 @@ import { Route as TradeAdminOutboundRouteImport } from './routes/trade.admin_.ou
 import { Route as TradeAdminPaymentSettingsRouteImport } from './routes/trade.admin_.payment-settings'
 import { Route as TradeAdminPortalInvitesRouteImport } from './routes/trade.admin_.portal-invites'
 import { Route as TradeAdminPriceDriftRouteImport } from './routes/trade.admin_.price-drift'
+import { Route as TradeAdminPriceListAuditRouteImport } from './routes/trade.admin_.price-list-audit'
 import { Route as TradeAdminPrivacyRequestsRouteImport } from './routes/trade.admin_.privacy-requests'
 import { Route as TradeAdminProcurementLedgerRouteImport } from './routes/trade.admin_.procurement-ledger'
 import { Route as TradeAdminProductAuditRouteImport } from './routes/trade.admin_.product-audit'
@@ -1303,6 +1304,12 @@ const TradeAdminPriceDriftRoute = TradeAdminPriceDriftRouteImport.update({
   path: '/admin/price-drift',
   getParentRoute: () => TradeRoute,
 } as any)
+const TradeAdminPriceListAuditRoute =
+  TradeAdminPriceListAuditRouteImport.update({
+    id: '/admin_/price-list-audit',
+    path: '/admin/price-list-audit',
+    getParentRoute: () => TradeRoute,
+  } as any)
 const TradeAdminPrivacyRequestsRoute =
   TradeAdminPrivacyRequestsRouteImport.update({
     id: '/admin_/privacy-requests',
@@ -1784,6 +1791,7 @@ export interface FileRoutesByFullPath {
   '/trade/admin/payment-settings': typeof TradeAdminPaymentSettingsRoute
   '/trade/admin/portal-invites': typeof TradeAdminPortalInvitesRoute
   '/trade/admin/price-drift': typeof TradeAdminPriceDriftRoute
+  '/trade/admin/price-list-audit': typeof TradeAdminPriceListAuditRoute
   '/trade/admin/privacy-requests': typeof TradeAdminPrivacyRequestsRoute
   '/trade/admin/procurement-ledger': typeof TradeAdminProcurementLedgerRoute
   '/trade/admin/product-audit': typeof TradeAdminProductAuditRoute
@@ -2040,6 +2048,7 @@ export interface FileRoutesByTo {
   '/trade/admin/payment-settings': typeof TradeAdminPaymentSettingsRoute
   '/trade/admin/portal-invites': typeof TradeAdminPortalInvitesRoute
   '/trade/admin/price-drift': typeof TradeAdminPriceDriftRoute
+  '/trade/admin/price-list-audit': typeof TradeAdminPriceListAuditRoute
   '/trade/admin/privacy-requests': typeof TradeAdminPrivacyRequestsRoute
   '/trade/admin/procurement-ledger': typeof TradeAdminProcurementLedgerRoute
   '/trade/admin/product-audit': typeof TradeAdminProductAuditRoute
@@ -2298,6 +2307,7 @@ export interface FileRoutesById {
   '/trade/admin_/payment-settings': typeof TradeAdminPaymentSettingsRoute
   '/trade/admin_/portal-invites': typeof TradeAdminPortalInvitesRoute
   '/trade/admin_/price-drift': typeof TradeAdminPriceDriftRoute
+  '/trade/admin_/price-list-audit': typeof TradeAdminPriceListAuditRoute
   '/trade/admin_/privacy-requests': typeof TradeAdminPrivacyRequestsRoute
   '/trade/admin_/procurement-ledger': typeof TradeAdminProcurementLedgerRoute
   '/trade/admin_/product-audit': typeof TradeAdminProductAuditRoute
@@ -2557,6 +2567,7 @@ export interface FileRouteTypes {
     | '/trade/admin/payment-settings'
     | '/trade/admin/portal-invites'
     | '/trade/admin/price-drift'
+    | '/trade/admin/price-list-audit'
     | '/trade/admin/privacy-requests'
     | '/trade/admin/procurement-ledger'
     | '/trade/admin/product-audit'
@@ -2813,6 +2824,7 @@ export interface FileRouteTypes {
     | '/trade/admin/payment-settings'
     | '/trade/admin/portal-invites'
     | '/trade/admin/price-drift'
+    | '/trade/admin/price-list-audit'
     | '/trade/admin/privacy-requests'
     | '/trade/admin/procurement-ledger'
     | '/trade/admin/product-audit'
@@ -3070,6 +3082,7 @@ export interface FileRouteTypes {
     | '/trade/admin_/payment-settings'
     | '/trade/admin_/portal-invites'
     | '/trade/admin_/price-drift'
+    | '/trade/admin_/price-list-audit'
     | '/trade/admin_/privacy-requests'
     | '/trade/admin_/procurement-ledger'
     | '/trade/admin_/product-audit'
@@ -4655,6 +4668,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TradeAdminPriceDriftRouteImport
       parentRoute: typeof TradeRoute
     }
+    '/trade/admin_/price-list-audit': {
+      id: '/trade/admin_/price-list-audit'
+      path: '/admin/price-list-audit'
+      fullPath: '/trade/admin/price-list-audit'
+      preLoaderRoute: typeof TradeAdminPriceListAuditRouteImport
+      parentRoute: typeof TradeRoute
+    }
     '/trade/admin_/privacy-requests': {
       id: '/trade/admin_/privacy-requests'
       path: '/admin/privacy-requests'
@@ -5136,6 +5156,7 @@ interface TradeRouteChildren {
   TradeAdminPaymentSettingsRoute: typeof TradeAdminPaymentSettingsRoute
   TradeAdminPortalInvitesRoute: typeof TradeAdminPortalInvitesRoute
   TradeAdminPriceDriftRoute: typeof TradeAdminPriceDriftRoute
+  TradeAdminPriceListAuditRoute: typeof TradeAdminPriceListAuditRoute
   TradeAdminPrivacyRequestsRoute: typeof TradeAdminPrivacyRequestsRoute
   TradeAdminProcurementLedgerRoute: typeof TradeAdminProcurementLedgerRoute
   TradeAdminProductAuditRoute: typeof TradeAdminProductAuditRoute
@@ -5288,6 +5309,7 @@ const TradeRouteChildren: TradeRouteChildren = {
   TradeAdminPaymentSettingsRoute: TradeAdminPaymentSettingsRoute,
   TradeAdminPortalInvitesRoute: TradeAdminPortalInvitesRoute,
   TradeAdminPriceDriftRoute: TradeAdminPriceDriftRoute,
+  TradeAdminPriceListAuditRoute: TradeAdminPriceListAuditRoute,
   TradeAdminPrivacyRequestsRoute: TradeAdminPrivacyRequestsRoute,
   TradeAdminProcurementLedgerRoute: TradeAdminProcurementLedgerRoute,
   TradeAdminProductAuditRoute: TradeAdminProductAuditRoute,
