@@ -5548,7 +5548,15 @@ export function AIConcierge({
                               const lockedBlock = lockedLines
                                 ? `LOCKED PROJECT FACTS — these are verified and must be reused verbatim. Never substitute, rename or re-ask them:\n${lockedLines}\n\n`
                                 : "";
+                              const selectedGrid = [...timeline].reverse().find(
+                                (t): t is Extract<TimelineItem, { kind: "layout_options" }> =>
+                                  t.kind === "layout_options" && t.selected != null,
+                              );
+                              const layoutLine = selectedGrid
+                                ? `SELECTED LAYOUT: Option ${selectedGrid.selected}. The brief is complete and the layout is chosen — do NOT ask me to open the Architectural Brief again. Compile the FF&E schedule (propose_ffe_rows) and draft the trade quote now.\n\n`
+                                : "";
                               const resumeText =
+                                layoutLine +
                                 `[Resume — continue from where we left off; do NOT re-ask qualifiers I've already answered and do NOT treat the brief below as a new submission. Acknowledge briefly and take the next concrete step in stage "${item.stage ?? stage}".]\n\n` +
                                 lockedBlock +
                                 `Current brief so far:\n${brief}${product}${finishLine}\n\n` +
