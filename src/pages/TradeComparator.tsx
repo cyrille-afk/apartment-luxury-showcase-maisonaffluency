@@ -18,6 +18,7 @@ import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import { useSearchParams } from "@/lib/router-compat";
 import { useComparatorDraft } from "@/hooks/useComparatorDraft";
 import { ProductComparisonTable } from "@/components/trade/ProductComparisonTable";
+import { ComparatorSelectionDrawer } from "@/components/trade/ComparatorSelectionDrawer";
 import { restoreSavedComparison } from "@/lib/comparatorDraft";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
@@ -215,7 +216,7 @@ export default function TradeComparator() {
           </DialogContent>
         </Dialog>
 
-        <section className="border-y border-border py-5">
+        <ComparatorSelectionDrawer count={compareList.length}>
           <div className="flex flex-col gap-4 [@media(min-width:1440px)]:flex-row [@media(min-width:1440px)]:items-center">
             <div className="relative w-full shrink-0 [@media(min-width:1440px)]:w-80">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -289,11 +290,11 @@ export default function TradeComparator() {
               </div>;
             })}
           </div>
-        </section>
+        </ComparatorSelectionDrawer>
 
-        <section className="flex flex-col gap-3 border-b border-border pb-5">
+        <section aria-label="Comparison actions" className="sticky top-14 z-20 flex flex-col gap-3 border-b border-border bg-background py-3 md:top-16 [&_button]:h-9 [&_button]:font-body [&_button]:text-xs [&_button]:font-medium">
           <div className="flex flex-wrap items-center gap-2">
-            <Input value={shortlistName} onChange={(e) => setShortlistName(e.target.value)} placeholder="Shortlist name (e.g. client, project)" aria-label="Shortlist name" className="h-9 w-72 font-body text-sm" />
+            <Input value={shortlistName} onChange={(e) => setShortlistName(e.target.value)} placeholder="Shortlist name (e.g. client, project)" aria-label="Shortlist name" className="h-9 w-full font-body text-xs sm:w-64" />
             <ProjectPicker value={projectId} onChange={value => { const next = new URLSearchParams(params); if (value) next.set("project", value); else next.delete("project"); setParams(next); }} />
             <Button size="sm" variant="outline" onClick={saveShortlist} disabled={compareList.length === 0 || !projectId || saving}><Bookmark className="mr-2 h-3.5 w-3.5" />{saving ? "Saving…" : "Save shortlist to project"}</Button>
             <Button size="sm" variant="outline" onClick={() => void exportPdf()} disabled={compareList.length === 0 || exporting}><FileDown className="mr-2 h-3.5 w-3.5" />{exporting ? "Preparing PDF…" : "Export comparison PDF"}</Button>

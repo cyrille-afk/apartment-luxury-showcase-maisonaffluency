@@ -1,3 +1,6 @@
+## Compact comparator setup
+- [ ] Collapse selection tools by default for selected comparisons and add a sticky outline action bar; verify selection editing, restored-page default and scrolling.
+
 ## Specification differences
 - [x] Added subtle neutral tints on differing populated specification cells; empty slots, matching categories and equivalent material lists stay plain, pricing unchanged. Four live products verified (16 differing cells, zero matching-category/price differences), no browser errors, 21 tests pass and preview clean.
 
