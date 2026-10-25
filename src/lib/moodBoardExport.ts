@@ -6,6 +6,8 @@ export interface MoodBoardExportItem {
   product_name?: string | null;
   brand_name?: string | null;
   image_url?: string | null;
+  /** Optional finish/notes line (never prices). */
+  detail?: string | null;
 }
 
 const INK: [number, number, number] = [33, 33, 31];
@@ -43,7 +45,7 @@ export async function buildMoodBoardPdf(title: string, items: MoodBoardExportIte
   const cols = items.length <= 4 ? 2 : items.length <= 9 ? 3 : 4;
   const gap = 12;
   const cell = (W - M * 2 - gap * (cols - 1)) / cols;
-  const caption = 26;
+  const caption = items.some((i) => i.detail) ? 36 : 26;
 
   const header = () => {
     doc.setFont("times", "normal");
@@ -81,6 +83,10 @@ export async function buildMoodBoardPdf(title: string, items: MoodBoardExportIte
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...MUTED);
     doc.text(doc.splitTextToSize(item.brand_name || "", cell)[0] || "", x, y + boxH + 21);
+    if (item.detail) {
+      doc.setFontSize(7);
+      doc.text(doc.splitTextToSize(item.detail, cell)[0] || "", x, y + boxH + 31);
+    }
     if ((idx + 1) % cols === 0) {
       x = M;
       y += boxH + caption + gap;
