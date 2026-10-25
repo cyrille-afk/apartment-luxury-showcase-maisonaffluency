@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { isLayoutScheduleContinuation } from "./_layoutContinuation.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { requireUser, rateLimit } from "../_shared/auth.ts";
 import { logAiUsage } from "../_shared/aiUsage.ts";
@@ -5279,6 +5280,7 @@ serve(async (req) => {
     const hasExplicitSelectionVerb = /\b(source|sourcing|propose|suggest|recommend|show me|pull (?:together|me)|curate|reinterpret|alternatives?|options?|first edit|draft (?:a )?(?:tearsheet|edit|selection)|put together|assemble|i'?d like to see|let'?s see|what do you have|list (?:all|every|the)|which .*(?:do you|are)|everything (?:by|from))\b/.test(lastUserMsgLower);
     const opensWithLookingFor = /^\s*(?:i(?:'m| am)?\s+(?:looking|searching|after|hunting|sourcing|in the market)|we(?:'re| are)?\s+(?:looking|searching|after))\b/.test(lastUserMsgLower);
 
+    const layoutScheduleContinuation = isLayoutScheduleContinuation(lastUserMsg, onboardingGateComplete);
     const submittedArchitecturalBrief = parseSubmittedArchitecturalBrief(lastUserMsg);
     let effectiveBrief: ExtractedBrief = submittedArchitecturalBrief
       ? submittedArchitecturalBrief
@@ -5297,6 +5299,10 @@ serve(async (req) => {
             plan: ["propose_tearsheet"],
           }
         : extractedBrief;
+
+    if (layoutScheduleContinuation) {
+      effectiveBrief = { ...effectiveBrief, intent: "selection", plan: ["propose_ffe_rows"] };
+    }
 
     // DISCOVERY GATE — strip any auto-proposed tearsheet/quote plan when the
     // latest user message is an opening brief without an explicit selection
@@ -5788,7 +5794,7 @@ serve(async (req) => {
 
 
 
-    if (hasExplicitSelectionVerb && requestedTypology && !mentionsKnownDesigner) {
+    if (!layoutScheduleContinuation && hasExplicitSelectionVerb && requestedTypology && !mentionsKnownDesigner) {
       const branchRequestedTypologies = normalizeRequestedTypologies(requestedTypology);
       const budgetCeiling = inferBudgetCeilingCents(lastUserMsg || "");
       const dimCeiling = inferDimensionConstraints(lastUserMsg || "");
@@ -6314,6 +6320,9 @@ serve(async (req) => {
     }
 
     const resolvedProjectId = activeProjectId || mentionedProjectId;
+    if (layoutScheduleContinuation && !resolvedProjectId) {
+      return sseTextResponse("Your brief and selected layout are retained. Choose or create your Bangkok project above the layout options, then ask me to continue the FF&E schedule and quote.");
+    }
     const projectT0 = performance.now();
     const projectContext = await loadProjectContext(supabase, userId, resolvedProjectId);
     mark("loadProjectContext", { ms: Math.round(performance.now() - projectT0), hasProject: !!resolvedProjectId });
@@ -6369,7 +6378,9 @@ serve(async (req) => {
     const stageAllowed = STAGE_GATES[currentStage] ?? null;
     const stageForcesQuote = currentStage === "quote";
 
-    const baseAllowed = isExplicitQuoteIntent
+    const baseAllowed = layoutScheduleContinuation
+      ? ["extract_requirements", "propose_ffe_rows"]
+      : isExplicitQuoteIntent
       ? ["draft_quote", "add_to_quote"]
       : null;
     const allowedNames = stageAllowed && baseAllowed
@@ -6403,7 +6414,9 @@ serve(async (req) => {
       !planHasQuote &&
       !stageForcesQuote &&
       !isExplicitQuoteIntent;
-    const toolChoice: any = forcePlannedTearsheet
+    const toolChoice: any = layoutScheduleContinuation
+      ? "required"
+      : forcePlannedTearsheet
       ? { type: "function", function: { name: "propose_tearsheet" } }
       : ((isExplicitQuoteIntent || stageForcesQuote) ? "required" : "auto");
 

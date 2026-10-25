@@ -1,4 +1,6 @@
 import { toDiscountFraction } from "@/lib/tradePricing";
+import { shouldOfferArchitecturalIntake } from "@/lib/felixLayoutHandoff";
+import { ProjectPicker } from "./ProjectPicker";
 import { updateFelixProductSelection } from "@/lib/updateFelixProductSelection";
 import { FelixQuoteSave } from "./concierge/FelixQuoteSave";
 import { GuestContactCapture } from "./GuestContactCapture";
@@ -3181,7 +3183,7 @@ export function AIConcierge({
     const userItem: TimelineItem = {
       kind: "msg",
       role: "user",
-      content: displayText,
+      content: submittedStructuredBrief ? text : displayText,
       ...(submittedStructuredBrief ? { briefSubmit: true } : {}),
       ...(timelineAttachments.length ? { attachments: timelineAttachments } : {}),
     };
@@ -3252,7 +3254,7 @@ export function AIConcierge({
     // but never opens it automatically. The designer controls the pacing by
     // clicking the CTA beneath Felix's response.
     const hasProposal = timeline.some((t) => t.kind === "proposal" || t.kind === "quote_proposal" || t.kind === "ffe_proposal");
-    if (!opts?.builderSubmit && !onboardingGate.completed && !hasProposal && !briefBuilderOpen && sendingAttachments.length === 0) {
+    if (shouldOfferArchitecturalIntake({ builderSubmit: opts?.builderSubmit === true, completed: effectiveOnboardingGate.completed, hasProposal, builderOpen: briefBuilderOpen, hasAttachments: sendingAttachments.length > 0 })) {
 
 
       const priorUserTurns = timeline.filter((t) => t.kind === "msg" && (t as any).role === "user").length;
@@ -3511,7 +3513,7 @@ export function AIConcierge({
     ];
     const turnOnboardingGate = opts?.builderSubmit && validateBriefDraft(submittedBriefText).valid
       ? evaluateFelixOnboardingGate(submittedBriefText, [submittedBriefText], true)
-      : onboardingGate;
+      : effectiveOnboardingGate;
 
     let assistantSoFar = "";
     let assistantStarted = false;
@@ -3956,7 +3958,7 @@ export function AIConcierge({
         briefSubmitDoneRef.current = null;
       }
     }
-  }, [input, attachments, streaming, timeline, stage, tone, lang, name, openLatestQuote, navigate, clearStallTimer, pushRetry, user, cancelBriefTransition, briefBuilderOpen, briefDraft, openBriefBuilder, onboardingGate]);
+  }, [input, attachments, streaming, timeline, stage, tone, lang, name, openLatestQuote, navigate, clearStallTimer, pushRetry, user, cancelBriefTransition, briefBuilderOpen, briefDraft, openBriefBuilder, onboardingGate, effectiveOnboardingGate]);
 
   // Keep a ref to the latest `send` so the concierge:stage handler (which
   // registers once on mount) can auto-send prefills against fresh state
@@ -4997,7 +4999,7 @@ export function AIConcierge({
             {timeline.map((item, i) => {
               if (item.kind === "msg") {
                 const hasLayoutGrid = timeline.some((entry) => entry.kind === "layout_options");
-                if (hasLayoutGrid && item.role === "assistant" && HELD_TEARSHEET_RE.test(item.content || "")) return null;
+                if (hasLayoutGrid && !timeline.some((entry) => entry.kind === "layout_options" && entry.selected != null) && item.role === "assistant" && HELD_TEARSHEET_RE.test(item.content || "")) return null;
                 const atts = item.role === "user" ? item.attachments : undefined;
                 return (
                   <div
@@ -5451,6 +5453,13 @@ export function AIConcierge({
                 if (!onboardingGate.completed) return null;
                 return (
                   <div key={i} className="w-full self-start">
+                    <ProjectPicker value={getConciergeSession()?.projectId ?? null} onChange={(projectId) => {
+                      updateConciergeSession({ projectId });
+                      try {
+                        if (projectId) sessionStorage.setItem("trade:lastProjectFilter", projectId);
+                        else sessionStorage.removeItem("trade:lastProjectFilter");
+                      } catch { /* storage may be unavailable */ }
+                    }} />
                     <LayoutComparisonGrid
                       selected={item.selected ?? null}
                       styleInput={item.styleInput ?? null}
@@ -5466,7 +5475,7 @@ export function AIConcierge({
                         // Actually request the FF&E schedule + quote from the
                         // concierge instead of a static promise that never
                         // produced anything.
-                        const brief = getConciergeSession()?.briefText?.trim();
+                        const brief = briefDraft.trim() || getConciergeSession()?.briefText?.trim();
                         const request =
                           `[Layout selected — do NOT re-ask the brief or reopen the Brief Builder.] ` +
                           `I have selected Option ${option.id}: ${option.name} (${option.focus}; ${option.alignment}; ${option.clearance}; ${option.itemCount} trade items). ` +
