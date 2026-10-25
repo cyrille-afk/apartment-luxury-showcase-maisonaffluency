@@ -34,3 +34,11 @@ describe("saved comparison restoration", () => {
     expect(draft.compareList[0]).not.toHaveProperty("trade_price_cents");
   });
 });
+describe("designer notes", () => {
+  it("keeps notes only for compared pieces and restores them from saved items", async () => {
+    const { sanitizeComparatorDraft, restoreSavedComparison } = await import("./comparatorDraft");
+    const draft = sanitizeComparatorDraft({ compareList: [{ id: "a", product_name: "A" }], pieceNotes: { a: "Client loves oak", b: "stale" } });
+    expect(draft.pieceNotes).toEqual({ a: "Client loves oak" });
+    expect(restoreSavedComparison([{ id: "a", product_name: "A", designer_notes: "Check COM" }], "S", []).pieceNotes).toEqual({ a: "Check COM" });
+  });
+});
