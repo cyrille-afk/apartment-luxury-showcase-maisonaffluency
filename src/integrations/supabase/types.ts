@@ -13843,6 +13843,10 @@ export type Database = {
       }
       release_ingestion_lease: { Args: { _owner: string }; Returns: undefined }
       remap_product_descriptors: { Args: never; Returns: number }
+      resend_expired_project_board_invite: {
+        Args: { _board_id: string; _invite_id: string; _project_id: string }
+        Returns: Json
+      }
       resolve_trade_email: { Args: { p_identifier: string }; Returns: string }
       restore_curator_pick_version: {
         Args: { _audit_id: string }

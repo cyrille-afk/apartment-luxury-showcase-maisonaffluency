@@ -19,3 +19,7 @@ export function boardInvitationStatus(invite: Pick<BoardInvitation, "status" | "
 export function boardInvitationPermission(invite: Pick<BoardInvitation, "view_only" | "role">) {
   return invite.view_only ? "View only" : invite.role === "contractor" ? "Can edit / add pieces" : "Can comment / approve";
 }
+
+export function canResendBoardInvitation(invite: Pick<BoardInvitation, "status" | "expires_at" | "last_seen_at">, now: number) {
+  return boardInvitationStatus(invite, now).label === "Expired";
+}

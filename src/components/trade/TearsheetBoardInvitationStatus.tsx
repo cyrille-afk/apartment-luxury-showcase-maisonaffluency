@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { boardInvitationPermission, boardInvitationStatus } from "./boardInvitationStatus";
+import ResendBoardInvitation from "./ResendBoardInvitation";
 
 export default function TearsheetBoardInvitationStatus({ projectId, refreshKey }: { projectId: string; refreshKey: number }) {
   const { user } = useAuth();
@@ -51,6 +52,7 @@ export default function TearsheetBoardInvitationStatus({ projectId, refreshKey }
               <p className={`mt-1 ${status.canView ? "text-foreground" : "text-muted-foreground"}`}>{status.label} · {status.canView ? "Can view" : "No current access"}</p>
               <p className="mt-1 text-muted-foreground">{boardInvitationPermission(invite)} · Expires {new Date(invite.expires_at).toLocaleDateString("en-GB")}</p>
               {invite.last_seen_at && <p className="mt-1 text-muted-foreground">Last viewed {new Date(invite.last_seen_at).toLocaleString("en-GB")}</p>}
+               <ResendBoardInvitation projectId={projectId} boardId={board.id} invite={invite} now={now} onRenewed={() => { setNow(Date.now()); void refetch(); }} />
             </li>;
           })}</ul>}
         </article>;
