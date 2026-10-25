@@ -27,7 +27,7 @@ async function embedComparisonFonts(doc: jsPDF) {
   }));
 }
 
-function drawComparisonCover(doc: jsPDF, cover: ComparisonPdfCover, title: string, count: number) {
+function drawComparisonCover(doc: jsPDF, cover: ComparisonPdfCover, title: string, productNames: string[]) {
   const theme = DEFAULT_COVER_THEME;
   const M = 24, W = 297, H = 210;
   doc.setFillColor(...hexToRgb(theme.background)).rect(0, 0, W, H, "F");
@@ -51,6 +51,27 @@ function drawComparisonCover(doc: jsPDF, cover: ComparisonPdfCover, title: strin
     const lines: string[] = doc.splitTextToSize(cover.comparisonName.trim(), W - M * 2);
     doc.text(lines, M, y); y += lines.length * 4.5 + 7;
   }
+  const nextCoverPage = () => {
+    doc.addPage();
+    doc.setFillColor(...hexToRgb(theme.background)).rect(0, 0, W, H, "F");
+    doc.setFont("Cormorant", "normal").setFontSize(20).setTextColor(...hexToRgb(theme.text));
+    doc.text("MAISON AFFLUENCY", M, 25);
+    y = 42;
+  };
+  if (y > 150) nextCoverPage();
+  doc.setFont("Inter", "normal").setFontSize(8).setTextColor(...hexToRgb(theme.accent));
+  doc.text("SELECTED PIECES", M, y); y += 7;
+  for (const name of productNames) {
+    doc.setFont("Cormorant", "normal").setFontSize(15);
+    const lines = doc.splitTextToSize(name, W - M * 2) as string[];
+    for (const line of lines) {
+      if (y > 178) nextCoverPage();
+      doc.setFont("Cormorant", "normal").setFontSize(15).setTextColor(...hexToRgb(theme.text));
+      doc.text(line, M, y); y += 5.8;
+    }
+    y += 1.5;
+  }
+  y += 7;
   const details = [
     ["CLIENT", cover.clientName?.trim()],
     ["LOCATION", cover.location?.trim()],
@@ -75,7 +96,8 @@ function drawComparisonCover(doc: jsPDF, cover: ComparisonPdfCover, title: strin
     y += 4;
   }
   doc.setFont("Inter", "normal").setFontSize(8).setTextColor(...hexToRgb(theme.accent));
-  doc.text(`${count} ${count === 1 ? "PIECE" : "PIECES"}  /  ${formatPdfDate(new Date(), "en-GB")}`, M, 193);
+  const count = productNames.length;
+  doc.text(`${count} ${count === 1 ? "PIECE" : "PIECES"}  /  EXPORTED ${formatPdfDate(new Date(), "en-GB")}`, M, 193);
   doc.text("maisonaffluency.com", W - M, 193, { align: "right" });
   doc.addPage(); doc.setTextColor(0); doc.setDrawColor(0);
 }
@@ -110,7 +132,7 @@ export async function buildComparisonPdf(pieces: ComparisonPdfPiece[], rows: { k
   const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "landscape" });
   await embedComparisonFonts(doc);
   doc.setProperties({ title: `${cover.projectName?.trim() || "Product Selection"} — ${title}`, author: "Maison Affluency" });
-  drawComparisonCover(doc, cover, title, pieces.length);
+  drawComparisonCover(doc, cover, title, pieces.map(piece => piece.name));
   const W = 297, H = 210, M = 14, labelW = 39, endY = 191;
   const colW = (W - M * 2 - labelW) / Math.max(pieces.length, 1);
   const css = getComputedStyle(document.documentElement);
