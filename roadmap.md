@@ -1,8 +1,8 @@
 # Roadmap — Automatic Visual Search Indexing
 
 ## Sign-in return address stacking
-- [ ] Stop the outgoing Trade layout from redirecting the incoming sign-in page, normalize query separators and repair existing nested return links.
-- [ ] Verify direct sign-in, protected-page entry, reopening and existing stacked links; run focused regressions.
+- [x] Stop the outgoing Trade layout from redirecting the incoming sign-in page, normalize query separators and repair existing nested return links.
+- [x] Live verified six direct/protected/nested/truncated/trailing-slash/filter cases, all stable after reload with the sign-in form visible and no page errors; focused return-address/navigation/password regressions pass and build clean.
 
 ## Website SMS alerts
 - [x] Verify Twilio sender and deliver one test SMS to the requested recipient.
