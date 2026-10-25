@@ -1,3 +1,6 @@
+## Curated Room Layout loading and freeze report
+- [ ] Verify visible page/catalogue/generation loading and idle-demand rendering; original Chrome freeze remains to be reproduced.
+
 ## Brief submission and stalled concierge replies
 - [x] Keep missing-detail errors visible beside Submit Brief; validate live fields and stop blank lines consuming following labels. Signed-in incomplete submission verified after 5.5 seconds with no page errors.
 - [x] Re-arm inactivity protection on transport heartbeats; failed/aborted brief streams cannot mark onboarding complete. Recovery copy now describes an incomplete answer rather than invented spatial work.
