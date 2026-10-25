@@ -13,6 +13,8 @@ export interface ComparisonPdfCover {
   style?: string | null;
   layout?: string | null;
   designerNotes?: string | null;
+  /** Interior-page footnote describing the FX rates used for converted prices. */
+  fxNote?: string | null;
 }
 
 export const COMPARISON_COVER_LAYOUTS = [
@@ -341,6 +343,10 @@ export async function buildComparisonPdf(pieces: ComparisonPdfPiece[], rows: { k
     if (!onCover) doc.setDrawColor(...brand.gold).setLineWidth(0.3).line(M, 199, W - M, 199);
     doc.setFont("Inter", "normal").setFontSize(7).setTextColor(...(onCover ? brand.cream : brand.jade));
     doc.text(`Page ${page} of ${total} | Maison Affluency Trade Portal`, W / 2, 204, { align: "center" });
+    if (!onCover && cover.fxNote) {
+      doc.setFontSize(6).setTextColor(...colors.muted);
+      doc.text(cover.fxNote, M, 196);
+    }
   }
   return doc.output("blob");
 }
