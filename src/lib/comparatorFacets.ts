@@ -61,6 +61,35 @@ export function materialTypeOptions(materials: string[], parent: string) {
   return [...new Set(materials.filter(m => materialParent(m) === parent && fold(m) !== fold(parent)))].sort((a, b) => a.localeCompare(b));
 }
 
+/** Display header for a material family; Fabric and Leather share one "Textiles & Leather" header. */
+const HEADER_BY_PARENT: Record<string, string> = { Wood: "Wood", Metal: "Metal", Fabric: "Textiles & Leather", Leather: "Textiles & Leather", Stone: "Stone", Glass: "Glass", Other: "Other" };
+const HEADER_ORDER = ["Wood", "Metal", "Textiles & Leather", "Stone", "Glass", "Other"];
+
+export type GroupedMaterialOptions = { header: string; items: string[] }[];
+
+/** Material dropdown structure: present facet values grouped under family headers; a family's generic value (e.g. "Fabric") leads its group. */
+export function groupedMaterialOptions(materials: string[]): GroupedMaterialOptions {
+  const groups = new Map<string, { generic: string[]; types: Set<string> }>();
+  for (const m of materials) {
+    const header = HEADER_BY_PARENT[materialParent(m)] ?? "Other";
+    const g = groups.get(header) ?? { generic: [], types: new Set<string>() };
+    if (fold(m) === fold(materialParent(m))) { if (!g.generic.includes(m)) g.generic.push(m); } else g.types.add(m);
+    groups.set(header, g);
+  }
+  return HEADER_ORDER.filter(h => groups.has(h)).map(header => {
+    const g = groups.get(header)!;
+    return { header, items: [...g.generic, ...[...g.types].sort((a, b) => a.localeCompare(b))] };
+  });
+}
+
+/** Facet selection produced by picking one dropdown item: a specific type narrows under its family; a family's generic name matches the whole family. */
+export function selectMaterialOption(value: string): { material?: string; materialType?: string } {
+  if (!value || value === "all") return { material: undefined, materialType: undefined };
+  const parent = materialParent(value);
+  if (fold(value) === fold(parent)) return { material: value };
+  return { material: parent, materialType: value };
+}
+
 /** Material selection is hierarchical: a family (e.g. "Wood") matches every type under it; `materialType` narrows to one. */
 export function matchesComparatorFacets(facets: ComparatorFacets, selection: ComparatorFacetSelection & { materialType?: string }) {
   const { materialType, ...rest } = selection;
