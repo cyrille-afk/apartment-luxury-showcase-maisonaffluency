@@ -144,3 +144,4 @@
 - Website SMS uses private unique incident/transition events and hashed one-use callback tokens, dispatched by existing monitor writes; fixed server-side recipients and atomic claims prevent public spending/replay, with uncertain sends never blindly retried — avoids duplicate alerts and additional polling.
 
 - Concierge transport heartbeats re-arm the UI inactivity watchdog without implying answer progress; failed or aborted brief streams never complete onboarding. Brief validation checks live fields and parses labels without crossing line boundaries; submission errors remain beside the sticky submit control — prevents false stalls, false completion and disappearing validation.
+- Completed layout selections preserve the submitted brief and use a project-scoped schedule continuation, not fresh intake or tearsheet shortcuts; schedule previews remain review-only until approval to prevent accidental orders.

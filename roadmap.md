@@ -78,5 +78,6 @@
 - [ ] Publish the new server route to activate unattended production callbacks; the database currently queues safely, but published callback delivery cannot be verified before publishing.
 
 ## Extension page download prompt
+- [ ] Complete Bangkok Option 3 schedule/quote verification: intake no longer reopens, but live catalogue coverage still rejects the selected references; no schedule or quote generated. Requires further catalogue matching diagnosis, not user approval.
 - [x] Remove the plugin package download button from the ChatGPT Extension Integration page and drop the matching tour wording; verified signed-in as cyrille@maisonaffluency.com that the page now shows no download control.
 - [ ] Decide whether the package file itself should stop being reachable at its web address (it still sits in the site's public files).
