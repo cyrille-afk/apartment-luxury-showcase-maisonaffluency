@@ -7,7 +7,7 @@ import { comparatorSwatches } from "@/lib/comparatorSwatches";
 import { downloadBlob } from "@/lib/furnishingSchedulePdf";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useRef, useState } from "react";
-import { Search, X, Heart, ChevronDown, Bookmark, Link2, FileDown, Trash2, FolderOpen } from "lucide-react";
+import { Search, X, Heart, ChevronDown, Bookmark, Link2, FileDown, Trash2, FolderOpen, FilePenLine } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
@@ -21,7 +21,8 @@ import { useSearchParams } from "@/lib/router-compat";
 import { useComparatorDraft } from "@/hooks/useComparatorDraft";
 import { ProductComparisonTable } from "@/components/trade/ProductComparisonTable";
 import { ComparatorSelectionDrawer } from "@/components/trade/ComparatorSelectionDrawer";
-import { restoreSavedComparison } from "@/lib/comparatorDraft";
+import { restoreSavedComparison, type ComparisonCoverEdits } from "@/lib/comparatorDraft";
+import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 function ComparisonPrice({ product, net }: { product: TradeProduct | null; net: boolean }) {
@@ -54,6 +55,10 @@ export default function TradeComparator() {
   const projectId = params.get("project");
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [coverOpen, setCoverOpen] = useState(false);
+  const [coverLoading, setCoverLoading] = useState(false);
+  const [coverForm, setCoverForm] = useState<ComparisonCoverEdits>({});
+  const coverScope = projectId || "unassigned";
   const [visiblePieces, setVisiblePieces] = useState<TradeProduct[] | null>(null);
   const actionsRef = useRef<HTMLElement>(null);
   useEffect(() => {
@@ -167,6 +172,28 @@ export default function TradeComparator() {
     refetchShortlists();
     refetchAllComparisons();
   };
+  const readCoverDetails = async (): Promise<ComparisonCoverEdits> => {
+    let project = null;
+    if (projectId) {
+      const { data, error } = await supabase.from("projects").select("name, client_name, location, location_city, location_neighborhood, style").eq("id", projectId).single();
+      if (error) throw new Error("Project details unavailable");
+      project = data;
+    }
+    return {
+      projectName: project?.name || "", comparisonName: shortlistName,
+      clientName: project?.client_name || "",
+      location: project?.location?.trim() || [project?.location_neighborhood, project?.location_city].filter(Boolean).join(", "),
+      style: project?.style || "",
+    };
+  };
+  const editCover = async () => {
+    setCoverLoading(true);
+    try {
+      setCoverForm({ ...await readCoverDetails(), ...draft.coverEdits[coverScope] });
+      setCoverOpen(true);
+    } catch { toast.error("The project's details could not be loaded. Please try again."); }
+    finally { setCoverLoading(false); }
+  };
   const exportPdf = async () => {
     if (exporting) return;
     setExporting(true);
@@ -174,13 +201,9 @@ export default function TradeComparator() {
     // Only the pieces currently visible after facet filtering are exported;
     // when no filter is active this is the full comparison list.
     const exportList = visiblePieces ?? compareList;
-    // Read the selected project's current, accessible display fields at export time.
-    let coverProject = null;
-    if (projectId) {
-      const { data, error } = await supabase.from("projects").select("name, client_name, location, location_city, location_neighborhood, style").eq("id", projectId).single();
-      if (error) { toast.error("The project's details could not be loaded. Please try again."); return; }
-      coverProject = data;
-    }
+    let coverDetails: ComparisonCoverEdits;
+    try { coverDetails = { ...await readCoverDetails(), ...draft.coverEdits[coverScope] }; }
+    catch { toast.error("The project's details could not be loaded. Please try again."); return; }
     const missingPricing = exportList.filter(p => !queryClient.getQueryData(["trade-product-pricing", p.id]));
     if (missingPricing.length) {
       const { data, error } = await supabase.functions.invoke("trade-catalog-pricing", { body: { pickIds: missingPricing.map(p => p.id) } });
@@ -206,11 +229,7 @@ export default function TradeComparator() {
       const swatches = await Promise.all(comparatorSwatches(p.materials, linkedSwatches.get(p.id) ?? []).map(async s => ({ name: s.name, color: s.color, image: s.imageUrl ? await textureImage(s.imageUrl) : null })));
       return { name: p.product_name, swatches, image: p.image_url ? await comparisonImage(p.image_url) : null, values: { brand_name: p.brand_name, category: p.category, dimensions: p.dimensions ?? "", materials: p.materials ?? "", lead_time: p.lead_time ?? "", rrp_price_cents: fmt(prices.retail, cur), trade_price_cents: fmt(prices.trade, cur) } };
     }));
-    const coverLocation = coverProject?.location?.trim() || [coverProject?.location_neighborhood, coverProject?.location_city].filter(Boolean).join(", ");
-    downloadBlob(await buildComparisonPdf(pieces, FIELDS, showTradePrice ? "Product Comparison (Trade)" : "Product Comparison", {
-      projectName: coverProject?.name, comparisonName: shortlistName,
-      clientName: coverProject?.client_name, location: coverLocation, style: coverProject?.style,
-    }), "product-comparison.pdf");
+    downloadBlob(await buildComparisonPdf(pieces, FIELDS, showTradePrice ? "Product Comparison (Trade)" : "Product Comparison", coverDetails), "product-comparison.pdf");
     } catch { toast.error("The PDF could not be prepared with all pictures. Please try again."); } finally { setExporting(false); }
   };
 
@@ -254,6 +273,34 @@ export default function TradeComparator() {
               </li>)}
               {!allComparisons.some(saved => `${saved.name} ${saved.projects?.name || ""}`.toLowerCase().includes(savedSearch.toLowerCase())) && <li className="py-6 text-sm text-muted-foreground">{allComparisons.length ? "No matching comparisons." : "No saved comparisons yet."}</li>}
             </ul>}
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={coverOpen} onOpenChange={setCoverOpen}>
+          <DialogContent className="max-h-[85dvh] w-[calc(100%-2rem)] max-w-xl overflow-y-auto">
+            <DialogHeader><DialogTitle className="font-display font-normal">PDF cover details</DialogTitle><DialogDescription className="sr-only">Project and client details for the comparison cover</DialogDescription></DialogHeader>
+            <form className="space-y-4" onSubmit={event => {
+              event.preventDefault();
+              setDraft(d => ({ ...d, coverEdits: { ...d.coverEdits, [coverScope]: { ...coverForm } } }));
+              setCoverOpen(false); toast.success("Cover details saved");
+            }}>
+              {([
+                ["projectName", "Project name"], ["comparisonName", "Comparison title"],
+                ["clientName", "Client name"], ["location", "Apartment / location"], ["style", "Style / apartment details"],
+              ] as const).map(([key, label]) => <div key={key} className="space-y-1.5">
+                <Label htmlFor={`cover-${key}`} className="text-xs font-medium text-muted-foreground">{label}</Label>
+                <Input id={`cover-${key}`} maxLength={500} value={coverForm[key] || ""} onChange={event => setCoverForm(form => ({ ...form, [key]: event.target.value }))} />
+              </div>)}
+              <div className="flex flex-wrap justify-between gap-2 border-t border-border pt-4">
+                <Button type="button" variant="ghost" disabled={coverLoading} onClick={async () => {
+                  setCoverLoading(true);
+                  try { setCoverForm(await readCoverDetails()); }
+                  catch { toast.error("The project's details could not be loaded. Please try again."); }
+                  finally { setCoverLoading(false); }
+                }}>Use project details</Button>
+                <div className="flex gap-2"><Button type="button" variant="outline" onClick={() => setCoverOpen(false)}>Cancel</Button><Button type="submit" disabled={!draftReady || coverLoading}>Save cover details</Button></div>
+              </div>
+            </form>
           </DialogContent>
         </Dialog>
 
@@ -338,6 +385,7 @@ export default function TradeComparator() {
             <Input value={shortlistName} onChange={(e) => setShortlistName(e.target.value)} placeholder="Shortlist name (e.g. client, project)" aria-label="Shortlist name" className="h-9 w-full font-body text-xs sm:w-64" />
             <ProjectPicker value={projectId} onChange={value => { const next = new URLSearchParams(params); if (value) next.set("project", value); else next.delete("project"); setParams(next); }} />
             <Button size="sm" variant="outline" onClick={saveShortlist} disabled={compareList.length === 0 || !projectId || saving}><Bookmark className="mr-2 h-3.5 w-3.5" />{saving ? "Saving…" : "Save shortlist to project"}</Button>
+            <Button size="sm" variant="outline" onClick={() => void editCover()} disabled={!draftReady || exporting || coverLoading}><FilePenLine className="mr-2 h-3.5 w-3.5" />{coverLoading ? "Loading details…" : "Edit PDF cover"}</Button>
             <Button size="sm" variant="outline" onClick={() => void exportPdf()} disabled={compareList.length === 0 || exporting || (visiblePieces !== null && visiblePieces.length === 0)}><FileDown className="mr-2 h-3.5 w-3.5" />{exporting ? "Preparing PDF…" : visiblePieces && visiblePieces.length !== compareList.length ? `Export visible (${visiblePieces.length})` : "Export comparison PDF"}</Button>
           </div>
           {shortlists.length > 0 && <ul className="flex flex-wrap gap-2" aria-label="Saved shortlists">

@@ -1,5 +1,23 @@
 import { describe, expect, it } from "vitest";
-import { restoreSavedComparison } from "./comparatorDraft";
+import { restoreSavedComparison, sanitizeComparatorDraft } from "./comparatorDraft";
+
+describe("comparison cover edits", () => {
+  it("preserves editable project and client details through draft restoration", () => {
+    const edits = { projectName: "Bangkok Apartment", comparisonName: "Living room", clientName: "Cyrille Delval", location: "Bangkok", style: "Progressive luxury" };
+    const restored = sanitizeComparatorDraft(JSON.parse(JSON.stringify({ coverEdits: { unassigned: edits } })));
+    expect(restored.coverEdits.unassigned).toEqual(edits);
+  });
+  it("keeps intentional empty fields and excludes prices and unapproved metadata", () => {
+    const restored = sanitizeComparatorDraft({ coverEdits: { unassigned: { clientName: "", trade_price_cents: 5000, internalNotes: "Private" } } });
+    expect(restored.coverEdits.unassigned).toEqual({ clientName: "" });
+  });
+  it("keeps project-specific edits separate", () => {
+    const projectId = "8f16a389-f13c-487a-83a2-01b81639e7dd";
+    const restored = sanitizeComparatorDraft({ coverEdits: { [projectId]: { projectName: "Singapore" }, unassigned: { projectName: "Bangkok" } } });
+    expect(restored.coverEdits[projectId].projectName).toBe("Singapore");
+    expect(restored.coverEdits.unassigned.projectName).toBe("Bangkok");
+  });
+});
 
 describe("saved comparison restoration", () => {
   const saved = { id: "dais", product_name: "Dais", brand_name: "Alexander Lamont", category: "Seating", image_url: "https://example.com/dais.jpg", materials: "Leather" };
