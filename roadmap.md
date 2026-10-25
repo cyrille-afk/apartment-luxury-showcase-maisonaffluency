@@ -1,3 +1,6 @@
+## Reopen saved comparisons
+- [ ] Add a named saved-comparison chooser across projects and restore saved pieces/name/project after leaving the page; verify on the signed-in account.
+
 ## Comparator table presentation
 - [x] Extracted the comparison table with large 4:5 neutral image blocks, centered above-card remove controls, bold muted left-aligned labels, stacked materials and tinted bold Trade Price. Four live pieces verified at 1946px and mobile with all images loaded, no page overflow/errors, refresh/removal preserved; 15 regressions pass, preview clean. Not published; GitHub sync needed.
 
