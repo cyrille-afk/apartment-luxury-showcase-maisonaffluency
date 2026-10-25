@@ -112,7 +112,7 @@ export default function TradeComparator() {
   const requestedShortlist = params.get("shortlist");
   const [openedShortlist, setOpenedShortlist] = useState<string | null>(null);
   useEffect(() => {
-    if (!requestedShortlist || requestedShortlist === openedShortlist || !details) return;
+    if (!requestedShortlist || requestedShortlist === openedShortlist || !details || catalogueLoading) return;
     const saved = shortlists.find(s => s.id === requestedShortlist);
     if (!saved || !Array.isArray(saved.items)) return;
     setCompareList(saved.items.flatMap(item => {
@@ -121,7 +121,7 @@ export default function TradeComparator() {
       return product ? [product] : [];
     }).slice(0, 4));
     setOpenedShortlist(requestedShortlist);
-  }, [requestedShortlist, openedShortlist, shortlists, details, catalogue, favoriteProducts]);
+  }, [requestedShortlist, openedShortlist, shortlists, details, catalogueLoading, catalogue, favoriteProducts]);
   const deleteShortlist = async (id: string) => {
     await supabase.from("comparator_shortlists").delete().eq("id", id);
     refetchShortlists();
@@ -130,6 +130,16 @@ export default function TradeComparator() {
     if (exporting) return;
     setExporting(true);
     try {
+    const missingPricing = compareList.filter(p => !queryClient.getQueryData(["trade-product-pricing", p.id]));
+    if (missingPricing.length) {
+      const { data, error } = await supabase.functions.invoke("trade-catalog-pricing", { body: { pickIds: missingPricing.map(p => p.id) } });
+      if (error) throw error;
+      const rows = data?.products ?? [];
+      for (const product of missingPricing) {
+        const row = rows.find((r: { id: string; source_pick_id?: string }) => r.source_pick_id === product.id || r.id === product.id || r.id === product.trade_product_id);
+        if (row) queryClient.setQueryData(["trade-product-pricing", product.id], row);
+      }
+    }
     const fmt = (c: number | null, cur = "EUR") => c == null ? "Price upon Request" : new Intl.NumberFormat("en-IE", { style: "currency", currency: cur, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(c / 100);
     const pieces = await Promise.all(compareList.map(async (p) => {
       const pricing = queryClient.getQueryData<any>(["trade-product-pricing", p.id]);
