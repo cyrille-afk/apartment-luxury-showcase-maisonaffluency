@@ -11,6 +11,7 @@ import BrandCarousel from "@/components/trade/BrandCarousel";
 import SectionHero from "@/components/trade/SectionHero";
 import { cldResponsiveImg } from "@/lib/cloudinary";
 import { useIsMobile } from "@/hooks/use-mobile";
+import StudioDirectoryList, { type DirectoryProduct } from "@/components/trade/StudioDirectoryList";
 
 /** Extract short discipline tags from a specialty string */
 function extractTags(specialty: string): string[] {
@@ -128,6 +129,9 @@ const TradeDesigners = () => {
   const initialBrand = searchParams.get("brand") || "all";
   const [selectedBrand, setSelectedBrand] = useState(initialBrand);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [viewMode, setViewMode] = useState<"portraits" | "directory">(() =>
+    typeof window !== "undefined" && sessionStorage.getItem("ma-designers-view") === "directory" ? "directory" : "portraits");
+  useEffect(() => { sessionStorage.setItem("ma-designers-view", viewMode); }, [viewMode]);
   const [mobileCarouselMode, setMobileCarouselMode] = useState<"ateliers" | "designers">("ateliers");
 
   useEffect(() => {
@@ -142,6 +146,16 @@ const TradeDesigners = () => {
     for (const p of allProducts) {
       const key = p.brand_name.toLowerCase();
       map.set(key, (map.get(key) || 0) + 1);
+    }
+    return map;
+  }, [allProducts]);
+
+  const productsByBrand = useMemo(() => {
+    const map = new Map<string, DirectoryProduct[]>();
+    for (const p of allProducts) {
+      const key = normalizeText(p.brand_name);
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push({ id: p.id, product_name: p.product_name, image_url: p.image_url, category: p.category });
     }
     return map;
   }, [allProducts]);
@@ -188,6 +202,17 @@ const TradeDesigners = () => {
         return { ...d, tags, productCount, isAtelierCard };
       });
   }, [designers, productCountMap, HIDDEN_CHILD_DESIGNERS, publishedChildCountByFounder]);
+
+  const childrenByFounder = useMemo(() => {
+    const map = new Map<string, EnrichedDesigner[]>();
+    for (const d of designers) {
+      if (!d.is_published || !d.founder || d.founder === d.name) continue;
+      const key = normalizeText(d.founder);
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push({ ...d, tags: [], productCount: 0 } as EnrichedDesigner);
+    }
+    return map;
+  }, [designers]);
 
   // Split carousel entries into ateliers vs designers
   const atelierCarouselEntries = useMemo(() => {
@@ -301,6 +326,13 @@ const TradeDesigners = () => {
     return [...letters].sort();
   }, [enriched]);
 
+  const openProfile = (slug: string) => {
+    sessionStorage.removeItem("__scroll_y");
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    navigate(`/trade/designers/${slug}`);
+  };
+  const openProduct = (id: string) => navigate(`/trade/products/${id}`);
+
   return (
     <>
       <Helmet>
@@ -322,6 +354,22 @@ const TradeDesigners = () => {
             )}
           </p>
           <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div role="tablist" aria-label="Presentation style" className="flex flex-shrink-0 rounded-md border border-border p-0.5">
+              {(["portraits", "directory"] as const).map((m) => (
+                <button
+                  key={m}
+                  role="tab"
+                  aria-selected={viewMode === m}
+                  onClick={() => setViewMode(m)}
+                  className={cn(
+                    "rounded px-3 py-1.5 font-body text-[10px] uppercase tracking-[0.12em] transition-colors",
+                    viewMode === m ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {m === "portraits" ? "Portraits" : "Directory"}
+                </button>
+              ))}
+            </div>
             <div className="relative flex-1 sm:w-64 sm:flex-none">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
@@ -501,18 +549,20 @@ const TradeDesigners = () => {
                 {filtered.length} {filtered.length === 1 ? "entry" : "entries"}
               </span>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filtered
-                .slice()
-                .sort((a, b) => {
-                  if (a.isAtelierCard && !b.isAtelierCard) return -1;
-                  if (!a.isAtelierCard && b.isAtelierCard) return 1;
-                  return a.name.localeCompare(b.name);
-                })
-                .map((d) => (
-                  <DesignerCard key={d.id} brand={d} navigate={navigate} />
-                ))}
-            </div>
+            {(() => {
+              const sorted = filtered.slice().sort((a, b) => {
+                if (a.isAtelierCard && !b.isAtelierCard) return -1;
+                if (!a.isAtelierCard && b.isAtelierCard) return 1;
+                return a.name.localeCompare(b.name);
+              });
+              return viewMode === "directory" ? (
+                <StudioDirectoryList entries={sorted} productsByBrand={productsByBrand} childrenByFounder={childrenByFounder} onOpenProfile={openProfile} onOpenProduct={openProduct} />
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {sorted.map((d) => <DesignerCard key={d.id} brand={d} navigate={navigate} />)}
+                </div>
+              );
+            })()}
           </div>
         ) : (
           <div className="space-y-10">
@@ -525,11 +575,15 @@ const TradeDesigners = () => {
                     {entries.length} {entries.length === 1 ? "entry" : "entries"}
                   </span>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {entries.map((entry) => (
-                    <DesignerCard key={entry.designer.id} brand={entry.designer} navigate={navigate} />
-                  ))}
-                </div>
+                {viewMode === "directory" ? (
+                  <StudioDirectoryList entries={entries.map((e) => e.designer)} productsByBrand={productsByBrand} childrenByFounder={childrenByFounder} onOpenProfile={openProfile} onOpenProduct={openProduct} />
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {entries.map((entry) => (
+                      <DesignerCard key={entry.designer.id} brand={entry.designer} navigate={navigate} />
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
