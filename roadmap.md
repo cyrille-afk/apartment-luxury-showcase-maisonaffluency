@@ -76,3 +76,7 @@
 - [x] Share the image embedding request between search and automatic processing; expose paused status and explicit recovery.
 - [x] Verify replacement enqueue, persisted vectors, private callback rejection, queue drain and 15 failure/duplicate tests. Restore the test photo; all 764 images remain indexed.
 - [ ] Publish the new server route to activate unattended production callbacks; the database currently queues safely, but published callback delivery cannot be verified before publishing.
+
+## Extension page download prompt
+- [x] Remove the plugin package download button from the ChatGPT Extension Integration page and drop the matching tour wording; verified signed-in as cyrille@maisonaffluency.com that the page now shows no download control.
+- [ ] Decide whether the package file itself should stop being reachable at its web address (it still sits in the site's public files).
