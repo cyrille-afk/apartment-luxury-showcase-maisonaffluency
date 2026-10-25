@@ -16,6 +16,7 @@ import { useUserBoards } from "@/hooks/useUserBoards";
 import { useStudio } from "@/hooks/useStudio";
 import { normalizeCategory, normalizeSubcategory, CATEGORY_ORDER, getSubcategoriesForCategory } from "@/lib/productTaxonomy";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
+import TearsheetBoardPdfExport from "@/components/trade/TearsheetBoardPdfExport";
 import { getConciergeSession, useConciergeSession } from "@/hooks/useConciergeSession";
 import { withImperialInline } from "@/lib/formatDimensions";
 import { formatLeadTime } from "@/components/trade/AvailabilityBadge";
@@ -772,6 +773,7 @@ export default function TradeTearsheets() {
           <h2 className="font-display text-lg">{selectedProject ? selectedProject.name : "Choose a project"}</h2>
           <div className="flex flex-wrap items-center gap-3">
             <ProjectPicker value={filterProjectId} onChange={setFilterProjectId} required />
+            {selectedProject && <TearsheetBoardPdfExport key={`pdf-${selectedProject.id}`} projectId={selectedProject.id} projectName={selectedProject.name} />}
             {selectedProject && <TearsheetBoardSharing key={selectedProject.id} projectId={selectedProject.id} projectName={selectedProject.name} />}
             {selectedProject && <Button variant="ghost" size="sm" onClick={() => navigate(`/trade/projects/${selectedProject.id}`)}>Open project →</Button>}
           </div>
