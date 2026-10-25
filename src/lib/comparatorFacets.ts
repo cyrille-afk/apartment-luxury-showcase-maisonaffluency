@@ -41,3 +41,29 @@ export function comparatorFacets(materials: string | null | undefined, linked: C
 export function matchesComparatorFacets(facets: ComparatorFacets, selection: ComparatorFacetSelection) {
   return (Object.keys(selection) as ComparatorFacetKind[]).every(kind => !selection[kind] || facets[kind].includes(selection[kind]!));
 }
+
+/** Merge unsaved draft categories into the override map the filters would use. A row left with all three boxes empty falls back to the automatic guess. */
+export function mergeFacetOverrides(drafts: Record<string, FinishFacetOverride | undefined>) {
+  const out = new Map<string, FinishFacetOverride>();
+  for (const [name, d] of Object.entries(drafts)) {
+    const has = d && Object.values(d).some(v => v && String(v).trim());
+    out.set(finishFacetKey(name), has ? { material: d!.material?.trim() || null, finish: d!.finish?.trim() || null, color: d!.color?.trim() || null } : {});
+  }
+  return out;
+}
+
+/** Which compared pieces each facet filter would show with the given overrides. */
+export function previewFacetGroups(pieces: { name: string; materials: string | null; linked?: ComparatorSwatch[] }[], overrides: Map<string, FinishFacetOverride>) {
+  const groups: Record<ComparatorFacetKind, Map<string, string[]>> = { material: new Map(), finish: new Map(), color: new Map() };
+  for (const piece of pieces) {
+    const facets = comparatorFacets(piece.materials, piece.linked ?? [], overrides);
+    for (const kind of Object.keys(VOCAB) as ComparatorFacetKind[]) {
+      for (const v of facets[kind]) {
+        const list = groups[kind].get(v) ?? [];
+        if (!list.includes(piece.name)) list.push(piece.name);
+        groups[kind].set(v, list);
+      }
+    }
+  }
+  return Object.fromEntries((Object.keys(groups) as ComparatorFacetKind[]).map(kind => [kind, [...groups[kind].entries()].map(([value, pieces]) => ({ value, pieces })).sort((a, b) => a.value.localeCompare(b.value))])) as Record<ComparatorFacetKind, { value: string; pieces: string[] }[]>;
+}

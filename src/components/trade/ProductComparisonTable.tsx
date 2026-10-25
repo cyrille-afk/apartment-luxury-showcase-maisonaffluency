@@ -36,6 +36,7 @@ export function ProductComparisonTable({ products: allProducts, fields, onRemove
     },
   });
   const finishNames = useMemo(() => { const seen = new Map<string, string>(); for (const p of allProducts) if (p) for (const n of comparatorFinishNames(p.materials as string | null, swatches?.get(p.id))) if (!seen.has(finishFacetKey(n))) seen.set(finishFacetKey(n), n); return [...seen.values()].sort((a, b) => a.localeCompare(b)); }, [allProducts, swatches]);
+  const categorisablePieces = useMemo(() => allProducts.flatMap(p => p ? [{ name: p.product_name, materials: (p.materials as string | null) ?? null, linked: swatches?.get(p.id) ?? [] }] : []), [allProducts, swatches]);
   const [selection, setSelection] = useState<ComparatorFacetSelection>({});
   const facetsById = useMemo(() => new Map(allProducts.flatMap(p => p ? [[p.id, comparatorFacets(p.materials as string | null, swatches?.get(p.id), overrides)] as const] : [])), [allProducts, swatches, overrides]);
   const options = useMemo(() => Object.fromEntries((Object.keys(FACET_LABELS) as ComparatorFacetKind[]).map(k => [k, [...new Set([...facetsById.values()].flatMap(f => f[k]))].sort()])) as Record<ComparatorFacetKind, string[]>, [facetsById]);
@@ -58,7 +59,7 @@ export function ProductComparisonTable({ products: allProducts, fields, onRemove
         </select>
       </label>)}
       {active && <Button type="button" variant="ghost" size="sm" onClick={() => setSelection({})}>Clear filters</Button>}
-      {isAdmin && finishNames.length > 0 && <FinishCategoryDialog names={finishNames} overrides={overrides} />}
+      {isAdmin && finishNames.length > 0 && <FinishCategoryDialog names={finishNames} overrides={overrides} pieces={categorisablePieces} />}
       {active && <p className="pb-2 font-body text-xs text-muted-foreground" aria-live="polite">Showing {products.length} of {allProducts.filter(Boolean).length} pieces</p>}
     </div>}
     {active && products.length === 0 ? <p className="py-12 font-body text-sm text-muted-foreground">No compared pieces match these filters.</p> :

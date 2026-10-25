@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { comparatorFacets, finishFacetKey, matchesComparatorFacets } from "./comparatorFacets";
+import { comparatorFacets, finishFacetKey, matchesComparatorFacets, mergeFacetOverrides, previewFacetGroups } from "./comparatorFacets";
 
 describe("comparatorFacets", () => {
   it("classifies material, finish and colour from names", () => {
@@ -24,5 +24,17 @@ describe("comparatorFacets", () => {
     const f = comparatorFacets("Dark Oak", [], new Map([[finishFacetKey("dark oak"), { color: "Brown" }]]));
     expect(f.color).toEqual(["Brown"]);
     expect(f.material).toEqual(["Oak"]);
+  });
+  it("preview shows which pieces each filter would list after draft categories merge", () => {
+    const merged = mergeFacetOverrides({ "Opera Drift": { material: null, finish: null, color: "Beige" }, "Unchanged": {} });
+    const groups = previewFacetGroups([
+      { name: "Clam Chair", materials: "Opera Drift", linked: [] },
+      { name: "Bench", materials: "Solid Oak frame", linked: [] },
+    ], merged);
+    expect(groups.material).toEqual([{ value: "Oak", pieces: ["Bench"] }]);
+    expect(groups.color).toEqual([{ value: "Beige", pieces: ["Clam Chair"] }]);
+    // a row the admin leaves empty falls back to the automatic guess
+    const guessed = mergeFacetOverrides({ "Opera Drift": {} });
+    expect(previewFacetGroups([{ name: "Clam Chair", materials: "Opera Drift", linked: [] }], guessed).color).toEqual([]);
   });
 });
