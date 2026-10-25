@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import ClientPicker from "@/components/trade/ClientPicker";
+import ProjectComparisonShortlists from "@/components/trade/ProjectComparisonShortlists";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import {
@@ -527,6 +528,7 @@ export default function TradeProjectDetail() {
 
         {/* BOARDS TAB */}
         <TabsContent value="boards" className="mt-0 space-y-4">
+          <ProjectComparisonShortlists projectId={project.id} />
           {(() => {
             const visibleBoards = selectedDesigner
               ? boards.filter((b) => brandBoardIds[selectedDesigner]?.has(b.id))

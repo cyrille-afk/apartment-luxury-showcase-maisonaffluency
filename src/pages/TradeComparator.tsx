@@ -1,11 +1,10 @@
-import { Helmet } from "react-helmet-async";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { buildComparisonPdf } from "@/lib/comparisonPdf";
+import { buildComparisonPdf, comparisonImage } from "@/lib/comparisonPdf";
 import { downloadBlob } from "@/lib/furnishingSchedulePdf";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search, X, Heart, ChevronDown, Bookmark, Link2, FileDown, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,8 +12,10 @@ import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
 import type { TradeProduct } from "@/lib/tradeProducts";
-import { comparatorDesignerGroups, comparatorPrices, resolvePublicUrlsByPickIds } from "@/lib/comparatorCatalogue";
+import { comparatorDesignerGroups, comparatorPrices, comparatorDetails, fetchComparatorDetails, resolvePublicUrlsByPickIds } from "@/lib/comparatorCatalogue";
 import { useAuth } from "@/hooks/useAuth";
+import { ProjectPicker } from "@/components/trade/ProjectPicker";
+import { useSearchParams } from "@/lib/router-compat";
 
 function ComparisonPrice({ product, net }: { product: TradeProduct | null; net: boolean }) {
   const { discountPct } = useTradePriceMode();
@@ -37,6 +38,12 @@ export default function TradeComparator() {
   const [openDesigners, setOpenDesigners] = useState<Set<string>>(new Set());
   const { user } = useAuth();
   const { liveProducts, isLoading: catalogueLoading } = useTradeProducts();
+  const [params, setParams] = useSearchParams();
+  const projectId = params.get("project");
+  const [saving, setSaving] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const { data: details } = useQuery({ queryKey: ["comparator-details", user?.id], enabled: !!user, queryFn: fetchComparatorDetails });
+  const catalogue = liveProducts.map(p => ({ ...p, ...details?.get(p.id) }));
   const { showTradePrice, discountLabel, tierLabel } = useTradePriceMode();
 
   const { data: favorites = [], isLoading: favoritesLoading } = useQuery({
@@ -44,13 +51,18 @@ export default function TradeComparator() {
     enabled: !!user?.id,
     queryFn: async () => {
       if (!user) return [];
-      const { data, error } = await supabase.from("trade_favorites").select("product_id").eq("user_id", user.id);
+      const { data, error } = await supabase.from("trade_favorites").select("product_id, trade_products(id, source_pick_id, product_name, brand_name, category, materials, dimensions, width_mm, depth_mm, height_mm, size_variants, image_url, lead_time)").eq("user_id", user.id);
       if (error) throw error;
-      return (data || []).map(f => f.product_id);
+      return data || [];
     },
   });
-  const favoriteIds = new Set(favorites);
-  const groups = comparatorDesignerGroups(liveProducts, search, letter, source === "favorites" ? favoriteIds : undefined);
+  const favoriteProducts = favorites.flatMap(f => {
+    const row = f.trade_products;
+    if (!row) return [];
+    const existing = catalogue.find(p => p.id === row.source_pick_id || p.trade_product_id === f.product_id || p.id === f.product_id);
+    return [existing ?? { id: row.source_pick_id || row.id, trade_product_id: row.id, product_name: row.product_name, brand_name: row.brand_name, category: row.category || "Uncategorized", tags: [], image_url: row.image_url, lead_time: row.lead_time, ...comparatorDetails(row) }];
+  });
+  const groups = comparatorDesignerGroups(source === "favorites" ? favoriteProducts : catalogue, search, letter);
   const isLoading = catalogueLoading || (source === "favorites" && favoritesLoading);
 
   const addToCompare = (p: TradeProduct) => {
@@ -67,45 +79,82 @@ export default function TradeComparator() {
   const { discountPct } = useTradePriceMode();
   const [shortlistName, setShortlistName] = useState("");
   const { data: shortlists = [], refetch: refetchShortlists } = useQuery({
-    queryKey: ["comparator-shortlists", user?.id],
+    queryKey: ["comparator-shortlists", user?.id, projectId],
     enabled: !!user,
     queryFn: async () => {
-      const { data, error } = await supabase.from("comparator_shortlists").select("id, name, items, share_token, created_at").order("created_at", { ascending: false });
+      let query = supabase.from("comparator_shortlists").select("id, name, items, share_token, created_at, project_id").eq("user_id", user?.id || "").order("created_at", { ascending: false });
+      if (projectId) query = query.eq("project_id", projectId);
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
   });
   const saveShortlist = async () => {
-    if (!user || compareList.length === 0) return;
+    if (!user || compareList.length === 0 || saving || !projectId) return;
+    setSaving(true);
+    try {
     // Public-safe snapshot only: no prices are stored, so shared links can never leak trade figures.
     const publicUrls = await resolvePublicUrlsByPickIds(compareList.map((p) => p.id));
     const items = compareList.map((p) => ({ id: p.id, product_name: p.product_name, brand_name: p.brand_name, category: p.category, dimensions: p.dimensions, materials: p.materials, lead_time: p.lead_time ?? null, image_url: p.image_url, public_url: publicUrls.get(p.id) ?? null }));
-    const { error } = await supabase.from("comparator_shortlists").insert({ user_id: user.id, name: shortlistName.trim() || "Shortlist", items });
+    const { error } = await supabase.from("comparator_shortlists").insert({ user_id: user.id, project_id: projectId, name: shortlistName.trim() || "Shortlist", items });
     if (error) { toast.error("Could not save shortlist"); return; }
     setShortlistName(""); toast.success("Shortlist saved"); refetchShortlists();
+    } catch { toast.error("Could not save shortlist"); } finally { setSaving(false); }
   };
   const openShortlist = (items: any) => {
     const ids: string[] = (items || []).map((i: any) => i.id);
-    setCompareList(ids.map((id) => liveProducts.find((p) => p.id === id)).filter(Boolean).slice(0, 4) as TradeProduct[]);
+    setCompareList(ids.map((id) => catalogue.find((p) => p.id === id) || favoriteProducts.find(p => p.id === id)).filter(Boolean).slice(0, 4) as TradeProduct[]);
   };
   const shareShortlist = async (token: string) => {
     await navigator.clipboard.writeText(`https://www.maisonaffluency.com/shortlist/${token}`);
     toast.success("Client link copied — shows pieces without prices");
   };
+  const requestedShortlist = params.get("shortlist");
+  const [openedShortlist, setOpenedShortlist] = useState<string | null>(null);
+  useEffect(() => {
+    if (!requestedShortlist || requestedShortlist === openedShortlist || !details || catalogueLoading) return;
+    const saved = shortlists.find(s => s.id === requestedShortlist);
+    if (!saved || !Array.isArray(saved.items)) return;
+    setCompareList(saved.items.flatMap(item => {
+      if (!item || typeof item !== "object" || Array.isArray(item) || typeof item.id !== "string") return [];
+      const product = catalogue.find(p => p.id === item.id) || favoriteProducts.find(p => p.id === item.id);
+      return product ? [product] : [];
+    }).slice(0, 4));
+    setOpenedShortlist(requestedShortlist);
+  }, [requestedShortlist, openedShortlist, shortlists, details, catalogueLoading, catalogue, favoriteProducts]);
   const deleteShortlist = async (id: string) => {
     await supabase.from("comparator_shortlists").delete().eq("id", id);
     refetchShortlists();
   };
-  const exportPdf = () => {
+  const exportPdf = async () => {
+    if (exporting) return;
+    setExporting(true);
+    try {
+    const missingPricing = compareList.filter(p => !queryClient.getQueryData(["trade-product-pricing", p.id]));
+    if (missingPricing.length) {
+      const { data, error } = await supabase.functions.invoke("trade-catalog-pricing", { body: { pickIds: missingPricing.map(p => p.id) } });
+      if (error) throw error;
+      const rows = data?.products ?? [];
+      for (const product of missingPricing) {
+        const row = rows.find((r: { id: string; source_pick_id?: string }) => r.source_pick_id === product.id || r.id === product.id || r.id === product.trade_product_id);
+        if (row) queryClient.setQueryData(["trade-product-pricing", product.id], row);
+      }
+    }
     const fmt = (c: number | null, cur = "EUR") => c == null ? "Price upon Request" : new Intl.NumberFormat("en-IE", { style: "currency", currency: cur, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(c / 100);
-    const pieces = compareList.map((p) => {
+    const pieces = await Promise.all(compareList.map(async (p) => {
       const pricing = queryClient.getQueryData<any>(["trade-product-pricing", p.id]);
       const prices = pricing ? comparatorPrices(pricing, discountPct) : { retail: null, trade: null };
       const cur = pricing?.currency || "EUR";
-      return { name: p.product_name, values: { brand_name: p.brand_name, category: p.category, dimensions: p.dimensions ?? "", materials: p.materials ?? "", lead_time: p.lead_time ?? "", rrp_price_cents: fmt(prices.retail, cur), trade_price_cents: fmt(prices.trade, cur) } };
-    });
+      return { name: p.product_name, image: p.image_url ? await comparisonImage(p.image_url) : null, values: { brand_name: p.brand_name, category: p.category, dimensions: p.dimensions ?? "", materials: p.materials ?? "", lead_time: p.lead_time ?? "", rrp_price_cents: fmt(prices.retail, cur), trade_price_cents: fmt(prices.trade, cur) } };
+    }));
     downloadBlob(buildComparisonPdf(pieces, FIELDS, showTradePrice ? "Product Comparison (Trade)" : "Product Comparison"), "product-comparison.pdf");
+    } catch { toast.error("The PDF could not be prepared with all pictures. Please try again."); } finally { setExporting(false); }
   };
+
+  useEffect(() => {
+    if (!details) return;
+    setCompareList(list => list.map(p => ({ ...p, ...details.get(p.id) })));
+  }, [details]);
 
   const comparisonSlots = Array.from({ length: 4 }, (_, index) => compareList[index] ?? null);
 
@@ -123,7 +172,6 @@ export default function TradeComparator() {
 
   return (
     <>
-      <Helmet><title>Product Comparator — Trade Portal</title></Helmet>
       <div className="mx-auto w-full max-w-6xl space-y-6 [@media(min-width:1440px)]:max-w-[min(90vw,1800px)]">
 
 
@@ -178,7 +226,7 @@ export default function TradeComparator() {
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
             <div className="flex gap-2" role="group" aria-label="Product source">
               <Button variant={source === "catalogue" ? "default" : "outline"} size="sm" onClick={() => setSource("catalogue")}>Designers A–Z</Button>
-              <Button variant={source === "favorites" ? "default" : "outline"} size="sm" onClick={() => setSource("favorites")}><Heart className="mr-2 h-3 w-3" />Favourites</Button>
+              <Button variant={source === "favorites" ? "default" : "outline"} size="sm" onClick={() => { setSource("favorites"); setLetter(""); setSearch(""); }}><Heart className="mr-2 h-3 w-3" />Favourites</Button>
             </div>
             <span className="font-body text-xs text-muted-foreground">{compareList.length}/4 selected</span>
           </div>
@@ -191,7 +239,7 @@ export default function TradeComparator() {
             {isLoading ? <div className="flex h-44 items-center justify-center"><DotCircleLoader size="sm" /></div> : groups.length === 0 ? (
               <p className="py-10 text-center font-body text-sm text-muted-foreground">{source === "favorites" ? "No matching favourites" : "No matching designers or pieces"}</p>
             ) : groups.map(({ designer, pieces }) => {
-              const expanded = !!search.trim() || openDesigners.has(designer);
+              const expanded = source === "favorites" || !!search.trim() || openDesigners.has(designer);
               return <div key={designer} className="border-b border-border">
                 <Button variant="ghost" aria-expanded={expanded} onClick={() => setOpenDesigners(prev => { const next = new Set(prev); if (next.has(designer)) next.delete(designer); else next.add(designer); return next; })} className="h-12 w-full justify-between rounded-none px-2">
                   <span className="font-body text-sm">{designer} <span className="ml-2 text-xs text-muted-foreground">{pieces.length} curator picks</span></span>
@@ -214,8 +262,9 @@ export default function TradeComparator() {
         <section className="flex flex-col gap-3 border-b border-border pb-5">
           <div className="flex flex-wrap items-center gap-2">
             <Input value={shortlistName} onChange={(e) => setShortlistName(e.target.value)} placeholder="Shortlist name (e.g. client, project)" aria-label="Shortlist name" className="h-9 w-72 font-body text-sm" />
-            <Button size="sm" variant="outline" onClick={saveShortlist} disabled={compareList.length === 0}><Bookmark className="mr-2 h-3.5 w-3.5" />Save shortlist</Button>
-            <Button size="sm" variant="outline" onClick={exportPdf} disabled={compareList.length === 0}><FileDown className="mr-2 h-3.5 w-3.5" />Export comparison PDF</Button>
+            <ProjectPicker value={projectId} onChange={value => { const next = new URLSearchParams(params); if (value) next.set("project", value); else next.delete("project"); setParams(next); }} />
+            <Button size="sm" variant="outline" onClick={saveShortlist} disabled={compareList.length === 0 || !projectId || saving}><Bookmark className="mr-2 h-3.5 w-3.5" />{saving ? "Saving…" : "Save shortlist to project"}</Button>
+            <Button size="sm" variant="outline" onClick={() => void exportPdf()} disabled={compareList.length === 0 || exporting}><FileDown className="mr-2 h-3.5 w-3.5" />{exporting ? "Preparing PDF…" : "Export comparison PDF"}</Button>
           </div>
           {shortlists.length > 0 && <ul className="flex flex-wrap gap-2" aria-label="Saved shortlists">
             {shortlists.map((s: any) => (
@@ -273,7 +322,7 @@ export default function TradeComparator() {
                     {comparisonSlots.map((product, index) => {
                       const val = product ? (product as any)[field.key] : null;
                       return (
-                        <td key={product?.id ?? `${field.key}-${index}`} className="px-4 py-3 font-body text-sm text-foreground align-top">
+                        <td key={product?.id ?? `${field.key}-${index}`} className="whitespace-pre-line px-4 py-3 font-body text-sm text-foreground align-top">
                           {field.key === "rrp_price_cents" || field.key === "trade_price_cents" ? <ComparisonPrice product={product} net={field.key === "trade_price_cents"} /> : product ? val || "—" : "—"}
                         </td>
                       );
