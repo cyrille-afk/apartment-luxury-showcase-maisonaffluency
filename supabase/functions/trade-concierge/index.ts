@@ -6326,15 +6326,16 @@ serve(async (req) => {
     const projectT0 = performance.now();
     const projectContext = await loadProjectContext(supabase, userId, resolvedProjectId);
     mark("loadProjectContext", { ms: Math.round(performance.now() - projectT0), hasProject: !!resolvedProjectId });
-    // Resolve trade discount % for this user (defaults to 8%).
-    let tradeDiscountPct = 0.08;
+    // Resolve trade discount % from trade_tier_config, mapping the profile tier
+    // exactly like useTradeDiscount (gold/platinum, everything else = silver).
+    // No bundled rate: if the config can't be read, quote at 0% (full RRP).
+    let tradeDiscountPct = 0;
     try {
-      const tier = (discountRow.data as any)?.trade_tier;
-      if (tier) {
-        const { data: cfg } = await supabase.from("trade_tier_config").select("discount_pct").eq("tier", tier).maybeSingle();
-        if (cfg?.discount_pct != null) tradeDiscountPct = Number(cfg.discount_pct);
-      }
-    } catch { /* keep default */ }
+      const raw = String((discountRow.data as any)?.trade_tier || "").toLowerCase();
+      const tier = raw === "gold" || raw === "platinum" ? raw : "silver";
+      const { data: cfg } = await supabase.from("trade_tier_config").select("discount_pct").eq("tier", tier).maybeSingle();
+      if (cfg?.discount_pct != null) tradeDiscountPct = Number(cfg.discount_pct);
+    } catch { /* keep 0 */ }
     if (layoutScheduleContinuation && resolvedProjectId) {
       const { data: project } = await supabase.from("projects").select("id, name").eq("id", resolvedProjectId).eq("user_id", userId).maybeSingle();
       if (!project) return sseTextResponse("Choose a project you own above the layouts so I can prepare its schedule and quote.");
