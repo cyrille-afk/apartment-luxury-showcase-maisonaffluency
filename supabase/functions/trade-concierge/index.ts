@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { isLayoutScheduleContinuation } from "./_layoutContinuation.ts";
+import { isLayoutScheduleContinuation, parseScheduleItems, rowInReferenceScope, selectScheduleRows } from "./_layoutContinuation.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { requireUser, rateLimit } from "../_shared/auth.ts";
 import { logAiUsage } from "../_shared/aiUsage.ts";
@@ -6339,30 +6339,53 @@ serve(async (req) => {
       const { data: project } = await supabase.from("projects").select("id, name").eq("id", resolvedProjectId).eq("user_id", userId).maybeSingle();
       if (!project) return sseTextResponse("Choose a project you own above the layouts so I can prepare its schedule and quote.");
       const submittedText = lastUserMsg.split("Submitted brief:")[1] || lastUserMsg;
-      const scheduleTypes = inferRequestedTypology(effectiveBrief.brief, extractStructuredBriefField(submittedText, "TYPOLOGY"));
+      const typologyField = extractStructuredBriefField(submittedText, "TYPOLOGY") || "";
+      const scheduleTypes = inferRequestedTypology(effectiveBrief.brief, typologyField);
       const candidates = await fetchStrictTypologyCandidates(supabase, scheduleTypes, null, inferLeadTimeConstraints(submittedText));
-      let picks = await hydratePickPreview(supabase, candidates.map((row: any) => row.id));
+      // Scope BEFORE hydrating: hydrating hundreds of ids in one lookup
+      // overflows the request and silently returns nothing.
+      let scoped: any[] = candidates;
       if (hasScopedDesigners) {
-        const allowed = new Set(scopedDesigners.map(normalizeLoose));
-        picks = picks.filter((row: any) => allowed.has(normalizeLoose(row.designer_name || row.brand_name || "")));
+        const scopedNames = scopedDesigners.map(normalizeLoose);
+        const { data: designerRows } = await supabase.from("designers").select("id, name, display_name");
+        const scopedIds = new Set<string>((designerRows || [])
+          .filter((d: any) => scopedNames.includes(normalizeLoose(d.name)) || scopedNames.includes(normalizeLoose(d.display_name)))
+          .map((d: any) => d.id));
+        scoped = candidates.filter((row: any) => rowInReferenceScope(row, scopedIds, scopedNames));
       }
+      const items = parseScheduleItems(typologyField);
       const types = normalizeRequestedTypologies(scheduleTypes);
-      const selected = pickRowsForRequestedTypologyCoverage(picks, types, 12);
-      if (!rowsCoverRequestedTypologies(selected, types)) {
-        return sseTextResponse("The selected reference brands cannot currently cover every requested furniture type. Your layout is retained; widen References to include more ateliers, then continue the schedule. I have not substituted unrelated pieces.");
+      let chosen: any[];
+      let missingItems: string[] = [];
+      if (items.length) {
+        const result = selectScheduleRows(scoped, items, 2);
+        chosen = result.rows;
+        missingItems = result.missing;
+      } else {
+        chosen = pickRowsForRequestedTypologyCoverage(scoped, types, 12);
+        if (!rowsCoverRequestedTypologies(chosen, types)) missingItems = types.map((t) => typologyLabel(t));
       }
-      const zoneText = extractStructuredBriefField(lastUserMsg, "ZONE");
+      console.log("[concierge layout-continuation]", JSON.stringify({ requestId, types, items: items.map((i) => i.label), scopedDesigners, candidates: candidates.length, scoped: scoped.length, chosen: chosen.length, missingItems }));
+      if (missingItems.length || !chosen.length) {
+        const scopeLabel = hasScopedDesigners ? `your References (${scopedDesigners.join(", ")})` : "the current catalogue";
+        return sseTextResponse(`I couldn't find ${missingItems.join(", ") || "the requested pieces"} within ${scopeLabel} that meets the brief's lead time. Your layout is retained; widen References or the timeline, then continue the schedule. I have not substituted unrelated pieces.`);
+      }
+      const hydrated = await hydratePickPreview(supabase, chosen.map((row: any) => row.id));
+      const itemById = new Map<string, string>(chosen.map((row: any) => [String(row.id), String(row.schedule_item || "")]));
+      const selected = hydrated.filter((row: any) => row?.id);
+      const zoneText = extractStructuredBriefField(submittedText, "ZONE") || "";
       const zones = zoneText.split(/[;,]/).map((zone) => zone.trim()).filter((zone) => zone && !/ceiling|not specified/i.test(zone));
       const rows = selected.map((pick: any) => {
-        const hay = `${pick.title || ""} ${pick.subcategory || ""}`.toLowerCase();
-        const preferred = /stool/.test(hay) ? (/bar/.test(hay) ? "bar" : "kitchen") : "lounge";
+        const hay = `${itemById.get(pick.id) || ""} ${pick.title || ""} ${pick.subcategory || ""}`.toLowerCase();
+        const preferred = /stool/.test(hay) ? (/\bbar\b/.test(hay) ? "bar" : "kitchen") : "lounge";
         const room = zones.find((zone) => zone.toLowerCase().includes(preferred)) || zones[0] || gateFacts.zone;
         return { pick_id: pick.id, room, qty: 1, variant: null, lead_weeks: null, note: "Review quantity and finish before approval; layout counts are not an order." };
       });
       const preview = await hydrateQuotePreview(supabase, rows, null, tradeDiscountPct);
       const currencies = Array.from(new Set(preview.map((row: any) => row.currency).filter(Boolean)));
       const currency = currencies.length === 1 ? currencies[0] : null;
-      const note = "Bangkok selected layout — review-only draft; budget, dimensions and final quantities remain subject to confirmation.";
+      const profileLabel = extractStructuredBriefField(submittedText, "PROJECT PROFILE") || project.name;
+      const note = `${profileLabel} — selected layout, review-only draft; budget, dimensions and final quantities remain subject to confirmation.`;
       return sseProposalsThenTextResponse([
         { tool: "propose_ffe_rows", tool_call_id: crypto.randomUUID(), args: { project_id: project.id, project_name: project.name, currency, note, rows }, preview: preview.map((row: any, index: number) => ({ ...row, room: rows[index]?.room })), trade_discount_pct: tradeDiscountPct * 100 },
         { tool: "draft_quote", tool_call_id: crypto.randomUUID(), args: { project_id: project.id, currency, note, lines: rows }, preview },

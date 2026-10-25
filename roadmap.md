@@ -83,6 +83,6 @@
 - [ ] Publish the new server route to activate unattended production callbacks; the database currently queues safely, but published callback delivery cannot be verified before publishing.
 
 ## Extension page download prompt
-- [ ] Complete Bangkok Option 3 schedule/quote verification: intake no longer reopens, but live catalogue coverage still rejects the selected references; no schedule or quote generated. Requires further catalogue matching diagnosis, not user approval.
+- [x] Complete Bangkok Option 3 schedule/quote verification: reference-scoped, per-piece matching now returns 6 pieces (2 bar stools, 2 side tables, 2 lounge chairs from Collection Particulière and Alinea) in both the FF&E schedule and quote preview, €40,459 RRP / €37,222 after 8%; live-verified in the preview, nothing approved.
 - [x] Remove the plugin package download button from the ChatGPT Extension Integration page and drop the matching tour wording; verified signed-in as cyrille@maisonaffluency.com that the page now shows no download control.
 - [ ] Decide whether the package file itself should stop being reachable at its web address (it still sits in the site's public files).
