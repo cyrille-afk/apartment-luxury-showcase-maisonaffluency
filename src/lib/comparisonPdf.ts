@@ -3,6 +3,7 @@ import { formatPdfDate } from "@/lib/pdfFormatting";
 import { DEFAULT_COVER_THEME, hexToRgb } from "@/lib/pdfCoverTheme";
 import { comparatorDimensionGroups } from "./comparatorDimensions";
 import { comparisonSectionPages } from "./comparisonPdfLayout";
+import { parseDesignerNote, plainDesignerNote, wrapDesignerNote, type NoteLine } from "./designerNoteFormat";
 import coverLogo from "@/assets/maison-affluency-cover-logo.png.asset.json";
 
 export interface ComparisonPdfCover {
@@ -94,7 +95,7 @@ function drawComparisonCover(doc: jsPDF, cover: ComparisonPdfCover, title: strin
     ["CLIENT", cover.clientName?.trim()],
     ["LOCATION", cover.location?.trim()],
     ["STYLE", cover.style?.trim()],
-    ["DESIGNER NOTES", cover.designerNotes?.trim()],
+    ["DESIGNER NOTES", cover.designerNotes?.trim() ? plainDesignerNote(cover.designerNotes.trim()) : ""],
   ].filter((row): row is [string, string] => !!row[1]);
   // Each column paginates onto further branded pages rather than clipping.
   const drawPieces = (x: number, width: number, top = 52) => {
@@ -210,21 +211,39 @@ export async function buildComparisonPdf(pieces: ComparisonPdfPiece[], rows: { k
     ...g.rows.map(r => `${r.label}: ${r.metric} (${r.imperial})`),
     ...(g.note ? [g.note] : []),
   ]).flatMap(line => textLines(line));
-  type Section = { key: string; label: string; cells: string[][]; swatches?: ComparisonPdfSwatch[][]; height: number };
+  const bulletIndent = 3;
+  const measure = (text: string, bold: boolean) => { doc.setFont("Inter", "normal").setFontSize(bodyFont); return doc.getTextWidth(text) + (bold ? text.length * 0.04 : 0); };
+  const noteLines = (text: string) => wrapDesignerNote(parseDesignerNote(text), colW - 6, measure, bulletIndent);
+  const drawNoteLine = (line: NoteLine, x: number, y: number) => {
+    let cx = x;
+    if (line.bullet) { doc.setFillColor(...brand.gold).circle(x + 0.9, y - 1, 0.55, "F"); }
+    if (line.bullet || line.runs.length && x !== cx) cx = x + bulletIndent;
+    for (const run of line.runs) {
+      const w = measure(run.text, run.bold);
+      if (run.mark) doc.setFillColor(...colors.trade).rect(cx - 0.3, y - 2.9, w + 0.6, 3.8, "F");
+      doc.setFont("Inter", "normal").setFontSize(bodyFont).setTextColor(...(run.bold ? brand.jade : colors.ink));
+      if (run.bold) { doc.setDrawColor(...brand.jade).setLineWidth(0.12); doc.text(run.text, cx, y, { renderingMode: "fillThenStroke" }); }
+      else doc.text(run.text, cx, y);
+      cx += w;
+    }
+    doc.setDrawColor(...colors.rule).setLineWidth(0.2);
+  };
+  type Section = { key: string; label: string; cells: string[][]; rich?: NoteLine[][]; swatches?: ComparisonPdfSwatch[][]; height: number };
   const sections: Section[] = rows.flatMap(row => {
     if (row.key === "materials") {
       const samples = pieces.map(p => p.swatches ?? []);
       // A compact six-sample summary keeps prices with the product grid; the full library follows separately.
       return [{ key: row.key, label: row.label, cells: samples.map(s => [s.length > 6 ? `+${s.length - 6} further finishes` : ""]), swatches: samples.map(s => s.slice(0, 6)), height: 18 }];
     }
-    const cells = pieces.map(p => row.key === "dimensions" ? dimensionLines(p.values[row.key] || "") : textLines(p.values[row.key] || "—"));
+    const rich = row.key === "designer_notes" ? pieces.map(p => p.values[row.key]?.trim() ? noteLines(p.values[row.key]) : [{ bullet: false, runs: [{ text: "—", bold: false, mark: false }] }]) : undefined;
+    const cells = rich ? rich.map(lines => lines.map(l => l.runs.map(r => r.text).join(""))) : pieces.map(p => row.key === "dimensions" ? dimensionLines(p.values[row.key] || "") : textLines(p.values[row.key] || "—"));
     const chunkSize = 30;
     const maxLines = Math.max(1, ...cells.map(c => c.length));
     return Array.from({ length: Math.ceil(maxLines / chunkSize) }, (_, i) => {
       const chunk = cells.map(c => c.slice(i * chunkSize, (i + 1) * chunkSize));
       const label = i ? `${row.label} (continued)` : row.label;
       const labelLines = textLines(label.toUpperCase(), labelW - 5);
-      return { key: row.key, label, cells: chunk, height: Math.max(...chunk.map(c => c.length), labelLines.length, 1) * lineH + 5 };
+      return { key: row.key, label, cells: chunk, rich: rich?.map(c => c.slice(i * chunkSize, (i + 1) * chunkSize)), height: Math.max(...chunk.map(c => c.length), labelLines.length, 1) * lineH + 5 };
     });
   });
   const names = pieces.map(p => { doc.setFont("Cormorant", "normal").setFontSize(13); return doc.splitTextToSize(p.name, colW - 6) as string[]; });
@@ -295,6 +314,7 @@ export async function buildComparisonPdf(pieces: ComparisonPdfPiece[], rows: { k
           doc.text(section.cells[i][0] || "", x, y + 13);
         } else {
           doc.setFont("Inter", "normal").setFontSize(bodyFont).setTextColor(...colors.ink);
+          if (section.rich) { section.rich[i].forEach((line, j) => drawNoteLine(line, x, y + 4.5 + j * lineH)); return; }
           section.cells[i].forEach((line, j) => {
             if (section.key === "dimensions" && /\(.* in\)$/.test(line)) {
               const at = line.lastIndexOf(" ("); const main = line.slice(0, at), imperial = line.slice(at);
