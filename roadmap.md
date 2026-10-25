@@ -1,5 +1,9 @@
 # Roadmap — Automatic Visual Search Indexing
 
+## Trade Program sign-in password reveal
+- [x] Add a show/hide toggle to the Trade Program sign-in password field so the member can check what they typed before submitting; the field still starts empty and hidden.
+- [x] Live verified on /trade/login: field starts type=password and empty, revealing shows the exact characters (type=text) and hiding restores the mask with the value intact, the toggle never submits the form and tab still moves straight to Sign In; three component tests pass and the build is clean.
+
 ## Sign-in modal premium redesign
 - [x] Put the credential form first, a plain "or" separator below it, Google last as an alternative, the muted internal-staff helper line under Google and one footer application link; remove Google's raw error wording everywhere.
 - [x] Live verified on /spec-sheets/joseph-dirand: order email → password → Sign In → or → Google → helper → footer, 448px card, wrong password shows "We couldn’t sign you in…" with no raw auth message; /trade/login carries the same copy with one application link; five component tests pass and the build is clean.
