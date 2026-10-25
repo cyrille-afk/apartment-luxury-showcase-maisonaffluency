@@ -544,6 +544,14 @@ import { extractProjectCityFromAssistant } from "@/lib/projectCityDetect";
 import { validateFelixLogic } from "@/lib/validateFelixLogic";
 import { detectUrgency } from "@/lib/urgencyDetect";
 
+// Opening suggestions for the public concierge — shown only while the
+// conversation has not started yet. Each entry is sent verbatim when tapped.
+const PUBLIC_CONCIERGE_STARTERS: string[] = [
+  "What materials and finishes define the pieces in the apartment?",
+  "Which designers are featured in the apartment?",
+  "What is Maison Affluency's design philosophy?",
+];
+
 
 const hasWelcomeActions = (actions: ConciergeQuickAction[] | undefined) =>
   !!actions?.some((action) => isOnboardingActionPrompt(action.prompt));
@@ -6026,6 +6034,28 @@ export function AIConcierge({
                 </div>
               );
             })}
+            {surface === "public"
+              && !streaming
+              && !timeline.some((entry) => entry.kind === "msg" && entry.role === "user")
+              && (
+              <div className="flex flex-col items-center gap-3 py-2">
+                <span className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                  Begin with a question
+                </span>
+                <div className="flex flex-wrap justify-center gap-2 max-w-[26rem]">
+                  {PUBLIC_CONCIERGE_STARTERS.map((starter) => (
+                    <button
+                      key={starter}
+                      type="button"
+                      onClick={() => void send(starter)}
+                      className="rounded-full border border-border bg-background px-3.5 py-1.5 font-body text-xs text-foreground transition-colors hover:bg-accent/10 hover:border-accent/40"
+                    >
+                      {starter}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             {guestContactKey && !streaming && (
               <GuestContactCapture guestKey={guestContactKey} onDone={() => setGuestContactKey(null)} />
             )}
