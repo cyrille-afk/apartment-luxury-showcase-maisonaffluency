@@ -20,13 +20,14 @@ interface Props {
   fields: ComparisonField[];
   onRemove: (id: string) => void;
   renderPrice: (product: TradeProduct | null, net: boolean) => ReactNode;
+  renderNote?: (product: TradeProduct) => ReactNode;
   onVisibleProductsChange?: (visible: TradeProduct[] | null) => void;
 }
 
 const NO_OVERRIDES = new Map<string, FinishFacetOverride>();
 const FACET_LABELS: Record<ComparatorFacetKind, string> = { material: "Material", finish: "Finish", color: "Colour" };
 
-export function ProductComparisonTable({ products: allProducts, fields, onRemove, renderPrice, onVisibleProductsChange }: Props) {
+export function ProductComparisonTable({ products: allProducts, fields, onRemove, renderPrice, renderNote, onVisibleProductsChange }: Props) {
   const { data: swatches, isLoading: swatchesLoading } = useComparatorSwatches(allProducts.flatMap(product => product ? [product.id] : []));
   const { isAdmin } = useAuth();
   const { data: overrides = NO_OVERRIDES } = useQuery({
@@ -103,7 +104,7 @@ export function ProductComparisonTable({ products: allProducts, fields, onRemove
               const text = typeof value === "string" && value.trim() ? value : "—";
               return <td key={product?.id ?? `${field.key}-${index}`} data-spec-different={differences[index] ? "" : undefined} className={`break-words px-3 py-5 text-left align-top font-body text-sm leading-relaxed text-foreground ${price ? "tabular-nums" : ""} ${trade ? "font-semibold" : "font-normal"} ${differences[index] ? "bg-muted/50" : ""}`}>
                 {differences[index] && <span className="sr-only">Different across selected products: </span>}
-                {price ? renderPrice(product, trade) : field.key === "materials" && product ? <ComparatorMaterialSwatches materials={text === "—" ? "" : text} linked={swatches?.get(product.id)} loading={swatchesLoading} /> : field.key === "dimensions" && product ? <ComparatorDimensions dimensions={text === "—" ? "" : text} /> : <span className="whitespace-pre-line">{text}</span>}
+                {price ? renderPrice(product, trade) : field.key === "designer_notes" ? (product && renderNote ? renderNote(product) : "—") : field.key === "materials" && product ? <ComparatorMaterialSwatches materials={text === "—" ? "" : text} linked={swatches?.get(product.id)} loading={swatchesLoading} /> : field.key === "dimensions" && product ? <ComparatorDimensions dimensions={text === "—" ? "" : text} /> : <span className="whitespace-pre-line">{text}</span>}
               </td>;
             })}
           </tr>;

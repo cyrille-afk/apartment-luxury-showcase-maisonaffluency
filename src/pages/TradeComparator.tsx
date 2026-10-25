@@ -27,6 +27,7 @@ import { ProductComparisonTable } from "@/components/trade/ProductComparisonTabl
 import { ComparatorSelectionDrawer } from "@/components/trade/ComparatorSelectionDrawer";
 import { restoreSavedComparison, type ComparisonCoverEdits } from "@/lib/comparatorDraft";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 // Server-synced rates only (refreshed by the currency sync job); no bundled fallback.
@@ -174,7 +175,7 @@ export default function TradeComparator() {
     try {
     // Public-safe snapshot only: no prices are stored, so shared links can never leak trade figures.
     const publicUrls = await resolvePublicUrlsByPickIds(compareList.map((p) => p.id));
-    const items = compareList.map((p) => ({ id: p.id, product_name: p.product_name, brand_name: p.brand_name, category: p.category, dimensions: p.dimensions, materials: p.materials, lead_time: p.lead_time ?? null, image_url: p.image_url, public_url: publicUrls.get(p.id) ?? null }));
+    const items = compareList.map((p) => ({ id: p.id, product_name: p.product_name, brand_name: p.brand_name, category: p.category, dimensions: p.dimensions, materials: p.materials, lead_time: p.lead_time ?? null, designer_notes: draft.pieceNotes[p.id]?.trim() || null, image_url: p.image_url, public_url: publicUrls.get(p.id) ?? null }));
     const { error } = await supabase.from("comparator_shortlists").insert({ user_id: user.id, project_id: projectId, name: shortlistName.trim() || "Shortlist", items });
     if (error) { toast.error("Could not save shortlist"); return; }
     setShortlistName(""); toast.success("Shortlist saved"); refetchShortlists(); refetchAllComparisons();
@@ -262,7 +263,7 @@ export default function TradeComparator() {
       const prices = pricing ? comparatorPrices(pricing, discountPct) : { retail: null, trade: null };
       const cur = pricing?.currency || "EUR";
       const swatches = await Promise.all(comparatorSwatches(p.materials, linkedSwatches.get(p.id) ?? []).map(async s => ({ name: s.name, color: s.color, image: s.imageUrl ? await textureImage(s.imageUrl) : null })));
-      return { name: p.product_name, swatches, image: p.image_url ? await comparisonImage(p.image_url) : null, values: { brand_name: p.brand_name, category: p.category, dimensions: p.dimensions ?? "", materials: p.materials ?? "", lead_time: p.lead_time ?? "", rrp_price_cents: fmt(prices.retail, cur), trade_price_cents: fmt(prices.trade, cur) } };
+      return { name: p.product_name, swatches, image: p.image_url ? await comparisonImage(p.image_url) : null, values: { brand_name: p.brand_name, category: p.category, dimensions: p.dimensions ?? "", materials: p.materials ?? "", lead_time: p.lead_time ?? "", designer_notes: draft.pieceNotes[p.id]?.trim() || "", rrp_price_cents: fmt(prices.retail, cur), trade_price_cents: fmt(prices.trade, cur) } };
     }));
     downloadBlob(await buildComparisonPdf(pieces, FIELDS, showTradePrice ? "Product Comparison (Trade)" : "Product Comparison", coverDetails), "product-comparison.pdf");
     } catch { toast.error("The PDF could not be prepared with all pictures. Please try again."); } finally { setExporting(false); }
@@ -281,6 +282,7 @@ export default function TradeComparator() {
     { key: "dimensions", label: "Dimensions" },
     { key: "materials", label: "Materials" },
     { key: "lead_time", label: "Lead Time" },
+    { key: "designer_notes", label: "Designer Notes" },
     { key: "rrp_price_cents", label: "RRP" },
     ...(showTradePrice
       ? [{ key: "trade_price_cents", label: `Trade Price · ${tierLabel} −${discountLabel}` }]
@@ -339,10 +341,14 @@ export default function TradeComparator() {
                 <Label htmlFor={`cover-${key}`} className="text-xs font-medium text-muted-foreground">{label}</Label>
                 <Input id={`cover-${key}`} maxLength={500} value={coverForm[key] || ""} onChange={event => setCoverForm(form => ({ ...form, [key]: event.target.value }))} />
               </div>)}
+              <div className="space-y-1.5">
+                <Label htmlFor="cover-designerNotes" className="text-xs font-medium text-muted-foreground">Designer notes</Label>
+                <Textarea id="cover-designerNotes" maxLength={2000} rows={4} value={coverForm.designerNotes || ""} onChange={event => setCoverForm(form => ({ ...form, designerNotes: event.target.value }))} placeholder="Notes for the cover, e.g. intent for the scheme" />
+              </div>
               <div className="flex flex-wrap justify-between gap-2 border-t border-border pt-4">
                 <Button type="button" variant="ghost" disabled={coverLoading} onClick={async () => {
                   setCoverLoading(true);
-                  try { const fresh = await readCoverDetails(); setCoverForm(form => ({ ...fresh, layout: form.layout })); }
+                  try { const fresh = await readCoverDetails(); setCoverForm(form => ({ ...fresh, layout: form.layout, designerNotes: form.designerNotes })); }
                   catch { toast.error("The project's details could not be loaded. Please try again."); }
                   finally { setCoverLoading(false); }
                 }}>Use project details</Button>
@@ -454,7 +460,7 @@ export default function TradeComparator() {
           </ul>}
         </section>
 
-        <ProductComparisonTable products={comparisonSlots} fields={FIELDS} onRemove={removeFromCompare} onVisibleProductsChange={setVisiblePieces} renderPrice={(product, net) => <ComparisonPrice product={product} net={net} currency={displayCurrency} />} />
+        <ProductComparisonTable products={comparisonSlots} fields={FIELDS} onRemove={removeFromCompare} onVisibleProductsChange={setVisiblePieces} renderNote={product => <Textarea aria-label={`Designer notes for ${product.product_name}`} maxLength={1000} rows={3} placeholder="Add notes…" value={draft.pieceNotes[product.id] ?? ""} onChange={e => { const value = e.target.value; setDraft(d => ({ ...d, pieceNotes: { ...d.pieceNotes, [product.id]: value } })); }} className="min-h-20 resize-y border-border/70 bg-background/60 font-body text-sm" />} renderPrice={(product, net) => <ComparisonPrice product={product} net={net} currency={displayCurrency} />} />
         {compareList.length > 0 && <p className="mt-3 font-body text-[10px] tracking-wide text-muted-foreground">
           Prices converted to {displayCurrency} with Maison Affluency's synced FX rates{fxRates.data?.updatedAt ? ` · last updated ${new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short" }).format(fxRates.data.updatedAt)}` : ""}. Original supplier prices shown beneath.
         </p>}

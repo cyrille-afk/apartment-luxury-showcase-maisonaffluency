@@ -1,6 +1,6 @@
 import type { TradeProduct } from "./tradeProducts";
 
-export const COMPARISON_COVER_FIELDS = ["projectName", "comparisonName", "clientName", "location", "style", "layout"] as const;
+export const COMPARISON_COVER_FIELDS = ["projectName", "comparisonName", "clientName", "location", "style", "layout", "designerNotes"] as const;
 export type ComparisonCoverEdits = Partial<Record<typeof COMPARISON_COVER_FIELDS[number], string>>;
 
 export interface ComparatorDraft {
@@ -11,10 +11,12 @@ export interface ComparatorDraft {
   openDesigners: string[];
   shortlistName: string;
   coverEdits: Record<string, ComparisonCoverEdits>;
+  /** Designer notes per compared piece, keyed by product id. */
+  pieceNotes: Record<string, string>;
 }
 
 export function emptyComparatorDraft(): ComparatorDraft {
-  return { compareList: [], search: "", letter: "", source: "catalogue", openDesigners: [], shortlistName: "", coverEdits: {} };
+  return { compareList: [], search: "", letter: "", source: "catalogue", openDesigners: [], shortlistName: "", coverEdits: {}, pieceNotes: {} };
 }
 
 // Explicitly exclude prices and account data, including from restored snapshots.
@@ -29,7 +31,7 @@ export function sanitizeComparatorDraft(value: unknown): ComparatorDraft {
       const fields = value as Record<string, unknown>;
       const edits: ComparisonCoverEdits = {};
       for (const key of COMPARISON_COVER_FIELDS) {
-        if (typeof fields[key] === "string") edits[key] = fields[key].slice(0, 500);
+        if (typeof fields[key] === "string") edits[key] = fields[key].slice(0, key === "designerNotes" ? 2000 : 500);
       }
       draft.coverEdits[scope] = edits;
     }
@@ -49,7 +51,13 @@ export function sanitizeComparatorDraft(value: unknown): ComparatorDraft {
         if (typeof item[key] === "string") product[key] = item[key];
       }
       draft.compareList.push(product);
+      if (typeof item.designer_notes === "string" && item.designer_notes.trim()) draft.pieceNotes[item.id] = item.designer_notes.slice(0, 1000);
       if (draft.compareList.length === 4) break;
+    }
+  }
+  if (row.pieceNotes && typeof row.pieceNotes === "object") {
+    for (const [id, note] of Object.entries(row.pieceNotes)) {
+      if (typeof note === "string" && note.trim() && draft.compareList.some(p => p.id === id)) draft.pieceNotes[id] = note.slice(0, 1000);
     }
   }
   return draft;
