@@ -109,6 +109,19 @@ export default function TradeComparator() {
     await navigator.clipboard.writeText(`https://www.maisonaffluency.com/shortlist/${token}`);
     toast.success("Client link copied — shows pieces without prices");
   };
+  const requestedShortlist = params.get("shortlist");
+  const [openedShortlist, setOpenedShortlist] = useState<string | null>(null);
+  useEffect(() => {
+    if (!requestedShortlist || requestedShortlist === openedShortlist || !details) return;
+    const saved = shortlists.find(s => s.id === requestedShortlist);
+    if (!saved || !Array.isArray(saved.items)) return;
+    setCompareList(saved.items.flatMap(item => {
+      if (!item || typeof item !== "object" || Array.isArray(item) || typeof item.id !== "string") return [];
+      const product = catalogue.find(p => p.id === item.id) || favoriteProducts.find(p => p.id === item.id);
+      return product ? [product] : [];
+    }).slice(0, 4));
+    setOpenedShortlist(requestedShortlist);
+  }, [requestedShortlist, openedShortlist, shortlists, details, catalogue, favoriteProducts]);
   const deleteShortlist = async (id: string) => {
     await supabase.from("comparator_shortlists").delete().eq("id", id);
     refetchShortlists();

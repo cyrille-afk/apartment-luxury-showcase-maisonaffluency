@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { comparatorDesignerGroups, comparatorPrices } from "./comparatorCatalogue";
+import { comparatorDesignerGroups, comparatorPrices, comparatorDetails } from "./comparatorCatalogue";
 import type { TradeProduct } from "./tradeProducts";
 
 const piece = (id: string, brand_name: string, product_name: string): TradeProduct => ({ id, brand_name, product_name, category: "Seating", tags: [], image_url: null });
@@ -15,6 +15,21 @@ describe("comparator catalogue", () => {
   it("favourites are optional, not a catalogue prerequisite", () => {
     expect(comparatorDesignerGroups(products, "", "")).toHaveLength(2);
     expect(comparatorDesignerGroups(products, "", "", new Set(["b"])).map(g => g.designer)).toEqual(["Zanellato"]);
+  });
+  it("makes child pieces available under both their designer and recorded parent house", () => {
+    const products = [{ ...piece("frank", "Jean-Michel Frank", "Chair"), maker_name: "Ecart" }, { ...piece("fuga", "Cristián Mohaded", "Fuga"), maker_name: "CC-Tapis" }];
+    expect(comparatorDesignerGroups(products, "", "E")[0]?.pieces.map(p => p.id)).toEqual(["frank"]);
+    expect(comparatorDesignerGroups(products, "CC-Tapis", "").find(g => g.designer === "CC-Tapis")?.pieces.map(p => p.id)).toEqual(["fuga"]);
+  });
+  it("includes favorites stored with the trade twin identity", () => {
+    expect(comparatorDesignerGroups([{ ...piece("pick", "Ecart", "Chair"), trade_product_id: "trade" }], "", "", new Set(["trade"]))[0]?.pieces[0].id).toBe("pick");
+  });
+  it("keeps every recorded size and material while deduplicating repeated sizes", () => {
+    const details = comparatorDetails({ size_variants: [{ label: "W 52.5 x D 56 x H 77 cm", base: "Solid Oak Wood", top: "Neve Fabric" }, { label: "W 52.5 x D 56 x H 77 cm", base: "Solid Stained Ash Wood", top: "Schiuma Fabric" }, { label: "W 60 x D 60 x H 80 cm", base: "Solid Oak Wood", top: "Acqua Fabric" }] });
+    expect(details.dimensions.match(/52.5/g)).toHaveLength(1);
+    expect(details.dimensions).toContain("W 60");
+    expect(details.dimensions).toContain("in");
+    expect(details.materials).toBe("Solid Oak Wood\nNeve Fabric\nSolid Stained Ash Wood\nSchiuma Fabric\nAcqua Fabric");
   });
 });
 describe("comparator tier prices", () => {
