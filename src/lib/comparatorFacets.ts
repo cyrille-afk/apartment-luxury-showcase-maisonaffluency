@@ -43,7 +43,7 @@ export const MATERIAL_TAXONOMY: Record<string, string[]> = {
   Wood: ["Ash", "Beech", "Cherry", "Elm", "Maple", "Oak", "Teak", "Walnut"],
   Metal: ["Aluminium", "Brass", "Bronze", "Copper", "Iron", "Steel"],
   Fabric: ["Bouclé", "Cotton", "Linen", "Mohair", "Silk", "Velvet", "Wool"],
-  Leather: ["Shagreen", "Suede"],
+  Leather: ["Parchment", "Shagreen", "Suede"],
   Stone: ["Granite", "Marble", "Onyx", "Travertine"],
   Glass: ["Crystal"],
 };
@@ -67,19 +67,31 @@ const HEADER_ORDER = ["Wood", "Metal", "Textiles & Leather", "Stone", "Glass", "
 
 export type GroupedMaterialOptions = { header: string; items: string[] }[];
 
-/** Material dropdown structure: present facet values grouped under family headers; a family's generic value (e.g. "Fabric") leads its group. */
+/** Present families expose their full taxonomy, so recognised types never disappear with the current selection. */
 export function groupedMaterialOptions(materials: string[]): GroupedMaterialOptions {
   const groups = new Map<string, { generic: string[]; types: Set<string> }>();
-  for (const m of materials) {
-    const header = HEADER_BY_PARENT[materialParent(m)] ?? "Other";
+  const expanded = new Set(materials);
+  for (const parent of materialParentOptions(materials)) {
+    for (const child of MATERIAL_TAXONOMY[parent] ?? []) expanded.add(child);
+  }
+  for (const m of expanded) {
+    const parent = materialParent(m);
+    const header = HEADER_BY_PARENT[parent] ?? "Other";
     const g = groups.get(header) ?? { generic: [], types: new Set<string>() };
-    if (fold(m) === fold(materialParent(m))) { if (!g.generic.includes(m)) g.generic.push(m); } else g.types.add(m);
+    if (fold(m) === fold(parent)) { if (!g.generic.includes(m)) g.generic.push(m); } else g.types.add(m);
     groups.set(header, g);
   }
   return HEADER_ORDER.filter(h => groups.has(h)).map(header => {
-    const g = groups.get(header)!;
+    const g = groups.get(header);
+    if (!g) return { header, items: [] };
     return { header, items: [...g.generic, ...[...g.types].sort((a, b) => a.localeCompare(b))] };
   });
+}
+
+/** Family-wide options read "All wood" rather than repeating the WOOD header. */
+export function materialOptionLabel(value: string) {
+  const parent = materialParent(value);
+  return HEADER_BY_PARENT[parent] === value ? `All ${value.toLowerCase()}` : value;
 }
 
 /** Facet selection produced by picking one dropdown item: a specific type narrows under its family; a family's generic name matches the whole family. */
