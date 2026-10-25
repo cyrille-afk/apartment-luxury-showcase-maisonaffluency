@@ -17,6 +17,10 @@ import type { TradeProduct } from "@/lib/tradeProducts";
 import { comparatorDesignerGroups, comparatorPrices, comparatorDetails, fetchComparatorDetails, resolvePublicUrlsByPickIds } from "@/lib/comparatorCatalogue";
 import { useAuth } from "@/hooks/useAuth";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
+import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
+import { useStudio } from "@/hooks/useStudio";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { COMPARATOR_CURRENCIES, comparatorCurrency, convertComparatorCents, formatMoney, type ComparatorCurrency, type ComparatorRates } from "@/lib/comparatorCurrency";
 import { useSearchParams } from "@/lib/router-compat";
 import { useComparatorDraft } from "@/hooks/useComparatorDraft";
 import { ProductComparisonTable } from "@/components/trade/ProductComparisonTable";
@@ -25,9 +29,30 @@ import { restoreSavedComparison, type ComparisonCoverEdits } from "@/lib/compara
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
-function ComparisonPrice({ product, net }: { product: TradeProduct | null; net: boolean }) {
+// Server-synced rates only (refreshed by the currency sync job); no bundled fallback.
+function useComparatorRates() {
+  return useQuery({
+    queryKey: ["comparator-fx-rates"],
+    staleTime: 10 * 60 * 1000,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("currency_rates").select("base_currency,target_currency,rate,last_updated_at");
+      if (error) throw error;
+      const rates: ComparatorRates = {}; let updated = 0;
+      for (const row of data ?? []) {
+        const rate = Number(row.rate);
+        if (!(rate > 0)) continue;
+        rates[`${row.base_currency}_${row.target_currency}`] = rate;
+        updated = Math.max(updated, Date.parse(row.last_updated_at) || 0);
+      }
+      return { rates, updatedAt: updated || null };
+    },
+  });
+}
+
+function ComparisonPrice({ product, net, currency }: { product: TradeProduct | null; net: boolean; currency: ComparatorCurrency }) {
   const { discountPct } = useTradePriceMode();
   const { data, isLoading, isError } = useTradeProductPricing(product?.id);
+  const fx = useComparatorRates();
   if (!product) return <>—</>;
   if (isLoading) return <>Loading…</>;
   if (isError) return <>Pricing unavailable</>;
@@ -35,11 +60,21 @@ function ComparisonPrice({ product, net }: { product: TradeProduct | null; net: 
   const prices = comparatorPrices(data, discountPct);
   const cents = net ? prices.trade : prices.retail;
   if (cents === null) return <>Price upon Request</>;
-  return <>{data.price_prefix ? `${data.price_prefix} ` : ""}{new Intl.NumberFormat("en-IE", { style: "currency", currency: data.currency || "EUR", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(cents / 100)}</>;
+  const prefix = data.price_prefix ? `${data.price_prefix} ` : "";
+  const source = data.currency || "EUR";
+  const original = `${prefix}${formatMoney(cents, source)}`;
+  if (source === currency) return <span className="font-semibold">{original}</span>;
+  const converted = fx.data ? convertComparatorCents(cents, source, currency, fx.data.rates) : null;
+  if (converted === null) return <span className="flex flex-col gap-0.5"><span className="font-semibold">{original}</span><span className="text-xs font-normal text-muted-foreground">{fx.isLoading ? "Converting…" : `${currency} conversion unavailable`}</span></span>;
+  return <span className="flex flex-col gap-0.5"><span className="font-semibold">{prefix}{formatMoney(converted, currency)}</span><span className="text-xs font-normal text-muted-foreground">Original: {original}</span></span>;
 }
 
 export default function TradeComparator() {
   const { user } = useAuth();
+  const { currentStudio } = useStudio();
+  const [displayPref, setDisplayPref] = useTradeDisplayCurrency();
+  const displayCurrency = comparatorCurrency(displayPref);
+  const fxRates = useComparatorRates();
   const { liveProducts, isLoading: catalogueLoading } = useTradeProducts();
   const [params, setParams] = useSearchParams();
   const requestedShortlist = params.get("shortlist");
@@ -399,6 +434,14 @@ export default function TradeComparator() {
             <ProjectPicker value={projectId} onChange={value => { const next = new URLSearchParams(params); if (value) next.set("project", value); else next.delete("project"); setParams(next); }} />
             <Button size="sm" variant="outline" onClick={saveShortlist} disabled={compareList.length === 0 || !projectId || saving}><Bookmark className="mr-2 h-3.5 w-3.5" />{saving ? "Saving…" : "Save shortlist to project"}</Button>
             <Button size="sm" variant="outline" onClick={() => void editCover()} disabled={!draftReady || exporting || coverLoading}><FilePenLine className="mr-2 h-3.5 w-3.5" />{coverLoading ? "Loading details…" : "Edit PDF cover"}</Button>
+            <div className="flex items-center gap-2 sm:ml-auto">
+              {currentStudio && <span className="hidden font-body text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground lg:inline">{currentStudio.display_name || currentStudio.name}</span>}
+              <Label htmlFor="comparator-currency" className="font-body text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground/70">Display Currency</Label>
+              <Select value={displayCurrency} onValueChange={value => setDisplayPref(comparatorCurrency(value))}>
+                <SelectTrigger id="comparator-currency" className="h-9 w-24 font-body text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>{COMPARATOR_CURRENCIES.map(c => <SelectItem key={c} value={c} className="font-body text-xs">{c}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
             <Button size="sm" variant="outline" onClick={() => void exportPdf()} disabled={compareList.length === 0 || exporting || (visiblePieces !== null && visiblePieces.length === 0)}><FileDown className="mr-2 h-3.5 w-3.5" />{exporting ? "Preparing PDF…" : visiblePieces && visiblePieces.length !== compareList.length ? `Export visible (${visiblePieces.length})` : "Export comparison PDF"}</Button>
           </div>
           {shortlists.length > 0 && <ul className="flex flex-wrap gap-2" aria-label="Saved shortlists">
@@ -411,7 +454,10 @@ export default function TradeComparator() {
           </ul>}
         </section>
 
-        <ProductComparisonTable products={comparisonSlots} fields={FIELDS} onRemove={removeFromCompare} onVisibleProductsChange={setVisiblePieces} renderPrice={(product, net) => <ComparisonPrice product={product} net={net} />} />
+        <ProductComparisonTable products={comparisonSlots} fields={FIELDS} onRemove={removeFromCompare} onVisibleProductsChange={setVisiblePieces} renderPrice={(product, net) => <ComparisonPrice product={product} net={net} currency={displayCurrency} />} />
+        {compareList.length > 0 && <p className="mt-3 font-body text-[10px] tracking-wide text-muted-foreground">
+          Prices converted to {displayCurrency} with Maison Affluency's synced FX rates{fxRates.data?.updatedAt ? ` · last updated ${new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short" }).format(fxRates.data.updatedAt)}` : ""}. Original supplier prices shown beneath.
+        </p>}
       </div>
     </>
   );
