@@ -1,3 +1,6 @@
+## Specification differences
+- [ ] Subtly highlight differing populated specifications, ignore empty slots and equivalent material-list formatting; verify live comparison and regression tests.
+
 ## Reopen saved comparisons
 - [x] Added searchable Saved comparisons chooser across owner projects; Restore reopens the saved project/name/ordered selections and can explicitly reset local edits. Signed-in temporary Singapore two-piece comparison saved, restored after leaving, re-restored after removal and deleted; no browser errors, 17 tests pass, preview clean.
 

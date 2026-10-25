@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { TradeProduct } from "@/lib/tradeProducts";
+import { differingSpecificationCells } from "@/lib/comparatorDifferences";
 
 interface ComparisonField { key: string; label: string }
 interface Props {
@@ -49,12 +50,14 @@ export function ProductComparisonTable({ products, fields, onRemove, renderPrice
         {fields.map(field => {
           const trade = field.key === "trade_price_cents";
           const price = trade || field.key === "rrp_price_cents";
+          const differences = differingSpecificationCells(products, field.key);
           return <tr key={field.key} data-trade-sensitive={trade ? "" : undefined} className={`border-b border-border/60 ${trade ? "bg-muted/70" : ""}`}>
             <th scope="row" className="py-5 pl-3 pr-4 text-left align-top font-body text-[10px] font-bold uppercase leading-relaxed text-muted-foreground">{field.label}</th>
             {products.map((product, index) => {
               const value = product ? product[field.key as keyof TradeProduct] : null;
               const text = typeof value === "string" && value.trim() ? value : "—";
-              return <td key={product?.id ?? `${field.key}-${index}`} className={`break-words px-3 py-5 text-left align-top font-body text-sm leading-relaxed text-foreground ${price ? "tabular-nums" : ""} ${trade ? "font-semibold" : "font-normal"}`}>
+              return <td key={product?.id ?? `${field.key}-${index}`} data-spec-different={differences[index] ? "" : undefined} className={`break-words px-3 py-5 text-left align-top font-body text-sm leading-relaxed text-foreground ${price ? "tabular-nums" : ""} ${trade ? "font-semibold" : "font-normal"} ${differences[index] ? "bg-muted/50" : ""}`}>
+                {differences[index] && <span className="sr-only">Different across selected products: </span>}
                 {price ? renderPrice(product, trade) : field.key === "materials" && text !== "—" ? <MaterialItems value={text} /> : <span className="whitespace-pre-line">{text}</span>}
               </td>;
             })}

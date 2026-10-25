@@ -1,4 +1,5 @@
 # src/lib rules
+- Comparator difference classification normalizes whitespace/case and material-list order, ignores empty slots and excludes pricing; only populated differing specifications are highlighted — avoids false differences or new pricing calculations.
 - Comparator details read recorded variant dimensions/materials and explicit maker credits; parent and child groupings share pieces without changing identity. Comparison PDFs load pictures before download and retain full text — avoids blank exports or invented specifications.
 
 - Per-install manifests reuse public/manifest.json with a stable id/scope and a validated one-time QR launch parameter; responses are no-store, root head owns the single manifest link, and standalone startup scrubs/stages the code before children mount — enables fresh-container handoff without sharing iOS storage or caching credentials in a worker.
