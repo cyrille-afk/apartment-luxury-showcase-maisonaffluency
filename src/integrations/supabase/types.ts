@@ -6497,6 +6497,33 @@ export type Database = {
         }
         Relationships: []
       }
+      price_list_content_checks: {
+        Row: {
+          checked_at: string
+          evidence: string
+          kind: string
+          revision: string
+          target_key: string
+          verdict: string
+        }
+        Insert: {
+          checked_at?: string
+          evidence: string
+          kind: string
+          revision: string
+          target_key: string
+          verdict: string
+        }
+        Update: {
+          checked_at?: string
+          evidence?: string
+          kind?: string
+          revision?: string
+          target_key?: string
+          verdict?: string
+        }
+        Relationships: []
+      }
       private_client_challenges: {
         Row: {
           attempts: number
@@ -12921,6 +12948,7 @@ export type Database = {
         }[]
       }
       admin_price_list_audit: { Args: never; Returns: Json }
+      admin_price_list_content_inventory: { Args: never; Returns: Json }
       admin_queue_overview: { Args: never; Returns: Json }
       admin_requeue_webhook_event: { Args: { p_id: string }; Returns: Json }
       admin_reset_onboarding_for_user: {

@@ -1688,6 +1688,13 @@
       "when": 1792899795004,
       "tag": "0240_price_list_audit",
       "breakpoints": true
+    },
+    {
+      "idx": 241,
+      "version": "7",
+      "when": 1792900476396,
+      "tag": "0241_price_list_content_audit",
+      "breakpoints": true
     }
   ]
 }
