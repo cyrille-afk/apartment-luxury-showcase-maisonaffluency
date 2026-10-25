@@ -6348,6 +6348,7 @@ serve(async (req) => {
       }
       const types = normalizeRequestedTypologies(scheduleTypes);
       const selected = pickRowsForRequestedTypologyCoverage(picks, types, 12);
+      console.log("[concierge layout-continuation]", JSON.stringify({ requestId, types, scopedDesigners, candidates: candidates.length, hydrated: picks.length, selected: selected.length, designers: Array.from(new Set(picks.map((p: any) => p.designer_name))).slice(0, 20) }));
       if (!rowsCoverRequestedTypologies(selected, types)) {
         return sseTextResponse("The selected reference brands cannot currently cover every requested furniture type. Your layout is retained; widen References to include more ateliers, then continue the schedule. I have not substituted unrelated pieces.");
       }
