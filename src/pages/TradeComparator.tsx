@@ -23,17 +23,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 
 function ComparisonPrice({ product, net }: { product: TradeProduct | null; net: boolean }) {
   const { discountPct } = useTradePriceMode();
-  const [savedOpen, setSavedOpen] = useState(false);
-  const [savedSearch, setSavedSearch] = useState("");
-  const [pendingRestore, setPendingRestore] = useState<string | null>(null);
-  const { data: allComparisons = [], isPending: savedLoading, isError: savedError, refetch: refetchAllComparisons } = useQuery({
-    queryKey: ["comparator-saved-library", user?.id], enabled: !!user,
-    queryFn: async () => {
-      const { data, error } = await supabase.from("comparator_shortlists").select("id, name, items, project_id, created_at, projects(name)").eq("user_id", user?.id || "").is("room_slug", null).order("created_at", { ascending: false });
-      if (error) throw error;
-      return data || [];
-    },
-  });
   const { data, isLoading, isError } = useTradeProductPricing(product?.id);
   if (!product) return <>—</>;
   if (isLoading) return <>Loading…</>;
@@ -97,6 +86,17 @@ export default function TradeComparator() {
 
   const queryClient = useQueryClient();
   const { discountPct } = useTradePriceMode();
+  const [savedOpen, setSavedOpen] = useState(false);
+  const [savedSearch, setSavedSearch] = useState("");
+  const [pendingRestore, setPendingRestore] = useState<string | null>(null);
+  const { data: allComparisons = [], isPending: savedLoading, isError: savedError, refetch: refetchAllComparisons } = useQuery({
+    queryKey: ["comparator-saved-library", user?.id], enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("comparator_shortlists").select("id, name, items, project_id, created_at, projects(name)").eq("user_id", user?.id || "").is("room_slug", null).order("created_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+  });
   const { data: shortlists = [], refetch: refetchShortlists } = useQuery({
     queryKey: ["comparator-shortlists", user?.id, projectId],
     enabled: !!user,
