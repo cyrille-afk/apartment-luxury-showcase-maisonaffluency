@@ -13,10 +13,11 @@ interface Props {
   projectName?: string
   boardTitle?: string
   role?: 'client' | 'contractor'
+  viewOnly?: boolean
   link?: string
 }
 
-const Email = ({ studioName = 'Your designer', studioLogoUrl = null, hideMaisonBranding = true, projectName = 'Project portfolio', boardTitle = 'Curated selection', role = 'client', link = '#' }: Props) => (
+const Email = ({ studioName = 'Your designer', studioLogoUrl = null, hideMaisonBranding = true, projectName = 'Project portfolio', boardTitle = 'Curated selection', role = 'client', viewOnly = false, link = '#' }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>{studioName} has shared {boardTitle} with you</Preview>
@@ -33,7 +34,7 @@ const Email = ({ studioName = 'Your designer', studioLogoUrl = null, hideMaisonB
         <Heading style={heading}>{projectName}</Heading>
         <Text style={selection}>{boardTitle}</Text>
         <Text style={paragraph}>
-          {studioName} has invited you to {role === 'contractor'
+          {studioName} has invited you to {viewOnly ? 'view this project’s tearsheet board. Your access is view-only; selections, comments and approvals cannot be changed.' : role === 'contractor'
             ? 'collaborate on this project board as an external contractor.'
             : 'review this curated selection. You can approve pieces and leave comments directly on the board.'}
         </Text>

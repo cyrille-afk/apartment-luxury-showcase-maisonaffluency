@@ -24,6 +24,7 @@ import { useExportCurrency } from "@/lib/displayMoney";
 import { useProjects } from "@/hooks/useProjects";
 import ClientPicker, { type PickedClient } from "@/components/trade/ClientPicker";
 import { assertTearsheetBoardProject, requireTearsheetProject } from "@/lib/tearsheetProjectScope";
+import TearsheetBoardSharing from "@/components/trade/TearsheetBoardSharing";
 
 interface TearsheetProduct {
   id: string;
@@ -771,6 +772,7 @@ export default function TradeTearsheets() {
           <h2 className="font-display text-lg">{selectedProject ? selectedProject.name : "Choose a project"}</h2>
           <div className="flex flex-wrap items-center gap-3">
             <ProjectPicker value={filterProjectId} onChange={setFilterProjectId} required />
+            {selectedProject && <TearsheetBoardSharing key={selectedProject.id} projectId={selectedProject.id} projectName={selectedProject.name} />}
             {selectedProject && <Button variant="ghost" size="sm" onClick={() => navigate(`/trade/projects/${selectedProject.id}`)}>Open project →</Button>}
           </div>
         </section>

@@ -24,12 +24,13 @@ function maskLink(url: string) {
 }
 
 
-export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, onInvited, readOnly = false }: {
+export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, onInvited, readOnly = false, projectId }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   boardId: string;
   onInvited: () => void;
   readOnly?: boolean;
+  projectId?: string;
 }) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"client" | "contractor">("client");
@@ -44,7 +45,10 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
     if (!parsed.success) { setError(parsed.error.issues[0].message); return; }
     setSending(true);
     setError(null);
-    const { data, error: err } = await supabase.rpc("create_board_invite" as any, { _board_id: boardId, _email: parsed.data, _role: readOnly ? "client" : role });
+    if (sending) return;
+    const { data, error: err } = projectId
+      ? await supabase.rpc("create_project_board_view_invite", { _project_id: projectId, _board_id: boardId, _email: parsed.data })
+      : await supabase.rpc("create_board_invite" as any, { _board_id: boardId, _email: parsed.data, _role: readOnly ? "client" : role });
     if (err || !data) {
       setSending(false);
       setError("Could not create the invite.");
@@ -63,19 +67,19 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) reset(); }}>
+    <Dialog open={open} onOpenChange={(v) => { if (sending) return; onOpenChange(v); if (!v) reset(); }}>
       <DialogContent className="rounded-none sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-display text-xl font-normal">{readOnly ? "Invite Client" : "Invite Collaborator"}</DialogTitle>
-          <DialogDescription className="font-body text-xs">They receive a private link to this board, valid for 30 days.</DialogDescription>
+          <DialogTitle className="font-display text-xl font-normal">{projectId ? "Invite architect or designer" : readOnly ? "Invite Client" : "Invite Collaborator"}</DialogTitle>
+          <DialogDescription className="font-body text-xs">{projectId ? "View-only access to this project board, verified by email. No editing, comments or approvals. Invitation expires after 30 days." : "They receive a private link to this board, valid for 30 days."}</DialogDescription>
         </DialogHeader>
         {!link ? (
           <div className="space-y-5 pt-2">
             <div className="space-y-1.5">
               <Label htmlFor="invite-email" className="font-body text-[10px] uppercase tracking-[0.18em]">Email</Label>
-              <Input id="invite-email" type="email" value={email} maxLength={255} onChange={(e) => setEmail(e.target.value)} className="rounded-none" placeholder="name@example.com" />
+              <Input id="invite-email" type="email" value={email} maxLength={255} disabled={sending} onChange={(e) => setEmail(e.target.value)} className="rounded-none" placeholder="name@example.com" />
             </div>
-            {!readOnly && <div className="space-y-1.5">
+            {!readOnly && !projectId && <div className="space-y-1.5">
               <Label htmlFor="invite-role" className="font-body text-[10px] uppercase tracking-[0.18em]">Role</Label>
               <select id="invite-role" value={role} onChange={(e) => setRole(e.target.value as any)} className="h-10 w-full rounded-none border border-input bg-background px-3 font-body text-sm">
                 <option value="client">Client (Read-Only + Comment/Approve)</option>
@@ -93,7 +97,7 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
                 <LinkIcon className="h-3.5 w-3.5" /> Copy Link
               </Button>
             </div>
-            <Button className="w-full rounded-none" onClick={reset}>Invite Another</Button>
+            <Button className="w-full rounded-none" disabled={sending} onClick={reset}>{sending ? "Sending invitation…" : "Invite Another"}</Button>
           </div>
         )}
       </DialogContent>

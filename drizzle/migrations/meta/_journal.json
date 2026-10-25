@@ -1695,6 +1695,20 @@
       "when": 1792900476396,
       "tag": "0241_price_list_content_audit",
       "breakpoints": true
+    },
+    {
+      "idx": 242,
+      "version": "7",
+      "when": 1792907832628,
+      "tag": "0242_project_board_view_invitations",
+      "breakpoints": true
+    },
+    {
+      "idx": 243,
+      "version": "7",
+      "when": 1792907995814,
+      "tag": "0243_view_invitation_room_approval_guard",
+      "breakpoints": true
     }
   ]
 }

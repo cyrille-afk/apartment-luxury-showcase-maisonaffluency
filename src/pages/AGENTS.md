@@ -1,5 +1,6 @@
 # Page rules
 - Tearsheets require an accessible selected project, scope board reads and recheck board ownership before item writes; board creation persists project_id and retains successful board identity on retries — prevents standalone and cross-project saves.
+- Tearsheet sharing reuses email-verified board invitations with a database-enforced view_only flag and project-scoped creation; revocation invalidates guest sessions through their parent invitation — collaborators cannot edit or approve selections.
 - Room layout canvases render on demand while idle and continuously during playback or dragging; pending generation/curation stays visible in the room area and locks competing actions to prevent duplicate work.
 
 - Sales Funnel delete controls pass the explicit source and UUID to the admin-authorized deletion RPC only after confirmation; real payment-linked records are protected and failed deletes remain open for retry — prevents deleting the wrong source or financial history.
