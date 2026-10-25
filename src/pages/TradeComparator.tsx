@@ -2,6 +2,8 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { buildComparisonPdf, comparisonImage } from "@/lib/comparisonPdf";
+import { comparatorSwatchesQueryOptions } from "@/hooks/useComparatorSwatches";
+import { comparatorSwatches } from "@/lib/comparatorSwatches";
 import { downloadBlob } from "@/lib/furnishingSchedulePdf";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useRef, useState } from "react";
@@ -190,11 +192,19 @@ export default function TradeComparator() {
       }
     }
     const fmt = (c: number | null, cur = "EUR") => c == null ? "Price upon Request" : new Intl.NumberFormat("en-IE", { style: "currency", currency: cur, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(c / 100);
+    const linkedSwatches = await queryClient.fetchQuery(comparatorSwatchesQueryOptions(exportList.map(p => p.id)));
+    const imageCache = new Map<string, ReturnType<typeof comparisonImage>>();
+    const textureImage = (url: string) => {
+      let pending = imageCache.get(url);
+      if (!pending) { pending = comparisonImage(url, true); imageCache.set(url, pending); }
+      return pending;
+    };
     const pieces = await Promise.all(exportList.map(async (p) => {
       const pricing = queryClient.getQueryData<any>(["trade-product-pricing", p.id]);
       const prices = pricing ? comparatorPrices(pricing, discountPct) : { retail: null, trade: null };
       const cur = pricing?.currency || "EUR";
-      return { name: p.product_name, image: p.image_url ? await comparisonImage(p.image_url) : null, values: { brand_name: p.brand_name, category: p.category, dimensions: p.dimensions ?? "", materials: p.materials ?? "", lead_time: p.lead_time ?? "", rrp_price_cents: fmt(prices.retail, cur), trade_price_cents: fmt(prices.trade, cur) } };
+      const swatches = await Promise.all(comparatorSwatches(p.materials, linkedSwatches.get(p.id) ?? []).map(async s => ({ name: s.name, color: s.color, image: s.imageUrl ? await textureImage(s.imageUrl) : null })));
+      return { name: p.product_name, swatches, image: p.image_url ? await comparisonImage(p.image_url) : null, values: { brand_name: p.brand_name, category: p.category, dimensions: p.dimensions ?? "", materials: p.materials ?? "", lead_time: p.lead_time ?? "", rrp_price_cents: fmt(prices.retail, cur), trade_price_cents: fmt(prices.trade, cur) } };
     }));
     const coverLocation = coverProject?.location?.trim() || [coverProject?.location_neighborhood, coverProject?.location_city].filter(Boolean).join(", ");
     downloadBlob(await buildComparisonPdf(pieces, FIELDS, showTradePrice ? "Product Comparison (Trade)" : "Product Comparison", {
