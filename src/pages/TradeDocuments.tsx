@@ -8,6 +8,7 @@ import { FileDown, Search, FolderOpen, FileText, BookOpen, FileSpreadsheet, X } 
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { brandInitial, ALPHABET } from "@/lib/resourceLetters";
+import { isPrivateFileUrl, signPriceListUrl } from "@/lib/priceListStorage";
 import SectionHero from "@/components/trade/SectionHero";
 import BrandCarousel from "@/components/trade/BrandCarousel";
 import { DocumentCardSkeleton } from "@/components/trade/skeletons";
@@ -22,6 +23,7 @@ interface TradeDocument {
   brand_name: string;
   document_type: string;
   file_url: string;
+  storage_path?: string | null;
   file_size_bytes: number | null;
   cover_image_url: string | null;
   created_at: string;
@@ -46,6 +48,24 @@ const TradeDocuments = () => {
   const [search, setSearch] = useState("");
   const [letter, setLetter] = useState<string | null>(null);
   const [viewOnly, setViewOnly] = useState<TradeDocument | null>(null);
+  const [viewOnlySrc, setViewOnlySrc] = useState<string | null>(null);
+  const [viewOnlyError, setViewOnlyError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setViewOnlySrc(null); setViewOnlyError(null);
+    if (!viewOnly) return;
+    let objectUrl: string | null = null; let cancelled = false;
+    (async () => {
+      try {
+        if (!viewOnly.storage_path) throw new Error("This price list is restricted to administrators.");
+        const signed = await signPriceListUrl(viewOnly.storage_path);
+        const blob = await (await fetch(signed)).blob();
+        objectUrl = URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
+        if (!cancelled) setViewOnlySrc(objectUrl);
+      } catch (e: any) { if (!cancelled) setViewOnlyError(e?.message || "Could not open this price list."); }
+    })();
+    return () => { cancelled = true; if (objectUrl) URL.revokeObjectURL(objectUrl); };
+  }, [viewOnly]);
   const [searchParams, setSearchParams] = useSearchParams();
   const initialBrand = searchParams.get("brand") || "all";
   const [selectedBrand, setSelectedBrand] = useState(initialBrand);
@@ -105,11 +125,11 @@ const TradeDocuments = () => {
     for (const doc of documents) {
       const existing = map.get(doc.brand_name);
       if (!existing) {
-        const isPdf = doc.file_url?.toLowerCase().endsWith(".pdf");
+        const isPdf = !isPrivateFileUrl(doc.file_url) && doc.file_url?.toLowerCase().endsWith(".pdf");
         map.set(doc.brand_name, { pdfUrl: isPdf ? doc.file_url : null, docCount: 1 });
       } else {
         existing.docCount++;
-        if (!existing.pdfUrl && doc.file_url?.toLowerCase().endsWith(".pdf")) {
+        if (!existing.pdfUrl && !isPrivateFileUrl(doc.file_url) && doc.file_url?.toLowerCase().endsWith(".pdf")) {
           existing.pdfUrl = doc.file_url;
         }
       }
@@ -314,7 +334,7 @@ const TradeDocuments = () => {
               </h2>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-4 md:grid-cols-[repeat(auto-fill,minmax(320px,1fr))]">
                 {docs.map((doc) => {
-                  const isPdf = doc.file_url.toLowerCase().endsWith(".pdf");
+                  const isPdf = !isPrivateFileUrl(doc.file_url) && doc.file_url.toLowerCase().endsWith(".pdf");
                   return (
                     <button
                       key={doc.id}
@@ -391,8 +411,13 @@ const TradeDocuments = () => {
             <DialogTitle className="font-display">{viewOnly?.brand_name} — {viewOnly?.title}</DialogTitle>
             <DialogDescription>Restricted price list · view only, admins only. Downloading and printing are disabled here.</DialogDescription>
           </DialogHeader>
-          {viewOnly && (
-            <iframe title={viewOnly.title} src={`${viewOnly.file_url}#toolbar=0&navpanes=0`} className="h-[75vh] w-full rounded border border-border" />
+          {viewOnly && viewOnlySrc && (
+            <iframe title={viewOnly.title} src={`${viewOnlySrc}#toolbar=0&navpanes=0`} className="h-[75vh] w-full rounded border border-border" />
+          )}
+          {viewOnly && !viewOnlySrc && (
+            <div className="flex h-[75vh] w-full items-center justify-center rounded border border-border">
+              {viewOnlyError ? <p className="font-body text-sm text-muted-foreground">{viewOnlyError}</p> : <DotCircleLoader size="sm" />}
+            </div>
           )}
         </DialogContent>
       </Dialog>

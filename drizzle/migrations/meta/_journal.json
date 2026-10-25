@@ -1674,6 +1674,13 @@
       "when": 1792898598625,
       "tag": "0238_trade_documents_pricelist_admin_only",
       "breakpoints": true
+    },
+    {
+      "idx": 239,
+      "version": "7",
+      "when": 1792898865350,
+      "tag": "0239_private_price_lists",
+      "breakpoints": true
     }
   ]
 }
