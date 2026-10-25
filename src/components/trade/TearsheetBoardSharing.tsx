@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Ban, Loader2, UserPlus, Share2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserBoards } from "@/hooks/useUserBoards";
@@ -6,10 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import InviteCollaboratorDialog from "./procurement/InviteCollaboratorDialog";
+import { boardInvitationPermission, boardInvitationStatus, type BoardInvitation } from "./boardInvitationStatus";
 
-type Invite = { id: string; email: string; status: string; expires_at: string; last_seen_at: string | null; view_only: boolean };
+type Invite = BoardInvitation;
 
 export default function TearsheetBoardSharing({ projectId, projectName }: { projectId: string; projectName: string }) {
+  const queryClient = useQueryClient();
+  const refreshAccess = () => { setRefresh(v => v + 1); void queryClient.invalidateQueries({ queryKey: ["tearsheet-board-access", projectId] }); };
   const [open, setOpen] = useState(false);
   const [boardId, setBoardId] = useState("");
   const [inviteOpen, setInviteOpen] = useState(false);
@@ -27,7 +31,7 @@ export default function TearsheetBoardSharing({ projectId, projectName }: { proj
     if (!open || !selectedBoard) { setInvites([]); return; }
     let active = true;
     setLoading(true); setError(""); setInvites([]);
-    supabase.from("board_invites").select("id, email, status, expires_at, last_seen_at, view_only")
+    supabase.from("board_invites").select("id, email, status, expires_at, last_seen_at, view_only, role")
       .eq("board_id", selectedBoard.id).order("created_at", { ascending: false })
       .then(({ data, error: failure }) => {
         if (!active) return;
@@ -45,7 +49,7 @@ export default function TearsheetBoardSharing({ projectId, projectName }: { proj
       .eq("id", id).eq("board_id", selectedBoard.id).select("id").maybeSingle();
     setBusy(null);
     if (failure || !data) { setError("Access could not be revoked. Try again."); return; }
-    setConfirmId(null); setRefresh(v => v + 1);
+    setConfirmId(null); refreshAccess();
   };
 
   return <>
@@ -67,10 +71,11 @@ export default function TearsheetBoardSharing({ projectId, projectName }: { proj
               <h3 className="mb-3 font-display text-base">Invitations</h3>
               {loading ? <p role="status" className="text-sm text-muted-foreground">Loading invitations…</p> : invites.length === 0 && !error ? <p className="text-sm text-muted-foreground">No invitations yet.</p> :
                 <ul className="divide-y divide-border">{invites.map(inv => {
-                  const inactive = inv.status === "revoked" || Date.parse(inv.expires_at) <= Date.now();
-                  const status = inv.status === "revoked" ? "Revoked" : inactive ? "Expired" : inv.last_seen_at ? "Viewed" : "Invited";
+                  const access = boardInvitationStatus(inv, Date.now());
+                  const inactive = !access.canView;
+                  const status = access.label;
                   return <li key={inv.id} className="space-y-2 py-3">
-                    <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="break-all text-sm">{inv.email}</p><p className="mt-1 text-xs text-muted-foreground">{inv.view_only ? "View only" : inv.status === "accepted" ? "Collaborator" : "Existing invitation"} · {status} · Expires {new Date(inv.expires_at).toLocaleDateString("en-GB")}</p></div>
+                    <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="break-all text-sm">{inv.email}</p><p className="mt-1 text-xs text-muted-foreground">{boardInvitationPermission(inv)} · {status} · Expires {new Date(inv.expires_at).toLocaleDateString("en-GB")}</p></div>
                       {!inactive && <Button size="icon" variant="ghost" aria-label={`Revoke access for ${inv.email}`} title="Revoke access" disabled={!!busy} onClick={() => setConfirmId(inv.id)}><Ban className="h-4 w-4" /></Button>}
                     </div>
                     {confirmId === inv.id && <div className="flex flex-wrap items-center gap-2"><p className="text-xs text-muted-foreground">Remove this person’s access?</p><Button size="sm" variant="destructive" disabled={!!busy} onClick={() => void revoke(inv.id)}>{busy === inv.id ? "Revoking…" : "Revoke access"}</Button><Button size="sm" variant="ghost" disabled={!!busy} onClick={() => setConfirmId(null)}>Cancel</Button></div>}
@@ -81,6 +86,6 @@ export default function TearsheetBoardSharing({ projectId, projectName }: { proj
           </div>}
       </DialogContent>
     </Dialog>
-    {selectedBoard && <InviteCollaboratorDialog key={selectedBoard.id} open={inviteOpen} onOpenChange={value => { setInviteOpen(value); if (!value) { setRefresh(v => v + 1); setOpen(true); } }} boardId={selectedBoard.id} projectId={projectId} readOnly onInvited={() => setRefresh(v => v + 1)} />}
+    {selectedBoard && <InviteCollaboratorDialog key={selectedBoard.id} open={inviteOpen} onOpenChange={value => { setInviteOpen(value); if (!value) { refreshAccess(); setOpen(true); } }} boardId={selectedBoard.id} projectId={projectId} readOnly onInvited={refreshAccess} />}
   </>;
 }

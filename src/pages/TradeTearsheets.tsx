@@ -26,6 +26,7 @@ import { useProjects } from "@/hooks/useProjects";
 import ClientPicker, { type PickedClient } from "@/components/trade/ClientPicker";
 import { assertTearsheetBoardProject, requireTearsheetProject } from "@/lib/tearsheetProjectScope";
 import TearsheetBoardSharing from "@/components/trade/TearsheetBoardSharing";
+import TearsheetBoardInvitationStatus from "@/components/trade/TearsheetBoardInvitationStatus";
 
 interface TearsheetProduct {
   id: string;
@@ -602,6 +603,7 @@ export default function TradeTearsheets() {
   const [newBoardClient, setNewBoardClient] = useState<PickedClient | null>(null);
   const [createdBoardId, setCreatedBoardId] = useState<string | null>(null);
   const [creatingBoard, setCreatingBoard] = useState(false);
+  const [boardAccessRefresh, setBoardAccessRefresh] = useState(0);
   const { boards: userBoards, loading: boardsLoading, error: boardsError } = useUserBoards(boardPickerOpen && !!selectedProject, filterProjectId);
   const projectBoards = userBoards.filter((board) => board.project_id === selectedProject?.id);
   useEffect(() => {
@@ -716,6 +718,7 @@ export default function TradeTearsheets() {
       }
       const success = await pushToBoard(boardId);
       if (success) {
+        setBoardAccessRefresh(value => value + 1);
         setNewBoardTitle("");
         setNewBoardClient(null);
         setCreatedBoardId(null);
@@ -782,6 +785,8 @@ export default function TradeTearsheets() {
         {!selectedProject ? (
           <div className="py-12 font-body text-sm text-muted-foreground" role="status">{projectsLoading ? "Loading projects…" : filterProjectId ? "This project is unavailable. Choose another project." : "No project selected."}</div>
         ) : <>
+
+        <TearsheetBoardInvitationStatus key={`access-${selectedProject.id}`} projectId={selectedProject.id} refreshKey={boardAccessRefresh} />
 
         {conciergeSession && (conciergeSession.product || conciergeSession.briefText || conciergeSession.finishes.fabric || conciergeSession.finishes.wood) && (
           <div className="rounded-lg border border-accent/40 bg-accent/5 p-3 flex items-start justify-between gap-3">
