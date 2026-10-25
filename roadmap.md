@@ -1,3 +1,6 @@
+## Specification differences
+- [x] Added subtle neutral tints on differing populated specification cells; empty slots, matching categories and equivalent material lists stay plain, pricing unchanged. Four live products verified (16 differing cells, zero matching-category/price differences), no browser errors, 21 tests pass and preview clean.
+
 ## Reopen saved comparisons
 - [x] Added searchable Saved comparisons chooser across owner projects; Restore reopens the saved project/name/ordered selections and can explicitly reset local edits. Signed-in temporary Singapore two-piece comparison saved, restored after leaving, re-restored after removal and deleted; no browser errors, 17 tests pass, preview clean.
 
