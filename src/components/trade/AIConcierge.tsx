@@ -544,6 +544,14 @@ import { extractProjectCityFromAssistant } from "@/lib/projectCityDetect";
 import { validateFelixLogic } from "@/lib/validateFelixLogic";
 import { detectUrgency } from "@/lib/urgencyDetect";
 
+// Opening suggestions for the public concierge — shown only while the
+// conversation has not started yet. Each entry is sent verbatim when tapped.
+const PUBLIC_CONCIERGE_STARTERS: string[] = [
+  "What materials and finishes define the pieces in the apartment?",
+  "Which designers are featured in the apartment?",
+  "What is Maison Affluency's design philosophy?",
+];
+
 
 const hasWelcomeActions = (actions: ConciergeQuickAction[] | undefined) =>
   !!actions?.some((action) => isOnboardingActionPrompt(action.prompt));
