@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { comparatorFacets, comparatorFinishNames, finishFacetKey, groupedMaterialOptions, matchesComparatorFacets, materialTypeOptions, selectMaterialOption, type FinishFacetOverride, type ComparatorFacetKind, type ComparatorFacetSelection } from "@/lib/comparatorFacets";
+import { comparatorFacets, comparatorFinishNames, finishFacetKey, groupedMaterialOptions, matchesComparatorFacets, materialTypeOptions, selectMaterialOption, type FinishFacetOverride } from "@/lib/comparatorFacets";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,6 @@ interface Props {
 }
 
 const NO_OVERRIDES = new Map<string, FinishFacetOverride>();
-const FACET_LABELS: Record<ComparatorFacetKind, string> = { material: "Material", finish: "Finish", color: "Colour" };
 
 export function ProductComparisonTable({ products: allProducts, fields, onRemove, renderPrice, renderNote, onVisibleProductsChange }: Props) {
   const { data: swatches, isLoading: swatchesLoading } = useComparatorSwatches(allProducts.flatMap(product => product ? [product.id] : []));
@@ -41,27 +40,31 @@ export function ProductComparisonTable({ products: allProducts, fields, onRemove
   });
   const finishNames = useMemo(() => { const seen = new Map<string, string>(); for (const p of allProducts) if (p) for (const n of comparatorFinishNames(p.materials as string | null, swatches?.get(p.id))) if (!seen.has(finishFacetKey(n))) seen.set(finishFacetKey(n), n); return [...seen.values()].sort((a, b) => a.localeCompare(b)); }, [allProducts, swatches]);
   const categorisablePieces = useMemo(() => allProducts.flatMap(p => p ? [{ name: p.product_name, materials: (p.materials as string | null) ?? null, linked: swatches?.get(p.id) ?? [] }] : []), [allProducts, swatches]);
-  const [selection, setSelection] = useState<ComparatorFacetSelection & { materialType?: string }>({});
+  const [selection, setSelection] = useState<{ material?: string; materialType?: string }>({});
   const facetsById = useMemo(() => new Map(allProducts.flatMap(p => p ? [[p.id, comparatorFacets(p.materials as string | null, swatches?.get(p.id), overrides)] as const] : [])), [allProducts, swatches, overrides]);
-  const options = useMemo(() => Object.fromEntries((Object.keys(FACET_LABELS) as ComparatorFacetKind[]).map(k => [k, [...new Set([...facetsById.values()].flatMap(f => f[k]))].sort()])) as Record<ComparatorFacetKind, string[]>, [facetsById]);
+  const options = useMemo(() => ({ material: [...new Set([...facetsById.values()].flatMap(f => f.material))].sort() }), [facetsById]);
   const materialGroups = useMemo(() => groupedMaterialOptions(options.material), [options.material]);
   const materialItems = useMemo(() => new Set(materialGroups.flatMap(g => g.items)), [materialGroups]);
   const materialValue = selection.materialType && materialItems.has(selection.materialType) ? selection.materialType : selection.material && materialItems.has(selection.material) ? selection.material : "all";
   const active = Object.values(selection).some(Boolean);
-  const products = active ? allProducts.filter(p => p && matchesComparatorFacets(facetsById.get(p.id)!, selection)) : allProducts;
+  const products = active ? allProducts.filter(p => {
+    if (!p) return false;
+    const facets = facetsById.get(p.id);
+    return facets ? matchesComparatorFacets(facets, selection) : false;
+  }) : allProducts;
   const visibleSignature = products.map(p => p?.id ?? "").join("|");
   useEffect(() => {
     onVisibleProductsChange?.(active ? products.filter((p): p is TradeProduct => !!p) : null);
   }, [active, visibleSignature, onVisibleProductsChange]);
-  const hasOptions = Object.values(options).some(o => o.length > 0);
+  const hasOptions = options.material.length > 0;
   const labelColumnWidth = "11rem";
   const productColumnWidth = `calc((100% - ${labelColumnWidth}) / ${Math.max(products.length, 1)})`;
   return <div>
-    {(hasOptions || (isAdmin && finishNames.length > 0)) && <div className="mb-6 flex flex-wrap items-end gap-4" role="group" aria-label="Filter compared products">
-      {options.material.length > 0 && <label className="flex flex-col gap-1.5">
+    {(hasOptions || (isAdmin && finishNames.length > 0)) && <div className="mb-6 flex flex-wrap items-end gap-x-6 gap-y-4 border-b border-border/60 pb-5" role="group" aria-label="Filter compared products">
+      {options.material.length > 0 && <label className="flex w-full flex-col gap-1.5 sm:w-64">
         <span className="font-body text-[10px] font-bold uppercase tracking-[0.14em] text-foreground/70">Material</span>
         <Select value={materialValue} onValueChange={v => setSelection(s => ({ ...s, ...selectMaterialOption(v) }))}>
-          <SelectTrigger className="h-9 w-auto min-w-40 border border-border bg-background px-3 font-body text-sm text-foreground">
+          <SelectTrigger aria-label="Material" className="h-9 w-full border border-border bg-background px-3 font-body text-sm text-foreground">
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="max-h-80 min-w-48">
@@ -80,13 +83,6 @@ export function ProductComparisonTable({ products: allProducts, fields, onRemove
           {materialTypeOptions(options.material, selection.material).map(v => <option key={v} value={v}>{v}</option>)}
         </select>
       </label>}
-      {(["finish", "color"] as ComparatorFacetKind[]).map(kind => options[kind].length > 0 && <label key={kind} className="flex flex-col gap-1.5">
-        <span className="font-body text-[10px] font-bold uppercase tracking-[0.14em] text-foreground/70">{FACET_LABELS[kind]}</span>
-        <select value={selection[kind] ?? ""} onChange={e => setSelection(s => ({ ...s, [kind]: e.target.value || undefined }))} className="h-9 min-w-40 border border-border bg-background px-3 font-body text-sm text-foreground">
-          <option value="">All</option>
-          {options[kind].map(v => <option key={v} value={v}>{v}</option>)}
-        </select>
-      </label>)}
       {active && <Button type="button" variant="ghost" size="sm" onClick={() => setSelection({})}>Clear filters</Button>}
       {isAdmin && finishNames.length > 0 && <FinishCategoryDialog names={finishNames} overrides={overrides} pieces={categorisablePieces} />}
       {active && <p className="pb-2 font-body text-xs text-muted-foreground" aria-live="polite">Showing {products.length} of {allProducts.filter(Boolean).length} pieces</p>}
