@@ -38,8 +38,35 @@ export function comparatorFacets(materials: string | null | undefined, linked: C
   return { material: [...out.material].sort(), finish: [...out.finish].sort(), color: [...out.color].sort() };
 }
 
-export function matchesComparatorFacets(facets: ComparatorFacets, selection: ComparatorFacetSelection) {
-  return (Object.keys(selection) as ComparatorFacetKind[]).every(kind => !selection[kind] || facets[kind].includes(selection[kind]!));
+/** Top-level material families; each specific material belongs to exactly one. */
+export const MATERIAL_TAXONOMY: Record<string, string[]> = {
+  Wood: ["Ash", "Beech", "Cherry", "Elm", "Maple", "Oak", "Teak", "Walnut"],
+  Metal: ["Aluminium", "Brass", "Bronze", "Copper", "Iron", "Steel"],
+  Fabric: ["Bouclé", "Cotton", "Linen", "Mohair", "Silk", "Velvet", "Wool"],
+  Leather: ["Shagreen", "Suede"],
+  Stone: ["Granite", "Marble", "Onyx", "Travertine"],
+  Glass: ["Crystal"],
+};
+const PARENT_ORDER = [...Object.keys(MATERIAL_TAXONOMY), "Other"];
+const PARENT_BY_TYPE = new Map(Object.entries(MATERIAL_TAXONOMY).flatMap(([parent, kids]) => [[fold(parent), parent], ...kids.map(k => [fold(k), parent] as [string, string])]));
+/** Base family for a material facet value ("Oak" → "Wood", "Wood" → "Wood"); unknown values fall under "Other". */
+export const materialParent = (value: string) => PARENT_BY_TYPE.get(fold(value)) ?? "Other";
+/** Base families present among the given material facet values, in taxonomy order. */
+export function materialParentOptions(materials: string[]) {
+  const present = new Set(materials.map(materialParent));
+  return PARENT_ORDER.filter(p => present.has(p));
+}
+/** Specific types under a family present among the values (the family's own generic name is excluded). */
+export function materialTypeOptions(materials: string[], parent: string) {
+  return [...new Set(materials.filter(m => materialParent(m) === parent && fold(m) !== fold(parent)))].sort((a, b) => a.localeCompare(b));
+}
+
+/** Material selection is hierarchical: a family (e.g. "Wood") matches every type under it; `materialType` narrows to one. */
+export function matchesComparatorFacets(facets: ComparatorFacets, selection: ComparatorFacetSelection & { materialType?: string }) {
+  const { materialType, ...rest } = selection;
+  if (rest.material && !facets.material.some(m => materialParent(m) === rest.material || m === rest.material)) return false;
+  if (materialType && !facets.material.includes(materialType)) return false;
+  return (["finish", "color"] as const).every(kind => !rest[kind] || facets[kind].includes(rest[kind]!));
 }
 
 /** Merge unsaved draft categories into the override map the filters would use. A row left with all three boxes empty falls back to the automatic guess. */

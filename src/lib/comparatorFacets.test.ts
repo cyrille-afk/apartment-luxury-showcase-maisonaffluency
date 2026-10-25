@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { comparatorFacets, finishFacetKey, matchesComparatorFacets, mergeFacetOverrides, previewFacetGroups } from "./comparatorFacets";
+import { comparatorFacets, finishFacetKey, matchesComparatorFacets, mergeFacetOverrides, previewFacetGroups, materialParentOptions, materialTypeOptions } from "./comparatorFacets";
 
 describe("comparatorFacets", () => {
   it("classifies material, finish and colour from names", () => {
@@ -36,5 +36,13 @@ describe("comparatorFacets", () => {
     // a row the admin leaves empty falls back to the automatic guess
     const guessed = mergeFacetOverrides({ "Opera Drift": {} });
     expect(previewFacetGroups([{ name: "Clam Chair", materials: "Opera Drift", linked: [] }], guessed).color).toEqual([]);
+  });
+  it("selecting Wood includes Ash and Oak pieces; Type narrows to one", () => {
+    const oak = comparatorFacets("Natural Oak"), ash = comparatorFacets("White Ash"), bronze = comparatorFacets("Dark Bronze");
+    expect([oak, ash, bronze].map(f => matchesComparatorFacets(f, { material: "Wood" }))).toEqual([true, true, false]);
+    expect([oak, ash].map(f => matchesComparatorFacets(f, { material: "Wood", materialType: "Ash" }))).toEqual([false, true]);
+    expect(materialParentOptions(["Oak", "Ash", "Bronze"])).toEqual(["Wood", "Metal"]);
+    expect(materialTypeOptions(["Oak", "Ash", "Bronze", "Wood"], "Wood")).toEqual(["Ash", "Oak"]);
+    expect(materialTypeOptions(["Oak", "Ash", "Bronze"], "Metal")).toEqual(["Bronze"]);
   });
 });
