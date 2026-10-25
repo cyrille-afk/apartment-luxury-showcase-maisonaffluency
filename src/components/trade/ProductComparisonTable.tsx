@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { comparatorFacets, comparatorFinishNames, finishFacetKey, matchesComparatorFacets, type FinishFacetOverride, type ComparatorFacetKind, type ComparatorFacetSelection } from "@/lib/comparatorFacets";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ interface Props {
   fields: ComparisonField[];
   onRemove: (id: string) => void;
   renderPrice: (product: TradeProduct | null, net: boolean) => ReactNode;
+  onVisibleProductsChange?: (visible: TradeProduct[] | null) => void;
 }
 
 const NO_OVERRIDES = new Map<string, FinishFacetOverride>();
