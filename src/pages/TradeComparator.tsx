@@ -28,6 +28,7 @@ import DesignerNoteToolbar from "@/components/trade/DesignerNoteToolbar";
 import { ComparatorSelectionDrawer } from "@/components/trade/ComparatorSelectionDrawer";
 import { restoreSavedComparison, type ComparisonCoverEdits } from "@/lib/comparatorDraft";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
@@ -268,7 +269,7 @@ export default function TradeComparator() {
       const value = fx ? convertComparatorCents(c, cur, displayCurrency, fx.rates) : null;
       if (value === null) return `${original}\n${displayCurrency} conversion unavailable`;
       converted = true;
-      return `${prefix}${formatMoney(value, displayCurrency)}\nOriginal: ${original}`;
+      return showOriginalPrices ? `${prefix}${formatMoney(value, displayCurrency)}\nOriginal: ${original}` : `${prefix}${formatMoney(value, displayCurrency)}`;
     };
     const pieces = await Promise.all(exportList.map(async (p) => {
       const pricing = queryClient.getQueryData<any>(["trade-product-pricing", p.id]);
