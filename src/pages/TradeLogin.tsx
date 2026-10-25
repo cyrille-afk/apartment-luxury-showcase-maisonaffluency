@@ -205,7 +205,7 @@ const TradeLogin = () => {
             <input
               type="text"
               name="identifier"
-              autoComplete="username"
+              autoComplete="off"
               inputMode="email"
               required
               placeholder="Trade ID or Email Address"
@@ -216,7 +216,7 @@ const TradeLogin = () => {
             <input
               type="password"
               name="password"
-              autoComplete="current-password"
+              autoComplete="new-password"
               required
               placeholder="Password"
               value={password}
