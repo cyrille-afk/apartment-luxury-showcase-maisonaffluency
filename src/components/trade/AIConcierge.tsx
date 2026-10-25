@@ -4124,7 +4124,7 @@ export function AIConcierge({
   };
 
   const lastItem = timeline[timeline.length - 1];
-  const showTypingDots = streaming && (!lastItem || lastItem.kind !== "msg" || lastItem.role !== "assistant");
+  const showTypingDots = streaming && (!lastItem || lastItem.kind !== "msg" || lastItem.role !== "assistant" || !lastItem.content?.trim());
   const copy = conciergeCopy(lang);
 
   // Dynamic composer placeholder: before the user has told Felix a project
@@ -6032,12 +6032,9 @@ export function AIConcierge({
             )}
             {showTypingDots && (
               <div className="flex justify-start">
-                <div className="bg-muted rounded-2xl rounded-bl-md px-3.5 py-2.5">
-                  {embedded ? (
-                    <Shimmer className="font-body text-xs">{`${name} is synchronizing your studio brief...`}</Shimmer>
-                  ) : (
-                    <DotCircleLoader size="sm" className="text-muted-foreground" />
-                  )}
+                <div role="status" aria-live="polite" className="bg-muted rounded-md px-3.5 py-2.5 flex items-center gap-2 text-muted-foreground">
+                  <Loader2 aria-hidden="true" className="h-3.5 w-3.5 shrink-0 animate-spin motion-reduce:animate-none" />
+                  <span className="font-body text-xs">Working on your question…</span>
                 </div>
               </div>
             )}

@@ -1,5 +1,8 @@
 # Roadmap — Automatic Visual Search Indexing
 
+## Concierge pending reply
+- [x] Show “Working on your question…” with a quiet spinner while awaiting text, including empty assistant placeholders, in embedded and floating conversations. Signed-in real question verified: waiting message visible, removed on reply, no page errors; build clean.
+
 ## Sign-in modal feedback and password reveal
 - [x] Added modal password reveal, inline pending/error/success states and Google-password guidance. Twelve focused tests pass; live eye toggle, pending lock and real credential rejection verified with no page errors. Build clean; no password changed.
 
