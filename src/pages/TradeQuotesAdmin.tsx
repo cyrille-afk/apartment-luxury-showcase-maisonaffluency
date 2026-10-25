@@ -511,16 +511,13 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
             .select("tier, discount_pct, label")
             .eq("tier", tier)
             .maybeSingle();
-          const fallback: Record<string, { pct: number; label: string }> = {
-            silver: { pct: 0.08, label: "Silver" },
-            gold: { pct: 0.10, label: "Gold" },
-            platinum: { pct: 0.15, label: "Platinum" },
-          };
-          setOwnerDiscountPct(cfg?.discount_pct != null ? Number(cfg.discount_pct) : fallback[tier].pct);
-          setOwnerTierLabel(cfg?.label || fallback[tier].label);
+          // No bundled rates: unreadable tier settings mean full price, not a stale discount.
+          const pct = Number(cfg?.discount_pct);
+          setOwnerDiscountPct(Number.isFinite(pct) && pct > 0 ? pct : 0);
+          setOwnerTierLabel(cfg?.label || tier.charAt(0).toUpperCase() + tier.slice(1));
         } catch {
-          setOwnerDiscountPct(0.08);
-          setOwnerTierLabel("Silver");
+          setOwnerDiscountPct(0);
+          setOwnerTierLabel("");
         }
       }
 
