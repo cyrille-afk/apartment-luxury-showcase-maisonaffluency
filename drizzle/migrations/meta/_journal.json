@@ -1681,6 +1681,13 @@
       "when": 1792898865350,
       "tag": "0239_private_price_lists",
       "breakpoints": true
+    },
+    {
+      "idx": 240,
+      "version": "7",
+      "when": 1792899795004,
+      "tag": "0240_price_list_audit",
+      "breakpoints": true
     }
   ]
 }

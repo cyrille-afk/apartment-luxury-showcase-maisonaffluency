@@ -10638,6 +10638,7 @@ export type Database = {
           file_url: string
           id: string
           is_featured_public: boolean
+          legacy_public_url: string | null
           sort_order: number
           storage_path: string | null
           title: string
@@ -10651,6 +10652,7 @@ export type Database = {
           file_url: string
           id?: string
           is_featured_public?: boolean
+          legacy_public_url?: string | null
           sort_order?: number
           storage_path?: string | null
           title: string
@@ -10664,6 +10666,7 @@ export type Database = {
           file_url?: string
           id?: string
           is_featured_public?: boolean
+          legacy_public_url?: string | null
           sort_order?: number
           storage_path?: string | null
           title?: string
@@ -12917,6 +12920,7 @@ export type Database = {
           total_users: number
         }[]
       }
+      admin_price_list_audit: { Args: never; Returns: Json }
       admin_queue_overview: { Args: never; Returns: Json }
       admin_requeue_webhook_event: { Args: { p_id: string }; Returns: Json }
       admin_reset_onboarding_for_user: {
