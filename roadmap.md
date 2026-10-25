@@ -1,3 +1,6 @@
+## Comparator refresh persistence
+- [ ] Preserve selected pieces and in-progress comparator controls across refresh; verify reload and removal on Cyrille's account without saving a cloud shortlist.
+
 ## Product comparator feedback
 - [x] Include recorded parent houses alongside child designers; Ecart and CC-Tapis verified. Favorites now load saved product records directly; both of Cyrille's two Favorites shown.
 - [x] Assign/save under accessible projects and reopen from project Boards; live Singapore project save and saved two-piece reload verified, temporary shortlist removed.
