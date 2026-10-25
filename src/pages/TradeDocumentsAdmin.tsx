@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, FileText, X, Image, Loader2, ArrowUp, ArrowDown, Star } from "lucide-react";
 import CloudUpload from "@/components/trade/CloudUpload";
 import BrandCarousel from "@/components/trade/BrandCarousel";
+import { isPrivateFileUrl, moveToPrivatePriceList } from "@/lib/priceListStorage";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -142,11 +143,20 @@ const TradeDocumentsAdmin = () => {
       cover_image_url: editing.cover_image_url || null,
     };
 
-    let error;
+    let error: any;
+    let savedId = editing.id as string | undefined;
     if (editing.id) {
       ({ error } = await supabase.from("trade_documents").update(payload).eq("id", editing.id));
     } else {
-      ({ error } = await supabase.from("trade_documents").insert(payload));
+      const ins = await supabase.from("trade_documents").insert(payload).select("id").single();
+      error = ins.error; savedId = ins.data?.id;
+    }
+    // Price lists never stay at a public link: move them into admin-only private storage.
+    if (!error && savedId && payload.document_type === "pricelist" && !isPrivateFileUrl(payload.file_url)) {
+      try {
+        const moved = await moveToPrivatePriceList(savedId, payload.file_url);
+        ({ error } = await supabase.from("trade_documents").update(moved).eq("id", savedId));
+      } catch (e: any) { error = e; }
     }
 
     setSaving(false);
@@ -234,7 +244,7 @@ const TradeDocumentsAdmin = () => {
   }, [toast]);
 
   const handleSetAsBrandThumbnail = useCallback(async (doc: TradeDocument) => {
-    const isPdf = doc.file_url?.toLowerCase().endsWith(".pdf");
+    const isPdf = !isPrivateFileUrl(doc.file_url) && doc.file_url?.toLowerCase().endsWith(".pdf");
     if (!isPdf) {
       toast({ title: "Only PDF documents can be extracted", variant: "destructive" });
       return;
@@ -392,11 +402,11 @@ const TradeDocumentsAdmin = () => {
           for (const doc of documents) {
             const existing = brandMap.get(doc.brand_name);
             if (!existing) {
-              const isPdf = doc.file_url?.toLowerCase().endsWith(".pdf");
+              const isPdf = !isPrivateFileUrl(doc.file_url) && doc.file_url?.toLowerCase().endsWith(".pdf");
               brandMap.set(doc.brand_name, { pdfUrl: isPdf ? doc.file_url : null, docCount: 1 });
             } else {
               existing.docCount++;
-              if (!existing.pdfUrl && doc.file_url?.toLowerCase().endsWith(".pdf")) existing.pdfUrl = doc.file_url;
+              if (!existing.pdfUrl && !isPrivateFileUrl(doc.file_url) && doc.file_url?.toLowerCase().endsWith(".pdf")) existing.pdfUrl = doc.file_url;
             }
           }
           const brandEntries = [...brandMap.entries()]
@@ -483,7 +493,7 @@ const TradeDocumentsAdmin = () => {
                     );
                   })()}
                   <span className="w-px h-4 bg-border mx-0.5" />
-                  {doc.file_url?.toLowerCase().endsWith(".pdf") && (
+                  {!isPrivateFileUrl(doc.file_url) && doc.file_url?.toLowerCase().endsWith(".pdf") && (
                     <button
                       onClick={() => handleSetAsBrandThumbnail(doc)}
                       disabled={extractingThumbnailId === doc.id}
