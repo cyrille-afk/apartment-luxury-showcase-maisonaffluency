@@ -129,9 +129,9 @@ const TradeDesigners = () => {
   const initialBrand = searchParams.get("brand") || "all";
   const [selectedBrand, setSelectedBrand] = useState(initialBrand);
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const [viewMode, setViewMode] = useState<"portraits" | "directory">(() =>
-    typeof window !== "undefined" && sessionStorage.getItem("ma-designers-view") === "directory" ? "directory" : "portraits");
-  useEffect(() => { sessionStorage.setItem("ma-designers-view", viewMode); }, [viewMode]);
+  const [viewMode, setViewMode] = useState<"portraits" | "directory">("portraits");
+  useEffect(() => { if (sessionStorage.getItem("ma-designers-view") === "directory") setViewMode("directory"); }, []);
+  const chooseView = (m: "portraits" | "directory") => { setViewMode(m); sessionStorage.setItem("ma-designers-view", m); };
   const [mobileCarouselMode, setMobileCarouselMode] = useState<"ateliers" | "designers">("ateliers");
 
   useEffect(() => {
@@ -360,7 +360,7 @@ const TradeDesigners = () => {
                   key={m}
                   role="tab"
                   aria-selected={viewMode === m}
-                  onClick={() => setViewMode(m)}
+                  onClick={() => chooseView(m)}
                   className={cn(
                     "rounded px-3 py-1.5 font-body text-[10px] uppercase tracking-[0.12em] transition-colors",
                     viewMode === m ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
