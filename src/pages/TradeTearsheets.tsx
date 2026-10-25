@@ -269,9 +269,10 @@ export default function TradeTearsheets() {
     enabled: !!filterProjectId && !!user,
     queryFn: async () => {
       const ids = new Set<string>();
+      if (!filterProjectId) return ids;
       const [quotesRes, boardsRes] = await Promise.all([
-        supabase.from("trade_quotes").select("id").eq("project_id", filterProjectId!),
-        supabase.from("client_boards").select("id").eq("project_id", filterProjectId!),
+        supabase.from("trade_quotes").select("id").eq("project_id", filterProjectId),
+        supabase.from("client_boards").select("id").eq("project_id", filterProjectId),
       ]);
       const quoteIds = (quotesRes.data || []).map((q: any) => q.id);
       const boardIds = (boardsRes.data || []).map((b: any) => b.id);
@@ -477,14 +478,15 @@ export default function TradeTearsheets() {
   useEffect(() => {
     if (dismissedHandoffRef.current) return;
     if (!initialFinishes.productId || selectedProduct || products.length === 0) return;
+    const productId = initialFinishes.productId;
     const direct = products.find((p) => p.id === initialFinishes.productId);
     if (direct) { setSelectedProduct(direct); return; }
     // Twin fallback: look up the incoming id's (brand, title) pair from both
     // source tables and match against the merged list.
     (async () => {
       const [tp, cp] = await Promise.all([
-        supabase.from("trade_products").select("brand_name, product_name").eq("id", initialFinishes.productId!).maybeSingle(),
-        supabase.from("designer_curator_picks").select("title, designers!inner(name)").eq("id", initialFinishes.productId!).maybeSingle(),
+        supabase.from("trade_products").select("brand_name, product_name").eq("id", productId).maybeSingle(),
+        supabase.from("designer_curator_picks").select("title, designers!inner(name)").eq("id", productId).maybeSingle(),
       ]);
       const brand = (tp.data as any)?.brand_name || ((cp.data as any)?.designers?.name);
       const name = (tp.data as any)?.product_name || (cp.data as any)?.title;
@@ -698,7 +700,7 @@ export default function TradeTearsheets() {
           project_id: projectId,
           title: newBoardTitle.trim(),
           client_id: newBoardClient?.id ?? null,
-          client_name: newBoardClient?.name || selectedProject.client_name || null,
+          client_name: newBoardClient?.name || selectedProject.client_name || "",
           client_email: newBoardClient?.primary_contact?.email ?? null,
         } as any)
         .select()
