@@ -5455,28 +5455,24 @@ export function AIConcierge({
                       selected={item.selected ?? null}
                       styleInput={item.styleInput ?? null}
                       onSelect={(option) => {
-                        if (item.selected != null) return;
-                        setTimeline((prev) => {
-                          const currentGrid = prev.find(
-                            (entry) => entry.kind === "layout_options" && entry.id === item.id,
-                          );
-                          if (currentGrid?.kind !== "layout_options" || currentGrid.selected != null) {
-                            return prev;
-                          }
-                          const next = prev.map((t) =>
-                            t.kind === "layout_options" && t.id === item.id
+                        if (item.selected != null || streaming) return;
+                        setTimeline((prev) =>
+                          prev.map((t) =>
+                            t.kind === "layout_options" && t.id === item.id && t.selected == null
                               ? { ...t, selected: option.id }
                               : t,
-                          );
-                          return [
-                            ...next,
-                            {
-                              kind: "msg" as const,
-                              role: "assistant" as const,
-                              content: `Excellent choice. I have locked in ${option.name} for your layout workspace. I am now compiling the live FF&E Schedule and generating your official trade quote preview right below.`,
-                            },
-                          ];
-                        });
+                          ),
+                        );
+                        // Actually request the FF&E schedule + quote from the
+                        // concierge instead of a static promise that never
+                        // produced anything.
+                        const brief = getConciergeSession()?.briefText?.trim();
+                        const request =
+                          `[Layout selected — do NOT re-ask the brief or reopen the Brief Builder.] ` +
+                          `I have selected Option ${option.id}: ${option.name} (${option.focus}; ${option.alignment}; ${option.clearance}; ${option.itemCount} trade items). ` +
+                          `Now compile the room-tagged FF&E schedule for this layout using propose_ffe_rows with real catalogue pieces, then draft the trade quote.` +
+                          (brief ? `\n\nSubmitted brief:\n${brief}` : "");
+                        send(request, { displayText: `Selected ${option.name} — compile the FF&E schedule and trade quote.` });
                       }}
                     />
                   </div>
@@ -5552,7 +5548,15 @@ export function AIConcierge({
                               const lockedBlock = lockedLines
                                 ? `LOCKED PROJECT FACTS — these are verified and must be reused verbatim. Never substitute, rename or re-ask them:\n${lockedLines}\n\n`
                                 : "";
+                              const selectedGrid = [...timeline].reverse().find(
+                                (t): t is Extract<TimelineItem, { kind: "layout_options" }> =>
+                                  t.kind === "layout_options" && t.selected != null,
+                              );
+                              const layoutLine = selectedGrid
+                                ? `SELECTED LAYOUT: Option ${selectedGrid.selected}. The brief is complete and the layout is chosen — do NOT ask me to open the Architectural Brief again. Compile the FF&E schedule (propose_ffe_rows) and draft the trade quote now.\n\n`
+                                : "";
                               const resumeText =
+                                layoutLine +
                                 `[Resume — continue from where we left off; do NOT re-ask qualifiers I've already answered and do NOT treat the brief below as a new submission. Acknowledge briefly and take the next concrete step in stage "${item.stage ?? stage}".]\n\n` +
                                 lockedBlock +
                                 `Current brief so far:\n${brief}${product}${finishLine}\n\n` +
