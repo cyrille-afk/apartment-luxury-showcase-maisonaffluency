@@ -1653,6 +1653,13 @@
       "when": 1792887902286,
       "tag": "0235_public_website_status",
       "breakpoints": true
+    },
+    {
+      "idx": 236,
+      "version": "7",
+      "when": 1792888005465,
+      "tag": "0236_restrict_public_status_writes",
+      "breakpoints": true
     }
   ]
 }
