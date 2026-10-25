@@ -230,20 +230,24 @@ export async function buildComparisonPdf(pieces: ComparisonPdfPiece[], rows: { k
   if (pieces.some(p => (p.swatches?.length ?? 0) > 0)) {
     let y = endY;
     const maxSwatches = Math.max(...pieces.map(p => p.swatches?.length ?? 0));
-    for (let index = 0; index < maxSwatches; index++) {
-      const lines = pieces.map(p => textLines(p.swatches?.[index]?.name || "", colW - 15));
-      const h = Math.max(8, ...lines.map(l => l.length * lineH + 3));
+    for (let index = 0; index < maxSwatches; index += 2) {
+      const sampleW = (colW - 4) / 2;
+      doc.setFont("Inter", "normal").setFontSize(6);
+      const lines = pieces.map(p => [0, 1].map(j => doc.splitTextToSize(p.swatches?.[index + j]?.name || "", sampleW - 8) as string[]));
+      const h = Math.max(7, ...lines.flatMap(pair => pair.map(l => l.length * 2.8 + 2)));
       if (y + h > endY) {
         doc.addPage(); y = heading(false);
         doc.setFont("Inter", "normal").setFontSize(8).setTextColor(...colors.muted);
         doc.text("MATERIALS & FINISHES", M, y + 5); y += 11;
       }
       pieces.forEach((p, i) => {
-        const swatch = p.swatches?.[index]; if (!swatch) return;
-        const x = M + labelW + i * colW;
-        drawSwatch(swatch, x, y + 1, 6);
-        doc.setFont("Inter", "normal").setFontSize(8).setTextColor(...colors.ink);
-        doc.text(lines[i], x + 9, y + 4, { lineHeightFactor: 1.35 });
+        [0, 1].forEach(j => {
+          const swatch = p.swatches?.[index + j]; if (!swatch) return;
+          const x = M + labelW + i * colW + j * sampleW;
+          drawSwatch(swatch, x, y + 1, 5);
+          doc.setFont("Inter", "normal").setFontSize(6).setTextColor(...colors.ink);
+          doc.text(lines[i][j], x + 7, y + 3, { lineHeightFactor: 1.3 });
+        });
       });
       y += h;
     }
