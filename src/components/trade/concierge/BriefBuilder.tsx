@@ -365,7 +365,7 @@ function extractField(body: string, label: string): string | null {
   // Allow an optional leading bullet ("- ", "* ", "• ") and optional bold
   // markers ("**LABEL**:") so lines like "- ZONE: ..." are recognized.
   const regex = new RegExp(
-    `^\\s*(?:[-*•]\\s+)?\\*{0,2}${escapeRe(label)}\\*{0,2}\\s*:\\s*(.*)$`,
+    `^[ \t]*(?:[-*•][ \t]+)?\\*{0,2}${escapeRe(label)}\\*{0,2}[ \t]*:[ \t]*(.*)$`,
     "im"
   );
   const match = body.match(regex);
@@ -922,6 +922,7 @@ export const BriefBuilder = React.forwardRef<BriefBuilderHandle, {
 
   const handleSubmit = async () => {
     if (!onSubmit || isSubmitting) return;
+    if (focusFirstMissing()) return;
     const text = briefTextForSubmit();
     const validation = validateBriefDraft(text);
     if (!validation.valid) {
