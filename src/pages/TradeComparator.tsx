@@ -24,6 +24,7 @@ import { COMPARATOR_CURRENCIES, comparatorCurrency, convertComparatorCents, form
 import { useSearchParams } from "@/lib/router-compat";
 import { useComparatorDraft } from "@/hooks/useComparatorDraft";
 import { ProductComparisonTable } from "@/components/trade/ProductComparisonTable";
+import DesignerNoteToolbar from "@/components/trade/DesignerNoteToolbar";
 import { ComparatorSelectionDrawer } from "@/components/trade/ComparatorSelectionDrawer";
 import { restoreSavedComparison, type ComparisonCoverEdits } from "@/lib/comparatorDraft";
 import { Label } from "@/components/ui/label";
