@@ -45,6 +45,7 @@ import { Route as SearchRouteImport } from './routes/search'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as StagingRouteImport } from './routes/staging'
+import { Route as StatusRouteImport } from './routes/status'
 import { Route as StudiosRouteImport } from './routes/studios'
 import { Route as SuccessRouteImport } from './routes/success'
 import { Route as TermsRouteImport } from './routes/terms'
@@ -441,6 +442,11 @@ const ShopRoute = ShopRouteImport.update({
 const StagingRoute = StagingRouteImport.update({
   id: '/staging',
   path: '/staging',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StatusRoute = StatusRouteImport.update({
+  id: '/status',
+  path: '/status',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StudiosRoute = StudiosRouteImport.update({
@@ -1605,6 +1611,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRouteWithChildren
   '/shop': typeof ShopRoute
   '/staging': typeof StagingRoute
+  '/status': typeof StatusRoute
   '/studios': typeof StudiosRoute
   '/success': typeof SuccessRoute
   '/terms': typeof TermsRoute
@@ -1860,6 +1867,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRouteWithChildren
   '/shop': typeof ShopRoute
   '/staging': typeof StagingRoute
+  '/status': typeof StatusRoute
   '/studios': typeof StudiosRoute
   '/success': typeof SuccessRoute
   '/terms': typeof TermsRoute
@@ -2115,6 +2123,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRouteWithChildren
   '/shop': typeof ShopRoute
   '/staging': typeof StagingRoute
+  '/status': typeof StatusRoute
   '/studios': typeof StudiosRoute
   '/success': typeof SuccessRoute
   '/terms': typeof TermsRoute
@@ -2372,6 +2381,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/shop'
     | '/staging'
+    | '/status'
     | '/studios'
     | '/success'
     | '/terms'
@@ -2627,6 +2637,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/shop'
     | '/staging'
+    | '/status'
     | '/studios'
     | '/success'
     | '/terms'
@@ -2881,6 +2892,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/shop'
     | '/staging'
+    | '/status'
     | '/studios'
     | '/success'
     | '/terms'
@@ -3137,6 +3149,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRouteWithChildren
   ShopRoute: typeof ShopRoute
   StagingRoute: typeof StagingRoute
+  StatusRoute: typeof StatusRoute
   StudiosRoute: typeof StudiosRoute
   SuccessRoute: typeof SuccessRoute
   TermsRoute: typeof TermsRoute
@@ -3458,6 +3471,13 @@ declare module '@tanstack/react-router' {
       path: '/staging'
       fullPath: '/staging'
       preLoaderRoute: typeof StagingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/status': {
+      id: '/status'
+      path: '/status'
+      fullPath: '/status'
+      preLoaderRoute: typeof StatusRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/studios': {
@@ -5338,6 +5358,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRouteWithChildren,
   ShopRoute: ShopRoute,
   StagingRoute: StagingRoute,
+  StatusRoute: StatusRoute,
   StudiosRoute: StudiosRoute,
   SuccessRoute: SuccessRoute,
   TermsRoute: TermsRoute,

@@ -1,5 +1,9 @@
 # Roadmap — Automatic Visual Search Indexing
 
+## Public website status
+- [x] Add public availability and observed interruption history from the existing independent monitor, with stale/failed-read states and private diagnostics excluded.
+- [x] Verified signed-out /status, all four live readings, refresh, mobile layout, anonymous safe reads/private empty reads and three availability tests; build clean. History starts 25 October; no fabricated outage or live monitoring failure was introduced. Publish remains user-controlled.
+
 ## Trade Program sign-in password reveal
 - [x] Add a show/hide toggle to the Trade Program sign-in password field so the member can check what they typed before submitting; the field still starts empty and hidden.
 - [x] Live verified on /trade/login: field starts type=password and empty, revealing shows the exact characters (type=text) and hiding restores the mask with the value intact, the toggle never submits the form and tab still moves straight to Sign In; three component tests pass and the build is clean.
