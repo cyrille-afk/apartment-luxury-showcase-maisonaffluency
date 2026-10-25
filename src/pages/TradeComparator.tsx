@@ -262,6 +262,7 @@ export default function TradeComparator() {
     };
     const fx = fxRates.data ?? (await fxRates.refetch()).data ?? null;
     let converted = false;
+    const showOriginalPrices = (coverDetails.originalPrices ?? "true") !== "false";
     const priceText = (c: number | null, cur: string, prefix: string) => {
       if (c == null) return "Price upon Request";
       const original = `${prefix}${fmt(c, cur)}`;
@@ -279,7 +280,7 @@ export default function TradeComparator() {
       const swatches = await Promise.all(comparatorSwatches(p.materials, linkedSwatches.get(p.id) ?? []).map(async s => ({ name: s.name, color: s.color, image: s.imageUrl ? await textureImage(s.imageUrl) : null })));
       return { name: p.product_name, swatches, image: p.image_url ? await comparisonImage(p.image_url) : null, values: { brand_name: p.brand_name, category: p.category, dimensions: p.dimensions ?? "", materials: p.materials ?? "", lead_time: p.lead_time ?? "", designer_notes: draft.pieceNotes[p.id]?.trim() || "", rrp_price_cents: priceText(prices.retail, cur, prefix), trade_price_cents: priceText(prices.trade, cur, prefix) } };
     }));
-    const fxNote = `Prices shown in ${displayCurrency}${converted ? ` using Maison Affluency's synced FX rates${fx?.updatedAt ? `, last updated ${new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short", timeZoneName: "short" }).format(fx.updatedAt)}` : ""}; original supplier prices shown beneath` : ""}.`;
+    const fxNote = `Prices shown in ${displayCurrency}${converted ? ` using Maison Affluency's synced FX rates${fx?.updatedAt ? `, last updated ${new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short", timeZoneName: "short" }).format(fx.updatedAt)}` : ""}${showOriginalPrices ? "; original supplier prices shown beneath" : ""}` : ""}.`;
     downloadBlob(await buildComparisonPdf(pieces, FIELDS, showTradePrice ? "Product Comparison (Trade)" : "Product Comparison", { ...coverDetails, fxNote }), "product-comparison.pdf");
     } catch { toast.error("The PDF could not be prepared with all pictures. Please try again."); } finally { setExporting(false); }
   };
@@ -371,7 +372,7 @@ export default function TradeComparator() {
               <div className="flex flex-wrap justify-between gap-2 border-t border-border pt-4">
                 <Button type="button" variant="ghost" disabled={coverLoading} onClick={async () => {
                   setCoverLoading(true);
-                  try { const fresh = await readCoverDetails(); setCoverForm(form => ({ ...fresh, layout: form.layout, designerNotes: form.designerNotes })); }
+                  try { const fresh = await readCoverDetails(); setCoverForm(form => ({ ...fresh, layout: form.layout, designerNotes: form.designerNotes, originalPrices: form.originalPrices })); }
                   catch { toast.error("The project's details could not be loaded. Please try again."); }
                   finally { setCoverLoading(false); }
                 }}>Use project details</Button>
