@@ -1,5 +1,8 @@
 import type { TradeProduct } from "./tradeProducts";
 
+export const COMPARISON_COVER_FIELDS = ["projectName", "comparisonName", "clientName", "location", "style"] as const;
+export type ComparisonCoverEdits = Partial<Record<typeof COMPARISON_COVER_FIELDS[number], string>>;
+
 export interface ComparatorDraft {
   compareList: TradeProduct[];
   search: string;
@@ -7,10 +10,11 @@ export interface ComparatorDraft {
   source: "catalogue" | "favorites";
   openDesigners: string[];
   shortlistName: string;
+  coverEdits: Record<string, ComparisonCoverEdits>;
 }
 
 export function emptyComparatorDraft(): ComparatorDraft {
-  return { compareList: [], search: "", letter: "", source: "catalogue", openDesigners: [], shortlistName: "" };
+  return { compareList: [], search: "", letter: "", source: "catalogue", openDesigners: [], shortlistName: "", coverEdits: {} };
 }
 
 // Explicitly exclude prices and account data, including from restored snapshots.
@@ -18,6 +22,18 @@ export function sanitizeComparatorDraft(value: unknown): ComparatorDraft {
   const draft = emptyComparatorDraft();
   if (!value || typeof value !== "object") return draft;
   const row = value as Record<string, unknown>;
+  if (row.coverEdits && typeof row.coverEdits === "object") {
+    for (const [scope, value] of Object.entries(row.coverEdits)) {
+      if (scope !== "unassigned" && !/^[a-f0-9-]{36}$/i.test(scope)) continue;
+      if (!value || typeof value !== "object") continue;
+      const fields = value as Record<string, unknown>;
+      const edits: ComparisonCoverEdits = {};
+      for (const key of COMPARISON_COVER_FIELDS) {
+        if (typeof fields[key] === "string") edits[key] = fields[key].slice(0, 500);
+      }
+      draft.coverEdits[scope] = edits;
+    }
+  }
   for (const key of ["search", "letter", "shortlistName"] as const) {
     if (typeof row[key] === "string") draft[key] = row[key];
   }
