@@ -2,7 +2,7 @@
 
 ## Website SMS alerts
 - [x] Verify Twilio sender and deliver one test SMS to the requested recipient.
-- [ ] Add secure outage/recovery transition dispatch alongside existing emails and verify token rejection/tests.
+- [x] Add private unique outage/recovery events and single-use callback tokens alongside existing emails; six focused tests pass, missing/invalid tokens return 401, build clean. Twilio test confirmed delivered. Dispatch configured; pending events wait for published callback.
 - [ ] Activate published callback and verify an automatic alert; requires publishing the new route.
 
 ## Public website status
