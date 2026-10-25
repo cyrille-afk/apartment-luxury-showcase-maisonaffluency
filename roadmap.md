@@ -1,4 +1,8 @@
 ## Structured comparator dimensions
+## Comparison PDF grid alignment
+- [ ] Consolidate landscape comparison, embed swatches, share structured dimensions/fonts and add numbered footers; verify actual exported pages visually.
+
+## Structured comparator dimensions
 - [x] Render labelled metric/imperial rows with common separator parsing and auxiliary heights; 48 regressions pass. Four real pieces verified signed-in on desktop/mobile, refresh retains rows, no overflow or browser errors. Preview only.
 
 ## Comparator material swatches
