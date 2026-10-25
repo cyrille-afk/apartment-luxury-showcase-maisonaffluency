@@ -2,12 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { TradeErrorBoundary, TradeLayout } from "@/app/legacyShell";
 import { guardStudioSetupRoute } from "@/lib/studioSetupRouteGuard";
+import { tradeLoginHref } from "@/lib/tradeLoginReturn";
 
 // Shown when the trade route's beforeLoad (session/studio/role reads) fails
 // after its own retries — e.g. a dropped connection or a brief outage. Gives
 // the member a clear way forward instead of the generic app crash screen.
 function TradeRouteRecovery() {
-  const next = `${window.location.pathname}${window.location.search}`;
+  const loginHref = tradeLoginHref(window.location.pathname, window.location.search);
   return (
     <div role="alert" className="min-h-screen bg-background flex items-center justify-center px-6">
       <div className="max-w-md text-center">
@@ -26,7 +27,7 @@ function TradeRouteRecovery() {
             Try again
           </button>
           <a
-            href={`/trade/login?next=${encodeURIComponent(next)}`}
+            href={loginHref}
             className="inline-flex items-center justify-center rounded-full border border-border px-6 py-2.5 font-body text-[11px] uppercase tracking-[0.2em] text-foreground transition-opacity hover:opacity-80"
           >
             Sign in again

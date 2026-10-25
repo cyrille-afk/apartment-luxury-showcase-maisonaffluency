@@ -98,7 +98,7 @@ export function useLocation() {
   return useMemo(
     () => ({
       pathname: loc.pathname,
-      search: loc.searchStr ? `?${loc.searchStr}` : "",
+      search: loc.searchStr ? `?${loc.searchStr.replace(/^\?+/, "")}` : "",
       hash: loc.hash ?? "",
       state: (loc.state ?? null) as unknown,
       key: loc.pathname + (loc.searchStr ?? ""),

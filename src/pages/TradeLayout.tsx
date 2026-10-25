@@ -29,6 +29,7 @@ import { StudioSwitcher } from "@/components/trade/StudioSwitcher";
 import { useStudio } from "@/hooks/useStudio";
 import { StudioBrand } from "@/components/trade/StudioBrand";
 import { StudioSetupNavigationGate } from "@/components/trade/StudioSetupNavigationGate";
+import { isTradeLoginPath, tradeLoginHref } from "@/lib/tradeLoginReturn";
 
 
 import { MobilePreviewHeaderButton } from "@/components/trade/MobilePreviewHeaderButton";
@@ -455,9 +456,10 @@ const TradeLayout = () => {
   }
 
   if (!user) {
+    // During navigation the old layout can still render with the incoming
+    // login location. Never wrap that pending destination in another login.
+    if (isTradeLoginPath(location.pathname)) return null;
     if (sessionExpired) {
-      const search = location.search.replace(/^\?+/, "");
-      const next = `${location.pathname}${search ? `?${search}` : ""}`;
       return (
         <main className="min-h-screen bg-background text-foreground flex flex-col px-6 sm:px-10">
           <header className="w-full max-w-6xl mx-auto border-b border-border py-7 sm:py-9">
@@ -470,7 +472,7 @@ const TradeLayout = () => {
               Please sign in again to continue. Your saved projects, quotes and studio settings are still here.
             </p>
             <Button asChild size="lg" className="self-start font-body">
-              <Link to={`/trade/login?next=${encodeURIComponent(next)}`}><LogIn aria-hidden="true" />Sign in</Link>
+              <Link to={tradeLoginHref(location.pathname, location.search)}><LogIn aria-hidden="true" />Sign in</Link>
             </Button>
           </section>
         </main>
@@ -478,7 +480,7 @@ const TradeLayout = () => {
     }
     const publicGatePath = location.pathname.replace(/\/$/, "") || "/trade";
     if (TRADE_GATE_COPY[publicGatePath]) return <TradePublicGate path={publicGatePath} />;
-    return <Navigate to={`/trade/login?next=${encodeURIComponent(`${location.pathname}${location.search}`)}`} replace />;
+    return <Navigate to={tradeLoginHref(location.pathname, location.search)} replace />;
   }
 
   // Admins bypass application status checks
