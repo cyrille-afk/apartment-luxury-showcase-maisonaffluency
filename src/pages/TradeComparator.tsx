@@ -5,7 +5,7 @@ import { buildComparisonPdf, comparisonImage } from "@/lib/comparisonPdf";
 import { downloadBlob } from "@/lib/furnishingSchedulePdf";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
-import { Search, X, Heart, ChevronDown, Bookmark, Link2, FileDown, Trash2 } from "lucide-react";
+import { Search, X, Heart, ChevronDown, Bookmark, Link2, FileDown, Trash2, FolderOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
@@ -18,9 +18,22 @@ import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import { useSearchParams } from "@/lib/router-compat";
 import { useComparatorDraft } from "@/hooks/useComparatorDraft";
 import { ProductComparisonTable } from "@/components/trade/ProductComparisonTable";
+import { restoreSavedComparison } from "@/lib/comparatorDraft";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 function ComparisonPrice({ product, net }: { product: TradeProduct | null; net: boolean }) {
   const { discountPct } = useTradePriceMode();
+  const [savedOpen, setSavedOpen] = useState(false);
+  const [savedSearch, setSavedSearch] = useState("");
+  const [pendingRestore, setPendingRestore] = useState<string | null>(null);
+  const { data: allComparisons = [], isPending: savedLoading, isError: savedError, refetch: refetchAllComparisons } = useQuery({
+    queryKey: ["comparator-saved-library", user?.id], enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("comparator_shortlists").select("id, name, items, project_id, created_at, projects(name)").eq("user_id", user?.id || "").is("room_slug", null).order("created_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+  });
   const { data, isLoading, isError } = useTradeProductPricing(product?.id);
   if (!product) return <>—</>;
   if (isLoading) return <>Loading…</>;
@@ -104,12 +117,16 @@ export default function TradeComparator() {
     const items = compareList.map((p) => ({ id: p.id, product_name: p.product_name, brand_name: p.brand_name, category: p.category, dimensions: p.dimensions, materials: p.materials, lead_time: p.lead_time ?? null, image_url: p.image_url, public_url: publicUrls.get(p.id) ?? null }));
     const { error } = await supabase.from("comparator_shortlists").insert({ user_id: user.id, project_id: projectId, name: shortlistName.trim() || "Shortlist", items });
     if (error) { toast.error("Could not save shortlist"); return; }
-    setShortlistName(""); toast.success("Shortlist saved"); refetchShortlists();
+    setShortlistName(""); toast.success("Shortlist saved"); refetchShortlists(); refetchAllComparisons();
     } catch { toast.error("Could not save shortlist"); } finally { setSaving(false); }
   };
-  const openShortlist = (items: any) => {
-    const ids: string[] = (items || []).map((i: any) => i.id);
-    setCompareList(ids.map((id) => catalogue.find((p) => p.id === id) || favoriteProducts.find(p => p.id === id)).filter(Boolean).slice(0, 4) as TradeProduct[]);
+  const openShortlist = (saved: { id: string; project_id: string | null }) => {
+    const next = new URLSearchParams(params);
+    next.set("shortlist", saved.id);
+    if (saved.project_id) next.set("project", saved.project_id); else next.delete("project");
+    setPendingRestore(saved.id);
+    setParams(next);
+    setSavedOpen(false);
   };
   const shareShortlist = async (token: string) => {
     await navigator.clipboard.writeText(`https://www.maisonaffluency.com/shortlist/${token}`);
@@ -117,20 +134,18 @@ export default function TradeComparator() {
   };
   const [openedShortlist, setOpenedShortlist] = useState<string | null>(null);
   useEffect(() => {
-    if (!draftReady || hasStoredDraft) return;
-    if (!requestedShortlist || requestedShortlist === openedShortlist || !details || catalogueLoading) return;
-    const saved = shortlists.find(s => s.id === requestedShortlist);
+    if (!draftReady || (hasStoredDraft && pendingRestore !== requestedShortlist)) return;
+    if (!requestedShortlist || (requestedShortlist === openedShortlist && pendingRestore !== requestedShortlist) || !details || catalogueLoading) return;
+    const saved = allComparisons.find(s => s.id === requestedShortlist) || shortlists.find(s => s.id === requestedShortlist);
     if (!saved || !Array.isArray(saved.items)) return;
-    setCompareList(saved.items.flatMap(item => {
-      if (!item || typeof item !== "object" || Array.isArray(item) || typeof item.id !== "string") return [];
-      const product = catalogue.find(p => p.id === item.id) || favoriteProducts.find(p => p.id === item.id);
-      return product ? [product] : [];
-    }).slice(0, 4));
+    setDraft(() => restoreSavedComparison(saved.items, saved.name, [...catalogue, ...favoriteProducts]));
     setOpenedShortlist(requestedShortlist);
-  }, [draftReady, hasStoredDraft, requestedShortlist, openedShortlist, shortlists, details, catalogueLoading, catalogue, favoriteProducts]);
+    setPendingRestore(null);
+  }, [draftReady, hasStoredDraft, pendingRestore, requestedShortlist, openedShortlist, allComparisons, shortlists, details, catalogueLoading, catalogue, favoriteProducts]);
   const deleteShortlist = async (id: string) => {
     await supabase.from("comparator_shortlists").delete().eq("id", id);
     refetchShortlists();
+    refetchAllComparisons();
   };
   const exportPdf = async () => {
     if (exporting) return;
@@ -182,12 +197,23 @@ export default function TradeComparator() {
 
 
 
-        <div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="font-display text-2xl text-foreground">Product Comparator</h1>
-          <p className="font-body text-sm text-muted-foreground mt-1">
-            
-          </p>
+          <Button variant="outline" size="sm" onClick={() => { setSavedOpen(true); refetchAllComparisons(); }}><FolderOpen className="mr-2 h-4 w-4" />Saved comparisons</Button>
         </div>
+        <Dialog open={savedOpen} onOpenChange={setSavedOpen}>
+          <DialogContent className="max-h-[85dvh] w-[calc(100%-2rem)] max-w-2xl overflow-y-auto">
+            <DialogHeader><DialogTitle className="font-display font-normal">Saved comparisons</DialogTitle><DialogDescription className="sr-only">Choose a saved product comparison</DialogDescription></DialogHeader>
+            <Input value={savedSearch} onChange={event => setSavedSearch(event.target.value)} placeholder="Search comparisons or projects…" aria-label="Search saved comparisons" />
+            {savedLoading ? <p role="status" className="py-6 text-sm text-muted-foreground">Loading comparisons…</p> : savedError ? <div role="alert"><p className="text-sm text-destructive">Saved comparisons could not be loaded.</p><Button variant="outline" size="sm" className="mt-3" onClick={() => refetchAllComparisons()}>Try again</Button></div> : <ul className="divide-y divide-border">
+              {allComparisons.filter(saved => `${saved.name} ${saved.projects?.name || ""}`.toLowerCase().includes(savedSearch.toLowerCase())).map(saved => <li key={saved.id} className="flex items-center justify-between gap-4 py-4">
+                <div className="min-w-0"><p className="break-words font-display text-base">{saved.name}</p><p className="mt-1 text-xs text-muted-foreground">{saved.projects?.name || "No project"} · {Array.isArray(saved.items) ? saved.items.length : 0} pieces</p></div>
+                <Button variant="outline" size="sm" onClick={() => openShortlist(saved)} aria-label={`Restore ${saved.name}`}><FolderOpen className="mr-2 h-3.5 w-3.5" />Restore</Button>
+              </li>)}
+              {!allComparisons.some(saved => `${saved.name} ${saved.projects?.name || ""}`.toLowerCase().includes(savedSearch.toLowerCase())) && <li className="py-6 text-sm text-muted-foreground">{allComparisons.length ? "No matching comparisons." : "No saved comparisons yet."}</li>}
+            </ul>}
+          </DialogContent>
+        </Dialog>
 
         <section className="border-y border-border py-5">
           <div className="flex flex-col gap-4 [@media(min-width:1440px)]:flex-row [@media(min-width:1440px)]:items-center">
@@ -275,7 +301,7 @@ export default function TradeComparator() {
           {shortlists.length > 0 && <ul className="flex flex-wrap gap-2" aria-label="Saved shortlists">
             {shortlists.map((s: any) => (
               <li key={s.id} className="flex items-center gap-1 border border-border px-2 py-1">
-                <Button variant="ghost" size="sm" className="h-7 px-2 font-body text-xs" onClick={() => openShortlist(s.items)}>{s.name} ({(s.items || []).length})</Button>
+                <Button variant="ghost" size="sm" className="h-7 px-2 font-body text-xs" onClick={() => openShortlist(s)}>{s.name} ({(s.items || []).length})</Button>
                 <Button variant="ghost" size="icon" className="h-7 w-7" aria-label={`Copy client link for ${s.name}`} onClick={() => shareShortlist(s.share_token)}><Link2 className="h-3.5 w-3.5" /></Button>
                 <Button variant="ghost" size="icon" className="h-7 w-7" aria-label={`Delete ${s.name}`} onClick={() => deleteShortlist(s.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
               </li>))}

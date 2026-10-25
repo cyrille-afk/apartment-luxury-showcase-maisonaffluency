@@ -1,4 +1,5 @@
 # Page rules
+- Saved comparator chooser reads all owner comparisons across projects; explicit Restore selects the saved project/name/ordered snapshot and replaces only that shortlist's local draft, while ordinary returns preserve unfinished edits — prevents filtered libraries and accidental draft loss.
 - Comparator unfinished selections and controls persist in account/saved-shortlist-scoped local drafts; hydrate before writes and never reopen the cloud snapshot over a restored edit — refresh must preserve work without creating a cloud shortlist.
 - Comparator shortlists use owner-private records with a project-edit-checked association; project Boards links reopen the saved comparison, and client snapshots remain price-free — project assignment must never broaden sharing access.
 - Tearsheets require an accessible selected project, scope board reads and recheck board ownership before item writes; board creation persists project_id and retains successful board identity on retries — prevents standalone and cross-project saves.
