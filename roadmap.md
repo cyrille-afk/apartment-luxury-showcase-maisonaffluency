@@ -1,3 +1,6 @@
+## Comparator table presentation
+- [ ] Refactor the comparison grid with larger borderless image blocks, consistent left alignment, stacked materials and Trade Price emphasis; verify populated desktop and mobile views.
+
 ## Comparator refresh persistence
 - [x] Preserve selected pieces and in-progress comparator controls across refresh with account-scoped price-free local drafts; live refresh retained Dais, Favorites and the unfinished name on Cyrille's account, removal stayed removed after a second refresh. No cloud shortlist created; 15 tests passed and preview build clean.
 
