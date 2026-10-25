@@ -17,10 +17,15 @@ interface Props {
 
 export function ProductComparisonTable({ products, fields, onRemove, renderPrice }: Props) {
   const { data: swatches, isLoading: swatchesLoading } = useComparatorSwatches(products.flatMap(product => product ? [product.id] : []));
+  const labelColumnWidth = "11rem";
+  const productColumnWidth = `calc((100% - ${labelColumnWidth}) / ${Math.max(products.length, 1)})`;
   return <div className="overflow-x-auto" role="region" aria-label="Product comparison" tabIndex={0}>
     <table className="w-full min-w-[1040px] table-fixed border-collapse text-left">
       <caption className="sr-only">Selected products, specifications and pricing</caption>
-      <colgroup><col className="w-36" />{products.map((_, index) => <col key={index} />)}</colgroup>
+      <colgroup>
+        <col style={{ width: labelColumnWidth }} />
+        {products.map((_, index) => <col key={index} style={{ width: productColumnWidth }} />)}
+      </colgroup>
       <thead>
         <tr className="border-b border-border">
           <th scope="col"><span className="sr-only">Specification</span></th>
