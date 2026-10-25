@@ -1,6 +1,6 @@
 import type { TradeProduct } from "./tradeProducts";
 
-export const COMPARISON_COVER_FIELDS = ["projectName", "comparisonName", "clientName", "location", "style"] as const;
+export const COMPARISON_COVER_FIELDS = ["projectName", "comparisonName", "clientName", "location", "style", "layout"] as const;
 export type ComparisonCoverEdits = Partial<Record<typeof COMPARISON_COVER_FIELDS[number], string>>;
 
 export interface ComparatorDraft {

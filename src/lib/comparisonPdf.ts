@@ -114,11 +114,13 @@ function drawComparisonCover(doc: jsPDF, cover: ComparisonPdfCover, title: strin
     const height = rows.reduce((sum, r) => sum + r.lines.length * 4.5 + (stacked ? 9 : 4), 0);
     if (!stacked && y + height > 181) nextCoverPage();
     for (const { label, lines } of rows) {
-      if (y > 176) nextCoverPage();
+      if (y > 176) { if (stacked) break; nextCoverPage(); }
       doc.setFont("Inter", "normal").setFontSize(8).setTextColor(...hexToRgb(theme.accent));
       doc.text(label, x, y);
       if (stacked) y += 5;
-      for (const line of lines) {
+      for (const [i, line] of lines.entries()) {
+        // The split column shares its page with the pieces, so very long text is shortened, never clipped.
+        if (stacked && y > 177 && i < lines.length - 1) { doc.setFont("Inter", "normal").setFontSize(10).text(`${line.replace(/\s*\S*$/, "")} …`, valueX, y); y += 4.5; break; }
         if (y > 181) nextCoverPage();
         doc.setFont("Inter", "normal").setFontSize(10).setTextColor(...hexToRgb(theme.text));
         doc.text(line, valueX, y); y += 4.5;
@@ -128,14 +130,11 @@ function drawComparisonCover(doc: jsPDF, cover: ComparisonPdfCover, title: strin
   };
   if (layout === "split") {
     const top = y, leftW = 92, gap = 14, rightX = M + leftW + gap;
-    const startPage = doc.getNumberOfPages();
     if (details.length) {
       drawDetails(M, leftW, true);
-      doc.setPage(startPage);
       doc.setDrawColor(...hexToRgb(theme.accent)).setLineWidth(0.3).line(M + leftW + gap / 2, top - 4, M + leftW + gap / 2, 181);
       y = top;
       drawPieces(rightX, W - rightX - M);
-      doc.setPage(doc.getNumberOfPages());
     } else drawPieces(M, W - M * 2);
   } else if (layout === "details-first") {
     if (details.length) { drawDetails(M, W - M * 2, false); y += 6; }

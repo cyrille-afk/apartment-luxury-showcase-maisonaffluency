@@ -284,6 +284,19 @@ export default function TradeComparator() {
               setDraft(d => ({ ...d, coverEdits: { ...d.coverEdits, [coverScope]: { ...coverForm } } }));
               setCoverOpen(false); toast.success("Cover details saved");
             }}>
+              <fieldset className="space-y-2">
+                <legend className="text-xs font-medium text-muted-foreground">Cover layout</legend>
+                <div className="grid gap-2 sm:grid-cols-3">
+                  {COMPARISON_COVER_LAYOUTS.map(option => {
+                    const active = comparisonCoverLayout(coverForm.layout) === option.id;
+                    return <button key={option.id} type="button" aria-pressed={active} onClick={() => setCoverForm(form => ({ ...form, layout: option.id }))}
+                      className={`rounded-sm border p-3 text-left transition-colors ${active ? "border-primary bg-muted" : "border-border hover:bg-muted/50"}`}>
+                      <span className="block text-sm font-medium text-foreground">{option.label}</span>
+                      <span className="mt-1 block text-xs text-muted-foreground">{option.description}</span>
+                    </button>;
+                  })}
+                </div>
+              </fieldset>
               {([
                 ["projectName", "Project name"], ["comparisonName", "Comparison title"],
                 ["clientName", "Client name"], ["location", "Apartment / location"], ["style", "Style / apartment details"],
@@ -294,7 +307,7 @@ export default function TradeComparator() {
               <div className="flex flex-wrap justify-between gap-2 border-t border-border pt-4">
                 <Button type="button" variant="ghost" disabled={coverLoading} onClick={async () => {
                   setCoverLoading(true);
-                  try { setCoverForm(await readCoverDetails()); }
+                  try { const fresh = await readCoverDetails(); setCoverForm(form => ({ ...fresh, layout: form.layout })); }
                   catch { toast.error("The project's details could not be loaded. Please try again."); }
                   finally { setCoverLoading(false); }
                 }}>Use project details</Button>
