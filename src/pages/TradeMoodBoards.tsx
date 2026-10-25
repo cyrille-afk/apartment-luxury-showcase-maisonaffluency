@@ -9,6 +9,8 @@ import { useSearchParams } from "@/lib/router-compat";
 import { Search, Loader2, Paintbrush, Plus, X, Heart, FolderOpen, LayoutGrid, Sparkles, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { MoodBoardActions } from "@/components/trade/MoodBoardActions";
+import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type PickerFilter = "all" | "favourites" | "board";
@@ -41,6 +43,7 @@ export default function TradeMoodBoards() {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const projectId = searchParams.get("project");
+  const { clientSafe } = useClientSafeMode();
   const [search, setSearch] = useState("");
   const [board, setBoard] = useState<any[]>(() => projectId ? [] : loadBoardFromStorage(null));
   const [filter, setFilter] = useState<PickerFilter>(projectId ? "board" : "all");
@@ -50,15 +53,6 @@ export default function TradeMoodBoards() {
   const prevBoardIdsRef = useRef<string>("");
   const seededProjectRef = useRef<string | null>(null);
 
-  // Auto-clear legacy global mood-board storage when landing on this route.
-  // The new system scopes boards per project; the unscoped key is stale data.
-  useEffect(() => {
-    try {
-      localStorage.removeItem(BOARD_STORAGE_KEY_BASE);
-    } catch {
-      // ignore
-    }
-  }, []);
 
   const { data: projectTearsheetProducts = [], isLoading: loadingProjectTearsheetProducts } = useQuery({
     queryKey: ["mood-board-tearsheet-products", projectId, user?.id],
@@ -371,11 +365,14 @@ export default function TradeMoodBoards() {
       <div className="mx-auto w-full max-w-6xl space-y-6 [@media(min-width:1440px)]:max-w-[min(90vw,1800px)]">
 
 
-        <div>
-          <h1 className="font-display text-2xl text-foreground">Mood Board Builder</h1>
-          <p className="font-body text-sm text-muted-foreground mt-1">
-            Curate product imagery into collages for early-stage concept pitches.
-          </p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h1 className="font-display text-2xl text-foreground">Mood Board Builder</h1>
+            <p className="font-body text-sm text-muted-foreground mt-1">
+              Curate product imagery into collages for early-stage concept pitches.
+            </p>
+          </div>
+          <MoodBoardActions items={board} defaultProjectId={projectId} />
         </div>
 
         <div className="flex flex-col gap-6 lg:flex-row [@media(min-width:1440px)]:grid [@media(min-width:1440px)]:grid-cols-[minmax(0,1fr)_320px] [@media(min-width:1440px)]:gap-8">
@@ -401,12 +398,12 @@ export default function TradeMoodBoards() {
                           <p className="font-body text-[10px] text-white/80">{item.brand_name}</p>
                         </div>
                       </div>
-                      <button
+                      {!clientSafe && <button
                         onClick={() => removeFromBoard(item.id)}
                         className="absolute top-2 right-2 w-6 h-6 rounded-full bg-background/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="h-3 w-3" />
-                      </button>
+                      </button>}
                     </div>
                   ))}
                 </div>
@@ -414,7 +411,7 @@ export default function TradeMoodBoards() {
             </div>
 
             {/* AI Recommendations */}
-            {(recLoading || recommendations.length > 0 || recError) && (
+            {!clientSafe && (recLoading || recommendations.length > 0 || recError) && (
               <div className="border-t border-border pt-5">
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="font-display text-sm text-foreground flex items-center gap-2">
@@ -491,8 +488,8 @@ export default function TradeMoodBoards() {
             )}
           </div>
 
-          {/* Product picker */}
-          <div className="w-full shrink-0 space-y-3 lg:w-72 [@media(min-width:1440px)]:w-80">
+          {/* Product picker — hidden in Client View so the board presents cleanly */}
+          <div hidden={clientSafe} className="w-full shrink-0 space-y-3 lg:w-72 [@media(min-width:1440px)]:w-80">
             {/* Filter toggle */}
             <div className="flex gap-1 p-0.5 bg-muted/50 rounded-lg">
               {filterOptions.map((opt) => (

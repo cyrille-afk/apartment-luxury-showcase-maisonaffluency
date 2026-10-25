@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { trackDownload } from "@/lib/trackDownload";
 import { FileDown, Search, FolderOpen, FileText, BookOpen, FileSpreadsheet, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { brandInitial, ALPHABET } from "@/lib/resourceLetters";
 import SectionHero from "@/components/trade/SectionHero";
 import BrandCarousel from "@/components/trade/BrandCarousel";
 import { DocumentCardSkeleton } from "@/components/trade/skeletons";
@@ -42,6 +44,8 @@ const TradeDocuments = () => {
   const [documents, setDocuments] = useState<TradeDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [letter, setLetter] = useState<string | null>(null);
+  const [viewOnly, setViewOnly] = useState<TradeDocument | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const initialBrand = searchParams.get("brand") || "all";
   const [selectedBrand, setSelectedBrand] = useState(initialBrand);
@@ -129,9 +133,11 @@ const TradeDocuments = () => {
       const matchesSearch = !search || d.title.toLowerCase().includes(search.toLowerCase()) || d.brand_name.toLowerCase().includes(search.toLowerCase());
       const matchesBrand = selectedBrand === "all" || d.brand_name === selectedBrand;
       const matchesType = selectedType === "all" || d.document_type === selectedType;
-      return matchesSearch && matchesBrand && matchesType;
+      const matchesLetter = !letter || brandInitial(d.brand_name) === letter;
+      return matchesSearch && matchesBrand && matchesType && matchesLetter;
     });
-  }, [documents, search, selectedBrand, selectedType]);
+  }, [documents, search, selectedBrand, selectedType, letter]);
+  const lettersWithDocs = useMemo(() => new Set(documents.map((d) => brandInitial(d.brand_name))), [documents]);
 
   // Group by brand
   const grouped = useMemo(() => {
@@ -268,6 +274,19 @@ const TradeDocuments = () => {
         </select>
       </div>
 
+      {/* A–Z: jump to makers by first letter */}
+      <div role="group" aria-label="Filter by first letter" className="mb-6 -mt-3 flex flex-wrap gap-1">
+        <button type="button" onClick={() => setLetter(null)} aria-pressed={!letter}
+          className={cn("h-7 min-w-7 rounded border px-2 font-body text-[10px] uppercase tracking-wider transition-colors", !letter ? "border-foreground bg-foreground text-background" : "border-border text-muted-foreground hover:text-foreground")}>All</button>
+        {ALPHABET.map((l) => {
+          const has = lettersWithDocs.has(l);
+          return (
+            <button key={l} type="button" disabled={!has} onClick={() => setLetter(letter === l ? null : l)} aria-pressed={letter === l}
+              className={cn("h-7 w-7 rounded border font-body text-[11px] transition-colors", letter === l ? "border-foreground bg-foreground text-background" : has ? "border-border text-foreground hover:bg-muted" : "border-transparent text-muted-foreground/40 cursor-not-allowed")}>{l}</button>
+          );
+        })}
+      </div>
+
       {/* Content */}
       {loading ? (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-4 md:grid-cols-[repeat(auto-fill,minmax(320px,1fr))]">
@@ -301,6 +320,8 @@ const TradeDocuments = () => {
                       key={doc.id}
                       onClick={async (e) => {
                         e.preventDefault();
+                        // Price lists are admin-only and view-only: never downloaded.
+                        if (doc.document_type === "pricelist") { setViewOnly(doc); return; }
                         // Track download with country
                         trackDownload(doc.id);
                         try {
@@ -364,6 +385,17 @@ const TradeDocuments = () => {
         </div>
       )}
     </div>
+      <Dialog open={!!viewOnly} onOpenChange={(o) => !o && setViewOnly(null)}>
+        <DialogContent className="max-w-5xl" onContextMenu={(e) => e.preventDefault()}>
+          <DialogHeader>
+            <DialogTitle className="font-display">{viewOnly?.brand_name} — {viewOnly?.title}</DialogTitle>
+            <DialogDescription>Restricted price list · view only, admins only. Downloading and printing are disabled here.</DialogDescription>
+          </DialogHeader>
+          {viewOnly && (
+            <iframe title={viewOnly.title} src={`${viewOnly.file_url}#toolbar=0&navpanes=0`} className="h-[75vh] w-full rounded border border-border" />
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

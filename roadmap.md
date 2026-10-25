@@ -90,8 +90,8 @@
 ## Cyrille feedback doc (25 Oct)
 - [ ] Quotes & Proformas: "operator does not exist: trade_tier = text" — not reproducible; awaiting account/site.
 - [ ] Designers & Ateliers: another presentation style (awaiting direction).
-- [ ] Resources: alphabetical search.
-- [ ] Resources: restrict price list access per category + block download.
+- [x] Resources: alphabetical search.
+- [x] Resources: price lists admin-only (database rule) + view-only viewer.
 - [ ] Material Library: click image for higher-res view.
-- [ ] Mood Board Builder: next step after selecting products; Studio/Presentation View; save/add to project; export.
+- [x] Mood Board Builder: save to project, PDF export, Client View.
 - [ ] Mark-up & annotations: save, share, assign to project; Studio/Presentation View.
