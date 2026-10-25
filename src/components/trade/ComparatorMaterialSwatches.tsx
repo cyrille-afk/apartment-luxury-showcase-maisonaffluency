@@ -22,7 +22,7 @@ export function ComparatorMaterialSwatches({ materials, linked = [], loading = f
     {visible.map(swatch => <FinishSwatch key={swatch.id} swatch={swatch} />)}
     {!!more.length && <Popover><PopoverTrigger asChild>
       <Button type="button" variant="ghost" size="sm" className="h-7 rounded-none px-1 font-body text-xs font-normal text-muted-foreground hover:text-foreground" aria-label={`Show ${more.length} more finishes`}>+{more.length} more</Button>
-    </PopoverTrigger><PopoverContent align="start" className="w-64 max-w-[calc(100vw-2rem)] p-3">
+    </PopoverTrigger><PopoverContent align="start" onOpenAutoFocus={event => event.preventDefault()} className="w-64 max-w-[calc(100vw-2rem)] p-3">
       <div className="mb-3 font-body text-xs font-medium text-popover-foreground">Additional finishes</div>
       <div className="flex max-h-60 flex-wrap gap-2 overflow-y-auto p-1" aria-label="Additional material swatches">{more.map(swatch => <FinishSwatch key={swatch.id} swatch={swatch} />)}</div>
     </PopoverContent></Popover>}
