@@ -62,7 +62,7 @@ export async function buildMoodBoardPdf(title: string, items: MoodBoardExportIte
   let y = M + 28;
   const images = await Promise.all(items.map((i) => (i.image_url ? toDataUrl(i.image_url) : Promise.resolve(null))));
   items.forEach((item, idx) => {
-    if (y + cell + caption > H - M) {
+    if (y + cell * 0.75 + caption > H - M) {
       doc.addPage();
       header();
       x = M;

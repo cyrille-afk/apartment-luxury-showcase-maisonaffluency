@@ -34,7 +34,7 @@ export default function TearsheetBoardPdfExport({ projectId, projectName }: { pr
           product_name: p?.product_name ?? "Piece",
           brand_name: p?.brand_name ?? "",
           image_url: p?.image_url ?? null,
-          detail: [r.variant_label, r.fabric_label, r.wood_label].filter(Boolean).join(" · ") || null,
+          detail: [r.variant_label, ...[r.fabric_label, r.wood_label].filter((l) => l && !(r.variant_label ?? "").includes(l))].filter(Boolean).join(" · ") || null,
         };
       });
       const blob = await buildMoodBoardPdf(`${projectName} — ${title}`, items, null);
