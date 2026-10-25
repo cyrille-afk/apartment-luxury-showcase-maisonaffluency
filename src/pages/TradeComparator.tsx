@@ -179,7 +179,7 @@ export default function TradeComparator() {
       if (error) { toast.error("The project's details could not be loaded. Please try again."); return; }
       coverProject = data;
     }
-    const missingPricing = compareList.filter(p => !queryClient.getQueryData(["trade-product-pricing", p.id]));
+    const missingPricing = exportList.filter(p => !queryClient.getQueryData(["trade-product-pricing", p.id]));
     if (missingPricing.length) {
       const { data, error } = await supabase.functions.invoke("trade-catalog-pricing", { body: { pickIds: missingPricing.map(p => p.id) } });
       if (error) throw error;
@@ -190,7 +190,7 @@ export default function TradeComparator() {
       }
     }
     const fmt = (c: number | null, cur = "EUR") => c == null ? "Price upon Request" : new Intl.NumberFormat("en-IE", { style: "currency", currency: cur, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(c / 100);
-    const pieces = await Promise.all(compareList.map(async (p) => {
+    const pieces = await Promise.all(exportList.map(async (p) => {
       const pricing = queryClient.getQueryData<any>(["trade-product-pricing", p.id]);
       const prices = pricing ? comparatorPrices(pricing, discountPct) : { retail: null, trade: null };
       const cur = pricing?.currency || "EUR";
