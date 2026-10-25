@@ -49,6 +49,7 @@
     "brace-expansion": "1.1.21"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^4.0.101",
     "@hookform/resolvers": "^5.2.2",
     "@lovable.dev/cloud-auth-js": "^1.2.0",
     "@lovable.dev/mcp-js": "^3.0.4",
