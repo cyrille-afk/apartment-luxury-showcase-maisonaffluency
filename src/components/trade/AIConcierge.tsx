@@ -996,6 +996,7 @@ export function AIConcierge({
   const [reqIdCopied, setReqIdCopied] = useState<boolean>(false);
   const [previewCopied, setPreviewCopied] = useState<boolean>(false);
   const [stageOverride, setStageOverride] = useState<Stage | null>(null);
+  const [layoutProjectId, setLayoutProjectId] = useState<string | null>(null);
   const [hasTradeArtifacts, setHasTradeArtifacts] = useState<boolean | null>(null);
   const [artifactRefreshKey, setArtifactRefreshKey] = useState(0);
   const routeStage = stageFromPath(pathname);
@@ -5453,8 +5454,8 @@ export function AIConcierge({
                 if (!onboardingGate.completed) return null;
                 return (
                   <div key={i} className="w-full self-start">
-                    <ProjectPicker value={getConciergeSession()?.projectId ?? null} onChange={(projectId) => {
-                      updateConciergeSession({ projectId });
+                    <ProjectPicker value={layoutProjectId} onChange={(projectId) => {
+                      setLayoutProjectId(projectId);
                       try {
                         if (projectId) sessionStorage.setItem("trade:lastProjectFilter", projectId);
                         else sessionStorage.removeItem("trade:lastProjectFilter");
@@ -5465,6 +5466,10 @@ export function AIConcierge({
                       styleInput={item.styleInput ?? null}
                       onSelect={(option) => {
                         if (item.selected != null || streaming) return;
+                        if (!layoutProjectId) {
+                          toast.error("Choose or create your project above the layouts before generating its schedule and quote.");
+                          return;
+                        }
                         setTimeline((prev) =>
                           prev.map((t) =>
                             t.kind === "layout_options" && t.id === item.id && t.selected == null
