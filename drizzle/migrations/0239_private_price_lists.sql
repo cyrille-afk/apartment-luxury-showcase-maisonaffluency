@@ -1,0 +1,6 @@
+ALTER TABLE public.trade_documents ADD COLUMN IF NOT EXISTS storage_path text;
+COMMENT ON COLUMN public.trade_documents.storage_path IS 'Object path in the private price-lists bucket; when set, file_url is not a public link and the file is served only via admin signed URLs.';
+CREATE POLICY "Admins read price lists" ON storage.objects FOR SELECT TO authenticated USING (bucket_id = 'price-lists' AND (public.has_role(auth.uid(),'admin') OR public.has_role(auth.uid(),'super_admin')));
+CREATE POLICY "Admins upload price lists" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'price-lists' AND (public.has_role(auth.uid(),'admin') OR public.has_role(auth.uid(),'super_admin')));
+CREATE POLICY "Admins update price lists" ON storage.objects FOR UPDATE TO authenticated USING (bucket_id = 'price-lists' AND (public.has_role(auth.uid(),'admin') OR public.has_role(auth.uid(),'super_admin')));
+CREATE POLICY "Admins delete price lists" ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'price-lists' AND (public.has_role(auth.uid(),'admin') OR public.has_role(auth.uid(),'super_admin')));

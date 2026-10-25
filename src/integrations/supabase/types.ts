@@ -10639,6 +10639,7 @@ export type Database = {
           id: string
           is_featured_public: boolean
           sort_order: number
+          storage_path: string | null
           title: string
         }
         Insert: {
@@ -10651,6 +10652,7 @@ export type Database = {
           id?: string
           is_featured_public?: boolean
           sort_order?: number
+          storage_path?: string | null
           title: string
         }
         Update: {
@@ -10663,6 +10665,7 @@ export type Database = {
           id?: string
           is_featured_public?: boolean
           sort_order?: number
+          storage_path?: string | null
           title?: string
         }
         Relationships: []
