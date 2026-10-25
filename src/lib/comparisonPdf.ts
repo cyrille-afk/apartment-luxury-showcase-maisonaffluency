@@ -66,14 +66,14 @@ function drawComparisonCover(doc: jsPDF, cover: ComparisonPdfCover, title: strin
     doc.setFont("Inter", "normal").setFontSize(8).setTextColor(...hexToRgb(theme.accent));
     doc.text(label, M, y);
     doc.setFontSize(10).setTextColor(...hexToRgb(theme.text));
-    for (const [index, line] of lines.entries()) {
+    for (const line of lines) {
       if (y > 181) { doc.addPage(); doc.setFillColor(...hexToRgb(theme.background)).rect(0, 0, W, H, "F"); y = 30; }
       doc.text(line, M + 34, y); y += 4.5;
     }
     y += 4;
   }
   doc.setFont("Inter", "normal").setFontSize(8).setTextColor(...hexToRgb(theme.accent));
-  doc.text(`${count} PIECES  /  ${formatPdfDate(new Date(), "en-GB")}`, M, 193);
+  doc.text(`${count} ${count === 1 ? "PIECE" : "PIECES"}  /  ${formatPdfDate(new Date(), "en-GB")}`, M, 193);
   doc.text("maisonaffluency.com", W - M, 193, { align: "right" });
   doc.addPage(); doc.setTextColor(0); doc.setDrawColor(0);
 }
