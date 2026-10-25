@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { comparatorFacets, finishFacetKey, matchesComparatorFacets, mergeFacetOverrides, previewFacetGroups, materialParentOptions, materialTypeOptions } from "./comparatorFacets";
+import { comparatorFacets, finishFacetKey, groupedMaterialOptions, matchesComparatorFacets, mergeFacetOverrides, previewFacetGroups, materialParentOptions, materialTypeOptions, selectMaterialOption } from "./comparatorFacets";
 
 describe("comparatorFacets", () => {
   it("classifies material, finish and colour from names", () => {

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { comparatorFacets, comparatorFinishNames, finishFacetKey, matchesComparatorFacets, materialParentOptions, materialTypeOptions, type FinishFacetOverride, type ComparatorFacetKind, type ComparatorFacetSelection } from "@/lib/comparatorFacets";
+import { comparatorFacets, comparatorFinishNames, finishFacetKey, groupedMaterialOptions, matchesComparatorFacets, materialTypeOptions, selectMaterialOption, type FinishFacetOverride, type ComparatorFacetKind, type ComparatorFacetSelection } from "@/lib/comparatorFacets";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -43,6 +44,9 @@ export function ProductComparisonTable({ products: allProducts, fields, onRemove
   const [selection, setSelection] = useState<ComparatorFacetSelection & { materialType?: string }>({});
   const facetsById = useMemo(() => new Map(allProducts.flatMap(p => p ? [[p.id, comparatorFacets(p.materials as string | null, swatches?.get(p.id), overrides)] as const] : [])), [allProducts, swatches, overrides]);
   const options = useMemo(() => Object.fromEntries((Object.keys(FACET_LABELS) as ComparatorFacetKind[]).map(k => [k, [...new Set([...facetsById.values()].flatMap(f => f[k]))].sort()])) as Record<ComparatorFacetKind, string[]>, [facetsById]);
+  const materialGroups = useMemo(() => groupedMaterialOptions(options.material), [options.material]);
+  const materialItems = useMemo(() => new Set(materialGroups.flatMap(g => g.items)), [materialGroups]);
+  const materialValue = selection.materialType && materialItems.has(selection.materialType) ? selection.materialType : selection.material && materialItems.has(selection.material) ? selection.material : "all";
   const active = Object.values(selection).some(Boolean);
   const products = active ? allProducts.filter(p => p && matchesComparatorFacets(facetsById.get(p.id)!, selection)) : allProducts;
   const visibleSignature = products.map(p => p?.id ?? "").join("|");
@@ -56,10 +60,18 @@ export function ProductComparisonTable({ products: allProducts, fields, onRemove
     {(hasOptions || (isAdmin && finishNames.length > 0)) && <div className="mb-6 flex flex-wrap items-end gap-4" role="group" aria-label="Filter compared products">
       {options.material.length > 0 && <label className="flex flex-col gap-1.5">
         <span className="font-body text-[10px] font-bold uppercase tracking-[0.14em] text-foreground/70">Material</span>
-        <select value={selection.material ?? ""} onChange={e => setSelection(s => ({ ...s, material: e.target.value || undefined, materialType: undefined }))} className="h-9 min-w-40 border border-border bg-background px-3 font-body text-sm text-foreground">
-          <option value="">All</option>
-          {materialParentOptions(options.material).map(v => <option key={v} value={v}>{v}</option>)}
-        </select>
+        <Select value={materialValue} onValueChange={v => setSelection(s => ({ ...s, ...selectMaterialOption(v) }))}>
+          <SelectTrigger className="h-9 w-auto min-w-40 border border-border bg-background px-3 font-body text-sm text-foreground">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="max-h-80 min-w-48">
+            <SelectItem value="all">All</SelectItem>
+            {materialGroups.map(g => <SelectGroup key={g.header}>
+              <SelectLabel className="font-body text-[10px] font-normal uppercase tracking-[0.14em] text-muted-foreground">{g.header}</SelectLabel>
+              {g.items.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+            </SelectGroup>)}
+          </SelectContent>
+        </Select>
       </label>}
       {selection.material && materialTypeOptions(options.material, selection.material).length > 0 && <label className="flex flex-col gap-1.5">
         <span className="font-body text-[10px] font-bold uppercase tracking-[0.14em] text-foreground/70">Type</span>
