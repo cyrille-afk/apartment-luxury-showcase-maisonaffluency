@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { comparatorFacets, comparatorFinishNames, finishFacetKey, matchesComparatorFacets, type FinishFacetOverride, type ComparatorFacetKind, type ComparatorFacetSelection } from "@/lib/comparatorFacets";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,12 +18,13 @@ interface Props {
   fields: ComparisonField[];
   onRemove: (id: string) => void;
   renderPrice: (product: TradeProduct | null, net: boolean) => ReactNode;
+  onVisibleProductsChange?: (visible: TradeProduct[] | null) => void;
 }
 
 const NO_OVERRIDES = new Map<string, FinishFacetOverride>();
 const FACET_LABELS: Record<ComparatorFacetKind, string> = { material: "Material", finish: "Finish", color: "Colour" };
 
-export function ProductComparisonTable({ products: allProducts, fields, onRemove, renderPrice }: Props) {
+export function ProductComparisonTable({ products: allProducts, fields, onRemove, renderPrice, onVisibleProductsChange }: Props) {
   const { data: swatches, isLoading: swatchesLoading } = useComparatorSwatches(allProducts.flatMap(product => product ? [product.id] : []));
   const { isAdmin } = useAuth();
   const { data: overrides = NO_OVERRIDES } = useQuery({
@@ -40,6 +41,10 @@ export function ProductComparisonTable({ products: allProducts, fields, onRemove
   const options = useMemo(() => Object.fromEntries((Object.keys(FACET_LABELS) as ComparatorFacetKind[]).map(k => [k, [...new Set([...facetsById.values()].flatMap(f => f[k]))].sort()])) as Record<ComparatorFacetKind, string[]>, [facetsById]);
   const active = Object.values(selection).some(Boolean);
   const products = active ? allProducts.filter(p => p && matchesComparatorFacets(facetsById.get(p.id)!, selection)) : allProducts;
+  const visibleSignature = products.map(p => p?.id ?? "").join("|");
+  useEffect(() => {
+    onVisibleProductsChange?.(active ? products.filter((p): p is TradeProduct => !!p) : null);
+  }, [active, visibleSignature, onVisibleProductsChange]);
   const hasOptions = Object.values(options).some(o => o.length > 0);
   const labelColumnWidth = "11rem";
   const productColumnWidth = `calc((100% - ${labelColumnWidth}) / ${Math.max(products.length, 1)})`;

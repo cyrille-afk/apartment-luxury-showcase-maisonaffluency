@@ -52,6 +52,7 @@ export default function TradeComparator() {
   const projectId = params.get("project");
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [visiblePieces, setVisiblePieces] = useState<TradeProduct[] | null>(null);
   const actionsRef = useRef<HTMLElement>(null);
   useEffect(() => {
     const header = document.querySelector<HTMLElement>(".trade-editorial-header");
@@ -168,6 +169,9 @@ export default function TradeComparator() {
     if (exporting) return;
     setExporting(true);
     try {
+    // Only the pieces currently visible after facet filtering are exported;
+    // when no filter is active this is the full comparison list.
+    const exportList = visiblePieces ?? compareList;
     // Read the selected project's current, accessible display fields at export time.
     let coverProject = null;
     if (projectId) {
@@ -175,7 +179,7 @@ export default function TradeComparator() {
       if (error) { toast.error("The project's details could not be loaded. Please try again."); return; }
       coverProject = data;
     }
-    const missingPricing = compareList.filter(p => !queryClient.getQueryData(["trade-product-pricing", p.id]));
+    const missingPricing = exportList.filter(p => !queryClient.getQueryData(["trade-product-pricing", p.id]));
     if (missingPricing.length) {
       const { data, error } = await supabase.functions.invoke("trade-catalog-pricing", { body: { pickIds: missingPricing.map(p => p.id) } });
       if (error) throw error;
@@ -186,7 +190,7 @@ export default function TradeComparator() {
       }
     }
     const fmt = (c: number | null, cur = "EUR") => c == null ? "Price upon Request" : new Intl.NumberFormat("en-IE", { style: "currency", currency: cur, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(c / 100);
-    const pieces = await Promise.all(compareList.map(async (p) => {
+    const pieces = await Promise.all(exportList.map(async (p) => {
       const pricing = queryClient.getQueryData<any>(["trade-product-pricing", p.id]);
       const prices = pricing ? comparatorPrices(pricing, discountPct) : { retail: null, trade: null };
       const cur = pricing?.currency || "EUR";
@@ -324,7 +328,7 @@ export default function TradeComparator() {
             <Input value={shortlistName} onChange={(e) => setShortlistName(e.target.value)} placeholder="Shortlist name (e.g. client, project)" aria-label="Shortlist name" className="h-9 w-full font-body text-xs sm:w-64" />
             <ProjectPicker value={projectId} onChange={value => { const next = new URLSearchParams(params); if (value) next.set("project", value); else next.delete("project"); setParams(next); }} />
             <Button size="sm" variant="outline" onClick={saveShortlist} disabled={compareList.length === 0 || !projectId || saving}><Bookmark className="mr-2 h-3.5 w-3.5" />{saving ? "Saving…" : "Save shortlist to project"}</Button>
-            <Button size="sm" variant="outline" onClick={() => void exportPdf()} disabled={compareList.length === 0 || exporting}><FileDown className="mr-2 h-3.5 w-3.5" />{exporting ? "Preparing PDF…" : "Export comparison PDF"}</Button>
+            <Button size="sm" variant="outline" onClick={() => void exportPdf()} disabled={compareList.length === 0 || exporting || (visiblePieces !== null && visiblePieces.length === 0)}><FileDown className="mr-2 h-3.5 w-3.5" />{exporting ? "Preparing PDF…" : visiblePieces && visiblePieces.length !== compareList.length ? `Export visible (${visiblePieces.length})` : "Export comparison PDF"}</Button>
           </div>
           {shortlists.length > 0 && <ul className="flex flex-wrap gap-2" aria-label="Saved shortlists">
             {shortlists.map((s: any) => (
@@ -336,7 +340,7 @@ export default function TradeComparator() {
           </ul>}
         </section>
 
-        <ProductComparisonTable products={comparisonSlots} fields={FIELDS} onRemove={removeFromCompare} renderPrice={(product, net) => <ComparisonPrice product={product} net={net} />} />
+        <ProductComparisonTable products={comparisonSlots} fields={FIELDS} onRemove={removeFromCompare} onVisibleProductsChange={setVisiblePieces} renderPrice={(product, net) => <ComparisonPrice product={product} net={net} />} />
       </div>
     </>
   );
