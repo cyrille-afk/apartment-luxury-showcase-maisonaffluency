@@ -28,10 +28,12 @@ export default function TearsheetBoardSharing({ projectId, projectName }: { proj
   const projectBoards = boards.filter(b => b.project_id === projectId);
   const selectedBoard = projectBoards.find(b => b.id === boardId);
 
+  useEffect(() => { setInvites([]); }, [selectedBoard?.id]);
+
   useEffect(() => {
     if (!open || !selectedBoard) { setInvites([]); return; }
     let active = true;
-    setLoading(true); setError(""); setInvites([]);
+    setLoading(true); setError("");
     supabase.from("board_invites").select("id, email, status, expires_at, last_seen_at, view_only, role")
       .eq("board_id", selectedBoard.id).order("created_at", { ascending: false })
       .then(({ data, error: failure }) => {
@@ -70,7 +72,7 @@ export default function TearsheetBoardSharing({ projectId, projectName }: { proj
             <Button className="w-full" disabled={!selectedBoard || !!busy || loading || !!error} onClick={() => { setOpen(false); setInviteOpen(true); }}><UserPlus className="h-4 w-4" />Invite architect or designer</Button>
             {selectedBoard && <section aria-label="Board invitations" className="border-t border-border pt-4">
               <h3 className="mb-3 font-display text-base">Invitations</h3>
-              {loading ? <p role="status" className="text-sm text-muted-foreground">Loading invitations…</p> : invites.length === 0 && !error ? <p className="text-sm text-muted-foreground">No invitations yet.</p> :
+              {loading && invites.length === 0 ? <p role="status" className="text-sm text-muted-foreground">Loading invitations…</p> : invites.length === 0 && !error ? <p className="text-sm text-muted-foreground">No invitations yet.</p> :
                 <ul className="divide-y divide-border">{invites.map(inv => {
                   const access = boardInvitationStatus(inv, Date.now());
                   const inactive = !access.canView;
