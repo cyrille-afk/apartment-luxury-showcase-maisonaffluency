@@ -11,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { FinishCategoryDialog } from "./FinishCategoryDialog";
+import { ComparatorDimensions } from "./ComparatorDimensions";
 
 interface ComparisonField { key: string; label: string }
 interface Props {
@@ -100,7 +101,7 @@ export function ProductComparisonTable({ products: allProducts, fields, onRemove
               const text = typeof value === "string" && value.trim() ? value : "—";
               return <td key={product?.id ?? `${field.key}-${index}`} data-spec-different={differences[index] ? "" : undefined} className={`break-words px-3 py-5 text-left align-top font-body text-sm leading-relaxed text-foreground ${price ? "tabular-nums" : ""} ${trade ? "font-semibold" : "font-normal"} ${differences[index] ? "bg-muted/50" : ""}`}>
                 {differences[index] && <span className="sr-only">Different across selected products: </span>}
-                {price ? renderPrice(product, trade) : field.key === "materials" && product ? <ComparatorMaterialSwatches materials={text === "—" ? "" : text} linked={swatches?.get(product.id)} loading={swatchesLoading} /> : <span className="whitespace-pre-line">{text}</span>}
+                {price ? renderPrice(product, trade) : field.key === "materials" && product ? <ComparatorMaterialSwatches materials={text === "—" ? "" : text} linked={swatches?.get(product.id)} loading={swatchesLoading} /> : field.key === "dimensions" && product ? <ComparatorDimensions dimensions={text === "—" ? "" : text} /> : <span className="whitespace-pre-line">{text}</span>}
               </td>;
             })}
           </tr>;
