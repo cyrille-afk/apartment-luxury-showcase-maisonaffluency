@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export type UserBoardSummary = {
   id: string;
+  project_id: string | null;
   title: string;
   client_name: string | null;
   status: string;
@@ -14,7 +15,7 @@ export type UserBoardSummary = {
  * Lightweight fetch of the signed-in user's tearsheets, with item counts.
  * Used by the concierge proposal card to let the user pick which board to append to.
  */
-export function useUserBoards(enabled: boolean) {
+export function useUserBoards(enabled: boolean, projectId?: string | null) {
   const [boards, setBoards] = useState<UserBoardSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,12 +38,14 @@ export function useUserBoards(enabled: boolean) {
         return;
       }
 
-      const { data: rows, error: err } = await supabase
+      let query = supabase
         .from("client_boards")
-        .select("id, title, client_name, status, updated_at")
+        .select("id, project_id, title, client_name, status, updated_at")
         .eq("user_id", userId)
         .order("updated_at", { ascending: false })
         .limit(100);
+      if (projectId) query = query.eq("project_id", projectId);
+      const { data: rows, error: err } = await query;
 
       if (err) {
         if (!cancelled) {
@@ -68,6 +71,7 @@ export function useUserBoards(enabled: boolean) {
       setBoards(
         (rows || []).map((r) => ({
           id: r.id,
+          project_id: r.project_id,
           title: r.title || "Untitled",
           client_name: r.client_name || null,
           status: r.status,
@@ -79,7 +83,7 @@ export function useUserBoards(enabled: boolean) {
     })();
 
     return () => { cancelled = true; };
-  }, [enabled]);
+  }, [enabled, projectId]);
 
   return { boards, loading, error };
 }

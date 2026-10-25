@@ -13,13 +13,14 @@ interface Props {
   value: string | null;
   onChange: (projectId: string | null) => void;
   compact?: boolean;
+  required?: boolean;
 }
 
 /**
  * Shared project picker. Shows recent projects first (auto-suggest),
  * then full list, with inline "Create project" affordance.
  */
-export function ProjectPicker({ value, onChange, compact }: Props) {
+export function ProjectPicker({ value, onChange, compact, required }: Props) {
   const { user } = useAuth();
   const { currentStudio } = useStudio();
   const { projects, loading, refresh } = useProjects({ activeOnly: false });
@@ -68,21 +69,23 @@ export function ProjectPicker({ value, onChange, compact }: Props) {
     toast.success("Project created");
     setNewName("");
     await refresh();
+    window.dispatchEvent(new Event("trade-projects:changed"));
     handleSelect((data as any).id);
   };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button
+        <Button
           type="button"
+          variant="outline"
           className={`inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-1.5 font-body text-xs text-foreground hover:bg-muted/40 transition-colors ${compact ? "" : "min-h-[36px]"}`}
         >
           <FolderOpen className="h-3.5 w-3.5 text-muted-foreground" />
           <span className="truncate max-w-[180px]">
-            {selected ? selected.name : "Assign to project"}
+            {selected ? selected.name : required ? "Choose or create project" : "Assign to project"}
           </span>
-          {selected && (
+          {selected && !required && (
             <X
               className="h-3 w-3 text-muted-foreground hover:text-foreground"
               onClick={(e) => {
@@ -91,7 +94,7 @@ export function ProjectPicker({ value, onChange, compact }: Props) {
               }}
             />
           )}
-        </button>
+        </Button>
       </PopoverTrigger>
       <PopoverContent className="w-72 p-0" align="start">
         <div className="p-2 border-b border-border">
@@ -147,6 +150,7 @@ export function ProjectPicker({ value, onChange, compact }: Props) {
             variant="default"
             disabled={!newName.trim() || creating}
             onClick={handleCreate}
+            aria-label="Create project"
             className="h-8 px-2"
           >
             <Plus className="h-3.5 w-3.5" />
