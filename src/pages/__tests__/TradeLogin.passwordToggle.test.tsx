@@ -98,7 +98,7 @@ describe("Trade Program sign-in password reveal", () => {
   });
   it("keeps submissions locked after confirmed authentication", async () => {
     const user = { id: "test-user", aud: "authenticated", app_metadata: {}, user_metadata: {}, created_at: "2026-10-25T00:00:00Z" };
-    const session = { access_token: "test", refresh_token: "test", expires_in: 3600, token_type: "bearer", user };
+    const session = { access_token: "test", refresh_token: "test", expires_in: 3600, token_type: "bearer" as const, user };
     vi.mocked(supabase.auth.signInWithPassword).mockResolvedValueOnce({ data: { session, user }, error: null });
     render(<TradeLogin />);
     fireEvent.change(screen.getByPlaceholderText("Trade ID or Email Address"), { target: { value: "test@example.com" } });
