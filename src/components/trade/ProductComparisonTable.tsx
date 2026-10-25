@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { comparatorFacets, comparatorFinishNames, finishFacetKey, groupedMaterialOptions, matchesComparatorFacets, materialTypeOptions, selectMaterialOption, type FinishFacetOverride } from "@/lib/comparatorFacets";
+import { comparatorFacets, comparatorFinishNames, finishFacetKey, groupedMaterialOptions, matchesComparatorFacets, materialOptionLabel, materialTypeOptions, selectMaterialOption, type FinishFacetOverride } from "@/lib/comparatorFacets";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -71,7 +71,7 @@ export function ProductComparisonTable({ products: allProducts, fields, onRemove
             <SelectItem value="all">All</SelectItem>
             {materialGroups.map(g => <SelectGroup key={g.header}>
               <SelectLabel className="font-body text-[10px] font-normal uppercase tracking-[0.14em] text-muted-foreground">{g.header}</SelectLabel>
-              {g.items.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+              {g.items.map(v => <SelectItem key={v} value={v}>{materialOptionLabel(v)}</SelectItem>)}
             </SelectGroup>)}
           </SelectContent>
         </Select>

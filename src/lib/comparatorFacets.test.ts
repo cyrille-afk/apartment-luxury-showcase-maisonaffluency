@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { comparatorFacets, finishFacetKey, groupedMaterialOptions, matchesComparatorFacets, mergeFacetOverrides, previewFacetGroups, materialParentOptions, materialTypeOptions, selectMaterialOption } from "./comparatorFacets";
+import { comparatorFacets, finishFacetKey, groupedMaterialOptions, matchesComparatorFacets, mergeFacetOverrides, previewFacetGroups, materialParent, materialOptionLabel, materialParentOptions, materialTypeOptions, selectMaterialOption } from "./comparatorFacets";
 
 describe("comparatorFacets", () => {
   it("classifies material, finish and colour from names", () => {
@@ -46,17 +46,31 @@ describe("comparatorFacets", () => {
     expect(materialTypeOptions(["Oak", "Ash", "Bronze"], "Metal")).toEqual(["Bronze"]);
   });
   it("grouped dropdown: family headers, shared textiles header, generic value leads its group", () => {
-    expect(groupedMaterialOptions(["Oak", "Ash", "Bronze", "Fabric", "Leather"])).toEqual([
-      { header: "Wood", items: ["Ash", "Oak"] },
-      { header: "Metal", items: ["Bronze"] },
-      { header: "Textiles & Leather", items: ["Fabric", "Leather"] },
-    ]);
-    expect(groupedMaterialOptions(["Oak", "Wood"])).toEqual([{ header: "Wood", items: ["Wood", "Oak"] }]);
+    const groups = groupedMaterialOptions(["Oak", "Ash", "Bronze", "Fabric", "Leather"]);
+    expect(groups.map(g => g.header)).toEqual(["Wood", "Metal", "Textiles & Leather"]);
+    expect(groups[2].items.slice(0, 2)).toEqual(["Fabric", "Leather"]);
+    expect(groupedMaterialOptions(["Oak", "Wood"])[0].items).toEqual(["Wood", "Ash", "Beech", "Cherry", "Elm", "Maple", "Oak", "Teak", "Walnut"]);
     expect(groupedMaterialOptions(["Ceramic"])).toEqual([{ header: "Other", items: ["Ceramic"] }]);
   });
   it("picking a dropdown item narrows to the type, or matches the whole family for a generic name", () => {
     expect(selectMaterialOption("Ash")).toEqual({ material: "Wood", materialType: "Ash" });
     expect(selectMaterialOption("Fabric")).toEqual({ material: "Fabric" });
     expect(selectMaterialOption("all")).toEqual({ material: undefined, materialType: undefined });
+  });
+  it("places Parchment under Textiles & Leather", () => {
+    expect(groupedMaterialOptions(["Parchment"]).map(g => g.header)).toEqual(["Textiles & Leather"]);
+    expect(selectMaterialOption("Parchment")).toEqual({ material: "Leather", materialType: "Parchment" });
+  });
+  it("classifies Bouclé and Velvet as fabrics", () => {
+    expect([materialParent("Bouclé"), materialParent("Velvet")]).toEqual(["Fabric", "Fabric"]);
+    expect(matchesComparatorFacets(comparatorFacets("Bouclé Velvet"), { material: "Fabric" })).toBe(true);
+  });
+  it("keeps Walnut available under Wood even when current pieces only contain Oak", () => {
+    expect(groupedMaterialOptions(["Oak"])[0].items).toContain("Walnut");
+    expect(matchesComparatorFacets(comparatorFacets("Walnut"), selectMaterialOption("Walnut"))).toBe(true);
+  });
+  it("distinguishes the family-wide Wood option from its header", () => {
+    expect(materialOptionLabel("Wood")).toBe("All wood");
+    expect(materialOptionLabel("Walnut")).toBe("Walnut");
   });
 });
