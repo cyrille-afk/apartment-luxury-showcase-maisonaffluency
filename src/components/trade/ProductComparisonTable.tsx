@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { TradeProduct } from "@/lib/tradeProducts";
 import { differingSpecificationCells } from "@/lib/comparatorDifferences";
+import { ComparatorMaterialSwatches } from "./ComparatorMaterialSwatches";
+import { useComparatorSwatches } from "@/hooks/useComparatorSwatches";
 
 interface ComparisonField { key: string; label: string }
 interface Props {
@@ -13,17 +15,8 @@ interface Props {
   renderPrice: (product: TradeProduct | null, net: boolean) => ReactNode;
 }
 
-function MaterialItems({ value }: { value: string }) {
-  const items = value.split(/\r?\n|\s*[•·;]\s*/).map(item => item.trim()).filter(Boolean);
-  return <ul className="space-y-2">
-    {items.map((item, index) => <li key={`${item}-${index}`} className="flex items-start gap-2.5">
-      <span aria-hidden className="mt-2 h-1 w-1 shrink-0 rounded-full bg-muted-foreground/40" />
-      <span className="min-w-0">{item}</span>
-    </li>)}
-  </ul>;
-}
-
 export function ProductComparisonTable({ products, fields, onRemove, renderPrice }: Props) {
+  const { data: swatches, isLoading: swatchesLoading } = useComparatorSwatches(products.flatMap(product => product ? [product.id] : []));
   return <div className="overflow-x-auto" role="region" aria-label="Product comparison" tabIndex={0}>
     <table className="w-full min-w-[1040px] table-fixed border-collapse text-left">
       <caption className="sr-only">Selected products, specifications and pricing</caption>
@@ -58,7 +51,7 @@ export function ProductComparisonTable({ products, fields, onRemove, renderPrice
               const text = typeof value === "string" && value.trim() ? value : "—";
               return <td key={product?.id ?? `${field.key}-${index}`} data-spec-different={differences[index] ? "" : undefined} className={`break-words px-3 py-5 text-left align-top font-body text-sm leading-relaxed text-foreground ${price ? "tabular-nums" : ""} ${trade ? "font-semibold" : "font-normal"} ${differences[index] ? "bg-muted/50" : ""}`}>
                 {differences[index] && <span className="sr-only">Different across selected products: </span>}
-                {price ? renderPrice(product, trade) : field.key === "materials" && text !== "—" ? <MaterialItems value={text} /> : <span className="whitespace-pre-line">{text}</span>}
+                {price ? renderPrice(product, trade) : field.key === "materials" && product ? <ComparatorMaterialSwatches materials={text === "—" ? "" : text} linked={swatches?.get(product.id)} loading={swatchesLoading} /> : <span className="whitespace-pre-line">{text}</span>}
               </td>;
             })}
           </tr>;
