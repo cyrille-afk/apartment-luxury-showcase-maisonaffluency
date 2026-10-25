@@ -45,4 +45,18 @@ describe("comparatorFacets", () => {
     expect(materialTypeOptions(["Oak", "Ash", "Bronze", "Wood"], "Wood")).toEqual(["Ash", "Oak"]);
     expect(materialTypeOptions(["Oak", "Ash", "Bronze"], "Metal")).toEqual(["Bronze"]);
   });
+  it("grouped dropdown: family headers, shared textiles header, generic value leads its group", () => {
+    expect(groupedMaterialOptions(["Oak", "Ash", "Bronze", "Fabric", "Leather"])).toEqual([
+      { header: "Wood", items: ["Ash", "Oak"] },
+      { header: "Metal", items: ["Bronze"] },
+      { header: "Textiles & Leather", items: ["Fabric", "Leather"] },
+    ]);
+    expect(groupedMaterialOptions(["Oak", "Wood"])).toEqual([{ header: "Wood", items: ["Wood", "Oak"] }]);
+    expect(groupedMaterialOptions(["Ceramic"])).toEqual([{ header: "Other", items: ["Ceramic"] }]);
+  });
+  it("picking a dropdown item narrows to the type, or matches the whole family for a generic name", () => {
+    expect(selectMaterialOption("Ash")).toEqual({ material: "Wood", materialType: "Ash" });
+    expect(selectMaterialOption("Fabric")).toEqual({ material: "Fabric" });
+    expect(selectMaterialOption("all")).toEqual({ material: undefined, materialType: undefined });
+  });
 });
