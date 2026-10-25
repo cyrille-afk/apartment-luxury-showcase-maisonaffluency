@@ -1,7 +1,7 @@
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { buildComparisonPdf, comparisonImage } from "@/lib/comparisonPdf";
+import { buildComparisonPdf, comparisonImage, COMPARISON_COVER_LAYOUTS, comparisonCoverLayout } from "@/lib/comparisonPdf";
 import { comparatorSwatchesQueryOptions } from "@/hooks/useComparatorSwatches";
 import { comparatorSwatches } from "@/lib/comparatorSwatches";
 import { downloadBlob } from "@/lib/furnishingSchedulePdf";
