@@ -349,6 +349,13 @@ export default function TradeComparator() {
                   })}
                 </div>
               </fieldset>
+              <div className="flex items-start gap-2 border-t border-border pt-4">
+                <Checkbox id="cover-originalPrices" className="mt-0.5" checked={coverForm.originalPrices !== "false"} onCheckedChange={checked => setCoverForm(form => ({ ...form, originalPrices: checked ? "true" : "false" }))} />
+                <div className="space-y-0.5">
+                  <Label htmlFor="cover-originalPrices" className="text-xs font-medium text-muted-foreground">Show original supplier prices in the PDF</Label>
+                  <p className="text-xs text-muted-foreground">When off, price rows show only the converted price.</p>
+                </div>
+              </div>
               {([
                 ["projectName", "Project name"], ["comparisonName", "Comparison title"],
                 ["clientName", "Client name"], ["location", "Apartment / location"], ["style", "Style / apartment details"],
