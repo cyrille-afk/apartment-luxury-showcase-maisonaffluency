@@ -164,6 +164,7 @@ export async function buildComparisonPdf(pieces: ComparisonPdfPiece[], rows: { k
     return [pixel[0], pixel[1], pixel[2]];
   };
   const colors = { paper: palette("paper"), ink: palette("ink"), muted: palette("muted"), rule: palette("rule"), image: palette("image"), trade: palette("trade") };
+  const brand = { jade: hexToRgb(DEFAULT_COVER_THEME.background), gold: hexToRgb(DEFAULT_COVER_THEME.accent), cream: hexToRgb(DEFAULT_COVER_THEME.text) };
   const bodyFont = 8, lineH = 3.8;
   const textLines = (text: string, width = colW - 6) => {
     doc.setFont("Inter", "normal").setFontSize(bodyFont);
@@ -199,11 +200,16 @@ export async function buildComparisonPdf(pieces: ComparisonPdfPiece[], rows: { k
   const pages = comparisonSectionPages(sections.map(s => s.height), endY - firstY, endY - 30 - nameHeight);
   const coverPages = doc.getNumberOfPages() - 1;
   const heading = (withImages: boolean) => {
+    // Branded jade band + gold rule; the grid itself stays on light cream paper for legibility.
     doc.setFillColor(...colors.paper).rect(0, 0, W, H, "F");
-    doc.setFont("Cormorant", "normal").setFontSize(17).setTextColor(...colors.ink);
-    doc.text("MAISON AFFLUENCY", M, 14);
-    doc.setFont("Inter", "normal").setFontSize(8).setTextColor(...colors.muted);
-    doc.text(title, M, 21); doc.text(formatPdfDate(new Date(), "en-GB"), W - M, 14, { align: "right" });
+    doc.setFillColor(...brand.jade).rect(0, 0, W, 25, "F");
+    doc.setDrawColor(...brand.gold).setLineWidth(0.5).line(0, 25, W, 25);
+    const logoH = 15, logoW = logoH * logo.width / logo.height;
+    doc.addImage(logo.data, "PNG", W - M - logoW, 5, logoW, logoH, "maison-affluency-cover-logo");
+    doc.setFont("Cormorant", "normal").setFontSize(17).setTextColor(...brand.cream);
+    doc.text("MAISON AFFLUENCY", M, 12);
+    doc.setFont("Inter", "normal").setFontSize(8).setTextColor(...brand.gold);
+    doc.text(`${title}  ·  ${formatPdfDate(new Date(), "en-GB")}`, M, 19);
     let y = 30;
     if (withImages) {
       pieces.forEach((piece, index) => {
@@ -240,8 +246,11 @@ export async function buildComparisonPdf(pieces: ComparisonPdfPiece[], rows: { k
     for (const index of indexes) {
       const section = sections[index];
       const trade = section.key === "trade_price_cents";
-      if (trade) doc.setFillColor(...colors.trade).rect(M, y, W - M * 2, section.height, "F");
-      doc.setFont("Inter", "normal").setFontSize(7).setTextColor(...colors.muted);
+      if (trade) {
+        doc.setFillColor(...colors.trade).rect(M, y, W - M * 2, section.height, "F");
+        doc.setFillColor(...brand.gold).rect(M, y, 0.8, section.height, "F");
+      }
+      doc.setFont("Inter", "normal").setFontSize(7).setTextColor(...brand.jade);
       doc.text(textLines(section.label.replace(/−/g, "-").toUpperCase(), labelW - 5), M, y + 4.5);
       pieces.forEach((_, i) => {
         const x = M + labelW + i * colW;
@@ -296,7 +305,8 @@ export async function buildComparisonPdf(pieces: ComparisonPdfPiece[], rows: { k
   for (let page = 1; page <= total; page++) {
     doc.setPage(page);
     const onCover = page <= coverPages;
-    doc.setFont("Inter", "normal").setFontSize(7).setTextColor(...(onCover ? hexToRgb(DEFAULT_COVER_THEME.text) : colors.muted));
+    if (!onCover) doc.setDrawColor(...brand.gold).setLineWidth(0.3).line(M, 199, W - M, 199);
+    doc.setFont("Inter", "normal").setFontSize(7).setTextColor(...(onCover ? brand.cream : brand.jade));
     doc.text(`Page ${page} of ${total} | Maison Affluency Trade Portal`, W / 2, 204, { align: "center" });
   }
   return doc.output("blob");
