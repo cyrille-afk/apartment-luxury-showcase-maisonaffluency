@@ -12553,6 +12553,45 @@ export type Database = {
         }
         Relationships: []
       }
+      website_status: {
+        Row: {
+          available: boolean
+          checked_at: string
+          path: string
+        }
+        Insert: {
+          available: boolean
+          checked_at: string
+          path: string
+        }
+        Update: {
+          available?: boolean
+          checked_at?: string
+          path?: string
+        }
+        Relationships: []
+      }
+      website_status_incidents: {
+        Row: {
+          id: string
+          path: string
+          resolved_at: string | null
+          started_at: string
+        }
+        Insert: {
+          id?: string
+          path: string
+          resolved_at?: string | null
+          started_at: string
+        }
+        Update: {
+          id?: string
+          path?: string
+          resolved_at?: string | null
+          started_at?: string
+        }
+        Relationships: []
+      }
       whatsapp_delivery_events: {
         Row: {
           channel: string
