@@ -1,7 +1,7 @@
 ## Product comparator feedback
-- [ ] Include parent houses/makers and all saved Favorites.
-- [ ] Assign and save shortlists under available projects.
-- [ ] Export product pictures and complete recorded materials/sizes; verify the flow.
+- [x] Include recorded parent houses alongside child designers; Ecart and CC-Tapis verified. Favorites now load saved product records directly; both of Cyrille's two Favorites shown.
+- [x] Assign/save under accessible projects and reopen from project Boards; live Singapore project save and saved two-piece reload verified, temporary shortlist removed.
+- [x] Export pictures and recorded variant materials/deduplicated metric+imperial sizes; inspected two-picture PDF and full material/size text, 10 tests passed, clean preview; not published, GitHub sync needed.
 
 ## Expired tearsheet invitations
 - [x] Add per-board expired-invitation resend in status cards and sharing controls; live-tested on Cyrille's Singapore board, restored view-only access for 30 days and refreshed viewer count, email queued (delivery not confirmed). Revoked/current/wrong-project/signed-out attempts denied, 12 focused tests passed, test invitations removed; not published.
