@@ -16,7 +16,8 @@ export function FinishCategoryDialog({ names, overrides }: { names: string[]; ov
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<Record<string, FinishFacetOverride>>({});
   const [saving, setSaving] = useState(false);
-  useEffect(() => { if (open) setDraft(Object.fromEntries(names.map(n => [n, { ...overrides.get(finishFacetKey(n)) }]))); }, [open, names, overrides]);
+  useEffect(() => { if (!open) return; setDraft(Object.fromEntries(names.map(n => [n, { ...overrides.get(finishFacetKey(n)) }]))); // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const save = async () => {
     setSaving(true);

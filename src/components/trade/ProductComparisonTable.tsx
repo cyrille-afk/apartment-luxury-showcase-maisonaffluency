@@ -20,12 +20,13 @@ interface Props {
   renderPrice: (product: TradeProduct | null, net: boolean) => ReactNode;
 }
 
+const NO_OVERRIDES = new Map<string, FinishFacetOverride>();
 const FACET_LABELS: Record<ComparatorFacetKind, string> = { material: "Material", finish: "Finish", color: "Colour" };
 
 export function ProductComparisonTable({ products: allProducts, fields, onRemove, renderPrice }: Props) {
   const { data: swatches, isLoading: swatchesLoading } = useComparatorSwatches(allProducts.flatMap(product => product ? [product.id] : []));
   const { isAdmin } = useAuth();
-  const { data: overrides = new Map<string, FinishFacetOverride>() } = useQuery({
+  const { data: overrides = NO_OVERRIDES } = useQuery({
     queryKey: ["finish-facet-overrides"], staleTime: 60_000,
     queryFn: async () => {
       const { data, error } = await supabase.from("finish_facet_overrides").select("finish_key,material,finish,color");
