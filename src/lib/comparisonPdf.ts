@@ -1,6 +1,8 @@
 import { jsPDF } from "jspdf";
 import { formatPdfDate } from "@/lib/pdfFormatting";
 import { DEFAULT_COVER_THEME, hexToRgb } from "@/lib/pdfCoverTheme";
+import { comparatorDimensionGroups } from "./comparatorDimensions";
+import { comparisonSectionPages } from "./comparisonPdfLayout";
 
 export interface ComparisonPdfCover {
   projectName?: string | null;
@@ -82,18 +84,24 @@ export interface ComparisonPdfPiece {
   name: string;
   values: Record<string, string>;
   image?: { data: string; width: number; height: number } | null;
+  swatches?: ComparisonPdfSwatch[];
 }
 
-export async function comparisonImage(url: string) {
+export interface ComparisonPdfSwatch { name: string; color?: string | null; image?: ComparisonPdfPiece["image"] }
+
+export async function comparisonImage(url: string, cropSquare = false) {
   const response = await fetch(url);
   if (!response.ok) throw new Error("Product picture unavailable");
   const bitmap = await createImageBitmap(await response.blob());
-  const scale = Math.min(1, 900 / Math.max(bitmap.width, bitmap.height));
+  const sourceSize = Math.min(bitmap.width, bitmap.height);
+  const scale = Math.min(1, (cropSquare ? 100 : 900) / (cropSquare ? sourceSize : Math.max(bitmap.width, bitmap.height)));
   const canvas = document.createElement("canvas");
-  canvas.width = Math.round(bitmap.width * scale); canvas.height = Math.round(bitmap.height * scale);
+  canvas.width = Math.round((cropSquare ? sourceSize : bitmap.width) * scale); canvas.height = Math.round((cropSquare ? sourceSize : bitmap.height) * scale);
   const context = canvas.getContext("2d");
   if (!context) { bitmap.close(); throw new Error("Product picture unavailable"); }
-  context.drawImage(bitmap, 0, 0, canvas.width, canvas.height); bitmap.close();
+  if (cropSquare) context.drawImage(bitmap, (bitmap.width - sourceSize) / 2, (bitmap.height - sourceSize) / 2, sourceSize, sourceSize, 0, 0, canvas.width, canvas.height);
+  else context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
   return { data: canvas.toDataURL("image/jpeg", 0.9), width: canvas.width, height: canvas.height };
 }
 
@@ -103,44 +111,153 @@ export async function buildComparisonPdf(pieces: ComparisonPdfPiece[], rows: { k
   await embedComparisonFonts(doc);
   doc.setProperties({ title: `${cover.projectName?.trim() || "Product Selection"} — ${title}`, author: "Maison Affluency" });
   drawComparisonCover(doc, cover, title, pieces.length);
-  const W = 297, M = 15, labelW = 42;
-  doc.setFont("helvetica", "bold"); doc.setFontSize(16);
-  doc.text("MAISON AFFLUENCY", M, 18);
-  doc.setFont("helvetica", "normal"); doc.setFontSize(11);
-  doc.text(title, M, 26);
-  doc.setFontSize(9);
-  doc.text(formatPdfDate(new Date(), "en-GB"), W - M, 18, { align: "right" });
-  const colW = (W - 2 * M - labelW) / Math.max(pieces.length, 1);
-  let y = 38;
-  if (pieces.some(p => p.image)) {
-    pieces.forEach((piece, index) => {
-      if (!piece.image) return;
-      const scale = Math.min((colW - 4) / piece.image.width, 40 / piece.image.height);
-      const width = piece.image.width * scale, height = piece.image.height * scale;
-      doc.addImage(piece.image.data, "JPEG", M + labelW + index * colW + (colW - 4 - width) / 2, y + (40 - height) / 2, width, height);
+  const W = 297, H = 210, M = 14, labelW = 39, endY = 191;
+  const colW = (W - M * 2 - labelW) / Math.max(pieces.length, 1);
+  const css = getComputedStyle(document.documentElement);
+  const palette = (role: string): [number, number, number] => {
+    const canvas = document.createElement("canvas"); canvas.width = canvas.height = 1;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("PDF colours unavailable");
+    ctx.fillStyle = `hsl(${css.getPropertyValue(`--comparison-pdf-${role}`).trim()})`;
+    ctx.fillRect(0, 0, 1, 1);
+    const pixel = ctx.getImageData(0, 0, 1, 1).data;
+    return [pixel[0], pixel[1], pixel[2]];
+  };
+  const colors = { paper: palette("paper"), ink: palette("ink"), muted: palette("muted"), rule: palette("rule"), image: palette("image"), trade: palette("trade") };
+  const bodyFont = 8, lineH = 3.8;
+  const textLines = (text: string, width = colW - 6) => {
+    doc.setFont("Inter", "normal").setFontSize(bodyFont);
+    return doc.splitTextToSize(text || "—", width) as string[];
+  };
+  const dimensionLines = (text: string) => comparatorDimensionGroups(text).flatMap(g => [
+    ...(g.name ? [g.name] : []),
+    ...g.rows.map(r => `${r.label}: ${r.metric} (${r.imperial})`),
+    ...(g.note ? [g.note] : []),
+  ]).flatMap(line => textLines(line));
+  type Section = { key: string; label: string; cells: string[][]; swatches?: ComparisonPdfSwatch[][]; height: number };
+  const sections: Section[] = rows.flatMap(row => {
+    if (row.key === "materials") {
+      const samples = pieces.map(p => p.swatches ?? []);
+      // A compact six-sample summary keeps prices with the product grid; the full library follows separately.
+      return [{ key: row.key, label: row.label, cells: samples.map(s => [s.length > 6 ? `+${s.length - 6} further finishes` : ""]), swatches: samples.map(s => s.slice(0, 6)), height: 18 }];
+    }
+    const cells = pieces.map(p => row.key === "dimensions" ? dimensionLines(p.values[row.key] || "") : textLines(p.values[row.key] || "—"));
+    const chunkSize = 30;
+    const maxLines = Math.max(1, ...cells.map(c => c.length));
+    return Array.from({ length: Math.ceil(maxLines / chunkSize) }, (_, i) => {
+      const chunk = cells.map(c => c.slice(i * chunkSize, (i + 1) * chunkSize));
+      const label = i ? `${row.label} (continued)` : row.label;
+      const labelLines = textLines(label.toUpperCase(), labelW - 5);
+      return { key: row.key, label, cells: chunk, height: Math.max(...chunk.map(c => c.length), labelLines.length, 1) * lineH + 5 };
     });
-    y += 45;
+  });
+  const names = pieces.map(p => { doc.setFont("Cormorant", "normal").setFontSize(13); return doc.splitTextToSize(p.name, colW - 6) as string[]; });
+  const nameHeight = Math.max(...names.map(n => n.length), 1) * 4.6 + 5;
+  const totalSections = sections.reduce((sum, row) => sum + row.height, 0);
+  const imageHeight = Math.max(27, Math.min(43, endY - 30 - nameHeight - totalSections));
+  const firstY = 30 + imageHeight + 4 + nameHeight;
+  const pages = comparisonSectionPages(sections.map(s => s.height), endY - firstY, endY - 30 - nameHeight);
+  const coverPages = doc.getNumberOfPages() - 1;
+  const heading = (withImages: boolean) => {
+    doc.setFillColor(...colors.paper).rect(0, 0, W, H, "F");
+    doc.setFont("Cormorant", "normal").setFontSize(17).setTextColor(...colors.ink);
+    doc.text("MAISON AFFLUENCY", M, 14);
+    doc.setFont("Inter", "normal").setFontSize(8).setTextColor(...colors.muted);
+    doc.text(title, M, 21); doc.text(formatPdfDate(new Date(), "en-GB"), W - M, 14, { align: "right" });
+    let y = 30;
+    if (withImages) {
+      pieces.forEach((piece, index) => {
+        const x = M + labelW + index * colW;
+        doc.setFillColor(...colors.image).rect(x, y, colW - 5, imageHeight, "F");
+        if (!piece.image) return;
+        const scale = Math.min((colW - 7) / piece.image.width, (imageHeight - 2) / piece.image.height);
+        const w = piece.image.width * scale, h = piece.image.height * scale;
+        doc.addImage(piece.image.data, "JPEG", x + (colW - 5 - w) / 2, y + (imageHeight - h) / 2, w, h);
+      });
+      y += imageHeight + 4;
+    }
+    doc.setFont("Cormorant", "normal").setFontSize(13).setTextColor(...colors.ink);
+    names.forEach((lines, i) => doc.text(lines, M + labelW + i * colW, y + 4, { lineHeightFactor: 1 }));
+    y += nameHeight;
+    doc.setDrawColor(...colors.rule).setLineWidth(0.2).line(M, y, W - M, y);
+    return y;
+  };
+  const drawSwatch = (swatch: ComparisonPdfSwatch, x: number, y: number, size: number) => {
+    if (swatch.image) doc.addImage(swatch.image.data, "JPEG", x, y, size, size);
+    else {
+      const color = swatch.color?.replace(/^#([a-f0-9])([a-f0-9])([a-f0-9])$/i, "#$1$1$2$2$3$3");
+      doc.setFillColor(...(color && /^#[a-f0-9]{6}$/i.test(color) ? hexToRgb(color) : colors.image));
+      doc.roundedRect(x, y, size, size, 0.4, 0.4, "F");
+      if (!color) {
+        doc.setFont("Inter", "normal").setFontSize(4.5).setTextColor(...colors.muted);
+        doc.text(swatch.name.split(/\s+/).slice(0, 2).map(v => v[0]).join(""), x + size / 2, y + size / 2 + 0.6, { align: "center" });
+      }
+    }
+  };
+  pages.forEach((indexes, pageIndex) => {
+    if (pageIndex) doc.addPage();
+    let y = heading(pageIndex === 0);
+    for (const index of indexes) {
+      const section = sections[index];
+      const trade = section.key === "trade_price_cents";
+      if (trade) doc.setFillColor(...colors.trade).rect(M, y, W - M * 2, section.height, "F");
+      doc.setFont("Inter", "normal").setFontSize(7).setTextColor(...colors.muted);
+      doc.text(textLines(section.label.replace(/−/g, "-").toUpperCase(), labelW - 5), M, y + 4.5);
+      pieces.forEach((_, i) => {
+        const x = M + labelW + i * colW;
+        if (section.swatches) {
+          section.swatches[i].forEach((s, j) => drawSwatch(s, x + j * 7.5, y + 3, 6));
+          doc.setFont("Inter", "normal").setFontSize(6.5).setTextColor(...colors.muted);
+          doc.text(section.cells[i][0] || "", x, y + 13);
+        } else {
+          doc.setFont("Inter", "normal").setFontSize(bodyFont).setTextColor(...colors.ink);
+          section.cells[i].forEach((line, j) => {
+            if (section.key === "dimensions" && /\(.* in\)$/.test(line)) {
+              const at = line.lastIndexOf(" ("); const main = line.slice(0, at), imperial = line.slice(at);
+              doc.text(main, x, y + 4.5 + j * lineH);
+              const width = doc.getTextWidth(main);
+              doc.setTextColor(...colors.muted).setFontSize(7).text(imperial, x + width, y + 4.5 + j * lineH);
+              doc.setTextColor(...colors.ink).setFontSize(bodyFont);
+            } else doc.text(line, x, y + 4.5 + j * lineH);
+          });
+        }
+      });
+      y += section.height;
+      doc.setDrawColor(...colors.rule).line(M, y, W - M, y);
+    }
+  });
+  // Print has no hover/popover: preserve every named finish in an aligned visual appendix.
+  if (pieces.some(p => (p.swatches?.length ?? 0) > 0)) {
+    let y = endY;
+    const maxSwatches = Math.max(...pieces.map(p => p.swatches?.length ?? 0));
+    for (let index = 0; index < maxSwatches; index += 2) {
+      const sampleW = (colW - 4) / 2;
+      doc.setFont("Inter", "normal").setFontSize(6);
+      const lines = pieces.map(p => [0, 1].map(j => doc.splitTextToSize(p.swatches?.[index + j]?.name || "", sampleW - 8) as string[]));
+      const h = Math.max(7, ...lines.flatMap(pair => pair.map(l => l.length * 2.8 + 2)));
+      if (y + h > endY) {
+        doc.addPage(); y = heading(false);
+        doc.setFont("Inter", "normal").setFontSize(8).setTextColor(...colors.muted);
+        doc.text("MATERIALS & FINISHES", M, y + 5); y += 11;
+      }
+      pieces.forEach((p, i) => {
+        [0, 1].forEach(j => {
+          const swatch = p.swatches?.[index + j]; if (!swatch) return;
+          const x = M + labelW + i * colW + j * sampleW;
+          drawSwatch(swatch, x, y + 1, 5);
+          doc.setFont("Inter", "normal").setFontSize(6).setTextColor(...colors.ink);
+          doc.text(lines[i][j], x + 7, y + 3, { lineHeightFactor: 1.3 });
+        });
+      });
+      y += h;
+    }
   }
-  doc.setFont("helvetica", "bold");
-  const heads = pieces.map((p) => doc.splitTextToSize(p.name, colW - 4));
-  heads.forEach((h, i) => doc.text(h, M + labelW + i * colW, y));
-  y += Math.max(...heads.map((h) => h.length), 1) * 4.5;
-  doc.line(M, y - 2, W - M, y - 2);
-  y += 4;
-  for (const row of rows) {
-    doc.setFont("helvetica", "normal"); doc.setFontSize(9);
-    const cells = pieces.map((p) => doc.splitTextToSize(p.values[row.key] || "—", colW - 4));
-    doc.setFont("helvetica", "bold"); doc.setFontSize(8);
-    const labelLines = doc.splitTextToSize(row.label.replace(/\u2212/g, "-").toUpperCase(), labelW - 6);
-    const h = Math.max(Math.max(...cells.map((c) => c.length), 1) * 4.5, labelLines.length * 4) + 3;
-    if (y + h > 195) { doc.addPage(); y = 20; }
-    doc.text(labelLines, M, y);
-    doc.setFont("helvetica", "normal"); doc.setFontSize(9);
-    cells.forEach((c, i) => doc.text(c, M + labelW + i * colW, y));
-    y += h;
-    doc.setDrawColor(220); doc.line(M, y - 3, W - M, y - 3); doc.setDrawColor(0);
+  const total = doc.getNumberOfPages();
+  for (let page = 1; page <= total; page++) {
+    doc.setPage(page);
+    const onCover = page <= coverPages;
+    doc.setFont("Inter", "normal").setFontSize(7).setTextColor(...(onCover ? hexToRgb(DEFAULT_COVER_THEME.text) : colors.muted));
+    doc.text(`Page ${page} of ${total} | Maison Affluency Trade Portal`, W / 2, 204, { align: "center" });
   }
-  doc.setFontSize(7);
-  doc.text("Prices subject to confirmation. maisonaffluency.com", M, 202);
   return doc.output("blob");
 }

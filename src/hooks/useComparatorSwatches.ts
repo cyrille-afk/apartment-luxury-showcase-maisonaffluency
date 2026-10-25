@@ -3,10 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import type { ComparatorSwatch } from "@/lib/comparatorSwatches";
 
 /** Fetch only the selected pieces' public finish metadata; never cache prices in a draft. */
-export function useComparatorSwatches(ids: string[]) {
+export function comparatorSwatchesQueryOptions(ids: string[]) {
   const stableIds = [...new Set(ids)].sort();
-  return useQuery({
-    queryKey: ["comparator-swatches", stableIds], enabled: stableIds.length > 0, staleTime: 60_000,
+  return {
+    queryKey: ["comparator-swatches", stableIds], staleTime: 60_000,
     queryFn: async () => {
       const { data: trades, error: tradeError } = await supabase.from("trade_products").select("id,source_pick_id").in("id", stableIds);
       if (tradeError) throw tradeError;
@@ -16,5 +16,9 @@ export function useComparatorSwatches(ids: string[]) {
       if (error) throw error;
       return new Map<string, ComparatorSwatch[]>(stableIds.map(id => [id, (data ?? []).filter(row => row.pick_id === (canonical.get(id) || id)).map(row => ({ id: row.fabric_id, name: row.name, imageUrl: row.image_url }))]));
     },
-  });
+  };
+}
+
+export function useComparatorSwatches(ids: string[]) {
+  return useQuery({ ...comparatorSwatchesQueryOptions(ids), enabled: ids.length > 0 });
 }
