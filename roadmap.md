@@ -1,5 +1,9 @@
 # Roadmap — Automatic Visual Search Indexing
 
+## Sign-in feedback
+- [x] Add inline credential loading, confirmed-success and actionable errors; coordinate disabled sign-in controls and match Google feedback to the same restrained styling.
+- [ ] Verify delayed request, rejection, retry and confirmed success; run focused regressions.
+
 ## Homepage logo return
 - [x] Limit the hidden homepage guard to initial loading and reconcile already-loaded styles on client-side return.
 - [x] Verify sign-in logo and close return, direct homepage and repeated visits on desktop/mobile; stylesheet handoff regressions pass. Confirm only one headline remains after hydration.

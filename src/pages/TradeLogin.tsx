@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { MobileTradeTourNotice } from "@/components/trade/MobileTradeTourNotice";
 import { clearGoogleAttempt, readGoogleAttempt, startGoogleAttempt } from "@/lib/googleSignInRecovery";
 import { GoogleAccessNotice } from "@/components/GoogleAccessNotice";
+import { signInErrorMessage } from "@/lib/signInFeedback";
 
 // Monochrome Google "G" — single-path glyph rendered in currentColor so it
 // stays charcoal/grayscale and reads as part of the brand, not a vendor badge.
@@ -27,6 +28,8 @@ const TradeLogin = () => {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [loginSucceeded, setLoginSucceeded] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleError, setGoogleError] = useState<string | null>(null);
@@ -75,8 +78,12 @@ const TradeLogin = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading || googleLoading || loginSucceeded) return;
+    setLoginError(null);
+    setGoogleRecovery(false);
+    setGoogleError(null);
     setLoading(true);
-
+    try {
     // Accepts either the member's Trade ID or their email address. Trade IDs
     // are resolved to the account email via a security-definer RPC before the
     // credential call, which always authenticates against the stored email.
@@ -85,12 +92,7 @@ const TradeLogin = () => {
     if (!raw.includes("@")) {
       const { data: resolved, error: resolveError } = await supabase.rpc("resolve_trade_email", { p_identifier: raw });
       if (resolveError || !resolved) {
-        toast({
-          title: "Login Failed",
-          description: "Trade ID not recognised. Check your approval email, or sign in with your email address.",
-          variant: "destructive",
-        });
-        setLoading(false);
+        setLoginError("Check your Trade ID in your approval email, or sign in with your email address.");
         return;
       }
       email = resolved;
@@ -99,10 +101,10 @@ const TradeLogin = () => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      toast({ title: "Login Failed", description: error.message, variant: "destructive" });
-      setLoading(false);
+      setLoginError(signInErrorMessage(error));
       return;
     }
+    setLoginSucceeded(true);
 
     // Signal the browser's password manager to save credentials
     if ('PasswordCredential' in window) {
@@ -115,10 +117,16 @@ const TradeLogin = () => {
     }
 
     navigate(getReturnPath());
-    setLoading(false);
+    } catch {
+      setLoginError("We can’t reach your account right now. Check your connection and try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleGoogleSignIn = async () => {
+    if (loading || googleLoading || loginSucceeded) return;
+    setLoginError(null);
     setGoogleLoading(true);
     setGoogleError(null);
     setGoogleSucceeded(false);
@@ -161,7 +169,7 @@ const TradeLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--card))] flex flex-col">
+    <div className="min-h-screen bg-card flex flex-col">
       <Helmet>
         <title>Trade Account Sign In — Maison Affluency</title>
         <meta name="description" content="Sign in to the Maison Affluency Trade Portal. Exclusive access for architects and interior designers to trade pricing, spec sheets, and curated collections." />
@@ -202,16 +210,19 @@ const TradeLogin = () => {
           </h1>
 
           <div className="mb-6"><MobileTradeTourNotice /></div>
-          <form onSubmit={handleLogin} className="space-y-5">
+          <form onSubmit={handleLogin} aria-busy={loading} className="space-y-5">
             <input
               type="text"
               name="identifier"
               autoComplete="off"
               inputMode="email"
               required
+              aria-label="Trade ID or Email Address"
+              disabled={loading || googleLoading || loginSucceeded}
+              aria-describedby={loginError ? "credential-sign-in-status" : undefined}
               placeholder="Trade ID or Email Address"
               value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
+              onChange={(e) => { setIdentifier(e.target.value); setLoginError(null); }}
               className="w-full border border-border bg-transparent px-4 py-3.5 font-body text-sm text-foreground placeholder:text-muted-foreground/70 outline-hidden focus:border-foreground transition-colors rounded-none"
             />
             <div className="relative">
@@ -220,15 +231,18 @@ const TradeLogin = () => {
                 name="password"
                 autoComplete="new-password"
                 required
+                aria-label="Password"
+                disabled={loading || googleLoading || loginSucceeded}
+                aria-describedby={loginError ? "credential-sign-in-status" : undefined}
                 placeholder="Password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => { setPassword(e.target.value); setLoginError(null); }}
                 className="w-full border border-border bg-transparent px-4 py-3.5 pr-12 font-body text-sm text-foreground placeholder:text-muted-foreground/70 outline-hidden focus:border-foreground transition-colors rounded-none"
               />
               {/* Reveal the typed password so the member can check it before
                   submitting. Kept out of the tab order so tab still moves
                   straight from the password to Sign In. */}
-              <button
+              <Button variant="ghost" size="icon"
                 type="button"
                 tabIndex={-1}
                 aria-label={showPassword ? "Hide password" : "Show password"}
@@ -239,42 +253,59 @@ const TradeLogin = () => {
                 {showPassword
                   ? <EyeOff className="h-4 w-4" aria-hidden="true" />
                   : <Eye className="h-4 w-4" aria-hidden="true" />}
-              </button>
+              </Button>
             </div>
 
-            <button
+            <Button
               type="submit"
-              disabled={loading}
-              className="w-full py-4 mt-2 bg-foreground text-background font-body text-xs uppercase tracking-[0.3em] rounded-none hover:opacity-90 transition-opacity disabled:opacity-50"
+              disabled={loading || googleLoading || loginSucceeded}
+              className="w-full h-14 mt-2 bg-foreground text-background font-body text-xs uppercase tracking-[0.3em] rounded-none hover:bg-foreground/90 transition-opacity disabled:opacity-70"
             >
-              {loading ? "Signing In" : "Sign In"}
-            </button>
+              {loading ? <Loader2 className="motion-safe:animate-spin" aria-hidden="true" /> : loginSucceeded ? <CircleCheck aria-hidden="true" /> : null}
+              {loginSucceeded ? "Signed In" : loading ? "Signing In" : "Sign In"}
+            </Button>
           </form>
 
+          <div className="min-h-24 pt-4">
+            {(loading || loginError || loginSucceeded) && (
+              <div id="credential-sign-in-status" role={loginError ? "alert" : "status"} aria-live={loginError ? "assertive" : "polite"} aria-atomic="true"
+                className={`border-l-2 pl-4 py-1 ${loginError ? "border-destructive text-destructive" : "border-primary text-foreground"}`}>
+                <p className="font-display text-base flex items-center gap-2">
+                  {loginError ? <CircleAlert className="h-4 w-4 shrink-0" aria-hidden="true" /> : loginSucceeded ? <CircleCheck className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" /> : null}
+                  {loginError ? "Unable to sign in" : loginSucceeded ? "Welcome back" : "Signing you in"}
+                </p>
+                <p className="mt-1 font-body text-xs leading-relaxed text-muted-foreground">
+                  {loginError || (loginSucceeded ? "Your sign-in is confirmed. Opening your requested page." : "Checking your account securely…")}
+                </p>
+              </div>
+            )}
+          </div>
+          <div className="flex items-center gap-4" aria-hidden="true"><span className="h-px flex-1 bg-border" /><span className="font-body text-xs text-muted-foreground">or</span><span className="h-px flex-1 bg-border" /></div>
+
           {/* Google sign-in — quiet, outlined, monochrome */}
-          <button
+          <Button variant="outline"
             type="button"
             onClick={handleGoogleSignIn}
-            disabled={googleLoading}
-            className="mt-5 w-full py-4 border border-foreground/30 bg-transparent text-foreground font-body text-xs uppercase tracking-[0.3em] rounded-none hover:border-foreground hover:bg-foreground/[0.03] transition-colors disabled:opacity-50 flex items-center justify-center gap-3"
+            disabled={googleLoading || loading || loginSucceeded}
+            className="mt-5 h-14 w-full border border-foreground/30 bg-transparent text-foreground font-body text-xs uppercase tracking-[0.3em] rounded-none hover:border-foreground hover:bg-muted transition-colors disabled:opacity-70 gap-3"
           >
-            <GoogleGlyph className="w-4 h-4 text-foreground/80" />
+            {googleLoading ? <Loader2 className="motion-safe:animate-spin" aria-hidden="true" /> : <GoogleGlyph className="w-4 h-4 text-foreground/80" />}
             {googleLoading ? "Connecting" : "Continue with Google"}
-          </button>
+          </Button>
           <GoogleAccessNotice showAccessRequest showApplyLink={false} />
 
           {/* Persistent Google sign-in error with retry — a toast alone
               disappears and leaves the member with no way forward. */}
           {(googleError || googleRecovery) && (
-            <div className={`mt-4 border px-4 py-3.5 ${googleLoading || googleSucceeded ? "border-border bg-muted/30" : "border-destructive/40 bg-destructive/5"}`}>
+            <div className={`mt-4 border-l-2 pl-4 py-1 ${googleLoading || googleSucceeded ? "border-primary" : "border-destructive"}`}>
               <div role="status" aria-live="polite" aria-atomic="true" data-testid="google-sign-in-status"
-                className={`flex items-center gap-2 font-body text-xs font-semibold uppercase tracking-[0.2em] ${googleLoading || googleSucceeded ? "text-foreground" : "text-destructive"}`}>
+                className={`flex items-center gap-2 font-display text-base ${googleLoading || googleSucceeded ? "text-foreground" : "text-destructive"}`}>
                 {googleLoading ? <Loader2 className="h-4 w-4 shrink-0 motion-safe:animate-spin" aria-hidden="true" />
-                  : googleSucceeded ? <CircleCheck className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  : googleSucceeded ? <CircleCheck className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
                     : <CircleAlert className="h-4 w-4 shrink-0" aria-hidden="true" />}
                 <span>{googleLoading ? "Google sign-in in progress" : googleSucceeded ? "Google sign-in succeeded" : "Google sign-in failed"}</span>
               </div>
-              <p className="mt-1.5 font-body text-sm text-foreground/80">
+              <p className="mt-1.5 font-body text-xs leading-relaxed text-muted-foreground">
                 {googleLoading ? "Waiting for Google sign-in to complete. Finish signing in in the Google window."
                   : googleSucceeded ? "Opening your requested page."
                     : "Google sign-in didn’t complete. Try again, or use your approved account’s email and password."}
