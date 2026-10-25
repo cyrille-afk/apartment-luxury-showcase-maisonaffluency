@@ -59,7 +59,7 @@ export function ProductComparisonTable({ products: allProducts, fields, onRemove
         </select>
       </label>)}
       {active && <Button type="button" variant="ghost" size="sm" onClick={() => setSelection({})}>Clear filters</Button>}
-      {isAdmin && finishNames.length > 0 && <FinishCategoryDialog names={finishNames} overrides={overrides} />}
+      {isAdmin && finishNames.length > 0 && <FinishCategoryDialog names={finishNames} overrides={overrides} pieces={categorisablePieces} />}
       {active && <p className="pb-2 font-body text-xs text-muted-foreground" aria-live="polite">Showing {products.length} of {allProducts.filter(Boolean).length} pieces</p>}
     </div>}
     {active && products.length === 0 ? <p className="py-12 font-body text-sm text-muted-foreground">No compared pieces match these filters.</p> :
