@@ -3660,6 +3660,7 @@ export function AIConcierge({
         lang: effectiveLang,
         onboardingGate: turnOnboardingGate,
         onDelta: upsertAssistant,
+        onActivity: armStall,
         onProposal: handleProposal,
         onStreamStart: (streamId) => {
           // Persist the stream id in the concierge session so hooks like

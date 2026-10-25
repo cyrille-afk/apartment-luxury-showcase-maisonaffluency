@@ -348,6 +348,7 @@ export async function streamConcierge({
   onAppliedConstraints,
   onMoodboardSignals,
   onReconnect,
+  onActivity,
   onDone,
   onError,
   signal,
@@ -361,6 +362,8 @@ export async function streamConcierge({
   lang?: string | null;
   onboardingGate?: { completed: boolean; facts: { projectProfile: string; zone: string; budget: string }; source: string };
   onDelta: (text: string) => void;
+  /** Transport activity, including heartbeat comments; never implies answer progress. */
+  onActivity?: () => void;
   onProposal?: (proposal: ConciergeProposal) => void;
   /**
    * Fires as soon as the model begins streaming a card-producing tool call,
@@ -606,6 +609,7 @@ export async function streamConcierge({
         if (!sawFirstByte) { sawFirstByte = true; }
         // Reset the idle watchdog on every successful chunk.
         armStallTimer("idle");
+        onActivity?.();
         buffer += decoder.decode(value, { stream: true });
 
         let idx: number;
