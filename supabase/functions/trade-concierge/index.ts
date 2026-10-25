@@ -6373,7 +6373,7 @@ serve(async (req) => {
       const hydrated = await hydratePickPreview(supabase, chosen.map((row: any) => row.id));
       const itemById = new Map<string, string>(chosen.map((row: any) => [String(row.id), String(row.schedule_item || "")]));
       const selected = hydrated.filter((row: any) => row?.id);
-      const zoneText = extractStructuredBriefField(submittedText, "ZONE");
+      const zoneText = extractStructuredBriefField(submittedText, "ZONE") || "";
       const zones = zoneText.split(/[;,]/).map((zone) => zone.trim()).filter((zone) => zone && !/ceiling|not specified/i.test(zone));
       const rows = selected.map((pick: any) => {
         const hay = `${itemById.get(pick.id) || ""} ${pick.title || ""} ${pick.subcategory || ""}`.toLowerCase();
