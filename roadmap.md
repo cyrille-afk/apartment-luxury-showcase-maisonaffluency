@@ -1,5 +1,10 @@
 # Roadmap — Automatic Visual Search Indexing
 
+## Website SMS alerts
+- [x] Verify Twilio sender and deliver one test SMS to the requested recipient.
+- [ ] Add secure outage/recovery transition dispatch alongside existing emails and verify token rejection/tests.
+- [ ] Activate published callback and verify an automatic alert; requires publishing the new route.
+
 ## Public website status
 - [x] Add public availability and observed interruption history from the existing independent monitor, with stale/failed-read states and private diagnostics excluded.
 - [x] Verified signed-out /status, all four live readings, refresh, mobile layout, anonymous safe reads/private empty reads and three availability tests; build clean. History starts 25 October; no fabricated outage or live monitoring failure was introduced. Publish remains user-controlled.
