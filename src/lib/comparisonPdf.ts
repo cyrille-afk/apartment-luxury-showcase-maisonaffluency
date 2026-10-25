@@ -229,7 +229,7 @@ export async function buildComparisonPdf(pieces: ComparisonPdfPiece[], rows: { k
     doc.setDrawColor(...colors.rule).setLineWidth(0.2);
   };
   type Section = { key: string; label: string; cells: string[][]; rich?: NoteLine[][]; swatches?: ComparisonPdfSwatch[][]; height: number };
-  const sections: Section[] = rows.flatMap(row => {
+  const sections: Section[] = rows.flatMap((row): Section[] => {
     if (row.key === "materials") {
       const samples = pieces.map(p => p.swatches ?? []);
       // A compact six-sample summary keeps prices with the product grid; the full library follows separately.
