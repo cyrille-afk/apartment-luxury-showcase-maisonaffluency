@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Tags } from "lucide-react";
 import { toast } from "sonner";
@@ -6,18 +6,21 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { FACET_VOCAB_OPTIONS, finishFacetKey, type ComparatorFacetKind, type FinishFacetOverride } from "@/lib/comparatorFacets";
+import { FACET_VOCAB_OPTIONS, comparatorFinishNames, finishFacetKey, mergeFacetOverrides, previewFacetGroups, type ComparatorFacetKind, type FinishFacetOverride } from "@/lib/comparatorFacets";
+import type { ComparatorSwatch } from "@/lib/comparatorSwatches";
 
 const KINDS: [ComparatorFacetKind, string][] = [["material", "Material"], ["finish", "Finish"], ["color", "Colour"]];
 
 /** Admin-only: assign explicit material / finish / colour categories to finish names. */
-export function FinishCategoryDialog({ names, overrides }: { names: string[]; overrides: Map<string, FinishFacetOverride> }) {
+export function FinishCategoryDialog({ names, overrides, pieces }: { names: string[]; overrides: Map<string, FinishFacetOverride>; pieces: { name: string; materials: string | null; linked: ComparatorSwatch[] }[] }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<Record<string, FinishFacetOverride>>({});
   const [saving, setSaving] = useState(false);
   useEffect(() => { if (!open) return; setDraft(Object.fromEntries(names.map(n => [n, { ...overrides.get(finishFacetKey(n)) }]))); // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+  const usedBy = useMemo(() => { const m = new Map<string, string[]>(); for (const n of names) { const key = finishFacetKey(n); m.set(n, pieces.filter(p => comparatorFinishNames(p.materials, p.linked).some(x => finishFacetKey(x) === key)).map(p => p.name)); } return m; }, [names, pieces]);
+  const preview = useMemo(() => previewFacetGroups(pieces, mergeFacetOverrides(draft)), [pieces, draft]);
 
   const save = async () => {
     setSaving(true);
