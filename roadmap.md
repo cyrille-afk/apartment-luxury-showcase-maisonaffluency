@@ -1,5 +1,9 @@
 # Roadmap — Automatic Visual Search Indexing
 
+## Sign-in return address stacking
+- [ ] Stop the outgoing Trade layout from redirecting the incoming sign-in page, normalize query separators and repair existing nested return links.
+- [ ] Verify direct sign-in, protected-page entry, reopening and existing stacked links; run focused regressions.
+
 ## Website SMS alerts
 - [x] Verify Twilio sender and deliver one test SMS to the requested recipient.
 - [x] Add private unique outage/recovery events and single-use callback tokens alongside existing emails; six focused tests pass, missing/invalid tokens return 401, build clean. Twilio test confirmed delivered. Dispatch configured; pending events wait for published callback.

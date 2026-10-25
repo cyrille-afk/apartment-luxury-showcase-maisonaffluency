@@ -1,8 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { TradeLogin } from "@/app/legacyShell";
+import { normalizedTradeLoginSearch } from "@/lib/tradeLoginReturn";
 
 export const Route = createFileRoute("/trade_/login")({
+  beforeLoad: ({ location }) => {
+    const search = normalizedTradeLoginSearch(location.searchStr);
+    if (search) throw redirect({ to: "/trade/login", search, replace: true });
+  },
   head: () => ({ meta: [
     { title: "Trade Sign In & Access Requests — Maison Affluency" },
     { name: "description", content: "Sign in to your Maison Affluency Trade account or request access when Google sign-in is blocked." },
