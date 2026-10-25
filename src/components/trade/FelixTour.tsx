@@ -238,7 +238,7 @@ const FELIX_STEPS: FelixStep[] = [
     target: "extension-setup",
     route: "/trade/extension-sync",
     dialogue:
-      "This is the **ChatGPT Extension Integration** setup page. Download the plugin package here, review your synced active project folders below, and follow the connection setup before staging catalogue pieces into a project. Opening this page alone does not activate the connection.",
+      "This is the **ChatGPT Extension Integration** setup page. Review your synced active project folders below, and follow the connection setup before staging catalogue pieces into a project. Opening this page alone does not activate the connection.",
   },
   {
     id: "pwa-install",
