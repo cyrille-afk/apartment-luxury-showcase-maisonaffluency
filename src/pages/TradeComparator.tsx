@@ -28,6 +28,7 @@ import DesignerNoteToolbar from "@/components/trade/DesignerNoteToolbar";
 import { ComparatorSelectionDrawer } from "@/components/trade/ComparatorSelectionDrawer";
 import { restoreSavedComparison, type ComparisonCoverEdits } from "@/lib/comparatorDraft";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
@@ -261,6 +262,7 @@ export default function TradeComparator() {
     };
     const fx = fxRates.data ?? (await fxRates.refetch()).data ?? null;
     let converted = false;
+    const showOriginalPrices = (coverDetails.originalPrices ?? "true") !== "false";
     const priceText = (c: number | null, cur: string, prefix: string) => {
       if (c == null) return "Price upon Request";
       const original = `${prefix}${fmt(c, cur)}`;
@@ -268,7 +270,7 @@ export default function TradeComparator() {
       const value = fx ? convertComparatorCents(c, cur, displayCurrency, fx.rates) : null;
       if (value === null) return `${original}\n${displayCurrency} conversion unavailable`;
       converted = true;
-      return `${prefix}${formatMoney(value, displayCurrency)}\nOriginal: ${original}`;
+      return showOriginalPrices ? `${prefix}${formatMoney(value, displayCurrency)}\nOriginal: ${original}` : `${prefix}${formatMoney(value, displayCurrency)}`;
     };
     const pieces = await Promise.all(exportList.map(async (p) => {
       const pricing = queryClient.getQueryData<any>(["trade-product-pricing", p.id]);
@@ -278,7 +280,7 @@ export default function TradeComparator() {
       const swatches = await Promise.all(comparatorSwatches(p.materials, linkedSwatches.get(p.id) ?? []).map(async s => ({ name: s.name, color: s.color, image: s.imageUrl ? await textureImage(s.imageUrl) : null })));
       return { name: p.product_name, swatches, image: p.image_url ? await comparisonImage(p.image_url) : null, values: { brand_name: p.brand_name, category: p.category, dimensions: p.dimensions ?? "", materials: p.materials ?? "", lead_time: p.lead_time ?? "", designer_notes: draft.pieceNotes[p.id]?.trim() || "", rrp_price_cents: priceText(prices.retail, cur, prefix), trade_price_cents: priceText(prices.trade, cur, prefix) } };
     }));
-    const fxNote = `Prices shown in ${displayCurrency}${converted ? ` using Maison Affluency's synced FX rates${fx?.updatedAt ? `, last updated ${new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short", timeZoneName: "short" }).format(fx.updatedAt)}` : ""}; original supplier prices shown beneath` : ""}.`;
+    const fxNote = `Prices shown in ${displayCurrency}${converted ? ` using Maison Affluency's synced FX rates${fx?.updatedAt ? `, last updated ${new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short", timeZoneName: "short" }).format(fx.updatedAt)}` : ""}${showOriginalPrices ? "; original supplier prices shown beneath" : ""}` : ""}.`;
     downloadBlob(await buildComparisonPdf(pieces, FIELDS, showTradePrice ? "Product Comparison (Trade)" : "Product Comparison", { ...coverDetails, fxNote }), "product-comparison.pdf");
     } catch { toast.error("The PDF could not be prepared with all pictures. Please try again."); } finally { setExporting(false); }
   };
@@ -348,6 +350,13 @@ export default function TradeComparator() {
                   })}
                 </div>
               </fieldset>
+              <div className="flex items-start gap-2 border-t border-border pt-4">
+                <Checkbox id="cover-originalPrices" className="mt-0.5" checked={coverForm.originalPrices !== "false"} onCheckedChange={checked => setCoverForm(form => ({ ...form, originalPrices: checked ? "true" : "false" }))} />
+                <div className="space-y-0.5">
+                  <Label htmlFor="cover-originalPrices" className="text-xs font-medium text-muted-foreground">Show original supplier prices in the PDF</Label>
+                  <p className="text-xs text-muted-foreground">When off, price rows show only the converted price.</p>
+                </div>
+              </div>
               {([
                 ["projectName", "Project name"], ["comparisonName", "Comparison title"],
                 ["clientName", "Client name"], ["location", "Apartment / location"], ["style", "Style / apartment details"],
@@ -363,7 +372,7 @@ export default function TradeComparator() {
               <div className="flex flex-wrap justify-between gap-2 border-t border-border pt-4">
                 <Button type="button" variant="ghost" disabled={coverLoading} onClick={async () => {
                   setCoverLoading(true);
-                  try { const fresh = await readCoverDetails(); setCoverForm(form => ({ ...fresh, layout: form.layout, designerNotes: form.designerNotes })); }
+                  try { const fresh = await readCoverDetails(); setCoverForm(form => ({ ...fresh, layout: form.layout, designerNotes: form.designerNotes, originalPrices: form.originalPrices })); }
                   catch { toast.error("The project's details could not be loaded. Please try again."); }
                   finally { setCoverLoading(false); }
                 }}>Use project details</Button>

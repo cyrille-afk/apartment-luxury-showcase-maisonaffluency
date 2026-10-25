@@ -17,6 +17,14 @@ describe("comparison cover edits", () => {
     expect(restored.coverEdits[projectId].projectName).toBe("Singapore");
     expect(restored.coverEdits.unassigned.projectName).toBe("Bangkok");
   });
+  it("persists the original-supplier-price PDF option as on by default and honours the off choice", () => {
+    const on = sanitizeComparatorDraft({ coverEdits: { unassigned: {} } });
+    expect((on.coverEdits.unassigned.originalPrices ?? "true") !== "false").toBe(true);
+    const off = sanitizeComparatorDraft({ coverEdits: { unassigned: { originalPrices: "false" } } });
+    expect((off.coverEdits.unassigned.originalPrices ?? "true") !== "false").toBe(false);
+    const junk = sanitizeComparatorDraft({ coverEdits: { unassigned: { originalPrices: false } } });
+    expect(junk.coverEdits.unassigned.originalPrices).toBeUndefined();
+  });
 });
 
 describe("saved comparison restoration", () => {
