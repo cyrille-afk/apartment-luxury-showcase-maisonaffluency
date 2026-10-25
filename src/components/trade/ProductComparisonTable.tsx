@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { comparatorFacets, comparatorFinishNames, finishFacetKey, matchesComparatorFacets, type FinishFacetOverride, type ComparatorFacetKind, type ComparatorFacetSelection } from "@/lib/comparatorFacets";
+import { comparatorFacets, comparatorFinishNames, finishFacetKey, matchesComparatorFacets, materialParentOptions, materialTypeOptions, type FinishFacetOverride, type ComparatorFacetKind, type ComparatorFacetSelection } from "@/lib/comparatorFacets";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -40,7 +40,7 @@ export function ProductComparisonTable({ products: allProducts, fields, onRemove
   });
   const finishNames = useMemo(() => { const seen = new Map<string, string>(); for (const p of allProducts) if (p) for (const n of comparatorFinishNames(p.materials as string | null, swatches?.get(p.id))) if (!seen.has(finishFacetKey(n))) seen.set(finishFacetKey(n), n); return [...seen.values()].sort((a, b) => a.localeCompare(b)); }, [allProducts, swatches]);
   const categorisablePieces = useMemo(() => allProducts.flatMap(p => p ? [{ name: p.product_name, materials: (p.materials as string | null) ?? null, linked: swatches?.get(p.id) ?? [] }] : []), [allProducts, swatches]);
-  const [selection, setSelection] = useState<ComparatorFacetSelection>({});
+  const [selection, setSelection] = useState<ComparatorFacetSelection & { materialType?: string }>({});
   const facetsById = useMemo(() => new Map(allProducts.flatMap(p => p ? [[p.id, comparatorFacets(p.materials as string | null, swatches?.get(p.id), overrides)] as const] : [])), [allProducts, swatches, overrides]);
   const options = useMemo(() => Object.fromEntries((Object.keys(FACET_LABELS) as ComparatorFacetKind[]).map(k => [k, [...new Set([...facetsById.values()].flatMap(f => f[k]))].sort()])) as Record<ComparatorFacetKind, string[]>, [facetsById]);
   const active = Object.values(selection).some(Boolean);
@@ -54,7 +54,21 @@ export function ProductComparisonTable({ products: allProducts, fields, onRemove
   const productColumnWidth = `calc((100% - ${labelColumnWidth}) / ${Math.max(products.length, 1)})`;
   return <div>
     {(hasOptions || (isAdmin && finishNames.length > 0)) && <div className="mb-6 flex flex-wrap items-end gap-4" role="group" aria-label="Filter compared products">
-      {(Object.keys(FACET_LABELS) as ComparatorFacetKind[]).map(kind => options[kind].length > 0 && <label key={kind} className="flex flex-col gap-1.5">
+      {options.material.length > 0 && <label className="flex flex-col gap-1.5">
+        <span className="font-body text-[10px] font-bold uppercase tracking-[0.14em] text-foreground/70">Material</span>
+        <select value={selection.material ?? ""} onChange={e => setSelection(s => ({ ...s, material: e.target.value || undefined, materialType: undefined }))} className="h-9 min-w-40 border border-border bg-background px-3 font-body text-sm text-foreground">
+          <option value="">All</option>
+          {materialParentOptions(options.material).map(v => <option key={v} value={v}>{v}</option>)}
+        </select>
+      </label>}
+      {selection.material && materialTypeOptions(options.material, selection.material).length > 0 && <label className="flex flex-col gap-1.5">
+        <span className="font-body text-[10px] font-bold uppercase tracking-[0.14em] text-foreground/70">Type</span>
+        <select value={selection.materialType ?? ""} onChange={e => setSelection(s => ({ ...s, materialType: e.target.value || undefined }))} className="h-9 min-w-40 border border-border bg-background px-3 font-body text-sm text-foreground">
+          <option value="">All</option>
+          {materialTypeOptions(options.material, selection.material).map(v => <option key={v} value={v}>{v}</option>)}
+        </select>
+      </label>}
+      {(["finish", "color"] as ComparatorFacetKind[]).map(kind => options[kind].length > 0 && <label key={kind} className="flex flex-col gap-1.5">
         <span className="font-body text-[10px] font-bold uppercase tracking-[0.14em] text-foreground/70">{FACET_LABELS[kind]}</span>
         <select value={selection[kind] ?? ""} onChange={e => setSelection(s => ({ ...s, [kind]: e.target.value || undefined }))} className="h-9 min-w-40 border border-border bg-background px-3 font-body text-sm text-foreground">
           <option value="">All</option>
