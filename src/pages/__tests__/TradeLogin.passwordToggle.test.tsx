@@ -43,7 +43,7 @@ function passwordField() {
 }
 
 function toggleButton() {
-  return screen.getByRole("button", { name: /password/i }) as HTMLButtonElement;
+  return screen.getByRole("button", { name: /^(Show|Hide) password$/ }) as HTMLButtonElement;
 }
 
 afterEach(cleanup);
