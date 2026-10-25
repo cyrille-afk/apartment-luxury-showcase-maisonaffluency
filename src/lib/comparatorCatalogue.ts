@@ -23,9 +23,12 @@ export function comparatorDesignerGroups(products: ComparatorProduct[], search: 
     .sort((a, b) => fold(a.designer).localeCompare(fold(b.designer), "en"));
 }
 
-type DetailSource = { dimensions?: string | null; materials?: string | null; width_mm?: number | null; depth_mm?: number | null; height_mm?: number | null; size_variants?: Array<{ label?: string | null; base?: string | null; top?: string | null }> | null };
+type DetailSource = { dimensions?: string | null; materials?: string | null; width_mm?: number | null; depth_mm?: number | null; height_mm?: number | null; size_variants?: unknown };
 export function comparatorDetails(source: DetailSource) {
-  const variants = source.size_variants ?? [];
+  const variants = Array.isArray(source.size_variants) ? source.size_variants.flatMap(v => {
+    if (!v || typeof v !== "object" || Array.isArray(v)) return [];
+    return [{ label: typeof v.label === "string" ? v.label : null, base: typeof v.base === "string" ? v.base : null, top: typeof v.top === "string" ? v.top : null }];
+  }) : [];
   const labels = variants.map(v => v.label?.trim()).filter((v): v is string => !!v && /\d/.test(v));
   const explicit = source.width_mm && source.depth_mm && source.height_mm ? `W ${source.width_mm / 10} × D ${source.depth_mm / 10} × H ${source.height_mm / 10} cm` : "";
   const dimensions = [...new Set([source.dimensions?.trim() || explicit, ...labels].filter(Boolean))].join("\n");
