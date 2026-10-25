@@ -3,6 +3,7 @@ import { formatPdfDate } from "@/lib/pdfFormatting";
 import { DEFAULT_COVER_THEME, hexToRgb } from "@/lib/pdfCoverTheme";
 import { comparatorDimensionGroups } from "./comparatorDimensions";
 import { comparisonSectionPages } from "./comparisonPdfLayout";
+import coverLogo from "@/assets/maison-affluency-cover-logo.png.asset.json";
 
 export interface ComparisonPdfCover {
   projectName?: string | null;
@@ -27,13 +28,31 @@ async function embedComparisonFonts(doc: jsPDF) {
   }));
 }
 
-function drawComparisonCover(doc: jsPDF, cover: ComparisonPdfCover, title: string, productNames: string[]) {
+async function loadComparisonCoverLogo() {
+  const response = await fetch(coverLogo.url);
+  if (!response.ok) throw new Error("Maison Affluency cover logo unavailable");
+  const bitmap = await createImageBitmap(await response.blob());
+  const canvas = document.createElement("canvas");
+  canvas.width = bitmap.width; canvas.height = bitmap.height;
+  const context = canvas.getContext("2d");
+  if (!context) { bitmap.close(); throw new Error("Maison Affluency cover logo unavailable"); }
+  context.drawImage(bitmap, 0, 0);
+  bitmap.close();
+  return { data: canvas.toDataURL("image/png"), width: canvas.width, height: canvas.height };
+}
+
+function drawComparisonCover(doc: jsPDF, cover: ComparisonPdfCover, title: string, productNames: string[], logo: Awaited<ReturnType<typeof loadComparisonCoverLogo>>) {
   const theme = DEFAULT_COVER_THEME;
   const M = 24, W = 297, H = 210;
-  doc.setFillColor(...hexToRgb(theme.background)).rect(0, 0, W, H, "F");
-  doc.setFont("Cormorant", "normal").setFontSize(26).setTextColor(...hexToRgb(theme.text));
-  doc.text("MAISON AFFLUENCY", M, 30);
-  doc.setDrawColor(...hexToRgb(theme.accent)).setLineWidth(0.4).line(M, 39, M + 55, 39);
+  const brandedPage = () => {
+    doc.setFillColor(...hexToRgb(theme.background)).rect(0, 0, W, H, "F");
+    const logoH = 23, logoW = logoH * logo.width / logo.height;
+    doc.addImage(logo.data, "PNG", W - M - logoW, 14, logoW, logoH, "maison-affluency-cover-logo");
+    doc.setFont("Cormorant", "normal").setFontSize(26).setTextColor(...hexToRgb(theme.text));
+    doc.text("MAISON AFFLUENCY", M, 30);
+    doc.setDrawColor(...hexToRgb(theme.accent)).setLineWidth(0.4).line(M, 39, W - M, 39);
+  };
+  brandedPage();
   doc.setFont("Inter", "normal").setFontSize(9).setTextColor(...hexToRgb(theme.accent));
   doc.text(title.toUpperCase(), M, 57);
   doc.setFont("Cormorant", "normal").setTextColor(...hexToRgb(theme.text));
@@ -53,10 +72,8 @@ function drawComparisonCover(doc: jsPDF, cover: ComparisonPdfCover, title: strin
   }
   const nextCoverPage = () => {
     doc.addPage();
-    doc.setFillColor(...hexToRgb(theme.background)).rect(0, 0, W, H, "F");
-    doc.setFont("Cormorant", "normal").setFontSize(20).setTextColor(...hexToRgb(theme.text));
-    doc.text("MAISON AFFLUENCY", M, 25);
-    y = 42;
+    brandedPage();
+    y = 52;
   };
   if (y > 150) nextCoverPage();
   doc.setFont("Inter", "normal").setFontSize(8).setTextColor(...hexToRgb(theme.accent));
@@ -83,14 +100,15 @@ function drawComparisonCover(doc: jsPDF, cover: ComparisonPdfCover, title: strin
   const height = detailLines.reduce((sum, row) => sum + row.lines.length * 4.5 + 4, 0);
   // Long recorded details continue on another branded page rather than being clipped.
   if (y + height > 181) {
-    doc.addPage(); doc.setFillColor(...hexToRgb(theme.background)).rect(0, 0, W, H, "F"); y = 30;
+    nextCoverPage();
   }
   for (const { label, lines } of detailLines) {
     doc.setFont("Inter", "normal").setFontSize(8).setTextColor(...hexToRgb(theme.accent));
     doc.text(label, M, y);
     doc.setFontSize(10).setTextColor(...hexToRgb(theme.text));
     for (const line of lines) {
-      if (y > 181) { doc.addPage(); doc.setFillColor(...hexToRgb(theme.background)).rect(0, 0, W, H, "F"); y = 30; }
+      if (y > 181) nextCoverPage();
+      doc.setFont("Inter", "normal").setFontSize(10).setTextColor(...hexToRgb(theme.text));
       doc.text(line, M + 34, y); y += 4.5;
     }
     y += 4;
@@ -130,9 +148,9 @@ export async function comparisonImage(url: string, cropSquare = false) {
 /** Branded landscape side-by-side comparison. Callers decide which rows (e.g. trade price) are included. */
 export async function buildComparisonPdf(pieces: ComparisonPdfPiece[], rows: { key: string; label: string }[], title = "Product Comparison", cover: ComparisonPdfCover = {}): Promise<Blob> {
   const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "landscape" });
-  await embedComparisonFonts(doc);
+  const [, logo] = await Promise.all([embedComparisonFonts(doc), loadComparisonCoverLogo()]);
   doc.setProperties({ title: `${cover.projectName?.trim() || "Product Selection"} — ${title}`, author: "Maison Affluency" });
-  drawComparisonCover(doc, cover, title, pieces.map(piece => piece.name));
+  drawComparisonCover(doc, cover, title, pieces.map(piece => piece.name), logo);
   const W = 297, H = 210, M = 14, labelW = 39, endY = 191;
   const colW = (W - M * 2 - labelW) / Math.max(pieces.length, 1);
   const css = getComputedStyle(document.documentElement);
