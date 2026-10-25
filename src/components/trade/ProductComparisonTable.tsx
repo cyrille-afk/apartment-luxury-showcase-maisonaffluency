@@ -49,8 +49,8 @@ export function ProductComparisonTable({ products, fields, onRemove, renderPrice
           const trade = field.key === "trade_price_cents";
           const price = trade || field.key === "rrp_price_cents";
           const differences = differingSpecificationCells(products, field.key);
-          return <tr key={field.key} data-trade-sensitive={trade ? "" : undefined} className={`border-b border-border/60 ${trade ? "bg-muted/70" : ""}`}>
-            <th scope="row" className="py-5 pl-3 pr-4 text-left align-top font-body text-[10px] font-bold uppercase leading-relaxed text-muted-foreground">{field.label}</th>
+          return <tr key={field.key} data-trade-sensitive={trade ? "" : undefined} className={`border-b border-border/60 ${trade ? "comparator-trade-row" : ""}`}>
+            <th scope="row" className="py-5 pl-3 pr-4 text-left align-top font-body text-[10px] font-bold uppercase tracking-[0.14em] leading-relaxed text-foreground/70">{field.label}</th>
             {products.map((product, index) => {
               const value = product ? product[field.key as keyof TradeProduct] : null;
               const text = typeof value === "string" && value.trim() ? value : "—";
