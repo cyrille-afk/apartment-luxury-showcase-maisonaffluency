@@ -1093,6 +1093,7 @@ export type Database = {
           role: string
           status: string
           token_hash: string
+          view_only: boolean
         }
         Insert: {
           accepted_user_id?: string | null
@@ -1110,6 +1111,7 @@ export type Database = {
           role: string
           status?: string
           token_hash: string
+          view_only?: boolean
         }
         Update: {
           accepted_user_id?: string | null
@@ -1127,6 +1129,7 @@ export type Database = {
           role?: string
           status?: string
           token_hash?: string
+          view_only?: boolean
         }
         Relationships: [
           {
@@ -12865,6 +12868,7 @@ export type Database = {
           role: string
           status: string
           token_hash: string
+          view_only: boolean
         }
         SetofOptions: {
           from: "*"
@@ -13154,6 +13158,10 @@ export type Database = {
       country_for_phone: { Args: { p_phone: string }; Returns: string }
       create_board_invite: {
         Args: { _board_id: string; _email: string; _role: string }
+        Returns: Json
+      }
+      create_project_board_view_invite: {
+        Args: { _board_id: string; _email: string; _project_id: string }
         Returns: Json
       }
       create_visualiser_client_board: {
