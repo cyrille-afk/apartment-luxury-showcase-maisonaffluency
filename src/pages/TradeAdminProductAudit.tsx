@@ -12,8 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { withImperialPerLine } from "@/lib/formatDimensions";
+import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 
-const TRADE_DISCOUNT = 0.08;
 
 function slugify(s: string) {
   return (s || "")
@@ -87,6 +87,7 @@ function AuditPane({
   const isTrade = side === "Trade";
   const currency = tradeProduct?.currency || product?.currency || "EUR";
   const rrp = tradeProduct?.rrp_price_cents || tradeProduct?.trade_price_cents || product?.trade_price_cents || null;
+  const { discountPct: TRADE_DISCOUNT } = useTradeDiscount();
   const tradePrice = rrp ? Math.round(rrp * (1 - TRADE_DISCOUNT)) : null;
   const images = allImages(product, tradeProduct);
   const hero = firstImage(product, tradeProduct);
