@@ -6338,13 +6338,15 @@ serve(async (req) => {
     if (layoutScheduleContinuation && resolvedProjectId) {
       const { data: project } = await supabase.from("projects").select("id, name").eq("id", resolvedProjectId).eq("user_id", userId).maybeSingle();
       if (!project) return sseTextResponse("Choose a project you own above the layouts so I can prepare its schedule and quote.");
-      const candidates = await fetchStrictTypologyCandidates(supabase, requestedTypology, null, inferLeadTimeConstraints(lastUserMsg));
+      const submittedText = lastUserMsg.split("Submitted brief:")[1] || lastUserMsg;
+      const scheduleTypes = inferRequestedTypology(effectiveBrief.brief, extractStructuredBriefField(submittedText, "TYPOLOGY"));
+      const candidates = await fetchStrictTypologyCandidates(supabase, scheduleTypes, null, inferLeadTimeConstraints(submittedText));
       let picks = await hydratePickPreview(supabase, candidates.map((row: any) => row.id));
       if (hasScopedDesigners) {
         const allowed = new Set(scopedDesigners.map(normalizeLoose));
         picks = picks.filter((row: any) => allowed.has(normalizeLoose(row.designer_name || row.brand_name || "")));
       }
-      const types = normalizeRequestedTypologies(requestedTypology);
+      const types = normalizeRequestedTypologies(scheduleTypes);
       const selected = pickRowsForRequestedTypologyCoverage(picks, types, 12);
       if (!rowsCoverRequestedTypologies(selected, types)) {
         return sseTextResponse("The selected reference brands cannot currently cover every requested furniture type. Your layout is retained; widen References to include more ateliers, then continue the schedule. I have not substituted unrelated pieces.");
