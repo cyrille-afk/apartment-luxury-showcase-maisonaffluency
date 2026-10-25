@@ -1,5 +1,5 @@
 ## Compact comparator setup
-- [ ] Collapse selection tools by default for selected comparisons and add a sticky outline action bar; verify selection editing, restored-page default and scrolling.
+- [x] Selection tools now collapse to a count/Modify Selection summary; empty selection starts open, editing stays open until Done, restored selections collapse. Sticky outline actions measure header/breadcrumb clearance; verified desktop at 128px and mobile at 56px with no overlap/overflow/errors, 21 regressions pass and preview clean.
 
 ## Specification differences
 - [x] Added subtle neutral tints on differing populated specification cells; empty slots, matching categories and equivalent material lists stay plain, pricing unchanged. Four live products verified (16 differing cells, zero matching-category/price differences), no browser errors, 21 tests pass and preview clean.
