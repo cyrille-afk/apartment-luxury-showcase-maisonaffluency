@@ -58,6 +58,7 @@ export default function TradeAdminPriceListAudit() {
   const [scanLabel, setScanLabel] = useState("");
   const [scanError, setScanError] = useState("");
   const [newChecks, setNewChecks] = useState<ContentCheck[]>([]);
+  const [selectedAsset, setSelectedAsset] = useState("");
   const content = useQuery({
     queryKey: ["admin-price-list-content-inventory"], enabled: !!user && isAdmin,
     queryFn: async () => {
@@ -67,12 +68,12 @@ export default function TradeAdminPriceListAudit() {
     },
   });
   const checks = [...newChecks, ...(content.data?.checks ?? [])];
-  async function runContentScan(coversOnly: boolean) {
+  async function runContentScan(coversOnly: boolean, selectedKey?: string) {
     if (!content.data || scanning) return;
     stop.current = false;
     setScanning(true);
     setScanError("");
-    const targets = content.data.targets.filter((target) => (!coversOnly || target.kind === "cover") && !currentContentCheck(target, checks));
+    const targets = content.data.targets.filter((target) => selectedKey ? target.key === selectedKey : (!coversOnly || target.kind === "cover") && !currentContentCheck(target, checks));
     try {
       for (const [index, target] of targets.entries()) {
         if (stop.current) break;
@@ -153,9 +154,25 @@ export default function TradeAdminPriceListAudit() {
           <Button variant="outline" disabled={scanning || !content.data} onClick={() => void runContentScan(false)}>Inspect unchecked public files</Button>
           {scanning && <Button variant="outline" onClick={() => { stop.current = true; }}>Stop after current file</Button>}
         </div>
+        <div className="flex flex-wrap gap-2">
+          <select aria-label="Public asset to inspect" value={selectedAsset} onChange={(event) => setSelectedAsset(event.target.value)} disabled={scanning} className="min-w-0 max-w-full flex-1 rounded-md border border-border bg-background p-2 text-sm text-foreground">
+            <option value="">Select a public asset</option>
+            {targets.map((target) => <option key={target.key} value={target.key}>{target.label}</option>)}
+          </select>
+          <Button variant="outline" disabled={scanning || !selectedAsset} onClick={() => void runContentScan(false, selectedAsset)}>Inspect selected asset</Button>
+        </div>
         {scanning && <p role="status" className="break-all font-body text-sm text-muted-foreground">Inspecting {scanLabel}</p>}
         {(scanError || content.error) && <p role="alert" className="font-body text-sm text-destructive">{scanError || "Public content inventory could not be loaded."}</p>}
         {targets.length > reviewed && <p className="font-body text-xs text-muted-foreground">Content coverage is incomplete. Unchecked, unsupported and failed assets are not considered safe. Image and document inspections use AI credits.</p>}
+        {checks.length > 0 && <details className="font-body text-sm">
+          <summary className="cursor-pointer text-foreground">Completed content checks</summary>
+          <ul className="mt-3 divide-y divide-border">
+            {targets.map((target) => {
+              const check = currentContentCheck(target, checks);
+              return check ? <li key={target.key} className="space-y-1 py-3"><p className="break-all text-foreground">{target.label} — {check.verdict.replaceAll("_", " ")}</p><p className="text-muted-foreground">{check.evidence}</p></li> : null;
+            })}
+          </ul>
+        </details>}
       </section>
 
       {q.isLoading ? (
