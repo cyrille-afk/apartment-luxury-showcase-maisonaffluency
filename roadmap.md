@@ -102,4 +102,4 @@
 
 ## Price-list content audit
 - [x] Inventory all public objects regardless of names and inspect document/image contents with saved revision-keyed results; flag covers with possible prices, keep incomplete coverage explicit.
-- [ ] Verify signed-in cover and unrelated-filename document inspection, private results and focused rules.
+- [x] Verified signed-in Parsa cover (no prices detected) and unrelated-filename PDF (Mernoe price list detected, eight prices); saved results visible, anonymous inventory refused/results hidden, five focused tests passed. Full public-content scan remains explicitly incomplete and user-controlled.
