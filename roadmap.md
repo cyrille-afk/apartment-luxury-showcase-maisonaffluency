@@ -1,7 +1,7 @@
 # Roadmap — Automatic Visual Search Indexing
 
 ## Sign-in modal feedback and password reveal
-- [ ] Add modal password reveal, inline pending/error/success states and Google-password guidance; verify rejection and retry.
+- [x] Added modal password reveal, inline pending/error/success states and Google-password guidance. Twelve focused tests pass; live eye toggle, pending lock and real credential rejection verified with no page errors. Build clean; no password changed.
 
 ## Sign-in feedback
 - [x] Add inline credential loading, confirmed-success and actionable errors; coordinate disabled sign-in controls and match Google feedback to the same restrained styling.
