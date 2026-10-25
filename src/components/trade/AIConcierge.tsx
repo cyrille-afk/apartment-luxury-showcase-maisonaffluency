@@ -3252,7 +3252,7 @@ export function AIConcierge({
     // but never opens it automatically. The designer controls the pacing by
     // clicking the CTA beneath Felix's response.
     const hasProposal = timeline.some((t) => t.kind === "proposal" || t.kind === "quote_proposal" || t.kind === "ffe_proposal");
-    if (!hasProposal && !briefBuilderOpen && sendingAttachments.length === 0) {
+    if (!opts?.builderSubmit && !onboardingGate.completed && !hasProposal && !briefBuilderOpen && sendingAttachments.length === 0) {
 
 
       const priorUserTurns = timeline.filter((t) => t.kind === "msg" && (t as any).role === "user").length;
