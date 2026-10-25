@@ -1,5 +1,82 @@
 import { jsPDF } from "jspdf";
 import { formatPdfDate } from "@/lib/pdfFormatting";
+import { DEFAULT_COVER_THEME, hexToRgb } from "@/lib/pdfCoverTheme";
+
+export interface ComparisonPdfCover {
+  projectName?: string | null;
+  comparisonName?: string | null;
+  clientName?: string | null;
+  location?: string | null;
+  style?: string | null;
+}
+
+async function embedComparisonFonts(doc: jsPDF) {
+  await Promise.all([
+    ["Inter", "/fonts/pdf/Inter-Light.ttf"],
+    ["Cormorant", "/fonts/pdf/CormorantGaramond-Regular.ttf"],
+  ].map(async ([name, path]) => {
+    const response = await fetch(path);
+    if (!response.ok) throw new Error("PDF font unavailable");
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    let binary = "";
+    for (const byte of bytes) binary += String.fromCharCode(byte);
+    doc.addFileToVFS(`${name}.ttf`, btoa(binary));
+    doc.addFont(`${name}.ttf`, name, "normal");
+  }));
+}
+
+function drawComparisonCover(doc: jsPDF, cover: ComparisonPdfCover, title: string, count: number) {
+  const theme = DEFAULT_COVER_THEME;
+  const M = 24, W = 297, H = 210;
+  doc.setFillColor(...hexToRgb(theme.background)).rect(0, 0, W, H, "F");
+  doc.setFont("Cormorant", "normal").setFontSize(26).setTextColor(...hexToRgb(theme.text));
+  doc.text("MAISON AFFLUENCY", M, 30);
+  doc.setDrawColor(...hexToRgb(theme.accent)).setLineWidth(0.4).line(M, 39, M + 55, 39);
+  doc.setFont("Inter", "normal").setFontSize(9).setTextColor(...hexToRgb(theme.accent));
+  doc.text(title.toUpperCase(), M, 57);
+  doc.setFont("Cormorant", "normal").setTextColor(...hexToRgb(theme.text));
+  let size = 36;
+  const projectName = cover.projectName?.trim() || "Product Selection";
+  doc.setFontSize(size);
+  let nameLines: string[] = doc.splitTextToSize(projectName, W - M * 2);
+  while (nameLines.length > 3 && size > 12) {
+    size -= 1; doc.setFontSize(size); nameLines = doc.splitTextToSize(projectName, W - M * 2);
+  }
+  doc.text(nameLines, M, 78, { lineHeightFactor: 1.1 });
+  let y = 78 + nameLines.length * size * 0.39 + 8;
+  doc.setFont("Inter", "normal").setFontSize(11);
+  if (cover.comparisonName?.trim()) {
+    const lines: string[] = doc.splitTextToSize(cover.comparisonName.trim(), W - M * 2);
+    doc.text(lines, M, y); y += lines.length * 4.5 + 7;
+  }
+  const details = [
+    ["CLIENT", cover.clientName?.trim()],
+    ["LOCATION", cover.location?.trim()],
+    ["STYLE", cover.style?.trim()],
+  ].filter((row): row is [string, string] => !!row[1]);
+  doc.setFontSize(10);
+  const valueW = W - M * 2 - 34;
+  const detailLines = details.map(([label, value]) => ({ label, lines: doc.splitTextToSize(value, valueW) as string[] }));
+  const height = detailLines.reduce((sum, row) => sum + row.lines.length * 4.5 + 4, 0);
+  // Long recorded details continue on another branded page rather than being clipped.
+  if (y + height > 181) {
+    doc.addPage(); doc.setFillColor(...hexToRgb(theme.background)).rect(0, 0, W, H, "F"); y = 30;
+  }
+  for (const { label, lines } of detailLines) {
+    doc.setFont("Inter", "normal").setFontSize(8).setTextColor(...hexToRgb(theme.accent));
+    doc.text(label, M, y);
+    doc.setFontSize(10).setTextColor(...hexToRgb(theme.text));
+    for (const line of lines) {
+      if (y > 181) { doc.addPage(); doc.setFillColor(...hexToRgb(theme.background)).rect(0, 0, W, H, "F"); y = 30; }
+      doc.text(line, M + 34, y); y += 4.5;
+    }
+    y += 4;
+  }
+  doc.setFont("Inter", "normal").setFontSize(8).setTextColor(...hexToRgb(theme.accent));
+  doc.text(`${count} ${count === 1 ? "PIECE" : "PIECES"}  /  ${formatPdfDate(new Date(), "en-GB")}`, M, 193);
+  doc.text("maisonaffluency.com", W - M, 193, { align: "right" });
+  doc.addPage(); doc.setTextColor(0); doc.setDrawColor(0);
+}
 
 export interface ComparisonPdfPiece {
   name: string;
@@ -21,8 +98,11 @@ export async function comparisonImage(url: string) {
 }
 
 /** Branded landscape side-by-side comparison. Callers decide which rows (e.g. trade price) are included. */
-export function buildComparisonPdf(pieces: ComparisonPdfPiece[], rows: { key: string; label: string }[], title = "Product Comparison"): Blob {
+export async function buildComparisonPdf(pieces: ComparisonPdfPiece[], rows: { key: string; label: string }[], title = "Product Comparison", cover: ComparisonPdfCover = {}): Promise<Blob> {
   const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "landscape" });
+  await embedComparisonFonts(doc);
+  doc.setProperties({ title: `${cover.projectName?.trim() || "Product Selection"} — ${title}`, author: "Maison Affluency" });
+  drawComparisonCover(doc, cover, title, pieces.length);
   const W = 297, M = 15, labelW = 42;
   doc.setFont("helvetica", "bold"); doc.setFontSize(16);
   doc.text("MAISON AFFLUENCY", M, 18);

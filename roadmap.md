@@ -1,3 +1,6 @@
+## Comparison PDF cover
+- [x] Added shared jade/bronze branded cover with project/shortlist name and recorded client, location and style (blank fields omitted, no invented details or internal notes). Signed-in Singapore and two-piece Bangkok exports downloaded; every page visually inspected, corrected singular PIECE label, pictures/specifications retained, no overlap or clipping; 20 regressions pass and preview clean. Preview only.
+
 ## Compact comparator setup
 - [x] Selection tools now collapse to a count/Modify Selection summary; empty selection starts open, editing stays open until Done, restored selections collapse. Sticky outline actions measure header/breadcrumb clearance; verified desktop at 128px and mobile at 56px with no overlap/overflow/errors, 21 regressions pass and preview clean.
 
