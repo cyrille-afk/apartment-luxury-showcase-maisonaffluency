@@ -1,5 +1,7 @@
 ## Curated Room Layout loading and freeze report
-- [ ] Verify visible page/catalogue/generation loading and idle-demand rendering; original Chrome freeze remains to be reproduced.
+- [x] Add page/catalogue/generation/curation loading states and coordinate competing actions; signed-in catalogue and generation indicators captured, five placement tests pass.
+- [x] Stop idle canvas rendering while retaining continuous rendering during walkthrough playback and dragging.
+- [ ] Resolve post-generation stall: twice reproduced screenshot timeouts after real room generation, including a 90-second timeout; complete room rendering and walkthrough remain unverified. Further model/render profiling is needed, not user input.
 
 ## Brief submission and stalled concierge replies
 - [x] Keep missing-detail errors visible beside Submit Brief; validate live fields and stop blank lines consuming following labels. Signed-in incomplete submission verified after 5.5 seconds with no page errors.
