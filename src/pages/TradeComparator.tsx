@@ -24,6 +24,7 @@ import { COMPARATOR_CURRENCIES, comparatorCurrency, convertComparatorCents, form
 import { useSearchParams } from "@/lib/router-compat";
 import { useComparatorDraft } from "@/hooks/useComparatorDraft";
 import { ProductComparisonTable } from "@/components/trade/ProductComparisonTable";
+import DesignerNoteToolbar from "@/components/trade/DesignerNoteToolbar";
 import { ComparatorSelectionDrawer } from "@/components/trade/ComparatorSelectionDrawer";
 import { restoreSavedComparison, type ComparisonCoverEdits } from "@/lib/comparatorDraft";
 import { Label } from "@/components/ui/label";
@@ -356,6 +357,7 @@ export default function TradeComparator() {
               </div>)}
               <div className="space-y-1.5">
                 <Label htmlFor="cover-designerNotes" className="text-xs font-medium text-muted-foreground">Designer notes</Label>
+                <DesignerNoteToolbar targetId="cover-designerNotes" maxLength={2000} value={coverForm.designerNotes || ""} onChange={value => setCoverForm(form => ({ ...form, designerNotes: value }))} />
                 <Textarea id="cover-designerNotes" maxLength={2000} rows={4} value={coverForm.designerNotes || ""} onChange={event => setCoverForm(form => ({ ...form, designerNotes: event.target.value }))} placeholder="Notes for the cover, e.g. intent for the scheme" />
               </div>
               <div className="flex flex-wrap justify-between gap-2 border-t border-border pt-4">
@@ -473,7 +475,7 @@ export default function TradeComparator() {
           </ul>}
         </section>
 
-        <ProductComparisonTable products={comparisonSlots} fields={FIELDS} onRemove={removeFromCompare} onVisibleProductsChange={setVisiblePieces} renderNote={product => <Textarea aria-label={`Designer notes for ${product.product_name}`} maxLength={1000} rows={3} placeholder="Add notes…" value={draft.pieceNotes[product.id] ?? ""} onChange={e => { const value = e.target.value; setDraft(d => ({ ...d, pieceNotes: { ...d.pieceNotes, [product.id]: value } })); }} className="min-h-20 resize-y border-border/70 bg-background/60 font-body text-sm" />} renderPrice={(product, net) => <ComparisonPrice product={product} net={net} currency={displayCurrency} />} />
+        <ProductComparisonTable products={comparisonSlots} fields={FIELDS} onRemove={removeFromCompare} onVisibleProductsChange={setVisiblePieces} renderNote={product => <div><DesignerNoteToolbar targetId={`piece-note-${product.id}`} maxLength={1000} value={draft.pieceNotes[product.id] ?? ""} onChange={value => setDraft(d => ({ ...d, pieceNotes: { ...d.pieceNotes, [product.id]: value } }))} /><Textarea id={`piece-note-${product.id}`} aria-label={`Designer notes for ${product.product_name}`} maxLength={1000} rows={3} placeholder="Add notes…" value={draft.pieceNotes[product.id] ?? ""} onChange={e => { const value = e.target.value; setDraft(d => ({ ...d, pieceNotes: { ...d.pieceNotes, [product.id]: value } })); }} className="min-h-20 resize-y border-border/70 bg-background/60 font-body text-sm" /></div>} renderPrice={(product, net) => <ComparisonPrice product={product} net={net} currency={displayCurrency} />} />
         {compareList.length > 0 && <p className="mt-3 font-body text-[10px] tracking-wide text-muted-foreground">
           Prices converted to {displayCurrency} with Maison Affluency's synced FX rates{fxRates.data?.updatedAt ? ` · last updated ${new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short" }).format(fxRates.data.updatedAt)}` : ""}. Original supplier prices shown beneath.
         </p>}
