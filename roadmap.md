@@ -1,3 +1,8 @@
+## Product comparator feedback
+- [ ] Include parent houses/makers and all saved Favorites.
+- [ ] Assign and save shortlists under available projects.
+- [ ] Export product pictures and complete recorded materials/sizes; verify the flow.
+
 ## Expired tearsheet invitations
 - [x] Add per-board expired-invitation resend in status cards and sharing controls; live-tested on Cyrille's Singapore board, restored view-only access for 30 days and refreshed viewer count, email queued (delivery not confirmed). Revoked/current/wrong-project/signed-out attempts denied, 12 focused tests passed, test invitations removed; not published.
 
