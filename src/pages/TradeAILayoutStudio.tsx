@@ -76,6 +76,8 @@ const TradeAILayoutStudio = () => {
   const [cameraView, setCameraView] = useState("overview");
   useEffect(() => { setCameraView("overview"); }, [overviewRevision]);
   const [loading, setLoading] = useState(false);
+  const [curating, setCurating] = useState(false);
+  const [layoutError, setLayoutError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [compareOpen, setCompareOpen] = useState(false);
@@ -174,7 +176,9 @@ const TradeAILayoutStudio = () => {
   useEffect(() => { void loadCatalogue(); }, [loadCatalogue]);
 
   const generate = async () => {
+    if (loading || aiLoading || curating) return;
     setLoading(true);
+    setLayoutError(null);
     setSelectedId(null);
     setCompareIds([]);
     setCompareOpen(false);
@@ -185,6 +189,8 @@ const TradeAILayoutStudio = () => {
       setScene(next);
       setOverviewRevision((r) => r + 1);
       setSkipped(miss);
+    } catch {
+      setLayoutError("Your room could not be prepared. Please try again; your previous layout is unchanged.");
     } finally {
       setLoading(false);
     }
@@ -192,7 +198,9 @@ const TradeAILayoutStudio = () => {
 
   // AI architect: the model proposes, validateArchitectLayout decides. Any rule break → deterministic layout.
   const generateWithAI = async () => {
+    if (loading || aiLoading || curating) return;
     setAiLoading(true);
+    setLayoutError(null);
     setSelectedId(null); setCompareIds([]); setCompareOpen(false); setCurrent(null);
     try {
       const live = (await loadCatalogue()) ?? catalogue;
@@ -221,12 +229,20 @@ const TradeAILayoutStudio = () => {
         toast.warning("AI layout broke a room rule — showing the standard layout instead");
       }
       setOverviewRevision((r) => r + 1);
+    } catch {
+      setLayoutError("Your room could not be prepared. Please try again; your previous layout is unchanged.");
     } finally {
       setAiLoading(false);
     }
   };
 
-  const runCuration = () => {
+  const runCuration = async () => {
+    if (loading || aiLoading || curating) return;
+    setCurating(true);
+    setLayoutError(null);
+    // Give the pending state a paint before synchronous catalogue selection.
+    await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    try {
     const result = curate(briefText, catalogue, brief.totalBudget);
     setCuration(result);
     setSelectedId(null);
@@ -237,6 +253,11 @@ const TradeAILayoutStudio = () => {
     if (result.parsed.budget) setBrief((b) => ({ ...b, totalBudget: result.budget }));
     setScene(sceneFromCuration(result, brief));
     setOverviewRevision((r) => r + 1);
+    } catch {
+      setLayoutError("Your selection could not be prepared. Please try again; your previous layout is unchanged.");
+    } finally {
+      setCurating(false);
+    }
   };
 
   const withLedger = (next: AICuratedSceneSchema) => ({ ...next, financialSummary: summarise(next) });
@@ -735,12 +756,12 @@ const TradeAILayoutStudio = () => {
               </div>
             ))}
           </div>
-          <Button className="w-full" onClick={generate} disabled={loading || catLoading || !!catError}>
+          <Button className="w-full" onClick={generate} disabled={loading || aiLoading || curating || catLoading || !!catError}>
             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
             {loading ? "Generating layout..." : "Generate Room Layout"}
           </Button>
           {videoStatus?.isAdmin && (
-          <Button variant="outline" className="w-full" onClick={generateWithAI} disabled={aiLoading || loading || catLoading || !!catError}>
+          <Button variant="outline" className="w-full" onClick={generateWithAI} disabled={aiLoading || loading || curating || catLoading || !!catError}>
             {aiLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
             {aiLoading ? "AI architect arranging..." : "Generate with AI architect"}
           </Button>
@@ -864,6 +885,13 @@ const TradeAILayoutStudio = () => {
       </aside>
 
       <div className="relative h-[70vh] min-h-[520px] min-w-0 border border-border bg-muted/30">
+        {(loading || aiLoading || curating || catLoading) && (
+          <div role="status" aria-live="polite" className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-background/90 text-foreground">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
+            <p className="font-display text-lg">{aiLoading ? "Arranging your room…" : curating ? "Curating your selection…" : loading ? "Preparing your room…" : "Loading your catalogue…"}</p>
+          </div>
+        )}
+        {layoutError && <div role="alert" className="absolute left-4 right-4 top-4 z-30 border border-destructive/40 bg-background p-4 text-sm text-destructive">{layoutError}</div>}
         {selectedAsset && <SelectedPieceDetails name={selectedPiece?.name ?? selectedAsset.sku} price={selectedPiece?.price ?? null} dimensions={selectedPiece?.dimensions ?? null} manufacturer={selectedPiece?.manufacturer} productUrl={selectedPiece?.productUrl} onClose={() => setSelectedId(null)} />}
         {compareOpen && scene && (
           <LayoutPieceCompare
@@ -1259,7 +1287,7 @@ const TradeAILayoutStudio = () => {
           </div>
         )}
         {!scene && !loading && (
-          <Canvas dpr={[1, 1.5]} aria-label="Empty room grid">
+          <Canvas frameloop="demand" dpr={[1, 1.5]} aria-label="Empty room grid">
             <PerspectiveCamera makeDefault fov={45} position={[brief.roomDimensions.width * 1.1, Math.max(brief.roomDimensions.width, brief.roomDimensions.length) * 1.1, brief.roomDimensions.length * 1.3]} />
             <OrbitControls makeDefault maxPolarAngle={Math.PI / 2.05} />
             <ambientLight intensity={0.8} />
@@ -1267,7 +1295,7 @@ const TradeAILayoutStudio = () => {
           </Canvas>
         )}
         {scene && (
-          <Canvas shadows dpr={[1, 1.5]} gl={{ preserveDrawingBuffer: true }} onPointerMissed={() => setSelectedId(null)}>
+          <Canvas frameloop={walking || dragging ? "always" : "demand"} shadows dpr={[1, 1.5]} gl={{ preserveDrawingBuffer: true }} onPointerMissed={() => setSelectedId(null)}>
             {authorMode === "draw"
               ? <FloorPlanDrawLayer width={scene.roomDimensions.width} length={scene.roomDimensions.length}
                   onPick={(x, z) => setAuthorNodes((n) => [...n, { position: [x, drawHeight, z], target: clusterCentre(scene) }])} />
@@ -1382,8 +1410,8 @@ const TradeAILayoutStudio = () => {
         <div className="space-y-2">
           <Textarea value={briefText} onChange={(e) => setBriefText(e.target.value)} rows={3} maxLength={2000}
             className="resize-none text-xs" placeholder="e.g. Warm minimalism, neutral tones, budget €50,000" />
-          <Button className="w-full" variant="outline" onClick={runCuration} disabled={catLoading || !!catError || !briefText.trim()}>
-            <Sparkles className="mr-2 h-4 w-4" /> Curate from brief
+          <Button className="w-full" variant="outline" onClick={runCuration} disabled={loading || aiLoading || curating || catLoading || !!catError || !briefText.trim()}>
+            {curating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />} {curating ? "Curating…" : "Curate from brief"}
           </Button>
         </div>
         {curation && (() => {

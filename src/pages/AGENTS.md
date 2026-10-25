@@ -1,4 +1,5 @@
 # Page rules
+- Room layout canvases render on demand while idle and continuously during playback or dragging; pending generation/curation stays visible in the room area and locks competing actions to prevent duplicate work.
 
 - Sales Funnel delete controls pass the explicit source and UUID to the admin-authorized deletion RPC only after confirmation; real payment-linked records are protected and failed deletes remain open for retry — prevents deleting the wrong source or financial history.
 
