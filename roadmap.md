@@ -1,3 +1,6 @@
+## Reopen saved comparisons
+- [x] Added searchable Saved comparisons chooser across owner projects; Restore reopens the saved project/name/ordered selections and can explicitly reset local edits. Signed-in temporary Singapore two-piece comparison saved, restored after leaving, re-restored after removal and deleted; no browser errors, 17 tests pass, preview clean.
+
 ## Comparator table presentation
 - [x] Extracted the comparison table with large 4:5 neutral image blocks, centered above-card remove controls, bold muted left-aligned labels, stacked materials and tinted bold Trade Price. Four live pieces verified at 1946px and mobile with all images loaded, no page overflow/errors, refresh/removal preserved; 15 regressions pass, preview clean. Not published; GitHub sync needed.
 

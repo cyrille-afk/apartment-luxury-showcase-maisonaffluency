@@ -42,3 +42,8 @@ export function sanitizeComparatorDraft(value: unknown): ComparatorDraft {
 export function comparatorDraftKey(userId: string, shortlistId: string | null): string {
   return `ma-comparator-draft-v1:${userId}:${shortlistId || "working"}`;
 }
+
+export function restoreSavedComparison(items: unknown, name: string, available: TradeProduct[]): ComparatorDraft {
+  const snapshot = sanitizeComparatorDraft({ compareList: items, shortlistName: name });
+  return { ...snapshot, compareList: snapshot.compareList.map(saved => available.find(product => product.id === saved.id || product.trade_product_id === saved.id) ?? saved) };
+}
