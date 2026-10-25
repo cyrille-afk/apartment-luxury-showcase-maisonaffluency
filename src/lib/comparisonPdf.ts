@@ -11,6 +11,17 @@ export interface ComparisonPdfCover {
   clientName?: string | null;
   location?: string | null;
   style?: string | null;
+  layout?: string | null;
+}
+
+export const COMPARISON_COVER_LAYOUTS = [
+  { id: "classic", label: "Classic", description: "Pieces first, project and client details beneath" },
+  { id: "details-first", label: "Details first", description: "Client, location and style lead, pieces follow" },
+  { id: "split", label: "Split columns", description: "Details in a gold-ruled column beside the pieces" },
+] as const;
+export type ComparisonCoverLayout = typeof COMPARISON_COVER_LAYOUTS[number]["id"];
+export function comparisonCoverLayout(value: unknown): ComparisonCoverLayout {
+  return COMPARISON_COVER_LAYOUTS.some(l => l.id === value) ? value as ComparisonCoverLayout : "classic";
 }
 
 async function embedComparisonFonts(doc: jsPDF) {
@@ -75,43 +86,64 @@ function drawComparisonCover(doc: jsPDF, cover: ComparisonPdfCover, title: strin
     brandedPage();
     y = 52;
   };
-  if (y > 150) nextCoverPage();
-  doc.setFont("Inter", "normal").setFontSize(8).setTextColor(...hexToRgb(theme.accent));
-  doc.text("SELECTED PIECES", M, y); y += 7;
-  for (const name of productNames) {
-    doc.setFont("Cormorant", "normal").setFontSize(15);
-    const lines = doc.splitTextToSize(name, W - M * 2) as string[];
-    for (const line of lines) {
-      if (y > 178) nextCoverPage();
-      doc.setFont("Cormorant", "normal").setFontSize(15).setTextColor(...hexToRgb(theme.text));
-      doc.text(line, M, y); y += 5.8;
-    }
-    y += 1.5;
-  }
-  y += 7;
+  const layout = comparisonCoverLayout(cover.layout);
   const details = [
     ["CLIENT", cover.clientName?.trim()],
     ["LOCATION", cover.location?.trim()],
     ["STYLE", cover.style?.trim()],
   ].filter((row): row is [string, string] => !!row[1]);
-  doc.setFontSize(10);
-  const valueW = W - M * 2 - 34;
-  const detailLines = details.map(([label, value]) => ({ label, lines: doc.splitTextToSize(value, valueW) as string[] }));
-  const height = detailLines.reduce((sum, row) => sum + row.lines.length * 4.5 + 4, 0);
-  // Long recorded details continue on another branded page rather than being clipped.
-  if (y + height > 181) {
-    nextCoverPage();
-  }
-  for (const { label, lines } of detailLines) {
+  // Each column paginates onto further branded pages rather than clipping.
+  const drawPieces = (x: number, width: number, top = 52) => {
+    if (y > 150) { nextCoverPage(); y = top; }
     doc.setFont("Inter", "normal").setFontSize(8).setTextColor(...hexToRgb(theme.accent));
-    doc.text(label, M, y);
-    doc.setFontSize(10).setTextColor(...hexToRgb(theme.text));
-    for (const line of lines) {
-      if (y > 181) nextCoverPage();
-      doc.setFont("Inter", "normal").setFontSize(10).setTextColor(...hexToRgb(theme.text));
-      doc.text(line, M + 34, y); y += 4.5;
+    doc.text("SELECTED PIECES", x, y); y += 7;
+    for (const name of productNames) {
+      doc.setFont("Cormorant", "normal").setFontSize(15);
+      for (const line of doc.splitTextToSize(name, width) as string[]) {
+        if (y > 178) { nextCoverPage(); y = top; }
+        doc.setFont("Cormorant", "normal").setFontSize(15).setTextColor(...hexToRgb(theme.text));
+        doc.text(line, x, y); y += 5.8;
+      }
+      y += 1.5;
     }
-    y += 4;
+  };
+  const drawDetails = (x: number, width: number, stacked: boolean) => {
+    const valueX = stacked ? x : x + 34, valueW = stacked ? width : width - 34;
+    doc.setFontSize(10);
+    const rows = details.map(([label, value]) => ({ label, lines: doc.splitTextToSize(value, valueW) as string[] }));
+    const height = rows.reduce((sum, r) => sum + r.lines.length * 4.5 + (stacked ? 9 : 4), 0);
+    if (!stacked && y + height > 181) nextCoverPage();
+    for (const { label, lines } of rows) {
+      if (y > 176) nextCoverPage();
+      doc.setFont("Inter", "normal").setFontSize(8).setTextColor(...hexToRgb(theme.accent));
+      doc.text(label, x, y);
+      if (stacked) y += 5;
+      for (const line of lines) {
+        if (y > 181) nextCoverPage();
+        doc.setFont("Inter", "normal").setFontSize(10).setTextColor(...hexToRgb(theme.text));
+        doc.text(line, valueX, y); y += 4.5;
+      }
+      y += 4;
+    }
+  };
+  if (layout === "split") {
+    const top = y, leftW = 92, gap = 14, rightX = M + leftW + gap;
+    const startPage = doc.getNumberOfPages();
+    if (details.length) {
+      drawDetails(M, leftW, true);
+      doc.setPage(startPage);
+      doc.setDrawColor(...hexToRgb(theme.accent)).setLineWidth(0.3).line(M + leftW + gap / 2, top - 4, M + leftW + gap / 2, 181);
+      y = top;
+      drawPieces(rightX, W - rightX - M);
+      doc.setPage(doc.getNumberOfPages());
+    } else drawPieces(M, W - M * 2);
+  } else if (layout === "details-first") {
+    if (details.length) { drawDetails(M, W - M * 2, false); y += 6; }
+    drawPieces(M, W - M * 2);
+  } else {
+    drawPieces(M, W - M * 2);
+    y += 7;
+    drawDetails(M, W - M * 2, false);
   }
   doc.setFont("Inter", "normal").setFontSize(8).setTextColor(...hexToRgb(theme.accent));
   const count = productNames.length;
