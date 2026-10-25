@@ -17,10 +17,15 @@ interface Props {
 
 export function ProductComparisonTable({ products, fields, onRemove, renderPrice }: Props) {
   const { data: swatches, isLoading: swatchesLoading } = useComparatorSwatches(products.flatMap(product => product ? [product.id] : []));
+  const labelColumnWidth = "11rem";
+  const productColumnWidth = `calc((100% - ${labelColumnWidth}) / ${Math.max(products.length, 1)})`;
   return <div className="overflow-x-auto" role="region" aria-label="Product comparison" tabIndex={0}>
     <table className="w-full min-w-[1040px] table-fixed border-collapse text-left">
       <caption className="sr-only">Selected products, specifications and pricing</caption>
-      <colgroup><col className="w-36" />{products.map((_, index) => <col key={index} />)}</colgroup>
+      <colgroup>
+        <col style={{ width: labelColumnWidth }} />
+        {products.map((_, index) => <col key={index} style={{ width: productColumnWidth }} />)}
+      </colgroup>
       <thead>
         <tr className="border-b border-border">
           <th scope="col"><span className="sr-only">Specification</span></th>
@@ -44,8 +49,8 @@ export function ProductComparisonTable({ products, fields, onRemove, renderPrice
           const trade = field.key === "trade_price_cents";
           const price = trade || field.key === "rrp_price_cents";
           const differences = differingSpecificationCells(products, field.key);
-          return <tr key={field.key} data-trade-sensitive={trade ? "" : undefined} className={`border-b border-border/60 ${trade ? "bg-muted/70" : ""}`}>
-            <th scope="row" className="py-5 pl-3 pr-4 text-left align-top font-body text-[10px] font-bold uppercase leading-relaxed text-muted-foreground">{field.label}</th>
+          return <tr key={field.key} data-trade-sensitive={trade ? "" : undefined} className={`border-b border-border/60 ${trade ? "comparator-trade-row" : ""}`}>
+            <th scope="row" className="py-5 pl-3 pr-4 text-left align-top font-body text-[10px] font-bold uppercase tracking-[0.14em] leading-relaxed text-foreground/70">{field.label}</th>
             {products.map((product, index) => {
               const value = product ? product[field.key as keyof TradeProduct] : null;
               const text = typeof value === "string" && value.trim() ? value : "—";
