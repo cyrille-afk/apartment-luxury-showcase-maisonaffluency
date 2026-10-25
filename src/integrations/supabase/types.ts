@@ -4643,6 +4643,36 @@ export type Database = {
         }
         Relationships: []
       }
+      finish_facet_overrides: {
+        Row: {
+          color: string | null
+          finish: string | null
+          finish_key: string
+          finish_name: string
+          material: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          color?: string | null
+          finish?: string | null
+          finish_key: string
+          finish_name: string
+          material?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          color?: string | null
+          finish?: string | null
+          finish_key?: string
+          finish_name?: string
+          material?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       funnel_card_payments: {
         Row: {
           amount_cents: number
