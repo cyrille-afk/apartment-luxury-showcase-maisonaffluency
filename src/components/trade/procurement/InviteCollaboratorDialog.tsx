@@ -67,7 +67,7 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) reset(); }}>
+    <Dialog open={open} onOpenChange={(v) => { if (sending) return; onOpenChange(v); if (!v) reset(); }}>
       <DialogContent className="rounded-none sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="font-display text-xl font-normal">{projectId ? "Invite architect or designer" : readOnly ? "Invite Client" : "Invite Collaborator"}</DialogTitle>
@@ -77,7 +77,7 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
           <div className="space-y-5 pt-2">
             <div className="space-y-1.5">
               <Label htmlFor="invite-email" className="font-body text-[10px] uppercase tracking-[0.18em]">Email</Label>
-              <Input id="invite-email" type="email" value={email} maxLength={255} onChange={(e) => setEmail(e.target.value)} className="rounded-none" placeholder="name@example.com" />
+              <Input id="invite-email" type="email" value={email} maxLength={255} disabled={sending} onChange={(e) => setEmail(e.target.value)} className="rounded-none" placeholder="name@example.com" />
             </div>
             {!readOnly && !projectId && <div className="space-y-1.5">
               <Label htmlFor="invite-role" className="font-body text-[10px] uppercase tracking-[0.18em]">Role</Label>
@@ -97,7 +97,7 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
                 <LinkIcon className="h-3.5 w-3.5" /> Copy Link
               </Button>
             </div>
-            <Button className="w-full rounded-none" onClick={reset}>Invite Another</Button>
+            <Button className="w-full rounded-none" disabled={sending} onClick={reset}>{sending ? "Sending invitation…" : "Invite Another"}</Button>
           </div>
         )}
       </DialogContent>
