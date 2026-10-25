@@ -95,3 +95,7 @@
 - [ ] Material Library: click image for higher-res view.
 - [x] Mood Board Builder: save to project, PDF export, Client View.
 - [ ] Mark-up & annotations: save, share, assign to project; Studio/Presentation View.
+
+## Price list audit admin link
+- [x] Add a "Price List Audit" link to the sidebar Admin group so the audit opens without typing its address.
+- [x] Live verified signed-in as cyrille@maisonaffluency.com: link present with the correct address, click lands on /trade/admin/price-list-audit and the report renders (57/57 secured, 5 needing securing) with no page errors.
