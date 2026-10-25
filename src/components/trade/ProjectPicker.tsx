@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { FolderOpen, Plus, Check, X } from "lucide-react";
 import { useProjects, getRecentProjectIds, pushRecentProject, type Project } from "@/hooks/useProjects";
 import { useAuth } from "@/hooks/useAuth";
+import { useStudio } from "@/hooks/useStudio";
 import { supabase } from "@/integrations/supabase/client";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,7 @@ interface Props {
  */
 export function ProjectPicker({ value, onChange, compact }: Props) {
   const { user } = useAuth();
+  const { currentStudio } = useStudio();
   const { projects, loading, refresh } = useProjects({ activeOnly: false });
   const [open, setOpen] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -55,7 +57,7 @@ export function ProjectPicker({ value, onChange, compact }: Props) {
     setCreating(true);
     const { data, error } = await supabase
       .from("projects" as any)
-      .insert({ user_id: user.id, name: newName.trim() } as any)
+      .insert({ user_id: user.id, studio_id: currentStudio?.id ?? null, name: newName.trim() } as any)
       .select()
       .single();
     setCreating(false);

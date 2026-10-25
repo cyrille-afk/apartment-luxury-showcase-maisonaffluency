@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { isLayoutScheduleContinuation } from "./_layoutContinuation.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { requireUser, rateLimit } from "../_shared/auth.ts";
 import { logAiUsage } from "../_shared/aiUsage.ts";
@@ -5279,6 +5280,7 @@ serve(async (req) => {
     const hasExplicitSelectionVerb = /\b(source|sourcing|propose|suggest|recommend|show me|pull (?:together|me)|curate|reinterpret|alternatives?|options?|first edit|draft (?:a )?(?:tearsheet|edit|selection)|put together|assemble|i'?d like to see|let'?s see|what do you have|list (?:all|every|the)|which .*(?:do you|are)|everything (?:by|from))\b/.test(lastUserMsgLower);
     const opensWithLookingFor = /^\s*(?:i(?:'m| am)?\s+(?:looking|searching|after|hunting|sourcing|in the market)|we(?:'re| are)?\s+(?:looking|searching|after))\b/.test(lastUserMsgLower);
 
+    const layoutScheduleContinuation = isLayoutScheduleContinuation(lastUserMsg, onboardingGateComplete);
     const submittedArchitecturalBrief = parseSubmittedArchitecturalBrief(lastUserMsg);
     let effectiveBrief: ExtractedBrief = submittedArchitecturalBrief
       ? submittedArchitecturalBrief
@@ -5297,6 +5299,10 @@ serve(async (req) => {
             plan: ["propose_tearsheet"],
           }
         : extractedBrief;
+
+    if (layoutScheduleContinuation) {
+      effectiveBrief = { ...effectiveBrief, intent: "selection", plan: ["propose_ffe_rows"] };
+    }
 
     // DISCOVERY GATE — strip any auto-proposed tearsheet/quote plan when the
     // latest user message is an opening brief without an explicit selection
@@ -5788,7 +5794,7 @@ serve(async (req) => {
 
 
 
-    if (hasExplicitSelectionVerb && requestedTypology && !mentionsKnownDesigner) {
+    if (!layoutScheduleContinuation && hasExplicitSelectionVerb && requestedTypology && !mentionsKnownDesigner) {
       const branchRequestedTypologies = normalizeRequestedTypologies(requestedTypology);
       const budgetCeiling = inferBudgetCeilingCents(lastUserMsg || "");
       const dimCeiling = inferDimensionConstraints(lastUserMsg || "");
@@ -5886,7 +5892,7 @@ serve(async (req) => {
       }
     }
 
-    if (mentionsKnownDesigner && isEnumerationRequest) {
+    if (!layoutScheduleContinuation && mentionsKnownDesigner && isEnumerationRequest) {
       const { data: designerRows } = await supabase
         .from("designers")
         .select("id, name, display_name")
@@ -6177,7 +6183,7 @@ serve(async (req) => {
 
     // Enumeration verb but no known designer matched — the model would otherwise
     // return an empty answer. Explain why and offer the nearest names.
-    if (isEnumerationRequest && !mentionsKnownDesigner) {
+    if (!layoutScheduleContinuation && isEnumerationRequest && !mentionsKnownDesigner) {
       const nearest = suggestNearestDesigners(lastUserMsg || "", 6);
       if (nearest.length > 0) {
         return sseTextResponse(
@@ -6190,7 +6196,7 @@ serve(async (req) => {
     }
 
 
-    if (hasScopedDesigners && parsedTypologyCats.length > 0 && /\bBlock\s+2\b|\bREFERENCES\s*:/i.test(userConversationText)) {
+    if (!layoutScheduleContinuation && hasScopedDesigners && parsedTypologyCats.length > 0 && /\bBlock\s+2\b|\bREFERENCES\s*:/i.test(userConversationText)) {
       const { data: designerRows } = await supabase
         .from("designers")
         .select("id, name, display_name")
@@ -6314,6 +6320,9 @@ serve(async (req) => {
     }
 
     const resolvedProjectId = activeProjectId || mentionedProjectId;
+    if (layoutScheduleContinuation && !resolvedProjectId) {
+      return sseTextResponse("Your brief and selected layout are retained. Choose or create your Bangkok project above the layout options, then ask me to continue the FF&E schedule and quote.");
+    }
     const projectT0 = performance.now();
     const projectContext = await loadProjectContext(supabase, userId, resolvedProjectId);
     mark("loadProjectContext", { ms: Math.round(performance.now() - projectT0), hasProject: !!resolvedProjectId });
@@ -6326,6 +6335,39 @@ serve(async (req) => {
         if (cfg?.discount_pct != null) tradeDiscountPct = Number(cfg.discount_pct);
       }
     } catch { /* keep default */ }
+    if (layoutScheduleContinuation && resolvedProjectId) {
+      const { data: project } = await supabase.from("projects").select("id, name").eq("id", resolvedProjectId).eq("user_id", userId).maybeSingle();
+      if (!project) return sseTextResponse("Choose a project you own above the layouts so I can prepare its schedule and quote.");
+      const submittedText = lastUserMsg.split("Submitted brief:")[1] || lastUserMsg;
+      const scheduleTypes = inferRequestedTypology(effectiveBrief.brief, extractStructuredBriefField(submittedText, "TYPOLOGY"));
+      const candidates = await fetchStrictTypologyCandidates(supabase, scheduleTypes, null, inferLeadTimeConstraints(submittedText));
+      let picks = await hydratePickPreview(supabase, candidates.map((row: any) => row.id));
+      if (hasScopedDesigners) {
+        const allowed = new Set(scopedDesigners.map(normalizeLoose));
+        picks = picks.filter((row: any) => allowed.has(normalizeLoose(row.designer_name || row.brand_name || "")));
+      }
+      const types = normalizeRequestedTypologies(scheduleTypes);
+      const selected = pickRowsForRequestedTypologyCoverage(picks, types, 12);
+      if (!rowsCoverRequestedTypologies(selected, types)) {
+        return sseTextResponse("The selected reference brands cannot currently cover every requested furniture type. Your layout is retained; widen References to include more ateliers, then continue the schedule. I have not substituted unrelated pieces.");
+      }
+      const zoneText = extractStructuredBriefField(lastUserMsg, "ZONE");
+      const zones = zoneText.split(/[;,]/).map((zone) => zone.trim()).filter((zone) => zone && !/ceiling|not specified/i.test(zone));
+      const rows = selected.map((pick: any) => {
+        const hay = `${pick.title || ""} ${pick.subcategory || ""}`.toLowerCase();
+        const preferred = /stool/.test(hay) ? (/bar/.test(hay) ? "bar" : "kitchen") : "lounge";
+        const room = zones.find((zone) => zone.toLowerCase().includes(preferred)) || zones[0] || gateFacts.zone;
+        return { pick_id: pick.id, room, qty: 1, variant: null, lead_weeks: null, note: "Review quantity and finish before approval; layout counts are not an order." };
+      });
+      const preview = await hydrateQuotePreview(supabase, rows, null, tradeDiscountPct);
+      const currencies = Array.from(new Set(preview.map((row: any) => row.currency).filter(Boolean)));
+      const currency = currencies.length === 1 ? currencies[0] : null;
+      const note = "Bangkok selected layout — review-only draft; budget, dimensions and final quantities remain subject to confirmation.";
+      return sseProposalsThenTextResponse([
+        { tool: "propose_ffe_rows", tool_call_id: crypto.randomUUID(), args: { project_id: project.id, project_name: project.name, currency, note, rows }, preview: preview.map((row: any, index: number) => ({ ...row, room: rows[index]?.room })), trade_discount_pct: tradeDiscountPct * 100 },
+        { tool: "draft_quote", tool_call_id: crypto.randomUUID(), args: { project_id: project.id, currency, note, lines: rows }, preview },
+      ], "Your room-tagged FF&E schedule and trade quote preview are ready below. Review quantities and finishes; approving the schedule saves one draft quote. Nothing has been ordered or sent.");
+    }
     const sentimentDirective = buildSentimentDirective(sentiment);
     const scopeDirective = hasScopedDesigners
       ? `\n\nBRIEF ALLOW-LIST — the client has explicitly named these brands as their references: ${scopedDesigners.join(", ")}. You may ONLY propose pieces from these brands. Do NOT recommend, name-drop, or include pieces from any other brand (Lost Profile Studio, or anyone else) — even as a "harmonising" or "companion" piece. If the allow-list cannot cover a requested typology, say so plainly and offer to widen the scope; never silently substitute another brand.`
@@ -6369,7 +6411,9 @@ serve(async (req) => {
     const stageAllowed = STAGE_GATES[currentStage] ?? null;
     const stageForcesQuote = currentStage === "quote";
 
-    const baseAllowed = isExplicitQuoteIntent
+    const baseAllowed = layoutScheduleContinuation
+      ? ["extract_requirements", "propose_ffe_rows"]
+      : isExplicitQuoteIntent
       ? ["draft_quote", "add_to_quote"]
       : null;
     const allowedNames = stageAllowed && baseAllowed
@@ -6403,7 +6447,9 @@ serve(async (req) => {
       !planHasQuote &&
       !stageForcesQuote &&
       !isExplicitQuoteIntent;
-    const toolChoice: any = forcePlannedTearsheet
+    const toolChoice: any = layoutScheduleContinuation
+      ? "required"
+      : forcePlannedTearsheet
       ? { type: "function", function: { name: "propose_tearsheet" } }
       : ((isExplicitQuoteIntent || stageForcesQuote) ? "required" : "auto");
 
