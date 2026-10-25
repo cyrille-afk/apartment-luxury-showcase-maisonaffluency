@@ -1,3 +1,6 @@
+## Comparator table presentation
+- [x] Extracted the comparison table with large 4:5 neutral image blocks, centered above-card remove controls, bold muted left-aligned labels, stacked materials and tinted bold Trade Price. Four live pieces verified at 1946px and mobile with all images loaded, no page overflow/errors, refresh/removal preserved; 15 regressions pass, preview clean. Not published; GitHub sync needed.
+
 ## Comparator refresh persistence
 - [x] Preserve selected pieces and in-progress comparator controls across refresh with account-scoped price-free local drafts; live refresh retained Dais, Favorites and the unfinished name on Cyrille's account, removal stayed removed after a second refresh. No cloud shortlist created; 15 tests passed and preview build clean.
 

@@ -17,6 +17,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import { useSearchParams } from "@/lib/router-compat";
 import { useComparatorDraft } from "@/hooks/useComparatorDraft";
+import { ProductComparisonTable } from "@/components/trade/ProductComparisonTable";
 
 function ComparisonPrice({ product, net }: { product: TradeProduct | null; net: boolean }) {
   const { discountPct } = useTradePriceMode();
@@ -281,62 +282,7 @@ export default function TradeComparator() {
           </ul>}
         </section>
 
-        <div className="overflow-x-auto border border-border rounded-lg">
-          <table className="w-full min-w-[900px] table-fixed text-left">
-            <colgroup>
-              <col className="w-36" />
-              {comparisonSlots.map((_, index) => <col key={index} />)}
-            </colgroup>
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="px-4 py-4" />
-                  {comparisonSlots.map((product, index) => (
-                    <th key={product?.id ?? `heading-${index}`} className="px-4 py-4 align-top">
-                      <div className="relative min-h-44">
-                        {product ? (
-                          <>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => removeFromCompare(product.id)}
-                              className="absolute right-0 top-0 z-10 h-7 w-7 bg-background/80"
-                              aria-label={`Remove ${product.product_name}`}
-                            >
-                              <X className="h-3.5 w-3.5" />
-                            </Button>
-                            {product.image_url && (
-                              <img src={product.image_url} alt="" className="mb-3 h-36 w-full bg-muted object-contain" />
-                            )}
-                            <p className="font-display text-sm font-normal text-foreground">{product.product_name}</p>
-                          </>
-                        ) : (
-                          <div className="flex h-36 items-center justify-center border border-dashed border-border font-body text-[10px] uppercase tracking-wider text-muted-foreground">
-                            Select product {index + 1}
-                          </div>
-                        )}
-                      </div>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {FIELDS.map((field) => (
-                  <tr key={field.key} data-trade-sensitive={field.key === "trade_price_cents" ? "" : undefined} className="border-b border-border/50">
-                    <td className="px-4 py-2.5 font-body text-[10px] uppercase tracking-wider text-muted-foreground">{field.label}</td>
-                    {comparisonSlots.map((product, index) => {
-                      const val = product ? (product as any)[field.key] : null;
-                      return (
-                        <td key={product?.id ?? `${field.key}-${index}`} className="whitespace-pre-line px-4 py-3 font-body text-sm text-foreground align-top">
-                          {field.key === "rrp_price_cents" || field.key === "trade_price_cents" ? <ComparisonPrice product={product} net={field.key === "trade_price_cents"} /> : product ? val || "—" : "—"}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <ProductComparisonTable products={comparisonSlots} fields={FIELDS} onRemove={removeFromCompare} renderPrice={(product, net) => <ComparisonPrice product={product} net={net} />} />
       </div>
     </>
   );
