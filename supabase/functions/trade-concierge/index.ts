@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { isLayoutScheduleContinuation } from "./_layoutContinuation.ts";
+import { isLayoutScheduleContinuation, parseScheduleItems, rowInReferenceScope, selectScheduleRows } from "./_layoutContinuation.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { requireUser, rateLimit } from "../_shared/auth.ts";
 import { logAiUsage } from "../_shared/aiUsage.ts";
@@ -6339,7 +6339,7 @@ serve(async (req) => {
       const { data: project } = await supabase.from("projects").select("id, name").eq("id", resolvedProjectId).eq("user_id", userId).maybeSingle();
       if (!project) return sseTextResponse("Choose a project you own above the layouts so I can prepare its schedule and quote.");
       const submittedText = lastUserMsg.split("Submitted brief:")[1] || lastUserMsg;
-      const typologyField = extractStructuredBriefField(submittedText, "TYPOLOGY");
+      const typologyField = extractStructuredBriefField(submittedText, "TYPOLOGY") || "";
       const scheduleTypes = inferRequestedTypology(effectiveBrief.brief, typologyField);
       const candidates = await fetchStrictTypologyCandidates(supabase, scheduleTypes, null, inferLeadTimeConstraints(submittedText));
       // Scope BEFORE hydrating: hydrating hundreds of ids in one lookup
