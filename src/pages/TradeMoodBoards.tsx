@@ -398,12 +398,12 @@ export default function TradeMoodBoards() {
                           <p className="font-body text-[10px] text-white/80">{item.brand_name}</p>
                         </div>
                       </div>
-                      <button
+                      {!clientSafe && <button
                         onClick={() => removeFromBoard(item.id)}
                         className="absolute top-2 right-2 w-6 h-6 rounded-full bg-background/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="h-3 w-3" />
-                      </button>
+                      </button>}
                     </div>
                   ))}
                 </div>
@@ -411,7 +411,7 @@ export default function TradeMoodBoards() {
             </div>
 
             {/* AI Recommendations */}
-            {(recLoading || recommendations.length > 0 || recError) && (
+            {!clientSafe && (recLoading || recommendations.length > 0 || recError) && (
               <div className="border-t border-border pt-5">
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="font-display text-sm text-foreground flex items-center gap-2">
