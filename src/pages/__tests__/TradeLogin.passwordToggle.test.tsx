@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, cleanup } from "@testing-library/react";
+import { fireEvent, render, screen, cleanup, waitFor, act } from "@testing-library/react";
 import TradeLogin from "../TradeLogin";
+import { supabase } from "@/integrations/supabase/client";
 
 vi.mock("react-helmet-async", () => ({ Helmet: () => null }));
 vi.mock("@/hooks/useAuth", () => ({ useAuth: () => ({ user: null, loading: false }) }));
@@ -46,7 +47,7 @@ function toggleButton() {
   return screen.getByRole("button", { name: /^(Show|Hide) password$/ }) as HTMLButtonElement;
 }
 
-afterEach(cleanup);
+afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
 describe("Trade Program sign-in password reveal", () => {
   it("starts hidden with an empty field", () => {
@@ -79,5 +80,28 @@ describe("Trade Program sign-in password reveal", () => {
   it("never submits the form when the reveal is clicked", () => {
     render(<TradeLogin />);
     expect(toggleButton().getAttribute("type")).toBe("button");
+  });
+  it("blocks duplicate submissions while pending and enables retry after rejection", async () => {
+    let complete: ((value: any) => void) | undefined;
+    vi.mocked(supabase.auth.signInWithPassword).mockImplementationOnce(() => new Promise(resolve => { complete = resolve; }));
+    render(<TradeLogin />);
+    fireEvent.change(screen.getByPlaceholderText("Trade ID or Email Address"), { target: { value: "test@example.com" } });
+    fireEvent.change(passwordField(), { target: { value: "wrong-password" } });
+    fireEvent.click(screen.getByRole("button", { name: "Sign In", exact: true }));
+    expect(screen.getByRole("button", { name: "Signing In", exact: true })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Continue with Google" })).toBeDisabled();
+    fireEvent.submit(passwordField().closest("form") as HTMLFormElement);
+    expect(supabase.auth.signInWithPassword).toHaveBeenCalledTimes(1);
+    await act(async () => { complete?.({ data: { session: null, user: null }, error: { code: "invalid_credentials", status: 400 } }); });
+    await waitFor(() => expect(screen.getByRole("button", { name: "Sign In", exact: true })).toBeEnabled());
+    expect(passwordField().value).toBe("wrong-password");
+  });
+  it("keeps submissions locked after confirmed authentication", async () => {
+    vi.mocked(supabase.auth.signInWithPassword).mockResolvedValueOnce({ data: { session: null, user: null }, error: null });
+    render(<TradeLogin />);
+    fireEvent.change(screen.getByPlaceholderText("Trade ID or Email Address"), { target: { value: "test@example.com" } });
+    fireEvent.change(passwordField(), { target: { value: "test-password" } });
+    fireEvent.click(screen.getByRole("button", { name: "Sign In", exact: true }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Signed In", exact: true })).toBeDisabled());
   });
 });
