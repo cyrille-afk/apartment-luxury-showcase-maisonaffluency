@@ -1,5 +1,5 @@
 ## Project tearsheet sharing
-- [ ] Add project-scoped board invitations for architects and interior designers; verify invite creation, private viewing and revocation without editing access.
+- [x] Add project-scoped board invitations for architects and interior designers; live-verified invitation creation on Cyrille's account, guest board rendering without approval controls, denied feedback/cross-project requests, revoked-link rejection and test cleanup; three focused tests pass.
 
 ## Project-first tearsheets
 - [x] Require choosing or creating a project before working on tearsheets; boards persist under that project, unrelated boards excluded. Verified project creation, Ondas board save, persisted project/item read-back and test cleanup on Cyrille's account; two rule tests pass, preview build clean.
