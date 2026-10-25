@@ -20,6 +20,7 @@ import BuildUpdateBanner from "@/components/BuildUpdateBanner";
 import AppRecoveryBoundary from "@/components/AppRecoveryBoundary";
 import { PwaPendingAuthConsumer } from "@/components/PwaPendingAuthConsumer";
 import { mobileManifestHref } from "@/lib/pwaLaunchManifest";
+import { watchAppStylesheetReady } from "@/lib/appStylesheetReady";
 import {
   AuthProvider,
   CheckoutFormProvider,
@@ -175,6 +176,7 @@ function RootShell({ children }: { children: ReactNode }) {
   }, [currentManifestHref, manifestLocation.pathname]);
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
+  useEffect(() => watchAppStylesheetReady(document), [isHome]);
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -189,7 +191,7 @@ function RootShell({ children }: { children: ReactNode }) {
           precedence="default"
           suppressHydrationWarning
         />
-        {isHome && (
+        {isHome && !hydrated && (
           <>
             <style>{"html.home-fouc:not(.app-css) #root{visibility:hidden}"}</style>
             <script dangerouslySetInnerHTML={{ __html: HOME_CSS_SWAP }} />
