@@ -52,6 +52,7 @@ export default function TradeComparator() {
   const projectId = params.get("project");
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [visiblePieces, setVisiblePieces] = useState<TradeProduct[] | null>(null);
   const actionsRef = useRef<HTMLElement>(null);
   useEffect(() => {
     const header = document.querySelector<HTMLElement>(".trade-editorial-header");
@@ -168,6 +169,9 @@ export default function TradeComparator() {
     if (exporting) return;
     setExporting(true);
     try {
+    // Only the pieces currently visible after facet filtering are exported;
+    // when no filter is active this is the full comparison list.
+    const exportList = visiblePieces ?? compareList;
     // Read the selected project's current, accessible display fields at export time.
     let coverProject = null;
     if (projectId) {
