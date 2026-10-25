@@ -1,3 +1,6 @@
+## Comparison PDF cover
+- [ ] Add Maison Affluency branding, selected project name and recorded apartment details; verify an exported PDF visually.
+
 ## Compact comparator setup
 - [x] Selection tools now collapse to a count/Modify Selection summary; empty selection starts open, editing stays open until Done, restored selections collapse. Sticky outline actions measure header/breadcrumb clearance; verified desktop at 128px and mobile at 56px with no overlap/overflow/errors, 21 regressions pass and preview clean.
 
