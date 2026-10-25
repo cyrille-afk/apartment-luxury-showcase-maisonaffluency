@@ -21,6 +21,9 @@ import { withImperialInline } from "@/lib/formatDimensions";
 import { formatLeadTime } from "@/components/trade/AvailabilityBadge";
 import { buildTearsheetPrintHtml } from "@/lib/tearsheetPrintHtml";
 import { useExportCurrency } from "@/lib/displayMoney";
+import { useProjects } from "@/hooks/useProjects";
+import ClientPicker, { type PickedClient } from "@/components/trade/ClientPicker";
+import { assertTearsheetBoardProject, requireTearsheetProject } from "@/lib/tearsheetProjectScope";
 
 interface TearsheetProduct {
   id: string;
@@ -104,6 +107,9 @@ export default function TradeTearsheets() {
   const [filterSubcategory, setFilterSubcategory] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
   const filterProjectId = searchParams.get("project");
+  const { projects, loading: projectsLoading } = useProjects({ activeOnly: false });
+  const selectedProject = projects.find((project) => project.id === filterProjectId);
+  const [projectPiecesOnly, setProjectPiecesOnly] = useState(false);
   // Finish handoff. Priority: URL params (from Draft-Tearsheet CTA) →
   // concierge session (persists across surfaces even when the URL is bare).
   const initialFinishes = useMemo(() => {
@@ -263,9 +269,10 @@ export default function TradeTearsheets() {
     enabled: !!filterProjectId && !!user,
     queryFn: async () => {
       const ids = new Set<string>();
+      if (!filterProjectId) return ids;
       const [quotesRes, boardsRes] = await Promise.all([
-        supabase.from("trade_quotes").select("id").eq("project_id", filterProjectId!),
-        supabase.from("client_boards").select("id").eq("project_id", filterProjectId!),
+        supabase.from("trade_quotes").select("id").eq("project_id", filterProjectId),
+        supabase.from("client_boards").select("id").eq("project_id", filterProjectId),
       ]);
       const quoteIds = (quotesRes.data || []).map((q: any) => q.id);
       const boardIds = (boardsRes.data || []).map((b: any) => b.id);
@@ -471,14 +478,15 @@ export default function TradeTearsheets() {
   useEffect(() => {
     if (dismissedHandoffRef.current) return;
     if (!initialFinishes.productId || selectedProduct || products.length === 0) return;
+    const productId = initialFinishes.productId;
     const direct = products.find((p) => p.id === initialFinishes.productId);
     if (direct) { setSelectedProduct(direct); return; }
     // Twin fallback: look up the incoming id's (brand, title) pair from both
     // source tables and match against the merged list.
     (async () => {
       const [tp, cp] = await Promise.all([
-        supabase.from("trade_products").select("brand_name, product_name").eq("id", initialFinishes.productId!).maybeSingle(),
-        supabase.from("designer_curator_picks").select("title, designers!inner(name)").eq("id", initialFinishes.productId!).maybeSingle(),
+        supabase.from("trade_products").select("brand_name, product_name").eq("id", productId).maybeSingle(),
+        supabase.from("designer_curator_picks").select("title, designers!inner(name)").eq("id", productId).maybeSingle(),
       ]);
       const brand = (tp.data as any)?.brand_name || ((cp.data as any)?.designers?.name);
       const name = (tp.data as any)?.product_name || (cp.data as any)?.title;
@@ -577,7 +585,7 @@ export default function TradeTearsheets() {
     if (filterDesigner && p.parent_brand !== filterDesigner) return false;
     if (filterCategory && p.category !== filterCategory) return false;
     if (filterSubcategory && p.subcategory !== filterSubcategory) return false;
-    if (filterProjectId && projectProductIds && !projectProductIds.has(p.id)) return false;
+    if (projectPiecesOnly && (!projectProductIds || !projectProductIds.has(p.id))) return false;
     return true;
   });
 
@@ -589,15 +597,27 @@ export default function TradeTearsheets() {
   const [pushedBoardIds, setPushedBoardIds] = useState<Set<string>>(new Set());
   const [showCreateBoardForm, setShowCreateBoardForm] = useState(false);
   const [newBoardTitle, setNewBoardTitle] = useState("");
-  const [newBoardClientName, setNewBoardClientName] = useState("");
-  const [newBoardClientEmail, setNewBoardClientEmail] = useState("");
+  const [newBoardClient, setNewBoardClient] = useState<PickedClient | null>(null);
+  const [createdBoardId, setCreatedBoardId] = useState<string | null>(null);
   const [creatingBoard, setCreatingBoard] = useState(false);
-  const { boards: userBoards, loading: boardsLoading } = useUserBoards(boardPickerOpen);
+  const { boards: userBoards, loading: boardsLoading, error: boardsError } = useUserBoards(boardPickerOpen && !!selectedProject, filterProjectId);
+  const projectBoards = userBoards.filter((board) => board.project_id === selectedProject?.id);
+  useEffect(() => {
+    setBoardPickerOpen(false);
+    setCreatedBoardId(null);
+    setShowCreateBoardForm(false);
+    setNewBoardTitle("");
+    setNewBoardClient(null);
+    setPushedBoardIds(new Set());
+  }, [filterProjectId]);
 
   const pushToBoard = async (boardId: string): Promise<boolean> => {
-    if (!selectedProduct) return false;
+    if (!selectedProduct || !selectedProject || pushingBoardId) return false;
     setPushingBoardId(boardId);
     try {
+      const { data: board, error: boardError } = await supabase.from("client_boards").select("project_id").eq("id", boardId).single();
+      if (boardError) throw boardError;
+      assertTearsheetBoardProject(selectedProject.id, board?.project_id);
       // client_board_items.product_id FKs to trade_products.id. Resolve if the
       // selected row is a curator pick (source_pick_id → trade_products.id).
       let tradeProductId: string | null = null;
@@ -653,27 +673,35 @@ export default function TradeTearsheets() {
       setPushedBoardIds((prev) => new Set(prev).add(boardId));
       toast({ title: "Added to board", description: `${selectedProduct.product_name} pinned with the chosen finishes.` });
       return true;
+    } catch {
+      toast({ title: "Couldn't add to project board", description: "Check the selected project and try again.", variant: "destructive" });
+      return false;
     } finally {
       setPushingBoardId(null);
     }
   };
 
   const createBoardAndPush = async () => {
-    if (!user || !newBoardTitle.trim() || !selectedProduct) return;
+    if (!user || !newBoardTitle.trim() || !selectedProduct || !selectedProject || creatingBoard) return;
     if (currentStudio && !canEdit) {
       toast({ title: "Read-only role", description: "Your role in this studio doesn't allow creating boards.", variant: "destructive" });
       return;
     }
     setCreatingBoard(true);
     try {
+      const projectId = requireTearsheetProject(selectedProject.id);
+      let boardId = createdBoardId;
+      if (!boardId) {
       const { data, error } = await supabase
         .from("client_boards")
         .insert({
           user_id: user.id,
           studio_id: currentStudio?.id ?? null,
+          project_id: projectId,
           title: newBoardTitle.trim(),
-          client_name: newBoardClientName.trim() || null,
-          client_email: newBoardClientEmail.trim() || null,
+          client_id: newBoardClient?.id ?? null,
+          client_name: newBoardClient?.name || selectedProject.client_name || "",
+          client_email: newBoardClient?.primary_contact?.email ?? null,
         } as any)
         .select()
         .single();
@@ -681,11 +709,14 @@ export default function TradeTearsheets() {
         toast({ title: "Couldn't create board", description: error?.message || "Unknown error", variant: "destructive" });
         return;
       }
-      const success = await pushToBoard(data.id);
+      boardId = data.id;
+      setCreatedBoardId(boardId);
+      }
+      const success = await pushToBoard(boardId);
       if (success) {
         setNewBoardTitle("");
-        setNewBoardClientName("");
-        setNewBoardClientEmail("");
+        setNewBoardClient(null);
+        setCreatedBoardId(null);
         setShowCreateBoardForm(false);
         setBoardPickerOpen(false);
       }
@@ -728,16 +759,25 @@ export default function TradeTearsheets() {
 
   return (
     <>
-      <Helmet><title>Tearsheet Builder — Trade Portal</title></Helmet>
+      <Helmet><title>Project Tearsheet Builder — Maison Affluency</title></Helmet>
       <div className="mx-auto w-full max-w-6xl space-y-6 [@media(min-width:1440px)]:max-w-[min(90vw,1800px)]">
 
 
         <div>
           <h1 className="font-display text-2xl text-foreground">Tearsheet Builder</h1>
-          <p className="font-body text-sm text-muted-foreground mt-1">
-            Generate one-click product tearsheets with specs, dimensions, and pricing for client handoff.
-          </p>
         </div>
+
+        <section className="flex flex-wrap items-center justify-between gap-3 border-y border-border py-4" aria-label="Tearsheet project">
+          <h2 className="font-display text-lg">{selectedProject ? selectedProject.name : "Choose a project"}</h2>
+          <div className="flex flex-wrap items-center gap-3">
+            <ProjectPicker value={filterProjectId} onChange={setFilterProjectId} required />
+            {selectedProject && <Button variant="ghost" size="sm" onClick={() => navigate(`/trade/projects/${selectedProject.id}`)}>Open project →</Button>}
+          </div>
+        </section>
+
+        {!selectedProject ? (
+          <div className="py-12 font-body text-sm text-muted-foreground" role="status">{projectsLoading ? "Loading projects…" : filterProjectId ? "This project is unavailable. Choose another project." : "No project selected."}</div>
+        ) : <>
 
         {conciergeSession && (conciergeSession.product || conciergeSession.briefText || conciergeSession.finishes.fabric || conciergeSession.finishes.wood) && (
           <div className="rounded-lg border border-accent/40 bg-accent/5 p-3 flex items-start justify-between gap-3">
@@ -807,7 +847,7 @@ export default function TradeTearsheets() {
               })()}
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={() => { setPushedBoardIds(new Set()); setBoardPickerOpen(true); }}>
-                  <LayoutGrid className="h-4 w-4 mr-2" />Push to Client Board
+                  <LayoutGrid className="h-4 w-4 mr-2" />Add to project board
                 </Button>
                 <Button variant="outline" size="sm" onClick={handlePrint}><Printer className="h-4 w-4 mr-2" />Print Tearsheet</Button>
               </div>
@@ -924,17 +964,17 @@ export default function TradeTearsheets() {
                   {subcategories.map((s) => <option key={s} value={s}>{s}</option>)}
                 </select>
               )}
-              <ProjectPicker value={filterProjectId} onChange={setFilterProjectId} compact />
-              {(filterDesigner || filterCategory || filterSubcategory || filterProjectId) && (
+              <label className="flex items-center gap-2 font-body text-xs text-muted-foreground"><input type="checkbox" checked={projectPiecesOnly} onChange={(event) => setProjectPiecesOnly(event.target.checked)} />Project pieces only</label>
+              {(filterDesigner || filterCategory || filterSubcategory || projectPiecesOnly) && (
                 <button
-                  onClick={() => { setFilterDesigner(""); setFilterCategory(""); setFilterSubcategory(""); setFilterProjectId(null); }}
+                  onClick={() => { setFilterDesigner(""); setFilterCategory(""); setFilterSubcategory(""); setProjectPiecesOnly(false); }}
                   className="font-body text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Clear filters
                 </button>
               )}
             </div>
-            {filterProjectId && (
+            {projectPiecesOnly && (
               <p className="font-body text-[11px] text-muted-foreground -mt-1">
                 Showing only products from this project's quotes and boards.
               </p>
@@ -972,6 +1012,7 @@ export default function TradeTearsheets() {
             )}
           </>
         )}
+        </>}
       </div>
 
       <Dialog open={boardPickerOpen} onOpenChange={(open) => {
@@ -979,15 +1020,14 @@ export default function TradeTearsheets() {
         if (!open) {
           setShowCreateBoardForm(false);
           setNewBoardTitle("");
-          setNewBoardClientName("");
-          setNewBoardClientEmail("");
+          setNewBoardClient(null);
         }
       }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-display text-lg">Push to Client Board</DialogTitle>
+            <DialogTitle className="font-display text-lg">Add to project board</DialogTitle>
             <DialogDescription className="font-body text-xs">
-              Pin {selectedProduct?.product_name ?? "this product"} to one of your boards, or create a new board on the fly.
+              {selectedProject?.name} · {selectedProduct?.product_name}
               {(chosenFinishes.fabric || chosenFinishes.wood || chosenFinishes.variant) && (
                 <span className="block mt-1 text-muted-foreground">
                   Finishes will be saved as a note on the board item:
@@ -1000,14 +1040,14 @@ export default function TradeTearsheets() {
           </DialogHeader>
           <div className="max-h-[28rem] overflow-y-auto space-y-3 pr-1">
             {!showCreateBoardForm ? (
-              <button
+              <Button variant="outline"
                 type="button"
                 onClick={() => setShowCreateBoardForm(true)}
                 className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-md border border-dashed border-border hover:border-foreground/30 bg-background text-left transition-all text-muted-foreground hover:text-foreground"
               >
                 <Plus className="h-4 w-4" />
-                <span className="font-body text-xs uppercase tracking-widest">Create new client board</span>
-              </button>
+                <span className="font-body text-xs uppercase tracking-widest">Create project board</span>
+              </Button>
             ) : (
               <div className="rounded-md border border-border bg-card p-3 space-y-3">
                 <div className="space-y-1.5">
@@ -1020,22 +1060,8 @@ export default function TradeTearsheets() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="font-body text-xs uppercase tracking-wider">Client Name (optional)</Label>
-                  <Input
-                    value={newBoardClientName}
-                    onChange={(e) => setNewBoardClientName(e.target.value)}
-                    placeholder="Client name"
-                    className="font-body text-sm"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="font-body text-xs uppercase tracking-wider">Client Email (optional)</Label>
-                  <Input
-                    value={newBoardClientEmail}
-                    onChange={(e) => setNewBoardClientEmail(e.target.value)}
-                    placeholder="client@email.com"
-                    className="font-body text-sm"
-                  />
+                  <Label className="font-body text-xs uppercase tracking-wider">Client (optional)</Label>
+                  <ClientPicker value={newBoardClient?.id} onChange={setNewBoardClient} size="sm" disabled={creatingBoard || !!createdBoardId} showManageLink={false} />
                 </div>
                 <div className="flex items-center gap-2 pt-1">
                   <Button
@@ -1045,7 +1071,7 @@ export default function TradeTearsheets() {
                     className="flex-1 font-body text-xs uppercase tracking-widest"
                   >
                     {creatingBoard && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                    Create & Push
+                    {createdBoardId ? "Retry adding piece" : "Create board & add piece"}
                   </Button>
                   <Button
                     type="button"
@@ -1053,8 +1079,8 @@ export default function TradeTearsheets() {
                     onClick={() => {
                       setShowCreateBoardForm(false);
                       setNewBoardTitle("");
-                      setNewBoardClientName("");
-                      setNewBoardClientEmail("");
+                      setNewBoardClient(null);
+                      setCreatedBoardId(null);
                     }}
                     disabled={creatingBoard}
                     className="font-body text-xs uppercase tracking-widest"
@@ -1069,21 +1095,21 @@ export default function TradeTearsheets() {
               <div className="flex justify-center py-8">
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
               </div>
-            ) : userBoards.length === 0 ? (
+            ) : boardsError ? <p role="alert" className="font-body text-sm text-destructive">Project boards could not be loaded. Close and try again.</p> : projectBoards.length === 0 ? (
               <p className="font-body text-sm text-muted-foreground py-6 text-center">
-                No existing boards. Create one above to push this tear sheet.
+                No boards in this project yet.
               </p>
             ) : (
               <div className="space-y-2">
                 <p className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">Existing boards</p>
-                {userBoards.map((b) => {
+                {projectBoards.map((b) => {
                   const pushed = pushedBoardIds.has(b.id);
                   const busy = pushingBoardId === b.id;
                   return (
                     <button
                       key={b.id}
                       type="button"
-                      disabled={busy || pushed}
+                      disabled={!!pushingBoardId || creatingBoard || pushed}
                       onClick={() => pushToBoard(b.id)}
                       className="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-md border border-border hover:border-foreground/30 bg-card text-left transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                     >
