@@ -214,16 +214,33 @@ const TradeLogin = () => {
               onChange={(e) => setIdentifier(e.target.value)}
               className="w-full border border-border bg-transparent px-4 py-3.5 font-body text-sm text-foreground placeholder:text-muted-foreground/70 outline-hidden focus:border-foreground transition-colors rounded-none"
             />
-            <input
-              type="password"
-              name="password"
-              autoComplete="new-password"
-              required
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-border bg-transparent px-4 py-3.5 font-body text-sm text-foreground placeholder:text-muted-foreground/70 outline-hidden focus:border-foreground transition-colors rounded-none"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                autoComplete="new-password"
+                required
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full border border-border bg-transparent px-4 py-3.5 pr-12 font-body text-sm text-foreground placeholder:text-muted-foreground/70 outline-hidden focus:border-foreground transition-colors rounded-none"
+              />
+              {/* Reveal the typed password so the member can check it before
+                  submitting. Kept out of the tab order so tab still moves
+                  straight from the password to Sign In. */}
+              <button
+                type="button"
+                tabIndex={-1}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-pressed={showPassword}
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex h-9 w-9 items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showPassword
+                  ? <EyeOff className="h-4 w-4" aria-hidden="true" />
+                  : <Eye className="h-4 w-4" aria-hidden="true" />}
+              </button>
+            </div>
 
             <button
               type="submit"
