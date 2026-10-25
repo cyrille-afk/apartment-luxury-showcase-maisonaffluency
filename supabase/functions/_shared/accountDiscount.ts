@@ -35,9 +35,11 @@ export async function resolveAccountDiscount(
     .eq("tier", tier)
     .maybeSingle();
 
+  // No bundled rates: if tier settings can't be read, charge full price
+  // rather than apply a stale discount.
   const pctRaw = Number(cfg?.discount_pct);
-  const fallback: Record<string, number> = { silver: 0.08, gold: 0.10, platinum: 0.15 };
-  const pct = Number.isFinite(pctRaw) && pctRaw > 0 ? pctRaw : fallback[tier];
+  if (!Number.isFinite(pctRaw) || pctRaw <= 0) return { pct: 0, label: null };
+  const pct = pctRaw;
   const pretty = `${(pct * 100).toFixed((pct * 100) % 1 === 0 ? 0 : 1)}%`;
   const scope = isAdmin ? "Administrator" : `Trade · ${cfg?.label || tier}`;
 
