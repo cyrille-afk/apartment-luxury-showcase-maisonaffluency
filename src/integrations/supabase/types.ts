@@ -12553,6 +12553,88 @@ export type Database = {
         }
         Relationships: []
       }
+      website_sms_config: {
+        Row: {
+          callback_url: string | null
+          enabled: boolean
+          id: boolean
+        }
+        Insert: {
+          callback_url?: string | null
+          enabled?: boolean
+          id?: boolean
+        }
+        Update: {
+          callback_url?: string | null
+          enabled?: boolean
+          id?: boolean
+        }
+        Relationships: []
+      }
+      website_sms_events: {
+        Row: {
+          created_at: string
+          error: string | null
+          event_kind: string
+          id: string
+          incident_id: string
+          provider_id: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          event_kind: string
+          id?: string
+          incident_id: string
+          provider_id?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          event_kind?: string
+          id?: string
+          incident_id?: string
+          provider_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "website_sms_events_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "website_status_incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      website_sms_wakes: {
+        Row: {
+          event_id: string
+          expires_at: string
+          token_hash: string
+        }
+        Insert: {
+          event_id: string
+          expires_at?: string
+          token_hash: string
+        }
+        Update: {
+          event_id?: string
+          expires_at?: string
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "website_sms_wakes_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "website_sms_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       website_status: {
         Row: {
           available: boolean
@@ -12997,6 +13079,24 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      claim_website_sms: {
+        Args: { wake_token: string }
+        Returns: {
+          created_at: string
+          error: string | null
+          event_kind: string
+          id: string
+          incident_id: string
+          provider_id: string | null
+          status: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "website_sms_events"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       compute_curator_pick_slug: {
         Args: { _subtitle: string; _title: string }
         Returns: string
@@ -13067,6 +13167,7 @@ export type Database = {
       }
       dispatch_product_image_jobs: { Args: never; Returns: undefined }
       dispatch_registration_alerts: { Args: never; Returns: undefined }
+      dispatch_website_sms: { Args: never; Returns: undefined }
       effective_product_availability: {
         Args: { _product_id: string }
         Returns: {

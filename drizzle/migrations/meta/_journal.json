@@ -1660,6 +1660,13 @@
       "when": 1792888005465,
       "tag": "0236_restrict_public_status_writes",
       "breakpoints": true
+    },
+    {
+      "idx": 237,
+      "version": "7",
+      "when": 1792888441063,
+      "tag": "0237_website_sms_events",
+      "breakpoints": true
     }
   ]
 }
