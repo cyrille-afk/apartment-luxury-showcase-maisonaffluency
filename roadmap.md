@@ -1,3 +1,6 @@
+## Tearsheet invitation status
+- [ ] Show invited viewers and current invitation/access status for every board in the selected project; verify saved invitations and empty boards in the signed-in page.
+
 ## Project tearsheet sharing
 - [x] Add project-scoped board invitations for architects and interior designers; live-verified invitation creation on Cyrille's account, guest board rendering without approval controls, denied feedback/cross-project requests, revoked-link rejection and test cleanup; three focused tests pass.
 
