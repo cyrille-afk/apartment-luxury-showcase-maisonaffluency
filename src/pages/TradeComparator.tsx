@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { buildComparisonPdf, comparisonImage } from "@/lib/comparisonPdf";
 import { downloadBlob } from "@/lib/furnishingSchedulePdf";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Search, X, Heart, ChevronDown, Bookmark, Link2, FileDown, Trash2, FolderOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -52,6 +52,22 @@ export default function TradeComparator() {
   const projectId = params.get("project");
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const actionsRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const header = document.querySelector<HTMLElement>(".trade-editorial-header");
+    const breadcrumbs = document.querySelector<HTMLElement>("[data-trade-breadcrumb-bar]");
+    const updateOffset = () => {
+      const headerHeight = header?.getBoundingClientRect().height ?? 0;
+      const breadcrumbHeight = window.innerWidth >= 768 ? breadcrumbs?.getBoundingClientRect().height ?? 0 : 0;
+      actionsRef.current?.style.setProperty("--comparison-actions-top", `${headerHeight + breadcrumbHeight}px`);
+    };
+    const observer = new ResizeObserver(updateOffset);
+    if (header) observer.observe(header);
+    if (breadcrumbs) observer.observe(breadcrumbs);
+    updateOffset();
+    window.addEventListener("resize", updateOffset);
+    return () => { observer.disconnect(); window.removeEventListener("resize", updateOffset); };
+  }, []);
   const { data: details } = useQuery({ queryKey: ["comparator-details", user?.id], enabled: !!user, queryFn: fetchComparatorDetails });
   const catalogue = liveProducts.map(p => ({ ...p, ...details?.get(p.id) }));
   const { showTradePrice, discountLabel, tierLabel } = useTradePriceMode();
@@ -292,7 +308,7 @@ export default function TradeComparator() {
           </div>
         </ComparatorSelectionDrawer>
 
-        <section aria-label="Comparison actions" className="sticky top-14 z-20 flex flex-col gap-3 border-b border-border bg-background py-3 md:top-16 [&_button]:h-9 [&_button]:font-body [&_button]:text-xs [&_button]:font-medium">
+        <section ref={actionsRef} aria-label="Comparison actions" className="sticky top-[var(--comparison-actions-top,4rem)] z-20 flex flex-col gap-3 border-b border-border bg-background py-3 [&_button]:h-9 [&_button]:font-body [&_button]:text-xs [&_button]:font-medium">
           <div className="flex flex-wrap items-center gap-2">
             <Input value={shortlistName} onChange={(e) => setShortlistName(e.target.value)} placeholder="Shortlist name (e.g. client, project)" aria-label="Shortlist name" className="h-9 w-full font-body text-xs sm:w-64" />
             <ProjectPicker value={projectId} onChange={value => { const next = new URLSearchParams(params); if (value) next.set("project", value); else next.delete("project"); setParams(next); }} />

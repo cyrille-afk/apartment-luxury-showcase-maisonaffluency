@@ -637,7 +637,7 @@ const TradeLayout = () => {
             )}
             <ToolsBreadcrumbProvider>
               {!fullBleed && !presentation && location.pathname.replace(/\/+$/, "") !== "/trade/the-collection" && (
-                 <div data-trade-sensitive className="relative md:sticky md:top-16 z-20 -mx-4 md:-mx-8 lg:-mx-12 -mt-4 md:-mt-8 lg:-mt-12 mb-4 bg-background/95 backdrop-blur-sm px-4 md:px-8 lg:px-12 pt-4 md:pt-5 pb-3 border-b border-border/40">
+                 <div data-trade-breadcrumb-bar data-trade-sensitive className="relative md:sticky md:top-16 z-20 -mx-4 md:-mx-8 lg:-mx-12 -mt-4 md:-mt-8 lg:-mt-12 mb-4 bg-background/95 backdrop-blur-sm px-4 md:px-8 lg:px-12 pt-4 md:pt-5 pb-3 border-b border-border/40">
                   <ToolsBreadcrumb className="mb-0" />
                   <ProjectWorkspaceBreadcrumb />
                 </div>
