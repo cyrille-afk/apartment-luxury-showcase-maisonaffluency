@@ -217,7 +217,7 @@ export async function buildComparisonPdf(pieces: ComparisonPdfPiece[], rows: { k
   const drawNoteLine = (line: NoteLine, x: number, y: number) => {
     let cx = x;
     if (line.bullet) { doc.setFillColor(...brand.gold).circle(x + 0.9, y - 1, 0.55, "F"); }
-    if (line.bullet || line.runs.length && x !== cx) cx = x + bulletIndent;
+    if (line.bullet || line.indent) cx = x + bulletIndent;
     for (const run of line.runs) {
       const w = measure(run.text, run.bold);
       if (run.mark) doc.setFillColor(...colors.trade).rect(cx - 0.3, y - 2.9, w + 0.6, 3.8, "F");

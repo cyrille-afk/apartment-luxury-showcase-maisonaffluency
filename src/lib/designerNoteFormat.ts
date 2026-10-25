@@ -3,7 +3,7 @@
  * Plain text in, structured runs out — never HTML, so notes can't inject markup.
  */
 export interface NoteRun { text: string; bold: boolean; mark: boolean }
-export interface NoteLine { bullet: boolean; runs: NoteRun[] }
+export interface NoteLine { bullet: boolean; indent?: boolean; runs: NoteRun[] }
 
 export function parseDesignerNote(source: string): NoteLine[] {
   return (source || "").replace(/\r\n?/g, "\n").split("\n").map(raw => {
@@ -33,7 +33,7 @@ export function wrapDesignerNote(lines: NoteLine[], width: number, measure: (tex
   for (const line of lines) {
     const avail = line.bullet ? width - bulletIndent : width;
     let current: NoteRun[] = [], used = 0, first = true;
-    const push = () => { out.push({ bullet: line.bullet && first, runs: current }); first = false; current = []; used = 0; };
+    const push = () => { out.push({ bullet: line.bullet && first, indent: line.bullet, runs: current }); first = false; current = []; used = 0; };
     const words = line.runs.flatMap(r => r.text.split(/(\s+)/).filter(Boolean).map(text => ({ ...r, text })));
     for (const word of words) {
       const space = /^\s+$/.test(word.text);
