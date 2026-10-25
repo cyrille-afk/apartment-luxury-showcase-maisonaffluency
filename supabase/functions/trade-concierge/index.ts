@@ -5892,7 +5892,7 @@ serve(async (req) => {
       }
     }
 
-    if (mentionsKnownDesigner && isEnumerationRequest) {
+    if (!layoutScheduleContinuation && mentionsKnownDesigner && isEnumerationRequest) {
       const { data: designerRows } = await supabase
         .from("designers")
         .select("id, name, display_name")
