@@ -1,5 +1,5 @@
 ## Project-first tearsheets
-- [ ] Require choosing or creating a project before working on tearsheets; save boards under that project and verify the complete flow.
+- [x] Require choosing or creating a project before working on tearsheets; boards persist under that project, unrelated boards excluded. Verified project creation, Ondas board save, persisted project/item read-back and test cleanup on Cyrille's account; two rule tests pass, preview build clean.
 
 ## Curated Room Layout loading and freeze report
 - [x] Add page/catalogue/generation/curation loading states and coordinate competing actions; signed-in catalogue and generation indicators captured, five placement tests pass.
