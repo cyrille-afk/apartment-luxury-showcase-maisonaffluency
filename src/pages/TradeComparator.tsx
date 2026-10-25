@@ -168,6 +168,13 @@ export default function TradeComparator() {
     if (exporting) return;
     setExporting(true);
     try {
+    // Read the selected project's current, accessible display fields at export time.
+    let coverProject = null;
+    if (projectId) {
+      const { data, error } = await supabase.from("projects").select("name, client_name, location, location_city, location_neighborhood, style").eq("id", projectId).single();
+      if (error) { toast.error("The project's details could not be loaded. Please try again."); return; }
+      coverProject = data;
+    }
     const missingPricing = compareList.filter(p => !queryClient.getQueryData(["trade-product-pricing", p.id]));
     if (missingPricing.length) {
       const { data, error } = await supabase.functions.invoke("trade-catalog-pricing", { body: { pickIds: missingPricing.map(p => p.id) } });
@@ -185,7 +192,11 @@ export default function TradeComparator() {
       const cur = pricing?.currency || "EUR";
       return { name: p.product_name, image: p.image_url ? await comparisonImage(p.image_url) : null, values: { brand_name: p.brand_name, category: p.category, dimensions: p.dimensions ?? "", materials: p.materials ?? "", lead_time: p.lead_time ?? "", rrp_price_cents: fmt(prices.retail, cur), trade_price_cents: fmt(prices.trade, cur) } };
     }));
-    downloadBlob(buildComparisonPdf(pieces, FIELDS, showTradePrice ? "Product Comparison (Trade)" : "Product Comparison"), "product-comparison.pdf");
+    const coverLocation = coverProject?.location?.trim() || [coverProject?.location_neighborhood, coverProject?.location_city].filter(Boolean).join(", ");
+    downloadBlob(await buildComparisonPdf(pieces, FIELDS, showTradePrice ? "Product Comparison (Trade)" : "Product Comparison", {
+      projectName: coverProject?.name, comparisonName: shortlistName,
+      clientName: coverProject?.client_name, location: coverLocation, style: coverProject?.style,
+    }), "product-comparison.pdf");
     } catch { toast.error("The PDF could not be prepared with all pictures. Please try again."); } finally { setExporting(false); }
   };
 
