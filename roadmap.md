@@ -11,6 +11,7 @@
 - [x] Replaced bullets with 28px wrapping real linked texture samples or explicit hex colours; unavailable samples use named neutral placeholders. Six visible with +X more popover, hover/focus labels and reduced-motion interaction. Signed-in Salute/Ecusson verified: six loaded images, +11 opens eleven finishes, desktop/mobile no page overflow or errors; prevented automatic tooltip covering the popover heading. Nineteen regressions pass, preview clean; not published, GitHub sync needed.
 
 ## Comparison PDF cover
+- [x] Add the authentic Maison Affluency logo to the existing jade, bronze/gold and cream cover; preserve project details, selected names and export date.
 - [x] Added shared jade/bronze branded cover with project/shortlist name and recorded client, location and style (blank fields omitted, no invented details or internal notes). Signed-in Singapore and two-piece Bangkok exports downloaded; every page visually inspected, corrected singular PIECE label, pictures/specifications retained, no overlap or clipping; 20 regressions pass and preview clean. Preview only.
 
 ## Compact comparator setup
