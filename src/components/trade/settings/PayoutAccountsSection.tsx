@@ -164,20 +164,32 @@ export default function PayoutAccountsSection() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [taxDocBusyId, setTaxDocBusyId] = useState<string | null>(null);
 
-  const [form, setForm] = useState({
-    label: "Primary payout",
-    account_holder_name: "",
-    country_code: "US",
-    currency: "USD",
-    iban: "",
-    ach_routing_number: "",
-    ach_account_number: "",
-    swift_bic: "",
-    bank_name: "",
-    tax_form_kind: "W9",
-    tax_form_reference: "",
-    tax_form_file: null as File | null,
-  });
+  const [form, setForm] = useState<PayoutFormState>(INITIAL_FORM);
+
+  // Restore an interrupted draft (dialog reopens with everything typed so
+  // far) once the studio is known.
+  useEffect(() => {
+    if (!currentStudio) return;
+    const draft = readDraft(currentStudio.id);
+    if (draft) {
+      setForm(draft.form);
+      setCreateOpen(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStudio?.id]);
+
+  // Keep the draft in sync while the dialog is open.
+  useEffect(() => {
+    if (!currentStudio || !createOpen) return;
+    writeDraft(currentStudio.id, form);
+  }, [currentStudio, createOpen, form]);
+
+  const handleDialogOpenChange = (open: boolean) => {
+    setCreateOpen(open);
+    // Explicit close (X / Cancel / Escape) discards the draft; only an
+    // unexpected unmount (reload/remount) leaves it in place for restore.
+    if (!open && currentStudio) clearDraft(currentStudio.id);
+  };
 
   const selectedTaxOption = useMemo(
     () => TAX_FORM_OPTIONS.find((o) => o.value === form.tax_form_kind) ?? TAX_FORM_OPTIONS[0],
