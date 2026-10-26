@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import lamp from '@/assets/trade-carousel-lamp.asset.json';
 import directory from '@/assets/trade-carousel-directory.asset.json';
@@ -10,7 +10,7 @@ import logo from '@/assets/trade-carousel-logo.asset.json';
 
 const slides = [
   { title: "The World's Best Design Brands. One Unified Trade Account.", image: lamp.url, alt: 'Pierre Bonnefille Bloc Table Lamp', kind: 'lamp', body: '' },
-  { title: '106 Master Designers & Ateliers.', image: directory.url, alt: 'Masters and Contemporary Talents directory', kind: 'directory', body: "Source directly from the world's most distinguished furniture houses and artisan workshops, unified in one network." },
+  { title: '300+ Master Designers & Ateliers.', image: directory.url, alt: 'Masters and Contemporary Talents directory', kind: 'directory', body: "Source directly from the world's most distinguished furniture houses and artisan workshops, unified in one network." },
   { title: 'Meet Felix: Your AI Curatorial Assistant.', image: felix.url, alt: 'Good evening, CYRILLE — Felix welcome dashboard', kind: 'screen', body: 'Tell Felix what you are designing. From fabric compatibility to sourcing custom bronze tables, your assistant curates options instantly.' },
   { title: 'Deep Side-by-Side Comparisons.', image: comparator.url, alt: 'Four-piece Product Comparator with complete specification tables', kind: 'screen', body: 'Evaluate custom finishes, dimensions, and global lead times across up to 4 items simultaneously on a single dashboard screen.' },
   { title: 'Client-Safe Viewports.', image: presentation.url, alt: 'Alexander Lamont profile with active Client Editorial Presentation toggle', kind: 'screen', body: 'Switch instantly from internal trade costs to an elegant, retail-ready presentation view with a single tap. Protect your studio margins automatically. 🔒' },
@@ -45,8 +45,8 @@ export default function TradeMarketingCarousel() {
           {slides.map((slide, index) => (
             <article key={slide.alt} className={`trade-marketing-slide trade-marketing-${slide.kind}`} aria-label={`${index + 1} of ${slides.length}`} aria-roledescription="slide">
               {slide.title && <h1 className="trade-marketing-title">{slide.title}</h1>}
-              <figure className="trade-marketing-media"><img src={slide.image} alt={slide.alt} loading={index === 0 ? 'eager' : 'lazy'} draggable={false} /></figure>
-              {slide.body && <p className="trade-marketing-body">{slide.body}</p>}
+              <figure className="trade-marketing-media"><img src={slide.image} alt={slide.alt} loading={index === 0 ? 'eager' : 'lazy'} draggable={false} />{slide.kind === 'lamp' && <figcaption className="trade-marketing-caption">PIERRE BONNEFILLE — BLOC TABLE LAMP</figcaption>}</figure>
+              {slide.body && <div className="trade-marketing-copy"><p className="trade-marketing-body">{slide.body}</p>{slide.kind === 'directory' && <p className="trade-marketing-archive">106 digital archives live today with new collections expanding weekly.</p>}{slide.kind === 'end' && <Button asChild variant="outline" className="trade-marketing-apply"><a href="https://www.maisonaffluency.com/trade-program?intent=apply" target="_blank" rel="noopener">Apply to the Trade Program <ArrowUpRight size={16} /></a></Button>}</div>}
             </article>
           ))}
         </div>
