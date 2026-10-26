@@ -969,9 +969,14 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         .map(el => el.getBoundingClientRect()).filter(r => r.width > 100 && r.height > 100 && r.bottom > 0)
         .reduce((top, r) => Math.min(top, r.top), viewport.h - 16)
     : viewport.h - 16;
+  const collectionTabsRight = ["collection", "quotes"].includes(step.id)
+    ? Array.from(document.querySelectorAll('[data-felix-collection-tab]'))
+        .reduce((right, el) => Math.max(right, el.getBoundingClientRect().right), 0)
+    : 0;
   const collectionPlacement = rect && ["collection", "quotes"].includes(step.id)
     ? collectionTourCardPlacement({ viewport, width: cardW, height: placementArgs.height, photoTop: collectionPhotoTop,
-        headingRight: document.querySelector('[data-felix-target="collection-overview"]')?.getBoundingClientRect().right ?? 0 })
+        headingRight: document.querySelector('[data-felix-target="collection-overview"]')?.getBoundingClientRect().right ?? 0,
+        tabsRight: collectionTabsRight })
     : null;
   const placement = collectionPlacement ?? chooseTourCardPlacement({
     ...placementArgs,
