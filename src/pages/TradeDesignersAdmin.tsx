@@ -135,6 +135,7 @@ function HeritageSlideManager({ designerId }: { designerId: string }) {
   const queryClient = useQueryClient();
   const [slides, setSlides] = useState<{ id: string; image_url: string; caption: string | null; sort_order: number }[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [urlInput, setUrlInput] = useState("");
 
   useEffect(() => {
     supabase
@@ -148,19 +149,35 @@ function HeritageSlideManager({ designerId }: { designerId: string }) {
       });
   }, [designerId]);
 
+  const addSlide = async (url: string) => {
+    const order = slides.length;
+    const { data, error } = await (supabase.from("designer_heritage_slides" as any) as any)
+      .insert({ designer_id: designerId, image_url: url, sort_order: order })
+      .select()
+      .single();
+    if (error) {
+      toast({ title: "Could not add slide", description: error.message, variant: "destructive" });
+    } else if (data) {
+      setSlides((prev) => [...prev, data as any]);
+    }
+  };
+
   const handleUpload = async (urls: string[]) => {
     for (const url of urls) {
-      const order = slides.length;
-      const { data, error } = await (supabase.from("designer_heritage_slides" as any) as any)
-        .insert({ designer_id: designerId, image_url: url, sort_order: order })
-        .select()
-        .single();
-      if (error) {
-        toast({ title: "Upload failed", description: error.message, variant: "destructive" });
-      } else if (data) {
-        setSlides((prev) => [...prev, data as any]);
-      }
+      await addSlide(url);
     }
+    queryClient.invalidateQueries({ queryKey: ["heritage-slides", designerId] });
+  };
+
+  const handleAddUrl = async () => {
+    const url = urlInput.trim();
+    if (!url) return;
+    if (!/^https:\/\//i.test(url)) {
+      toast({ title: "Invalid URL", description: "Paste a full https:// image URL (e.g. a Cloudinary link).", variant: "destructive" });
+      return;
+    }
+    await addSlide(url);
+    setUrlInput("");
     queryClient.invalidateQueries({ queryKey: ["heritage-slides", designerId] });
   };
 
