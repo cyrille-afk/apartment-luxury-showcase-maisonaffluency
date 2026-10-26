@@ -23,11 +23,12 @@ interface Props {
   renderPrice: (product: TradeProduct | null, net: boolean) => ReactNode;
   renderNote?: (product: TradeProduct) => ReactNode;
   onVisibleProductsChange?: (visible: TradeProduct[] | null) => void;
+  renderControls?: (filters: ReactNode) => ReactNode;
 }
 
 const NO_OVERRIDES = new Map<string, FinishFacetOverride>();
 
-export function ProductComparisonTable({ products: allProducts, fields, onRemove, renderPrice, renderNote, onVisibleProductsChange }: Props) {
+export function ProductComparisonTable({ products: allProducts, fields, onRemove, renderPrice, renderNote, onVisibleProductsChange, renderControls }: Props) {
   const { data: swatches, isLoading: swatchesLoading } = useComparatorSwatches(allProducts.flatMap(product => product ? [product.id] : []));
   const { isAdmin } = useAuth();
   const { data: overrides = NO_OVERRIDES } = useQuery({
@@ -59,12 +60,11 @@ export function ProductComparisonTable({ products: allProducts, fields, onRemove
   const hasOptions = options.material.length > 0;
   const labelColumnWidth = "11rem";
   const productColumnWidth = `calc((100% - ${labelColumnWidth}) / ${Math.max(products.length, 1)})`;
-  return <div>
-    {(hasOptions || (isAdmin && finishNames.length > 0)) && <div className="mb-6 flex flex-wrap items-end gap-x-6 gap-y-4 border-b border-border/60 pb-5" role="group" aria-label="Filter compared products">
-      {options.material.length > 0 && <label className="flex w-full flex-col gap-1.5 sm:w-64">
+  const filters = (hasOptions || (isAdmin && finishNames.length > 0)) && <div className="flex min-w-0 flex-wrap items-center gap-2" role="group" aria-label="Filter compared products">
+      {options.material.length > 0 && <label className="flex min-w-0 items-center gap-2">
         <span className="font-body text-[10px] font-bold uppercase tracking-[0.14em] text-foreground/70">Material</span>
         <Select value={materialValue} onValueChange={v => setSelection(s => ({ ...s, ...selectMaterialOption(v) }))}>
-          <SelectTrigger aria-label="Material" className="h-9 w-full border border-border bg-background px-3 font-body text-sm text-foreground">
+          <SelectTrigger aria-label="Material" className="h-8 w-40 border border-border bg-background px-3 font-body text-xs text-foreground sm:w-48">
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="max-h-80 min-w-48">
@@ -76,17 +76,19 @@ export function ProductComparisonTable({ products: allProducts, fields, onRemove
           </SelectContent>
         </Select>
       </label>}
-      {selection.material && materialTypeOptions(options.material, selection.material).length > 0 && <label className="flex flex-col gap-1.5">
+      {selection.material && materialTypeOptions(options.material, selection.material).length > 0 && <label className="flex items-center gap-2">
         <span className="font-body text-[10px] font-bold uppercase tracking-[0.14em] text-foreground/70">Type</span>
-        <select value={selection.materialType ?? ""} onChange={e => setSelection(s => ({ ...s, materialType: e.target.value || undefined }))} className="h-9 min-w-40 border border-border bg-background px-3 font-body text-sm text-foreground">
+        <select aria-label="Material type" value={selection.materialType ?? ""} onChange={e => setSelection(s => ({ ...s, materialType: e.target.value || undefined }))} className="h-8 min-w-32 border border-border bg-background px-3 font-body text-xs text-foreground">
           <option value="">All</option>
           {materialTypeOptions(options.material, selection.material).map(v => <option key={v} value={v}>{v}</option>)}
         </select>
       </label>}
       {active && <Button type="button" variant="ghost" size="sm" onClick={() => setSelection({})}>Clear filters</Button>}
       {isAdmin && finishNames.length > 0 && <FinishCategoryDialog names={finishNames} overrides={overrides} pieces={categorisablePieces} />}
-      {active && <p className="pb-2 font-body text-xs text-muted-foreground" aria-live="polite">Showing {products.length} of {allProducts.filter(Boolean).length} pieces</p>}
-    </div>}
+      {active && <p className="font-body text-xs text-muted-foreground" aria-live="polite">Showing {products.length} of {allProducts.filter(Boolean).length} pieces</p>}
+    </div>;
+  return <div>
+    {renderControls ? renderControls(filters) : filters}
     {active && products.length === 0 ? <p className="py-12 font-body text-sm text-muted-foreground">No compared pieces match these filters.</p> :
   <div className="overflow-x-auto" role="region" aria-label="Product comparison" tabIndex={0}>
     <table className="w-full min-w-[1040px] table-fixed border-collapse text-left">
