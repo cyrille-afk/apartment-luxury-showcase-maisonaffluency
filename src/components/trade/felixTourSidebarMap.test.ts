@@ -5,10 +5,10 @@ import { FELIX_STEP_SIDEBAR, type TourSidebarAnchor } from "./felixTourSidebarMa
 const STEP_IDS = [
   "welcome", "tier-tracking", "collection", "quotes",
   "client-safe-presentations", "margin-protection", "quote-generation",
-  "direct-client-billing", "projects", "tools", "settings",
-  "portfolio-management", "client-view", "branding-panel", "white-label",
-  "invite", "bespoke-commissions", "technical-assets", "felix-chat",
-  "priority-concierge", "ai-extension-sync", "pwa-install", "beta-feedboard",
+  "direct-client-billing", "projects", "portfolio-management", "client-view",
+  "branding-panel", "white-label", "invite", "tools", "bespoke-commissions",
+  "technical-assets", "felix-chat", "priority-concierge", "ai-extension-sync",
+  "pwa-install", "settings", "beta-feedboard",
 ];
 
 const VALID_ANCHORS: TourSidebarAnchor[] = [
