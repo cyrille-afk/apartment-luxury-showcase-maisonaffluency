@@ -8,8 +8,8 @@ describe("onboarding sequence", () => {
     expect(steps[8]?.id).toBe("projects");
     expect(steps[9]?.id).toBe("tools");
   });
-  it("renumbers the preceding pricing and quote steps without changing the 23-step total", () => {
-    expect(FELIX_STEP_ORDER.slice(3, 8)).toEqual(["tier-tracking", "client-safe-presentations", "margin-protection", "quote-generation", "direct-client-billing"]);
+  it("keeps both tier steps together right after Welcome, before the Collection", () => {
+    expect(FELIX_STEP_ORDER.slice(0, 4)).toEqual(["welcome", "tier-tracking", "collection", "quotes"]);
     expect(FELIX_STEP_ORDER).toHaveLength(23);
     expect(new Set(FELIX_STEP_ORDER).size).toBe(23);
   });

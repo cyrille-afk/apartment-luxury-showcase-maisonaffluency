@@ -1,3 +1,6 @@
+## Tier steps open the tour
+- [x] Real-Time Tier Tracking moved to Step 2 directly after Welcome; Collection/margins/presentation steps renumbered 3-6, Steps 9-23 unchanged. Signed-in walk of Steps 1-10 verified titles, sidebar anchors and routes; Back 10 to 9 verified; no page errors, 33 unit regressions pass. e2e specs renumbered (early-late, placement, collection-transition, reduced-motion, sidebar-anchors, board-presentation). Preview only; GitHub sync needed.
+
 ## Grouped later onboarding steps
 - [x] Steps 12-23 regrouped by sidebar section: Projects & Interventions (12-16: portfolio switcher, board collaboration, branding, white-label, invite), Tools (17-18: custom requests, technical assets), Trade Concierge (19-20), then extension sync, mobile app and finale. Signed-in walk of Steps 12-23 verified correct titles, sidebar anchors and routes with no page errors; 33 unit regressions pass. Preview only; GitHub sync needed.
 

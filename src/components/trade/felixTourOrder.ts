@@ -1,6 +1,6 @@
 /** Stable identities own sequence; navigation must not depend on old numbers. */
 export const FELIX_STEP_ORDER = [
-  "welcome", "collection", "quotes", "tier-tracking",
+  "welcome", "tier-tracking", "collection", "quotes",
   "client-safe-presentations", "margin-protection", "quote-generation",
   "direct-client-billing", "projects", "tools", "settings",
   "portfolio-management", "client-view", "branding-panel", "white-label",
