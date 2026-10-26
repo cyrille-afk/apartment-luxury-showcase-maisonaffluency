@@ -81,6 +81,76 @@ function defaultTaxKindForCountry(code: string): string {
   return "TAX_ID";
 }
 
+// The "Add payout account" dialog must survive page remounts/reloads: members
+// routinely switch away mid-form to look up IBAN/SWIFT/tax details, and any
+// refresh used to wipe the dialog. The draft (minus the file pick, which
+// browsers cannot restore) persists in sessionStorage until saved or
+// explicitly cancelled.
+const DRAFT_KEY_PREFIX = "ma-payout-account-draft-v1";
+
+type PayoutFormState = {
+  label: string;
+  account_holder_name: string;
+  country_code: string;
+  currency: string;
+  iban: string;
+  ach_routing_number: string;
+  ach_account_number: string;
+  swift_bic: string;
+  bank_name: string;
+  tax_form_kind: string;
+  tax_form_reference: string;
+  tax_form_file: File | null;
+};
+
+const INITIAL_FORM: PayoutFormState = {
+  label: "Primary payout",
+  account_holder_name: "",
+  country_code: "US",
+  currency: "USD",
+  iban: "",
+  ach_routing_number: "",
+  ach_account_number: "",
+  swift_bic: "",
+  bank_name: "",
+  tax_form_kind: "W9",
+  tax_form_reference: "",
+  tax_form_file: null,
+};
+
+function draftKey(studioId: string): string {
+  return `${DRAFT_KEY_PREFIX}:${studioId}`;
+}
+
+function readDraft(studioId: string): { form: PayoutFormState } | null {
+  try {
+    const raw = window.sessionStorage.getItem(draftKey(studioId));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { form?: Partial<PayoutFormState> };
+    if (!parsed.form || typeof parsed.form !== "object") return null;
+    return { form: { ...INITIAL_FORM, ...parsed.form, tax_form_file: null } };
+  } catch {
+    return null;
+  }
+}
+
+function writeDraft(studioId: string, form: PayoutFormState): void {
+  try {
+    const { tax_form_file: _file, ...serializable } = form;
+    window.sessionStorage.setItem(draftKey(studioId), JSON.stringify({ form: serializable }));
+  } catch {
+    /* noop */
+  }
+}
+
+function clearDraft(studioId: string): void {
+  try {
+    window.sessionStorage.removeItem(draftKey(studioId));
+  } catch {
+    /* noop */
+  }
+}
+
 export default function PayoutAccountsSection() {
   const { user } = useAuth();
   const { currentStudio, isAdmin } = useStudio();
@@ -94,20 +164,32 @@ export default function PayoutAccountsSection() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [taxDocBusyId, setTaxDocBusyId] = useState<string | null>(null);
 
-  const [form, setForm] = useState({
-    label: "Primary payout",
-    account_holder_name: "",
-    country_code: "US",
-    currency: "USD",
-    iban: "",
-    ach_routing_number: "",
-    ach_account_number: "",
-    swift_bic: "",
-    bank_name: "",
-    tax_form_kind: "W9",
-    tax_form_reference: "",
-    tax_form_file: null as File | null,
-  });
+  const [form, setForm] = useState<PayoutFormState>(INITIAL_FORM);
+
+  // Restore an interrupted draft (dialog reopens with everything typed so
+  // far) once the studio is known.
+  useEffect(() => {
+    if (!currentStudio) return;
+    const draft = readDraft(currentStudio.id);
+    if (draft) {
+      setForm(draft.form);
+      setCreateOpen(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStudio?.id]);
+
+  // Keep the draft in sync while the dialog is open.
+  useEffect(() => {
+    if (!currentStudio || !createOpen) return;
+    writeDraft(currentStudio.id, form);
+  }, [currentStudio, createOpen, form]);
+
+  const handleDialogOpenChange = (open: boolean) => {
+    setCreateOpen(open);
+    // Explicit close (X / Cancel / Escape) discards the draft; only an
+    // unexpected unmount (reload/remount) leaves it in place for restore.
+    if (!open && currentStudio) clearDraft(currentStudio.id);
+  };
 
   const selectedTaxOption = useMemo(
     () => TAX_FORM_OPTIONS.find((o) => o.value === form.tax_form_kind) ?? TAX_FORM_OPTIONS[0],
@@ -181,11 +263,12 @@ export default function PayoutAccountsSection() {
       if (error) throw error;
 
       setCreateOpen(false);
+      if (currentStudio) clearDraft(currentStudio.id);
       setForm({
-        ...form,
-        account_holder_name: "", iban: "", ach_routing_number: "",
-        ach_account_number: "", swift_bic: "", bank_name: "",
-        tax_form_reference: "", tax_form_file: null,
+        ...INITIAL_FORM,
+        country_code: form.country_code,
+        currency: form.currency,
+        tax_form_kind: form.tax_form_kind,
       });
       fetchAccounts();
     } catch (e) {
@@ -363,7 +446,7 @@ export default function PayoutAccountsSection() {
         )}
       </CardContent>
 
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+      <Dialog open={createOpen} onOpenChange={handleDialogOpenChange}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Add payout account</DialogTitle>
@@ -484,7 +567,7 @@ export default function PayoutAccountsSection() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => handleDialogOpenChange(false)}>Cancel</Button>
             <Button onClick={handleCreate} disabled={creating || !form.account_holder_name.trim()}>
               {creating ? "Saving…" : "Save & continue"}
             </Button>
