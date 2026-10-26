@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import lamp from '@/assets/trade-carousel-lamp.asset.json';
@@ -20,6 +20,16 @@ const slides = [
 export default function TradeMarketingCarousel() {
   const track = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
+  useEffect(() => {
+    const element = track.current;
+    if (!element) return;
+    const observer = new ResizeObserver(() => {
+      element.scrollTo({ left: 0, behavior: 'instant' });
+      setActive(0);
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
   const move = (index: number) => {
     const element = track.current;
     if (!element) return;

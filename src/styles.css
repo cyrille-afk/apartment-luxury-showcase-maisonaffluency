@@ -32,6 +32,8 @@
 .trade-marketing-pagination { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 16px; }
 .trade-marketing-dots { display: flex; gap: 2px; }
 .trade-marketing-pagination button { color: var(--carousel-paper); }
+.trade-marketing-pagination button:hover,
+.trade-marketing-pagination button:focus { background: transparent; }
 .trade-marketing-dot { display: block; width: 6px; height: 6px; border-radius: 50%; background: color-mix(in oklab, var(--carousel-paper) 35%, transparent); transition: background 180ms; }
 [aria-current='true'] .trade-marketing-dot { background: var(--carousel-gold); }
 @media (max-width: 480px) {

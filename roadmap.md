@@ -1,5 +1,5 @@
 ## Six-slide Trade carousel
-- [ ] Add the six-slide carousel with exact supplied copy, complete screenshots, swipe navigation and active dots; verify desktop and phone.
+- [x] Added /trade-carousel with exact supplied copy and original contain-only screenshots, six active dots and arrow/keyboard navigation. All images loaded on desktop/phone with no overflow or browser errors. Generated artwork candidates altered screenshot lettering, so the component uses authentic originals instead. Preview only.
 
 ## Designer editor continuity
 - [x] Normal lifecycle exits clear the recovery marker and flush drafts; crash fallback retains filters instead of returning to All designers. Signed-in Michel Amar immediate reload and tab-switch verified with unsaved biography preserved; original text restored without saving. Eight tests pass, no browser errors and preview build clean. Preview only.
