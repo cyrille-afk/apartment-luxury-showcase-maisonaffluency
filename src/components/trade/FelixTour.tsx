@@ -108,6 +108,7 @@ const FELIX_STEPS: FelixStep[] = orderFelixSteps<FelixStep>([
     id: "quote-generation",
     title: "Professional Quote Generation",
     target: "quotes-create",
+    secondaryTarget: "header-client-view",
     route: "/trade/quotes",
     prepare: () => {
       if (!document.querySelector('[data-felix-target="quotes-create"]')) {
@@ -115,7 +116,7 @@ const FELIX_STEPS: FelixStep[] = orderFelixSteps<FelixStep>([
       }
     },
     dialogue:
-      "This is your Quotes & Proformas workspace. The automated document compiler turns any product selection into a polished, client-ready quotation in moments — line items, finishes, lead times, and your tier pricing assembled for you. Create a new proforma specification whenever a project is ready to formalize.",
+      "We have switched back from Client View to your Studio Workspace — the outlined switch in the top bar now reads Studio Workspace, and your full trade pricing is visible again. This is your Quotes & Proformas workspace. The automated document compiler turns any product selection into a polished, client-ready quotation in moments — line items, finishes, lead times, and your tier pricing assembled for you. Create a new proforma specification whenever a project is ready to formalize.",
   },
   {
     id: "direct-client-billing",
