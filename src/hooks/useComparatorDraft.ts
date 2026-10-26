@@ -42,6 +42,11 @@ export function useComparatorDraft(userId: string | undefined, shortlistId: stri
           draft = sanitizeComparatorDraft(data.draft);
           stored = true;
           try { localStorage.setItem(key, JSON.stringify(draft)); localStorage.setItem(stampKey(key), String(remoteStamp)); } catch { /* ignore */ }
+        } else if (stored && (!data || localStamp > remoteStamp)) {
+          // Selections made before account sync existed (or offline) upload once.
+          const stamp = localStamp || Date.now();
+          try { localStorage.setItem(stampKey(key), String(stamp)); } catch { /* ignore */ }
+          await supabase.from("comparator_working_drafts").upsert({ user_id: userId, draft_key: remoteKey, draft: draft as never, updated_at: new Date(stamp).toISOString() });
         }
       } catch { /* Offline: keep this device's copy. */ }
       if (cancelled) return;
