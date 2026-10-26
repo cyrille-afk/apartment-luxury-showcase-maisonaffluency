@@ -1,7 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
-import { ArrowUp, ChevronDown, Clock, Download, FileText, ImagePlus, Loader2, Plus, Search, Square, Trash2, X } from "lucide-react";
+import { ArrowUp, ArrowUpRight, ChevronDown, Clock, Download, FileText, ImagePlus, Loader2, Plus, Search, Square, Trash2, X } from "lucide-react";
 import { renderCurationPdf } from "@/lib/curationExport";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,6 +25,13 @@ const QUICK_STARTS = [
   "Check COM fabric compatibility",
   "Pair a bronze side table with a bouclé lounge chair",
   "Suggest lighting for a double-height entrance",
+];
+
+/** Faint example rows shown while the member has no curations yet. */
+const PLACEHOLDER_CURATIONS = [
+  { title: "Penthouse Living Room Scheme", date: "18 Oct" },
+  { title: "Orchard Road Villa Finishes", date: "9 Oct" },
+  { title: "Bronze & Bouclé Material Pairing", date: "27 Sep" },
 ];
 
 interface ThreadRow { id: string; title: string; updated_at: string; project_id?: string | null }
@@ -303,6 +310,17 @@ export default function TradeConcierge() {
     void loadThreads();
   };
 
+  /** Clicking a "Begin with" suggestion types it into the composer without sending. */
+  const fillComposer = (q: string) => {
+    if (workspace && !threadId) {
+      // Return to the entry state so the composer is visible again.
+      writeLS(openFlagKey, null);
+      setWorkspace(null);
+    }
+    setPrompt(q);
+    window.setTimeout(() => inputRef.current?.focus(), 60);
+  };
+
   /** In-thread input: continue the saved curation conversation. */
   const submit = async (text: string) => {
     const p = text.trim();
@@ -368,11 +386,12 @@ export default function TradeConcierge() {
                 <button
                   key={q}
                   type="button"
-                  disabled={busy}
-                  onClick={() => (threadId ? void submit(q) : openWorkspace(q))}
-                  className="rounded-full border border-border bg-background px-3.5 py-1.5 text-left text-xs text-foreground transition-colors hover:border-accent hover:bg-accent/10 disabled:opacity-50"
+                  onClick={() => fillComposer(q)}
+                  aria-label={`Add “${q}” to the composer`}
+                  className="group inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3.5 py-1.5 text-left text-xs text-foreground transition-all hover:border-accent hover:bg-accent/10 active:scale-[0.98] focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-accent"
                 >
                   {q}
+                  <ArrowUpRight aria-hidden className="h-3 w-3 shrink-0 text-transparent transition-colors group-hover:text-accent" />
                 </button>
               ))}
             </div>
@@ -460,7 +479,14 @@ export default function TradeConcierge() {
             {!threadsLoaded ? (
               <div className="space-y-2">{[0, 1, 2].map((i) => <div key={i} className="h-10 animate-pulse rounded-sm bg-foreground/[0.05]" />)}</div>
             ) : pastItems.length === 0 ? (
-              <p className="font-display text-sm italic text-muted-foreground">Your curations will appear here.</p>
+              <ul aria-hidden className="pointer-events-none select-none space-y-1 opacity-55">
+                {PLACEHOLDER_CURATIONS.map((p) => (
+                  <li key={p.title} className="rounded-sm border-l-2 border-transparent px-3 py-2">
+                    <span className="block truncate font-display text-sm italic text-muted-foreground">{p.title}</span>
+                    <span className="block text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{p.date}</span>
+                  </li>
+                ))}
+              </ul>
             ) : filteredItems.length === 0 ? (
               <div className="space-y-1.5">
                 <p className="font-display text-sm italic text-muted-foreground">
@@ -644,7 +670,7 @@ export default function TradeConcierge() {
                           onClick={t.run}
                           className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1 text-[11px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:border-accent hover:text-foreground"
                         >
-                          <t.icon className="h-3 w-3" />
+                          <t.icon className="h-3 w-3" strokeWidth={1.75} />
                           {t.label}
                         </button>
                       ))}
