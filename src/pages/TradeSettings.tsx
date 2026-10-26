@@ -190,7 +190,11 @@ const TradeSettings = () => {
 
     const { error } = await supabase
       .from("profiles")
-      .update(result.data)
+      .update({
+        ...result.data,
+        business_reg_number: result.data.business_reg_number || null,
+        tax_vat_id: result.data.tax_vat_id || null,
+      })
       .eq("id", user.id);
 
     if (error) {
