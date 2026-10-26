@@ -1364,6 +1364,11 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
       ? `/products/${definitiveProductSlug}`
       : `/designers/${definitiveDesignerSlug}/${definitiveProductSlug}`;
     const currentPath = location.pathname.replace(/\/+$/, "") || "/";
+    // Only canonicalize while the address is still this product's own URL.
+    // While navigating away (e.g. to the designer profile), this page stays
+    // mounted briefly; redirecting then would bounce the visitor back here.
+    const lastSegment = decodeURIComponent(currentPath.split("/").pop() || "");
+    if (!productSlug || lastSegment !== productSlug) return;
     if (currentPath !== definitivePath) {
       navigate(`${definitivePath}${location.search}`, { replace: true, state: location.state });
     }
