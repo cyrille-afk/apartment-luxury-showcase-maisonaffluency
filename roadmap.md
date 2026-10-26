@@ -1,3 +1,6 @@
+## Onboarding project-folder order
+- [x] Client Project Folders is Step 9 before Tools (Step 10); preceding pricing/quote steps renumbered 4–8. Signed-in Steps 4–10 and Back to Step 9 verified without browser errors; 14 unit regressions pass and build clean. Existing JS e2e runner blocked by absent browser binary; equivalent central flow verified with Python Playwright. Preview only; GitHub sync needed.
+
 ## Collection tour background and placement
 - [x] Step 2 opens the actual Collection; Step 3 uses upper-right reserved editorial space. Signed-in 1946×1181, 1280×1800 and 1024×600 checks show zero photograph overlaps; Back/Next/close remove reserved space correctly, no browser errors, 30 regressions pass and build clean. Preview only; GitHub sync needed.
 

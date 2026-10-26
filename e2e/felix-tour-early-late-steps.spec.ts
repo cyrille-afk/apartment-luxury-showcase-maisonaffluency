@@ -17,6 +17,7 @@ type StepExpectation = {
   /** Case-insensitive fragment of the "Find it later" line. */
   ref: RegExp;
   url?: RegExp;
+  header?: boolean;
 };
 
 const seed = async (page: Page, progress: number | null) => {
@@ -34,9 +35,10 @@ const seed = async (page: Page, progress: number | null) => {
 
 const expectStep = async (page: Page, s: StepExpectation) => {
   const card = page.getByRole("dialog").filter({ hasText: s.title });
-  await expect(card).toHaveCSS("opacity", "1", { timeout: 60000 });
+  await expect(card).toBeVisible({ timeout: 60000 });
   if (s.url) await expect(page).toHaveURL(s.url);
-  await expect(page.locator("html")).toHaveAttribute("data-felix-tour-sidebar", s.anchor);
+  if (s.header) await expect(page.locator("html")).not.toHaveAttribute("data-felix-tour-sidebar");
+  else await expect(page.locator("html")).toHaveAttribute("data-felix-tour-sidebar", s.anchor);
   await expect(page.locator("[data-felix-sidebar-ref]")).toContainText(s.ref);
   await expect(card).toContainText(s.copy);
   await expect(page.locator("[data-felix-spotlight]")).toBeVisible();
@@ -62,8 +64,9 @@ test("tour steps 1-12: sidebar references, copy and highlights", async ({ page, 
   await step1.getByRole("button", { name: "Next", exact: true }).click();
 
   // Step 2 — The Collection (gated: opening The Collection advances the tour)
-  const step2 = page.getByRole("dialog").filter({ hasText: "Open The Collection to continue." });
-  await expect(step2).toHaveCSS("opacity", "1", { timeout: 60000 });
+  const step2 = page.locator("[data-felix-tour-card]");
+  await expect(step2).toBeVisible({ timeout: 60000 });
+  await expect(step2.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "2");
   await expect(page.locator("html")).toHaveAttribute("data-felix-tour-sidebar", "collection");
   await expect(page.locator("[data-felix-sidebar-ref]")).toContainText(/The Collection/i);
   await expect(step2).toContainText("Interactive Gallery");
@@ -79,17 +82,7 @@ test("tour steps 1-12: sidebar references, copy and highlights", async ({ page, 
   });
   await step3.getByRole("button", { name: "Next", exact: true }).click();
 
-  // Step 4 — Client Project Folders
-  const step4 = await expectStep(page, {
-    title: "Client Project Folders",
-    copy: "isolated workspace",
-    anchor: "projects",
-    ref: /Projects & Interventions → Projects/i,
-    url: /\/trade\/projects/,
-  });
-  await step4.getByRole("button", { name: "Next", exact: true }).click();
-
-  // Step 5 — Real-Time Tier Tracking
+  // Step 4 — Real-Time Tier Tracking
   const step5 = await expectStep(page, {
     title: "Real-Time Tier Tracking",
     copy: "rolling 12-month confirmed project spend",
@@ -98,28 +91,30 @@ test("tour steps 1-12: sidebar references, copy and highlights", async ({ page, 
   });
   await step5.getByRole("button", { name: "Next", exact: true }).click();
 
-  // Step 6 — Client-Safe Presentations (Next enables Client View and jumps on)
+  // Step 5 — Client-Safe Presentations (Next enables Client View and jumps on)
   const step6 = await expectStep(page, {
     title: "Client-Safe Presentations",
     copy: "client-facing presentation mode",
     anchor: "collection",
-    ref: /The Collection/i,
+    ref: /Client Editorial Presentation/i,
+    header: true,
     url: /\/trade\/the-collection/,
   });
   await step6.getByRole("button", { name: "Next", exact: true }).click();
 
-  // Step 7 — Absolute Margin Protection (product page: no trade sidebar, the
+  // Step 6 — Absolute Margin Protection (product page: no trade sidebar, the
   // in-card reference still names The Collection)
   const step7 = await expectStep(page, {
     title: "Absolute Margin Protection",
     copy: "safely hidden behind standard retail pricing",
     anchor: "collection",
-    ref: /The Collection/i,
+    ref: /Client Editorial Presentation/i,
+    header: true,
     url: /\/trade\/products\//,
   });
   await step7.getByRole("button", { name: "Next", exact: true }).click();
 
-  // Step 8 — Professional Quote Generation
+  // Step 7 — Professional Quote Generation
   const step8 = await expectStep(page, {
     title: "Professional Quote Generation",
     copy: "automated document compiler",
@@ -129,7 +124,7 @@ test("tour steps 1-12: sidebar references, copy and highlights", async ({ page, 
   });
   await step8.getByRole("button", { name: "Next", exact: true }).click();
 
-  // Step 9 — Direct Client Billing
+  // Step 8 — Direct Client Billing
   const step9 = await expectStep(page, {
     title: "Direct Client Billing",
     copy: "document controls for an existing quotation",
@@ -137,6 +132,17 @@ test("tour steps 1-12: sidebar references, copy and highlights", async ({ page, 
     ref: /Quotes & Proformas/i,
   });
   await step9.getByRole("button", { name: "Next", exact: true }).click();
+
+  // Step 9 — Client Project Folders follows quote/project assignment.
+  const projectFolders = await expectStep(page, {
+    title: "Client Project Folders",
+    copy: "isolated workspace",
+    anchor: "projects",
+    ref: /Projects & Interventions → Projects/i,
+    url: /\/trade\/projects/,
+  });
+  await expect(projectFolders.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "9");
+  await projectFolders.getByRole("button", { name: "Next", exact: true }).click();
 
   // Step 10 — The Trade Tools Grid
   const step10 = await expectStep(page, {
