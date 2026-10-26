@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { createApplicationDraft, isNorthAmerica, parseDraftBody, payoutsBenefit } from '../../supabase/functions/_shared/applicationNotificationCopy';
+import { approvalGreeting, createApplicationDraft, isNorthAmerica, parseDraftBody, payoutsBenefit } from '../../supabase/functions/_shared/applicationNotificationCopy';
 
 describe('Application draft copy', () => {
   it('includes all thirteen exact benefits with the condensed payouts block by default', () => {
     const draft = createApplicationDraft('approved', 'Jane Smith', 'Atelier');
     const blocks = parseDraftBody(draft.body);
     expect(blocks.filter(b => b.kind === 'benefit')).toHaveLength(13);
-    expect(blocks[0].text).toBe('Dear Jane Smith,');
+    expect(blocks[0].text).toBe('Dear Jane,');
     expect(blocks[2].kind).toBe('intro');
     expect(draft.body).toContain('Trade Payouts & Billing Flex');
     expect(draft.body).toContain('defaults to our Agent Commission model');
@@ -18,6 +18,15 @@ describe('Application draft copy', () => {
     expect(draft.body).toContain('strict onboarding limitations');
     expect(draft.body).toContain('on behalf of Atelier');
     expect(draft.body).not.toContain('◆');
+  });
+});
+
+describe('Approval recipient mapping', () => {
+  it('uses the first name from the stored contact name', () => {
+    expect(approvalGreeting('  Jane Smith  ', 'Atelier')).toBe('Dear Jane,');
+  });
+  it('addresses the company team when a contact name is missing', () => {
+    expect(approvalGreeting('  ', 'Atelier')).toBe('Dear the team at Atelier,');
   });
 });
 

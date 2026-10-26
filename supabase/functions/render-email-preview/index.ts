@@ -3,6 +3,7 @@ import { renderAsync } from "npm:@react-email/components@0.0.22";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { TEMPLATES } from "../_shared/transactional-email-templates/registry.tsx";
 import { welcomeDesignerData } from "../_shared/welcomeDesignerCount.ts";
+import { enhanceApprovalEmailHtml } from "../_shared/approvalEmailHtml.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -65,7 +66,7 @@ Deno.serve(async (req) => {
 
   try {
     const props = await welcomeDesignerData(admin, templateName, templateData ?? entry.previewData ?? {});
-    const html = await renderAsync(React.createElement(entry.component, props));
+    const html = enhanceApprovalEmailHtml(templateName, await renderAsync(React.createElement(entry.component, props)));
     const subject =
       typeof entry.subject === "function" ? entry.subject(props) : entry.subject;
     return json(200, { html, subject });
