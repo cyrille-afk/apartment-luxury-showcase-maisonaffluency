@@ -22,6 +22,14 @@
 .trade-marketing-media { margin: 0; min-height: 0; display: flex; align-items: center; justify-content: center; }
 .trade-marketing-media img { display: block; width: 100%; height: 100%; object-fit: contain; }
 .trade-marketing-body { font-family: Helvetica, Arial, sans-serif; font-size: 18px; line-height: 1.5; letter-spacing: 0; margin: 0; align-self: center; }
+.trade-marketing-copy { align-self: center; min-width: 0; }
+.trade-marketing-archive { font-family: Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.4; margin: 16px 0 0; }
+.trade-marketing-caption { font-family: Helvetica, Arial, sans-serif; font-size: 10px; line-height: 1.4; margin-top: 10px; color: var(--carousel-paper); text-align: center; }
+.trade-marketing-lamp .trade-marketing-media { flex-direction: column; }
+.trade-marketing-lamp .trade-marketing-media img { min-height: 0; flex: 1; }
+.trade-marketing-apply { margin-top: 20px; border-color: var(--carousel-gold); color: var(--carousel-paper); background: transparent; }
+.trade-marketing-apply:hover { background: var(--carousel-gold); color: var(--carousel-black); }
+.trade-marketing-end .trade-marketing-copy { text-align: center; }
 .trade-marketing-screen .trade-marketing-media img { filter: drop-shadow(var(--carousel-shadow)); }
 .trade-marketing-directory { background: var(--carousel-black); color: var(--carousel-paper); grid-template-rows: 60% 17% 23%; }
 .trade-marketing-directory .trade-marketing-title { grid-row: 2; }
@@ -30,7 +38,7 @@
 .trade-marketing-lamp .trade-marketing-media { grid-row: 1; }
 .trade-marketing-lamp .trade-marketing-title { grid-row: 2; text-align: center; font-size: 32px; }
 .trade-marketing-end { background: var(--carousel-black); color: var(--carousel-paper); grid-template-rows: 58% 42%; }
-.trade-marketing-end .trade-marketing-body { text-align: center; font-size: 24px; line-height: 1.6; }
+.trade-marketing-end .trade-marketing-body { text-align: center; font-size: 22px; line-height: 1.5; }
 .trade-marketing-pagination { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 16px; }
 .trade-marketing-dots { display: flex; gap: 2px; }
 .trade-marketing-pagination button { color: var(--carousel-paper); }
@@ -42,8 +50,11 @@
   .trade-marketing-stage { padding: 0; }
   .trade-marketing-title { font-size: 21px; }
   .trade-marketing-body { font-size: 13px; line-height: 1.4; }
+  .trade-marketing-archive { font-size: 11px; margin-top: 10px; }
+  .trade-marketing-caption { font-size: 8px; }
+  .trade-marketing-apply { margin-top: 12px; font-size: 12px; }
   .trade-marketing-lamp .trade-marketing-title { font-size: 23px; }
-  .trade-marketing-end .trade-marketing-body { font-size: 17px; }
+  .trade-marketing-end .trade-marketing-body { font-size: 15px; }
 }
 @media (prefers-reduced-motion: reduce) { .trade-marketing-dot { transition: none; } }
 

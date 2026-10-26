@@ -1,3 +1,6 @@
+## Six-slide brief revision
+- [x] Lamp attribution, exact 300+/106 directory wording and application CTA added; six app/HTML slides inspected desktop/phone, navigation verified, no app errors, preview build OK. App preview only; publish and GitHub sync needed.
+
 ## Trade approval email refinement
 - [x] Personalised first-name/company-team approval greetings, exact Felix benefit copy, 0.05em header/CTA tracking and charcoal hover enhancement. Signed-in actual approval draft opened/cancelled; named/team/draft renderings inspected desktop/phone with no overflow/errors, 23 regressions pass. Existing send/preview services deployed and live previews verified without sending emails. Admin review UI remains preview-only; publish and GitHub sync needed. Hover depends on email-client CSS support.
 
