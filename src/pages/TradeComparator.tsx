@@ -297,7 +297,7 @@ export default function TradeComparator() {
     try {
       downloadBlob(await buildPdfBlob(), "product-comparison.pdf");
       setExportOpen(false);
-    } catch { setExportError("The PDF could not be prepared with all pictures. Please try again."); } finally { setExporting(false); }
+    } catch (error) { console.error("Comparison PDF generation failed", error instanceof Error ? error.message : "Document preparation failed"); setExportError("The PDF could not be prepared with all pictures. Please try again."); } finally { setExporting(false); }
   };
 
   useEffect(() => {
