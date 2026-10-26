@@ -723,7 +723,10 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
 
   useLayoutEffect(() => {
     const sidebarRef = FELIX_STEP_SIDEBAR[step.id];
-    if (open && !isPaused) {
+    // Pulse the sidebar only once the card has settled beside its target —
+    // highlighting the nav item first reads as the sidebar opening before the
+    // card appears.
+    if (open && !isPaused && settled) {
       document.documentElement.dataset.felixTourStep = step.id;
       // Global step → sidebar map: styles.css pulses the matching nav item.
       if (sidebarRef && sidebarRef.where !== "header") document.documentElement.dataset.felixTourSidebar = sidebarRef.anchor;
@@ -736,7 +739,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       delete document.documentElement.dataset.felixTourStep;
       delete document.documentElement.dataset.felixTourSidebar;
     };
-  }, [open, isPaused, step.id]);
+  }, [open, isPaused, settled, step.id]);
 
   useEffect(() => () => {
     if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current);
