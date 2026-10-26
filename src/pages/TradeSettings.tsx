@@ -57,6 +57,8 @@ const TradeSettings = () => {
     first_name: "",
     last_name: "",
     company: "",
+    business_reg_number: "",
+    tax_vat_id: "",
     phone: "",
     country: "",
   });
@@ -112,11 +114,16 @@ const TradeSettings = () => {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("avatar_url, country, trade_tier_12mo_spend_cents")
+      .select("avatar_url, country, trade_tier_12mo_spend_cents, business_reg_number, tax_vat_id")
       .eq("id", user.id)
       .single()
       .then(({ data }) => {
         if ((data as any)?.country) setForm((f) => ({ ...f, country: (data as any).country }));
+        setForm((f) => ({
+          ...f,
+          business_reg_number: (data as any)?.business_reg_number || "",
+          tax_vat_id: (data as any)?.tax_vat_id || "",
+        }));
         if ((data as any)?.avatar_url) setAvatarUrl((data as any).avatar_url);
         if ((data as any)?.trade_tier_12mo_spend_cents != null) {
           setSpendCents((data as any).trade_tier_12mo_spend_cents);
@@ -477,6 +484,35 @@ const TradeSettings = () => {
               className={`${inputClass} ${profileErrors.company ? errorInputClass : ""}`}
             />
             <FieldError field="company" errors={profileErrors} />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="settings-reg-number" className="font-body text-xs text-muted-foreground uppercase tracking-wider mb-1.5 block">
+                Business Registration No.
+              </label>
+              <input
+                id="settings-reg-number"
+                type="text"
+                value={form.business_reg_number}
+                onChange={(e) => setForm({ ...form, business_reg_number: e.target.value })}
+                className={`${inputClass} ${profileErrors.business_reg_number ? errorInputClass : ""}`}
+              />
+              <FieldError field="business_reg_number" errors={profileErrors} />
+            </div>
+            <div>
+              <label htmlFor="settings-tax-id" className="font-body text-xs text-muted-foreground uppercase tracking-wider mb-1.5 block">
+                Tax ID / VAT
+              </label>
+              <input
+                id="settings-tax-id"
+                type="text"
+                value={form.tax_vat_id}
+                onChange={(e) => setForm({ ...form, tax_vat_id: e.target.value })}
+                className={`${inputClass} ${profileErrors.tax_vat_id ? errorInputClass : ""}`}
+              />
+              <FieldError field="tax_vat_id" errors={profileErrors} />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
