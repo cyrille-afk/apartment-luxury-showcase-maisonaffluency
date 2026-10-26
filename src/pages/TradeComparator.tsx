@@ -149,6 +149,8 @@ export default function TradeComparator() {
     setCompareList((prev) => prev.filter((p) => p.id !== id));
   };
 
+  const clearAllCompare = () => setDraft(d => ({ ...d, compareList: [], pieceNotes: {} }));
+
   const queryClient = useQueryClient();
   const { discountPct } = useTradePriceMode();
   const [savedOpen, setSavedOpen] = useState(false);
@@ -431,6 +433,7 @@ export default function TradeComparator() {
               {filters}
               <div className="ml-auto flex shrink-0 items-center gap-3">
                 <span className="font-body text-xs text-muted-foreground" aria-live="polite">{compareList.length}/4 Pieces Selected</span>
+                {compareList.length > 0 && <Button variant="link" size="sm" className="h-7 px-0" onClick={clearAllCompare}>Clear all</Button>}
                 <Button variant="link" size="sm" className="h-7 px-0" aria-expanded={selectionOpen} aria-controls="comparator-selection-drawer" onClick={() => setSelectionExpanded(!selectionOpen)}>{selectionOpen ? "Done" : "Modify Selection"}</Button>
               </div>
             </div>
