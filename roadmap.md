@@ -1,3 +1,6 @@
+## Designer editor continuity
+- [x] Normal lifecycle exits clear the recovery marker and flush drafts; crash fallback retains filters instead of returning to All designers. Signed-in Michel Amar immediate reload and tab-switch verified with unsaved biography preserved; original text restored without saving. Eight tests pass, no browser errors and preview build clean. Preview only.
+
 ## Resources catalogue recovery
 - [x] Removed eager maker PDF previews; document previews use the bundled worker and clean up on exit/timeout. Signed-in Tools → Resources → Delcourt search verified; both real catalogue PDFs downloaded, covers displayed and no page errors. Five recovery/alphabet tests pass, build clean. Preview only; GitHub sync needed.
 
