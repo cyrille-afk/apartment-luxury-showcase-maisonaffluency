@@ -12,9 +12,11 @@ import type { ComparatorSwatch } from "@/lib/comparatorSwatches";
 const KINDS: [ComparatorFacetKind, string][] = [["material", "Material"], ["finish", "Finish"], ["color", "Colour"]];
 
 /** Admin-only: assign explicit material / finish / colour categories to finish names. */
-export function FinishCategoryDialog({ names, overrides, pieces }: { names: string[]; overrides: Map<string, FinishFacetOverride>; pieces: { name: string; materials: string | null; linked: ComparatorSwatch[] }[] }) {
+export function FinishCategoryDialog({ names, overrides, pieces, controlledOpen, onOpenChange }: { names: string[]; overrides: Map<string, FinishFacetOverride>; pieces: { name: string; materials: string | null; linked: ComparatorSwatch[] }[]; controlledOpen?: boolean; onOpenChange?: (open: boolean) => void }) {
   const qc = useQueryClient();
-  const [open, setOpen] = useState(false);
+  const [localOpen, setLocalOpen] = useState(false);
+  const open = controlledOpen ?? localOpen;
+  const setOpen = onOpenChange ?? setLocalOpen;
   const [draft, setDraft] = useState<Record<string, FinishFacetOverride>>({});
   const [saving, setSaving] = useState(false);
   useEffect(() => { if (!open) return; setDraft(Object.fromEntries(names.map(n => [n, { ...overrides.get(finishFacetKey(n)) }]))); // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -40,7 +42,7 @@ export function FinishCategoryDialog({ names, overrides, pieces }: { names: stri
   };
 
   return <Dialog open={open} onOpenChange={setOpen}>
-    <DialogTrigger asChild><Button type="button" variant="outline" size="sm" className="gap-2"><Tags className="h-3.5 w-3.5" />Categorise finishes</Button></DialogTrigger>
+    {controlledOpen === undefined && <DialogTrigger asChild><Button type="button" variant="outline" size="sm" className="gap-2"><Tags className="h-3.5 w-3.5" />Categorise finishes</Button></DialogTrigger>}
     <DialogContent className="max-h-[85vh] max-w-3xl overflow-y-auto">
       <DialogHeader>
         <DialogTitle className="font-display font-normal">Categorise finishes</DialogTitle>
