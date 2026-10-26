@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { StudioInitialization } from "./StudioInitialization";
 import { useDesktopTradeTour } from "./useDesktopTradeTour";
-import { fmtPct, resolveTierTokens, hasPendingTourStart, clearTourStartRequest, markTourCompleted, quoteWorkspaceReady } from "./felixTourUtils";
+import { fmtPct, resolveTierTokens, hasPendingTourStart, clearTourStartRequest, markTourCompleted, quoteWorkspaceReady, collectionWorkspaceReady } from "./felixTourUtils";
 import { FELIX_STEP_SIDEBAR } from "./felixTourSidebarMap";
 import { orderFelixSteps } from "./felixTourOrder";
 import { chooseTourCardPlacement, collectionTourCardOrigin, collectionTourCardPlacement, tourPanelLandingScrollDelta, type TourRect } from "./felixTourPlacement";
@@ -512,7 +512,11 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         preparedAt = now;
         current.prepare();
       }
-      const elements = routeReady
+      // Pending navigation keeps the outgoing page mounted; never place the
+      // Collection card (or pulse its sidebar link) until the Collection page itself renders.
+      const collectionReady = collectionWorkspaceReady(current.id, location.pathname,
+        document.querySelector("[data-felix-collection-tabs]") !== null);
+      const elements = routeReady && collectionReady
         ? Array.from(document.querySelectorAll(`[data-felix-target="${stepTarget}"]`))
         : [];
       // Discovery also handles a lazy Quotes mount after the route effect ran.
