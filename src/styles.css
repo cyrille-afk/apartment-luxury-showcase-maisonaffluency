@@ -98,6 +98,12 @@ html[data-felix-tour-step="client-safe-presentations"] .trade-editorial-header {
     overflow-wrap: break-word;
   }
 }
+@media (min-width: 1024px) and (max-width: 1199px) {
+  html[data-felix-collection-dock] [data-felix-collection-header] h1 {
+    font-size: 30px;
+    overflow-wrap: normal;
+  }
+}
 
 /* Reuse the tour's lifecycle-owned root state, so close/pause/unmount cannot
    leave sidebar highlights behind. Page overview spotlights remain intact.
