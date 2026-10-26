@@ -66,11 +66,22 @@ test("Margin Protection continues into both quote steps without crashing", async
   await expect(page.getByRole("dialog").filter({ hasText: "Absolute Margin Protection" })).toBeVisible({ timeout: 60_000 });
   await expect(page.locator("html")).toHaveAttribute("data-client-view", "active");
   await expect(page.locator('head link[rel="canonical"]')).toHaveCount(1);
+  await page.evaluate(() => {
+    const flashes: string[] = [];
+    (window as unknown as { felixProductFlashes: string[] }).felixProductFlashes = flashes;
+    const observer = new MutationObserver(() => {
+      if (document.documentElement.dataset.clientView === "inactive" &&
+          document.querySelector('[data-felix-target="client-view-product-price"]') &&
+          !document.querySelector('[data-felix-target="quotes-create"]')) flashes.push(location.pathname);
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-client-view"], childList: true, subtree: true });
+  });
   await page.getByRole("button", { name: "Next", exact: true }).click();
   await expect(page).toHaveURL(/\/trade\/quotes$/);
   await expect(page.getByRole("dialog").filter({ hasText: "Professional Quote Generation" })).toBeVisible({ timeout: 30_000 });
   await expect(page.locator("html")).toHaveAttribute("data-client-view", "inactive");
   await expect(page.locator('[data-felix-target="quotes-create"]')).toBeVisible();
+  expect(await page.evaluate(() => (window as unknown as { felixProductFlashes: string[] }).felixProductFlashes)).toEqual([]);
   await expect(page.locator('head link[rel="canonical"]')).toHaveCount(1);
   await page.getByRole("button", { name: "Next", exact: true }).click();
   await expect(page.getByRole("dialog").filter({ hasText: "Direct Client Billing" })).toBeVisible({ timeout: 30_000 });
