@@ -175,7 +175,11 @@ function RootShell({ children }: { children: ReactNode }) {
     }
   }, [currentManifestHref, manifestLocation.pathname]);
   const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
+  useEffect(() => {
+    setHydrated(true);
+    // Ends the "still loading" bar: from here every tap is handled.
+    document.documentElement.classList.add("app-ready");
+  }, []);
   useEffect(() => watchAppStylesheetReady(document), [isHome, hydrated]);
   return (
     <html lang="en" suppressHydrationWarning>
@@ -191,9 +195,13 @@ function RootShell({ children }: { children: ReactNode }) {
           precedence="default"
           suppressHydrationWarning
         />
+        {/* Slow connections can show the page long before taps work; a thin
+            moving bar tells visitors it is still loading instead of frozen. */}
+        <style>{"@keyframes ma-boot-bar{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}html:not(.app-ready) body::before{content:'';position:fixed;top:0;left:0;z-index:2147483647;width:40%;height:3px;background:var(--color-primary,currentColor);animation:ma-boot-bar 1.2s ease-in-out infinite;pointer-events:none}"}</style>
         {isHome && !hydrated && (
           <>
-            <style>{"html.home-fouc:not(.app-css) #root{visibility:hidden}"}</style>
+            {/* Once the page's own headline is visible, the quick-paint copy must go — never two headlines. */}
+            <style>{"html.home-fouc:not(.app-css) #root{visibility:hidden}html.app-css #static-hero-copy{display:none!important}"}</style>
             <script dangerouslySetInnerHTML={{ __html: HOME_CSS_SWAP }} />
             <noscript>
               <link rel="stylesheet" href={appCss} />
