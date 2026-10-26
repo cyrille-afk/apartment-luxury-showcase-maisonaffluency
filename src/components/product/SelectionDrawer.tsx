@@ -14,12 +14,6 @@ import { cn } from "@/lib/utils";
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
 
 import { supabase } from "@/integrations/supabase/client";
-import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
-import { privatePairingsEnabled } from "@/lib/curatedPairings";
-import { useCuratedPairingSession } from "@/lib/curatedPairingSession";
-import CuratedPairings from "./CuratedPairings";
-import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
 
 /** Mobile / WhatsApp number: digits, +, spaces, dashes, parentheses — 7–20 chars. */
 const PHONE_RE = /^[+0-9][0-9 ()-]{6,19}$/;
@@ -81,8 +75,6 @@ export interface SelectionDrawerProps {
   /** Piece has no public price: hide payment methods, request a quotation. */
   quoteOnly?: boolean;
   placing?: boolean;
-  /** Explicit off switch for approved trade checkout. */
-  allowPairings?: boolean;
 }
 
 export default function SelectionDrawer({
