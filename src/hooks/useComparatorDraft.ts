@@ -62,7 +62,7 @@ export function useComparatorDraft(userId: string | undefined, shortlistId: stri
     setLoaded(current.current);
     if (pushTimer.current) clearTimeout(pushTimer.current);
     pushTimer.current = setTimeout(() => {
-      void supabase.from("comparator_working_drafts").upsert({ user_id: userId, draft_key: remoteKey, draft: clean as never, updated_at: new Date(now).toISOString() });
+      void supabase.from("comparator_working_drafts").upsert({ user_id: userId, draft_key: remoteKey, draft: clean as never, updated_at: new Date(now).toISOString() }).then(() => undefined, () => undefined);
     }, 600);
   }, [key, userId, remoteKey]);
 
