@@ -1,4 +1,5 @@
 # src/lib rules
+- Comparator PDF exports use comparatorExport's explicit field/value allowlist; client mode strips supplier/notes/trade values, internal trade fields require existing visibility, and disabled sections omit swatches too — export configuration cannot rely on screen-hidden rows for privacy.
 - Comparator search and alphabet transitions use shared pure draft helpers that clear the competing filter without replacing selections — keeps UI and persisted interaction state consistent.
 - Comparator material menus expand recognised present families through the shared taxonomy; family-wide choices use distinct labels from non-selectable headers — prevents missing species and duplicate-looking group names without changing recorded finish data.
 - Comparator edition labels reuse the curator-pick edition/house helpers and rehydrate live edition and house metadata after draft restore — keeps mixed-maker house attribution without storing prices or inventing edition copy.

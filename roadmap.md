@@ -1,3 +1,6 @@
+## Intentional comparator export
+- [x] Added client-default export modal with guarded trade switch and retail/specification/material switches. Signed-in real client, internal and minimal PDFs downloaded; extracted text confirms client omits supplier/trade/internal notes, internal includes opted-in trade, and disabled sections disappear. Cancellation and fresh client defaults on reopening verified desktop/phone; 19 tests pass, build clean. Fixed existing invalid FX date formatting uncovered by real conversion. Preview only; GitHub sync needed.
+
 ## Comparator cold start and filtering
 - [x] Cold-start catalogue shows Achille Salvagni Atelier, Adrien Messié and Alex Proba with All active and four empty slots. Search/letter reset each other; designer and piece matches, adding without collapse, Done/reopen and phone containment verified signed-in. Project assignment sits beside Material; 35 tests pass and build clean. Preview only; GitHub sync needed.
 
