@@ -2,6 +2,49 @@
 @import "tailwindcss" source("../src");
 @config "../tailwind.legacy.config.ts";
 
+/* Editorial carousel: original captures are always contained, never cropped. */
+.trade-marketing-stage {
+  --carousel-black: oklch(0 0 0);
+  --carousel-paper: oklch(1 0 0);
+  --carousel-ink: oklch(0.15 0 0);
+  --carousel-gold: oklch(0.72 0.09 85);
+  --carousel-shadow: 0 5px 18px color-mix(in oklab, var(--carousel-black) 10%, transparent);
+  background: var(--carousel-black); color: var(--carousel-paper);
+  min-height: 100svh; display: grid; place-items: center; padding: 24px 0;
+}
+.trade-marketing-carousel { width: min(100%, 620px); min-width: 0; }
+.trade-marketing-track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
+.trade-marketing-track::-webkit-scrollbar { display: none; }
+.trade-marketing-slide { flex: 0 0 100%; min-width: 0; aspect-ratio: 4 / 5; scroll-snap-align: start; scroll-snap-stop: always; background: var(--carousel-paper); color: var(--carousel-ink); display: grid; grid-template-rows: 24% 49% 27%; padding: 8%; box-sizing: border-box; }
+.trade-marketing-title { font-family: 'Playfair Display', Georgia, serif; font-size: 30px; font-weight: 400; line-height: 1.18; letter-spacing: 0; margin: 0; align-self: center; overflow-wrap: anywhere; }
+.trade-marketing-media { margin: 0; min-height: 0; display: flex; align-items: center; justify-content: center; }
+.trade-marketing-media img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.trade-marketing-body { font-family: Helvetica, Arial, sans-serif; font-size: 18px; line-height: 1.5; letter-spacing: 0; margin: 0; align-self: center; }
+.trade-marketing-screen .trade-marketing-media img { filter: drop-shadow(var(--carousel-shadow)); }
+.trade-marketing-directory { background: var(--carousel-black); color: var(--carousel-paper); grid-template-rows: 60% 17% 23%; }
+.trade-marketing-directory .trade-marketing-title { grid-row: 2; }
+.trade-marketing-directory .trade-marketing-media { grid-row: 1; }
+.trade-marketing-lamp { position: relative; background: var(--carousel-black); color: var(--carousel-paper); grid-template-rows: 70% 30%; }
+.trade-marketing-lamp .trade-marketing-media { grid-row: 1; }
+.trade-marketing-lamp .trade-marketing-title { grid-row: 2; text-align: center; font-size: 32px; }
+.trade-marketing-end { background: var(--carousel-black); color: var(--carousel-paper); grid-template-rows: 58% 42%; }
+.trade-marketing-end .trade-marketing-body { text-align: center; font-size: 24px; line-height: 1.6; }
+.trade-marketing-pagination { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 16px; }
+.trade-marketing-dots { display: flex; gap: 2px; }
+.trade-marketing-pagination button { color: var(--carousel-paper); }
+.trade-marketing-pagination button:hover,
+.trade-marketing-pagination button:focus { background: transparent; }
+.trade-marketing-dot { display: block; width: 6px; height: 6px; border-radius: 50%; background: color-mix(in oklab, var(--carousel-paper) 35%, transparent); transition: background 180ms; }
+[aria-current='true'] .trade-marketing-dot { background: var(--carousel-gold); }
+@media (max-width: 480px) {
+  .trade-marketing-stage { padding: 0; }
+  .trade-marketing-title { font-size: 21px; }
+  .trade-marketing-body { font-size: 13px; line-height: 1.4; }
+  .trade-marketing-lamp .trade-marketing-title { font-size: 23px; }
+  .trade-marketing-end .trade-marketing-body { font-size: 17px; }
+}
+@media (prefers-reduced-motion: reduce) { .trade-marketing-dot { transition: none; } }
+
 /* The v3 `short` raw screen (max-height: 780px), re-expressed as a v4 variant. */
 @custom-variant short (@media (max-height: 780px));
 

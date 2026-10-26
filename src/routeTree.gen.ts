@@ -51,6 +51,7 @@ import { Route as SuccessRouteImport } from './routes/success'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TestRouteImport } from './routes/test'
 import { Route as TradeRouteImport } from './routes/trade'
+import { Route as TradeCarouselRouteImport } from './routes/trade-carousel'
 import { Route as TradeDemoRouteImport } from './routes/trade-demo'
 import { Route as TradeFaqRouteImport } from './routes/trade-faq'
 import { Route as TradeOnboardingRouteImport } from './routes/trade-onboarding'
@@ -474,6 +475,11 @@ const TestRoute = TestRouteImport.update({
 const TradeRoute = TradeRouteImport.update({
   id: '/trade',
   path: '/trade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TradeCarouselRoute = TradeCarouselRouteImport.update({
+  id: '/trade-carousel',
+  path: '/trade-carousel',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TradeDemoRoute = TradeDemoRouteImport.update({
@@ -1630,6 +1636,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/test': typeof TestRoute
   '/trade': typeof TradeRouteWithChildren
+  '/trade-carousel': typeof TradeCarouselRoute
   '/trade-demo': typeof TradeDemoRoute
   '/trade-faq': typeof TradeFaqRoute
   '/trade-onboarding': typeof TradeOnboardingRoute
@@ -1887,6 +1894,7 @@ export interface FileRoutesByTo {
   '/success': typeof SuccessRoute
   '/terms': typeof TermsRoute
   '/test': typeof TestRoute
+  '/trade-carousel': typeof TradeCarouselRoute
   '/trade-demo': typeof TradeDemoRoute
   '/trade-faq': typeof TradeFaqRoute
   '/trade-onboarding': typeof TradeOnboardingRoute
@@ -2146,6 +2154,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/test': typeof TestRoute
   '/trade': typeof TradeRouteWithChildren
+  '/trade-carousel': typeof TradeCarouselRoute
   '/trade-demo': typeof TradeDemoRoute
   '/trade-faq': typeof TradeFaqRoute
   '/trade-onboarding': typeof TradeOnboardingRoute
@@ -2406,6 +2415,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/test'
     | '/trade'
+    | '/trade-carousel'
     | '/trade-demo'
     | '/trade-faq'
     | '/trade-onboarding'
@@ -2663,6 +2673,7 @@ export interface FileRouteTypes {
     | '/success'
     | '/terms'
     | '/test'
+    | '/trade-carousel'
     | '/trade-demo'
     | '/trade-faq'
     | '/trade-onboarding'
@@ -2921,6 +2932,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/test'
     | '/trade'
+    | '/trade-carousel'
     | '/trade-demo'
     | '/trade-faq'
     | '/trade-onboarding'
@@ -3180,6 +3192,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   TestRoute: typeof TestRoute
   TradeRoute: typeof TradeRouteWithChildren
+  TradeCarouselRoute: typeof TradeCarouselRoute
   TradeDemoRoute: typeof TradeDemoRoute
   TradeFaqRoute: typeof TradeFaqRoute
   TradeOnboardingRoute: typeof TradeOnboardingRoute
@@ -3539,6 +3552,13 @@ declare module '@tanstack/react-router' {
       path: '/trade'
       fullPath: '/trade'
       preLoaderRoute: typeof TradeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trade-carousel': {
+      id: '/trade-carousel'
+      path: '/trade-carousel'
+      fullPath: '/trade-carousel'
+      preLoaderRoute: typeof TradeCarouselRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/trade-demo': {
@@ -5406,6 +5426,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   TestRoute: TestRoute,
   TradeRoute: TradeRouteWithChildren,
+  TradeCarouselRoute: TradeCarouselRoute,
   TradeDemoRoute: TradeDemoRoute,
   TradeFaqRoute: TradeFaqRoute,
   TradeOnboardingRoute: TradeOnboardingRoute,
