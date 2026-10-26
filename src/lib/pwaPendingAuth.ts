@@ -75,3 +75,23 @@ export function clearPendingAuthToken(): void {
     /* noop */
   }
 }
+
+/**
+ * iOS installs keep the one-time code baked into their launch address, so the
+ * same code arrives on every tap of the home-screen icon. Remember the last
+ * code this container accepted: a repeat is ignored and the app opens normally
+ * on the homepage, instead of failing the sign-in or forcing the Trade area.
+ */
+export const SEEN_LAUNCH_TOKEN_KEY = "ma_pwa_seen_launch_token";
+
+/** Returns true the first time a launch code is seen in this container. */
+export function claimFirstLaunchToken(token: string, storage: Pick<Storage, "getItem" | "setItem"> | null = typeof window === "undefined" ? null : window.localStorage): boolean {
+  if (!storage) return false;
+  try {
+    if (storage.getItem(SEEN_LAUNCH_TOKEN_KEY) === token) return false;
+    storage.setItem(SEEN_LAUNCH_TOKEN_KEY, token);
+    return true;
+  } catch {
+    return false;
+  }
+}
