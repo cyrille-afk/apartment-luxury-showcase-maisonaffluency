@@ -4,9 +4,9 @@ const session = process.env.LOVABLE_BROWSER_SUPABASE_SESSION_JSON;
 const storageKey = process.env.LOVABLE_BROWSER_SUPABASE_STORAGE_KEY;
 test.use({ viewport: { width: 1946, height: 1181 }, trace: "off", video: "off" });
 
-// Steps 1–12 and 19–23: for every step verify the card copy, the published
+// Steps 1–12 and 17–23: for every step verify the card copy, the published
 // step → sidebar attribute, the "find it later" reference, and the spotlight.
-// Steps 13–18 are covered by felix-board-presentation-steps.spec.ts.
+// Steps 12–16 are covered by felix-board-presentation-steps.spec.ts.
 
 type StepExpectation = {
   title: string;
