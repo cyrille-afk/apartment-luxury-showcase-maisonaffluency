@@ -18,15 +18,6 @@
     "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1791633700/Screen_Shot_2026-10-10_at_7.58.22_PM_ptnpdf.png"
   },
   {
-    "id": "3efb1180-115f-4188-a3b1-95d36cc289f9",
-    "slug": "pierre-bonnefille",
-    "name": "Pierre Bonnefille",
-    "founder": null,
-    "hero_image_url": "https://s30964.pcdn.co/introspective-magazine/wp-content/uploads/2019/12/hero-2-1024x512.jpg",
-    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1775045300/Screen_Shot_2026-04-01_at_8.07.17_PM_mnsidx.png",
-    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1784360734/img-122_lxteqt.jpg"
-  },
-  {
     "id": "e91f75d3-0001-4000-8000-000000000001",
     "slug": "atelier-demichelis",
     "name": "Atelier Demichelis",
@@ -36,6 +27,15 @@
     "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1780565552/Lampe-Babel-bois-de-chene-bronze-champagne-Atelier-Demichelis-Emmanuelle-Braun01_cvxtd5.webp"
   },
   {
+    "id": "3efb1180-115f-4188-a3b1-95d36cc289f9",
+    "slug": "pierre-bonnefille",
+    "name": "Pierre Bonnefille",
+    "founder": null,
+    "hero_image_url": "https://s30964.pcdn.co/introspective-magazine/wp-content/uploads/2019/12/hero-2-1024x512.jpg",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1775045300/Screen_Shot_2026-04-01_at_8.07.17_PM_mnsidx.png",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1784360734/img-122_lxteqt.jpg"
+  },
+  {
     "id": "63dd0737-d56f-427d-8a0e-42cddef9f198",
     "slug": "gilles-boissier",
     "name": "Gilles & Boissier",
@@ -43,6 +43,15 @@
     "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1779961728/Screenshot_2026-05-28_at_5.48.25_PM_mxyruf.png",
     "image_url": "https://eteline.com/upload/designers/9-portrait_gille_et_boissier.jpeg",
     "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1792123034/Screen_Shot_2026-10-16_at_11.56.01_AM_axtvyl.png"
+  },
+  {
+    "id": "27ec2534-5f58-4294-b2e7-5bacf8b796d6",
+    "slug": "michel-amar-studio",
+    "name": "Michel Amar Studio",
+    "founder": null,
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1774939319/Agora_Wall_Sculpture-2_k0qqyg.jpg",
+    "image_url": "https://static.wixstatic.com/media/7417ce_c2e4af9b85de4c6a97a9a9be1a9d41f2~mv2.jpg/v1/fill/w_640,h_960,al_t,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/7417ce_c2e4af9b85de4c6a97a9a9be1a9d41f2~mv2.jpg",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1791789798/Screen_Shot_2026-10-12_at_3.21.56_PM_af9kyf.png"
   },
   {
     "id": "5d99b52f-4197-485e-a74b-eabb3292ef2a",
