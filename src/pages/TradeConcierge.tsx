@@ -386,11 +386,12 @@ export default function TradeConcierge() {
                 <button
                   key={q}
                   type="button"
-                  disabled={busy}
-                  onClick={() => (threadId ? void submit(q) : openWorkspace(q))}
-                  className="rounded-full border border-border bg-background px-3.5 py-1.5 text-left text-xs text-foreground transition-colors hover:border-accent hover:bg-accent/10 disabled:opacity-50"
+                  onClick={() => fillComposer(q)}
+                  aria-label={`Add “${q}” to the composer`}
+                  className="group inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3.5 py-1.5 text-left text-xs text-foreground transition-all hover:border-accent hover:bg-accent/10 active:scale-[0.98] focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-accent"
                 >
                   {q}
+                  <ArrowUpRight aria-hidden className="h-3 w-3 shrink-0 text-transparent transition-colors group-hover:text-accent" />
                 </button>
               ))}
             </div>
@@ -478,7 +479,14 @@ export default function TradeConcierge() {
             {!threadsLoaded ? (
               <div className="space-y-2">{[0, 1, 2].map((i) => <div key={i} className="h-10 animate-pulse rounded-sm bg-foreground/[0.05]" />)}</div>
             ) : pastItems.length === 0 ? (
-              <p className="font-display text-sm italic text-muted-foreground">Your curations will appear here.</p>
+              <ul aria-hidden className="pointer-events-none select-none space-y-1 opacity-55">
+                {PLACEHOLDER_CURATIONS.map((p) => (
+                  <li key={p.title} className="rounded-sm border-l-2 border-transparent px-3 py-2">
+                    <span className="block truncate font-display text-sm italic text-muted-foreground">{p.title}</span>
+                    <span className="block text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{p.date}</span>
+                  </li>
+                ))}
+              </ul>
             ) : filteredItems.length === 0 ? (
               <div className="space-y-1.5">
                 <p className="font-display text-sm italic text-muted-foreground">
