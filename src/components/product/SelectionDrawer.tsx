@@ -96,12 +96,7 @@ export default function SelectionDrawer({
   onCheckout,
   quoteOnly = false,
   placing = false,
-  allowPairings = true,
 }: SelectionDrawerProps) {
-  const { buyerProfile } = useCheckoutForm();
-  const { isTradeUser, isAdmin, rolesLoaded, user } = useAuth();
-  const { dismissed: pairingsDismissed, visible: pairingsVisible, reopen: reopenPairings, dismiss: dismissPairings } = useCuratedPairingSession(isOpen);
-  const pairingsEnabled = allowPairings && privatePairingsEnabled(buyerProfile) && !isTradeUser && !isAdmin && (!user || rolesLoaded);
 
   const [method, setMethod] = useState<PaymentMethod>("online");
   const [localQty, setLocalQty] = useState(1);
