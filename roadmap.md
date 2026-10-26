@@ -1,5 +1,5 @@
 ## Compact two-row comparison header
-- [ ] Consolidate metadata/export and the material/selection strip, preserving saved comparison actions; verify signed-in desktop and phone controls.
+- [x] Consolidated into two compact sticky rows with borderless name, project/save controls, currency, cover and primary export; saved shortlist share/delete actions remain in Saved comparisons. Signed-in four-piece desktop verified: 56px metadata row + 50px filter strip, matrix immediately beneath; selection editing, project choices and cover opening work, phone has no page overflow or browser errors. All 23 filter/draft/currency regressions pass; preview build clean. GitHub sync needed.
 
 ## Comparator curator-pick labels
 - [x] Restore shared edition/house labels from live catalogue metadata. Ecart Armchair, 1926 badge verified on the signed-in comparison and after refresh; 23 tests pass, no browser errors and preview clean. Preview only.
