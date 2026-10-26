@@ -3,8 +3,8 @@ export const FELIX_STEP_ORDER = [
   "welcome", "collection", "quotes", "tier-tracking",
   "client-safe-presentations", "margin-protection", "quote-generation",
   "direct-client-billing", "projects", "tools", "settings",
-  "portfolio-management", "bespoke-commissions", "felix-chat", "client-view",
-  "branding-panel", "white-label", "invite", "technical-assets",
+  "portfolio-management", "client-view", "branding-panel", "white-label",
+  "invite", "bespoke-commissions", "technical-assets", "felix-chat",
   "priority-concierge", "ai-extension-sync", "pwa-install", "beta-feedboard",
 ] as const;
 

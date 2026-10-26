@@ -4,9 +4,9 @@ const session = process.env.LOVABLE_BROWSER_SUPABASE_SESSION_JSON;
 const storageKey = process.env.LOVABLE_BROWSER_SUPABASE_STORAGE_KEY;
 test.use({ viewport: { width: 1946, height: 1181 }, trace: "off", video: "off" });
 
-// Steps 1–12 and 19–23: for every step verify the card copy, the published
+// Steps 1–12 and 17–23: for every step verify the card copy, the published
 // step → sidebar attribute, the "find it later" reference, and the spotlight.
-// Steps 13–18 are covered by felix-board-presentation-steps.spec.ts.
+// Steps 12–16 are covered by felix-board-presentation-steps.spec.ts.
 
 type StepExpectation = {
   title: string;
@@ -177,22 +177,42 @@ test("tour steps 1-12: sidebar references, copy and highlights", async ({ page, 
   expect(errors).toEqual([]);
 });
 
-test("tour steps 19-23: sidebar references, copy and highlights", async ({ page, isMobile }) => {
+test("tour steps 17-23: sidebar references, copy and highlights", async ({ page, isMobile }) => {
   test.skip(isMobile, "Desktop-only tour.");
   test.skip(!session || !storageKey, "Requires a managed Trade session.");
   if (!session || !storageKey) return;
   test.setTimeout(300000);
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  await seed(page, 18);
+  await seed(page, 16);
 
-  // Step 19 — Technical Design Assets
-  const step19 = await expectStep(page, {
+  // Step 17 — Bespoke & Custom Commissions
+  const step17 = await expectStep(page, {
+    title: "Bespoke & Custom Commissions",
+    copy: "bespoke specifications and atelier replies",
+    anchor: "tools",
+    ref: /Tools → Custom Requests/i,
+    url: /\/trade\/custom-requests/,
+  });
+  await step17.getByRole("button", { name: "Next", exact: true }).click();
+
+  // Step 18 — Technical Design Assets
+  const step18 = await expectStep(page, {
     title: "Technical Design Assets",
     copy: "technical sheets",
     anchor: "tools",
     ref: /Tools/i,
     url: /\/trade\/tools/,
+  });
+  await step18.getByRole("button", { name: "Next", exact: true }).click();
+
+  // Step 19 — Your Personal Concierge
+  const step19 = await expectStep(page, {
+    title: "Your Personal Concierge",
+    copy: "Trade Concierge",
+    anchor: "concierge",
+    ref: /Trade Concierge/i,
+    url: /\/trade\/concierge/,
   });
   await step19.getByRole("button", { name: "Next", exact: true }).click();
 

@@ -1,3 +1,6 @@
+## Grouped later onboarding steps
+- [x] Steps 12-23 regrouped by sidebar section: Projects & Interventions (12-16: portfolio switcher, board collaboration, branding, white-label, invite), Tools (17-18: custom requests, technical assets), Trade Concierge (19-20), then extension sync, mobile app and finale. Signed-in walk of Steps 12-23 verified correct titles, sidebar anchors and routes with no page errors; 33 unit regressions pass. Preview only; GitHub sync needed.
+
 ## Step 6 to Step 7 handoff
 - [x] Keep the outgoing product in Client Presentation until Quotes & Proformas mounts. Signed-in normal and two-second delayed handoffs, Back and repeated Next verified: zero Studio-product flashes or browser errors; 27 unit regressions pass, preview build clean. Preview only; GitHub sync needed.
 

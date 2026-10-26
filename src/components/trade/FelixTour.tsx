@@ -177,7 +177,7 @@ const FELIX_STEPS: FelixStep[] = orderFelixSteps<FelixStep>([
     route: "board",
     done: () => switchOn('[aria-label="Toggle client editorial presentation"]'),
     dialogue:
-      "We now leave the Concierge and open one of your project boards — the same boards listed under **Projects & Interventions → Projects** in your sidebar. Exceptional sourcing is only the first step; bringing your client along on the journey is where projects come to life. Switch on **Client Editorial Presentation** to show this board without the internal trade calculations.",
+      "We now open one of your project boards — the same boards listed under **Projects & Interventions → Projects** in your sidebar. Exceptional sourcing is only the first step; bringing your client along on the journey is where projects come to life. Switch on **Client Editorial Presentation** to show this board without the internal trade calculations.",
   },
   {
     id: "branding-panel",
@@ -431,7 +431,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       const el = (e.target as HTMLElement | null)?.closest?.(`[data-felix-target="${stepTarget}"]${step.id === "collection" ? ', [data-felix-target="dashboard-showroom"]' : ''}`);
       if (el && step.id === "collection") {
         flushSync(() => {
-          setCurrentStep(2);
+          setCurrentStep(FELIX_STEPS.findIndex(s => s.id === "quotes"));
         });
         return;
       }
