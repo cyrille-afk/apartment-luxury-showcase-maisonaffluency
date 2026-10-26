@@ -218,6 +218,22 @@ function HeritageSlideManager({ designerId }: { designerId: string }) {
             </button>
           </div>
         ))}
+        <div className="flex items-center gap-2">
+          <Input
+            value={urlInput}
+            onChange={(e) => setUrlInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddUrl(); } }}
+            placeholder="Paste image URL (Cloudinary, …)"
+            className="text-xs flex-1"
+          />
+          <button
+            type="button"
+            onClick={handleAddUrl}
+            className="px-3 py-2 border border-border rounded-md text-xs text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors shrink-0"
+          >
+            Add URL
+          </button>
+        </div>
         <CloudUpload
           folder="heritage-slides"
           accept="image/*"
