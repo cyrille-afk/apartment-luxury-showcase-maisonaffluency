@@ -1093,7 +1093,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
           {/* Required action — pinned to the top of the card so it reads in
               line with the highlighted control instead of floating below the
               dialogue. */}
-          {!stepDone && !isPaused && !targetUnavailable && (
+          {(!stepDone || step.id === "collection" || step.id === "quotes") && !isPaused && !targetUnavailable && (
             <div role="status" className="mt-3 flex items-center gap-3 rounded-md bg-primary px-4 py-3 text-primary-foreground">
               <ArrowRight
                 data-felix-control-arrow
@@ -1102,7 +1102,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
                 style={{ transform: `rotate(${Math.atan2(rect.top + rect.height / 2 - (cardTop + 92), rect.left + rect.width / 2 - (cardLeft + 44)) * 180 / Math.PI}deg)` }}
               />
               <p className="font-body text-sm font-semibold leading-snug">
-                {step.id === "collection" ? "Open The Collection to continue." : step.id === "white-label" ? "Turn on ‘Use studio branding only’ below to unlock Next." : step.id === "client-view" ? "Switch to Client View to unlock Next." : "Use the highlighted control to continue."}
+                {step.id === "collection" ? "Open The Collection to continue." : step.id === "quotes" ? "Explore the highlighted Collection tabs." : step.id === "white-label" ? "Turn on ‘Use studio branding only’ below to unlock Next." : step.id === "client-view" ? "Switch to Client View to unlock Next." : "Use the highlighted control to continue."}
               </p>
             </div>
           )}
