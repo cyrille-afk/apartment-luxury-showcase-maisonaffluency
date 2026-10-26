@@ -1,3 +1,6 @@
+## Compact two-row comparison header
+- [ ] Consolidate metadata/export and the material/selection strip, preserving saved comparison actions; verify signed-in desktop and phone controls.
+
 ## Comparator curator-pick labels
 - [x] Restore shared edition/house labels from live catalogue metadata. Ecart Armchair, 1926 badge verified on the signed-in comparison and after refresh; 23 tests pass, no browser errors and preview clean. Preview only.
 
