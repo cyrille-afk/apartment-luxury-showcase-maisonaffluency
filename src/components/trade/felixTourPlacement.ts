@@ -16,8 +16,7 @@ export function collectionTourCardPlacement({ viewport, width, height, photoTop,
   const left = Math.min(contentRight + 32, maxLeft);
   const top = 80;
   const availableHeight = Math.min(viewport.h - 16, photoTop - 12) - top;
-  if (left < contentRight + 20 || maxLeft - left > 0 && left + width > viewport.w - 24 || availableHeight < 160) return null;
-  if (left < contentRight + 20) return null;
+  if (left < contentRight + 20 || availableHeight < 160) return null;
   return { left, top, width, height: Math.min(height, availableHeight) };
 }
 
