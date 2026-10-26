@@ -1,3 +1,6 @@
+## Comparator selection hierarchy
+- [ ] Separate Done from piece removals with global actions, alphabetical filters, then search/scrolling selected pieces; verify selection, removal and completion on desktop and phone.
+
 ## Compact two-row comparison header
 - [x] Simplified to one primary bar (name, project, currency, Tools, export) and a 34px low-contrast material/selection strip. Cover, save, saved comparisons and admin finish categories moved into Tools; all three dialogs and four-piece selection verified signed-in. Desktop matrix starts at 274px; phone wraps without page overflow or browser errors. All 31 catalogue/filter/draft regressions pass; preview build clean. GitHub sync needed.
 
