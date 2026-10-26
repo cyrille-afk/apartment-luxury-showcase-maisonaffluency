@@ -67,13 +67,13 @@ test("all 23 tour steps keep cards inside the viewport and outside protected fea
       expect(near!.below).toBeLessThanOrEqual(60);
       expect(near!.across).toBe(true);
     }
-    if (number === 2) await page.locator('[data-felix-target="nav-collection"]').click();
-    else if (number === 15) {
+    if (number === 3) await page.locator('[data-felix-target="nav-collection"]').click();
+    else if (number === 13) {
       const toggle = page.getByRole("switch", { name: "Toggle client editorial presentation" });
       if (await toggle.isChecked()) await card.getByRole("button", { name: "Next", exact: true }).click();
       else await toggle.check();
     } else {
-      if (number === 17) {
+      if (number === 15) {
         // Intercept this test's branding write; exercise the UI without altering a saved board.
         await page.route("**/rest/v1/moodboards*", route => route.request().method() === "PATCH" ? route.fulfill({ status: 204 }) : route.continue());
         await page.locator("#hide-maison").check();

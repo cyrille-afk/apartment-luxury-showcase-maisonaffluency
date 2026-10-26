@@ -14,7 +14,7 @@ test("Collection tour remains visible without images and preserves both browsing
   await page.evaluate(([key, value]) => {
     localStorage.setItem(key, value);
     localStorage.removeItem("felix_dashboard_tour_seen_v1");
-    localStorage.setItem("felix_tour_progress_v1", "1");
+    localStorage.setItem("felix_tour_progress_v1", "2");
     localStorage.setItem("trade_quick_tour_done", "1");
     localStorage.removeItem("trade_quick_tour_step");
   }, [storageKey, session]);
@@ -67,7 +67,7 @@ test("Collection tour remains visible without images and preserves both browsing
   await verifyTargets();
   expect(await page.evaluate(() => (window as Window & { darkTourFrames?: number }).darkTourFrames)).toBe(0);
   await step3.getByRole("button", { name: "Next", exact: true }).click();
-  await expect(page).toHaveURL(/\/trade\/projects$/);
-  await expect(page.getByRole("dialog").filter({ hasText: "Client Project Folders" })).toBeVisible();
+  await expect(page).toHaveURL(/\/trade\/the-collection$/);
+  await expect(page.getByRole("dialog").filter({ hasText: "Client-Safe Presentations" })).toBeVisible();
   expect(errors).toEqual([]);
 });
