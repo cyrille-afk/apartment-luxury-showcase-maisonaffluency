@@ -138,9 +138,14 @@ export function PwaPendingAuthConsumer({ children }: { children: ReactNode }) {
                 <RotateCw aria-hidden="true" /> Try again
               </Button>
             )}
-            <Button variant={retryable ? "outline" : "default"} onClick={() => { clearPendingAuthToken(); setPhase("ready"); void navigate({ to: "/trade/login", search: { next: "/trade" }, replace: true }); }}>
-              <LogIn aria-hidden="true" /> Sign in
-            </Button>
+            <div className="flex flex-col gap-3">
+              <Button variant={retryable ? "outline" : "default"} onClick={() => { clearPendingAuthToken(); setPhase("ready"); void navigate({ to: "/", replace: true }); }}>
+                Continue to Maison Affluency
+              </Button>
+              <Button variant="outline" onClick={() => { clearPendingAuthToken(); setPhase("ready"); void navigate({ to: "/trade/login", search: { next: "/trade" }, replace: true }); }}>
+                <LogIn aria-hidden="true" /> Trade sign in
+              </Button>
+            </div>
           </section>
         ) : (
           <div role="status" aria-live="polite" className={`space-y-5 transition-opacity duration-150 motion-reduce:transition-none ${phase === "fading" ? "opacity-0" : "opacity-100"}`}>
