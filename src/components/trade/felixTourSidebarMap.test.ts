@@ -3,12 +3,12 @@ import { FELIX_STEP_SIDEBAR, type TourSidebarAnchor } from "./felixTourSidebarMa
 
 // The 23 onboarding step ids, in tour order (mirrors FELIX_STEPS in FelixTour.tsx).
 const STEP_IDS = [
-  "welcome", "collection", "quotes", "projects", "tier-tracking",
+  "welcome", "collection", "quotes", "tier-tracking",
   "client-safe-presentations", "margin-protection", "quote-generation",
-  "direct-client-billing", "tools", "settings", "portfolio-management",
-  "bespoke-commissions", "felix-chat", "client-view", "branding-panel",
-  "white-label", "invite", "technical-assets", "priority-concierge",
-  "ai-extension-sync", "pwa-install", "beta-feedboard",
+  "direct-client-billing", "projects", "tools", "settings",
+  "portfolio-management", "client-view", "branding-panel", "white-label",
+  "invite", "bespoke-commissions", "technical-assets", "felix-chat",
+  "priority-concierge", "ai-extension-sync", "pwa-install", "beta-feedboard",
 ];
 
 const VALID_ANCHORS: TourSidebarAnchor[] = [

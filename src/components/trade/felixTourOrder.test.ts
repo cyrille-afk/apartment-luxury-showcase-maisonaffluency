@@ -13,4 +13,14 @@ describe("onboarding sequence", () => {
     expect(FELIX_STEP_ORDER).toHaveLength(23);
     expect(new Set(FELIX_STEP_ORDER).size).toBe(23);
   });
+  it("groups the later steps by sidebar section so the tour never ping-pongs", () => {
+    // Steps 12-16 stay on Projects & Interventions, 17-18 on Tools,
+    // 19-20 on Trade Concierge, then extension sync, mobile app, finale.
+    expect(FELIX_STEP_ORDER.slice(11, 16)).toEqual([
+      "portfolio-management", "client-view", "branding-panel", "white-label", "invite",
+    ]);
+    expect(FELIX_STEP_ORDER.slice(16, 18)).toEqual(["bespoke-commissions", "technical-assets"]);
+    expect(FELIX_STEP_ORDER.slice(18, 20)).toEqual(["felix-chat", "priority-concierge"]);
+    expect(FELIX_STEP_ORDER.slice(20)).toEqual(["ai-extension-sync", "pwa-install", "beta-feedboard"]);
+  });
 });
