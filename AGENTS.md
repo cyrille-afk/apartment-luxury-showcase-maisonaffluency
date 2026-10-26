@@ -7,7 +7,7 @@
 - Studio creators have an owner-scoped SELECT policy alongside member visibility so INSERT RETURNING succeeds before AFTER-trigger membership becomes visible; creation retains created_by = auth.uid() and automatic owner membership.
 - Felix/Benefits: max-w-[1500px] px-6; Felix left, results right, one useMoodboardSourcing; Benefits 50/50, text left.
 - Admin application actions save review metadata before app-email sends; decline-and-delete queues the notice before deleting, with stable per-application/template idempotency keys — failures must not erase the record.
-- Approve/decline open a side-effect-free draft review; only confirmation runs actions; one shared plain-text copy/parser feeds preview and escaped templates — no HTML.
+- Approve/decline drafts act only on confirmation; shared copy/parser owns greetings and escaped templates; approvalEmailHtml styles send/preview CTAs alike — no editable HTML.
 - Approved-account activation resends reuse the branded review drawer with one fresh idempotency key per opened resend, retained on retries; never change approval to resend.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
