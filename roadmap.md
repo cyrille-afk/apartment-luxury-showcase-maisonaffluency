@@ -1,3 +1,6 @@
+## Step 6 to Step 7 handoff
+- [ ] Keep the outgoing product in Client Presentation until Quotes & Proformas mounts; verify the signed-in handoff with delayed navigation.
+
 ## Collection tour control clarity
 - [x] Arrow points toward the Collection; browsing tabs have bright backgrounds, individual bronze outlines and 13px labels with unchanged line height. Signed-in Steps 2–3, both browsing tabs and close verified at 1946×1181: identical header/photo rectangles open and closed, highlights cleared, no browser errors; 19 regressions pass and build clean. Preview only; GitHub sync needed.
 

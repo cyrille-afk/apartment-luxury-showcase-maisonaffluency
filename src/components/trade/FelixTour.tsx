@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { StudioInitialization } from "./StudioInitialization";
 import { useDesktopTradeTour } from "./useDesktopTradeTour";
-import { fmtPct, resolveTierTokens, hasPendingTourStart, clearTourStartRequest, markTourCompleted } from "./felixTourUtils";
+import { fmtPct, resolveTierTokens, hasPendingTourStart, clearTourStartRequest, markTourCompleted, quoteWorkspaceReady } from "./felixTourUtils";
 import { FELIX_STEP_SIDEBAR } from "./felixTourSidebarMap";
 import { orderFelixSteps } from "./felixTourOrder";
 import { chooseTourCardPlacement, collectionTourCardOrigin, collectionTourCardPlacement, tourPanelLandingScrollDelta, type TourRect } from "./felixTourPlacement";
@@ -388,9 +388,13 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
   useLayoutEffect(() => {
     if (!open) return;
     const id = FELIX_STEPS[currentStep]?.id;
+    // TanStack may retain the outgoing product while Quotes is pending.
+    // Keep that product client-safe until the real quote control mounts.
+    if (id === "quote-generation" && !quoteWorkspaceReady(location.pathname,
+      Boolean(document.querySelector('[data-felix-target="quotes-create"]')))) return;
     if (id === "margin-protection") setClientSafeMode(true);
     else if (!CLIENT_VIEW_PASSTHROUGH_STEPS.has(id)) setClientSafeMode(false);
-  }, [open, currentStep]);
+  }, [open, currentStep, location.pathname]);
 
   // A direct click on the header switch advances the presentation step like Next.
   // Only react to the off→on edge: Back can still revisit it.
@@ -510,6 +514,10 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       const elements = routeReady
         ? Array.from(document.querySelectorAll(`[data-felix-target="${stepTarget}"]`))
         : [];
+      // Discovery also handles a lazy Quotes mount after the route effect ran.
+      if (current.id === "quote-generation" && quoteWorkspaceReady(location.pathname, elements.length > 0)) {
+        setClientSafeMode(false);
+      }
       // Demonstrate the actual retail price, never a heading or hidden net price.
       const targets = current.id === "margin-protection"
         ? elements.filter((el) => {
@@ -821,8 +829,8 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       setCurrentStep(FELIX_STEPS.findIndex(s => s.id === "margin-protection"));
       return;
     }
-    // Commit the next step before its entry effect restores Studio Mode.
-    // Swapping the product layout can suspend and cancel a delayed advance.
+    // Commit immediately; Studio Mode is restored only on the mounted Quotes
+    // workspace, never on this outgoing product during pending navigation.
     if (step.id === "margin-protection") {
       setCurrentStep(FELIX_STEPS.findIndex(s => s.id === "quote-generation"));
       return;

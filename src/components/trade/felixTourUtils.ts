@@ -1,6 +1,10 @@
 import type { TradeTier, TierConfigRow } from "@/hooks/useTradeDiscount";
 import type { TierVolumeModel } from "@/hooks/useTierVolumeLocale";
 
+/** A pending URL alone does not mean the previous product has unmounted. */
+export const quoteWorkspaceReady = (pathname: string, quoteControlMounted: boolean) =>
+  pathname === "/trade/quotes" && quoteControlMounted;
+
 /** Shared copy formatting stays outside the React Fast Refresh boundary. */
 export const fmtPct = (fraction: number) => {
   const pct = fraction * 100;
