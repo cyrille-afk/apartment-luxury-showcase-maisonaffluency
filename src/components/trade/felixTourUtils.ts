@@ -5,6 +5,13 @@ import type { TierVolumeModel } from "@/hooks/useTierVolumeLocale";
 export const quoteWorkspaceReady = (pathname: string, quoteControlMounted: boolean) =>
   pathname === "/trade/quotes" && quoteControlMounted;
 
+/**
+ * Collection steps (3–4) must not reveal while the outgoing page is still on
+ * screen: the sidebar link exists everywhere, so wait for the Collection tabs.
+ */
+export const collectionWorkspaceReady = (stepId: string, pathname: string, collectionTabsMounted: boolean) =>
+  !["collection", "quotes"].includes(stepId) || (pathname === "/trade/the-collection" && collectionTabsMounted);
+
 /** Shared copy formatting stays outside the React Fast Refresh boundary. */
 export const fmtPct = (fraction: number) => {
   const pct = fraction * 100;

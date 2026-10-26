@@ -1,11 +1,21 @@
 import { describe, expect, it, vi } from "vitest";
-import { startFelixTour, hasPendingTourStart, clearTourStartRequest, TOUR_PENDING_KEY, markTourCompleted, consumeTourCompletion, TOUR_COMPLETED_KEY, quoteWorkspaceReady } from "./felixTourUtils";
+import { startFelixTour, hasPendingTourStart, clearTourStartRequest, TOUR_PENDING_KEY, markTourCompleted, consumeTourCompletion, TOUR_COMPLETED_KEY, quoteWorkspaceReady, collectionWorkspaceReady } from "./felixTourUtils";
 
 describe("Step 6 to Step 7 presentation handoff", () => {
   it("restores Studio Mode only after Quotes replaces the previous product", () => {
     expect(quoteWorkspaceReady("/trade/products/sebastian-herkner-man-of-parts/praia-da-granja-coffee-table", false)).toBe(false);
     expect(quoteWorkspaceReady("/trade/quotes", false)).toBe(false);
     expect(quoteWorkspaceReady("/trade/quotes", true)).toBe(true);
+  });
+});
+
+describe("Step 3 Collection reveal", () => {
+  it("waits for the Collection page itself, not just the URL or sidebar link", () => {
+    expect(collectionWorkspaceReady("collection", "/trade", false)).toBe(false);
+    expect(collectionWorkspaceReady("collection", "/trade/the-collection", false)).toBe(false);
+    expect(collectionWorkspaceReady("collection", "/trade/the-collection", true)).toBe(true);
+    expect(collectionWorkspaceReady("quotes", "/trade/the-collection", false)).toBe(false);
+    expect(collectionWorkspaceReady("tools", "/trade/tools", false)).toBe(true);
   });
 });
 
