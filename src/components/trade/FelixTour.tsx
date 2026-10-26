@@ -17,6 +17,7 @@ import { StudioInitialization } from "./StudioInitialization";
 import { useDesktopTradeTour } from "./useDesktopTradeTour";
 import { fmtPct, resolveTierTokens, hasPendingTourStart, clearTourStartRequest, markTourCompleted } from "./felixTourUtils";
 import { FELIX_STEP_SIDEBAR } from "./felixTourSidebarMap";
+import { orderFelixSteps } from "./felixTourOrder";
 import { chooseTourCardPlacement, collectionTourCardOrigin, tourPanelLandingScrollDelta, type TourRect } from "./felixTourPlacement";
 
 type FelixStep = {
@@ -44,7 +45,7 @@ type FelixStep = {
 const switchOn = (sel: string) =>
   document.querySelector(sel)?.getAttribute("data-state") === "checked";
 
-const FELIX_STEPS: FelixStep[] = [
+const FELIX_STEPS: FelixStep[] = orderFelixSteps<FelixStep>([
   {
     id: "welcome",
     title: "Welcome & Trade Tier Validation",
@@ -257,7 +258,7 @@ const FELIX_STEPS: FelixStep[] = [
     dialogue:
       "You’ve explored your workspace. Now make it your own: confirm your **studio identity**, invite your **team**, and name your **first project folder**. Your new project will be ready on the dashboard. You can share feedback anytime from the Beta Feedboard.",
   },
-];
+]);
 
 /** Board presentation steps where the member's Client View choice is kept. */
 const CLIENT_VIEW_PASSTHROUGH_STEPS = new Set(["client-view", "branding-panel", "white-label", "invite"]);
@@ -391,13 +392,13 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     else if (!CLIENT_VIEW_PASSTHROUGH_STEPS.has(id)) setClientSafeMode(false);
   }, [open, currentStep]);
 
-  // A direct click on the header switch advances Step 6 just like Next.
-  // Only react to the off→on edge: Back can still revisit Step 6.
+  // A direct click on the header switch advances the presentation step like Next.
+  // Only react to the off→on edge: Back can still revisit it.
   useLayoutEffect(() => {
     const entered = clientSafe && !previousClientSafe.current;
     previousClientSafe.current = clientSafe;
-    if (entered && open && currentStep === 5) {
-      setCurrentStep(6);
+    if (entered && open && step.id === "client-safe-presentations") {
+      setCurrentStep(FELIX_STEPS.findIndex(s => s.id === "margin-protection"));
     }
   }, [clientSafe, open, currentStep]);
 
@@ -833,13 +834,13 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     // The next frame (including route fallbacks) must already be client-safe.
     if (step.id === "client-safe-presentations") {
       setClientSafeMode(true);
-      setCurrentStep(6);
+      setCurrentStep(FELIX_STEPS.findIndex(s => s.id === "margin-protection"));
       return;
     }
     // Commit the next step before its entry effect restores Studio Mode.
     // Swapping the product layout can suspend and cancel a delayed advance.
     if (step.id === "margin-protection") {
-      setCurrentStep(7);
+      setCurrentStep(FELIX_STEPS.findIndex(s => s.id === "quote-generation"));
       return;
     }
     changeStep(1);

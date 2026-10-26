@@ -11,3 +11,4 @@
 - Felix saves configured net snapshots and stable line IDs atomically through an invoker RPC; quote RLS controls access, retries update rather than append, and the quote editor must not discount configured amounts again.
 - Felix PDF recipient/project fields are download-only overrides using ClientPicker; editing them never changes saved quotes or address-book contacts.
 - Felix finish snapshots carry selector-derived labels and selected swatch URLs into cards, saved snapshots and PDFs; one shared finish list keeps those views consistent.
+- Felix step order comes from felixTourOrder; special transitions resolve stable step IDs, not numeric indexes — reordering must not skip pricing or quote demonstrations.

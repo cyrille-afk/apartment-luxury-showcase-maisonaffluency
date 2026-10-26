@@ -6,7 +6,7 @@ const storageKey = process.env.LOVABLE_BROWSER_SUPABASE_STORAGE_KEY;
 test.use({ viewport: { width: 1946, height: 1181 }, trace: "off", video: "off" });
 
 for (const loading of ["module", "data"] as const) {
-test(`Step 6 to 7 waits for slow product ${loading} before declaring its price unavailable`, async ({ page }) => {
+test(`Step 5 to 6 waits for slow product ${loading} before declaring its price unavailable`, async ({ page }) => {
   test.skip(!session || !storageKey, "Requires a managed trade session.");
   if (!session || !storageKey) return;
   test.setTimeout(120_000);
@@ -27,7 +27,7 @@ test(`Step 6 to 7 waits for slow product ${loading} before declaring its price u
   await page.evaluate(([key, value]) => {
     localStorage.setItem(key, value);
     localStorage.removeItem("felix_dashboard_tour_seen_v1");
-    localStorage.setItem("felix_tour_progress_v1", "5");
+    localStorage.setItem("felix_tour_progress_v1", "4");
     localStorage.setItem("trade_quick_tour_done", "1");
     localStorage.removeItem("trade_quick_tour_step");
   }, [storageKey, session]);
@@ -58,7 +58,7 @@ test("Margin Protection continues into both quote steps without crashing", async
   await page.evaluate(([key, value]) => {
     localStorage.setItem(key, value);
     localStorage.removeItem("felix_dashboard_tour_seen_v1");
-    localStorage.setItem("felix_tour_progress_v1", "6");
+    localStorage.setItem("felix_tour_progress_v1", "5");
     localStorage.setItem("trade_quick_tour_done", "1");
     localStorage.removeItem("trade_quick_tour_step");
   }, [storageKey, session]);
