@@ -27,7 +27,7 @@ test(`Step 5 to 6 waits for slow product ${loading} before declaring its price u
   await page.evaluate(([key, value]) => {
     localStorage.setItem(key, value);
     localStorage.removeItem("felix_dashboard_tour_seen_v1");
-    localStorage.setItem("felix_tour_progress_v1", "5");
+    localStorage.setItem("felix_tour_progress_v1", "4");
     localStorage.setItem("trade_quick_tour_done", "1");
     localStorage.removeItem("trade_quick_tour_step");
   }, [storageKey, session]);
@@ -58,7 +58,7 @@ test("Margin Protection continues into both quote steps without crashing", async
   await page.evaluate(([key, value]) => {
     localStorage.setItem(key, value);
     localStorage.removeItem("felix_dashboard_tour_seen_v1");
-    localStorage.setItem("felix_tour_progress_v1", "6");
+    localStorage.setItem("felix_tour_progress_v1", "5");
     localStorage.setItem("trade_quick_tour_done", "1");
     localStorage.removeItem("trade_quick_tour_step");
   }, [storageKey, session]);
