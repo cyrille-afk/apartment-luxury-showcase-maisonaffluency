@@ -24,6 +24,8 @@ const profileSchema = z.object({
   first_name: z.string().trim().min(1, "First name is required").max(100, "Max 100 characters"),
   last_name: z.string().trim().min(1, "Last name is required").max(100, "Max 100 characters"),
   company: z.string().trim().max(200, "Max 200 characters"),
+  business_reg_number: z.string().trim().max(120, "Max 120 characters"),
+  tax_vat_id: z.string().trim().max(120, "Max 120 characters"),
   phone: z.string().trim().max(30, "Max 30 characters"),
   country: z.string().trim().max(100, "Max 100 characters").optional().or(z.literal("")),
 });

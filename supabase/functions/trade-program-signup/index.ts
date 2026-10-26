@@ -62,6 +62,9 @@ Deno.serve(async (req) => {
   if (step === 3 && (!websiteUrl || websiteUrl.length < 3)) {
     return json({ error: 'Please provide either your website or Instagram handle to expedite review' }, 400)
   }
+  if (step === 3 && (!businessRegNumber || businessRegNumber.length < 3)) {
+    return json({ error: 'A business registration or tax ID is required' }, 400)
+  }
 
   // Bot protection: the final submission (account creation + alerts) requires
   // a valid Cloudflare Turnstile token before any insert or notification.
