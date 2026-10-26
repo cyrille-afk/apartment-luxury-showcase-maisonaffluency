@@ -63,36 +63,37 @@ test("tour steps 1-12: sidebar references, copy and highlights", async ({ page, 
   });
   await step1.getByRole("button", { name: "Next", exact: true }).click();
 
-  // Step 2 — The Collection (gated: opening The Collection advances the tour)
-  const step2 = page.locator("[data-felix-tour-card]");
-  await expect(step2).toBeVisible({ timeout: 60000 });
+  // Step 2 — Real-Time Tier Tracking (both tier steps open the tour)
+  const step2 = await expectStep(page, {
+    title: "Real-Time Tier Tracking",
+    copy: "rolling 12-month confirmed project spend",
+    anchor: "dashboard",
+    ref: /Dashboard/i,
+  });
   await expect(step2.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "2");
+  await step2.getByRole("button", { name: "Next", exact: true }).click();
+
+  // Step 3 — The Collection (gated: opening The Collection advances the tour)
+  const step3 = page.locator("[data-felix-tour-card]");
+  await expect(step3).toBeVisible({ timeout: 60000 });
+  await expect(step3.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "3");
   await expect(page.locator("html")).toHaveAttribute("data-felix-tour-sidebar", "collection");
   await expect(page.locator("[data-felix-sidebar-ref]")).toContainText(/The Collection/i);
-  await expect(step2).toContainText("Interactive Gallery");
+  await expect(step3).toContainText("Interactive Gallery");
   await page.locator('[data-felix-target="nav-collection"]').first().click();
 
-  // Step 3 — Transparent Project Margins
-  const step3 = await expectStep(page, {
+  // Step 4 — Transparent Project Margins
+  const step4 = await expectStep(page, {
     title: "Transparent Project Margins",
     copy: "plan your project margins with clarity",
     anchor: "collection",
     ref: /The Collection/i,
     url: /\/trade\/the-collection/,
   });
-  await step3.getByRole("button", { name: "Next", exact: true }).click();
-
-  // Step 4 — Real-Time Tier Tracking
-  const step5 = await expectStep(page, {
-    title: "Real-Time Tier Tracking",
-    copy: "rolling 12-month confirmed project spend",
-    anchor: "dashboard",
-    ref: /Dashboard/i,
-  });
-  await step5.getByRole("button", { name: "Next", exact: true }).click();
+  await step4.getByRole("button", { name: "Next", exact: true }).click();
 
   // Step 5 — Client-Safe Presentations (Next enables Client View and jumps on)
-  const step6 = await expectStep(page, {
+  const step5 = await expectStep(page, {
     title: "Client-Safe Presentations",
     copy: "client-facing presentation mode",
     anchor: "collection",
@@ -100,11 +101,11 @@ test("tour steps 1-12: sidebar references, copy and highlights", async ({ page, 
     header: true,
     url: /\/trade\/the-collection/,
   });
-  await step6.getByRole("button", { name: "Next", exact: true }).click();
+  await step5.getByRole("button", { name: "Next", exact: true }).click();
 
   // Step 6 — Absolute Margin Protection (product page: no trade sidebar, the
   // in-card reference still names The Collection)
-  const step7 = await expectStep(page, {
+  const step6 = await expectStep(page, {
     title: "Absolute Margin Protection",
     copy: "safely hidden behind standard retail pricing",
     anchor: "collection",
@@ -112,26 +113,26 @@ test("tour steps 1-12: sidebar references, copy and highlights", async ({ page, 
     header: true,
     url: /\/trade\/products\//,
   });
-  await step7.getByRole("button", { name: "Next", exact: true }).click();
+  await step6.getByRole("button", { name: "Next", exact: true }).click();
 
   // Step 7 — Professional Quote Generation
-  const step8 = await expectStep(page, {
+  const step7 = await expectStep(page, {
     title: "Professional Quote Generation",
     copy: "automated document compiler",
     anchor: "quotes",
     ref: /Quotes & Proformas/i,
     url: /\/trade\/quotes/,
   });
-  await step8.getByRole("button", { name: "Next", exact: true }).click();
+  await step7.getByRole("button", { name: "Next", exact: true }).click();
 
   // Step 8 — Direct Client Billing
-  const step9 = await expectStep(page, {
+  const step8 = await expectStep(page, {
     title: "Direct Client Billing",
     copy: "document controls for an existing quotation",
     anchor: "quotes",
     ref: /Quotes & Proformas/i,
   });
-  await step9.getByRole("button", { name: "Next", exact: true }).click();
+  await step8.getByRole("button", { name: "Next", exact: true }).click();
 
   // Step 9 — Client Project Folders follows quote/project assignment.
   const projectFolders = await expectStep(page, {
