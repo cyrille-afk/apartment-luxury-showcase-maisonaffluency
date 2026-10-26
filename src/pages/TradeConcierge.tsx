@@ -310,6 +310,17 @@ export default function TradeConcierge() {
     void loadThreads();
   };
 
+  /** Clicking a "Begin with" suggestion types it into the composer without sending. */
+  const fillComposer = (q: string) => {
+    if (workspace && !threadId) {
+      // Return to the entry state so the composer is visible again.
+      writeLS(openFlagKey, null);
+      setWorkspace(null);
+    }
+    setPrompt(q);
+    window.setTimeout(() => inputRef.current?.focus(), 60);
+  };
+
   /** In-thread input: continue the saved curation conversation. */
   const submit = async (text: string) => {
     const p = text.trim();
