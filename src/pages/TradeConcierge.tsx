@@ -1,7 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
-import { ArrowUp, ChevronDown, Clock, Download, FileText, ImagePlus, Loader2, Plus, Search, Square, Trash2, X } from "lucide-react";
+import { ArrowUp, ArrowUpRight, ChevronDown, Clock, Download, FileText, ImagePlus, Loader2, Plus, Search, Square, Trash2, X } from "lucide-react";
 import { renderCurationPdf } from "@/lib/curationExport";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,6 +25,13 @@ const QUICK_STARTS = [
   "Check COM fabric compatibility",
   "Pair a bronze side table with a bouclé lounge chair",
   "Suggest lighting for a double-height entrance",
+];
+
+/** Faint example rows shown while the member has no curations yet. */
+const PLACEHOLDER_CURATIONS = [
+  { title: "Penthouse Living Room Scheme", date: "18 Oct" },
+  { title: "Orchard Road Villa Finishes", date: "9 Oct" },
+  { title: "Bronze & Bouclé Material Pairing", date: "27 Sep" },
 ];
 
 interface ThreadRow { id: string; title: string; updated_at: string; project_id?: string | null }
