@@ -670,7 +670,7 @@ export default function TradeConcierge() {
                           onClick={t.run}
                           className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1 text-[11px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:border-accent hover:text-foreground"
                         >
-                          <t.icon className="h-3 w-3" />
+                          <t.icon className="h-3 w-3" strokeWidth={1.75} />
                           {t.label}
                         </button>
                       ))}
