@@ -7,7 +7,7 @@ import { comparatorSwatches } from "@/lib/comparatorSwatches";
 import { downloadBlob } from "@/lib/furnishingSchedulePdf";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useRef, useState } from "react";
-import { Search, X, Heart, ChevronDown, Bookmark, Link2, FileDown, Trash2, FolderOpen, FilePenLine, Eye, Tags } from "lucide-react";
+import { Search, X, Heart, Check, ChevronDown, Bookmark, Link2, FileDown, Trash2, FolderOpen, FilePenLine, Eye, Tags } from "lucide-react";
 import { PdfViewerDialog } from "@/components/trade/PdfViewerDialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -423,33 +423,48 @@ export default function TradeComparator() {
                     <DropdownMenuItem disabled={!draftReady || exporting || coverLoading} onSelect={() => void editCover()}><FilePenLine className="mr-2 h-3.5 w-3.5" />Edit PDF cover</DropdownMenuItem>
                     <DropdownMenuItem disabled={compareList.length === 0 || !projectId || saving} onSelect={() => void saveShortlist()}><Bookmark className="mr-2 h-3.5 w-3.5" />{saving ? "Saving…" : "Save shortlist to project"}</DropdownMenuItem>
                     <DropdownMenuItem onSelect={() => { setSavedOpen(true); refetchAllComparisons(); }}><FolderOpen className="mr-2 h-3.5 w-3.5" />Saved comparisons</DropdownMenuItem>
-                    {categorise && <><DropdownMenuSeparator /><DropdownMenuItem onSelect={categorise}><Tags className="mr-2 h-3.5 w-3.5" />Categorise finishes</DropdownMenuItem></>}
                   </DropdownMenuContent>
                 </DropdownMenu>
                 <Button size="sm" variant="default" onClick={() => void exportPdf()} disabled={compareList.length === 0 || exporting || (visiblePieces !== null && visiblePieces.length === 0)}><FileDown className="h-3.5 w-3.5" />{exporting ? "Preparing PDF…" : visiblePieces && visiblePieces.length !== compareList.length ? `Export visible (${visiblePieces.length})` : "Export comparison PDF"}</Button>
               </div>
             </div>
-            <div aria-label="Comparison filter strip" className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 border-y border-border/40 bg-muted/40 px-2 py-0.5 [&_button]:h-7">
-              {filters}
-              <div className="ml-auto flex shrink-0 items-center gap-3">
+            <div aria-label="Comparison filter strip" className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-y border-border bg-muted/50 px-3 py-3">
+              <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
+                {filters}
+                {categorise && <Button variant="ghost" size="sm" onClick={categorise} className="h-8 gap-1.5 px-2"><Tags className="h-3.5 w-3.5" />Categorise finishes</Button>}
+              </div>
+              <div className="ml-auto flex shrink-0 items-center gap-3 sm:gap-4">
                 <span className="font-body text-xs text-muted-foreground" aria-live="polite">{compareList.length}/4 Pieces Selected</span>
                 {compareList.length > 0 && <Button variant="link" size="sm" className="h-7 px-0" onClick={clearAllCompare}>Clear all</Button>}
-                <Button variant="link" size="sm" className="h-7 px-0" aria-expanded={selectionOpen} aria-controls="comparator-selection-drawer" onClick={() => setSelectionExpanded(!selectionOpen)}>{selectionOpen ? "Done" : "Modify Selection"}</Button>
+                <Button variant={selectionOpen ? "default" : "link"} size="sm" className={selectionOpen ? "h-9 gap-1.5 px-4" : "h-9 px-0"} aria-expanded={selectionOpen} aria-controls="comparator-selection-drawer" onClick={() => setSelectionExpanded(!selectionOpen)}>{selectionOpen && <Check className="h-3.5 w-3.5" />}{selectionOpen ? "Done" : "Modify Selection"}</Button>
               </div>
             </div>
           </section>
           <ComparatorSelectionDrawer count={compareList.length} open={selectionOpen}>
-          <div className="flex flex-col gap-4 [@media(min-width:1440px)]:flex-row [@media(min-width:1440px)]:items-center">
-            <div className="relative w-full shrink-0 [@media(min-width:1440px)]:w-80">
+          <div aria-label="Alphabetical filters" className="flex min-w-0 flex-col gap-3 border-b border-border/50 pb-4 xl:flex-row xl:items-center xl:gap-5">
+            <div className="flex shrink-0 gap-2" role="group" aria-label="Product source">
+              <Button variant={source === "catalogue" ? "default" : "outline"} size="sm" aria-pressed={source === "catalogue"} onClick={() => setSource("catalogue")}>Designers A–Z</Button>
+              <Button variant={source === "favorites" ? "default" : "outline"} size="sm" aria-pressed={source === "favorites"} onClick={() => { setSource("favorites"); setLetter(""); setSearch(""); }}><Heart className="mr-2 h-3 w-3" />Favourites</Button>
+            </div>
+            <nav className="flex min-w-0 flex-1 gap-1 overflow-x-auto pb-1 motion-safe:scroll-smooth" aria-label="Designer alphabet">
+              {["", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"].map(initial => (
+                <Button key={initial} variant={letter === initial ? "default" : "ghost"} size="sm" aria-pressed={letter === initial} onClick={() => setLetter(initial)} className="h-8 min-w-8 shrink-0 px-2">{initial || "All"}</Button>
+              ))}
+            </nav>
+          </div>
+
+          <div aria-label="Search and selected pieces" className="flex min-w-0 flex-col gap-4 py-4 lg:flex-row lg:items-center">
+            <div className="relative w-full shrink-0 lg:w-64 xl:w-72">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search designers or pieces…" aria-label="Search designers or pieces" className="pl-10 font-body text-sm" />
             </div>
 
-            <div className="grid min-w-0 flex-1 grid-cols-2 gap-2 lg:grid-cols-4">
+            <div role="list" aria-label="Selected pieces" className="flex min-w-0 flex-1 gap-2 overflow-x-auto pb-2 motion-safe:scroll-smooth">
               {comparisonSlots.map((product, index) => (
                 <div
                   key={product?.id ?? `empty-${index}`}
-                  className="flex h-11 min-w-0 items-center gap-2 border border-border bg-muted/20 px-3"
+                  role="listitem"
+                  className="flex h-12 w-52 shrink-0 items-center gap-2 rounded-sm border border-border bg-muted/20 px-2.5 xl:w-56"
                 >
                   {product ? (
                     <>
@@ -458,13 +473,13 @@ export default function TradeComparator() {
                       ) : (
                         <span className="h-7 w-7 shrink-0 bg-muted" aria-hidden />
                       )}
-                      <span className="min-w-0 flex-1 truncate font-body text-xs text-foreground">{product.product_name}</span>
+                      <span title={product.product_name} className="min-w-0 flex-1 truncate font-body text-xs text-foreground">{product.product_name}</span>
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
                         onClick={() => removeFromCompare(product.id)}
-                        className="h-7 w-7 shrink-0"
+                        className="h-8 w-8 shrink-0"
                         aria-label={`Remove ${product.product_name}`}
                       >
                         <X className="h-3.5 w-3.5" />
@@ -478,19 +493,7 @@ export default function TradeComparator() {
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex gap-2" role="group" aria-label="Product source">
-              <Button variant={source === "catalogue" ? "default" : "outline"} size="sm" onClick={() => setSource("catalogue")}>Designers A–Z</Button>
-              <Button variant={source === "favorites" ? "default" : "outline"} size="sm" onClick={() => { setSource("favorites"); setLetter(""); setSearch(""); }}><Heart className="mr-2 h-3 w-3" />Favourites</Button>
-            </div>
-
-          </div>
-          <nav className="mt-3 flex flex-wrap gap-1" aria-label="Designer alphabet">
-            {["", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"].map(initial => (
-              <Button key={initial} variant={letter === initial ? "default" : "ghost"} size="sm" aria-pressed={letter === initial} onClick={() => setLetter(initial)} className="h-8 min-w-8 px-2">{initial || "All"}</Button>
-            ))}
-          </nav>
-          <div className="mt-3 max-h-80 min-h-44 overflow-y-auto">
+          <div className="max-h-80 min-h-44 overflow-y-auto">
             {isLoading ? <div className="flex h-44 items-center justify-center"><DotCircleLoader size="sm" /></div> : groups.length === 0 ? (
               <p className="py-10 text-center font-body text-sm text-muted-foreground">{source === "favorites" ? "No matching favourites" : "No matching designers or pieces"}</p>
             ) : groups.map(({ designer, pieces }) => {
