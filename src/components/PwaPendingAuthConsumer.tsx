@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { redeemMobileSyncToken, MOBILE_SYNC_TTL_SECONDS } from "@/lib/mobileSync.functions";
-import { readPendingAuthToken, clearPendingAuthToken, storePendingAuthToken } from "@/lib/pwaPendingAuth";
+import { readPendingAuthToken, clearPendingAuthToken, storePendingAuthToken, claimFirstLaunchToken } from "@/lib/pwaPendingAuth";
 import { takeLaunchToken } from "@/lib/pwaLaunchManifest";
 import { isInstalledPwaDisplay } from "@/lib/pwaMode";
 import { useAuth } from "@/hooks/useAuth";
@@ -37,7 +37,7 @@ export function PwaPendingAuthConsumer({ children }: { children: ReactNode }) {
       setIsPwaBooting(true);
       launchCaptured.current = true;
       const launchToken = takeLaunchToken();
-      if (launchToken) storePendingAuthToken(launchToken, MOBILE_SYNC_TTL_SECONDS);
+      if (launchToken && claimFirstLaunchToken(launchToken)) storePendingAuthToken(launchToken, MOBILE_SYNC_TTL_SECONDS);
     }
     // Let restoration finish first so its older null session cannot overwrite
     // the new OTP session. The AuthProvider remains mounted above this gate.
