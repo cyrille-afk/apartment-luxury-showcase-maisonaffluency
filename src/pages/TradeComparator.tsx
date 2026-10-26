@@ -7,10 +7,11 @@ import { comparatorSwatches } from "@/lib/comparatorSwatches";
 import { downloadBlob } from "@/lib/furnishingSchedulePdf";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useRef, useState } from "react";
-import { Search, X, Heart, ChevronDown, Bookmark, Link2, FileDown, Trash2, FolderOpen, FilePenLine, Eye } from "lucide-react";
+import { Search, X, Heart, ChevronDown, Bookmark, Link2, FileDown, Trash2, FolderOpen, FilePenLine, Eye, Tags } from "lucide-react";
 import { PdfViewerDialog } from "@/components/trade/PdfViewerDialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
@@ -316,7 +317,6 @@ export default function TradeComparator() {
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="font-display text-2xl text-foreground">Product Comparator</h1>
-          <Button variant="outline" size="sm" onClick={() => { setSavedOpen(true); refetchAllComparisons(); }}><FolderOpen className="mr-2 h-4 w-4" />Saved comparisons</Button>
         </div>
         <Dialog open={savedOpen} onOpenChange={setSavedOpen}>
           <DialogContent className="max-h-[85dvh] w-[calc(100%-2rem)] max-w-2xl overflow-y-auto">
@@ -402,29 +402,36 @@ export default function TradeComparator() {
             <Label htmlFor="preview-originalPrices" className="text-xs font-medium text-muted-foreground">Show original supplier prices beneath converted prices</Label>
           </div>} />
 
-        <ProductComparisonTable renderControls={filters => <>
+        <ProductComparisonTable renderControls={(filters, categorise) => <>
           <section ref={actionsRef} aria-label="Comparison controls" className="sticky top-[var(--comparison-actions-top,4rem)] z-20 bg-background [&_button]:font-body [&_button]:text-xs [&_button]:font-medium">
-            <div aria-label="Comparison actions" className="flex flex-col gap-2 py-2 xl:flex-row xl:items-center xl:justify-between">
-              <div className="flex min-w-0 flex-wrap items-center gap-2">
-                <Input value={shortlistName} onChange={e => setShortlistName(e.target.value)} placeholder="Shortlist name" aria-label="Shortlist name" className="h-9 w-40 rounded-none border-0 bg-transparent px-0 font-body text-sm shadow-none sm:w-56 focus-visible:ring-1" />
+            <div aria-label="Comparison actions" className="flex flex-wrap items-center gap-2 py-1.5 lg:flex-nowrap">
+              <div className="flex min-w-0 flex-1 items-center gap-2">
+                <Input value={shortlistName} onChange={e => setShortlistName(e.target.value)} placeholder="Shortlist name" aria-label="Shortlist name" className="h-9 min-w-0 flex-1 rounded-none border-0 bg-transparent px-0 font-body text-sm shadow-none sm:max-w-56 focus-visible:ring-1" />
                 <ProjectPicker value={projectId} onChange={value => { const next = new URLSearchParams(params); if (value) next.set("project", value); else next.delete("project"); setParams(next); }} />
-                <Button size="icon-sm" variant="ghost" title="Save shortlist to project" aria-label="Save shortlist to project" onClick={saveShortlist} disabled={compareList.length === 0 || !projectId || saving}><Bookmark className="h-3.5 w-3.5" /></Button>
               </div>
-              <div className="flex flex-wrap items-center gap-2 xl:justify-end">
+              <div className="ml-auto flex shrink-0 items-center gap-2">
                 <Label htmlFor="comparator-currency" className="sr-only">Display Currency</Label>
                 <Select value={displayCurrency} onValueChange={value => setDisplayPref(comparatorCurrency(value))}>
                   <SelectTrigger id="comparator-currency" aria-label="Display Currency" className="h-9 w-24 font-body text-xs"><SelectValue /></SelectTrigger>
                   <SelectContent>{COMPARATOR_CURRENCIES.map(c => <SelectItem key={c} value={c} className="font-body text-xs">{c}</SelectItem>)}</SelectContent>
                 </Select>
-                <Button size="sm" variant="outline" onClick={() => void editCover()} disabled={!draftReady || exporting || coverLoading}><FilePenLine className="h-3.5 w-3.5" />{coverLoading ? "Loading details…" : "Edit PDF cover"}</Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild><Button size="sm" variant="outline">Tools<ChevronDown className="h-3.5 w-3.5" /></Button></DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56 font-body">
+                    <DropdownMenuItem disabled={!draftReady || exporting || coverLoading} onSelect={() => void editCover()}><FilePenLine className="mr-2 h-3.5 w-3.5" />Edit PDF cover</DropdownMenuItem>
+                    <DropdownMenuItem disabled={compareList.length === 0 || !projectId || saving} onSelect={() => void saveShortlist()}><Bookmark className="mr-2 h-3.5 w-3.5" />{saving ? "Saving…" : "Save shortlist to project"}</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => { setSavedOpen(true); refetchAllComparisons(); }}><FolderOpen className="mr-2 h-3.5 w-3.5" />Saved comparisons</DropdownMenuItem>
+                    {categorise && <><DropdownMenuSeparator /><DropdownMenuItem onSelect={categorise}><Tags className="mr-2 h-3.5 w-3.5" />Categorise finishes</DropdownMenuItem></>}
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <Button size="sm" variant="default" onClick={() => void exportPdf()} disabled={compareList.length === 0 || exporting || (visiblePieces !== null && visiblePieces.length === 0)}><FileDown className="h-3.5 w-3.5" />{exporting ? "Preparing PDF…" : visiblePieces && visiblePieces.length !== compareList.length ? `Export visible (${visiblePieces.length})` : "Export comparison PDF"}</Button>
               </div>
             </div>
-            <div aria-label="Comparison filter strip" className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-y border-border/60 bg-muted px-3 py-2 [&_button:not([data-slot])]:h-8">
+            <div aria-label="Comparison filter strip" className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 border-y border-border/40 bg-muted/40 px-2 py-0.5 [&_button]:h-7">
               {filters}
               <div className="ml-auto flex shrink-0 items-center gap-3">
                 <span className="font-body text-xs text-muted-foreground" aria-live="polite">{compareList.length}/4 Pieces Selected</span>
-                <Button variant="link" size="sm" className="h-8 px-0" aria-expanded={selectionOpen} aria-controls="comparator-selection-drawer" onClick={() => setSelectionExpanded(!selectionOpen)}>{selectionOpen ? "Done" : "Modify Selection"}</Button>
+                <Button variant="link" size="sm" className="h-7 px-0" aria-expanded={selectionOpen} aria-controls="comparator-selection-drawer" onClick={() => setSelectionExpanded(!selectionOpen)}>{selectionOpen ? "Done" : "Modify Selection"}</Button>
               </div>
             </div>
           </section>

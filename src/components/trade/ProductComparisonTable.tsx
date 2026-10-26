@@ -23,7 +23,7 @@ interface Props {
   renderPrice: (product: TradeProduct | null, net: boolean) => ReactNode;
   renderNote?: (product: TradeProduct) => ReactNode;
   onVisibleProductsChange?: (visible: TradeProduct[] | null) => void;
-  renderControls?: (filters: ReactNode) => ReactNode;
+  renderControls?: (filters: ReactNode, categorise?: () => void) => ReactNode;
 }
 
 const NO_OVERRIDES = new Map<string, FinishFacetOverride>();
@@ -31,6 +31,7 @@ const NO_OVERRIDES = new Map<string, FinishFacetOverride>();
 export function ProductComparisonTable({ products: allProducts, fields, onRemove, renderPrice, renderNote, onVisibleProductsChange, renderControls }: Props) {
   const { data: swatches, isLoading: swatchesLoading } = useComparatorSwatches(allProducts.flatMap(product => product ? [product.id] : []));
   const { isAdmin } = useAuth();
+  const [categoryOpen, setCategoryOpen] = useState(false);
   const { data: overrides = NO_OVERRIDES } = useQuery({
     queryKey: ["finish-facet-overrides"], staleTime: 60_000,
     queryFn: async () => {
@@ -64,7 +65,7 @@ export function ProductComparisonTable({ products: allProducts, fields, onRemove
       {options.material.length > 0 && <label className="flex min-w-0 items-center gap-2">
         <span className="font-body text-[10px] font-bold uppercase tracking-[0.14em] text-foreground/70">Material</span>
         <Select value={materialValue} onValueChange={v => setSelection(s => ({ ...s, ...selectMaterialOption(v) }))}>
-          <SelectTrigger aria-label="Material" className="h-8 w-40 border border-border bg-background px-3 font-body text-xs text-foreground sm:w-48">
+          <SelectTrigger aria-label="Material" className="h-7 w-36 border-0 bg-transparent px-2 font-body text-xs text-foreground shadow-none sm:w-44">
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="max-h-80 min-w-48">
@@ -78,17 +79,18 @@ export function ProductComparisonTable({ products: allProducts, fields, onRemove
       </label>}
       {selection.material && materialTypeOptions(options.material, selection.material).length > 0 && <label className="flex items-center gap-2">
         <span className="font-body text-[10px] font-bold uppercase tracking-[0.14em] text-foreground/70">Type</span>
-        <select aria-label="Material type" value={selection.materialType ?? ""} onChange={e => setSelection(s => ({ ...s, materialType: e.target.value || undefined }))} className="h-8 min-w-32 border border-border bg-background px-3 font-body text-xs text-foreground">
+        <select aria-label="Material type" value={selection.materialType ?? ""} onChange={e => setSelection(s => ({ ...s, materialType: e.target.value || undefined }))} className="h-7 min-w-32 border-0 bg-transparent px-2 font-body text-xs text-foreground">
           <option value="">All</option>
           {materialTypeOptions(options.material, selection.material).map(v => <option key={v} value={v}>{v}</option>)}
         </select>
       </label>}
       {active && <Button type="button" variant="ghost" size="sm" onClick={() => setSelection({})}>Clear filters</Button>}
-      {isAdmin && finishNames.length > 0 && <FinishCategoryDialog names={finishNames} overrides={overrides} pieces={categorisablePieces} />}
+      {!renderControls && isAdmin && finishNames.length > 0 && <FinishCategoryDialog names={finishNames} overrides={overrides} pieces={categorisablePieces} />}
       {active && <p className="font-body text-xs text-muted-foreground" aria-live="polite">Showing {products.length} of {allProducts.filter(Boolean).length} pieces</p>}
     </div>;
   return <div>
-    {renderControls ? renderControls(filters) : filters}
+    {renderControls ? renderControls(filters, isAdmin && finishNames.length > 0 ? () => setCategoryOpen(true) : undefined) : filters}
+    {renderControls && isAdmin && finishNames.length > 0 && <FinishCategoryDialog names={finishNames} overrides={overrides} pieces={categorisablePieces} controlledOpen={categoryOpen} onOpenChange={setCategoryOpen} />}
     {active && products.length === 0 ? <p className="py-12 font-body text-sm text-muted-foreground">No compared pieces match these filters.</p> :
   <div className="overflow-x-auto" role="region" aria-label="Product comparison" tabIndex={0}>
     <table className="w-full min-w-[1040px] table-fixed border-collapse text-left">
