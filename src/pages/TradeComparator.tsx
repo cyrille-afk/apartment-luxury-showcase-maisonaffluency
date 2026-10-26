@@ -149,6 +149,8 @@ export default function TradeComparator() {
     setCompareList((prev) => prev.filter((p) => p.id !== id));
   };
 
+  const clearAllCompare = () => setDraft(d => ({ ...d, compareList: [], pieceNotes: {} }));
+
   const queryClient = useQueryClient();
   const { discountPct } = useTradePriceMode();
   const [savedOpen, setSavedOpen] = useState(false);
