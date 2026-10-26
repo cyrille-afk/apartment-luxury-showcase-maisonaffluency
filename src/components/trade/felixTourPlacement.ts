@@ -1,9 +1,19 @@
 export type TourRect = { top: number; left: number; width: number; height: number };
 type Bounds = { left: number; top: number; right: number; bottom: number };
 
-/** Collection tour cards occupy the reserved upper-right editorial space. */
+/** Collection tour cards use existing upper-right space, never page reflow. */
 export function collectionTourCardOrigin(viewportWidth: number, cardWidth: number, headingTop: number) {
   return { left: viewportWidth - cardWidth - 24, top: Math.max(80, headingTop - 32) };
+}
+
+export function collectionTourCardPlacement({ viewport, width, height, photoTop, headingRight }: {
+  viewport: { w: number; h: number }; width: number; height: number; photoTop: number; headingRight: number;
+}): TourRect | null {
+  const left = viewport.w - width - 24;
+  const top = 80;
+  const availableHeight = Math.min(viewport.h - 16, photoTop - 12) - top;
+  if (left < headingRight + 20 || availableHeight < 160) return null;
+  return { left, top, width, height: Math.min(height, availableHeight) };
 }
 
 /** Reserve the full explanation above a wide panel, rather than centering only the panel. */

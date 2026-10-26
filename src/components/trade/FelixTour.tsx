@@ -18,7 +18,7 @@ import { useDesktopTradeTour } from "./useDesktopTradeTour";
 import { fmtPct, resolveTierTokens, hasPendingTourStart, clearTourStartRequest, markTourCompleted } from "./felixTourUtils";
 import { FELIX_STEP_SIDEBAR } from "./felixTourSidebarMap";
 import { orderFelixSteps } from "./felixTourOrder";
-import { chooseTourCardPlacement, collectionTourCardOrigin, tourPanelLandingScrollDelta, type TourRect } from "./felixTourPlacement";
+import { chooseTourCardPlacement, collectionTourCardOrigin, collectionTourCardPlacement, tourPanelLandingScrollDelta, type TourRect } from "./felixTourPlacement";
 
 type FelixStep = {
   id: string;
@@ -726,22 +726,6 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     };
   }, [open, isPaused, step.id]);
 
-  // Reserve real page space for the full explanation, not an overlay over photos.
-  useLayoutEffect(() => {
-    const root = document.documentElement;
-    if (open && !isPaused && ["collection", "quotes"].includes(step.id)) {
-      root.dataset.felixCollectionDock = "true";
-      root.style.setProperty("--felix-collection-card-height", `${Math.max(380, measuredCardHeight)}px`);
-    } else {
-      delete root.dataset.felixCollectionDock;
-      root.style.removeProperty("--felix-collection-card-height");
-    }
-    return () => {
-      delete root.dataset.felixCollectionDock;
-      root.style.removeProperty("--felix-collection-card-height");
-    };
-  }, [open, isPaused, step.id, measuredCardHeight]);
-
   useEffect(() => () => {
     if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current);
   }, []);
@@ -968,7 +952,16 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
   // uncovered when that is what lands the card beside its highlight; tier 2
   // only applies on short viewports where nothing fits without overlapping
   // navigation.
-  const placement = chooseTourCardPlacement({
+  const collectionPhotoTop = ["collection", "quotes"].includes(step.id)
+    ? Array.from(document.querySelectorAll('[data-felix-collection-header] ~ div img'))
+        .map(el => el.getBoundingClientRect()).filter(r => r.width > 100 && r.height > 100 && r.bottom > 0)
+        .reduce((top, r) => Math.min(top, r.top), viewport.h - 16)
+    : viewport.h - 16;
+  const collectionPlacement = rect && ["collection", "quotes"].includes(step.id)
+    ? collectionTourCardPlacement({ viewport, width: cardW, height: placementArgs.height, photoTop: collectionPhotoTop,
+        headingRight: document.querySelector('[data-felix-target="collection-overview"]')?.getBoundingClientRect().right ?? 0 })
+    : null;
+  const placement = collectionPlacement ?? chooseTourCardPlacement({
     ...placementArgs,
     tiers: [
       [position?.obstacles ?? [], position?.featureObstacles ?? []],

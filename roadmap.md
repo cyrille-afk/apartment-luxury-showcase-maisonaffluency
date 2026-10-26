@@ -1,3 +1,6 @@
+## Restore Collection proportions
+- [ ] Restore Ref1 header/photo geometry; bound the upper-right tour card without reflow and verify against the same page with the tour closed.
+
 ## Onboarding project-folder order
 - [x] Client Project Folders is Step 9 before Tools (Step 10); preceding pricing/quote steps renumbered 4–8. Signed-in Steps 4–10 and Back to Step 9 verified without browser errors; 14 unit regressions pass and build clean. Existing JS e2e runner blocked by absent browser binary; equivalent central flow verified with Python Playwright. Preview only; GitHub sync needed.
 
