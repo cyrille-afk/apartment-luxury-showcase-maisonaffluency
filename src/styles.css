@@ -3,6 +3,8 @@
 @config "../tailwind.legacy.config.ts";
 
 /* Editorial carousel: original captures are always contained, never cropped. */
+.approval-email-brand,
+.approval-email-portal-preview { letter-spacing: 0.05em; }
 .trade-marketing-stage {
   --carousel-black: oklch(0 0 0);
   --carousel-paper: oklch(1 0 0);

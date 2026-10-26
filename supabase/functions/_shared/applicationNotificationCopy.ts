@@ -86,8 +86,8 @@ const APPROVAL_BENEFITS_BASE = [
     "details": []
   },
   {
-    "title": "AI Concierge",
-    "description": "An in-app assistant trained exclusively on our catalogue for instant recommendations.",
+    "title": "AI Concierge Powered by Felix",
+    "description": "An intelligent in-app curatorial assistant trained exclusively on our catalogue. Ask Felix to cross-reference specifications, match historical design aesthetics, or source the exact finishes your mood boards demand for instant recommendations.",
     "details": []
   },
 ] as const;
@@ -100,6 +100,14 @@ export function approvalBenefits(country?: string | null): readonly ApprovalBene
 /** Default (non-North-American) benefit list, kept for backwards compatibility. */
 export const APPROVAL_BENEFITS = approvalBenefits();
 
+/** Stored contact names supply the first name; company-only applications address the practice. */
+export function approvalGreeting(name?: string | null, company?: string | null): string {
+  const firstName = name?.trim().split(/\s+/)[0];
+  if (firstName) return `Dear ${firstName},`;
+  const firm = company?.trim();
+  return firm ? `Dear the team at ${firm},` : 'Dear Trade Program member,';
+}
+
 export function createApplicationDraft(status: 'approved' | 'rejected', name?: string | null, company?: string | null, country?: string | null): NotificationDraft {
   const greeting = name ? `Dear ${name},` : 'Dear Applicant,';
   if (status === 'rejected') return { subject: REJECTION_SUBJECT, body: [greeting,
@@ -107,7 +115,7 @@ export function createApplicationDraft(status: 'approved' | 'rejected', name?: s
     'Following careful consideration, we regret that we are unable to welcome your practice into the Trade Program at this stage. Our membership is subject to highly selective tier requirements and strict onboarding limitations, which guide the number and scope of practices we can support.',
     'We appreciate the care behind your application and your interest in our ateliers and designers. Thank you for considering Maison Affluency as a partner for your projects.',
     'Warm regards,\nThe Maison Affluency Team'].join('\n\n') };
-  return { subject: APPROVAL_SUBJECT, body: [greeting,
+  return { subject: APPROVAL_SUBJECT, body: [approvalGreeting(name, company),
     `We are pleased to inform you that your application${company ? ` for ${company}` : ''} to the Maison Affluency Trade Program has been approved.`,
     "Your application is approved. Use the button below to securely set your password and activate sign-in access. As a member of the Trade Program, your studio enters a refined ecosystem of sourcing, tooling, and commercial infrastructure designed for the world's most discerning design firms.",
     ...approvalBenefits(country).map(b => `◆ ${b.title}\n${b.description}${b.details.length ? '\n' + b.details.map(d => `• ${d}`).join('\n') : ''}`),

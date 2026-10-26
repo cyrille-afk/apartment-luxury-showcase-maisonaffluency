@@ -1,3 +1,6 @@
+## Trade approval email refinement
+- [ ] Personalise approval greetings, apply exact Felix copy and refine header/button typography; verify shared draft and delivered-template rendering without sending to applicants.
+
 ## Six-slide Trade carousel
 - [x] Added /trade-carousel with exact supplied copy and original contain-only screenshots, six active dots and arrow/keyboard navigation. All images loaded on desktop/phone with no overflow or browser errors. Generated artwork candidates altered screenshot lettering, so the component uses authentic originals instead. Preview only.
 

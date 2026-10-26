@@ -34,7 +34,7 @@ export default function ApplicationNotificationDrawer({ recipient, company, appr
   ].join('\n');
   const lastBenefit = blocks.map(b => b.kind).lastIndexOf('benefit');
   const valid = draft.subject.trim().length > 0 && draft.subject.length <= 200 && !/[\r\n]/.test(draft.subject) && draft.body.trim().length > 0 && draft.body.length <= 20000;
-  const portalAction = <div className="my-8 text-center"><span className="inline-block rounded-full bg-moodboard-ink px-8 py-4 text-xs uppercase text-card">Access Your Trade Portal</span></div>;
+  const portalAction = <div className="my-8 text-center"><Button type="button" variant="ghost" className="approval-email-portal-preview h-auto rounded-full bg-moodboard-ink px-8 py-4 font-sans text-xs uppercase text-card transition-colors duration-200 hover:bg-moodboard-ink/85 hover:text-card">Access Your Trade Portal</Button></div>;
   return <Sheet open onOpenChange={open => { if (!open && !busy) onClose(); }}>
     <SheetContent side="right" className="flex w-full flex-col bg-background text-foreground sm:max-w-[780px]" onEscapeKeyDown={e => { if (busy) e.preventDefault(); }} onPointerDownOutside={e => { if (busy) e.preventDefault(); }}>
       <SheetHeader className="shrink-0 border-b border-border pb-5 pr-8">
@@ -64,7 +64,7 @@ export default function ApplicationNotificationDrawer({ recipient, company, appr
             </div>
           ) : (
           <div className="mx-auto max-w-[600px] font-serif text-foreground">
-            <img src="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/affluency-email-wordmark.jpg" alt="Affluency — Unique by Design" className="mx-auto mb-8 h-auto w-[420px] max-w-full" />
+            {approval ? <div className="approval-email-brand mb-8 text-center"><p className="text-4xl leading-relaxed">AFFLUENCY</p><p className="mt-2 font-sans text-[10px] text-gold">UNIQUE BY DESIGN</p></div> : <img src="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/affluency-email-wordmark.jpg" alt="Affluency — Unique by Design" className="mx-auto mb-8 h-auto w-[420px] max-w-full" />}
             <hr className="mb-6 border-border" />
             {blocks.map((block, i) => <div key={i}>
               {block.kind === 'greeting' ? <h4 className="mb-6 whitespace-pre-wrap text-2xl">{block.text}</h4>

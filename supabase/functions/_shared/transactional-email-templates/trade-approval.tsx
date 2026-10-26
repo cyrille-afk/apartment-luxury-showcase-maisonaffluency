@@ -6,7 +6,7 @@ import {
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.tsx'
 import { ApplicationDraftBody } from './application-draft-body.tsx'
-import { payoutsBenefit } from '../applicationNotificationCopy.ts'
+import { approvalGreeting, approvalBenefits, payoutsBenefit } from '../applicationNotificationCopy.ts'
 
 const SITE_NAME = "Maison Affluency"
 
@@ -16,6 +16,8 @@ const portalHref = (activationUrl?: string, portalRef?: string) =>
 interface TradeApprovalProps {
   name?: string
   companyName?: string
+  first_name?: string
+  company_firm_name?: string
   country?: string
   bodyText?: string
   subjectText?: string
@@ -23,27 +25,23 @@ interface TradeApprovalProps {
   portalRef?: string
 }
 
-const TradeApprovalEmail = ({ name, companyName, country, bodyText, activationUrl, portalRef }: TradeApprovalProps) => (
+const TradeApprovalEmail = ({ name, companyName, first_name, company_firm_name, country, bodyText, activationUrl, portalRef }: TradeApprovalProps) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>Your Trade Program application has been approved</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={logoSection}>
-          <Img
-            src="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/affluency-email-wordmark.jpg"
-            alt="Affluency - Unique by Design"
-            width="420"
-            style={logo}
-          />
+          <Text style={brand}>AFFLUENCY</Text>
+          <Text style={brandTagline}>UNIQUE BY DESIGN</Text>
         </Section>
         <Hr style={divider} />
         {bodyText ? <ApplicationDraftBody body={bodyText} approval activationUrl={activationUrl} /> : <><Heading style={h1}>
-          {name ? `Dear ${name},` : 'Dear Applicant,'}
+          {approvalGreeting(first_name || name, company_firm_name || companyName)}
         </Heading>
         <Text style={text}>
           We are pleased to inform you that your application
-          {companyName ? <> for <strong>{companyName}</strong></> : ''} to the {SITE_NAME} Trade Program has been approved.
+          {(company_firm_name || companyName) ? <> for <strong>{company_firm_name || companyName}</strong></> : ''} to the {SITE_NAME} Trade Program has been approved.
         </Text>
         <Text style={introText}>
           Your application is approved. Use the button below to securely set your password and activate sign-in access. As a member of the Trade Program, your studio enters a refined ecosystem of sourcing, tooling, and commercial infrastructure designed for the world's most discerning design firms.
@@ -96,8 +94,8 @@ const TradeApprovalEmail = ({ name, companyName, country, bodyText, activationUr
               description="Turn architectural drawings into furnished 3D visualisations to present to clients."
             />
             <BenefitRow
-              title="AI Concierge"
-              description="An in-app assistant trained exclusively on our catalogue for instant recommendations."
+              title={approvalBenefits(country)[11].title}
+              description={approvalBenefits(country)[11].description}
             />
             <BenefitRow {...payoutsBenefit(country)} details={[...payoutsBenefit(country).details]} />
           </tbody>
@@ -168,8 +166,8 @@ const BenefitRow = ({ title, description, details }: BenefitRowProps) => (
 )
 
 const plainText = (data: Record<string, any>) => {
-  const name = typeof data.name === 'string' ? data.name : undefined
-  const companyName = typeof data.companyName === 'string' ? data.companyName : undefined
+  const name = typeof data.first_name === 'string' && data.first_name.trim() ? data.first_name : typeof data.name === 'string' ? data.name : undefined
+  const companyName = typeof data.company_firm_name === 'string' && data.company_firm_name.trim() ? data.company_firm_name : typeof data.companyName === 'string' ? data.companyName : undefined
   const country = typeof data.country === 'string' ? data.country : undefined
   const activationUrl = typeof data.activationUrl === 'string' ? data.activationUrl : undefined
   const portalRef = typeof data.portalRef === 'string' ? data.portalRef : undefined
@@ -198,7 +196,7 @@ const plainText = (data: Record<string, any>) => {
   return [
     'MAISON AFFLUENCY — Unique by Design',
     '',
-    name ? `Dear ${name},` : 'Dear Applicant,',
+    approvalGreeting(name, companyName),
     '',
     `We are pleased to inform you that your application${companyName ? ` for ${companyName}` : ''} to the ${SITE_NAME} Trade Program has been approved.`,
     '',
@@ -228,7 +226,7 @@ const plainText = (data: Record<string, any>) => {
     '',
     benefitLines({ title: '3D Studio', description: 'Turn architectural drawings into furnished 3D visualisations to present to clients.' }),
     '',
-    benefitLines({ title: 'AI Concierge', description: 'An in-app assistant trained exclusively on our catalogue for instant recommendations.' }),
+    benefitLines(approvalBenefits(country)[11]),
     '',
     benefitLines(payoutsBenefit(country)),
     '',
@@ -255,9 +253,10 @@ export const template = {
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: "Georgia, 'Playfair Display', serif" }
-const container = { padding: '40px 20px', maxWidth: '600px', margin: '0 auto', backgroundColor: '#faf9f7' }
+const container = { padding: '40px 24px', maxWidth: '600px', margin: '0 auto', backgroundColor: '#faf9f7', border: '1px solid #e8e4de' }
 const logoSection = { textAlign: 'center' as const, marginBottom: '32px', paddingBottom: '24px' }
-const logo = { margin: '0 auto' }
+const brand = { margin: '0', color: '#1a1a1a', fontFamily: 'Georgia, serif', fontSize: '36px', lineHeight: '1.3', letterSpacing: '0.05em' }
+const brandTagline = { margin: '8px 0 0', color: '#9b8753', fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '10px', lineHeight: '1.5', letterSpacing: '0.05em' }
 const divider = { border: 'none', borderTop: '1px solid #e8e4de', margin: '0 0 24px' }
 const h1 = { color: '#1a1a1a', fontSize: '24px', marginBottom: '24px', fontFamily: "Georgia, 'Playfair Display', serif" }
 const text = { color: '#333333', lineHeight: '1.8', marginBottom: '20px', fontSize: '15px' }
@@ -279,7 +278,9 @@ const button = {
   color: '#ffffff',
   textDecoration: 'none',
   fontSize: '13px',
-  letterSpacing: '0.15em',
+  letterSpacing: '0.05em',
+  fontFamily: 'Arial, Helvetica, sans-serif',
+  transition: 'background-color 220ms ease',
   textTransform: 'uppercase' as const,
   borderRadius: '24px',
 }

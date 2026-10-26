@@ -23,6 +23,9 @@ export function ApplicationDraftBody({ body, approval, activationUrl }: { body: 
 
 const PortalAction = ({ activationUrl }: { activationUrl?: string }) => <Section style={{ textAlign: 'center', margin: '32px 0' }}>
   <Button href={activationUrl || "https://www.maisonaffluency.com/trade/login"} style={button}>Access Your Trade Portal</Button>
+  <Text style={{ color: '#888888', fontSize: '12px', lineHeight: '1.7', wordBreak: 'break-all' }}>If the button above does not work, copy and paste this link into your browser:<br />
+    <a href={activationUrl || 'https://www.maisonaffluency.com/trade/login'} style={{ color: '#1a1a1a' }}>{activationUrl || 'https://www.maisonaffluency.com/trade/login'}</a>
+  </Text>
 </Section>
 const heading = { color: '#1a1a1a', fontSize: '24px', marginBottom: '24px' }
 const text = { color: '#333333', lineHeight: '1.8', marginBottom: '20px', fontSize: '15px' }
@@ -30,4 +33,4 @@ const title = { color: '#1a1a1a', fontSize: '15px', fontWeight: 'bold' as const,
 const description = { ...text, fontSize: '14px', lineHeight: '1.6', margin: '0' }
 const icon = { verticalAlign: 'top' as const, width: '28px', paddingBottom: '18px', color: '#1a1a1a', fontSize: '14px' }
 const details = { color: '#333333', fontSize: '13px', lineHeight: '1.6', margin: '8px 0 0 18px', paddingLeft: '14px' }
-const button = { display: 'inline-block', padding: '14px 32px', backgroundColor: '#1a1a1a', color: '#ffffff', textDecoration: 'none', fontSize: '13px', letterSpacing: '0.15em', textTransform: 'uppercase' as const, borderRadius: '24px' }
+const button = { display: 'inline-block', padding: '14px 32px', backgroundColor: '#1a1a1a', color: '#ffffff', textDecoration: 'none', fontSize: '13px', letterSpacing: '0.05em', fontFamily: 'Arial, Helvetica, sans-serif', transition: 'background-color 220ms ease', textTransform: 'uppercase' as const, borderRadius: '24px' }
