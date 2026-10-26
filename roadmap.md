@@ -1,5 +1,5 @@
 ## Trade approval email refinement
-- [ ] Personalise approval greetings, apply exact Felix copy and refine header/button typography; verify shared draft and delivered-template rendering without sending to applicants.
+- [x] Personalised first-name/company-team approval greetings, exact Felix benefit copy, 0.05em header/CTA tracking and charcoal hover enhancement. Signed-in actual approval draft opened/cancelled; named/team/draft renderings inspected desktop/phone with no overflow/errors, 23 regressions pass. Existing send/preview services deployed and live previews verified without sending emails. Admin review UI remains preview-only; publish and GitHub sync needed. Hover depends on email-client CSS support.
 
 ## Six-slide Trade carousel
 - [x] Added /trade-carousel with exact supplied copy and original contain-only screenshots, six active dots and arrow/keyboard navigation. All images loaded on desktop/phone with no overflow or browser errors. Generated artwork candidates altered screenshot lettering, so the component uses authentic originals instead. Preview only.
