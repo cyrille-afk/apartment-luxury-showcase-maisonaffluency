@@ -176,12 +176,11 @@ export default function SelectionDrawer({
     if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape" || e.defaultPrevented) return;
-      if (pairingsEnabled && pairingsVisible) dismissPairings();
-      else onClose();
+      onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [isOpen, onClose, pairingsEnabled, pairingsVisible, dismissPairings]);
+  }, [isOpen, onClose]);
 
   // Portal to document.body so the drawer escapes any ancestor stacking
   // context (transforms, blurs) — its z-[10000] must always beat the
@@ -199,19 +198,9 @@ export default function SelectionDrawer({
         onClick={onClose}
         className={cn(
           "absolute inset-0 bg-foreground/40 transition-opacity duration-300",
-          isOpen && pairingsEnabled && pairingsVisible && "backdrop-blur-md",
           isOpen ? "opacity-100" : "opacity-0"
         )}
       />
-
-      {pairingsEnabled && <CuratedPairings
-        open={pairingsVisible}
-        title={lines?.[lines.length - 1]?.title || title || ""}
-        brand={lines?.[lines.length - 1]?.brand || brand || ""}
-        excludedIds={(lines || []).map((line) => line.key.split("::")[0])}
-        onDismiss={dismissPairings}
-        onExplore={onClose}
-      />}
 
       {/* Panel — slides right-to-left */}
       <aside
