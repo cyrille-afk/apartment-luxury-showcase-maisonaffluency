@@ -6,13 +6,17 @@ export function collectionTourCardOrigin(viewportWidth: number, cardWidth: numbe
   return { left: viewportWidth - cardWidth - 24, top: Math.max(80, headingTop - 32) };
 }
 
-export function collectionTourCardPlacement({ viewport, width, height, photoTop, headingRight }: {
-  viewport: { w: number; h: number }; width: number; height: number; photoTop: number; headingRight: number;
+export function collectionTourCardPlacement({ viewport, width, height, photoTop, headingRight, tabsRight = 0 }: {
+  viewport: { w: number; h: number }; width: number; height: number; photoTop: number; headingRight: number; tabsRight?: number;
 }): TourRect | null {
-  const left = viewport.w - width - 24;
+  // Sit beside the Collection header and tabs rather than at the extreme
+  // right edge, while staying fully above the gallery photographs.
+  const contentRight = Math.max(headingRight, tabsRight);
+  const maxLeft = viewport.w - width - 24;
+  const left = Math.min(contentRight + 32, maxLeft);
   const top = 80;
   const availableHeight = Math.min(viewport.h - 16, photoTop - 12) - top;
-  if (left < headingRight + 20 || availableHeight < 160) return null;
+  if (left < contentRight + 20 || availableHeight < 160) return null;
   return { left, top, width, height: Math.min(height, availableHeight) };
 }
 

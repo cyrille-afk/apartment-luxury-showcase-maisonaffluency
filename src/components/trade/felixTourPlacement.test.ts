@@ -6,7 +6,12 @@ const overlaps = (a: TourRect, b: TourRect) => a.left < b.left + b.width && a.le
 describe("Collection tour upper-right placement", () => {
   it("constrains the card to existing space above photographs without changing the page", () => {
     expect(collectionTourCardPlacement({ viewport: { w: 1946, h: 1181 }, width: 380, height: 510, photoTop: 580, headingRight: 1016 }))
-      .toEqual({ left: 1542, top: 80, width: 380, height: 488 });
+      .toEqual({ left: 1048, top: 80, width: 380, height: 488 });
+  });
+  it("sits clear of the tab row and falls back when the content fills the width", () => {
+    expect(collectionTourCardPlacement({ viewport: { w: 1946, h: 1181 }, width: 380, height: 510, photoTop: 580, headingRight: 900, tabsRight: 1200 }))
+      .toEqual({ left: 1232, top: 80, width: 380, height: 488 });
+    expect(collectionTourCardPlacement({ viewport: { w: 1280, h: 900 }, width: 380, height: 510, photoTop: 580, headingRight: 900, tabsRight: 1200 })).toBeNull();
   });
   for (const w of [1946, 1280, 1024]) {
     it(`keeps the card above photographs and clear of the heading at ${w}px`, () => {

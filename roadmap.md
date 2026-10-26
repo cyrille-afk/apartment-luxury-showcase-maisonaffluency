@@ -186,3 +186,4 @@
 ## Price-list content audit
 - [x] Inventory all public objects regardless of names and inspect document/image contents with saved revision-keyed results; flag covers with possible prices, keep incomplete coverage explicit.
 - [x] Verified signed-in Parsa cover (no prices detected) and unrelated-filename PDF (Mernoe price list detected, eight prices); saved results visible, anonymous inventory refused/results hidden, five focused tests passed. Full public-content scan remains explicitly incomplete and user-controlled.
+- [x] Steps 3–4 tour card sits beside the Collection header/tabs instead of the extreme right edge, bounded above the first room title/caption (h3 + images), never overlapping tabs or gallery text. Verified signed-in at 1946×1181 on both Collection tabs: zero tab/photo/caption overlap; 18 placement tests pass, build clean. Preview only; GitHub sync needed.
