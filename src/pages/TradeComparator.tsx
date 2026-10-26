@@ -19,7 +19,6 @@ import { comparatorDesignerGroups, comparatorPrices, comparatorDetails, fetchCom
 import { useAuth } from "@/hooks/useAuth";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
-import { useStudio } from "@/hooks/useStudio";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { COMPARATOR_CURRENCIES, comparatorCurrency, convertComparatorCents, formatMoney, type ComparatorCurrency, type ComparatorRates } from "@/lib/comparatorCurrency";
 import { useSearchParams } from "@/lib/router-compat";
@@ -75,7 +74,6 @@ function ComparisonPrice({ product, net, currency }: { product: TradeProduct | n
 
 export default function TradeComparator() {
   const { user } = useAuth();
-  const { currentStudio } = useStudio();
   const [displayPref, setDisplayPref] = useTradeDisplayCurrency();
   const displayCurrency = comparatorCurrency(displayPref);
   const fxRates = useComparatorRates();
@@ -92,6 +90,8 @@ export default function TradeComparator() {
   const setCompareList = (update: TradeProduct[] | ((list: TradeProduct[]) => TradeProduct[])) => setDraft(d => ({ ...d, compareList: typeof update === "function" ? update(d.compareList) : update }));
   const setOpenDesigners = (update: (value: Set<string>) => Set<string>) => setDraft(d => ({ ...d, openDesigners: [...update(new Set(d.openDesigners))] }));
   const projectId = params.get("project");
+  const [selectionExpanded, setSelectionExpanded] = useState<boolean | null>(null);
+  const selectionOpen = selectionExpanded ?? compareList.length === 0;
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [coverOpen, setCoverOpen] = useState(false);
@@ -310,7 +310,7 @@ export default function TradeComparator() {
 
   return (
     <>
-      <div className="mx-auto w-full max-w-6xl space-y-6 [@media(min-width:1440px)]:max-w-[min(90vw,1800px)]">
+      <div className="mx-auto w-full max-w-6xl space-y-3 [@media(min-width:1440px)]:max-w-[min(90vw,1800px)]">
 
 
 
@@ -321,6 +321,14 @@ export default function TradeComparator() {
         <Dialog open={savedOpen} onOpenChange={setSavedOpen}>
           <DialogContent className="max-h-[85dvh] w-[calc(100%-2rem)] max-w-2xl overflow-y-auto">
             <DialogHeader><DialogTitle className="font-display font-normal">Saved comparisons</DialogTitle><DialogDescription className="sr-only">Choose a saved product comparison</DialogDescription></DialogHeader>
+          {shortlists.length > 0 && <ul className="flex flex-wrap gap-2" aria-label="Saved shortlists">
+            {shortlists.map((s: any) => (
+              <li key={s.id} className="flex items-center gap-1 border border-border px-2 py-1">
+                <Button variant="ghost" size="sm" className="h-7 px-2 font-body text-xs" onClick={() => openShortlist(s)}>{s.name} ({(s.items || []).length})</Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7" aria-label={`Copy client link for ${s.name}`} onClick={() => shareShortlist(s.share_token)}><Link2 className="h-3.5 w-3.5" /></Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7" aria-label={`Delete ${s.name}`} onClick={() => deleteShortlist(s.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+              </li>))}
+          </ul>}
             <Input value={savedSearch} onChange={event => setSavedSearch(event.target.value)} placeholder="Search comparisons or projects…" aria-label="Search saved comparisons" />
             {savedLoading ? <p role="status" className="py-6 text-sm text-muted-foreground">Loading comparisons…</p> : savedError ? <div role="alert"><p className="text-sm text-destructive">Saved comparisons could not be loaded.</p><Button variant="outline" size="sm" className="mt-3" onClick={() => refetchAllComparisons()}>Try again</Button></div> : <ul className="divide-y divide-border">
               {allComparisons.filter(saved => `${saved.name} ${saved.projects?.name || ""}`.toLowerCase().includes(savedSearch.toLowerCase())).map(saved => <li key={saved.id} className="flex items-center justify-between gap-4 py-4">
@@ -394,7 +402,33 @@ export default function TradeComparator() {
             <Label htmlFor="preview-originalPrices" className="text-xs font-medium text-muted-foreground">Show original supplier prices beneath converted prices</Label>
           </div>} />
 
-        <ComparatorSelectionDrawer count={compareList.length}>
+        <ProductComparisonTable renderControls={filters => <>
+          <section ref={actionsRef} aria-label="Comparison controls" className="sticky top-[var(--comparison-actions-top,4rem)] z-20 bg-background [&_button]:font-body [&_button]:text-xs [&_button]:font-medium">
+            <div aria-label="Comparison actions" className="flex flex-col gap-2 py-2 xl:flex-row xl:items-center xl:justify-between">
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
+                <Input value={shortlistName} onChange={e => setShortlistName(e.target.value)} placeholder="Shortlist name" aria-label="Shortlist name" className="h-9 w-40 rounded-none border-0 bg-transparent px-0 font-body text-sm shadow-none sm:w-56 focus-visible:ring-1" />
+                <ProjectPicker value={projectId} onChange={value => { const next = new URLSearchParams(params); if (value) next.set("project", value); else next.delete("project"); setParams(next); }} />
+                <Button size="icon-sm" variant="ghost" title="Save shortlist to project" aria-label="Save shortlist to project" onClick={saveShortlist} disabled={compareList.length === 0 || !projectId || saving}><Bookmark className="h-3.5 w-3.5" /></Button>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 xl:justify-end">
+                <Label htmlFor="comparator-currency" className="sr-only">Display Currency</Label>
+                <Select value={displayCurrency} onValueChange={value => setDisplayPref(comparatorCurrency(value))}>
+                  <SelectTrigger id="comparator-currency" aria-label="Display Currency" className="h-9 w-24 font-body text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>{COMPARATOR_CURRENCIES.map(c => <SelectItem key={c} value={c} className="font-body text-xs">{c}</SelectItem>)}</SelectContent>
+                </Select>
+                <Button size="sm" variant="outline" onClick={() => void editCover()} disabled={!draftReady || exporting || coverLoading}><FilePenLine className="h-3.5 w-3.5" />{coverLoading ? "Loading details…" : "Edit PDF cover"}</Button>
+                <Button size="sm" variant="default" onClick={() => void exportPdf()} disabled={compareList.length === 0 || exporting || (visiblePieces !== null && visiblePieces.length === 0)}><FileDown className="h-3.5 w-3.5" />{exporting ? "Preparing PDF…" : visiblePieces && visiblePieces.length !== compareList.length ? `Export visible (${visiblePieces.length})` : "Export comparison PDF"}</Button>
+              </div>
+            </div>
+            <div aria-label="Comparison filter strip" className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-y border-border/60 bg-muted px-3 py-2 [&_button:not([data-slot])]:h-8">
+              {filters}
+              <div className="ml-auto flex shrink-0 items-center gap-3">
+                <span className="font-body text-xs text-muted-foreground" aria-live="polite">{compareList.length}/4 Pieces Selected</span>
+                <Button variant="link" size="sm" className="h-8 px-0" aria-expanded={selectionOpen} aria-controls="comparator-selection-drawer" onClick={() => setSelectionExpanded(!selectionOpen)}>{selectionOpen ? "Done" : "Modify Selection"}</Button>
+              </div>
+            </div>
+          </section>
+          <ComparatorSelectionDrawer count={compareList.length} open={selectionOpen}>
           <div className="flex flex-col gap-4 [@media(min-width:1440px)]:flex-row [@media(min-width:1440px)]:items-center">
             <div className="relative w-full shrink-0 [@media(min-width:1440px)]:w-80">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -439,7 +473,7 @@ export default function TradeComparator() {
               <Button variant={source === "catalogue" ? "default" : "outline"} size="sm" onClick={() => setSource("catalogue")}>Designers A–Z</Button>
               <Button variant={source === "favorites" ? "default" : "outline"} size="sm" onClick={() => { setSource("favorites"); setLetter(""); setSearch(""); }}><Heart className="mr-2 h-3 w-3" />Favourites</Button>
             </div>
-            <span className="font-body text-xs text-muted-foreground">{compareList.length}/4 selected</span>
+
           </div>
           <nav className="mt-3 flex flex-wrap gap-1" aria-label="Designer alphabet">
             {["", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"].map(initial => (
@@ -469,34 +503,7 @@ export default function TradeComparator() {
             })}
           </div>
         </ComparatorSelectionDrawer>
-
-        <section ref={actionsRef} aria-label="Comparison actions" className="sticky top-[var(--comparison-actions-top,4rem)] z-20 flex flex-col gap-3 border-b border-border bg-background py-3 [&_button]:h-9 [&_button]:font-body [&_button]:text-xs [&_button]:font-medium">
-          <div className="flex flex-wrap items-center gap-2">
-            <Input value={shortlistName} onChange={(e) => setShortlistName(e.target.value)} placeholder="Shortlist name (e.g. client, project)" aria-label="Shortlist name" className="h-9 w-full font-body text-xs sm:w-64" />
-            <ProjectPicker value={projectId} onChange={value => { const next = new URLSearchParams(params); if (value) next.set("project", value); else next.delete("project"); setParams(next); }} />
-            <Button size="sm" variant="outline" onClick={saveShortlist} disabled={compareList.length === 0 || !projectId || saving}><Bookmark className="mr-2 h-3.5 w-3.5" />{saving ? "Saving…" : "Save shortlist to project"}</Button>
-            <Button size="sm" variant="outline" onClick={() => void editCover()} disabled={!draftReady || exporting || coverLoading}><FilePenLine className="mr-2 h-3.5 w-3.5" />{coverLoading ? "Loading details…" : "Edit PDF cover"}</Button>
-            <div className="flex items-center gap-2 sm:ml-auto">
-              {currentStudio && <span className="hidden font-body text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground lg:inline">{currentStudio.display_name || currentStudio.name}</span>}
-              <Label htmlFor="comparator-currency" className="font-body text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground/70">Display Currency</Label>
-              <Select value={displayCurrency} onValueChange={value => setDisplayPref(comparatorCurrency(value))}>
-                <SelectTrigger id="comparator-currency" className="h-9 w-24 font-body text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent>{COMPARATOR_CURRENCIES.map(c => <SelectItem key={c} value={c} className="font-body text-xs">{c}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <Button size="sm" variant="outline" onClick={() => void exportPdf()} disabled={compareList.length === 0 || exporting || (visiblePieces !== null && visiblePieces.length === 0)}><FileDown className="mr-2 h-3.5 w-3.5" />{exporting ? "Preparing PDF…" : visiblePieces && visiblePieces.length !== compareList.length ? `Export visible (${visiblePieces.length})` : "Export comparison PDF"}</Button>
-          </div>
-          {shortlists.length > 0 && <ul className="flex flex-wrap gap-2" aria-label="Saved shortlists">
-            {shortlists.map((s: any) => (
-              <li key={s.id} className="flex items-center gap-1 border border-border px-2 py-1">
-                <Button variant="ghost" size="sm" className="h-7 px-2 font-body text-xs" onClick={() => openShortlist(s)}>{s.name} ({(s.items || []).length})</Button>
-                <Button variant="ghost" size="icon" className="h-7 w-7" aria-label={`Copy client link for ${s.name}`} onClick={() => shareShortlist(s.share_token)}><Link2 className="h-3.5 w-3.5" /></Button>
-                <Button variant="ghost" size="icon" className="h-7 w-7" aria-label={`Delete ${s.name}`} onClick={() => deleteShortlist(s.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
-              </li>))}
-          </ul>}
-        </section>
-
-        <ProductComparisonTable products={comparisonSlots} fields={FIELDS} onRemove={removeFromCompare} onVisibleProductsChange={setVisiblePieces} renderNote={product => <div><DesignerNoteToolbar targetId={`piece-note-${product.id}`} maxLength={1000} value={draft.pieceNotes[product.id] ?? ""} onChange={value => setDraft(d => ({ ...d, pieceNotes: { ...d.pieceNotes, [product.id]: value } }))} /><Textarea id={`piece-note-${product.id}`} aria-label={`Designer notes for ${product.product_name}`} maxLength={1000} rows={3} placeholder="Add notes…" value={draft.pieceNotes[product.id] ?? ""} onChange={e => { const value = e.target.value; setDraft(d => ({ ...d, pieceNotes: { ...d.pieceNotes, [product.id]: value } })); }} className="min-h-20 resize-y border-border/70 bg-background/60 font-body text-sm" /></div>} renderPrice={(product, net) => <ComparisonPrice product={product} net={net} currency={displayCurrency} />} />
+        </>} products={comparisonSlots} fields={FIELDS} onRemove={removeFromCompare} onVisibleProductsChange={setVisiblePieces} renderNote={product => <div><DesignerNoteToolbar targetId={`piece-note-${product.id}`} maxLength={1000} value={draft.pieceNotes[product.id] ?? ""} onChange={value => setDraft(d => ({ ...d, pieceNotes: { ...d.pieceNotes, [product.id]: value } }))} /><Textarea id={`piece-note-${product.id}`} aria-label={`Designer notes for ${product.product_name}`} maxLength={1000} rows={3} placeholder="Add notes…" value={draft.pieceNotes[product.id] ?? ""} onChange={e => { const value = e.target.value; setDraft(d => ({ ...d, pieceNotes: { ...d.pieceNotes, [product.id]: value } })); }} className="min-h-20 resize-y border-border/70 bg-background/60 font-body text-sm" /></div>} renderPrice={(product, net) => <ComparisonPrice product={product} net={net} currency={displayCurrency} />} />
         {compareList.length > 0 && <p className="mt-3 font-body text-[10px] tracking-wide text-muted-foreground">
           Prices converted to {displayCurrency} with Maison Affluency's synced FX rates{fxRates.data?.updatedAt ? ` · last updated ${new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short" }).format(fxRates.data.updatedAt)}` : ""}. Original supplier prices shown beneath.
         </p>}
