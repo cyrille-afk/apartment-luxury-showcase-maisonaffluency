@@ -567,7 +567,7 @@ export default function PayoutAccountsSection() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => handleDialogOpenChange(false)}>Cancel</Button>
             <Button onClick={handleCreate} disabled={creating || !form.account_holder_name.trim()}>
               {creating ? "Saving…" : "Save & continue"}
             </Button>
