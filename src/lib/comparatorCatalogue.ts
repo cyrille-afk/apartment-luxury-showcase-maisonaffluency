@@ -37,10 +37,22 @@ export function comparatorDetails(source: DetailSource) {
   return { dimensions: withImperialPerLine(dimensions), materials };
 }
 
+/** The legacy founder field can name a person; only a published profile can identify a parent maker. */
+export function comparatorParentMaker(founder: string | null | undefined, publishedNames: string[]) {
+  if (!founder?.trim()) return null;
+  return publishedNames.find(name => fold(name.trim()) === fold(founder.trim())) ?? null;
+}
+
 export async function fetchComparatorDetails() {
+  const { data: profiles, error: profileError } = await supabase.from("designers").select("name").eq("is_published", true);
+  if (profileError) throw profileError;
+  const publishedNames = (profiles ?? []).map(profile => profile.name);
   const { data, error } = await supabase.from("designer_curator_picks").select("id, dimensions, materials, width_mm, depth_mm, height_mm, size_variants, edition, edition_number, edition_signing, tags, designers(founder)").eq("is_hidden", false).eq("hidden_in_studio", false);
   if (error) throw error;
-  return new Map((data ?? []).map(row => [row.id, { ...comparatorDetails(row as DetailSource), maker_name: row.designers?.founder, reedition_by: row.designers?.founder ?? undefined, edition: formatEditionLabel(row) ?? undefined, tags: row.tags ?? [] }]));
+  return new Map((data ?? []).map(row => {
+    const maker = comparatorParentMaker(row.designers?.founder, publishedNames);
+    return [row.id, { ...comparatorDetails(row as DetailSource), maker_name: maker, reedition_by: maker ?? undefined, edition: formatEditionLabel(row) ?? undefined, tags: row.tags ?? [] }];
+  }));
 }
 
 export function comparatorPrices(row: { trade_price_cents: number | null; rrp_price_cents: number | null }, discountPct: number) {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { comparatorDesignerGroups, comparatorPrices, comparatorDetails } from "./comparatorCatalogue";
+import { comparatorDesignerGroups, comparatorPrices, comparatorDetails, comparatorParentMaker } from "./comparatorCatalogue";
 import type { TradeProduct } from "./tradeProducts";
 
 const piece = (id: string, brand_name: string, product_name: string): TradeProduct => ({ id, brand_name, product_name, category: "Seating", tags: [], image_url: null });
@@ -20,6 +20,17 @@ describe("comparator catalogue", () => {
     const products = [{ ...piece("frank", "Jean-Michel Frank", "Chair"), maker_name: "Ecart" }, { ...piece("fuga", "Cristián Mohaded", "Fuga"), maker_name: "CC-Tapis" }];
     expect(comparatorDesignerGroups(products, "", "E")[0]?.pieces.map(p => p.id)).toEqual(["frank"]);
     expect(comparatorDesignerGroups(products, "CC-Tapis", "").find(g => g.designer === "CC-Tapis")?.pieces.map(p => p.id)).toEqual(["fuga"]);
+  });
+  it("does not turn Dagmar founder Aaron Fitzgerald into a catalogue designer", () => {
+    const maker = comparatorParentMaker("Aaron Fitzgerald", ["Dagmar", "Ecart", "CC-Tapis"]);
+    expect(maker).toBeNull();
+    const groups = comparatorDesignerGroups([{ ...piece("clam", "Dagmar", "Clam Chair, 1944"), subtitle: "Arnold Madsen", maker_name: maker }], "", "");
+    expect(groups.map(group => group.designer)).toEqual(["Dagmar"]);
+    expect(groups[0].pieces[0].subtitle).toBe("Arnold Madsen");
+  });
+  it("preserves published parent houses despite accent and case differences", () => {
+    expect(comparatorParentMaker("écart", ["Dagmar", "Ecart"])).toBe("Ecart");
+    expect(comparatorParentMaker("CC-Tapis", ["CC-Tapis"])).toBe("CC-Tapis");
   });
   it("includes favorites stored with the trade twin identity", () => {
     expect(comparatorDesignerGroups([{ ...piece("pick", "Ecart", "Chair"), trade_product_id: "trade" }], "", "", new Set(["trade"]))[0]?.pieces[0].id).toBe("pick");
