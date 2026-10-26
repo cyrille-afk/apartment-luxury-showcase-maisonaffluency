@@ -1,4 +1,5 @@
 # src/lib rules
+- Comparator search and alphabet transitions use shared pure draft helpers that clear the competing filter without replacing selections — keeps UI and persisted interaction state consistent.
 - Comparator material menus expand recognised present families through the shared taxonomy; family-wide choices use distinct labels from non-selectable headers — prevents missing species and duplicate-looking group names without changing recorded finish data.
 - Comparator edition labels reuse the curator-pick edition/house helpers and rehydrate live edition and house metadata after draft restore — keeps mixed-maker house attribution without storing prices or inventing edition copy.
 - Comparator dimension parsing is isolated in comparatorDimensions and converts only recorded length units into labelled metric/imperial rows; supplier inch duplicates are omitted and unknown text stays unconfirmed — avoids fabricated measurements and changes to PDF/product-page formatting.

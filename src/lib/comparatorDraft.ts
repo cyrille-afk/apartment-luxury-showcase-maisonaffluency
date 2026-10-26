@@ -19,6 +19,14 @@ export function emptyComparatorDraft(): ComparatorDraft {
   return { compareList: [], search: "", letter: "", source: "catalogue", openDesigners: [], shortlistName: "", coverEdits: {}, pieceNotes: {} };
 }
 
+export function searchComparatorDraft(draft: ComparatorDraft, search: string): ComparatorDraft {
+  return { ...draft, search, letter: "" };
+}
+
+export function filterComparatorDraftByLetter(draft: ComparatorDraft, letter: string): ComparatorDraft {
+  return { ...draft, letter, search: "" };
+}
+
 // Explicitly exclude prices and account data, including from restored snapshots.
 export function sanitizeComparatorDraft(value: unknown): ComparatorDraft {
   const draft = emptyComparatorDraft();

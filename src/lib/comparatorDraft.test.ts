@@ -1,5 +1,26 @@
 import { describe, expect, it } from "vitest";
-import { restoreSavedComparison, sanitizeComparatorDraft } from "./comparatorDraft";
+import { emptyComparatorDraft, filterComparatorDraftByLetter, searchComparatorDraft, restoreSavedComparison, sanitizeComparatorDraft } from "./comparatorDraft";
+
+describe("selection filter interaction", () => {
+  it("starts in the full catalogue with All active and no search", () => {
+    expect(emptyComparatorDraft()).toMatchObject({ compareList: [], source: "catalogue", letter: "", search: "" });
+  });
+  it("clears the letter when searching for a designer or piece", () => {
+    const next = searchComparatorDraft({ ...emptyComparatorDraft(), letter: "A" }, "Clam Chair");
+    expect(next.search).toBe("Clam Chair");
+    expect(next.letter).toBe("");
+  });
+  it("clears search when choosing a letter", () => {
+    const next = filterComparatorDraftByLetter({ ...emptyComparatorDraft(), search: "Dagmar" }, "B");
+    expect(next.search).toBe("");
+    expect(next.letter).toBe("B");
+  });
+  it("clears search when returning to All", () => {
+    const next = filterComparatorDraftByLetter({ ...emptyComparatorDraft(), search: "Dagmar" }, "");
+    expect(next.search).toBe("");
+    expect(next.letter).toBe("");
+  });
+});
 
 describe("comparison cover edits", () => {
   it("preserves editable project and client details through draft restoration", () => {

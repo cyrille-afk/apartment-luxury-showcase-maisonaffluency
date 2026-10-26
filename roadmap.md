@@ -1,3 +1,6 @@
+## Comparator cold start and filtering
+- [x] Cold-start catalogue shows Achille Salvagni Atelier, Adrien Messié and Alex Proba with All active and four empty slots. Search/letter reset each other; designer and piece matches, adding without collapse, Done/reopen and phone containment verified signed-in. Project assignment sits beside Material; 35 tests pass and build clean. Preview only; GitHub sync needed.
+
 ## Comparator selection hierarchy
 - [x] Separate Done from piece removals with global actions, alphabetical filters, then search/scrolling selected pieces. Signed-in four-piece desktop/phone verification: 102px/206px Done-to-X separation, loaded thumbnails, contained phone scrolling, material menu and category dialog, removal, Done/reopen and Clear all work; no page errors, 35 regressions pass. Preview only; GitHub sync needed.
 

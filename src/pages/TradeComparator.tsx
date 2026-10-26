@@ -27,7 +27,7 @@ import { useComparatorDraft } from "@/hooks/useComparatorDraft";
 import { ProductComparisonTable } from "@/components/trade/ProductComparisonTable";
 import DesignerNoteToolbar from "@/components/trade/DesignerNoteToolbar";
 import { ComparatorSelectionDrawer } from "@/components/trade/ComparatorSelectionDrawer";
-import { restoreSavedComparison, type ComparisonCoverEdits } from "@/lib/comparatorDraft";
+import { filterComparatorDraftByLetter, searchComparatorDraft, restoreSavedComparison, type ComparisonCoverEdits } from "@/lib/comparatorDraft";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
@@ -84,9 +84,9 @@ export default function TradeComparator() {
   const { draft, setDraft, ready: draftReady, hasStoredDraft } = useComparatorDraft(user?.id, requestedShortlist);
   const { search, compareList, letter, source, shortlistName } = draft;
   const openDesigners = new Set(draft.openDesigners);
-  const setSearch = (search: string) => setDraft(d => ({ ...d, search }));
-  const setLetter = (letter: string) => setDraft(d => ({ ...d, letter }));
-  const setSource = (source: "catalogue" | "favorites") => setDraft(d => ({ ...d, source }));
+  const setSearch = (search: string) => { setSelectionExpanded(true); setDraft(d => searchComparatorDraft(d, search)); };
+  const setLetter = (letter: string) => { setSelectionExpanded(true); setDraft(d => filterComparatorDraftByLetter(d, letter)); };
+  const setSource = (source: "catalogue" | "favorites") => { setSelectionExpanded(true); setDraft(d => ({ ...d, source, search: "", letter: "" })); };
   const setShortlistName = (shortlistName: string) => setDraft(d => ({ ...d, shortlistName }));
   const setCompareList = (update: TradeProduct[] | ((list: TradeProduct[]) => TradeProduct[])) => setDraft(d => ({ ...d, compareList: typeof update === "function" ? update(d.compareList) : update }));
   const setOpenDesigners = (update: (value: Set<string>) => Set<string>) => setDraft(d => ({ ...d, openDesigners: [...update(new Set(d.openDesigners))] }));
@@ -142,6 +142,7 @@ export default function TradeComparator() {
   const addToCompare = (p: TradeProduct) => {
     if (compareList.length >= 4) return;
     if (compareList.find((c) => c.id === p.id)) return;
+    setSelectionExpanded(true);
     setCompareList((prev) => [...prev, p]);
   };
 
@@ -409,7 +410,6 @@ export default function TradeComparator() {
             <div aria-label="Comparison actions" className="flex flex-wrap items-center gap-2 py-1.5 lg:flex-nowrap">
               <div className="flex min-w-0 flex-1 items-center gap-2">
                 <Input value={shortlistName} onChange={e => setShortlistName(e.target.value)} placeholder="Shortlist name" aria-label="Shortlist name" className="h-9 min-w-0 flex-1 rounded-none border-0 bg-transparent px-0 font-body text-sm shadow-none sm:max-w-56 focus-visible:ring-1" />
-                <ProjectPicker value={projectId} onChange={value => { const next = new URLSearchParams(params); if (value) next.set("project", value); else next.delete("project"); setParams(next); }} />
               </div>
               <div className="ml-auto flex shrink-0 items-center gap-2">
                 <Label htmlFor="comparator-currency" className="sr-only">Display Currency</Label>
@@ -431,6 +431,7 @@ export default function TradeComparator() {
             <div aria-label="Comparison filter strip" className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-y border-border bg-muted/50 px-3 py-3">
               <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
                 {filters}
+                <ProjectPicker value={projectId} onChange={value => { const next = new URLSearchParams(params); if (value) next.set("project", value); else next.delete("project"); setParams(next); }} />
                 {categorise && <Button variant="ghost" size="sm" onClick={categorise} className="h-8 gap-1.5 px-2"><Tags className="h-3.5 w-3.5" />Categorise finishes</Button>}
               </div>
               <div className="ml-auto flex shrink-0 items-center gap-3 sm:gap-4">
@@ -444,7 +445,7 @@ export default function TradeComparator() {
           <div aria-label="Alphabetical filters" className="flex min-w-0 flex-col gap-3 border-b border-border/50 pb-4 xl:flex-row xl:items-center xl:gap-5">
             <div className="flex shrink-0 gap-2" role="group" aria-label="Product source">
               <Button variant={source === "catalogue" ? "default" : "outline"} size="sm" aria-pressed={source === "catalogue"} onClick={() => setSource("catalogue")}>Designers A–Z</Button>
-              <Button variant={source === "favorites" ? "default" : "outline"} size="sm" aria-pressed={source === "favorites"} onClick={() => { setSource("favorites"); setLetter(""); setSearch(""); }}><Heart className="mr-2 h-3 w-3" />Favourites</Button>
+              <Button variant={source === "favorites" ? "default" : "outline"} size="sm" aria-pressed={source === "favorites"} onClick={() => setSource("favorites")}><Heart className="mr-2 h-3 w-3" />Favourites</Button>
             </div>
             <nav className="flex min-w-0 flex-1 gap-1 overflow-x-auto pb-1 motion-safe:scroll-smooth" aria-label="Designer alphabet">
               {["", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"].map(initial => (
@@ -493,7 +494,7 @@ export default function TradeComparator() {
             </div>
           </div>
 
-          <div className="max-h-80 min-h-44 overflow-y-auto">
+          <div role="region" aria-label="Designer catalogue" className="max-h-80 min-h-44 overflow-y-auto">
             {isLoading ? <div className="flex h-44 items-center justify-center"><DotCircleLoader size="sm" /></div> : groups.length === 0 ? (
               <p className="py-10 text-center font-body text-sm text-muted-foreground">{source === "favorites" ? "No matching favourites" : "No matching designers or pieces"}</p>
             ) : groups.map(({ designer, pieces }) => {
