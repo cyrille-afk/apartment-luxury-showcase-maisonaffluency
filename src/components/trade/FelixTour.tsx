@@ -611,7 +611,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         height: Math.max(...boxes.map((r) => r.bottom)) - Math.min(...boxes.map((r) => r.top)),
       } : null;
       // Protect all visible page headings/tabs, not just this step's spotlight.
-      const protectedElements = Array.from(document.querySelectorAll('h1, h2, h3, [role="heading"], [role="tab"], div.border-b > button, [data-felix-target="collection-overview"]'))
+      const protectedElements = Array.from(document.querySelectorAll('h1, h2, h3, [role="heading"], [role="tab"], [role="switch"], div.border-b > button, [data-felix-target="collection-overview"], [data-felix-target="header-client-view"]'))
         .filter((el) => !el.closest('[data-felix-tour-card]') && (el as HTMLElement).offsetParent !== null);
       // The sidebar is a hard obstacle when space allows, but on short
       // viewports a card may legitimately overlap it as a last resort.
