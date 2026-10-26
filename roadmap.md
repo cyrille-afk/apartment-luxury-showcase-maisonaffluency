@@ -1,3 +1,6 @@
+## Designer editor continuity
+- [ ] Preserve designer filters and drafts across reloads, tab switches and recovery; verify Michel Amar in the signed-in editor.
+
 ## Resources catalogue recovery
 - [x] Removed eager maker PDF previews; document previews use the bundled worker and clean up on exit/timeout. Signed-in Tools → Resources → Delcourt search verified; both real catalogue PDFs downloaded, covers displayed and no page errors. Five recovery/alphabet tests pass, build clean. Preview only; GitHub sync needed.
 

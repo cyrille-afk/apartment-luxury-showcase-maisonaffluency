@@ -52,6 +52,7 @@ import BiographyPdfButton from "@/components/BiographyPdfButton";
 import { applyCuratorPickOrder, sortCuratorPicks } from "@/lib/curatorPickSort";
 import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
 import { lastNameInitial, sortNameKey } from "@/lib/nameFormat";
+import { recoverDesignerEditorDraft } from "./designerEditorRecovery";
 
 const EditorialBiography = lazy(() => import("@/components/EditorialBiography"));
 
@@ -2167,7 +2168,7 @@ const readDesignerEditorDraft = (): Partial<DesignerEditorDraft> => {
   // opens the editor with nothing expanded (unsaved text edits in the draft
   // buffer are kept) so a stuck restore can be bypassed.
   try {
-    if (previousLoadHung || new URLSearchParams(window.location.search).get("fresh") === "1") {
+    if (new URLSearchParams(window.location.search).get("fresh") === "1") {
       localStorage.removeItem(DESIGNER_EDITOR_NAV_KEY);
       sessionStorage.removeItem(DESIGNER_EDITOR_NAV_KEY);
       Object.keys(sessionStorage)
@@ -2200,12 +2201,14 @@ const readDesignerEditorDraft = (): Partial<DesignerEditorDraft> => {
       draft = {
         ...draft,
         search: nav.search ?? draft.search,
-        activeLetter: nav.activeLetter ?? draft.activeLetter ?? null,
-        expandedId: nav.expandedId ?? draft.expandedId ?? null,
+        activeLetter: Object.hasOwn(nav, "activeLetter") ? nav.activeLetter : draft.activeLetter ?? null,
+        expandedId: Object.hasOwn(nav, "expandedId") ? nav.expandedId : draft.expandedId ?? null,
       };
     }
   } catch { /* noop */ }
-  return draft;
+  // A genuinely interrupted restore may collapse the heavy accordion, but
+  // must never send the editor back to the beginning of All designers.
+  return recoverDesignerEditorDraft(draft, {}, previousLoadHung);
 };
 
 
@@ -2222,10 +2225,20 @@ const TradeDesignersAdmin = () => {
   const [initialDraft] = useState<Partial<DesignerEditorDraft>>(() => readDesignerEditorDraft());
   // Clear the freeze-loop guard once the editor has stayed responsive.
   useEffect(() => {
-    const t = window.setTimeout(() => {
+    const markResponsive = () => {
       try { sessionStorage.removeItem(DESIGNER_EDITOR_RESTORE_GUARD_KEY); } catch { /* noop */ }
-    }, 5000);
-    return () => window.clearTimeout(t);
+    };
+    const t = window.setTimeout(markResponsive, 5000);
+    // A normal reload/navigation is not a hung page. Only abrupt termination
+    // without these lifecycle events should leave the crash-loop marker.
+    window.addEventListener("pagehide", markResponsive);
+    window.addEventListener("beforeunload", markResponsive);
+    return () => {
+      window.clearTimeout(t);
+      window.removeEventListener("pagehide", markResponsive);
+      window.removeEventListener("beforeunload", markResponsive);
+      markResponsive();
+    };
   }, []);
 
   // Restore filter state (search + letter) AND the open designer accordion so a
@@ -2306,6 +2319,10 @@ const TradeDesignersAdmin = () => {
     // biography never serializes the entire draft buffer on every keystroke.
     const persistTimer = window.setTimeout(persistDraft, 500);
     window.addEventListener("pagehide", persistDraft);
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") persistDraft();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
 
     // Persist the draft on unload WITHOUT a blocking "Leave site?" prompt.
     // The prompt froze the embedded preview on every reload (code updates
@@ -2318,7 +2335,9 @@ const TradeDesignersAdmin = () => {
 
     return () => {
       window.clearTimeout(persistTimer);
+      persistDraft();
       window.removeEventListener("pagehide", persistDraft);
+      document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("beforeunload", onBeforeUnload);
     };
   }, [search, activeLetter, expandedId, editBuffer, previewId, previewMobile, previewDebug]);
