@@ -1049,7 +1049,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       </div>}
       {ring}
       {secondaryRing}
-      {sidebarAnchor && effectivePlacement && settled && !transitioning && (
+      {sidebarAnchor && step.id !== "quotes" && effectivePlacement && settled && !transitioning && (
         <svg aria-hidden="true" className="pointer-events-none fixed inset-0 z-[140] h-full w-full fill-none stroke-accent" strokeWidth="1.5">
           <path d={`M ${sidebarAnchor.left + sidebarAnchor.width + 8} ${sidebarAnchor.top + sidebarAnchor.height / 2} H ${Math.max(sidebarAnchor.left + sidebarAnchor.width + 12, cardLeft - 12)} V ${cardTop + 28} H ${Math.max(cardLeft, sidebarAnchor.left + sidebarAnchor.width + 12)}`} />
           <path data-felix-sidebar-arrow d={`M ${sidebarAnchor.left + sidebarAnchor.width + 13} ${sidebarAnchor.top + sidebarAnchor.height / 2 - 5} l -5 5 l 5 5`} />
@@ -1110,7 +1110,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
                 style={{ transform: `rotate(${Math.atan2(rect.top + rect.height / 2 - (cardTop + 92), rect.left + rect.width / 2 - (cardLeft + 44)) * 180 / Math.PI}deg)` }}
               />
               <p className="font-body text-sm font-semibold leading-snug">
-                {step.id === "collection" ? "Open The Collection to continue." : step.id === "quotes" ? "Explore the highlighted Collection tabs." : step.id === "white-label" ? "Turn on ‘Use studio branding only’ below to unlock Next." : step.id === "client-view" ? "Switch to Client View to unlock Next." : "Use the highlighted control to continue."}
+                {step.id === "collection" ? "Open The Collection to continue." : step.id === "quotes" ? "Click a different Collection tab." : step.id === "white-label" ? "Turn on ‘Use studio branding only’ below to unlock Next." : step.id === "client-view" ? "Switch to Client View to unlock Next." : "Use the highlighted control to continue."}
               </p>
             </div>
           )}
