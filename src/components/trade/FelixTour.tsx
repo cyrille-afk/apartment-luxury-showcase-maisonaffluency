@@ -621,7 +621,10 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       const inView = (r: { width: number; height: number; bottom: number; top: number; right: number; left: number }) =>
         r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < window.innerHeight && r.right > 0 && r.left < window.innerWidth;
       const toRect = (r: DOMRect) => ({ left: r.left, top: r.top, width: r.width, height: r.height });
-      const featureOnly = [...boxes, ...anchorBoxes].filter(inView).map(toRect);
+      // The secondary orientation target (e.g. the Studio Workspace switch) is
+      // part of what the step teaches: keep it in every obstacle tier so the
+      // card never covers the control it references.
+      const featureOnly = [...boxes, ...anchorBoxes, ...(secondaryNext ? [secondaryNext] : [])].filter(inView).map(toRect);
       const softObstacles = [...boxes, ...anchorBoxes, ...protectedElements.map((el) => el.getBoundingClientRect())]
         .filter(inView)
         .map(toRect);
