@@ -360,6 +360,9 @@ const TradeLayout = () => {
   const productRoute = /^\/trade\/products\//.test(location.pathname);
   const collectionRoute = location.pathname.replace(/\/+$/, "") === "/trade/the-collection";
   const designerRoute = isTradeDesignerBrowse(location.pathname);
+  // Quotes carry trade pricing, so the Client View switch stays reachable
+  // there too — and the tour can highlight it when returning to Studio View.
+  const quotesRoute = location.pathname.replace(/\/+$/, "") === "/trade/quotes";
   const presentation = (productRoute || collectionRoute || designerRoute) && clientSafe;
 
   // Strip a bare trailing "#" left in the URL by in-page anchor scrolls.
