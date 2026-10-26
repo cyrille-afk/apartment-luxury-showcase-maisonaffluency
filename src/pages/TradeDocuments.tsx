@@ -13,6 +13,7 @@ import SectionHero from "@/components/trade/SectionHero";
 import BrandCarousel from "@/components/trade/BrandCarousel";
 import { DocumentCardSkeleton } from "@/components/trade/skeletons";
 import { useToolsBreadcrumbExtras } from "@/components/trade/ToolsBreadcrumb";
+import { Button } from "@/components/ui/button";
 
 
 const PdfThumbnail = lazy(() => import("@/components/trade/PdfThumbnail"));
@@ -45,6 +46,10 @@ const formatFileSize = (bytes: number | null) => {
 const TradeDocuments = () => {
   const [documents, setDocuments] = useState<TradeDocument[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [retry, setRetry] = useState(0);
+  const [downloading, setDownloading] = useState<string | null>(null);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [letter, setLetter] = useState<string | null>(null);
   const [viewOnly, setViewOnly] = useState<TradeDocument | null>(null);
@@ -74,8 +79,11 @@ const TradeDocuments = () => {
   const [mobileCarouselMode, setMobileCarouselMode] = useState<"ateliers" | "designers">("ateliers");
 
   useEffect(() => {
+    let cancelled = false;
     const fetchData = async () => {
       setLoading(true);
+      setLoadError(false);
+      try {
       const [docsRes, designersRes] = await Promise.all([
         supabase
           .from("trade_documents")
@@ -88,6 +96,8 @@ const TradeDocuments = () => {
           .select("name, founder")
           .eq("is_published", true),
       ]);
+      if (docsRes.error) throw docsRes.error;
+      if (cancelled) return;
       setDocuments((docsRes.data as TradeDocument[]) || []);
       // Build atelier set from designers table:
       // 1. Any founder value (brands that have designers under them)
@@ -108,10 +118,15 @@ const TradeDocuments = () => {
         }
       }
       setAtelierNames(ateliers);
-      setLoading(false);
+      } catch {
+        if (!cancelled) setLoadError(true);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     };
-    fetchData();
-  }, []);
+    void fetchData();
+    return () => { cancelled = true; };
+  }, [retry]);
 
   useEffect(() => {
     setSelectedBrand(searchParams.get("brand") || "all");
@@ -121,16 +136,15 @@ const TradeDocuments = () => {
 
   // Build carousel entries split by atelier vs designer
   const { atelierEntries, designerEntries } = useMemo(() => {
-    const map = new Map<string, { pdfUrl: string | null; docCount: number }>();
+    const map = new Map<string, { imageUrl: string | null; docCount: number }>();
     for (const doc of documents) {
       const existing = map.get(doc.brand_name);
       if (!existing) {
-        const isPdf = !isPrivateFileUrl(doc.file_url) && doc.file_url?.toLowerCase().endsWith(".pdf");
-        map.set(doc.brand_name, { pdfUrl: isPdf ? doc.file_url : null, docCount: 1 });
+        map.set(doc.brand_name, { imageUrl: doc.cover_image_url, docCount: 1 });
       } else {
         existing.docCount++;
-        if (!existing.pdfUrl && !isPrivateFileUrl(doc.file_url) && doc.file_url?.toLowerCase().endsWith(".pdf")) {
-          existing.pdfUrl = doc.file_url;
+        if (!existing.imageUrl && doc.cover_image_url) {
+          existing.imageUrl = doc.cover_image_url;
         }
       }
     }
@@ -308,7 +322,13 @@ const TradeDocuments = () => {
       </div>
 
       {/* Content */}
-      {loading ? (
+      {downloadError && <p role="alert" className="font-body text-sm text-destructive">{downloadError}</p>}
+      {loadError ? (
+        <div role="alert" className="py-10 text-center">
+          <p className="mb-3 font-body text-sm text-muted-foreground">Resources could not load. Please try again.</p>
+          <Button variant="outline" onClick={() => setRetry(value => value + 1)}>Try again</Button>
+        </div>
+      ) : loading ? (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-4 md:grid-cols-[repeat(auto-fill,minmax(320px,1fr))]">
           {Array.from({ length: 8 }).map((_, i) => <DocumentCardSkeleton key={i} />)}
         </div>
@@ -336,17 +356,20 @@ const TradeDocuments = () => {
                 {docs.map((doc) => {
                   const isPdf = !isPrivateFileUrl(doc.file_url) && doc.file_url.toLowerCase().endsWith(".pdf");
                   return (
-                    <button
+                    <Button variant="ghost"
                       key={doc.id}
+                      disabled={downloading !== null}
                       onClick={async (e) => {
                         e.preventDefault();
                         // Price lists are admin-only and view-only: never downloaded.
                         if (doc.document_type === "pricelist") { setViewOnly(doc); return; }
-                        // Track download with country
-                        trackDownload(doc.id);
+                        setDownloading(doc.id);
+                        setDownloadError(null);
                         try {
-                          const res = await fetch(doc.file_url);
+                          const res = await fetch(doc.file_url, { signal: AbortSignal.timeout(120000) });
+                          if (!res.ok) throw new Error("Document unavailable");
                           const blob = await res.blob();
+                          if (!blob.size) throw new Error("Empty document");
                           const url = URL.createObjectURL(blob);
                           const a = document.createElement("a");
                           a.href = url;
@@ -355,12 +378,15 @@ const TradeDocuments = () => {
                           document.body.appendChild(a);
                           a.click();
                           document.body.removeChild(a);
-                          URL.revokeObjectURL(url);
+                          window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+                          trackDownload(doc.id);
                         } catch {
-                          window.open(doc.file_url, "_blank");
+                          setDownloadError(`${doc.title} could not download. Please try again.`);
+                        } finally {
+                          setDownloading(null);
                         }
                       }}
-                      className="group text-left border border-border rounded-lg overflow-hidden hover:border-foreground/20 hover:shadow-sm transition-all cursor-pointer"
+                      className="group block h-auto whitespace-normal p-0 text-left border border-border rounded-lg overflow-hidden hover:border-foreground/20 hover:shadow-sm transition-all cursor-pointer"
                     >
                       {/* Cover thumbnail */}
                       <div className="aspect-[3/4] bg-muted/20 relative overflow-hidden">
@@ -391,12 +417,13 @@ const TradeDocuments = () => {
                       {/* Info */}
                       <div className="p-3">
                         <p className="font-body text-sm text-foreground truncate leading-tight">{doc.title}</p>
+                        {downloading === doc.id && <p role="status" className="mt-1 font-body text-xs text-muted-foreground">Downloading…</p>}
                         <p className="font-body text-[10px] text-muted-foreground mt-0.5">
                           {typeLabels[doc.document_type] || doc.document_type}
                           {doc.file_size_bytes ? ` · ${formatFileSize(doc.file_size_bytes)}` : ""}
                         </p>
                       </div>
-                    </button>
+                    </Button>
                   );
                 })}
               </div>

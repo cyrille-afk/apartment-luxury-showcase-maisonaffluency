@@ -1,3 +1,6 @@
+## Resources catalogue recovery
+- [x] Removed eager maker PDF previews; document previews use the bundled worker and clean up on exit/timeout. Signed-in Tools → Resources → Delcourt search verified; both real catalogue PDFs downloaded, covers displayed and no page errors. Five recovery/alphabet tests pass, build clean. Preview only; GitHub sync needed.
+
 ## Tier steps open the tour
 - [x] Real-Time Tier Tracking moved to Step 2 directly after Welcome; Collection/margins/presentation steps renumbered 3-6, Steps 9-23 unchanged. Signed-in walk of Steps 1-10 verified titles, sidebar anchors and routes; Back 10 to 9 verified; no page errors, 33 unit regressions pass. e2e specs renumbered (early-late, placement, collection-transition, reduced-motion, sidebar-anchors, board-presentation). Preview only; GitHub sync needed.
 

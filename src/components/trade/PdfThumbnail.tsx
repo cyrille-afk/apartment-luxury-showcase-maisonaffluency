@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { FileText } from "lucide-react";
+import pdfWorker from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 
 interface PdfThumbnailProps {
   url: string;
@@ -53,17 +54,22 @@ const PdfThumbnail = ({ url, alt = "PDF cover", className = "" }: PdfThumbnailPr
   useEffect(() => {
     if (cachedDataUrl || !isVisible) return;
     let cancelled = false;
+    let task: import("pdfjs-dist").PDFDocumentLoadingTask | undefined;
+    const timeout = window.setTimeout(() => {
+      if (!cancelled) { setError(true); void task?.destroy(); }
+    }, 20000);
 
     const render = async () => {
       try {
         const pdfjsLib = await import("pdfjs-dist");
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+        pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
-        const pdf = await pdfjsLib.getDocument({
+        task = pdfjsLib.getDocument({
           url,
           disableAutoFetch: true,
           disableStream: true,
-        }).promise;
+        });
+        const pdf = await task.promise;
 
         if (cancelled) return;
 
@@ -96,11 +102,14 @@ const PdfThumbnail = ({ url, alt = "PDF cover", className = "" }: PdfThumbnailPr
         }
       } catch {
         if (!cancelled) setError(true);
+      } finally {
+        window.clearTimeout(timeout);
+        void task?.destroy();
       }
     };
 
     render();
-    return () => { cancelled = true; };
+    return () => { cancelled = true; window.clearTimeout(timeout); void task?.destroy(); };
   }, [url, isVisible, cachedDataUrl]);
 
   if (error) {
