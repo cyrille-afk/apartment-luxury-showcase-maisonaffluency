@@ -20,7 +20,7 @@ test("tour steps 12-16: sidebar refs, transition copy and presentation-mode high
   await page.evaluate(([key, value]) => {
     localStorage.setItem(key, value);
     localStorage.removeItem("felix_dashboard_tour_seen_v1");
-    localStorage.setItem("felix_tour_progress_v1", "11");
+    localStorage.setItem("felix_tour_progress_v1", "9");
     localStorage.setItem("trade_quick_tour_done", "1");
     localStorage.removeItem("trade_quick_tour_step");
   }, [storageKey, session]);

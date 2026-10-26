@@ -13,7 +13,7 @@ test("Take your studio on site highlights the sidebar Mobile App Workspace promp
   await page.evaluate(([key, value]) => {
     localStorage.setItem(key, value);
     localStorage.removeItem("felix_dashboard_tour_seen_v1");
-    localStorage.setItem("felix_tour_progress_v1", "21");
+    localStorage.setItem("felix_tour_progress_v1", "20");
     localStorage.setItem("trade_quick_tour_done", "1");
     localStorage.removeItem("trade_quick_tour_step");
   }, [storageKey, session]);

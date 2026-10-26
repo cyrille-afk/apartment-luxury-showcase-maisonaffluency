@@ -145,7 +145,7 @@ const FELIX_STEPS: FelixStep[] = orderFelixSteps<FelixStep>([
     target: "settings-studio-team",
     route: "/trade/settings",
     dialogue:
-      "Open **Studio & team** to update your client-facing studio identity, manage teammates, and assign their roles. Your personal account details and tier progress remain on this Account Settings page.",
+      "Your studio setup lives here in **Settings**. Open **Studio & team** to update your client-facing studio identity, manage teammates, and assign their roles. Your personal account details and tier progress remain on this Account Settings page — next, we set up your studio together.",
   },
   {
     id: "portfolio-management",
