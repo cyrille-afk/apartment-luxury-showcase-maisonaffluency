@@ -340,8 +340,8 @@ const HeroJoinForm = ({
         {portfolioError && <p id={ghost ? "mobile-website-error" : "website-error"} role="alert" className="mt-1.5 text-left font-body text-[10px] uppercase tracking-wide text-destructive">{portfolioError}</p>}
       </div>
       <div>
-        <label htmlFor={ghost ? "mobile-regNumber" : "regNumber"} className={labelCls}>Business Registration / Tax ID (Optional)</label>
-        <input id={ghost ? "mobile-regNumber" : "regNumber"} name="regNumber" maxLength={120} placeholder="e.g. UEN, VAT, EIN" className={inputCls} />
+        <label htmlFor={ghost ? "mobile-regNumber" : "regNumber"} className={labelCls}>Business Registration / Tax ID</label>
+        <input id={ghost ? "mobile-regNumber" : "regNumber"} name="regNumber" required minLength={3} maxLength={120} placeholder="e.g. UEN, VAT, EIN" className={inputCls} />
       </div>
       <div>
         <span className={labelCls}>Professional Certification or Portfolio File Upload (Optional)</span>
@@ -441,7 +441,7 @@ const TradeLanding = () => {
     const websiteUrl = ((formData.get("website") as string) || "").trim();
     const businessRegNumber = ((formData.get("regNumber") as string) || "").trim();
     const validation = tradeApplicationSchema.safeParse({ email, companyName, phoneNumber, websiteUrl });
-    if (!validation.success) {
+    if (!validation.success || businessRegNumber.length < 3) {
       setJoinError("Please complete all required fields with valid details.");
       return;
     }
