@@ -88,6 +88,17 @@ html[data-felix-tour-step="client-safe-presentations"] .trade-editorial-header {
    leave sidebar highlights behind. Page overview spotlights remain intact.
    The active step's sidebar item comes from the global step → sidebar map
    (felixTourSidebarMap.ts), published as <html data-felix-tour-sidebar>. */
+html:is([data-felix-tour-step="collection"], [data-felix-tour-step="quotes"]) [data-felix-collection-tabs] {
+  z-index: 132;
+  background: hsl(var(--background));
+  backdrop-filter: none;
+}
+html:is([data-felix-tour-step="collection"], [data-felix-tour-step="quotes"]) [data-felix-collection-tab] {
+  color: hsl(var(--foreground));
+  outline: 2px solid hsl(var(--accent));
+  outline-offset: 6px;
+  background: hsl(var(--accent) / 0.1);
+}
 html[data-felix-tour-sidebar] .trade-editorial-sidebar {
   z-index: 132;
 }

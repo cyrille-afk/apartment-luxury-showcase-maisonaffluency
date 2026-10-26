@@ -1095,7 +1095,12 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
               dialogue. */}
           {!stepDone && !isPaused && !targetUnavailable && (
             <div role="status" className="mt-3 flex items-center gap-3 rounded-md bg-primary px-4 py-3 text-primary-foreground">
-              {step.id === "collection" || step.id === "client-view" ? <ArrowLeft className="h-5 w-5 shrink-0" aria-hidden="true" /> : <ArrowRight className="h-5 w-5 shrink-0" aria-hidden="true" />}
+              <ArrowRight
+                data-felix-control-arrow
+                className="h-5 w-5 shrink-0"
+                aria-hidden="true"
+                style={{ transform: `rotate(${Math.atan2(rect.top + rect.height / 2 - (cardTop + 92), rect.left + rect.width / 2 - (cardLeft + 44)) * 180 / Math.PI}deg)` }}
+              />
               <p className="font-body text-sm font-semibold leading-snug">
                 {step.id === "collection" ? "Open The Collection to continue." : step.id === "white-label" ? "Turn on ‘Use studio branding only’ below to unlock Next." : step.id === "client-view" ? "Switch to Client View to unlock Next." : "Use the highlighted control to continue."}
               </p>

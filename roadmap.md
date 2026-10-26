@@ -1,3 +1,6 @@
+## Collection tour control clarity
+- [ ] Point the required-action arrow toward the Collection control, brighten and outline browsing tabs, and increase their label size without shifting photographs; verify signed-in interaction and cleanup.
+
 ## Restore Collection proportions
 - [x] Removed tour header resizing; original header and four photo rectangles are identical with tour open/closed at 1946×1181. Upper-right card ends 12px above photos with internal scrolling; signed-in Next/close verified, 19 tests pass, no browser errors and build clean. Preview only; GitHub sync needed.
 

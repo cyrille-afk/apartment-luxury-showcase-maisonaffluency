@@ -12,6 +12,7 @@ import VisualSearchPanel from "@/components/trade/VisualSearchPanel";
 import ShowroomDesignerDirectory from "@/components/trade/ShowroomDesignerDirectory";
 import { cn } from "@/lib/utils";
 import GallerySkeleton from "@/components/trade/GallerySkeleton";
+import { Button } from "@/components/ui/button";
 import { createActiveDraftQuote, fetchScopedDraftQuotes, rememberActiveQuoteId } from "@/lib/activeProjectId";
 
 interface DraftQuote {
@@ -154,18 +155,20 @@ const TradeShowroom = () => {
         </div>
 
         {/* Sub-header workspace navigation */}
-        <div className="sticky top-14 md:top-16 z-10 -mx-4 md:-mx-8 lg:-mx-12 mb-10 flex flex-wrap items-center gap-x-8 gap-y-2 border-b border-border bg-background/95 px-4 md:px-8 lg:px-12 pb-3 pt-3 backdrop-blur-sm">
+        <div data-felix-collection-tabs className="sticky top-14 md:top-16 z-10 -mx-4 md:-mx-8 lg:-mx-12 mb-10 flex flex-wrap items-center gap-x-8 gap-y-2 border-b border-border bg-background/95 px-4 md:px-8 lg:px-12 pb-3 pt-3 backdrop-blur-sm">
           {([
             { id: "gallery", label: "Interactive Gallery", Icon: MapPin },
             { id: "designers", label: "Designers & Ateliers", Icon: Grid3X3 },
             { id: "search", label: "Visual Search", Icon: Search },
           ] as const).map(({ id, label, Icon }) => (
-            <button
+            <Button
+              variant="ghost"
               key={id}
+              data-felix-collection-tab={id}
               data-felix-target={id === "gallery" || id === "designers" ? "collection-overview" : undefined}
               onClick={() => setActiveTab(id)}
               className={cn(
-                "flex items-center gap-2 font-body text-[11px] uppercase tracking-[0.15em] transition-colors",
+                "h-auto rounded-none p-0 flex items-center gap-2 font-body text-[13px] leading-[16.5px] uppercase tracking-[0.15em] transition-colors hover:bg-transparent",
                 activeTab === id
                   ? "font-medium text-foreground underline decoration-foreground underline-offset-[10px]"
                   : "text-muted-foreground/70 hover:text-foreground",
@@ -173,7 +176,7 @@ const TradeShowroom = () => {
             >
               <Icon className="h-3 w-3" />
               {label}
-            </button>
+            </Button>
           ))}
         </div>
 
