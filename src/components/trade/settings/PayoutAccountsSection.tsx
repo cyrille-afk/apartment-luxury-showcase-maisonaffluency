@@ -263,11 +263,12 @@ export default function PayoutAccountsSection() {
       if (error) throw error;
 
       setCreateOpen(false);
+      if (currentStudio) clearDraft(currentStudio.id);
       setForm({
-        ...form,
-        account_holder_name: "", iban: "", ach_routing_number: "",
-        ach_account_number: "", swift_bic: "", bank_name: "",
-        tax_form_reference: "", tax_form_file: null,
+        ...INITIAL_FORM,
+        country_code: form.country_code,
+        currency: form.currency,
+        tax_form_kind: form.tax_form_kind,
       });
       fetchAccounts();
     } catch (e) {
@@ -445,7 +446,7 @@ export default function PayoutAccountsSection() {
         )}
       </CardContent>
 
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+      <Dialog open={createOpen} onOpenChange={handleDialogOpenChange}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Add payout account</DialogTitle>
