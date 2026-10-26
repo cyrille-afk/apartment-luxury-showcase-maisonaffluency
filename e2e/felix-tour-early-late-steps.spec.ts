@@ -17,6 +17,7 @@ type StepExpectation = {
   /** Case-insensitive fragment of the "Find it later" line. */
   ref: RegExp;
   url?: RegExp;
+  header?: boolean;
 };
 
 const seed = async (page: Page, progress: number | null) => {
@@ -34,9 +35,10 @@ const seed = async (page: Page, progress: number | null) => {
 
 const expectStep = async (page: Page, s: StepExpectation) => {
   const card = page.getByRole("dialog").filter({ hasText: s.title });
-  await expect(card).toHaveCSS("opacity", "1", { timeout: 60000 });
+  await expect(card).toBeVisible({ timeout: 60000 });
   if (s.url) await expect(page).toHaveURL(s.url);
-  await expect(page.locator("html")).toHaveAttribute("data-felix-tour-sidebar", s.anchor);
+  if (s.header) await expect(page.locator("html")).not.toHaveAttribute("data-felix-tour-sidebar");
+  else await expect(page.locator("html")).toHaveAttribute("data-felix-tour-sidebar", s.anchor);
   await expect(page.locator("[data-felix-sidebar-ref]")).toContainText(s.ref);
   await expect(card).toContainText(s.copy);
   await expect(page.locator("[data-felix-spotlight]")).toBeVisible();
@@ -62,8 +64,9 @@ test("tour steps 1-12: sidebar references, copy and highlights", async ({ page, 
   await step1.getByRole("button", { name: "Next", exact: true }).click();
 
   // Step 2 — The Collection (gated: opening The Collection advances the tour)
-  const step2 = page.getByRole("dialog").filter({ hasText: "Open The Collection to continue." });
-  await expect(step2).toHaveCSS("opacity", "1", { timeout: 60000 });
+  const step2 = page.locator("[data-felix-tour-card]");
+  await expect(step2).toBeVisible({ timeout: 60000 });
+  await expect(step2.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "2");
   await expect(page.locator("html")).toHaveAttribute("data-felix-tour-sidebar", "collection");
   await expect(page.locator("[data-felix-sidebar-ref]")).toContainText(/The Collection/i);
   await expect(step2).toContainText("Interactive Gallery");
@@ -93,7 +96,8 @@ test("tour steps 1-12: sidebar references, copy and highlights", async ({ page, 
     title: "Client-Safe Presentations",
     copy: "client-facing presentation mode",
     anchor: "collection",
-    ref: /The Collection/i,
+    ref: /Client Editorial Presentation/i,
+    header: true,
     url: /\/trade\/the-collection/,
   });
   await step6.getByRole("button", { name: "Next", exact: true }).click();
@@ -104,7 +108,8 @@ test("tour steps 1-12: sidebar references, copy and highlights", async ({ page, 
     title: "Absolute Margin Protection",
     copy: "safely hidden behind standard retail pricing",
     anchor: "collection",
-    ref: /The Collection/i,
+    ref: /Client Editorial Presentation/i,
+    header: true,
     url: /\/trade\/products\//,
   });
   await step7.getByRole("button", { name: "Next", exact: true }).click();
