@@ -9,7 +9,7 @@
 - Admin application actions save review metadata before app-email sends; decline-and-delete queues the notice before deleting, with stable per-application/template idempotency keys — failures must not erase the record.
 - Approve/decline open a side-effect-free draft review; only confirmation runs actions; one shared plain-text copy/parser feeds preview and escaped templates — no HTML.
 - Approved-account activation resends reuse the branded review drawer with one fresh idempotency key per opened resend, retained on retries; never change approval to resend.
-- Felix advances before gallery load; greeting tracks tour state. Share regional tiers; eligibility stays EUR-ledger based.
+- Felix Collection uses measured header space and upper-right placement (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
 - Felix reduced motion combines the device preference with a persisted browser toggle; its lifecycle-owned root marker disables only tour animation/scroll easing while keeping static borders, arrows and step controls — avoids altering unrelated app motion or weakening device accessibility preferences.
 - Felix sidebar anchors reuse lifecycle-owned document state and stable markers; overlays portal into the root stacking context with an opaque isolated card. All steps use the shared empty-space placement solver protecting visible headings, tabs, targets and sidebar anchors; bounded scrolling handles tall cards and connectors retain sidebar context — clamping must never move a card over protected content.
