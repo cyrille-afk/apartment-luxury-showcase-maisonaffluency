@@ -1,6 +1,7 @@
 import * as React from 'npm:react@18.3.1'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { TEMPLATES } from '../_shared/transactional-email-templates/registry.tsx'
+import { enhanceApprovalEmailHtml } from '../_shared/approvalEmailHtml.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -62,9 +63,9 @@ Deno.serve(async (req) => {
     }
 
     try {
-      const html = await renderAsync(
+      const html = enhanceApprovalEmailHtml(name, await renderAsync(
         React.createElement(entry.component, entry.previewData)
-      )
+      ))
       const resolvedSubject =
         typeof entry.subject === 'function'
           ? entry.subject(entry.previewData)

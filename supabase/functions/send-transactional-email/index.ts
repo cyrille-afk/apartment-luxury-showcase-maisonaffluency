@@ -1,5 +1,6 @@
 import * as React from 'npm:react@18.3.1'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
+import { enhanceApprovalEmailHtml } from '../_shared/approvalEmailHtml.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { TEMPLATES } from '../_shared/transactional-email-templates/registry.tsx'
@@ -453,9 +454,9 @@ Deno.serve(async (req) => {
       recipientName: displayNameForContact(templateData.recipientName, effectiveRecipient) || undefined,
     }
   }
-  const html = await renderAsync(
+  const html = enhanceApprovalEmailHtml(templateName, await renderAsync(
     React.createElement(template.component, templateData)
-  )
+  ))
   const plainText = template.text
     ? (typeof template.text === 'function' ? template.text(templateData) : template.text)
     : await renderAsync(
