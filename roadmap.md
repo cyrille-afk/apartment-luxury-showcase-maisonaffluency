@@ -1,3 +1,6 @@
+## Collection tour background and placement
+- [ ] Show the actual Collection at Step 2; keep Step 3 upper-right with photographs and navigation unobstructed; verify Next/Back/close and desktop sizing.
+
 ## Intentional comparator export
 - [x] Added client-default export modal with guarded trade switch and retail/specification/material switches. Signed-in real client, internal and minimal PDFs downloaded; extracted text confirms client omits supplier/trade/internal notes, internal includes opted-in trade, and disabled sections disappear. Cancellation and fresh client defaults on reopening verified desktop/phone; 19 tests pass, build clean. Fixed existing invalid FX date formatting uncovered by real conversion. Preview only; GitHub sync needed.
 

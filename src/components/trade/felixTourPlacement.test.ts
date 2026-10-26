@@ -1,7 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { chooseTourCardPlacement, placeTourCard, tourPanelLandingScrollDelta, type TourRect } from "./felixTourPlacement";
+import { chooseTourCardPlacement, collectionTourCardOrigin, placeTourCard, tourPanelLandingScrollDelta, type TourRect } from "./felixTourPlacement";
 
 const overlaps = (a: TourRect, b: TourRect) => a.left < b.left + b.width && a.left + a.width > b.left && a.top < b.top + b.height && a.top + a.height > b.top;
+
+describe("Collection tour upper-right placement", () => {
+  for (const w of [1946, 1280, 1024]) {
+    it(`keeps the card above photographs and clear of the heading at ${w}px`, () => {
+      const preferred = collectionTourCardOrigin(w, 380, 144);
+      const heading = { left: 304, top: 144, width: w - 748, height: 48 };
+      const photos = { left: 304, top: 700, width: w - 352, height: 400 };
+      const card = placeTourCard({ viewport: { w, h: 1181 }, width: 380, height: 510, preferred, obstacles: [heading, photos, { left: 0, top: 0, width: 255, height: 1181 }] });
+      expect(card).toEqual({ ...preferred, width: 380, height: 510 });
+      if (!card) return;
+      expect(overlaps(card, photos)).toBe(false);
+      expect(overlaps(card, heading)).toBe(false);
+    });
+  }
+});
 
 describe("branding panel landing", () => {
   it("scrolls back to reserve the entire explanation above the panel", () => {

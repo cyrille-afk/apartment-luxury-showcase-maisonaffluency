@@ -1,6 +1,11 @@
 export type TourRect = { top: number; left: number; width: number; height: number };
 type Bounds = { left: number; top: number; right: number; bottom: number };
 
+/** Collection tour cards occupy the reserved upper-right editorial space. */
+export function collectionTourCardOrigin(viewportWidth: number, cardWidth: number, headingTop: number) {
+  return { left: viewportWidth - cardWidth - 24, top: Math.max(80, headingTop - 32) };
+}
+
 /** Reserve the full explanation above a wide panel, rather than centering only the panel. */
 export function tourPanelLandingScrollDelta({ target, cardHeight, viewportHeight }: {
   target: TourRect;

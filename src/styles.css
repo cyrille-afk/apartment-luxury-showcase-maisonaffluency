@@ -84,6 +84,21 @@ html[data-felix-tour-step="client-safe-presentations"] .trade-editorial-header {
   z-index: 133;
 }
 
+/* Tour-only editorial space keeps the upper-right explanation off room photos.
+   The lifecycle marker and measured height disappear on pause/close. */
+@media (min-width: 1024px) {
+  html[data-felix-collection-dock] [data-felix-collection-header] {
+    padding-top: 32px;
+    padding-bottom: 32px;
+    padding-right: 420px;
+    min-height: calc(var(--felix-collection-card-height, 510px) + 64px);
+  }
+  html[data-felix-collection-dock] [data-felix-collection-header] > div > div {
+    min-width: 0;
+    overflow-wrap: break-word;
+  }
+}
+
 /* Reuse the tour's lifecycle-owned root state, so close/pause/unmount cannot
    leave sidebar highlights behind. Page overview spotlights remain intact.
    The active step's sidebar item comes from the global step → sidebar map

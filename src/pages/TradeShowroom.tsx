@@ -133,7 +133,7 @@ const TradeShowroom = () => {
       </Helmet>
       <div className="w-full">
         {/* Editorial header: pure white, no banner */}
-        <div className="bg-background py-14 md:py-20 lg:py-24">
+        <div data-felix-collection-header className="bg-background py-14 md:py-20 lg:py-24">
           <div className="flex items-start justify-between gap-6">
             <div>
               <h1 data-felix-target="collection-overview" className="font-display text-3xl md:text-4xl lg:text-5xl font-light text-foreground tracking-tight">

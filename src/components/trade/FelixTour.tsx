@@ -17,7 +17,7 @@ import { StudioInitialization } from "./StudioInitialization";
 import { useDesktopTradeTour } from "./useDesktopTradeTour";
 import { fmtPct, resolveTierTokens, hasPendingTourStart, clearTourStartRequest, markTourCompleted } from "./felixTourUtils";
 import { FELIX_STEP_SIDEBAR } from "./felixTourSidebarMap";
-import { chooseTourCardPlacement, tourPanelLandingScrollDelta, type TourRect } from "./felixTourPlacement";
+import { chooseTourCardPlacement, collectionTourCardOrigin, tourPanelLandingScrollDelta, type TourRect } from "./felixTourPlacement";
 
 type FelixStep = {
   id: string;
@@ -57,7 +57,7 @@ const FELIX_STEPS: FelixStep[] = [
     id: "collection",
     title: "The Collection",
     target: "nav-collection",
-    route: "/trade",
+    route: "/trade/the-collection",
     dialogue:
       "Open **The Collection** from your sidebar. Explore rooms in the **Interactive Gallery**, or browse **Designers & Ateliers** to access each designer’s product pages. Your Silver Tier gives you a {silverPct} trade discount on eligible pieces.",
   },
@@ -725,6 +725,22 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     };
   }, [open, isPaused, step.id]);
 
+  // Reserve real page space for the full explanation, not an overlay over photos.
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    if (open && !isPaused && ["collection", "quotes"].includes(step.id)) {
+      root.dataset.felixCollectionDock = "true";
+      root.style.setProperty("--felix-collection-card-height", `${Math.max(380, measuredCardHeight)}px`);
+    } else {
+      delete root.dataset.felixCollectionDock;
+      root.style.removeProperty("--felix-collection-card-height");
+    }
+    return () => {
+      delete root.dataset.felixCollectionDock;
+      root.style.removeProperty("--felix-collection-card-height");
+    };
+  }, [open, isPaused, step.id, measuredCardHeight]);
+
   useEffect(() => () => {
     if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current);
   }, []);
@@ -904,14 +920,14 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     const centerX = clampX(rect.left + rect.width / 2 - cardW / 2);
     const rightX = rect.left + rect.width + PAD + 8;
     const leftX = rect.left - PAD - 8 - cardW;
-    if (sidebarAnchor) {
+    if (["collection", "quotes"].includes(step.id)) {
+      const heading = document.querySelector('[data-felix-target="collection-overview"]')?.getBoundingClientRect();
+      const origin = collectionTourCardOrigin(viewport.w, cardW, heading?.top ?? rect.top);
+      cardLeft = origin.left;
+      cardTop = origin.top;
+    } else if (sidebarAnchor) {
       cardLeft = clampX(sidebarAnchor.left + sidebarAnchor.width + 24);
       cardTop = clampY(sidebarAnchor.top - 20);
-      if (step.id === "quotes") {
-        // Sidebar alignment must never override the Collection's clear window.
-        // Keep the card beside the sidebar, but below the heading AND both tabs.
-        cardTop = clampY(rect.top + rect.height + PAD + 8);
-      }
     } else if (step.id === "client-view") {
       // Step 15: never below the switch (it would cover the product photo).
       // Right of the switch, offset so the action banner pinned at the top of
@@ -923,20 +939,6 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       } else {
         cardLeft = centerX;
         cardTop = Math.max(16, rect.top - cardH - PAD - 8);
-      }
-    } else if (step.id === "quotes") {
-      // Step 3: never cover the Interactive Gallery heading. Prefer below it
-      // (left-aligned to the heading); on short viewports go right, else above.
-      const belowY = rect.top + rect.height + PAD + 8;
-      if (belowY + cardH <= viewport.h - 16) {
-        cardLeft = clampX(rect.left);
-        cardTop = belowY;
-      } else if (rightX + cardW <= viewport.w - 16) {
-        cardLeft = rightX;
-        cardTop = centerY;
-      } else {
-        cardLeft = centerX;
-        cardTop = clampY(rect.top - cardH - PAD - 8);
       }
     } else if (rightX + cardW <= viewport.w - 16) {
       cardLeft = rightX;
