@@ -1,5 +1,5 @@
 ## Compact two-row comparison header
-- [x] Consolidated into two compact sticky rows with borderless name, project/save controls, currency, cover and primary export; saved shortlist share/delete actions remain in Saved comparisons. Signed-in four-piece desktop verified: 56px metadata row + 50px filter strip, matrix immediately beneath; selection editing, project choices and cover opening work, phone has no page overflow or browser errors. All 23 filter/draft/currency regressions pass; preview build clean. GitHub sync needed.
+- [x] Simplified to one primary bar (name, project, currency, Tools, export) and a 34px low-contrast material/selection strip. Cover, save, saved comparisons and admin finish categories moved into Tools; all three dialogs and four-piece selection verified signed-in. Desktop matrix starts at 274px; phone wraps without page overflow or browser errors. All 31 catalogue/filter/draft regressions pass; preview build clean. GitHub sync needed.
 
 ## Comparator curator-pick labels
 - [x] Restore shared edition/house labels from live catalogue metadata. Ecart Armchair, 1926 badge verified on the signed-in comparison and after refresh; 23 tests pass, no browser errors and preview clean. Preview only.
