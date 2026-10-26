@@ -43,11 +43,11 @@ const Email = ({ firstName, name, portalRef }: Props) => {
           </Text>
 
           <Text style={paragraph}>
-            We are currently completing a specialized fine-tuning phase for our advanced Trade suite, design tools, and custom AI curatorial assistant. This expanded system is scheduled to fully deploy alongside our exhibition calendar for Design Miami Paris from October 20–25, 2026.
+            The Maison Affluency Trade Portal is now live — your full Trade suite, design tools, and AI curatorial assistant are available from today.
           </Text>
 
           <Text style={paragraph}>
-            While direct system credentials conclude, your firm has been assigned priority tier status. For any immediate projects requiring trade quotes, high-resolution visual assets, or logistical curation, please reply directly to this thread or reach our desk at{' '}
+            Your firm has been assigned priority tier status. For any projects requiring trade quotes, high-resolution visual assets, or logistical curation, please reply directly to this thread or reach our desk at{' '}
             <Link href="mailto:concierge@maisonaffluency.com" style={link}>concierge@maisonaffluency.com</Link>.
           </Text>
 
@@ -109,9 +109,9 @@ const plainText = (data: Record<string, any>) => {
     '',
     'Thank you for your interest in the Maison Affluency Trade Program. We have successfully received the application details for your studio.',
     '',
-    'We are currently completing a specialized fine-tuning phase for our advanced Trade suite, design tools, and custom AI curatorial assistant. This expanded system is scheduled to fully deploy alongside our exhibition calendar for Design Miami Paris from October 20–25, 2026.',
+    'The Maison Affluency Trade Portal is now live — your full Trade suite, design tools, and AI curatorial assistant are available from today.',
     '',
-    'While direct system credentials conclude, your firm has been assigned priority tier status. For any immediate projects requiring trade quotes, high-resolution visual assets, or logistical curation, please reply directly to this thread or reach our desk at concierge@maisonaffluency.com.',
+    'Your firm has been assigned priority tier status. For any projects requiring trade quotes, high-resolution visual assets, or logistical curation, please reply directly to this thread or reach our desk at concierge@maisonaffluency.com.',
     '',
     'ACCESS YOUR TRADE PORTAL',
     portalUrl,
