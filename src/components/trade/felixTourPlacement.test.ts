@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { chooseTourCardPlacement, collectionTourCardOrigin, placeTourCard, tourPanelLandingScrollDelta, type TourRect } from "./felixTourPlacement";
+import { chooseTourCardPlacement, collectionTourCardOrigin, collectionTourCardPlacement, placeTourCard, tourPanelLandingScrollDelta, type TourRect } from "./felixTourPlacement";
 
 const overlaps = (a: TourRect, b: TourRect) => a.left < b.left + b.width && a.left + a.width > b.left && a.top < b.top + b.height && a.top + a.height > b.top;
 
 describe("Collection tour upper-right placement", () => {
+  it("constrains the card to existing space above photographs without changing the page", () => {
+    expect(collectionTourCardPlacement({ viewport: { w: 1946, h: 1181 }, width: 380, height: 510, photoTop: 580, headingRight: 1016 }))
+      .toEqual({ left: 1542, top: 80, width: 380, height: 488 });
+  });
   for (const w of [1946, 1280, 1024]) {
     it(`keeps the card above photographs and clear of the heading at ${w}px`, () => {
       const preferred = collectionTourCardOrigin(w, 380, 144);
