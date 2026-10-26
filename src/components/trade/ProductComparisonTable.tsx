@@ -58,11 +58,10 @@ export function ProductComparisonTable({ products: allProducts, fields, onRemove
   useEffect(() => {
     onVisibleProductsChange?.(active ? products.filter((p): p is TradeProduct => !!p) : null);
   }, [active, visibleSignature, onVisibleProductsChange]);
-  const hasOptions = options.material.length > 0;
   const labelColumnWidth = "11rem";
   const productColumnWidth = `calc((100% - ${labelColumnWidth}) / ${Math.max(products.length, 1)})`;
-  const filters = (hasOptions || (isAdmin && finishNames.length > 0)) && <div className="flex min-w-0 flex-wrap items-center gap-2" role="group" aria-label="Filter compared products">
-      {options.material.length > 0 && <label className="flex min-w-0 items-center gap-2">
+  const filters = <div className="flex min-w-0 flex-wrap items-center gap-2" role="group" aria-label="Filter compared products">
+      <label className="flex min-w-0 items-center gap-2">
         <span className="font-body text-[10px] font-bold uppercase tracking-[0.14em] text-foreground/70">Material</span>
         <Select value={materialValue} onValueChange={v => setSelection(s => ({ ...s, ...selectMaterialOption(v) }))}>
           <SelectTrigger aria-label="Material" className="h-7 w-36 border-0 bg-transparent px-2 font-body text-xs text-foreground shadow-none sm:w-44">
@@ -76,7 +75,7 @@ export function ProductComparisonTable({ products: allProducts, fields, onRemove
             </SelectGroup>)}
           </SelectContent>
         </Select>
-      </label>}
+      </label>
       {selection.material && materialTypeOptions(options.material, selection.material).length > 0 && <label className="flex items-center gap-2">
         <span className="font-body text-[10px] font-bold uppercase tracking-[0.14em] text-foreground/70">Type</span>
         <select aria-label="Material type" value={selection.materialType ?? ""} onChange={e => setSelection(s => ({ ...s, materialType: e.target.value || undefined }))} className="h-7 min-w-32 border-0 bg-transparent px-2 font-body text-xs text-foreground">

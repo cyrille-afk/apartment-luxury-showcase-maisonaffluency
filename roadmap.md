@@ -1,3 +1,6 @@
+## Comparator cold start and filtering
+- [ ] Keep cold-start designers visible; mutually reset search/alphabet, keep editing open during interactions, and move project assignment into global actions. Verify live and run filter/draft regressions.
+
 ## Comparator selection hierarchy
 - [x] Separate Done from piece removals with global actions, alphabetical filters, then search/scrolling selected pieces. Signed-in four-piece desktop/phone verification: 102px/206px Done-to-X separation, loaded thumbnails, contained phone scrolling, material menu and category dialog, removal, Done/reopen and Clear all work; no page errors, 35 regressions pass. Preview only; GitHub sync needed.
 
