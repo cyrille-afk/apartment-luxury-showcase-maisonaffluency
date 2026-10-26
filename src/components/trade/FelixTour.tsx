@@ -664,7 +664,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         stableSince = 0;
         // A pending route or Suspense/data skeleton is not a missing feature.
         // Start the feature-discovery budget only after the page has rendered.
-        const pageLoading = !routeReady || Array.from(document.querySelectorAll('[data-trade-page-loading]'))
+        const pageLoading = !routeReady || !collectionReady || Array.from(document.querySelectorAll('[data-trade-page-loading]'))
           .some((el) => (el as HTMLElement).offsetParent !== null);
         if (pageLoading) {
           if (!loadingSince) loadingSince = now;
