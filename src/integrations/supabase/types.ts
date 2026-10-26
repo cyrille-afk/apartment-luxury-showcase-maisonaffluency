@@ -7175,6 +7175,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          business_reg_number: string | null
           catalog_abuse_flagged_at: string | null
           catalog_abuse_strikes: number
           company: string
@@ -7193,6 +7194,7 @@ export type Database = {
           phone: string
           preferred_currency: string | null
           referred_by_studio_id: string | null
+          tax_vat_id: string | null
           trade_id: string | null
           trade_nda_accepted_at: string | null
           trade_status: string | null
@@ -7204,6 +7206,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          business_reg_number?: string | null
           catalog_abuse_flagged_at?: string | null
           catalog_abuse_strikes?: number
           company?: string
@@ -7222,6 +7225,7 @@ export type Database = {
           phone?: string
           preferred_currency?: string | null
           referred_by_studio_id?: string | null
+          tax_vat_id?: string | null
           trade_id?: string | null
           trade_nda_accepted_at?: string | null
           trade_status?: string | null
@@ -7235,6 +7239,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          business_reg_number?: string | null
           catalog_abuse_flagged_at?: string | null
           catalog_abuse_strikes?: number
           company?: string
@@ -7253,6 +7258,7 @@ export type Database = {
           phone?: string
           preferred_currency?: string | null
           referred_by_studio_id?: string | null
+          tax_vat_id?: string | null
           trade_id?: string | null
           trade_nda_accepted_at?: string | null
           trade_status?: string | null
