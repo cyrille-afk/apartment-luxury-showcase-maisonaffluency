@@ -1,5 +1,5 @@
 ## Restore Collection proportions
-- [ ] Restore Ref1 header/photo geometry; bound the upper-right tour card without reflow and verify against the same page with the tour closed.
+- [x] Removed tour header resizing; original header and four photo rectangles are identical with tour open/closed at 1946×1181. Upper-right card ends 12px above photos with internal scrolling; signed-in Next/close verified, 19 tests pass, no browser errors and build clean. Preview only; GitHub sync needed.
 
 ## Onboarding project-folder order
 - [x] Client Project Folders is Step 9 before Tools (Step 10); preceding pricing/quote steps renumbered 4–8. Signed-in Steps 4–10 and Back to Step 9 verified without browser errors; 14 unit regressions pass and build clean. Existing JS e2e runner blocked by absent browser binary; equivalent central flow verified with Python Playwright. Preview only; GitHub sync needed.
