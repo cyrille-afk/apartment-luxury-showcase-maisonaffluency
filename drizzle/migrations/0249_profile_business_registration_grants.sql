@@ -1,0 +1,1 @@
+GRANT UPDATE (business_reg_number, tax_vat_id) ON public.profiles TO authenticated;
