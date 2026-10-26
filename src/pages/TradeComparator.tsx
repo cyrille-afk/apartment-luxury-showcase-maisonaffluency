@@ -11,7 +11,7 @@ import { Search, X, Heart, Check, ChevronDown, Bookmark, Link2, FileDown, Trash2
 import { PdfViewerDialog } from "@/components/trade/PdfViewerDialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
