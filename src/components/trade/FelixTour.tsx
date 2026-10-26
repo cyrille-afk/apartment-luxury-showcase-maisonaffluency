@@ -964,9 +964,16 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
   // uncovered when that is what lands the card beside its highlight; tier 2
   // only applies on short viewports where nothing fits without overlapping
   // navigation.
+  // Bound the card above the first room section: its h3 title and caption sit
+  // above the photographs, so measuring images alone would cover that text.
   const collectionPhotoTop = ["collection", "quotes"].includes(step.id)
-    ? Array.from(document.querySelectorAll('[data-felix-collection-header] ~ div img'))
-        .map(el => el.getBoundingClientRect()).filter(r => r.width > 100 && r.height > 100 && r.bottom > 0)
+    ? [
+        ...Array.from(document.querySelectorAll('[data-felix-collection-header] ~ div img'))
+          .map(el => el.getBoundingClientRect()).filter(r => r.width > 100 && r.height > 100),
+        ...Array.from(document.querySelectorAll('[data-felix-collection-header] ~ div h3'))
+          .map(el => el.getBoundingClientRect()).filter(r => r.width > 100),
+      ]
+        .filter(r => r.bottom > 0)
         .reduce((top, r) => Math.min(top, r.top), viewport.h - 16)
     : viewport.h - 16;
   const collectionTabsRight = ["collection", "quotes"].includes(step.id)
