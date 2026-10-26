@@ -1,3 +1,6 @@
+## Intentional comparator export
+- [ ] Add client-default export modal, guarded trade toggle, detail toggles and explicit generation; verify real client/internal PDFs and cancellation.
+
 ## Comparator cold start and filtering
 - [x] Cold-start catalogue shows Achille Salvagni Atelier, Adrien Messié and Alex Proba with All active and four empty slots. Search/letter reset each other; designer and piece matches, adding without collapse, Done/reopen and phone containment verified signed-in. Project assignment sits beside Material; 35 tests pass and build clean. Preview only; GitHub sync needed.
 
