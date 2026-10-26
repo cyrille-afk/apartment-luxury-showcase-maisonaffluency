@@ -516,16 +516,6 @@ export default function SelectionDrawer({
 
         {/* ── 6 · Sticky footer actions ──────────────────────────────────── */}
         <footer className="shrink-0 border-t border-border/60 px-6 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
-          {pairingsEnabled && pairingsDismissed && !pairingsVisible && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={reopenPairings}
-              className="mb-3 h-12 w-full touch-manipulation rounded-none border-gold/50 bg-transparent px-4 font-body text-xs font-medium uppercase tracking-widest text-foreground transition-colors hover:bg-gold/10 active:bg-gold/15 sm:h-11"
-            >
-              Curated Pairings
-            </Button>
-          )}
           <button
             type="button"
             onClick={() => onCheckout?.(method)}
