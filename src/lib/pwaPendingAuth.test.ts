@@ -59,3 +59,15 @@ describe("pwaPendingAuth", () => {
     expect(readPendingAuthToken()).toBeNull();
   });
 });
+
+import { claimFirstLaunchToken } from "./pwaPendingAuth";
+
+describe("claimFirstLaunchToken", () => {
+  it("accepts a launch code once, then ignores the same code on later icon taps", () => {
+    const store = new Map<string, string>();
+    const storage = { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => void store.set(k, v) };
+    expect(claimFirstLaunchToken("a".repeat(43), storage)).toBe(true);
+    expect(claimFirstLaunchToken("a".repeat(43), storage)).toBe(false);
+    expect(claimFirstLaunchToken("b".repeat(43), storage)).toBe(true);
+  });
+});
