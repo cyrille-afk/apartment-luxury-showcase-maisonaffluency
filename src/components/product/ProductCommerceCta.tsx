@@ -611,7 +611,6 @@ export default function ProductCommerceCta({
         <SelectionDrawer
           isOpen={miniCartOpen}
           onClose={() => setMiniCartOpen(false)}
-          allowPairings={!tradeApproved}
           lines={cartItems.length > 1 ? cartItems.map((item) => ({ key: item.key, brand: item.designerName, title: item.title, configuration: item.finishLabel, imageUrl: item.imageUrl, quantity: item.quantity, priceLabel: item.unitPriceCents > 0 ? formatMoney(item.unitPriceCents * item.quantity, item.currency) : "Price upon Request", leadTime: item.leadTime })) : undefined}
           onLineQuantityChange={setCartQuantity}
           onRemoveLine={removeFromCart}

@@ -14,12 +14,6 @@ import { cn } from "@/lib/utils";
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
 
 import { supabase } from "@/integrations/supabase/client";
-import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
-import { privatePairingsEnabled } from "@/lib/curatedPairings";
-import { useCuratedPairingSession } from "@/lib/curatedPairingSession";
-import CuratedPairings from "./CuratedPairings";
-import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
 
 /** Mobile / WhatsApp number: digits, +, spaces, dashes, parentheses — 7–20 chars. */
 const PHONE_RE = /^[+0-9][0-9 ()-]{6,19}$/;
@@ -81,8 +75,6 @@ export interface SelectionDrawerProps {
   /** Piece has no public price: hide payment methods, request a quotation. */
   quoteOnly?: boolean;
   placing?: boolean;
-  /** Explicit off switch for approved trade checkout. */
-  allowPairings?: boolean;
 }
 
 export default function SelectionDrawer({
@@ -104,12 +96,7 @@ export default function SelectionDrawer({
   onCheckout,
   quoteOnly = false,
   placing = false,
-  allowPairings = true,
 }: SelectionDrawerProps) {
-  const { buyerProfile } = useCheckoutForm();
-  const { isTradeUser, isAdmin, rolesLoaded, user } = useAuth();
-  const { dismissed: pairingsDismissed, visible: pairingsVisible, reopen: reopenPairings, dismiss: dismissPairings } = useCuratedPairingSession(isOpen);
-  const pairingsEnabled = allowPairings && privatePairingsEnabled(buyerProfile) && !isTradeUser && !isAdmin && (!user || rolesLoaded);
 
   const [method, setMethod] = useState<PaymentMethod>("online");
   const [localQty, setLocalQty] = useState(1);
@@ -189,12 +176,11 @@ export default function SelectionDrawer({
     if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape" || e.defaultPrevented) return;
-      if (pairingsEnabled && pairingsVisible) dismissPairings();
-      else onClose();
+      onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [isOpen, onClose, pairingsEnabled, pairingsVisible, dismissPairings]);
+  }, [isOpen, onClose]);
 
   // Portal to document.body so the drawer escapes any ancestor stacking
   // context (transforms, blurs) — its z-[10000] must always beat the
@@ -212,19 +198,9 @@ export default function SelectionDrawer({
         onClick={onClose}
         className={cn(
           "absolute inset-0 bg-foreground/40 transition-opacity duration-300",
-          isOpen && pairingsEnabled && pairingsVisible && "backdrop-blur-md",
           isOpen ? "opacity-100" : "opacity-0"
         )}
       />
-
-      {pairingsEnabled && <CuratedPairings
-        open={pairingsVisible}
-        title={lines?.[lines.length - 1]?.title || title || ""}
-        brand={lines?.[lines.length - 1]?.brand || brand || ""}
-        excludedIds={(lines || []).map((line) => line.key.split("::")[0])}
-        onDismiss={dismissPairings}
-        onExplore={onClose}
-      />}
 
       {/* Panel — slides right-to-left */}
       <aside
@@ -540,16 +516,6 @@ export default function SelectionDrawer({
 
         {/* ── 6 · Sticky footer actions ──────────────────────────────────── */}
         <footer className="shrink-0 border-t border-border/60 px-6 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
-          {pairingsEnabled && pairingsDismissed && !pairingsVisible && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={reopenPairings}
-              className="mb-3 h-12 w-full touch-manipulation rounded-none border-gold/50 bg-transparent px-4 font-body text-xs font-medium uppercase tracking-widest text-foreground transition-colors hover:bg-gold/10 active:bg-gold/15 sm:h-11"
-            >
-              Curated Pairings
-            </Button>
-          )}
           <button
             type="button"
             onClick={() => onCheckout?.(method)}
