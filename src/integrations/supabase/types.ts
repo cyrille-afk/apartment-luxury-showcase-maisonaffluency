@@ -2322,6 +2322,27 @@ export type Database = {
           },
         ]
       }
+      comparator_working_drafts: {
+        Row: {
+          draft: Json
+          draft_key: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          draft?: Json
+          draft_key: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          draft?: Json
+          draft_key?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       competitor_designers: {
         Row: {
           created_at: string
