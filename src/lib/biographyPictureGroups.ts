@@ -4,6 +4,7 @@
  */
 export function biographyPictureGroups<T>(texts: T[], pictureCount: number): T[][] {
   if (pictureCount <= 0) return texts.length ? [texts] : [];
+  if (texts.length < pictureCount) return Array.from({ length: pictureCount }, (_, i) => texts.slice(i, i + 1));
   const base = Math.floor(texts.length / pictureCount);
   const extra = texts.length % pictureCount;
   const groups: T[][] = [];
