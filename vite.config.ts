@@ -23,6 +23,11 @@ export default defineConfig({
     server: {
       watch: { ignored: ["**/src/integrations/supabase/types.ts", "**/supabase/migrations/**"] },
     },
+    // Pre-bundle deps discovered lazily on first SSR-hydrated visit; late discovery
+    // forces a full-page reload that wipes open admin editors mid-entry.
+    optimizeDeps: {
+      include: ["@tanstack/router-core", "@tanstack/router-core/isServer", "@tanstack/router-core/ssr/client", "seroval"],
+    },
     build: { chunkSizeWarningLimit: 1500 },
   },
 });
