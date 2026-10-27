@@ -216,7 +216,7 @@ export const ROSTER: readonly RosterEntry[] = [
   {"name": "Pinton 1867", "specialty": "Rugs & Tapestry"},
   {"name": "Poltrona Frau", "specialty": "Luxury Leather Seating · Italian Craftsmanship"},
   {"name": "Pool Studio", "specialty": "Furniture Design"},
-  {"name": "Pouenat", "specialty": "Uniquely French. Handcrafted in metal."},
+  {"name": "Maison Pouenat", "specialty": "Uniquely French. Handcrafted in metal."},
   {"name": "Privatiselectionem", "specialty": "Furniture"},
   {"name": "Raphael Navot", "specialty": "Architecture and lighting design"},
   {"name": "Reda Amalou", "specialty": "Refined by architecture. Enriched by the world."},
