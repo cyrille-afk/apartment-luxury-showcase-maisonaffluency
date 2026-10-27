@@ -12,3 +12,8 @@ describe("biography picture pairing", () => {
     expect(biographyPictureGroups([2, 3], 3)).toEqual([[2], [3], []]);
   });
 });
+describe("even spread", () => {
+  it("gives each of three pictures two of six paragraphs", () => {
+    expect(biographyPictureGroups([2, 3, 4, 5, 6, 7], 3)).toEqual([[2, 3], [4, 5], [6, 7]]);
+  });
+});

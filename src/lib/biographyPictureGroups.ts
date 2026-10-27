@@ -1,7 +1,18 @@
-/** Pair successive pictures with one narrative paragraph, leaving remaining text with the final picture. */
+/**
+ * Spread the narrative evenly across the pictures so no picture sits beside
+ * blank space; any remainder goes to the final pictures.
+ */
 export function biographyPictureGroups<T>(texts: T[], pictureCount: number): T[][] {
   if (pictureCount <= 0) return texts.length ? [texts] : [];
-  return Array.from({ length: pictureCount }, (_, index) =>
-    index === pictureCount - 1 ? texts.slice(index) : texts.slice(index, index + 1),
-  );
+  if (texts.length < pictureCount) return Array.from({ length: pictureCount }, (_, i) => texts.slice(i, i + 1));
+  const base = Math.floor(texts.length / pictureCount);
+  const extra = texts.length % pictureCount;
+  const groups: T[][] = [];
+  let cursor = 0;
+  for (let index = 0; index < pictureCount; index += 1) {
+    const size = base + (index >= pictureCount - extra ? 1 : 0);
+    groups.push(texts.slice(cursor, cursor + size));
+    cursor += size;
+  }
+  return groups;
 }
