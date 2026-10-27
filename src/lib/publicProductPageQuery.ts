@@ -114,7 +114,7 @@ export async function fetchPublicProductPage(
   // title-derived slugs so any bookmarked/shared URLs keep resolving.
   let product = matchPick(picks);
 
-  // Parent houses (Marta Sala Éditions, Veronese, Ecart, Pouenat, CC-Tapis…)
+  // Parent houses (Marta Sala Éditions, Veronese, Ecart, Maison Pouenat, CC-Tapis…)
   // hold no picks of their own — their profile aggregates the picks of the
   // designers they publish. Resolve across the whole founder family, then
   // fall back to a global slug lookup so any parent/child URL resolves.
