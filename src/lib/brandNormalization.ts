@@ -39,6 +39,9 @@ const RAW_ALIASES: Record<string, string> = {
   "nathalie ziegler pasqua": "Nathalie Ziegler",
   "reda amalou design": "Reda Amalou",
   "sollen design": "Sollen",
+  // The publisher renamed itself "Maison Pouenat" (2026-10-27); slugs, asset names
+  // and older trade rows still carry the bare "Pouenat" spelling.
+  "pouenat": "Maison Pouenat",
 };
 
 const PARENT_BRAND_BY_KEY: Record<string, string> = Object.fromEntries(
