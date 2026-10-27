@@ -512,13 +512,13 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
     ],
   },
   "pouenat": {
-    name: "Pouenat",
+    name: "Maison Pouenat",
     curatorPicks: [
       {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773292459/Screen_Shot_2026-03-12_at_12.50.53_PM_wp4tbm.png",
         hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773315073/Screen_Shot_2026-03-12_at_7.30.39_PM_ee2fty.png",
         title: "Firefly Chandelier",
-        subtitle: "Damien Langlois-Meurinne by Pouenat",
+        subtitle: "Damien Langlois-Meurinne by Maison Pouenat",
         category: "Lighting",
         tags: ["Lighting", "Chandeliers"],
         materials: "Light bronze patinated brass · Mouth-blown balls in tinted glass, white, amber yellow, turquoise blue, steel blue, bristol glass, smoky grey, smoky bronze or coral",
@@ -530,7 +530,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
       {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773292505/Screen_Shot_2026-03-12_at_12.50.12_PM_izz0qk.png",
         title: "Dolly Wall Light",
-        subtitle: "Humbert & Poyet by Pouenat",
+        subtitle: "Humbert & Poyet by Maison Pouenat",
         category: "Lighting",
         tags: ["Lighting", "Wall Lights"],
         materials: "Brass engraving \"Lignes\" dark and light patina | 1001 · Alabaster",
@@ -541,7 +541,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
       {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773292460/Screen_Shot_2026-03-12_at_12.50.40_PM_bgpojp.png",
         title: "Sensible Coffee Table",
-        subtitle: "Stéphane Parmentier by Pouenat",
+        subtitle: "Stéphane Parmentier by Maison Pouenat",
         category: "Tables",
         tags: ["Tables", "Coffee Tables"],
         materials: "Rubbed patinated brass + satin varnish · Top in grey tinted spruce + matt varnish | Mirror polished brass + shiny varnish\nTop in grey tinted spruce + matt varnish | Lightly sanded brass + satin varnish · Top in grey tinted spruce + matt varnish",
@@ -1742,7 +1742,7 @@ const brandBgMap: Record<string, string> = {
   "Sé Collections": seCollectionsBg,
   "Maison WeCraft": maisonWecraftBg,
   "Hervé van der Straeten": herveVanDerStraetenBg,
-  "Pouenat": pouenatBg,
+  "Maison Pouenat": pouenatBg,
   "Poltrona Frau": poltronaFrauBg,
   "Valeria Nascimento": valeriaNascimentoBg,
   "Simon Cabrol": simonCabrolBg,
@@ -1852,7 +1852,7 @@ const brandToDesignerMap: Record<string, string> = {
   "Saint-Louis": "saint-louis",
   "Peter Reed 1861": "peter-reed",
   "Alpange": "alpange",
-  "Pouenat": "pouenat",
+  "Maison Pouenat": "pouenat",
   "Pierre Frey": "pierre-frey",
 };
 
@@ -1954,11 +1954,11 @@ const PARENT_BRAND_CONFIGS: ParentBrandConfig[] = [
     pillLabel: "Man of Parts",
   },
   {
-    brandName: "Pouenat",
-    dbParentName: "Pouenat",
+    brandName: "Maison Pouenat",
+    dbParentName: "Maison Pouenat",
     instagram: "https://www.instagram.com/pouenat.official/?hl=en",
     profileSlug: "pouenat",
-    pillLabel: "Pouenat",
+    pillLabel: "Maison Pouenat",
   },
   {
     brandName: "De La Espada",

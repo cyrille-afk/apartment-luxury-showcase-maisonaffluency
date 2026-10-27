@@ -1779,52 +1779,52 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       {
         image: tristanAuerYsaWallLightH,
         title: "Wall Light H",
-        subtitle: "for Pouenat",
+        subtitle: "for Maison Pouenat",
         category: "Lighting",
         tags: ["Lighting", "Wall Lights"],
         materials: "Patinated steel • Alabaster",
         dimensions: "L21 × P9 × H50 cm",
-        description: "The Wall Light H for Pouenat is designed by Tristan Auer, combining patinated steel with sculpted alabaster to create a luminaire of quiet architectural power. The alabaster diffuses light with a warm, mineral glow that speaks to Auer's mastery of material and proportion."
+        description: "The Wall Light H for Maison Pouenat is designed by Tristan Auer, combining patinated steel with sculpted alabaster to create a luminaire of quiet architectural power. The alabaster diffuses light with a warm, mineral glow that speaks to Auer's mastery of material and proportion."
       },
       {
         image: tristanAuerPedestalSuzanne,
         title: "Pedestal Suzanne",
-        subtitle: "for Pouenat",
+        subtitle: "for Maison Pouenat",
         category: "Tables",
         tags: ["Tables", "Side Tables"],
         materials: "Mirror-polished stainless steel • Copper • Copper tray • Turquoise patinated brass",
         dimensions: "L70 × P60 × H63 cm",
-        description: "The Pedestal Suzanne for Pouenat by Tristan Auer is a tour de force in material contrasts — mirror-polished stainless steel meets a weathered copper surface and turquoise patinated brass accents. The result is a side table of sculptural boldness, where industrial precision and artisanal oxidation coexist."
+        description: "The Pedestal Suzanne for Maison Pouenat by Tristan Auer is a tour de force in material contrasts — mirror-polished stainless steel meets a weathered copper surface and turquoise patinated brass accents. The result is a side table of sculptural boldness, where industrial precision and artisanal oxidation coexist."
       },
       {
         image: tristanAuerTableLampH,
         title: "Table Lamp H",
-        subtitle: "for Pouenat",
+        subtitle: "for Maison Pouenat",
         category: "Lighting",
         tags: ["Lighting", "Table Lamps"],
         materials: "Patinated steel • Copper leaf hammered steel • Alabaster",
         dimensions: "L28 × P18 × H50 cm",
-        description: "The Table Lamp H for Pouenat by Tristan Auer marries patinated steel with copper leaf hammered steel and alabaster diffusers, creating a luminaire of rare material depth. When lit, the alabaster emits a warm glow that highlights the textured copper interior — a sculptural object as much as a light source."
+        description: "The Table Lamp H for Maison Pouenat by Tristan Auer marries patinated steel with copper leaf hammered steel and alabaster diffusers, creating a luminaire of rare material depth. When lit, the alabaster emits a warm glow that highlights the textured copper interior — a sculptural object as much as a light source."
       },
       {
         image: tristanAuerTeeFloorLamp,
         title: "Tee Floor Lamp",
-        subtitle: "for Pouenat",
+        subtitle: "for Maison Pouenat",
         category: "Lighting",
         tags: ["Lighting", "Limited Edition 16/100"],
         materials: "Brushed brass • Marble • Scala silk lamp shade",
         dimensions: "D50 × H170 cm",
-        description: "The Tee Floor Lamp for Pouenat by Tristan Auer is a limited edition piece (16/100) that combines brushed brass, sculptural marble and a custom Scala silk shade. Its refined material layering — warm brass base, tactile marble column, crisp silk shade — embodies Auer's philosophy of doing more with less."
+        description: "The Tee Floor Lamp for Maison Pouenat by Tristan Auer is a limited edition piece (16/100) that combines brushed brass, sculptural marble and a custom Scala silk shade. Its refined material layering — warm brass base, tactile marble column, crisp silk shade — embodies Auer's philosophy of doing more with less."
       },
       {
         image: tristanAuerEclipseWallLight,
         title: "Eclipse Wall Light",
-        subtitle: "for Pouenat — 100/30/31/32/33",
+        subtitle: "for Maison Pouenat — 100/30/31/32/33",
         category: "Lighting",
         tags: ["Lighting", "Wall Lights"],
         materials: "Gunmetal patinated steel • Shiny varnish",
         dimensions: "L27 × P9 × H27 cm",
-        description: "The Eclipse Wall Light for Pouenat by Tristan Auer is a sculptural study in circular geometry — a brushed copper disc framing a deep painted steel recess. Its minimal, planetary form generates a warm, grazing light that animates the wall surface with shadow and material depth."
+        description: "The Eclipse Wall Light for Maison Pouenat by Tristan Auer is a sculptural study in circular geometry — a brushed copper disc framing a deep painted steel recess. Its minimal, planetary form generates a warm, grazing light that animates the wall surface with shadow and material depth."
       },
     ],
     cardThumbnails: [

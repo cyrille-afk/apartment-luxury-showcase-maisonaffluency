@@ -2385,13 +2385,13 @@
   "similarity": 0.889,
   "a": {
    "id": "292852a6-89e1-4ffb-a5e9-2d27048a1a29",
-   "brand": "Pouenat",
+   "brand": "Maison Pouenat",
    "name": "Sorbet Table Lamp by Humberrt",
    "created": "2026-05-26 03:03:32.483121+00"
   },
   "b": {
    "id": "a2065546-22cd-43a2-8dfc-d0a77cd4d2e8",
-   "brand": "Pouenat",
+   "brand": "Maison Pouenat",
    "name": "Sorbet Table Lamp by Humbert & Poyet",
    "created": "2026-05-26 03:03:39.12279+00"
   }
@@ -3491,13 +3491,13 @@
   "a": {
    "id": "280d26e5-accd-43b5-bbc2-71c06fcc0f1b",
    "brand": "Nicolas Aubagnac",
-   "name": "Iguazu Coffee Table for Pouenat",
+   "name": "Iguazu Coffee Table for Maison Pouenat",
    "created": "2026-04-30 13:40:55.345292+00"
   },
   "b": {
    "id": "9229cc76-6657-48dd-8ea7-6c61595078fd",
    "brand": "Nicolas Aubagnac",
-   "name": "Iguazu Table Lamp for Pouenat",
+   "name": "Iguazu Table Lamp for Maison Pouenat",
    "created": "2026-04-30 13:40:55.345292+00"
   }
  },

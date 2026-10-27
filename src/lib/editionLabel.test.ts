@@ -37,7 +37,7 @@ describe("Ecart re-edition labels", () => {
 
   it("does not label unrelated designers", () => {
     expect(isEcartReedition({ designerName: "Victoria Magniant" })).toBe(false);
-    expect(isEcartReedition({ designerName: "Joseph Dirand", founder: "Pouenat" })).toBe(false);
+    expect(isEcartReedition({ designerName: "Joseph Dirand", founder: "Maison Pouenat" })).toBe(false);
   });
 
   it("normalises older edition spellings and avoids a doubled Ecart badge", () => {
