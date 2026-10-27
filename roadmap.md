@@ -1,208 +1,23 @@
-## Six-slide brief revision
-- [x] Lamp attribution, exact 300+/106 directory wording and application CTA added; six app/HTML slides inspected desktop/phone, navigation verified, no app errors, preview build OK. App preview only; publish and GitHub sync needed.
+# Roadmap
 
-## Trade approval email refinement
-- [x] Personalised first-name/company-team approval greetings, exact Felix benefit copy, 0.05em header/CTA tracking and charcoal hover enhancement. Signed-in actual approval draft opened/cancelled; named/team/draft renderings inspected desktop/phone with no overflow/errors, 23 regressions pass. Existing send/preview services deployed and live previews verified without sending emails. Admin review UI remains preview-only; publish and GitHub sync needed. Hover depends on email-client CSS support.
+## Rename Pouenat -> Maison Pouenat (everywhere the brand is shown)
 
-## Six-slide Trade carousel
-- [x] Added /trade-carousel with exact supplied copy and original contain-only screenshots, six active dots and arrow/keyboard navigation. All images loaded on desktop/phone with no overflow or browser errors. Generated artwork candidates altered screenshot lettering, so the component uses authentic originals instead. Preview only.
-
-## Designer editor continuity
-- [x] Normal lifecycle exits clear the recovery marker and flush drafts; crash fallback retains filters instead of returning to All designers. Signed-in Michel Amar immediate reload and tab-switch verified with unsaved biography preserved; original text restored without saving. Eight tests pass, no browser errors and preview build clean. Preview only.
-
-## Resources catalogue recovery
-- [x] Removed eager maker PDF previews; document previews use the bundled worker and clean up on exit/timeout. Signed-in Tools → Resources → Delcourt search verified; both real catalogue PDFs downloaded, covers displayed and no page errors. Five recovery/alphabet tests pass, build clean. Preview only; GitHub sync needed.
-
-## Tier steps open the tour
-- [x] Real-Time Tier Tracking moved to Step 2 directly after Welcome; Collection/margins/presentation steps renumbered 3-6, Steps 9-23 unchanged. Signed-in walk of Steps 1-10 verified titles, sidebar anchors and routes; Back 10 to 9 verified; no page errors, 33 unit regressions pass. e2e specs renumbered (early-late, placement, collection-transition, reduced-motion, sidebar-anchors, board-presentation). Preview only; GitHub sync needed.
-
-## Grouped later onboarding steps
-- [x] Steps 12-23 regrouped by sidebar section: Projects & Interventions (12-16: portfolio switcher, board collaboration, branding, white-label, invite), Tools (17-18: custom requests, technical assets), Trade Concierge (19-20), then extension sync, mobile app and finale. Signed-in walk of Steps 12-23 verified correct titles, sidebar anchors and routes with no page errors; 33 unit regressions pass. Preview only; GitHub sync needed.
-
-## Step 6 to Step 7 handoff
-- [x] Keep the outgoing product in Client Presentation until Quotes & Proformas mounts. Signed-in normal and two-second delayed handoffs, Back and repeated Next verified: zero Studio-product flashes or browser errors; 27 unit regressions pass, preview build clean. Preview only; GitHub sync needed.
-- [x] Step 7 highlights the Client View → Studio Workspace switch: dialogue names the switch, the top-bar toggle renders on /trade/quotes with the orientation ring, and the card never covers it (secondary targets are hard obstacles). Verified signed-in: zero card/toggle overlap, 16 tour regressions pass, build clean. Preview only; GitHub sync needed.
-
-## Collection tour control clarity
-- [x] Arrow points toward the Collection; browsing tabs have bright backgrounds, individual bronze outlines and 13px labels with unchanged line height. Signed-in Steps 2–3, both browsing tabs and close verified at 1946×1181: identical header/photo rectangles open and closed, highlights cleared, no browser errors; 19 regressions pass and build clean. Preview only; GitHub sync needed.
-
-## Restore Collection proportions
-- [x] Removed tour header resizing; original header and four photo rectangles are identical with tour open/closed at 1946×1181. Upper-right card ends 12px above photos with internal scrolling; signed-in Next/close verified, 19 tests pass, no browser errors and build clean. Preview only; GitHub sync needed.
-
-## Onboarding project-folder order
-- [x] Client Project Folders is Step 9 before Tools (Step 10); preceding pricing/quote steps renumbered 4–8. Signed-in Steps 4–10 and Back to Step 9 verified without browser errors; 14 unit regressions pass and build clean. Existing JS e2e runner blocked by absent browser binary; equivalent central flow verified with Python Playwright. Preview only; GitHub sync needed.
-
-## Collection tour background and placement
-- [x] Step 2 opens the actual Collection; Step 3 uses upper-right reserved editorial space. Signed-in 1946×1181, 1280×1800 and 1024×600 checks show zero photograph overlaps; Back/Next/close remove reserved space correctly, no browser errors, 30 regressions pass and build clean. Preview only; GitHub sync needed.
-
-## Intentional comparator export
-- [x] Added client-default export modal with guarded trade switch and retail/specification/material switches. Signed-in real client, internal and minimal PDFs downloaded; extracted text confirms client omits supplier/trade/internal notes, internal includes opted-in trade, and disabled sections disappear. Cancellation and fresh client defaults on reopening verified desktop/phone; 19 tests pass, build clean. Fixed existing invalid FX date formatting uncovered by real conversion. Preview only; GitHub sync needed.
-
-## Comparator cold start and filtering
-- [x] Cold-start catalogue shows Achille Salvagni Atelier, Adrien Messié and Alex Proba with All active and four empty slots. Search/letter reset each other; designer and piece matches, adding without collapse, Done/reopen and phone containment verified signed-in. Project assignment sits beside Material; 35 tests pass and build clean. Preview only; GitHub sync needed.
-
-## Comparator selection hierarchy
-- [x] Separate Done from piece removals with global actions, alphabetical filters, then search/scrolling selected pieces. Signed-in four-piece desktop/phone verification: 102px/206px Done-to-X separation, loaded thumbnails, contained phone scrolling, material menu and category dialog, removal, Done/reopen and Clear all work; no page errors, 35 regressions pass. Preview only; GitHub sync needed.
-
-## Compact two-row comparison header
-- [x] Simplified to one primary bar (name, project, currency, Tools, export) and a 34px low-contrast material/selection strip. Cover, save, saved comparisons and admin finish categories moved into Tools; all three dialogs and four-piece selection verified signed-in. Desktop matrix starts at 274px; phone wraps without page overflow or browser errors. All 31 catalogue/filter/draft regressions pass; preview build clean. GitHub sync needed.
-
-## Comparator curator-pick labels
-- [x] Restore shared edition/house labels from live catalogue metadata. Ecart Armchair, 1926 badge verified on the signed-in comparison and after refresh; 23 tests pass, no browser errors and preview clean. Preview only.
-
-## Comparison PDF grid alignment
-- [x] Consolidate images/specifications/prices on one landscape sheet with six visual swatches, shared dimensions, embedded editorial/body fonts and total-aware footers. Full finish names/textures remain in an aligned appendix. PDF skill visual QA found an overly long single-column appendix and condensed it to paired samples; all five final pages inspected, no clipping/overlap. Signed-in export downloaded; 22 tests pass and preview clean. Preview only, GitHub sync needed.
-
-## Structured comparator dimensions
-- [x] Render labelled metric/imperial rows with common separator parsing and auxiliary heights; 48 regressions pass. Four real pieces verified signed-in on desktop/mobile, refresh retains rows, no overflow or browser errors. Preview only.
-
-## Comparator material swatches
-- [x] Replaced bullets with 28px wrapping real linked texture samples or explicit hex colours; unavailable samples use named neutral placeholders. Six visible with +X more popover, hover/focus labels and reduced-motion interaction. Signed-in Salute/Ecusson verified: six loaded images, +11 opens eleven finishes, desktop/mobile no page overflow or errors; prevented automatic tooltip covering the popover heading. Nineteen regressions pass, preview clean; not published, GitHub sync needed.
-
-## Comparison PDF cover
-- [x] Add editable project, comparison, client, apartment/location and style cover fields, with local persistence and project prefills; keep project records and shared shortlist snapshots unchanged.
-- [x] Add the authentic Maison Affluency logo to the existing jade, bronze/gold and cream cover; preserve project details, selected names and export date.
-- [x] Added shared jade/bronze branded cover with project/shortlist name and recorded client, location and style (blank fields omitted, no invented details or internal notes). Signed-in Singapore and two-piece Bangkok exports downloaded; every page visually inspected, corrected singular PIECE label, pictures/specifications retained, no overlap or clipping; 20 regressions pass and preview clean. Preview only.
-
-## Compact comparator setup
-- [x] Selection tools now collapse to a count/Modify Selection summary; empty selection starts open, editing stays open until Done, restored selections collapse. Sticky outline actions measure header/breadcrumb clearance; verified desktop at 128px and mobile at 56px with no overlap/overflow/errors, 21 regressions pass and preview clean.
-
-## Specification differences
-- [x] Added subtle neutral tints on differing populated specification cells; empty slots, matching categories and equivalent material lists stay plain, pricing unchanged. Four live products verified (16 differing cells, zero matching-category/price differences), no browser errors, 21 tests pass and preview clean.
-
-## Reopen saved comparisons
-- [x] Added searchable Saved comparisons chooser across owner projects; Restore reopens the saved project/name/ordered selections and can explicitly reset local edits. Signed-in temporary Singapore two-piece comparison saved, restored after leaving, re-restored after removal and deleted; no browser errors, 17 tests pass, preview clean.
-
-## Comparator table presentation
-- [x] Extracted the comparison table with large 4:5 neutral image blocks, centered above-card remove controls, bold muted left-aligned labels, stacked materials and tinted bold Trade Price. Four live pieces verified at 1946px and mobile with all images loaded, no page overflow/errors, refresh/removal preserved; 15 regressions pass, preview clean. Not published; GitHub sync needed.
-
-## Comparator refresh persistence
-- [x] Preserve selected pieces and in-progress comparator controls across refresh with account-scoped price-free local drafts; live refresh retained Dais, Favorites and the unfinished name on Cyrille's account, removal stayed removed after a second refresh. No cloud shortlist created; 15 tests passed and preview build clean.
-
-## Product comparator feedback
-- [x] Include recorded parent houses alongside child designers; Ecart and CC-Tapis verified. Favorites now load saved product records directly; both of Cyrille's two Favorites shown.
-- [x] Assign/save under accessible projects and reopen from project Boards; live Singapore project save and saved two-piece reload verified, temporary shortlist removed.
-- [x] Export pictures and recorded variant materials/deduplicated metric+imperial sizes; inspected two-picture PDF and full material/size text, 10 tests passed, clean preview; not published, GitHub sync needed.
-
-## Expired tearsheet invitations
-- [x] Add per-board expired-invitation resend in status cards and sharing controls; live-tested on Cyrille's Singapore board, restored view-only access for 30 days and refreshed viewer count, email queued (delivery not confirmed). Revoked/current/wrong-project/signed-out attempts denied, 12 focused tests passed, test invitations removed; not published.
-
-## Tearsheet invitation status
-- [x] Show invited viewers, permissions, expiry and last-viewed status for every project board; signed-in Singapore project verified against saved invitations (one unique current viewer, revoked history, two uninvited boards), refresh and sharing controls checked with no browser errors; 14 focused tests pass.
-
-## Project tearsheet sharing
-- [x] Add project-scoped board invitations for architects and interior designers; live-verified invitation creation on Cyrille's account, guest board rendering without approval controls, denied feedback/cross-project requests, revoked-link rejection and test cleanup; three focused tests pass.
-
-## Project-first tearsheets
-- [x] Require choosing or creating a project before working on tearsheets; boards persist under that project, unrelated boards excluded. Verified project creation, Ondas board save, persisted project/item read-back and test cleanup on Cyrille's account; two rule tests pass, preview build clean.
-
-## Curated Room Layout loading and freeze report
-- [x] Add page/catalogue/generation/curation loading states and coordinate competing actions; signed-in catalogue and generation indicators captured, five placement tests pass.
-- [x] Stop idle canvas rendering while retaining continuous rendering during walkthrough playback and dragging.
-- [ ] Resolve post-generation stall: twice reproduced screenshot timeouts after real room generation, including a 90-second timeout; complete room rendering and walkthrough remain unverified. Further model/render profiling is needed, not user input.
-
-## Brief submission and stalled concierge replies
-- [x] Keep missing-detail errors visible beside Submit Brief; validate live fields and stop blank lines consuming following labels. Signed-in incomplete submission verified after 5.5 seconds with no page errors.
-- [x] Re-arm inactivity protection on transport heartbeats; failed/aborted brief streams cannot mark onboarding complete. Recovery copy now describes an incomplete answer rather than invented spatial work.
-- [ ] Verify the user’s complete original brief and refinement end-to-end; original brief/thread not supplied. Backend logs available only for latest test request, so exact screenshot failure remains unconfirmed.
-
-# Roadmap — Automatic Visual Search Indexing
-
-## Concierge pending reply
-- [x] Show “Working on your question…” with a quiet spinner while awaiting text, including empty assistant placeholders, in embedded and floating conversations. Signed-in real question verified: waiting message visible, removed on reply, no page errors; build clean.
-
-## Sign-in modal feedback and password reveal
-- [x] Added modal password reveal, inline pending/error/success states and Google-password guidance. Twelve focused tests pass; live eye toggle, pending lock and real credential rejection verified with no page errors. Build clean; no password changed.
-
-## Sign-in feedback
-- [x] Add inline credential loading, confirmed-success and actionable errors; coordinate disabled sign-in controls and match Google feedback to the same restrained styling.
-- [x] Live verified delayed real credential request, disabled competing controls, actionable rejection, retained input and retry with no page errors; eight focused tests pass, including confirmed-success locking. Successful credential login was not exercised; no account password changed. Build clean.
-
-## Homepage logo return
-- [x] Limit the hidden homepage guard to initial loading and reconcile already-loaded styles on client-side return.
-- [x] Verify sign-in logo and close return, direct homepage and repeated visits on desktop/mobile; stylesheet handoff regressions pass. Confirm only one headline remains after hydration.
-
-## Sign-in return address stacking
-- [x] Stop the outgoing Trade layout from redirecting the incoming sign-in page, normalize query separators and repair existing nested return links.
-- [x] Live verified six direct/protected/nested/truncated/trailing-slash/filter cases, all stable after reload with the sign-in form visible and no page errors; focused return-address/navigation/password regressions pass and build clean.
-
-## Website SMS alerts
-- [x] Verify Twilio sender and deliver one test SMS to the requested recipient.
-- [x] Add private unique outage/recovery events and single-use callback tokens alongside existing emails; six focused tests pass, missing/invalid tokens return 401, build clean. Twilio test confirmed delivered. Dispatch configured; pending events wait for published callback.
-- [ ] Activate published callback and verify an automatic alert; requires publishing the new route.
-
-## Public website status
-- [x] Add public availability and observed interruption history from the existing independent monitor, with stale/failed-read states and private diagnostics excluded.
-- [x] Verified signed-out /status, all four live readings, refresh, mobile layout, anonymous safe reads/private empty reads and three availability tests; build clean. History starts 25 October; no fabricated outage or live monitoring failure was introduced. Publish remains user-controlled.
-
-## Trade Program sign-in password reveal
-- [x] Add a show/hide toggle to the Trade Program sign-in password field so the member can check what they typed before submitting; the field still starts empty and hidden.
-- [x] Live verified on /trade/login: field starts type=password and empty, revealing shows the exact characters (type=text) and hiding restores the mask with the value intact, the toggle never submits the form and tab still moves straight to Sign In; three component tests pass and the build is clean.
-
-## Sign-in modal premium redesign
-- [x] Put the credential form first, a plain "or" separator below it, Google last as an alternative, the muted internal-staff helper line under Google and one footer application link; remove Google's raw error wording everywhere.
-- [x] Live verified on /spec-sheets/joseph-dirand: order email → password → Sign In → or → Google → helper → footer, 448px card, wrong password shows "We couldn’t sign you in…" with no raw auth message; /trade/login carries the same copy with one application link; five component tests pass and the build is clean.
-
-## Sign-in lightbox rewrite
-- [x] Put email and password first with padded bordered fields, move Google below an "Or sign in with" rule, and replace the dense Google disclaimer with the approved one-line note.
-- [x] Live verified: field order (email 748px, password 843px, Google 1003px), 16px/12px input padding, one Trade application link, no request-access accordion in the lightbox, wrong password keeps the dialog open and shows "Login Failed — Invalid login credentials".
-
-
-## Repeated redirect blank page
-- [x] Reproduced an empty /public-piece page on immediate repeat navigation in a real TanStack router test before fixing the guard.
-- [x] Scope deduplication to router/resolved visit and release settled attempts; all five redirect tests pass. Signed-in Ondas public-to-Trade visits both render, second in 0.78 seconds with no browser errors; current app build is clean.
-
-## Reviewed quote client PDF export
-- [x] Add a client-ready PDF download to quote review using the shared branded document and existing checks; export does not publish, email or change status.
-- [x] Passed snapshot preparation, check-blocking and stale-document tests; downloaded QU-9F86D9 on Cyrille's Trade account (120,250 bytes, 3 A4 pages). Inspected all pages and confirmed SGD 13,314.93 subtotal / SGD 16,444.35 total match review, existing Draft marking preserved and no browser errors.
-
-## Favorites product opening and registration password
-- [x] Replace Favorites' legacy product overlay with the shared full product destination; live verified Ondas then Dais in Presentation, Ondas in Studio, Technical List navigation and browser Back, with no page errors.
-- [ ] Identify the password-change screen referred to as step 6 and verify its save response; activation, reset and settings code all await the auth update and handle errors. Blocked on identifying the user's screen; no password changed.
-
-## Quote review before client sending
-- [x] Add a selected-piece, quantity and trade-price review step using the editor's existing calculations and client-send checks.
-- [x] Verify review on a saved quote: one table, quantity 1, SGD 13,314.93 unit/subtotal and SGD 16,444.35 total match the editor; unapproved-client continuation stays blocked. All 24 focused tests passed; no client email sent.
-
-## Studio creation access failure
-- [x] Reproduce Gregoire's non-admin INSERT RETURNING failure; add creator-only studio read policy and verify creation plus automatic owner membership.
-
-## Google Trade access requests
-- [x] Add name/email submission through the existing validated inquiry handler, admin-visible storage and staff notifications; no account or approval changes.
-- [x] Verify signed-in real submission, admin read-back, sent notification logs and six validation/recovery tests; remove test inquiry.
-- [ ] Verify an unsigned visitor completes Turnstile and submits: the sandbox security widget did not provide a token. Guest submission stays disabled without verification.
-
-- [x] Add minimum visual-match and maximum result controls; verified default 8, expanded 12, 100% empty state and 74% filtered results against a real uploaded room photo; five tests pass.
-
-- [x] Existing real Visual Search, catalogue backfill and distinct-room checks completed.
-- [x] Add durable image-change queue, secure event wake, leases and bounded retry recovery.
-- [x] Share the image embedding request between search and automatic processing; expose paused status and explicit recovery.
-- [x] Verify replacement enqueue, persisted vectors, private callback rejection, queue drain and 15 failure/duplicate tests. Restore the test photo; all 764 images remain indexed.
-- [ ] Publish the new server route to activate unattended production callbacks; the database currently queues safely, but published callback delivery cannot be verified before publishing.
-
-## Extension page download prompt
-- [x] Complete Bangkok Option 3 schedule/quote verification: reference-scoped, per-piece matching now returns 6 pieces (2 bar stools, 2 side tables, 2 lounge chairs from Collection Particulière and Alinea) in both the FF&E schedule and quote preview, €40,459 RRP / €37,222 after 8%; live-verified in the preview, nothing approved.
-- [x] Remove the plugin package download button from the ChatGPT Extension Integration page and drop the matching tour wording; verified signed-in as cyrille@maisonaffluency.com that the page now shows no download control.
-- [ ] Decide whether the package file itself should stop being reachable at its web address (it still sits in the site's public files).
-
-## Cyrille feedback doc (25 Oct)
-- [ ] Quotes & Proformas: "operator does not exist: trade_tier = text" — not reproducible; awaiting account/site.
-- [ ] Designers & Ateliers: another presentation style (awaiting direction).
-- [x] Resources: alphabetical search.
-- [x] Resources: price lists admin-only (database rule) + view-only viewer.
-- [ ] Material Library: click image for higher-res view.
-- [x] Mood Board Builder: save to project, PDF export, Client View.
-- [ ] Mark-up & annotations: save, share, assign to project; Studio/Presentation View.
-
-## Price list audit admin link
-- [x] Add a "Price List Audit" link to the sidebar Admin group so the audit opens without typing its address.
-- [x] Live verified signed-in as cyrille@maisonaffluency.com: link present with the correct address, click lands on /trade/admin/price-list-audit and the report renders (57/57 secured, 5 needing securing) with no page errors.
-
-## Price-list content audit
-- [x] Inventory all public objects regardless of names and inspect document/image contents with saved revision-keyed results; flag covers with possible prices, keep incomplete coverage explicit.
-- [x] Verified signed-in Parsa cover (no prices detected) and unrelated-filename PDF (Mernoe price list detected, eight prices); saved results visible, anonymous inventory refused/results hidden, five focused tests passed. Full public-content scan remains explicitly incomplete and user-controlled.
-- [x] Steps 3–4 tour card sits beside the Collection header/tabs instead of the extreme right edge, bounded above the first room title/caption (h3 + images), never overlapping tabs or gallery text. Verified signed-in at 1946×1181 on both Collection tabs: zero tab/photo/caption overlap; 18 placement tests pass, build clean. Preview only; GitHub sync needed.
-- [x] Sidebar pulse no longer precedes the tour card: data-felixTourSidebar/felixTourStep are gated on the card's settled state so the nav highlight and card appear together. Verified signed-in: pulse and card both at 5.88s (route+gallery load), never sidebar-first; 34 tour regressions pass, build clean. Preview only; GitHub sync needed.
-- [x] Removed the pre-launch auto-message from the trade application confirmation email (trade-program-invitation, HTML + plain text): "fine-tuning phase… Design Miami Paris October 20–25" replaced with "The Trade Portal is now live — available from today"; "While direct system credentials conclude" dropped. Deployed send-transactional-email; boot check and live check pass. Legitimate review notices (on-screen "review your credentials shortly", pending-review card) kept.
-- [x] Step 3 no longer lands beside the sidebar first: Collection steps wait (collectionWorkspaceReady) for the Collection tabs to mount, so the card never appears on the outgoing dashboard and jumps right. Verified on live site (bug reproduced: card at 32,80 before page render) and fixed in preview (first visible frame at final position, pulse same frame); 35 tour tests pass.
-- [x] Tour regrouped by sidebar section: 9–14 Projects (Client Project Folders first), 15–17 Tools (Tools Grid first), 18–19 Concierge, 20 Extension Sync, 21 Mobile App, 22 Settings → 23 studio-setup finale. Verified signed-in walk 8–23.
+- [x] Database: guarded rename across designer profiles, parent-house labels, product
+      listings, material library, downloadable catalogues, concierge designer list,
+      product photo records, journal articles (founder "Henri Pouenat", web addresses,
+      image filenames and page addresses untouched)
+- [ ] Static brand lists in `src/data/brandCategories.json`
+- [ ] Hardcoded homepage/atelier copy in `BrandsAteliers.tsx`, `FeaturedDesigners.tsx`
+- [ ] `DesignersHoverHero.tsx` founder-suffix suppression set
+- [ ] Admin/placeholder examples: `TradeDocumentsAdmin.tsx`, `TradeAdminSuppliers.tsx`,
+      `StudioMemoryCard.tsx`
+- [ ] Assistant/tool descriptions: `src/lib/mcp/index.ts`, `src/lib/mcp/tools/search-curator-picks.ts`
+- [ ] `src/lib/brandNormalization.ts`: legacy "Pouenat" -> "Maison Pouenat" alias
+- [ ] Unit-test fixtures (`designerHierarchy`, `editionLabel`, `comparatorEditionLabel`)
+- [ ] Regenerate build outputs from the database: designers index, featured designers,
+      catalogue manifest, product link-preview pages, sitemap
+- [ ] Hand-edited link-preview pages: `public/ateliers/pouenat-og*.html`,
+      `public/journal/pouenat-ad-collector-ad100-design-2025-og.html`
+- [ ] Concierge roster files + redeploy the concierge and MCP functions
+- [ ] Verify: designer directory, product page credit, comparator grouping, trade filter
+      chips, search facets, link-preview titles, unit tests, build
