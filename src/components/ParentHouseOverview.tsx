@@ -10,7 +10,7 @@ const fold = (s: string) =>
 
 /**
  * Parent-house overview section: lists every designer working under a parent
- * house (e.g. Veronese, Pouenat) as expandable rows. Collapsed rows show the
+ * house (e.g. Veronese, Maison Pouenat) as expandable rows. Collapsed rows show the
  * designer's name + specialty; expanding reveals portrait, bio excerpt and a
  * link to the full profile. A search field and specialty filters appear when
  * the roster is large enough to warrant them.

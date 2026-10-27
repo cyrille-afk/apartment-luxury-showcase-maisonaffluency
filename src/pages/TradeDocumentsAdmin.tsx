@@ -294,7 +294,7 @@ const TradeDocumentsAdmin = () => {
                 value={editing.title}
                 onChange={(e) => setEditing(prev => prev ? { ...prev, title: e.target.value } : null)}
                 className={inputClass}
-                placeholder="e.g. Pouenat 2025 Catalogue"
+                placeholder="e.g. Maison Pouenat 2025 Catalogue"
               />
             </div>
 
@@ -305,7 +305,7 @@ const TradeDocumentsAdmin = () => {
                   value={editing.brand_name}
                   onChange={(e) => setEditing(prev => prev ? { ...prev, brand_name: e.target.value } : null)}
                   className={inputClass}
-                  placeholder="e.g. Pouenat"
+                  placeholder="e.g. Maison Pouenat"
                 />
               </div>
               <div>

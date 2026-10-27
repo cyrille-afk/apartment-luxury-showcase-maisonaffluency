@@ -268,7 +268,7 @@ export default function StudioMemoryCard() {
             type="text"
             value={desStr}
             onChange={(e) => setDesStr(e.target.value)}
-            placeholder="e.g. Thierry Lemaire, Apparatus, Pouenat"
+            placeholder="e.g. Thierry Lemaire, Apparatus, Maison Pouenat"
             className="mt-1 w-full px-3 py-2 border border-border rounded-md bg-background text-foreground font-body text-sm"
           />
         </label>

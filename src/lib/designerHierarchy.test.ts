@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { isChildBrandDesigner } from "./designerHierarchy";
 
 describe("Independent designer collection ownership", () => {
-  it("keeps Gilles & Boissier independent of Pouenat in the live catalogue", async () => {
+  it("keeps Gilles & Boissier independent of Maison Pouenat in the live catalogue", async () => {
     const { data, error } = await supabase.from("designers")
       .select("name, founder, is_independent")
       .eq("slug", "gilles-boissier").single();
@@ -14,7 +14,7 @@ describe("Independent designer collection ownership", () => {
   });
 
   it("excludes independent portfolios but retains genuine house children", () => {
-    const designer = { name: "Gilles & Boissier", founder: "Pouenat" };
+    const designer = { name: "Gilles & Boissier", founder: "Maison Pouenat" };
     expect(isChildBrandDesigner({ ...designer, is_independent: true })).toBe(false);
     expect(isChildBrandDesigner({ ...designer, is_independent: false })).toBe(true);
   });

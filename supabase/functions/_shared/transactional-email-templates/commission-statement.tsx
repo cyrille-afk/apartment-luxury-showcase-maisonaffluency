@@ -197,7 +197,7 @@ export const template = {
     expectedWireOn: '18 Jun 2026',
     items: [
       { name: 'Salvagni — Sesta low table', quantity: 1, msrpFormatted: '12,400.00' },
-      { name: 'Pouenat — Calliope sconce', quantity: 4, msrpFormatted: '35,850.00' },
+      { name: 'Maison Pouenat — Calliope sconce', quantity: 4, msrpFormatted: '35,850.00' },
     ],
   },
 } satisfies TemplateEntry

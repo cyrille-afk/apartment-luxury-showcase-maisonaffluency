@@ -3,7 +3,7 @@ import type { TradeProduct } from "./tradeProducts";
 
 /**
  * Comparator chips match the product page: only a recorded edition, or the
- * Ecart REEDITION house credit. Parent houses (e.g. Pouenat for Gilles &
+ * Ecart REEDITION house credit. Parent houses (e.g. Maison Pouenat for Gilles &
  * Boissier) never generate a generic "<House> Edition" chip here.
  */
 export function comparatorEditionLabel(product: Pick<TradeProduct, "brand_name" | "edition" | "tags" | "reedition_by">): string | null {

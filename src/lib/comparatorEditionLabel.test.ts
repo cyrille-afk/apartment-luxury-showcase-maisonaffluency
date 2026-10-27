@@ -15,7 +15,7 @@ describe("comparator curator-pick edition labels", () => {
 import { describe as d2, it as i2, expect as e2 } from "vitest";
 import { comparatorEditionLabel as label2 } from "./comparatorEditionLabel";
 d2("parent house without recorded edition", () => {
-  i2("shows no Pouenat Edition chip on Gilles & Boissier pieces", () => {
-    e2(label2({ brand_name: "Gilles & Boissier", reedition_by: "Pouenat", edition: undefined, tags: [] } as never)).toBeNull();
+  i2("shows no Maison Pouenat Edition chip on Gilles & Boissier pieces", () => {
+    e2(label2({ brand_name: "Gilles & Boissier", reedition_by: "Maison Pouenat", edition: undefined, tags: [] } as never)).toBeNull();
   });
 });

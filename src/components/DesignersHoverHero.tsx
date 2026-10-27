@@ -2070,7 +2070,7 @@ const DesignersHoverHero = () => {
                          {group.designers.map((d, dIdx) => {
                            const [first, last] = splitName(d.name);
                            const isActive = d.slug === activeSlug;
-                           const HIDE_FOUNDER_SUFFIX = new Set(["Man of Parts", "Pouenat", "Ozone"]);
+                           const HIDE_FOUNDER_SUFFIX = new Set(["Man of Parts", "Maison Pouenat", "Ozone"]);
                            const brandSuffix =
                              DIRECTORY_BRAND_SUFFIX[d.slug] ??
                              (d.founder && d.founder !== d.name && !HIDE_FOUNDER_SUFFIX.has(d.founder)
@@ -2150,7 +2150,7 @@ const DesignersHoverHero = () => {
                           const [first, last] = splitName(d.name);
                           const isActive = d.slug === activeSlug;
                           const isDimmed = activeSlug !== null && !isActive;
-                          const HIDE_FOUNDER_SUFFIX = new Set(["Man of Parts", "Pouenat", "Ozone"]);
+                          const HIDE_FOUNDER_SUFFIX = new Set(["Man of Parts", "Maison Pouenat", "Ozone"]);
                           const brandSuffix =
                                       DIRECTORY_BRAND_SUFFIX[d.slug] ??
                                       (d.founder && d.founder !== d.name && !HIDE_FOUNDER_SUFFIX.has(d.founder)
