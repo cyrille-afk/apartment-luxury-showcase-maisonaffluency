@@ -233,9 +233,13 @@ type NarrativeRow =
   | { kind: "texts"; texts: TextEntry[] };
 
 /** Break a row in two so the collection CTA can sit between its paragraphs. */
-function splitNarrativeRow(rows: NarrativeRow[], { rowIndex, splitAt }: CtaPlacement): NarrativeRow[] {
+function splitNarrativeRow(rows: NarrativeRow[], { rowIndex, splitAt: rawSplitAt }: CtaPlacement): NarrativeRow[] {
   const row = rows[rowIndex];
-  if (splitAt <= 0 || !row || (row.kind !== "picture" && row.kind !== "texts")) return rows;
+  if (rawSplitAt <= 0 || !row || (row.kind !== "picture" && row.kind !== "texts")) return rows;
+  // A picture keeps at least two paragraphs beside it — the CTA never strands
+  // a picture next to a single line.
+  const splitAt = row.kind === "picture" ? Math.max(rawSplitAt, Math.min(2, row.texts.length)) : rawSplitAt;
+  if (splitAt >= row.texts.length) return rows;
   return [
     ...rows.slice(0, rowIndex),
     { ...row, texts: row.texts.slice(0, splitAt) },
