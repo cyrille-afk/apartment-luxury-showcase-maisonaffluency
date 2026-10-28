@@ -1,5 +1,9 @@
 # Roadmap
 
+## Trade order workspace
+- [ ] Bypass public onboarding for authenticated Trade Studio orders using the professional session and existing checkout flow.
+- [ ] Verify the Trade order handoff and unchanged Public/Presentation intake.
+
 ## Admin price history
 - [x] Persist editor save attempts in admin-only database records; verified failed/confirmed writes across independent sessions, atomic saved status and nine access checks without changing prices.
 - [x] Add saved price history from the existing admin-only audit log, including variant changes.
