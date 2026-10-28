@@ -1,9 +1,9 @@
 # Roadmap
 
 ## Admin price history
-- [ ] Add saved price history from the existing admin-only audit log, including variant changes.
-- [ ] Show current-session pending, failed and unconfirmed editor saves separately from confirmed history.
-- [ ] Verify price differences, admin access and the history view with real saved records.
+- [x] Add saved price history from the existing admin-only audit log, including variant changes.
+- [x] Show current-session pending, failed and unconfirmed editor saves separately from confirmed history.
+- [x] Verify price differences, admin access and the history view with real saved records.
 
 ## Technical SEO findings
 - [x] Bound product titles and descriptions consistently in server and client metadata.
