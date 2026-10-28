@@ -283,6 +283,15 @@ export default function SelectionDrawer({
                         {l.configuration}
                       </p>
                     )}
+                    {(() => {
+                      if (!l.dimensionsLabel) return null;
+                      if (l.configuration && drawerDimensionsBody(l.dimensionsLabel) && l.configuration.includes(drawerDimensionsBody(l.dimensionsLabel)!)) return null;
+                      return (
+                        <p className="mt-1.5 font-body text-xs leading-relaxed text-muted-foreground">
+                          {l.dimensionsLabel}
+                        </p>
+                      );
+                    })()}
                     {l.leadTime && (
                       <p className="mt-1.5 font-body text-[11px] text-muted-foreground/80">
                         Lead time: {l.leadTime}
