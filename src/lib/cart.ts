@@ -18,6 +18,8 @@ export interface CartItem {
   imageUrl: string | null;
   leadTime: string | null;
   unitPriceCents: number;
+  /** Display-only configured net snapshot; checkout still validates retail server-side. */
+  netUnitPriceCents?: number | null;
   currency: string;
   quantity: number;
   /** Original catalogue currency when the line was converted for display. */

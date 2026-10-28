@@ -1996,6 +1996,10 @@ const TradeProductPage: React.FC = () => {
       imageUrl: product.image_url || null,
       leadTime: product.lead_time || null,
       unitPriceCents: converted,
+      netUnitPriceCents: (() => {
+        const rawUpcharge = fabricUpchargeCentsRaw > 0 ? convertCents(fabricUpchargeCentsRaw, selectedFabric?.currency || srcCcy, srcCcy as DisplayCurrency, fxRates) : 0;
+        return convertCents(configuredProductPrice(unit - rawUpcharge, rawUpcharge, TRADE_DISCOUNT).netCents, srcCcy, tgtCcy as DisplayCurrency, fxRates);
+      })(),
       currency: tgtCcy,
       quantity: orderQuantity,
       sourceCurrency: didConvert ? srcCcy : null,
