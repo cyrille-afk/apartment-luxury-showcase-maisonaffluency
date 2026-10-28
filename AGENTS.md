@@ -11,6 +11,7 @@
 - Approved-account activation resends reuse the branded review drawer with one fresh idempotency key per opened resend, retained on retries; never change approval to resend.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Presentation state reconciles browser storage on subscriber remount and focus/pageshow; product/drawer lifetimes cannot reset the saved mode.
 - Trade marketing carousel uses an isolated public preview, original asset pointers, contain-only screenshots and CSS scroll snapping — preserves exact captures without changing portal navigation.
 - Felix reduced motion combines the device preference with a persisted browser toggle; its lifecycle-owned root marker disables only tour animation/scroll easing while keeping static borders, arrows and step controls — avoids altering unrelated app motion or weakening device accessibility preferences.
 - Felix sidebar anchors reuse lifecycle-owned document state and stable markers; overlays portal into the root stacking context with an opaque isolated card. All steps use the shared empty-space placement solver protecting visible headings, tabs, targets and sidebar anchors; bounded scrolling handles tall cards and connectors retain sidebar context — clamping must never move a card over protected content.
