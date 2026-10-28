@@ -7,7 +7,7 @@
 - [x] Verify live toggle round-trip and actual presentation print/PDF, including a presentation link opened with shared mode off; 20 regression tests pass.
 
 ## Trade order workspace
-- [ ] Restore product-page order/workspace drawers without role selection or cart redirection; verify both buttons signed in.
+- [x] Restore product-page order/workspace drawers without role selection or cart redirection; both Saint Honoré buttons verified signed in, with unchanged product URL and active details; 18 regression tests pass.
 - [x] Bypass public onboarding for authenticated Trade Studio orders using the professional session and existing checkout flow.
 - [x] Verify signed-in Saint Honoré order opens its configured basket with professional identity, no onboarding or browser errors; 11 tests cover Trade mobile/desktop and retained Public/Presentation intake.
 

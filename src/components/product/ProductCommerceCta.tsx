@@ -488,6 +488,10 @@ export default function ProductCommerceCta({
   // 2nd unique line routes to the full-page cart. Keep the line in sync.
   const handleDrawerQuantity = (q: number) => {
     setQuantity(q);
+    if (isTradeWorkspace && cartItems.length === 1) {
+      setCartQuantity(cartItems[0].key, q);
+      return;
+    }
     onAddToCart?.(q, "update");
   };
 
