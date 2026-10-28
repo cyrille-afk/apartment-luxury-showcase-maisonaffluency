@@ -55,6 +55,7 @@ import { lastNameInitial, sortNameKey } from "@/lib/nameFormat";
 import { recoverDesignerEditorDraft } from "./designerEditorRecovery";
 import AdminPriceHistory from "@/components/admin/AdminPriceHistory";
 import { priceDifferences, startPriceAttempt, finishPriceAttempt, type PriceSnapshot } from "@/lib/adminPriceHistory";
+import { completePriceSave, PRICE_EDITOR_FIELDS, type PriceSaveState } from "@/lib/priceSaveFeedback";
 
 const EditorialBiography = lazy(() => import("@/components/EditorialBiography"));
 
@@ -287,6 +288,9 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
     pickup_address: string | null;
   };
   const [picks, setPicks] = useState<Pick[]>([]);
+  const [priceSaveStates, setPriceSaveStates] = useState<Record<string, PriceSaveState>>({});
+  const priceRevisions = useRef<Record<string, number>>({});
+  const unsavedPriceValues = useRef(new Map<string, { id: string; field: string; value: any }>());
   const [historyPickId, setHistoryPickId] = useState<string | null>(null);
   const [deletedOpen, setDeletedOpen] = useState(false);
   const [syncPickId, setSyncPickId] = useState<string | null>(null);
@@ -492,9 +496,16 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
   const pickWriteChainRef = useRef<Map<string, Promise<void>>>(new Map());
 
   const persistPickField = useCallback((id: string, field: string, value: any) => {
+    const feedbackKey = `${id}::${field}`;
+    const revision = priceRevisions.current[feedbackKey] ?? 0;
     const run = async () => {
-      const isPrice = ["trade_price_cents", "price_per_sqm_cents", "size_variants"].includes(field);
+      const isPrice = PRICE_EDITOR_FIELDS.has(field);
+      if (isPrice) setPriceSaveStates((states) => {
+        const current = states[feedbackKey];
+        return current?.revision === revision ? { ...states, [feedbackKey]: { revision, status: "saving" } } : states;
+      });
       let priceAttemptId: string | undefined;
+      try {
       if (isPrice && user) {
         const { data: before } = await supabase.from("designer_curator_picks")
           .select("title,currency,trade_price_cents,price_per_sqm_cents,size_variants").eq("id", id).maybeSingle();
@@ -523,15 +534,30 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
         finishPriceAttempt(priceAttemptId, error ? "Failed" : Array.isArray(data) && data.some((row) => row.id === id) ? "Saved" : "Unconfirmed");
         queryClient.invalidateQueries({ queryKey: ["admin-price-history"] });
       }
+      if (isPrice) {
+        const confirmed = !error && Array.isArray(data) && data.some((row) => row.id === id);
+        setPriceSaveStates((states) => {
+          const current = states[feedbackKey];
+          return current ? { ...states, [feedbackKey]: completePriceSave(current, revision, confirmed, new Date().toISOString()) } : states;
+        });
+        if (confirmed && priceRevisions.current[feedbackKey] === revision) unsavedPriceValues.current.delete(feedbackKey);
+      }
 
       if (error) {
         toast({ title: "Save failed", description: error.message, variant: "destructive" });
-        await loadPicks();
+        if (!isPrice) await loadPicks();
       } else if (["sort_order", "image_url", "hover_image_url", "is_hidden", "hidden_in_studio", "trade_only"].includes(field)) {
         queryClient.invalidateQueries({ queryKey: ["designer-picks"] });
         queryClient.invalidateQueries({ queryKey: ["designer-grouped-picks"] });
         queryClient.invalidateQueries({ queryKey: ["designer-attributed-picks"] });
         queryClient.invalidateQueries({ queryKey: ["trade-live-products"] });
+      }
+      } catch {
+        if (priceAttemptId) finishPriceAttempt(priceAttemptId, "Unconfirmed");
+        if (isPrice) setPriceSaveStates((states) => {
+          const current = states[feedbackKey];
+          return current ? { ...states, [feedbackKey]: completePriceSave(current, revision, false, new Date().toISOString()) } : states;
+        });
       }
     };
     const prev = pickWriteChainRef.current.get(id) ?? Promise.resolve();
@@ -572,6 +598,13 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
   }, [flushPendingWrites]);
 
   const updateField = (id: string, field: string, value: any) => {
+    if (PRICE_EDITOR_FIELDS.has(field)) {
+      const key = `${id}::${field}`;
+      const revision = (priceRevisions.current[key] ?? 0) + 1;
+      priceRevisions.current[key] = revision;
+      unsavedPriceValues.current.set(key, { id, field, value });
+      setPriceSaveStates((states) => ({ ...states, [key]: { revision, status: "unsaved" } }));
+    }
     const shared = PICKUP_SHARED_FIELDS.has(field);
     setPicks((prev) => prev.map((p) => (shared || p.id === id ? { ...p, [field]: value } : p)));
     const key = shared ? `designer::${field}` : `${id}::${field}`;
@@ -1137,6 +1170,28 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
                   onChangeHsRules={(next) => updateField(pick.id, "hs_code_rules" as any, next)}
                 />
 
+                <div className="min-h-10 flex items-center justify-between gap-3 border-b border-border pb-2" role="status" aria-live="polite" data-price-save-status={pick.id}>
+                  {(() => {
+                    const states = Object.entries(priceSaveStates).filter(([key]) => key.startsWith(`${pick.id}::`)).map(([, state]) => state);
+                    const failed = states.some((state) => state.status === "failed");
+                    const pending = states.some((state) => state.status === "unsaved" || state.status === "saving");
+                    const latest = states.map((state) => state.confirmedAt).filter((time): time is string => Boolean(time)).sort().at(-1);
+                    return <>
+                      <span className={cn("text-xs", failed ? "text-destructive" : "text-muted-foreground")}>
+                        {failed ? "Price changes not saved. Your edits are still here—retry before leaving." : pending ? "Unsaved price changes—wait for confirmation before leaving." : latest ? `Prices saved · ${new Date(latest).toLocaleTimeString("en-GB")}` : "No unsaved price changes"}
+                      </span>
+                      {(failed || pending) && <Button variant="outline" size="sm" disabled={states.some((state) => state.status === "saving")} onClick={() => {
+                        const entries = Array.from(unsavedPriceValues.current.values()).filter((entry) => entry.id === pick.id);
+                        entries.forEach((entry) => {
+                          const key = `${entry.id}::${entry.field}`;
+                          const queued = pendingWritesRef.current.get(key);
+                          if (queued) { window.clearTimeout(queued.timer); pendingWritesRef.current.delete(key); }
+                          void persistPickField(entry.id, entry.field, entry.value);
+                        });
+                      }}><Save className="h-3.5 w-3.5" />{failed ? "Retry save" : "Save now"}</Button>}
+                    </>;
+                  })()}
+                </div>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                   <div>
                     <label className="text-[10px] text-muted-foreground">Currency</label>
@@ -1158,6 +1213,7 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
                     <Input
                       type="number"
                       step="0.01"
+                      aria-label={`Default RRP for ${pick.title}`}
                       value={pick.trade_price_cents != null ? (pick.trade_price_cents / 100).toString() : ""}
                       onChange={(e) => {
                         const v = e.target.value;
