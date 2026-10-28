@@ -750,6 +750,8 @@ const TradeProductPage: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeQuoteId, setActiveQuoteId] = useState<string | null>(null);
   const [drawerRefreshKey, setDrawerRefreshKey] = useState(0);
+  const [drawerPriceSnapshot, setDrawerPriceSnapshot] = useState<{ itemId: string; retailLabel: string | null; netLabel: string | null } | null>(null);
+  const drawerPricesRef = useRef<{ retailLabel: string | null; netLabel: string | null }>({ retailLabel: null, netLabel: null });
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
   const [customRequestOpen, setCustomRequestOpen] = useState(false);
@@ -957,6 +959,7 @@ const TradeProductPage: React.FC = () => {
   const handleAddToQuote = useCallback(async () => {
     if (!user || !data) return;
     const felixSelection = felixSelectionRef.current;
+    const selectedDrawerPrices = { ...drawerPricesRef.current };
     setAdding(true);
     try {
       const { product, designer } = data;
@@ -1113,6 +1116,7 @@ const TradeProductPage: React.FC = () => {
         // and pre-fill shipping (CBM / kg / mode / origin country) from the
         // catalogue so the per-line shipping estimator is accurate from day one.
         if (itemId) {
+          setDrawerPriceSnapshot({ itemId: String(itemId), ...selectedDrawerPrices });
           const patch: any = {};
           if (variantLabel) patch.variant_label = variantLabel;
           // Ensure the finish-specific image sticks even when the RPC merged
@@ -2052,6 +2056,7 @@ const TradeProductPage: React.FC = () => {
     baseAxisIsDimension: baseAxisIsDim, isUpholstered: isProductUpholstered(product as any),
     woodLabelOverride: product.wood_label_override,
   });
+  drawerPricesRef.current = { retailLabel: priceLabels?.retailLabel ?? null, netLabel: priceLabels?.netLabel ?? null };
   const felixBaseSwatch = findQuoteFinishSwatch([selectedWoodPrice?.name, selectedBaseDisplay, displayedFinishes.base, selectedBase], felixLinkedSwatches);
   const felixPicturedSwatches = felixLinkedSwatches.filter((swatch) => swatch.image_indices?.includes((galleryActiveIndex ?? 0) + 1));
   const felixTopSwatch = findQuoteFinishSwatch([selectedFabric?.name, selectedTopSwatch?.name, selectedTopDisplay, displayedFinishes.top, selectedTop, selectedSwatchGalleryName], felixLinkedSwatches)
@@ -3683,6 +3688,7 @@ const TradeProductPage: React.FC = () => {
         retailLabelOverride={priceLabels?.retailLabel ?? null}
         netLabelOverride={priceLabels?.netLabel ?? null}
         selectedFinishes={[selectedBase, selectedTop, selectedDualSize, selectedSingleSize, selectedFabric?.name].filter((value): value is string => typeof value === "string" && value.length > 0)}
+        orderFinishLabel={selectorQuoteFinishes?.pickId === product.id ? selectorQuoteFinishes.finishes.map((finish) => `${finish.label}: ${finish.name}`).join(" · ") : [selectedWoodPrice?.name || selectedBaseDisplay || selectedBase, selectedTopDisplay || selectedTop, selectedDualSize || selectedSingleSize, selectedFabric?.name].filter(Boolean).join(" · ")}
         onAddToCart={(orderQuantity) => handleProceedToOrder(orderQuantity, true)}
         onPlaceOrder={() => currentRrpCents() ? handleProceedToOrder() : setCustomRequestOpen(true)}
       />
@@ -3692,6 +3698,7 @@ const TradeProductPage: React.FC = () => {
         onOpenChange={setDrawerOpen}
         quoteId={activeQuoteId}
         refreshKey={drawerRefreshKey}
+        activePriceSnapshot={drawerPriceSnapshot}
       />
 
       <CustomRequestModal

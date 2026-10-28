@@ -15,6 +15,7 @@ import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
 
 import { supabase } from "@/integrations/supabase/client";
 import PresentationModeToggle from "@/components/trade/PresentationModeToggle";
+import DrawerPricing from "@/components/trade/DrawerPricing";
 
 /** Mobile / WhatsApp number: digits, +, spaces, dashes, parentheses — 7–20 chars. */
 const PHONE_RE = /^[+0-9][0-9 ()-]{6,19}$/;
@@ -40,6 +41,7 @@ export interface DrawerLine {
   configuration?: string | null;
   leadTime?: string | null;
   priceLabel?: string | null;
+  netPriceLabel?: string | null;
   imageUrl?: string | null;
   quantity: number;
 }
@@ -58,6 +60,7 @@ export interface SelectionDrawerProps {
   leadTime?: string | null;
   /** Fully formatted price line, e.g. "From $7,513" or "Price upon Request" */
   priceLabel?: string | null;
+  netPriceLabel?: string | null;
   imageUrl?: string | null;
   quantity?: number;
   onQuantityChange?: (q: number) => void;
@@ -70,6 +73,7 @@ export interface SelectionDrawerProps {
   onRemoveLine?: (key: string) => void;
   /** Formatted subtotal shown above the footer in multi-line mode. */
   subtotalLabel?: string | null;
+  netSubtotalLabel?: string | null;
   /** Optional "View full cart" secondary action. */
   onViewCart?: () => void;
   /** Fired by the sticky footer CTA with the selected payment method */
@@ -88,6 +92,7 @@ export default function SelectionDrawer({
   configuration = null,
   leadTime = null,
   priceLabel = null,
+  netPriceLabel = null,
   imageUrl = null,
   quantity: quantityProp,
   onQuantityChange,
@@ -95,6 +100,7 @@ export default function SelectionDrawer({
   onLineQuantityChange,
   onRemoveLine,
   subtotalLabel = null,
+  netSubtotalLabel = null,
   onViewCart,
   onCheckout,
   quoteOnly = false,
@@ -272,7 +278,7 @@ export default function SelectionDrawer({
                         Lead time: {l.leadTime}
                       </p>
                     )}
-                    {l.priceLabel && (
+                    {professionalWorkspace ? <DrawerPricing retailLabel={l.priceLabel} netLabel={l.netPriceLabel} /> : l.priceLabel && (
                       <p className="mt-2 font-body text-sm font-medium text-foreground">
                         {l.priceLabel}
                       </p>
@@ -314,13 +320,13 @@ export default function SelectionDrawer({
                 </div>
               ))}
               {subtotalLabel && (
-                <div className="flex items-center justify-between py-5">
+                <div className="py-5">
                   <span className="font-body text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
                     Subtotal
                   </span>
-                  <span className="font-body text-sm font-medium text-foreground">
+                  {professionalWorkspace ? <DrawerPricing retailLabel={subtotalLabel} netLabel={netSubtotalLabel} /> : <span className="font-body text-sm font-medium text-foreground">
                     {subtotalLabel}
-                  </span>
+                  </span>}
                 </div>
               )}
             </div>
@@ -357,7 +363,7 @@ export default function SelectionDrawer({
                   Lead time: {leadTime}
                 </p>
               )}
-              {priceLabel && (
+              {professionalWorkspace ? <DrawerPricing retailLabel={priceLabel} netLabel={netPriceLabel} /> : priceLabel && (
                 <p className="mt-2 font-body text-sm font-medium text-foreground">
                   {priceLabel}
                 </p>
