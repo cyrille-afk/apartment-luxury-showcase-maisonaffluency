@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
 import { findQuoteFinishSwatches } from "@/lib/quoteFinishSwatches";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
+import { dimensionsFromVariantLabel } from "@/lib/drawerDimensions";
 import PresentationModeToggle from "./PresentationModeToggle";
 import DrawerPricing from "./DrawerPricing";
 
@@ -34,6 +35,7 @@ interface QuoteItem {
     currency: string;
     source_pick_id?: string | null;
     id?: string | null;
+    dimensions?: string | null;
   };
 }
 
@@ -45,6 +47,8 @@ interface QuoteDrawerProps {
   /** Bump this number to trigger a re-fetch (e.g. after adding an item) */
   refreshKey?: number;
   activePriceSnapshot?: { itemId: string; retailLabel: string | null; netLabel: string | null; configuration?: string; imageUrl?: string | null; finishes?: { name: string; image_url: string }[] } | null;
+  /** Live model dimensions for the active line, e.g. "Saint Honoré 280: W 280 x D 160 x H 75 cm". */
+  activeDimensionsLabel?: string | null;
 }
 
 const formatPrice = (cents: number, currency: string) => {
@@ -52,7 +56,7 @@ const formatPrice = (cents: number, currency: string) => {
   return new Intl.NumberFormat("en-US", { style: "currency", currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
 };
 
-const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceSnapshot }: QuoteDrawerProps) => {
+const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceSnapshot, activeDimensionsLabel = null }: QuoteDrawerProps) => {
   const { clientSafe } = useClientSafeMode();
   const [items, setItems] = useState<QuoteItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -68,7 +72,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
       setLoading(true);
       const { data } = await supabase
         .from("trade_quote_items")
-        .select("id, image_url, quantity, unit_price_cents, unit_price_currency, variant_label, fabric_id, wood_fabric_id, fabric_meters, fabric_upcharge_cents, fabric_currency, fabric:fabrics!fabric_id(name, image_url, tier, price_per_lm_cents, currency), wood_fabric:fabrics!trade_quote_items_wood_fabric_id_fkey(name, image_url), product:trade_products(id, product_name, brand_name, image_url, trade_price_cents, rrp_price_cents, currency, source_pick_id)")
+        .select("id, image_url, quantity, unit_price_cents, unit_price_currency, variant_label, fabric_id, wood_fabric_id, fabric_meters, fabric_upcharge_cents, fabric_currency, fabric:fabrics!fabric_id(name, image_url, tier, price_per_lm_cents, currency), wood_fabric:fabrics!trade_quote_items_wood_fabric_id_fkey(name, image_url), product:trade_products(id, product_name, brand_name, image_url, trade_price_cents, rrp_price_cents, currency, source_pick_id, dimensions)")
         .eq("quote_id", quoteId)
         .order("created_at", { ascending: false });
 
@@ -303,6 +307,18 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
                       <span className="text-muted-foreground">Finish:</span> {item.variant_label}
                     </p>
                   )}
+                  {(() => {
+                    const isActive = activePriceSnapshot?.itemId === savedItem.id;
+                    const dims = isActive
+                      ? (activeDimensionsLabel || dimensionsFromVariantLabel(item.variant_label, item.product?.dimensions))
+                      : dimensionsFromVariantLabel(item.variant_label, item.product?.dimensions);
+                    if (!dims) return null;
+                    return (
+                      <p className="font-body text-[10px] text-foreground/80 mt-0.5 break-words">
+                        <span className="text-muted-foreground">Dimensions:</span> {dims}
+                      </p>
+                    );
+                  })()}
                   {(item.fabric?.name || item.fabric_upcharge_cents) && (
                     <p className="font-body text-[10px] text-foreground/80 mt-0.5 break-words">
                       <span className="text-muted-foreground">Fabric:</span>{" "}

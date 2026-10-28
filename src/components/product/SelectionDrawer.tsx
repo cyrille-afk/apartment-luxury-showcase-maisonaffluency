@@ -11,6 +11,7 @@ import {
   Send,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { drawerDimensionsBody } from "@/lib/drawerDimensions";
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -39,6 +40,8 @@ export interface DrawerLine {
   brand?: string | null;
   title?: string | null;
   configuration?: string | null;
+  /** Model dimensions line, e.g. "Saint Honoré 280: W 280 x D 160 x H 75 cm" */
+  dimensionsLabel?: string | null;
   leadTime?: string | null;
   priceLabel?: string | null;
   netPriceLabel?: string | null;
@@ -56,6 +59,8 @@ export interface SelectionDrawerProps {
   title?: string | null;
   /** Configuration line, e.g. "Oiled Walnut / Sheepskin SKANDILOCK – 09 Moonlight" */
   configuration?: string | null;
+  /** Model dimensions line, e.g. "Saint Honoré 280: W 280 x D 160 x H 75 cm" */
+  dimensionsLabel?: string | null;
   /** e.g. "10–14 weeks" */
   leadTime?: string | null;
   /** Fully formatted price line, e.g. "From $7,513" or "Price upon Request" */
@@ -90,6 +95,7 @@ export default function SelectionDrawer({
   brand = null,
   title = null,
   configuration = null,
+  dimensionsLabel = null,
   leadTime = null,
   priceLabel = null,
   netPriceLabel = null,
@@ -278,6 +284,15 @@ export default function SelectionDrawer({
                         {l.configuration}
                       </p>
                     )}
+                    {(() => {
+                      if (!l.dimensionsLabel) return null;
+                      if (l.configuration && drawerDimensionsBody(l.dimensionsLabel) && l.configuration.includes(drawerDimensionsBody(l.dimensionsLabel)!)) return null;
+                      return (
+                        <p className="mt-1.5 font-body text-xs leading-relaxed text-muted-foreground">
+                          {l.dimensionsLabel}
+                        </p>
+                      );
+                    })()}
                     {l.leadTime && (
                       <p className="mt-1.5 font-body text-[11px] text-muted-foreground/80">
                         Lead time: {l.leadTime}
@@ -363,6 +378,16 @@ export default function SelectionDrawer({
                   {configuration}
                 </p>
               )}
+              {(() => {
+                if (!dimensionsLabel) return null;
+                const body = drawerDimensionsBody(dimensionsLabel);
+                if (configuration && body && configuration.includes(body)) return null;
+                return (
+                  <p className="mt-1.5 font-body text-xs leading-relaxed text-muted-foreground">
+                    {dimensionsLabel}
+                  </p>
+                );
+              })()}
               {leadTime && (
                 <p className="mt-1.5 font-body text-[11px] text-muted-foreground/80">
                   Lead time: {leadTime}
