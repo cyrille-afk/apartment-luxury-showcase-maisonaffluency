@@ -1779,12 +1779,6 @@ const TradeProductPage: React.FC = () => {
   // When the Label axis holds a finish (e.g. wood "Oak") rather than a size,
   // dimensions come from the row's own `dimensions` field or the product.
   const dualLabelIsDim = dualSizeOptions.length > 0 && dualSizeOptions.every((s: string) => looksLikeDimension(s));
-  // Model dimensions shown inside the Quote & Order Workspace drawers —
-  // mirrors the main page's dimension row and follows the selected size variant.
-  const drawerDimensionsLabel = formatDrawerDimensions(
-    selectedDualSize || selectedSingleSize,
-    product?.dimensions || null,
-  );
   const dualRowDims: string | null =
     ((dualVariant as any)?.dimensions ||
       ((sizeVariants || []).find((v: any) => v?.dimensions) as any)?.dimensions ||
