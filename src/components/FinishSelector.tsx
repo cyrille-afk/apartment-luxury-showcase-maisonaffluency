@@ -365,6 +365,21 @@ const pickFinishGlyph = (
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
+const FINISH_SELECTION_KEY = "ma-finish-selection-v1:";
+export function readFinishSelection(pickId: string): Record<string, string> {
+  try {
+    const raw = window.sessionStorage.getItem(FINISH_SELECTION_KEY + pickId);
+    const parsed = raw ? JSON.parse(raw) : null;
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch { return {}; }
+}
+export function saveFinishSelection(pickId: string, axis: string, id: string) {
+  try {
+    const next = { ...readFinishSelection(pickId), [axis]: id };
+    window.sessionStorage.setItem(FINISH_SELECTION_KEY + pickId, JSON.stringify(next));
+  } catch { /* storage unavailable */ }
+}
+
 export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, upholsteryLabel, secondaryUpholsteryLabel, onSecondaryUpholsteryTierChange, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, sharedBaseTopSwatches = false, disabledBaseNames, disabledTopNames, selectedBasePairing, selectedTopPairing, topLabel, onTopFinishChange, onFrameFinishChange, frameOptions, baseAxisOptions, topAxisOptions, disabledBaseOptions, disabledTopOptions, axisBaseLabel, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, photoLedFinishes = false, preselectFabricName, onFinishGroupingResolved, onDisplayedFinishesChange, onQuoteFinishesChange }: FinishSelectorProps) {
 
   const isRugProduct = /\brugs?\b/i.test(`${productTitle || ""} ${productCategory || ""}`);
@@ -386,6 +401,21 @@ export default function FinishSelector({ pickId, className, productTitle, produc
    * whatever the visible photo happens to show.
    */
   const userPickedAxesRef = useRef<Record<string, boolean>>({});
+  const pickHandlersRef = useRef<Map<string, () => void>>(new Map());
+  const restoredSelectionRef = useRef<string | null>(null);
+  // Replay finishes saved this browser session (survives preview reloads).
+  useEffect(() => {
+    if (!pickId || fabrics.length === 0 || restoredSelectionRef.current === pickId) return;
+    if (Object.keys(userPickedAxesRef.current).length > 0) { restoredSelectionRef.current = pickId; return; }
+    const saved = readFinishSelection(pickId);
+    const entries = Object.entries(saved)
+      .filter(([axis]) => !(preselectFabricName && axis === "fabric"))
+      .filter(([, id]) => fabrics.some((x) => x.id === id));
+    // Wait until every saved tile has rendered its handler.
+    if (entries.some(([, id]) => !pickHandlersRef.current.has(id))) return;
+    restoredSelectionRef.current = pickId;
+    entries.forEach(([, id]) => pickHandlersRef.current.get(id)?.());
+  });
   const [selectedTopId, setSelectedTopId] = useState<string | null>(null);
   const [selectedFrameId, setSelectedFrameId] = useState<string | null>(null);
   const [openFrame, setOpenFrame] = useState(false);
@@ -805,8 +835,13 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       ? setSelectedTopId
       : setSelectedWoodId;
 
+    const restoreAxisKey = isRugGroup ? `rug:${rugComponent || getRugComponent(f.name)}` : picturedAxis;
+    // Registered so a saved selection can be replayed through the exact
+    // same handler (and parent callbacks) after a reload.
+    pickHandlersRef.current.set(f.id, () => handlePick());
     const handlePick = () => {
       if (isDisabled) return;
+      if (pickId) saveFinishSelection(pickId, restoreAxisKey, f.id);
       if (splitExtraKey !== undefined) {
         // Third-or-later category group on a category-split product (e.g.
         // Wood + Lacquer + Stone): mirrors the split-top behaviour — its own

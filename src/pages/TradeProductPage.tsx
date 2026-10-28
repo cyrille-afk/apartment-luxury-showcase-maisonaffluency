@@ -752,6 +752,7 @@ const TradeProductPage: React.FC = () => {
   const [drawerRefreshKey, setDrawerRefreshKey] = useState(0);
   const [drawerPriceSnapshot, setDrawerPriceSnapshot] = useState<{ itemId: string; retailLabel: string | null; netLabel: string | null; configuration?: string; imageUrl?: string | null; finishes?: { name: string; image_url: string }[] } | null>(null);
   const drawerPricesRef = useRef<{ retailLabel: string | null; netLabel: string | null }>({ retailLabel: null, netLabel: null });
+
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
   const [customRequestOpen, setCustomRequestOpen] = useState(false);
@@ -1328,6 +1329,7 @@ const TradeProductPage: React.FC = () => {
         });
         setDrawerRefreshKey((k) => k + 1);
         setDrawerOpen(true);
+        try { window.sessionStorage.setItem(`ma-copilot-open-v1:${product.id}`, activeQuoteId || quoteId); } catch { /* noop */ }
         if (felixSelection) {
           window.dispatchEvent(new CustomEvent("concierge:propose_tearsheet_proactive", { detail: { ...structuredClone(felixSelection), lockedAt: Date.now() } }));
         }
@@ -1513,6 +1515,16 @@ const TradeProductPage: React.FC = () => {
     if (selection?.productId !== data.product.id) return;
     window.dispatchEvent(new CustomEvent("concierge:update_product_selection", { detail: selection }));
   });
+
+  // Reopen Co-Pilot after a reload if it was open for this product this session.
+  useEffect(() => {
+    if (!data?.product?.id) return;
+    const pid = data.product.id;
+    try {
+      const savedQuote = window.sessionStorage.getItem(`ma-copilot-open-v1:${pid}`);
+      if (savedQuote) { setActiveQuoteId((cur) => cur || savedQuote); setDrawerOpen(true); }
+    } catch { /* noop */ }
+  }, [data?.product?.id]);
 
   if (isLoading) {
     return <div className="pt-8"><ProductDetailSkeleton variant="page" /></div>;
@@ -3703,7 +3715,10 @@ const TradeProductPage: React.FC = () => {
 
       <QuoteDrawer
         open={drawerOpen}
-        onOpenChange={setDrawerOpen}
+        onOpenChange={(next) => {
+          setDrawerOpen(next);
+          if (!next) { try { window.sessionStorage.removeItem(`ma-copilot-open-v1:${product.id}`); } catch { /* noop */ } }
+        }}
         quoteId={activeQuoteId}
         refreshKey={drawerRefreshKey}
         activePriceSnapshot={drawerPriceSnapshot}
