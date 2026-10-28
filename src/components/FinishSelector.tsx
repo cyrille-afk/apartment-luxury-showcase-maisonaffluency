@@ -405,7 +405,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   const restoredSelectionRef = useRef<string | null>(null);
   // Replay finishes saved this browser session (survives preview reloads).
   useEffect(() => {
-    if (fabrics.length === 0 || restoredSelectionRef.current === pickId) return;
+    if (!pickId || fabrics.length === 0 || restoredSelectionRef.current === pickId) return;
     if (Object.keys(userPickedAxesRef.current).length > 0) { restoredSelectionRef.current = pickId; return; }
     const saved = readFinishSelection(pickId);
     const entries = Object.entries(saved)
@@ -841,7 +841,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     pickHandlersRef.current.set(f.id, () => handlePick());
     const handlePick = () => {
       if (isDisabled) return;
-      saveFinishSelection(pickId, restoreAxisKey, f.id);
+      if (pickId) saveFinishSelection(pickId, restoreAxisKey, f.id);
       if (splitExtraKey !== undefined) {
         // Third-or-later category group on a category-split product (e.g.
         // Wood + Lacquer + Stone): mirrors the split-top behaviour — its own
