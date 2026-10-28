@@ -48,6 +48,13 @@ export default function AdminPriceHistory() {
           <Input aria-label="Search price history" placeholder="Search products or finishes" value={search} onChange={(event) => setSearch(event.target.value)} />
           <Button variant="outline" size="icon" aria-label="Refresh price history" disabled={history.isFetching} onClick={() => void history.refetch()}><RefreshCw className="h-4 w-4" /></Button>
         </div>
+        <div role="group" aria-label="Filter price changes by save status" className="flex flex-wrap items-center gap-2">
+          {(["all", "saved", "pending", "failed"] as const).map((filter) => (
+            <Button key={filter} size="sm" variant={statusFilter === filter ? "default" : "outline"} aria-pressed={statusFilter === filter} onClick={() => setStatusFilter(filter)}>
+              {PRICE_HISTORY_FILTER_LABELS[filter]}<span className="ml-2 tabular-nums text-xs opacity-70">{counts[filter]}</span>
+            </Button>
+          ))}
+        </div>
         <p className="text-xs text-muted-foreground">Account history · Times in {Intl.DateTimeFormat().resolvedOptions().timeZone}. Interrupted saves remain unconfirmed.</p>
         {history.isError && <div className="text-sm text-destructive" role="alert">Saved history could not be loaded. Try refreshing.</div>}
         {history.isLoading ? <p className="text-sm text-muted-foreground">Loading saved changes…</p> : <div className="overflow-x-auto">
@@ -55,11 +62,11 @@ export default function AdminPriceHistory() {
             <tbody>{rows.flatMap((row) => row.changes.map((change, index) => <tr key={`${row.id}-${index}`} className="border-b border-border align-top">
               <td className="px-3 py-3 min-w-52"><div className="font-display">{row.product}</div><div className="text-xs text-muted-foreground mt-1">{change.label}</div></td>
               <td className="px-3 py-3 whitespace-nowrap text-muted-foreground">{priceValue(change.before, row.currency)}</td><td className="px-3 py-3 whitespace-nowrap">{priceValue(change.after, row.currency)}</td>
-              <td className={`px-3 py-3 whitespace-nowrap ${row.status === "Failed" ? "text-destructive" : "text-foreground"}`}>{row.status}</td>
+              <td className={`px-3 py-3 whitespace-nowrap ${row.status === "Failed" ? "text-destructive" : matchesPriceHistoryFilter(row.status, "pending") ? "text-muted-foreground" : "text-foreground"}`}>{row.status}</td>
               <td className="px-3 py-3 whitespace-nowrap text-xs text-muted-foreground">{new Date(row.timestamp).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "medium" })}</td>
             </tr>))}</tbody>
           </table>
-          {!rows.length && !history.isError && <p className="py-8 text-sm text-muted-foreground">No price changes found.</p>}
+          {!rows.length && !history.isError && <p className="py-8 text-sm text-muted-foreground">{statusFilter === "all" ? "No price changes found." : `No ${PRICE_HISTORY_FILTER_LABELS[statusFilter].toLowerCase()} price changes.`}</p>}
         </div>}
         {Math.max(history.data?.audit.length ?? 0, history.data?.attempts.length ?? 0) >= limit && <Button variant="outline" onClick={() => setLimit((value) => value + 100)}>Load older records</Button>}
       </DialogContent>
