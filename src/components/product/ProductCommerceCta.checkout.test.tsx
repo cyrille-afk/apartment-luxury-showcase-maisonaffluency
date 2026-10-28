@@ -3,11 +3,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CartItem } from '@/lib/cart';
 import ProductCommerceCta from './ProductCommerceCta';
 
-const mocks = vi.hoisted(() => ({ navigate: vi.fn(), items: [] as CartItem[], intake: vi.fn(), clientSafe: false }));
-vi.mock('@/lib/router-compat', () => ({ useNavigate: () => mocks.navigate, useLocation: () => ({ state: null }), Link: () => null }));
+const mocks = vi.hoisted(() => ({ navigate: vi.fn(), items: [] as CartItem[], intake: vi.fn(), clientSafe: false, pathname: '/designers/atelier/chair', update: vi.fn(), auth: { user: { email: 'professional@example.com' } as { email: string } | null, profile: { first_name: 'Trade', last_name: 'Member', email: 'professional@example.com' }, rolesLoaded: true, isAdmin: false, isTradeUser: true, tradeStatus: 'approved' } }));
+vi.mock('@/lib/router-compat', () => ({ useNavigate: () => mocks.navigate, useLocation: () => ({ state: null, pathname: mocks.pathname }), Link: () => null }));
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => mocks.auth }));
 vi.mock('@/lib/cart', async (original) => ({ ...await original<typeof import('@/lib/cart')>(), useCart: () => mocks.items }));
 vi.mock('@/contexts/ProductConfigContext', () => ({ useProductConfigOptional: () => null }));
-vi.mock('@/contexts/CheckoutFormContext', () => ({ useCheckoutForm: () => ({ buyerProfile: 'private', projectCity: 'London', email: 'client@example.com', update: vi.fn() }) }));
+vi.mock('@/contexts/CheckoutFormContext', () => ({ useCheckoutForm: () => ({ buyerProfile: 'private', projectCity: 'London', email: 'client@example.com', update: mocks.update }) }));
 vi.mock('@/hooks/useTradeProductPricing', () => ({ useTradeProductPricing: () => ({ data: null }) }));
 vi.mock('@/hooks/useTradeDiscount', () => ({ useTradeDiscount: () => ({ discountPct: 0, apply: (price: number) => price }) }));
 vi.mock('@/lib/clientSafeMode', () => ({ useClientSafeMode: () => ({ clientSafe: mocks.clientSafe }) }));
@@ -16,7 +17,7 @@ vi.mock('./BespokeConfigurationDialog', () => ({ default: () => null }));
 vi.mock('./OrderIntakeSheet', () => ({ default: (props: { isOpen: boolean; onComplete: (details: unknown) => void }) => { mocks.intake(props); return props.isOpen ? <button onClick={() => props.onComplete({ profile: 'private', city: 'London', email: 'client@example.com', notes: '', phone: '', company: '' })}>Complete intake</button> : null; } }));
 
 beforeEach(() => { vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} }); vi.stubGlobal('matchMedia', () => ({ matches: false, addEventListener() {}, removeEventListener() {} })); });
-afterEach(() => { cleanup(); vi.clearAllMocks(); sessionStorage.clear(); mocks.clientSafe = false; vi.useRealTimers(); vi.unstubAllGlobals(); });
+afterEach(() => { cleanup(); vi.clearAllMocks(); sessionStorage.clear(); mocks.clientSafe = false; mocks.pathname = '/designers/atelier/chair'; mocks.auth.user = { email: 'professional@example.com' }; mocks.auth.rolesLoaded = true; mocks.items = []; vi.useRealTimers(); vi.unstubAllGlobals(); });
 
 describe('mobile order intake', () => {
   it.each([false, true])('requires intake before ordering even for returning approved=%s buyers', (approved) => {
@@ -36,18 +37,38 @@ describe('mobile order intake', () => {
 });
 
 describe('product selection checkout hand-off', () => {
-  it('gates a separate desktop workspace order button through intake', () => {
+  it('bypasses intake for an authenticated desktop Trade workspace order and inherits the professional session', () => {
+    mocks.pathname = '/trade/products/chair';
     vi.stubGlobal('matchMedia', () => ({ matches: true, addEventListener() {}, removeEventListener() {} }));
     vi.useFakeTimers();
     sessionStorage.setItem('ma_intake_done', '1');
     const placeOrder = vi.fn();
     render(<ProductCommerceCta productId="chair" dockOnly tradeApproved orderTriggerEvent="ma:open-workspace-order" onPlaceOrder={placeOrder} />);
     act(() => window.dispatchEvent(new Event('ma:open-workspace-order')));
-    expect(mocks.intake.mock.calls.at(-1)?.[0].isOpen).toBe(true);
-    expect(placeOrder).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole('button', { name: 'Complete intake' }));
-    act(() => vi.advanceTimersByTime(260));
+    expect(mocks.intake.mock.calls.at(-1)?.[0].isOpen).toBe(false);
+    expect(mocks.update).toHaveBeenCalledWith({ buyerProfile: 'designer', email: 'professional@example.com', guestName: 'Trade Member' });
     expect(placeOrder).toHaveBeenCalledWith(1);
+  });
+
+  it('bypasses onboarding on mobile Trade orders', () => {
+    mocks.pathname = '/trade/products/chair';
+    const placeOrder = vi.fn();
+    render(<ProductCommerceCta productId="chair" dockOnly tradeApproved onPlaceOrder={placeOrder} />);
+    fireEvent.click(screen.getByRole('button', { name: /^Place Order$/ }));
+    expect(placeOrder).toHaveBeenCalledWith(1);
+    expect(mocks.intake.mock.calls.at(-1)?.[0].isOpen).toBe(false);
+  });
+
+  it.each(['presentation', 'signed-out', 'pending-roles'])('retains intake instead of using Trade bypass for %s', (state) => {
+    mocks.pathname = '/trade/products/chair';
+    if (state === 'presentation') mocks.clientSafe = true;
+    if (state === 'signed-out') mocks.auth.user = null;
+    if (state === 'pending-roles') mocks.auth.rolesLoaded = false;
+    const placeOrder = vi.fn();
+    render(<ProductCommerceCta productId="chair" dockOnly tradeApproved onPlaceOrder={placeOrder} />);
+    fireEvent.click(screen.getByRole('button', { name: /^Place Order$/ }));
+    expect(placeOrder).not.toHaveBeenCalled();
+    expect(mocks.intake.mock.calls.at(-1)?.[0].isOpen).toBe(true);
   });
 
   it.each([false, true])('requires desktop intake for returning approved=%s buyers', (approved) => {
