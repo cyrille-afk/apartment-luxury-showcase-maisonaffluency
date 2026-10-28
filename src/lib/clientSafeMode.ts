@@ -34,7 +34,7 @@ function emit() {
 }
 
 export function setClientSafeMode(next: boolean) {
-  if (safe === next) return;
+  const changed = safe !== next;
   safe = next;
   syncDocumentMask();
   try {
@@ -42,7 +42,7 @@ export function setClientSafeMode(next: boolean) {
   } catch {
     /* private mode — session-only */
   }
-  emit();
+  if (changed) emit();
 }
 
 export function getClientSafeMode() {
@@ -51,17 +51,35 @@ export function getClientSafeMode() {
 
 function subscribe(cb: () => void) {
   listeners.add(cb);
+  // A drawer/route can unmount every subscriber while another tab changes
+  // the preference. Reconcile on remount and PWA/browser resume as well.
+  const restorePreference = () => {
+    try {
+      const next = window.localStorage.getItem(KEY) === "1";
+      if (safe === next) return;
+      safe = next;
+      syncDocumentMask();
+      emit();
+    } catch {
+      // Storage unavailable: retain the current session's explicit choice.
+    }
+  };
   const onStorage = (e: StorageEvent) => {
-    if (e.key === KEY) {
+    if (e.key === KEY || e.key === null) {
       safe = e.newValue === "1";
       syncDocumentMask();
       emit();
     }
   };
   window.addEventListener("storage", onStorage);
+  window.addEventListener("focus", restorePreference);
+  window.addEventListener("pageshow", restorePreference);
+  restorePreference();
   return () => {
     listeners.delete(cb);
     window.removeEventListener("storage", onStorage);
+    window.removeEventListener("focus", restorePreference);
+    window.removeEventListener("pageshow", restorePreference);
   };
 }
 
