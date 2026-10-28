@@ -365,6 +365,21 @@ const pickFinishGlyph = (
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
+const FINISH_SELECTION_KEY = "ma-finish-selection-v1:";
+export function readFinishSelection(pickId: string): Record<string, string> {
+  try {
+    const raw = window.sessionStorage.getItem(FINISH_SELECTION_KEY + pickId);
+    const parsed = raw ? JSON.parse(raw) : null;
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch { return {}; }
+}
+export function saveFinishSelection(pickId: string, axis: string, id: string) {
+  try {
+    const next = { ...readFinishSelection(pickId), [axis]: id };
+    window.sessionStorage.setItem(FINISH_SELECTION_KEY + pickId, JSON.stringify(next));
+  } catch { /* storage unavailable */ }
+}
+
 export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, upholsteryLabel, secondaryUpholsteryLabel, onSecondaryUpholsteryTierChange, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, sharedBaseTopSwatches = false, disabledBaseNames, disabledTopNames, selectedBasePairing, selectedTopPairing, topLabel, onTopFinishChange, onFrameFinishChange, frameOptions, baseAxisOptions, topAxisOptions, disabledBaseOptions, disabledTopOptions, axisBaseLabel, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, photoLedFinishes = false, preselectFabricName, onFinishGroupingResolved, onDisplayedFinishesChange, onQuoteFinishesChange }: FinishSelectorProps) {
 
   const isRugProduct = /\brugs?\b/i.test(`${productTitle || ""} ${productCategory || ""}`);
@@ -391,14 +406,13 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   // Replay finishes saved this browser session (survives preview reloads).
   useEffect(() => {
     if (fabrics.length === 0 || restoredSelectionRef.current === pickId) return;
+    if (Object.keys(userPickedAxesRef.current).length > 0) { restoredSelectionRef.current = pickId; return; }
     const saved = readFinishSelection(pickId);
-    const entries = Object.entries(saved).filter(([axis]) => !(preselectFabricName && axis === "fabric"));
-    if (entries.length > 0 && entries.some(([, id]) => !pickHandlersRef.current.has(id))) {
-      // Tiles not rendered yet; try again on the next render (bounded by fabrics load).
-      if (!entries.some(([, id]) => fabrics.some((x) => x.id === id))) restoredSelectionRef.current = pickId;
-      else if (entries.every(([, id]) => !fabrics.some((x) => x.id === id) || pickHandlersRef.current.has(id))) { /* fallthrough */ }
-      else return;
-    }
+    const entries = Object.entries(saved)
+      .filter(([axis]) => !(preselectFabricName && axis === "fabric"))
+      .filter(([, id]) => fabrics.some((x) => x.id === id));
+    // Wait until every saved tile has rendered its handler.
+    if (entries.some(([, id]) => !pickHandlersRef.current.has(id))) return;
     restoredSelectionRef.current = pickId;
     entries.forEach(([, id]) => pickHandlersRef.current.get(id)?.());
   });

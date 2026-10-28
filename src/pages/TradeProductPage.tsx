@@ -1328,6 +1328,7 @@ const TradeProductPage: React.FC = () => {
         });
         setDrawerRefreshKey((k) => k + 1);
         setDrawerOpen(true);
+        try { window.sessionStorage.setItem(`ma-copilot-open-v1:${product.id}`, activeQuoteId || quoteId); } catch { /* noop */ }
         if (felixSelection) {
           window.dispatchEvent(new CustomEvent("concierge:propose_tearsheet_proactive", { detail: { ...structuredClone(felixSelection), lockedAt: Date.now() } }));
         }
@@ -3703,7 +3704,10 @@ const TradeProductPage: React.FC = () => {
 
       <QuoteDrawer
         open={drawerOpen}
-        onOpenChange={setDrawerOpen}
+        onOpenChange={(next) => {
+          setDrawerOpen(next);
+          if (!next) { try { window.sessionStorage.removeItem(`ma-copilot-open-v1:${product.id}`); } catch { /* noop */ } }
+        }}
         quoteId={activeQuoteId}
         refreshKey={drawerRefreshKey}
         activePriceSnapshot={drawerPriceSnapshot}
