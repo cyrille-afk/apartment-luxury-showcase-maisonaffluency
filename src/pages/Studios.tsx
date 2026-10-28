@@ -167,27 +167,9 @@ export default function Studios() {
   return (
     <main className="min-h-screen bg-background">
       <Helmet>
-        <title>{seoTitle}</title>
-        <meta name="description" content={seoDescription} />
         <link rel="alternate" hrefLang="en" href={canonical} />
         <link rel="alternate" hrefLang="x-default" href={canonical} />
 
-        {/* Open Graph */}
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="Maison Affluency" />
-        <meta property="og:locale" content="en_US" />
-        <meta property="og:title" content={seoTitle} />
-        <meta property="og:description" content={seoDescription} />
-        <meta property="og:url" content={canonical} />
-        <meta property="og:image" content={ogImage} />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-
-        {/* Twitter */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={seoTitle} />
-        <meta name="twitter:description" content={seoDescription} />
-        <meta name="twitter:image" content={ogImage} />
 
         <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
         {!loading && filtered.length > 0 && isAuthed && (

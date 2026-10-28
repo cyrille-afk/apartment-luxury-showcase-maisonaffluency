@@ -100,11 +100,6 @@ const ProductPage = () => {
   if (loading) {
     return (
       <>
-        <Helmet>
-          <title>Loading product — Maison Affluency</title>
-          <meta name="description" content="Curated collectible design at Maison Affluency Singapore." />
-          <meta name="robots" content="index, follow" />
-        </Helmet>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <DotCircleLoader size="md" />
         </div>
