@@ -34,10 +34,12 @@ const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((listener) => listener());
 export const subscribePriceAttempts = (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; };
 export const getPriceAttempts = () => attempts;
-export const getServerPriceAttempts = (): PriceAttempt[] => [];
+const emptyAttempts: PriceAttempt[] = [];
+export const getServerPriceAttempts = (): PriceAttempt[] => emptyAttempts;
 export function startPriceAttempt(attempt: Omit<PriceAttempt, "id" | "timestamp" | "status">) {
   const id = crypto.randomUUID();
-  attempts = [{ ...attempt, id, timestamp: new Date().toISOString(), status: "Saving" }, ...attempts].slice(0, 100);
+  const row: PriceAttempt = { ...attempt, id, timestamp: new Date().toISOString(), status: "Saving" };
+  attempts = [row, ...attempts].slice(0, 100);
   emit(); return id;
 }
 export function finishPriceAttempt(id: string, status: "Saved" | "Failed" | "Unconfirmed") {
