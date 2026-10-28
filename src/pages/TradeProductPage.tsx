@@ -79,6 +79,7 @@ import { isProductUpholstered } from "@/lib/upholstery";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { getBasePlaceholder, getTopPlaceholder, formatVariantAxisLabel, isDimensionAxisLabel, resolveFinishSectionLabels } from "@/lib/variantPlaceholders";
 import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine, withImperialStacked } from "@/lib/formatDimensions";
+import { formatDrawerDimensions } from "@/lib/drawerDimensions";
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import { makeSwatchAxisFilter } from "@/lib/finishDuplication";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex, findVariantForImageIndex } from "@/lib/variantImageMap";
@@ -1778,6 +1779,12 @@ const TradeProductPage: React.FC = () => {
   // When the Label axis holds a finish (e.g. wood "Oak") rather than a size,
   // dimensions come from the row's own `dimensions` field or the product.
   const dualLabelIsDim = dualSizeOptions.length > 0 && dualSizeOptions.every((s: string) => looksLikeDimension(s));
+  // Model dimensions shown inside the Quote & Order Workspace drawers —
+  // mirrors the main page's dimension row and follows the selected size variant.
+  const drawerDimensionsLabel = formatDrawerDimensions(
+    selectedDualSize || selectedSingleSize,
+    product?.dimensions || null,
+  );
   const dualRowDims: string | null =
     ((dualVariant as any)?.dimensions ||
       ((sizeVariants || []).find((v: any) => v?.dimensions) as any)?.dimensions ||
@@ -3709,6 +3716,7 @@ const TradeProductPage: React.FC = () => {
         netLabelOverride={priceLabels?.netLabel ?? null}
         selectedFinishes={[selectedBase, selectedTop, selectedDualSize, selectedSingleSize, selectedFabric?.name].filter((value): value is string => typeof value === "string" && value.length > 0)}
         orderFinishLabel={selectorQuoteFinishes?.pickId === product.id ? selectorQuoteFinishes.finishes.map((finish) => `${finish.label}: ${finish.name}`).join(" · ") : [selectedWoodPrice?.name || selectedBaseDisplay || selectedBase, selectedTopDisplay || selectedTop, selectedDualSize || selectedSingleSize, selectedFabric?.name].filter(Boolean).join(" · ")}
+        dimensionsLabel={drawerDimensionsLabel}
         onAddToCart={(orderQuantity) => handleProceedToOrder(orderQuantity, true)}
         onPlaceOrder={() => currentRrpCents() ? handleProceedToOrder() : setCustomRequestOpen(true)}
       />
@@ -3722,6 +3730,7 @@ const TradeProductPage: React.FC = () => {
         quoteId={activeQuoteId}
         refreshKey={drawerRefreshKey}
         activePriceSnapshot={drawerPriceSnapshot}
+        activeDimensionsLabel={drawerDimensionsLabel}
       />
 
       <CustomRequestModal
