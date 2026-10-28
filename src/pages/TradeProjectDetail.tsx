@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import ClientPicker from "@/components/trade/ClientPicker";
+import CopyTearsheetLink from "@/components/trade/CopyTearsheetLink";
 import ProjectComparisonShortlists from "@/components/trade/ProjectComparisonShortlists";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
@@ -425,6 +426,11 @@ export default function TradeProjectDetail() {
           >
             <ImageIcon className="h-3 w-3" /> Tearsheets
           </Link>
+          <CopyTearsheetLink
+            path={`/trade/tearsheets?project=${project.id}`}
+            label="Copy tearsheet link"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background hover:bg-muted/40 px-3 py-1 font-body text-xs text-foreground transition-colors"
+          />
         </div>
         <div>
           <div className="flex items-center justify-between mb-2">

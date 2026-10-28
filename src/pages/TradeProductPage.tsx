@@ -40,6 +40,7 @@ import FinishesPdfButton from "@/components/product/FinishesPdfButton";
 import ActiveSwatchCaption from "@/components/product/ActiveSwatchCaption";
 import PicturedFinishesStrip from "@/components/product/PicturedFinishesStrip";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
+import CopyTearsheetLink from "@/components/trade/CopyTearsheetLink";
 import { buildTradeCoverSheetPdf } from "@/lib/tradeCoverSheetPdf";
 import CadAssetsSection from "@/components/trade/CadAssetsSection";
 import Product3DViewer from "@/components/trade/Product3DViewer";
@@ -1551,6 +1552,24 @@ const TradeProductPage: React.FC = () => {
   const favoriteId = tradeProductId || product.id;
   const favorited = isFavorited(favoriteId);
   const requestedFabricName = new URLSearchParams(location.search).get("fabric");
+
+  // Shared tearsheet URL builder — the "Draft Tearsheet with These Finishes"
+  // button and its copy-link control both use this so they always agree on
+  // the exact product + finish selection being shared.
+  const buildTearsheetHref = () => {
+    const params = new URLSearchParams();
+    params.set("product", product.id);
+    const fabricName = selectedFabric?.name || selectedTopDisplay || selectedTop || null;
+    const woodName = selectedWoodPrice?.name || selectedBaseDisplay || selectedBase || selectedSingleMaterial || null;
+    if (fabricName) params.set("fabric", String(fabricName));
+    if (selectedFabric?.image_url) params.set("fabricImg", selectedFabric.image_url);
+    if (woodName) params.set("wood", String(woodName));
+    if (selectedWoodPrice?.image_url) params.set("woodImg", selectedWoodPrice.image_url);
+    const variantLabelParts = [selectedBase, selectedTop, selectedDualSize, selectedSingleSize]
+      .filter(Boolean).map(String);
+    if (variantLabelParts.length) params.set("variant", variantLabelParts.join(" · "));
+    return `/trade/tearsheets?${params.toString()}`;
+  };
 
   const { rawSubcategory, normalizedSubcategory } = normalizeCategoryContext(product.subcategory);
 
@@ -3419,6 +3438,7 @@ const TradeProductPage: React.FC = () => {
                 swatches load and until at least one finish is chosen. */}
             {(finishesLoading || hasLinkedFabrics || linkedWoodFinishes.length > 0) && (
               (selectedFabric || selectedWoodPrice || selectedTop || selectedBase || selectedSingleMaterial) && !finishesLoading ? (
+                <>
                 <button
                   type="button"
                   onClick={() => {
@@ -3459,6 +3479,8 @@ const TradeProductPage: React.FC = () => {
                   <FileText size={13} />
                   Draft Tearsheet with These Finishes
                 </button>
+                <CopyTearsheetLink path={buildTearsheetHref()} variant="block" />
+                </>
               ) : (
                 <button
                   type="button"

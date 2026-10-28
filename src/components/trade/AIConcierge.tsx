@@ -455,6 +455,7 @@ import { buildSpecSchedule, type SpecScheduleItem } from "@/lib/specScheduleBuil
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import CopyTearsheetLink from "@/components/trade/CopyTearsheetLink";
 import { MatchBadge, parseMatchTail, inlineSignalsIntoMatchLines } from "@/components/trade/concierge/MatchBadge";
 import { buildSeedDirective } from "@/lib/conciergePrefill";
 import { isAttachmentPlaceholderText, buildAttachmentSystemNote } from "@/lib/attachmentIntent";
@@ -5255,6 +5256,19 @@ export function AIConcierge({
                           >
                             {inlineSignalsIntoMatchLines(markdownBody)}
                           </ReactMarkdown>
+                          {(() => {
+                            // Copy-link shortcut for Felix's generated tearsheet
+                            // URL (the [Open tearsheet](…) link in this reply).
+                            const tearsheetLinkMatch = /\[Open tearsheet\]\(((?:\/trade\/boards\/[^)\s"]+)|https?:\/\/[^)\s"]+)\)/i.exec(String(item.content || ""));
+                            if (!tearsheetLinkMatch) return null;
+                            return (
+                              <CopyTearsheetLink
+                                path={tearsheetLinkMatch[1]}
+                                label="Copy tearsheet link"
+                                className="inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-background/80 px-3 py-1.5 font-body text-[11px] sm:text-xs leading-none text-foreground hover:bg-muted hover:border-foreground/30 transition-colors"
+                              />
+                            );
+                          })()}
                           {found.length > 0 && (
                             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-1">
                               {found.map((label) => {
