@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { priceDifferences, priceValue, durableAttemptRows, subscribePriceAttempts, getPriceAttempts, getServerPriceAttempts, type DurablePriceAttempt, type PriceSnapshot } from "@/lib/adminPriceHistory";
+import { priceDifferences, priceValue, durableAttemptRows, subscribePriceAttempts, getPriceAttempts, getServerPriceAttempts, matchesPriceHistoryFilter, priceHistoryCounts, PRICE_HISTORY_FILTER_LABELS, type DurablePriceAttempt, type PriceHistoryFilter, type PriceSnapshot } from "@/lib/adminPriceHistory";
 
 type AuditRow = { id: string; created_at: string; old_data: PriceSnapshot; new_data: PriceSnapshot };
 export default function AdminPriceHistory() {
