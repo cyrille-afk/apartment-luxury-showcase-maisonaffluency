@@ -43,16 +43,6 @@ export default function CategorySeo({ category, subcategory, categorySlug, subca
 
   return (
     <Helmet>
-      <title>{title}</title>
-      <meta name="description" content={description} />
-      <meta property="og:type" content="website" />
-      <meta property="og:site_name" content="Maison Affluency" />
-      <meta property="og:title" content={title} />
-      <meta property="og:description" content={description} />
-      <meta property="og:url" content={canonical} />
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content={title} />
-      <meta name="twitter:description" content={description} />
       <script type="application/ld+json">{JSON.stringify(collectionLd)}</script>
       <script type="application/ld+json">{JSON.stringify(crumbsLd)}</script>
     </Helmet>

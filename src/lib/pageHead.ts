@@ -54,7 +54,7 @@ const TRADE_IMAGE = "https://www.maisonaffluency.com/trade-program-hero-authenti
 
 export const STATIC_PAGE_HEADS = {
   home: {
-    title: "Maison Affluency — Curated Luxury Furniture & Collectible Design",
+    title: "Maison Affluency | Luxury Furniture & Collectible Design",
     description: "Discover exceptional collectible furniture, bespoke interiors, and contemporary design by world-renowned designers and ateliers. Based in Singapore.",
     path: "/",
     image: HOME_IMAGE,
