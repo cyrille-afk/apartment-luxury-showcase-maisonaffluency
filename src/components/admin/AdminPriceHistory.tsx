@@ -14,6 +14,7 @@ export default function AdminPriceHistory() {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [limit, setLimit] = useState(100);
+  const [statusFilter, setStatusFilter] = useState<PriceHistoryFilter>("all");
   const attempts = useSyncExternalStore(subscribePriceAttempts, getPriceAttempts, getServerPriceAttempts);
   const history = useQuery({
     queryKey: ["admin-price-history", user?.id, limit], enabled: open && isAdmin && rolesLoaded,
@@ -35,7 +36,9 @@ export default function AdminPriceHistory() {
   });
   const local = attempts.filter((row) => row.userId === user?.id);
   const localIds = new Set(local.map((row) => row.id));
-  const rows = [...local, ...durableAttemptRows(history.data?.attempts ?? []).filter((row) => !localIds.has(row.id)), ...saved].filter((row) => `${row.product} ${row.changes.map((change) => change.label).join(" ")}`.toLowerCase().includes(search.toLowerCase())).sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+  const searched = [...local, ...durableAttemptRows(history.data?.attempts ?? []).filter((row) => !localIds.has(row.id)), ...saved].filter((row) => `${row.product} ${row.changes.map((change) => change.label).join(" ")}`.toLowerCase().includes(search.toLowerCase())).sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+  const counts = priceHistoryCounts(searched);
+  const rows = searched.filter((row) => matchesPriceHistoryFilter(row.status, statusFilter));
   return <>
     <Button variant="outline" size="sm" onClick={() => setOpen(true)}><History className="h-4 w-4" />Price history</Button>
     <Dialog open={open} onOpenChange={setOpen}>
