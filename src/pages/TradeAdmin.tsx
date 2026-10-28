@@ -15,6 +15,7 @@ import {
 import { Link } from "@/lib/router-compat";
 import { Inbox, AlertTriangle, ShieldCheck, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import AdminPriceHistory from "@/components/admin/AdminPriceHistory";
 
 
 /**
@@ -358,6 +359,7 @@ const TradeAdmin = () => {
     <>
       <Helmet><title>Admin — Trade Portal — Maison Affluency</title></Helmet>
     <div className="max-w-5xl space-y-6">
+      <AdminPriceHistory />
       {/* Inquiries Inbox — Price upon Request + concierge + contact form */}
       <Link
         to="/trade/admin/inquiries"

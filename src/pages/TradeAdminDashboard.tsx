@@ -4,6 +4,7 @@ import { Navigate, useNavigate } from "@/lib/router-compat";
 import { E2ETokenCopier } from "@/components/admin/E2ETokenCopier";
 import { NewInquiriesAlert } from "@/components/trade/NewInquiriesAlert";
 import { SalesFunnelCard } from "@/components/trade/SalesFunnelCard";
+import AdminPriceHistory from "@/components/admin/AdminPriceHistory";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -188,6 +189,7 @@ export default function TradeAdminDashboard() {
           </p>
         </div>
 
+        <AdminPriceHistory />
         {groups.map((group) => {
           const visibleItems = group.items.filter(
             (item) => !item.superAdminOnly || isSuperAdmin

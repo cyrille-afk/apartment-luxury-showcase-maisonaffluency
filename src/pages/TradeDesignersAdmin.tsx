@@ -53,6 +53,8 @@ import { applyCuratorPickOrder, sortCuratorPicks } from "@/lib/curatorPickSort";
 import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
 import { lastNameInitial, sortNameKey } from "@/lib/nameFormat";
 import { recoverDesignerEditorDraft } from "./designerEditorRecovery";
+import AdminPriceHistory from "@/components/admin/AdminPriceHistory";
+import { priceDifferences, startPriceAttempt, finishPriceAttempt, type PriceSnapshot } from "@/lib/adminPriceHistory";
 
 const EditorialBiography = lazy(() => import("@/components/EditorialBiography"));
 
@@ -257,6 +259,7 @@ const PICKUP_SHARED_FIELDS = new Set(["pickup_address", "pickup_country", "picku
 
 function CuratorPicksManager({ designerId, designerName, designerSlug }: { designerId: string; designerName?: string; designerSlug?: string }) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   type PdfEntry = { label: string; url: string; filename?: string };
   type Pick = {
@@ -490,19 +493,35 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
 
   const persistPickField = useCallback((id: string, field: string, value: any) => {
     const run = async () => {
+      const isPrice = ["trade_price_cents", "price_per_sqm_cents", "size_variants"].includes(field);
+      let priceAttemptId: string | undefined;
+      if (isPrice && user) {
+        const { data: before } = await supabase.from("designer_curator_picks")
+          .select("title,currency,trade_price_cents,price_per_sqm_cents,size_variants").eq("id", id).maybeSingle();
+        if (before) {
+          const snapshot = before as unknown as PriceSnapshot;
+          const changes = priceDifferences(snapshot, { ...snapshot, [field]: value });
+          if (changes.length) priceAttemptId = startPriceAttempt({ userId: user.id, product: before.title, currency: before.currency || "EUR", changes });
+        }
+      }
       const attempt = () => {
         const query = supabase
           .from("designer_curator_picks")
           .update({ [field]: value } as any);
         return PICKUP_SHARED_FIELDS.has(field)
           ? query.eq("designer_id", designerId)
-          : query.eq("id", id);
+          : query.eq("id", id).select("id");
       };
 
-      let { error } = await attempt();
+      let { error, data } = await attempt();
       if (error && (error.code === "57014" || /statement timeout/i.test(error.message))) {
         await new Promise((r) => setTimeout(r, 800));
-        ({ error } = await attempt());
+        ({ error, data } = await attempt());
+      }
+
+      if (priceAttemptId) {
+        finishPriceAttempt(priceAttemptId, error ? "Failed" : Array.isArray(data) && data.some((row) => row.id === id) ? "Saved" : "Unconfirmed");
+        queryClient.invalidateQueries({ queryKey: ["admin-price-history"] });
       }
 
       if (error) {
@@ -522,7 +541,7 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
       if (pickWriteChainRef.current.get(id) === next) pickWriteChainRef.current.delete(id);
     });
     return next;
-  }, [loadPicks, toast, queryClient, designerId]);
+  }, [loadPicks, toast, queryClient, designerId, user]);
 
   const flushPendingWrites = useCallback(() => {
     const entries = Array.from(pendingWritesRef.current.values());
@@ -2696,6 +2715,7 @@ const TradeDesignersAdmin = () => {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <AdminPriceHistory />
             {(() => {
               const expanded = designers.find((d) => d.id === expandedId);
               if (!expanded) {
