@@ -56,9 +56,9 @@ export function CheckoutRecoveryPanel({ message, recovery, lines, busy, onConfir
           </Button>
         )}
         {recovery && recovery.reason !== "price_changed" && affected?.productPath && (
-          <Button type="button" size="sm" variant="outline" onClick={() => { if (affected.productPath) onReselect(affected.productPath); }}>Reselect on product page</Button>
+          <Button type="button" size="sm" variant="outline" onClick={() => { if (affected.productPath) onReselect(affected.productPath); }}>{recovery.reason === "unavailable" ? "Enquire on product page" : "Reselect on product page"}</Button>
         )}
-        <Button type="button" size="sm" variant="outline" disabled={busy} onClick={onRetry}>Try again</Button>
+        {recovery?.reason !== "unavailable" && <Button type="button" size="sm" variant="outline" disabled={busy} onClick={onRetry}>Try again</Button>}
       </div>
     </div>
   );
