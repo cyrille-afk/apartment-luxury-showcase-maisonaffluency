@@ -1319,9 +1319,8 @@ const TradeProductPage: React.FC = () => {
           ].filter(Boolean).map((s) => String(s)),
         });
         setDrawerRefreshKey((k) => k + 1);
-        setDrawerOpen(!felixSelection);
+        setDrawerOpen(true);
         if (felixSelection) {
-          window.dispatchEvent(new CustomEvent("concierge:stage", { detail: { openPanel: true } }));
           window.dispatchEvent(new CustomEvent("concierge:propose_tearsheet_proactive", { detail: { ...structuredClone(felixSelection), lockedAt: Date.now() } }));
         }
         toast({
@@ -1966,11 +1965,11 @@ const TradeProductPage: React.FC = () => {
   };
 
   /** Direct order — writes the configured piece into the shared cart. */
-  const handleProceedToOrder = () => {
+  const handleProceedToOrder = (orderQuantity = quantity, persistOnly = false) => {
     const unit = currentRrpCents();
     if (!unit) {
       toast({ title: "Price upon Request", description: "Our concierge will confirm the rate for this configuration." });
-      return;
+      return false;
     }
     const finishLabel = [selectedBase, selectedTop, selectedDualSize, selectedSingleSize, selectedFabric?.name]
       .filter(Boolean).map(String).join(" · ") || null;
@@ -1994,13 +1993,14 @@ const TradeProductPage: React.FC = () => {
       leadTime: product.lead_time || null,
       unitPriceCents: converted,
       currency: tgtCcy,
-      quantity,
+      quantity: orderQuantity,
       sourceCurrency: didConvert ? srcCcy : null,
       sourceUnitPriceCents: didConvert ? unit : null,
       fxRate: didConvert ? fxRates[`${srcCcy}_${tgtCcy}`] ?? converted / unit : null,
       origin: product.origin,
     });
-    navigate("/cart");
+    if (!persistOnly) navigate("/cart");
+    return true;
   };
 
   /**
@@ -3683,6 +3683,7 @@ const TradeProductPage: React.FC = () => {
         retailLabelOverride={priceLabels?.retailLabel ?? null}
         netLabelOverride={priceLabels?.netLabel ?? null}
         selectedFinishes={[selectedBase, selectedTop, selectedDualSize, selectedSingleSize, selectedFabric?.name].filter((value): value is string => typeof value === "string" && value.length > 0)}
+        onAddToCart={(orderQuantity) => handleProceedToOrder(orderQuantity, true)}
         onPlaceOrder={() => currentRrpCents() ? handleProceedToOrder() : setCustomRequestOpen(true)}
       />
 

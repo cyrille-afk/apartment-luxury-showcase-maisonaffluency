@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { acceptRecoveredPrice, parseRecovery } from "./checkoutRecovery";
+import { acceptRecoveredPrice, parseRecovery, readFunctionFailure } from "./checkoutRecovery";
 
 const lines = [
   { pickId: "pendant", pairing: null, unitCents: 5700000, finishLabel: "Brass", quantity: 1 },
@@ -7,6 +7,16 @@ const lines = [
 ];
 
 describe("checkout recovery", () => {
+  it("handles the Saint Honoré unavailable 409 without throwing or changing its price", async () => {
+    const pickId = "54d04665-4ce2-45b5-8a76-77e5bb57fe95";
+    const message = "Saint Honoré Sofa is not available for direct purchase — please send an enquiry.";
+    const failure = await readFunctionFailure({ context: new Response(JSON.stringify({ error: message, recovery: { pickId, reason: "unavailable" } }), { status: 409 }) }, null, "Unable to start checkout.");
+    expect(failure.message).toBe(message);
+    expect(failure.recovery?.reason).toBe("unavailable");
+    expect(failure.recovery?.pickId).toBe(pickId);
+    if (!failure.recovery) throw new Error("Missing recovery");
+    expect(acceptRecoveredPrice([{ pickId, unitCents: 2050000 }], failure.recovery)).toBeNull();
+  });
   it("accepting a changed pairing price keeps the pairing, finish and quantity", () => {
     const next = acceptRecoveredPrice(lines, parseRecovery({ pickId: "console", reason: "price_changed", currentUnitCents: 910000, pairing: { ruleId: "r1", optionId: "ivory-brass" } })!)!;
     expect(next[1]).toEqual({ ...lines[1], unitCents: 910000 });

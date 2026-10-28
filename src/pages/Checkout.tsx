@@ -2088,7 +2088,7 @@ export default function Checkout() {
     : null;
   // Signed-in buyers never retype their email.
   useEffect(() => {
-    if (user?.email) setEmail((v) => v || user.email!);
+    if (user?.email && !checkoutForm.email) checkoutForm.setEmail(user.email);
   }, [user]);
   // Summary math: line items keep their standard catalogue prices; the tier
   // discount is applied once at cart level, exactly like the backend charge.
@@ -2256,12 +2256,9 @@ export default function Checkout() {
     }
   }, [checkoutForm.email]);
   const setEmail = useCallback(
-    (v: string | ((prev: string) => string)) => {
-      setEmailLocal((prev) => {
-        const next = typeof v === "function" ? v(prev) : v;
-        checkoutForm.setEmail(next);
-        return next;
-      });
+    (next: string) => {
+      setEmailLocal(next);
+      checkoutForm.setEmail(next);
     },
     [checkoutForm],
   );
@@ -2588,7 +2585,11 @@ export default function Checkout() {
         if ((piRes as any)?.error || pi?.error) {
           const failure = await readFunctionFailure((piRes as any)?.error, pi, "Unable to start checkout.");
           setRecovery(failure.recovery);
-          throw new Error(failure.message);
+          setError(failure.message);
+          intentIdRef.current = "";
+          clientSecretRef.current = "";
+          setClientSecret(null);
+          return;
         }
 
         // Guardrail: the amount Stripe will charge must equal the cart-derived

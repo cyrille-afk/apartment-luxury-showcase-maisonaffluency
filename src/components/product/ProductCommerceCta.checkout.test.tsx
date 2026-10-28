@@ -43,25 +43,42 @@ describe('product selection checkout hand-off', () => {
     vi.useFakeTimers();
     sessionStorage.setItem('ma_intake_done', '1');
     const placeOrder = vi.fn();
-    render(<ProductCommerceCta productId="chair" dockOnly tradeApproved orderTriggerEvent="ma:open-workspace-order" onPlaceOrder={placeOrder} />);
+    const add = vi.fn();
+    render(<ProductCommerceCta onAddToCart={add} productId="chair" dockOnly tradeApproved orderTriggerEvent="ma:open-workspace-order" onPlaceOrder={placeOrder} />);
     act(() => window.dispatchEvent(new Event('ma:open-workspace-order')));
-    expect(mocks.intake.mock.calls.at(-1)?.[0].isOpen).toBe(false);
+    expect(mocks.intake).not.toHaveBeenCalled();
     expect(mocks.update).toHaveBeenCalledWith({ buyerProfile: 'designer', email: 'professional@example.com', guestName: 'Trade Member' });
-    expect(placeOrder).toHaveBeenCalledWith(1);
+    expect(add).toHaveBeenCalledWith(1);
+    expect(placeOrder).not.toHaveBeenCalled();
+    expect(mocks.navigate).not.toHaveBeenCalled();
   });
 
-  it('bypasses onboarding on mobile Trade orders', () => {
+  it.each([false, true])('bypasses onboarding on mobile Trade orders, presentation=%s', (presentation) => {
+    mocks.clientSafe = presentation;
     mocks.pathname = '/trade/products/chair';
     const placeOrder = vi.fn();
-    render(<ProductCommerceCta productId="chair" dockOnly tradeApproved onPlaceOrder={placeOrder} />);
+    const add = vi.fn();
+    render(<ProductCommerceCta onAddToCart={add} productId="chair" dockOnly tradeApproved onPlaceOrder={placeOrder} />);
     fireEvent.click(screen.getByRole('button', { name: /^Place Order$/ }));
-    expect(placeOrder).toHaveBeenCalledWith(1);
-    expect(mocks.intake.mock.calls.at(-1)?.[0].isOpen).toBe(false);
+    expect(add).toHaveBeenCalledWith(1);
+    expect(placeOrder).not.toHaveBeenCalled();
+    expect(mocks.navigate).not.toHaveBeenCalled();
+    expect(mocks.intake).not.toHaveBeenCalled();
   });
 
-  it.each(['presentation', 'signed-out', 'pending-roles'])('retains intake instead of using Trade bypass for %s', (state) => {
+  it('keeps multiple configured Trade lines in the drawer without cart redirection', () => {
     mocks.pathname = '/trade/products/chair';
-    if (state === 'presentation') mocks.clientSafe = true;
+    mocks.items = [{ key: 'chair', quantity: 1 }, { key: 'table', quantity: 2 }] as CartItem[];
+    const add = vi.fn();
+    render(<ProductCommerceCta productId="chair" dockOnly tradeApproved onPlaceOrder={vi.fn()} onAddToCart={add} />);
+    fireEvent.click(screen.getByRole('button', { name: /^Place Order$/ }));
+    expect(add).toHaveBeenCalledWith(1);
+    expect(mocks.navigate).not.toHaveBeenCalled();
+    expect(mocks.intake).not.toHaveBeenCalled();
+  });
+
+  it.each(['signed-out', 'pending-roles'])('retains intake instead of using Trade bypass for %s', (state) => {
+    mocks.pathname = '/trade/products/chair';
     if (state === 'signed-out') mocks.auth.user = null;
     if (state === 'pending-roles') mocks.auth.rolesLoaded = false;
     const placeOrder = vi.fn();
