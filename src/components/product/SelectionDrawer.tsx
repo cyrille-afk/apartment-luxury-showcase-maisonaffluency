@@ -39,6 +39,8 @@ export interface DrawerLine {
   brand?: string | null;
   title?: string | null;
   configuration?: string | null;
+  /** Model dimensions line, e.g. "Saint Honoré 280: W 280 x D 160 x H 75 cm" */
+  dimensionsLabel?: string | null;
   leadTime?: string | null;
   priceLabel?: string | null;
   netPriceLabel?: string | null;
@@ -56,6 +58,8 @@ export interface SelectionDrawerProps {
   title?: string | null;
   /** Configuration line, e.g. "Oiled Walnut / Sheepskin SKANDILOCK – 09 Moonlight" */
   configuration?: string | null;
+  /** Model dimensions line, e.g. "Saint Honoré 280: W 280 x D 160 x H 75 cm" */
+  dimensionsLabel?: string | null;
   /** e.g. "10–14 weeks" */
   leadTime?: string | null;
   /** Fully formatted price line, e.g. "From $7,513" or "Price upon Request" */
