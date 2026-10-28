@@ -691,6 +691,7 @@ export default function ProductCommerceCta({
           onComplete={completeIntake}
           mode={desktopDirectBespoke ? "quote" : "order"}
           isTradeAuthorized={tradeApproved}
+          showPresentationToggle={Boolean(user) && rolesLoaded && (isAdmin || isTradeUser || tradeStatus === "approved") && /^\/trade(?:\/|$)/.test(location.pathname)}
           showAttachmentDropzone={intakeFor === "bespoke"}
           finalLabel={
             intakeFor === "bespoke"

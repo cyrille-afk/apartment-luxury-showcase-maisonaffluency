@@ -58,6 +58,7 @@ interface Props {
   /** Overrides the last step's action label (e.g. "Continue"). */
   finalLabel?: string;
   isTradeAuthorized?: boolean;
+  showPresentationToggle?: boolean;
   showAttachmentDropzone?: boolean;
 }
 
@@ -95,6 +96,7 @@ export default function OrderIntakeSheet({
   productId,
   finalLabel,
   isTradeAuthorized = false,
+  showPresentationToggle = false,
   showAttachmentDropzone = false,
 }: Props) {
   const { toast, dismiss } = useToast();
@@ -523,7 +525,7 @@ export default function OrderIntakeSheet({
 
         <div className="flex shrink-0 items-center justify-between px-6 pb-3 pt-4 md:px-8 md:pt-6">
           <div className="flex items-center gap-2">
-            {isTradeAuthorized && <PresentationModeToggle />}
+            {(isTradeAuthorized || showPresentationToggle) && <PresentationModeToggle />}
             {step > 0 && (
               <button
                 type="button"

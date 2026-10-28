@@ -13,3 +13,4 @@
 - Felix PDF recipient/project fields are download-only overrides using ClientPicker; editing them never changes saved quotes or address-book contacts.
 - Felix finish snapshots carry selector-derived labels and selected swatch URLs into cards, saved snapshots and PDFs; one shared finish list keeps those views consistent.
 - Felix step order comes from felixTourOrder; special transitions resolve stable step IDs, not numeric indexes — reordering must not skip pricing or quote demonstrations.
+- Local PresentationModeToggle controls reuse clientSafeMode; QuoteDrawer never relabels saved net snapshots as retail, and presentation tearsheet exports omit internal prices in generated HTML, with copied links carrying an explicit presentation flag — protects margins across tabs and downloads.

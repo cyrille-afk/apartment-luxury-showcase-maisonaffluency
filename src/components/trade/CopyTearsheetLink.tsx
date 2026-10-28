@@ -1,12 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, Link2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getClientSafeMode } from "@/lib/clientSafeMode";
 
 /** Resolve a shared path to an absolute URL for sharing. */
 export function copyTearsheetHref(path: string): string {
-  if (/^https?:\/\//i.test(path)) return path;
   const origin = typeof window !== "undefined" && window.location?.origin ? window.location.origin : "";
-  return `${origin}${path.startsWith("/") ? path : `/${path}`}`;
+  const href = /^https?:\/\//i.test(path) ? path : `${origin}${path.startsWith("/") ? path : `/${path}`}`;
+  if (!getClientSafeMode() || !origin) return href;
+  const url = new URL(href);
+  if (url.origin === origin && /^\/trade\/(tearsheets|boards)(?:\/|$)/.test(url.pathname)) {
+    url.searchParams.set("presentation", "1");
+    return url.href;
+  }
+  return href;
 }
 
 interface Props {

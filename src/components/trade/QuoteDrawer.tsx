@@ -316,7 +316,10 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
                     </span>
                     {(() => {
                       // Saved unit prices may be net snapshots. Never relabel them as retail.
-                      if (clientSafe) return <span className="font-body text-[10px] text-muted-foreground">Price upon Request</span>;
+                      if (clientSafe) {
+                        const retail = !item.variant_label ? item.product?.rrp_price_cents : null;
+                        return <span className="font-body text-[10px] text-muted-foreground">{retail && retail > 0 ? `Retail Price: ${formatPrice(retail, item.product.currency || "EUR")}` : "Price upon Request"}</span>;
+                      }
                       const displayCents = item.unit_price_cents ?? item.product?.trade_price_cents ?? item.product?.rrp_price_cents;
                       const displayCurrency = item.unit_price_cents != null
                         ? (item.unit_price_currency || item.product?.currency || "EUR")
