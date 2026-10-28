@@ -59,6 +59,8 @@ export interface ProductCommerceCtaProps {
   selectedFinishes?: string[];
   /** Display-accurate finish label (axis reference merged with swatch colourway). */
   orderFinishLabel?: string | null;
+  /** Model dimensions line, e.g. "Saint Honoré 280: W 280 x D 160 x H 75 cm" */
+  dimensionsLabel?: string | null;
   /** All selectable finishes — enables the quote sheet's finish selector. */
   finishOptions?: string[];
   /** Per-finish price + image, powering live re-pricing inside the intake sheet. */
