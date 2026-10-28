@@ -218,7 +218,7 @@ export default function ProductCommerceCta({
   const { clientSafe } = useClientSafeMode();
   const { user, profile: professionalProfile, rolesLoaded, isAdmin, isTradeUser, tradeStatus } = useAuth();
   const isTradeWorkspace = /^\/trade(?:\/|$)/.test(location.pathname) &&
-    tradeApproved && !clientSafe && Boolean(user) && rolesLoaded &&
+    tradeApproved && Boolean(user) && rolesLoaded &&
     (isAdmin || isTradeUser || tradeStatus === "approved");
   const { data: pricing } = useTradeProductPricing(productId, tradeApproved);
   const { discountPct, apply } = useTradeDiscount();
@@ -273,7 +273,7 @@ export default function ProductCommerceCta({
       return;
     }
     setQuoteOnlySelection(false);
-    if (checkoutForm.buyerProfile !== "private" && shouldUseFullPageCart(getCart())) {
+    if (!isTradeWorkspace && checkoutForm.buyerProfile !== "private" && shouldUseFullPageCart(getCart())) {
       setMiniCartOpen(false);
       navigate("/cart");
       return;
@@ -296,7 +296,8 @@ export default function ProductCommerceCta({
       });
       setIntakeFor(null);
       setDesktopDirectBespoke(false);
-      runIntent(target);
+      if (target === "order") openSelection();
+      else runIntent(target);
       return;
     }
     const desktop = typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
@@ -476,11 +477,11 @@ export default function ProductCommerceCta({
   // that landed after the click, or another tab), hand off to the full page.
   useEffect(() => {
     if (!miniCartOpen) return;
-    if (checkoutForm.buyerProfile !== "private" && shouldUseFullPageCart(cartItems)) {
+    if (!isTradeWorkspace && checkoutForm.buyerProfile !== "private" && shouldUseFullPageCart(cartItems)) {
       setMiniCartOpen(false);
       navigate("/cart");
     }
-  }, [miniCartOpen, cartItems, navigate, checkoutForm.buyerProfile]);
+  }, [miniCartOpen, cartItems, navigate, checkoutForm.buyerProfile, isTradeWorkspace]);
 
 
   // Drawer quantity stepper: quantity alone never changes the layout — only a
@@ -624,15 +625,16 @@ export default function ProductCommerceCta({
       {fixedDock && mobileDock ? createPortal(mobileDock, document.body) : mobileDock}
 
       {/* Slide-out mini-cart drawer (State A order confirmation) */}
-      {!tradeApproved && (
+      {(!tradeApproved || isTradeWorkspace) && (
         <SelectionDrawer
+          professionalWorkspace={isTradeWorkspace}
           isOpen={miniCartOpen}
           onClose={() => setMiniCartOpen(false)}
           lines={cartItems.length > 1 ? cartItems.map((item) => ({ key: item.key, brand: item.designerName, title: item.title, configuration: item.finishLabel, imageUrl: item.imageUrl, quantity: item.quantity, priceLabel: item.unitPriceCents > 0 ? formatMoney(item.unitPriceCents * item.quantity, item.currency) : "Price upon Request", leadTime: item.leadTime })) : undefined}
           onLineQuantityChange={setCartQuantity}
           onRemoveLine={removeFromCart}
           subtotalLabel={cartItems.length > 1 ? formatMoney(cartSubtotalCents(cartItems), cartItems[0]?.currency) : undefined}
-          onViewCart={cartItems.length > 1 ? () => { setMiniCartOpen(false); navigate("/cart"); } : undefined}
+          onViewCart={!isTradeWorkspace && cartItems.length > 1 ? () => { setMiniCartOpen(false); navigate("/cart"); } : undefined}
           brand={designerName}
           title={productTitle}
           configuration={orderFinishLabel || (selectedFinishes.length ? selectedFinishes.join(" / ") : null)}
@@ -684,7 +686,7 @@ export default function ProductCommerceCta({
 
       {/* 3-step intent capture — mobile sheet / centred desktop panel. Runs
           ahead of both the order drawer and the bespoke dialog. */}
-      {(
+      {!isTradeWorkspace && (
         <OrderIntakeSheet
           isOpen={!isTradeWorkspace && intakeFor !== null}
           onClose={() => setIntakeFor(null)}

@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
 
 import { supabase } from "@/integrations/supabase/client";
+import PresentationModeToggle from "@/components/trade/PresentationModeToggle";
 
 /** Mobile / WhatsApp number: digits, +, spaces, dashes, parentheses — 7–20 chars. */
 const PHONE_RE = /^[+0-9][0-9 ()-]{6,19}$/;
@@ -44,6 +45,7 @@ export interface DrawerLine {
 }
 
 export interface SelectionDrawerProps {
+  professionalWorkspace?: boolean;
   isOpen: boolean;
   onClose: () => void;
   /** Brand / designer, e.g. "Dagmar" */
@@ -78,6 +80,7 @@ export interface SelectionDrawerProps {
 }
 
 export default function SelectionDrawer({
+  professionalWorkspace = false,
   isOpen,
   onClose,
   brand = null,
@@ -206,7 +209,7 @@ export default function SelectionDrawer({
       <aside
         role="dialog"
         aria-modal="true"
-        aria-label="Your selection"
+        aria-label={professionalWorkspace ? "Quote & Order Workspace" : "Your selection"}
         className={cn(
           "absolute right-0 top-0 h-full w-full max-w-[420px]",
           "flex flex-col bg-background text-foreground border-l border-border/60",
@@ -217,9 +220,12 @@ export default function SelectionDrawer({
       >
         {/* ── 1 · Sticky header ─────────────────────────────────────────── */}
         <header className="flex h-16 shrink-0 items-center justify-between border-b border-border/60 px-6">
-          <h2 className="font-body text-[10px] font-medium uppercase tracking-widest text-foreground">
-            Your Cart Selection
-          </h2>
+          <div className="min-w-0">
+            <h2 className="font-body text-[10px] font-medium uppercase tracking-widest text-foreground">
+              {professionalWorkspace ? "Quote & Order Workspace" : "Your Cart Selection"}
+            </h2>
+            {professionalWorkspace && <PresentationModeToggle />}
+          </div>
           <button
             type="button"
             aria-label="Close"
