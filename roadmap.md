@@ -7,6 +7,7 @@
 - [x] Verify live toggle round-trip and actual presentation print/PDF, including a presentation link opened with shared mode off; 20 regression tests pass.
 
 ## Trade order workspace
+- [ ] Align both restored drawers with active finishes and retail/net breakdown; verify synchronized Presentation Mode removes every net row.
 - [x] Handle unavailable-purchase 409 inline without throwing, preserve selections and offer an enquiry; exact response verified in signed-in checkout with no blank screen or provider-update errors.
 - [x] Restore product-page order/workspace drawers without role selection or cart redirection; both Saint Honoré buttons verified signed in, with unchanged product URL and active details; 18 regression tests pass.
 - [x] Bypass public onboarding for authenticated Trade Studio orders using the professional session and existing checkout flow.
