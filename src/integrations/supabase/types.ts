@@ -460,6 +460,48 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_price_save_attempts: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_code: string | null
+          field_name: string
+          id: string
+          new_data: Json
+          old_data: Json
+          product_id: string
+          product_name: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_code?: string | null
+          field_name: string
+          id?: string
+          new_data: Json
+          old_data: Json
+          product_id: string
+          product_name: string
+          status?: string
+          user_id?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_code?: string | null
+          field_name?: string
+          id?: string
+          new_data?: Json
+          old_data?: Json
+          product_id?: string
+          product_name?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_curated_layouts: {
         Row: {
           brief: Json
@@ -13053,6 +13095,10 @@ export type Database = {
         Returns: number
       }
       approve_shared_room: { Args: { _token: string }; Returns: undefined }
+      begin_admin_price_save: {
+        Args: { _field: string; _id: string; _product_id: string; _value: Json }
+        Returns: string
+      }
       board_access_request: {
         Args: { _email: string; _slug: string }
         Returns: Json
@@ -13204,6 +13250,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      commit_admin_price_save: { Args: { _id: string }; Returns: Json }
       compute_curator_pick_slug: {
         Args: { _subtitle: string; _title: string }
         Returns: string

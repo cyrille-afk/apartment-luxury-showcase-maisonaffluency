@@ -1751,6 +1751,20 @@
       "when": 1793008668081,
       "tag": "0249_profile_business_registration_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 250,
+      "version": "7",
+      "when": 1793153692783,
+      "tag": "0250_persistent_admin_price_save_attempts",
+      "breakpoints": true
+    },
+    {
+      "idx": 251,
+      "version": "7",
+      "when": 1793153840645,
+      "tag": "0251_restrict_price_audit_direct_grants",
+      "breakpoints": true
     }
   ]
 }

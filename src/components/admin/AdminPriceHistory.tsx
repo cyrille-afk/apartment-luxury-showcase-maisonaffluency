@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { priceDifferences, priceValue, subscribePriceAttempts, getPriceAttempts, getServerPriceAttempts, type PriceSnapshot } from "@/lib/adminPriceHistory";
+import { priceDifferences, priceValue, durableAttemptRows, subscribePriceAttempts, getPriceAttempts, getServerPriceAttempts, type DurablePriceAttempt, type PriceSnapshot } from "@/lib/adminPriceHistory";
 
 type AuditRow = { id: string; created_at: string; old_data: PriceSnapshot; new_data: PriceSnapshot };
 export default function AdminPriceHistory() {
@@ -18,18 +18,24 @@ export default function AdminPriceHistory() {
   const history = useQuery({
     queryKey: ["admin-price-history", user?.id, limit], enabled: open && isAdmin && rolesLoaded,
     queryFn: async () => {
-      const { data, error } = await supabase.from("content_audit_log").select("id,created_at,old_data,new_data")
-        .eq("table_name", "designer_curator_picks").eq("operation", "UPDATE").order("created_at", { ascending: false }).limit(limit);
-      if (error) throw error;
-      return (data ?? []) as unknown as AuditRow[];
+      const [audit, durable] = await Promise.all([
+        supabase.from("content_audit_log").select("id,created_at,old_data,new_data")
+          .eq("table_name", "designer_curator_picks").eq("operation", "UPDATE").order("created_at", { ascending: false }).limit(limit),
+        supabase.from("admin_price_save_attempts").select("id,user_id,product_name,created_at,completed_at,status,old_data,new_data").order("created_at", { ascending: false }).limit(limit),
+      ]);
+      if (audit.error) throw audit.error;
+      if (durable.error) throw durable.error;
+      return { audit: (audit.data ?? []) as unknown as AuditRow[], attempts: (durable.data ?? []) as unknown as DurablePriceAttempt[] };
     },
   });
   if (!isAdmin || !rolesLoaded) return null;
-  const saved = (history.data ?? []).flatMap((row) => {
+  const saved = (history.data?.audit ?? []).flatMap((row) => {
     const changes = priceDifferences(row.old_data ?? {}, row.new_data ?? {});
     return changes.length ? [{ id: row.id, timestamp: row.created_at, product: row.new_data?.title ?? row.old_data?.title ?? "Deleted product", currency: row.new_data?.currency ?? row.old_data?.currency ?? "EUR", changes, status: "Saved" }] : [];
   });
-  const rows = [...attempts.filter((row) => row.userId === user?.id), ...saved].filter((row) => `${row.product} ${row.changes.map((change) => change.label).join(" ")}`.toLowerCase().includes(search.toLowerCase())).sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+  const local = attempts.filter((row) => row.userId === user?.id);
+  const localIds = new Set(local.map((row) => row.id));
+  const rows = [...local, ...durableAttemptRows(history.data?.attempts ?? []).filter((row) => !localIds.has(row.id)), ...saved].filter((row) => `${row.product} ${row.changes.map((change) => change.label).join(" ")}`.toLowerCase().includes(search.toLowerCase())).sort((a, b) => b.timestamp.localeCompare(a.timestamp));
   return <>
     <Button variant="outline" size="sm" onClick={() => setOpen(true)}><History className="h-4 w-4" />Price history</Button>
     <Dialog open={open} onOpenChange={setOpen}>
@@ -39,7 +45,7 @@ export default function AdminPriceHistory() {
           <Input aria-label="Search price history" placeholder="Search products or finishes" value={search} onChange={(event) => setSearch(event.target.value)} />
           <Button variant="outline" size="icon" aria-label="Refresh price history" disabled={history.isFetching} onClick={() => void history.refetch()}><RefreshCw className="h-4 w-4" /></Button>
         </div>
-        <p className="text-xs text-muted-foreground">Saved records · Times in {Intl.DateTimeFormat().resolvedOptions().timeZone}. Unsaved attempts are from this session only.</p>
+        <p className="text-xs text-muted-foreground">Account history · Times in {Intl.DateTimeFormat().resolvedOptions().timeZone}. Interrupted saves remain unconfirmed.</p>
         {history.isError && <div className="text-sm text-destructive" role="alert">Saved history could not be loaded. Try refreshing.</div>}
         {history.isLoading ? <p className="text-sm text-muted-foreground">Loading saved changes…</p> : <div className="overflow-x-auto">
           <table className="w-full text-sm"><thead className="border-b border-border text-left text-xs text-muted-foreground"><tr>{["Product / finish", "Previous price", "New price", "Save status", "Timestamp"].map((label) => <th key={label} className="px-3 py-3 font-medium">{label}</th>)}</tr></thead>
@@ -52,7 +58,7 @@ export default function AdminPriceHistory() {
           </table>
           {!rows.length && !history.isError && <p className="py-8 text-sm text-muted-foreground">No price changes found.</p>}
         </div>}
-        {(history.data?.length ?? 0) >= limit && <Button variant="outline" onClick={() => setLimit((value) => value + 100)}>Load older records</Button>}
+        {Math.max(history.data?.audit.length ?? 0, history.data?.attempts.length ?? 0) >= limit && <Button variant="outline" onClick={() => setLimit((value) => value + 100)}>Load older records</Button>}
       </DialogContent>
     </Dialog>
   </>;

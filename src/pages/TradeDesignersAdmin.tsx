@@ -507,15 +507,29 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
       let priceAttemptId: string | undefined;
       try {
       if (isPrice && user) {
-        const { data: before } = await supabase.from("designer_curator_picks")
+        const { data: before, error: beforeError } = await supabase.from("designer_curator_picks")
           .select("title,currency,trade_price_cents,price_per_sqm_cents,size_variants").eq("id", id).maybeSingle();
+        if (beforeError || !before) throw new Error("Could not verify the previous price");
         if (before) {
           const snapshot = before as unknown as PriceSnapshot;
           const changes = priceDifferences(snapshot, { ...snapshot, [field]: value });
           if (changes.length) priceAttemptId = startPriceAttempt({ userId: user.id, product: before.title, currency: before.currency || "EUR", changes });
         }
       }
-      const attempt = () => {
+      let durableId: string | undefined;
+      if (isPrice) {
+        durableId = priceAttemptId ?? crypto.randomUUID();
+        const { error } = await supabase.rpc("begin_admin_price_save", { _id: durableId, _product_id: id, _field: field, _value: value });
+        if (error) throw error;
+      }
+      const attempt = async () => {
+        if (durableId) {
+          const { data: result, error } = await supabase.rpc("commit_admin_price_save", { _id: durableId });
+          if (error) return { data: null, error };
+          const outcome = result as { status?: string; error_code?: string } | null;
+          if (outcome?.status === "Saved") return { data: [{ id }], error: null };
+          return { data: null, error: { code: outcome?.error_code ?? "UNCONFIRMED", message: outcome?.error_code === "40001" ? "This price changed elsewhere. Refresh the product before retrying." : "Price was not saved. Your edit is retained; retry when ready." } };
+        }
         const query = supabase
           .from("designer_curator_picks")
           .update({ [field]: value } as any);
@@ -525,7 +539,7 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
       };
 
       let { error, data } = await attempt();
-      if (error && (error.code === "57014" || /statement timeout/i.test(error.message))) {
+      if (!durableId && error && (error.code === "57014" || /statement timeout/i.test(error.message))) {
         await new Promise((r) => setTimeout(r, 800));
         ({ error, data } = await attempt());
       }
@@ -534,6 +548,7 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
         finishPriceAttempt(priceAttemptId, error ? "Failed" : Array.isArray(data) && data.some((row) => row.id === id) ? "Saved" : "Unconfirmed");
         queryClient.invalidateQueries({ queryKey: ["admin-price-history"] });
       }
+      if (durableId) queryClient.invalidateQueries({ queryKey: ["admin-price-history"] });
       if (isPrice) {
         const confirmed = !error && Array.isArray(data) && data.some((row) => row.id === id);
         setPriceSaveStates((states) => {
@@ -554,6 +569,8 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
       }
       } catch {
         if (priceAttemptId) finishPriceAttempt(priceAttemptId, "Unconfirmed");
+        queryClient.invalidateQueries({ queryKey: ["admin-price-history"] });
+        if (isPrice) toast({ title: "Price not confirmed saved", description: "Your edit is retained. Check Price history and retry.", variant: "destructive" });
         if (isPrice) setPriceSaveStates((states) => {
           const current = states[feedbackKey];
           return current ? { ...states, [feedbackKey]: completePriceSave(current, revision, false, new Date().toISOString()) } : states;

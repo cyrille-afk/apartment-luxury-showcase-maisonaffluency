@@ -106,7 +106,7 @@
 - Instagram reconnect treats access tokens as opaque and delegates validity to Meta; obvious paste mistakes return recoverable unsaved responses and display inline, never exposing tokens or replacing a working connection — avoids guessed token formats and page-level errors.
 - Resources maker tiles use stored cover images, never eager catalogue PDF previews; visible document previews use the bundled worker with bounded lifetime and cleanup — prevents preview traffic starving downloads.
 - Designer Editor lifecycle exits clear the restore guard and flush buffered edits; crash recovery collapses heavy content but retains filters — normal refreshes must not reset the editor to All designers.
-- Admin price history uses the admin-only audit log; session-only price feedback tracks field revisions, retains failed edits for retry and confirms returned rows only — older saves cannot clear newer unsaved warnings; never block beforeunload.
+- Admin price history combines the admin-only content audit log with durable admin_price_save_attempts; admin-checked begin/commit RPCs record attempts before writing and atomically commit product changes with Saved status, rejecting concurrent field changes. Local feedback tracks revisions and retains failed edits; interrupted attempts remain unconfirmed, never block beforeunload.
 <!-- LOVABLE:END -->
 - Felix sourcing matching/ranking runs only in the `felix-sourcing` edge function; the client receives final results only — keeps matching rules out of the browser bundle.
 - No standalone Collectibles page: collectibles live only in the unified designers directory and shared product templates; /collectibles redirects to /designers.
