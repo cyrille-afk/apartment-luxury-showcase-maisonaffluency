@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Presentation price protection
+- [ ] Persist and verify mode across product pages, drawer remounts and app reloads/resume.
 - [x] Add synchronized Presentation Mode controls beside product prices and at drawer headers.
 - [x] Show retail-only client prices and omit trade values from presentation tearsheets and copied previews; unknown quote retail is Price upon Request, never relabelled net.
 - [x] Verify live toggle round-trip and actual presentation print/PDF, including a presentation link opened with shared mode off; 20 regression tests pass.

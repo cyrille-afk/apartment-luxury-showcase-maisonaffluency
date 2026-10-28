@@ -13,6 +13,44 @@ afterEach(() => {
 });
 
 describe("Client View document guard", () => {
+  it.each([true, false])("persists the explicit %s preference across drawer remounts and a fresh app session", async (enabled) => {
+    const mode = await import("./clientSafeMode");
+    const product = renderHook(() => mode.useClientSafeMode());
+    act(() => product.result.current.setClientSafe(enabled));
+    expect(localStorage.getItem("ma_client_safe_mode")).toBe(enabled ? "1" : "0");
+    product.unmount();
+    const drawer = renderHook(() => mode.useClientSafeMode());
+    expect(drawer.result.current.clientSafe).toBe(enabled);
+    drawer.unmount();
+    vi.resetModules();
+    const restarted = await import("./clientSafeMode");
+    expect(restarted.getClientSafeMode()).toBe(enabled);
+    expect(document.documentElement.dataset.clientView).toBe(enabled ? "active" : "inactive");
+  });
+
+  it("restores changes made while product and drawer subscribers were closed", async () => {
+    const mode = await import("./clientSafeMode");
+    const first = renderHook(() => mode.useClientSafeMode());
+    first.unmount();
+    localStorage.setItem("ma_client_safe_mode", "1");
+    const reopened = renderHook(() => mode.useClientSafeMode());
+    expect(reopened.result.current.clientSafe).toBe(true);
+    expect(document.documentElement.dataset.clientView).toBe("active");
+    reopened.unmount();
+  });
+
+  it("reconciles the saved preference when a suspended browser session resumes", async () => {
+    const mode = await import("./clientSafeMode");
+    const hook = renderHook(() => mode.useClientSafeMode());
+    localStorage.setItem("ma_client_safe_mode", "1");
+    act(() => window.dispatchEvent(new Event("pageshow")));
+    expect(hook.result.current.clientSafe).toBe(true);
+    localStorage.setItem("ma_client_safe_mode", "0");
+    act(() => window.dispatchEvent(new Event("focus")));
+    expect(hook.result.current.clientSafe).toBe(false);
+    hook.unmount();
+  });
+
   it("restores the mask before rendering, conceals trade-only nodes and reveals placeholders on every switch", async () => {
     localStorage.setItem("ma_client_safe_mode", "1");
     const style = document.createElement("style");
