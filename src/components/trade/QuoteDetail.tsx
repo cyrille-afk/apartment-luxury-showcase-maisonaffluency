@@ -28,6 +28,7 @@ import { Button } from "@/components/ui/button";
 import QuoteReviewSummary from "@/components/trade/QuoteReviewSummary";
 import ReviewedQuotePdfDownload from "@/components/trade/ReviewedQuotePdfDownload";
 import { Link, useNavigate } from "@/lib/router-compat";
+import CopyTearsheetLink from "@/components/trade/CopyTearsheetLink";
 import { QuoteItemSkeleton } from "@/components/trade/skeletons";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import ClientPicker from "@/components/trade/ClientPicker";
@@ -2983,6 +2984,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         <Layers className="h-3 w-3" />
                         Project tearsheets
                       </a>
+                      <CopyTearsheetLink path={`/trade/tearsheets?project=${projectId}`} label="Copy tearsheet link" />
                       <a
                         href={`/trade/boards?project=${projectId}`}
                         className="inline-flex items-center gap-1 font-body text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
