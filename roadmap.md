@@ -1,9 +1,9 @@
 # Roadmap
 
 ## Presentation price protection
-- [ ] Add synchronized Presentation Mode controls beside product prices and at drawer headers.
-- [ ] Show retail-only client prices and omit trade values from presentation tearsheets and copied previews.
-- [ ] Verify toggle synchronization and document price protection.
+- [x] Add synchronized Presentation Mode controls beside product prices and at drawer headers.
+- [x] Show retail-only client prices and omit trade values from presentation tearsheets and copied previews; unknown quote retail is Price upon Request, never relabelled net.
+- [x] Verify live toggle round-trip and actual presentation print/PDF, including a presentation link opened with shared mode off; 20 regression tests pass.
 
 ## Trade order workspace
 - [x] Bypass public onboarding for authenticated Trade Studio orders using the professional session and existing checkout flow.
