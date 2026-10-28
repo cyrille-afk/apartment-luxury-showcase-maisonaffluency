@@ -47,6 +47,24 @@ export function finishPriceAttempt(id: string, status: "Saved" | "Failed" | "Unc
   emit();
 }
 export type DurablePriceAttempt = { id: string; user_id: string; product_name: string; created_at: string; completed_at: string | null; status: "Saving" | "Saved" | "Failed" | "Unconfirmed"; old_data: PriceSnapshot; new_data: PriceSnapshot };
+export type PriceHistoryFilter = "all" | "saved" | "pending" | "failed";
+export const PRICE_HISTORY_FILTER_LABELS: Record<PriceHistoryFilter, string> = { all: "All", saved: "Saved", pending: "Pending", failed: "Failed" };
+// A save the browser never saw a reply for is pending, not failed and not saved.
+const PENDING_STATUSES = new Set(["Saving", "Unconfirmed"]);
+export function matchesPriceHistoryFilter(status: string, filter: PriceHistoryFilter) {
+  if (filter === "all") return true;
+  if (filter === "saved") return status === "Saved";
+  if (filter === "pending") return PENDING_STATUSES.has(status);
+  return status === "Failed";
+}
+export function priceHistoryCounts<T extends { status: string }>(rows: T[]): Record<PriceHistoryFilter, number> {
+  return {
+    all: rows.length,
+    saved: rows.filter((row) => matchesPriceHistoryFilter(row.status, "saved")).length,
+    pending: rows.filter((row) => matchesPriceHistoryFilter(row.status, "pending")).length,
+    failed: rows.filter((row) => matchesPriceHistoryFilter(row.status, "failed")).length,
+  };
+}
 export function durableAttemptRows(records: DurablePriceAttempt[]) {
   return records.filter((row) => row.status !== "Saved").map((row) => ({
     id: row.id, userId: row.user_id, product: row.product_name,

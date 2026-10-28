@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { priceDifferences, priceValue, durableAttemptRows, startPriceAttempt, finishPriceAttempt, getPriceAttempts, type DurablePriceAttempt } from "./adminPriceHistory";
+import { priceDifferences, priceValue, durableAttemptRows, startPriceAttempt, finishPriceAttempt, getPriceAttempts, matchesPriceHistoryFilter, priceHistoryCounts, type DurablePriceAttempt } from "./adminPriceHistory";
 describe("admin price history", () => {
   it("records previous and new main prices in cents", () => {
     expect(priceDifferences({ trade_price_cents: 399000 }, { trade_price_cents: 499000 })).toEqual([{ label: "Main price", before: 399000, after: 499000 }]);
@@ -29,4 +29,14 @@ describe("admin price history", () => {
   });
   it("never calls an interrupted save successful", () => { expect(durableAttemptRows([{ ...durable, status: "Saving", completed_at: null }])[0].status).toBe("Unconfirmed"); });
   it("does not duplicate confirmed changes from the authoritative audit log", () => { expect(durableAttemptRows([{ ...durable, status: "Saved" }])).toEqual([]); });
+  it("groups save statuses so saved, pending and failed can be viewed apart", () => {
+    expect(["Saved", "Failed", "Unconfirmed", "Saving"].map((status) => matchesPriceHistoryFilter(status, "saved"))).toEqual([true, false, false, false]);
+    expect(["Saved", "Failed", "Unconfirmed", "Saving"].map((status) => matchesPriceHistoryFilter(status, "pending"))).toEqual([false, false, true, true]);
+    expect(["Saved", "Failed", "Unconfirmed", "Saving"].map((status) => matchesPriceHistoryFilter(status, "failed"))).toEqual([false, true, false, false]);
+    expect(["Saved", "Failed", "Unconfirmed", "Saving"].map((status) => matchesPriceHistoryFilter(status, "all"))).toEqual([true, true, true, true]);
+  });
+  it("counts each history row under exactly one status filter", () => {
+    const rows = [{ status: "Saved" }, { status: "Saved" }, { status: "Failed" }, { status: "Unconfirmed" }, { status: "Saving" }];
+    expect(priceHistoryCounts(rows)).toEqual({ all: 5, saved: 2, pending: 2, failed: 1 });
+  });
 });
