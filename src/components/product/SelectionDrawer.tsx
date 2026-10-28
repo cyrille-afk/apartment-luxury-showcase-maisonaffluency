@@ -94,6 +94,7 @@ export default function SelectionDrawer({
   brand = null,
   title = null,
   configuration = null,
+  dimensionsLabel = null,
   leadTime = null,
   priceLabel = null,
   netPriceLabel = null,
