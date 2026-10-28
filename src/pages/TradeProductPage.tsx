@@ -1319,9 +1319,8 @@ const TradeProductPage: React.FC = () => {
           ].filter(Boolean).map((s) => String(s)),
         });
         setDrawerRefreshKey((k) => k + 1);
-        setDrawerOpen(!felixSelection);
+        setDrawerOpen(true);
         if (felixSelection) {
-          window.dispatchEvent(new CustomEvent("concierge:stage", { detail: { openPanel: true } }));
           window.dispatchEvent(new CustomEvent("concierge:propose_tearsheet_proactive", { detail: { ...structuredClone(felixSelection), lockedAt: Date.now() } }));
         }
         toast({
