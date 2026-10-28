@@ -1,5 +1,9 @@
 import taxonomy from "../src/data/productTaxonomy.json" with { type: "json" };
 
+// Sign-in is an indexable public landing; registration redirects to the
+// application page, and password recovery must never be indexed.
+export const accountSitemapRoutes = [{ loc: "/trade/login", changefreq: "monthly", priority: "0.5" }];
+
 export const sitemapSlug = (label) => label.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
   .toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 

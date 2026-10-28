@@ -6,10 +6,10 @@ import { getLegacyProductHead } from "@/lib/pageHead.functions";
 
 export const Route = createFileRoute("/product_/$id")({
   loader: async ({ params }) => ({ seo: await getLegacyProductHead({ data: { id: params.id } }) }),
-  head: ({ loaderData }) => loaderData?.seo ? buildPageHead(loaderData.seo) : buildPageHead({
+  head: ({ loaderData, params }) => loaderData?.seo ? buildPageHead(loaderData.seo) : buildPageHead({
     title: "Product Collection — Maison Affluency",
     description: "Explore collectible furniture and lighting in Maison Affluency's curated collection of designers and ateliers.",
-    path: "/designers",
+    path: `/product/${params.id}`,
   }),
   component: () => (
     <Suspense fallback={<PageLoadingSkeleton />}><ProductPage /></Suspense>
