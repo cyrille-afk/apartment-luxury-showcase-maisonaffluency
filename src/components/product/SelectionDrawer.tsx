@@ -118,6 +118,11 @@ export default function SelectionDrawer({
   const [conciergeSent, setConciergeSent] = useState(false);
   const multiLine = Array.isArray(lines) && lines.length > 0;
   const quantity = quantityProp ?? localQty;
+  useEffect(() => {
+    if (!professionalWorkspace || !isOpen) return;
+    window.dispatchEvent(new CustomEvent("ma:product-workspace-open", { detail: true }));
+    return () => { window.dispatchEvent(new CustomEvent("ma:product-workspace-open", { detail: false })); };
+  }, [professionalWorkspace, isOpen]);
 
   const setQuantity = (q: number) => {
     setLocalQty(q);

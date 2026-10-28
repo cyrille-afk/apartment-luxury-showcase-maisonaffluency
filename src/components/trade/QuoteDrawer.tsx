@@ -56,6 +56,11 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
   const { clientSafe } = useClientSafeMode();
   const [items, setItems] = useState<QuoteItem[]>([]);
   const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    window.dispatchEvent(new CustomEvent("ma:product-workspace-open", { detail: true }));
+    return () => { window.dispatchEvent(new CustomEvent("ma:product-workspace-open", { detail: false })); };
+  }, [open]);
 
   useEffect(() => {
     if (!open || !quoteId) return;

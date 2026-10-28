@@ -39,6 +39,12 @@ export default function ProductPageContainer({
   const { slug: designerSlug, productSlug } = useParams<{ slug?: string; productSlug?: string }>();
   const { user, isTradeUser, isAdmin, isSuperAdmin, tradeStatus, rolesLoaded } = useAuth();
   const { clientSafe } = useClientSafeMode();
+  const [workspaceOpen, setWorkspaceOpen] = useState(false);
+  useEffect(() => {
+    const onWorkspace = (event: Event) => setWorkspaceOpen((event as CustomEvent<boolean>).detail);
+    window.addEventListener("ma:product-workspace-open", onWorkspace);
+    return () => window.removeEventListener("ma:product-workspace-open", onWorkspace);
+  }, []);
   const routeInsideTradePortal =
     isInsideTradePortal ?? /^\/trade(\/|$)/.test(pathname);
 
@@ -102,7 +108,7 @@ export default function ProductPageContainer({
   return (
     <ProductConfigProvider isInsideTradePortal={insideTradePortal}>
       <Suspense fallback={<PageLoadingSkeleton />}>
-        {insideTradePortal && !clientSafe ? <TradePortalDashboardLayout /> : <PublicEditorialLayout presentation={insideTradePortal && clientSafe} />}
+        {insideTradePortal && (!clientSafe || workspaceOpen) ? <TradePortalDashboardLayout /> : <PublicEditorialLayout presentation={insideTradePortal && clientSafe} />}
       </Suspense>
     </ProductConfigProvider>
   );
