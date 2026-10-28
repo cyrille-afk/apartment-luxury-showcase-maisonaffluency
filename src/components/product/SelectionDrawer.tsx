@@ -11,6 +11,7 @@ import {
   Send,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { drawerDimensionsBody } from "@/lib/drawerDimensions";
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -377,6 +378,16 @@ export default function SelectionDrawer({
                   {configuration}
                 </p>
               )}
+              {(() => {
+                if (!dimensionsLabel) return null;
+                const body = drawerDimensionsBody(dimensionsLabel);
+                if (configuration && body && configuration.includes(body)) return null;
+                return (
+                  <p className="mt-1.5 font-body text-xs leading-relaxed text-muted-foreground">
+                    {dimensionsLabel}
+                  </p>
+                );
+              })()}
               {leadTime && (
                 <p className="mt-1.5 font-body text-[11px] text-muted-foreground/80">
                   Lead time: {leadTime}
