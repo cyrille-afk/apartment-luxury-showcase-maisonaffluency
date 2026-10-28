@@ -11,6 +11,9 @@ describe("admin price history", () => {
   it("does not mistake photo edits for price changes", () => {
     expect(priceDifferences({ size_variants: [{ base: "Oak", price_cents: 499000, image_index: 0 }] }, { size_variants: [{ base: "Oak", price_cents: 499000, image_index: 2 }] })).toEqual([]);
   });
+  it("does not report new unpriced options as price changes", () => {
+    expect(priceDifferences({ size_variants: [] }, { size_variants: [{ base: "Travertine", price_cents: 0 }] })).toEqual([]);
+  });
   it("marks failed saves without inventing saved records", () => {
     const id = startPriceAttempt({ userId: "admin", product: "Chair", currency: "EUR", changes: [{ label: "Main price", before: 399000, after: 499000 }] });
     expect(getPriceAttempts().find((row) => row.id === id)?.status).toBe("Saving");

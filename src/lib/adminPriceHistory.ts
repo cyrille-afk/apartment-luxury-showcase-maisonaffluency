@@ -14,12 +14,12 @@ export function priceDifferences(before: PriceSnapshot, after: PriceSnapshot): P
   const changes: PriceDifference[] = [];
   for (const [field, label] of [["trade_price_cents", "Main price"], ["price_per_sqm_cents", "Price / m²"]] as const) {
     const oldValue = amount(before[field]); const newValue = amount(after[field]);
-    if (oldValue !== newValue) changes.push({ label, before: oldValue, after: newValue });
+    if ((oldValue ?? 0) !== (newValue ?? 0)) changes.push({ label, before: oldValue, after: newValue });
   }
   const oldVariants = variants(before); const newVariants = variants(after);
   for (const label of new Set([...oldVariants.keys(), ...newVariants.keys()])) {
     const oldValue = oldVariants.get(label) ?? null; const newValue = newVariants.get(label) ?? null;
-    if (oldValue !== newValue) changes.push({ label, before: oldValue, after: newValue });
+    if ((oldValue ?? 0) !== (newValue ?? 0)) changes.push({ label, before: oldValue, after: newValue });
   }
   return changes;
 }
