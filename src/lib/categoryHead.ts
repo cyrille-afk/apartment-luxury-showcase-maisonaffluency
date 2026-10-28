@@ -1,6 +1,8 @@
 import { categoryFromSlug, subcategoryFromSlugs } from "./categorySlugs";
 import { buildPageHead } from "./pageHead";
 import { seoDescription, seoTitle } from "./seoText";
+import { getCategoryHero } from "@/constants/categoryHeroes";
+import { toOgImage } from "./ogImage";
 
 export function categoryHeadData(category: string, subcategory: string | null, path: string) {
   const label = subcategory || category;
@@ -10,6 +12,7 @@ export function categoryHeadData(category: string, subcategory: string | null, p
       ? `Explore curated ${subcategory.toLowerCase()} from designers and ateliers in Maison Affluency's collectible ${category.toLowerCase()} collection.`
       : `Discover collectible ${category.toLowerCase()} from world-renowned designers and ateliers at Maison Affluency.`),
     path,
+    image: toOgImage(getCategoryHero(category, subcategory).image),
   };
 }
 
