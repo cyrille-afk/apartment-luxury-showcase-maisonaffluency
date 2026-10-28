@@ -1,8 +1,10 @@
 import { useClientSafeMode } from "@/lib/clientSafeMode";
+import RetailPrice from "@/components/product/RetailPrice";
 
 /** Retail and net are separate inputs: saved net snapshots are never retail. */
 export default function DrawerPricing({ retailLabel, netLabel }: { retailLabel?: string | null; netLabel?: string | null }) {
   const { clientSafe } = useClientSafeMode();
+  if (clientSafe) return <RetailPrice label={retailLabel} className="mt-2" />;
   return (
     <div className="mt-2 space-y-1 font-body text-xs">
       <p className="text-muted-foreground">Retail Price: <span className="font-medium text-foreground">{retailLabel || "Price upon Request"}</span></p>

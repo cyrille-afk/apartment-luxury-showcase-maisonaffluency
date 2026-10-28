@@ -17,6 +17,7 @@ import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { cn } from "@/lib/utils";
 import { setStickyCommerceDockHeight } from "@/lib/stickyCommerceDock";
+import RetailPrice from "@/components/product/RetailPrice";
 
 /**
  * Multi-tier product commerce CTA.
@@ -536,9 +537,9 @@ export default function ProductCommerceCta({
     >
       <div className="flex min-h-11 w-full items-center justify-between gap-3">
         <div className="mobile-product-commerce-summary min-w-0 flex-1">
-          <span className="font-display text-base leading-tight truncate block">
+          {clientSafe ? <RetailPrice label={retailLabel} /> : <span className="font-display text-base leading-tight truncate block">
             {clientSafe ? rrpLabel ?? "Price upon Request" : tradeApproved ? netLabel ?? rrpLabel ?? "Price upon Request" : rrpLabel ?? "Price upon Request"}
-          </span>
+          </span>}
           <span className="font-body text-[9px] uppercase tracking-[0.12em] text-muted-foreground truncate">Excl. shipping &amp; duties</span>
         </div>
         <Button type="button" onClick={handleMobilePrimary} disabled={placingOrder} className={cn(primaryBtn, "mobile-product-commerce-action h-11 shrink-0 w-auto px-5 whitespace-nowrap")}>
@@ -559,7 +560,7 @@ export default function ProductCommerceCta({
             Production lead time: {cleanLeadTime(leadTime)}
           </p>
         )}
-        {tradeApproved && displayNet ? (
+        {tradeApproved && clientSafe ? <RetailPrice label={retailLabel} /> : tradeApproved && displayNet ? (
           <PriceBlock rrpLabel={retailLabel} netLabel={displayNet} trade from={false} />
         ) : null}
 
