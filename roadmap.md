@@ -1,5 +1,10 @@
 # Roadmap
 
+## Presentation price protection
+- [ ] Add synchronized Presentation Mode controls beside product prices and at drawer headers.
+- [ ] Show retail-only client prices and omit trade values from presentation tearsheets and copied previews.
+- [ ] Verify toggle synchronization and document price protection.
+
 ## Trade order workspace
 - [x] Bypass public onboarding for authenticated Trade Studio orders using the professional session and existing checkout flow.
 - [x] Verify signed-in Saint Honoré order opens its configured basket with professional identity, no onboarding or browser errors; 11 tests cover Trade mobile/desktop and retained Public/Presentation intake.
