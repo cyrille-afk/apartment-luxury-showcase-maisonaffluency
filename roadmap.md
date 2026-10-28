@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Admin price history
-- [ ] Persist editor save attempts in admin-only database records; verify cross-session reads and atomic saved status.
+- [x] Persist editor save attempts in admin-only database records; verified failed/confirmed writes across independent sessions, atomic saved status and nine access checks without changing prices.
 - [x] Add saved price history from the existing admin-only audit log, including variant changes.
 - [x] Show current-session pending, failed and unconfirmed editor saves separately from confirmed history.
 - [x] Verify price differences, admin access and the history view with real saved records.
