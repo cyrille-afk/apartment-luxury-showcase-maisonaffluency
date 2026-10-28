@@ -4,6 +4,7 @@ import type { Database } from "@/integrations/supabase/types";
 import { toOgImage } from "@/lib/ogImage";
 import type { PageHeadInput } from "@/lib/pageHead";
 import { productSeoText, seoDescription, seoTitle } from "@/lib/seoText";
+import { formatDesignerDisplayName } from "@/lib/designerDisplayName";
 
 /**
  * Public-only lookups for server-rendered link previews. Uses the publishable
@@ -119,7 +120,7 @@ export const getProductHead = createServerFn({ method: "GET" })
       const { data: d } = await supabase.from("designers").select("id, name, display_name").eq("id", pick.designer_id).maybeSingle();
       designer = d;
     }
-    const maker = designer?.display_name || designer?.name || "";
+    const maker = formatDesignerDisplayName(designer?.name || designer?.display_name);
     const name = pick.title.replace(/\s+/g, " ").trim();
     const { title, description } = productSeoText({ name, maker, description: pick.description, materials: pick.materials });
     const path = data.designerSlug ? `/designers/${data.designerSlug}/${data.productSlug}` : `/products/${data.productSlug}`;
