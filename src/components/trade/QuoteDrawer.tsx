@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
 import { findQuoteFinishSwatches } from "@/lib/quoteFinishSwatches";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
+import { dimensionsFromVariantLabel } from "@/lib/drawerDimensions";
 import PresentationModeToggle from "./PresentationModeToggle";
 import DrawerPricing from "./DrawerPricing";
 
@@ -34,6 +35,7 @@ interface QuoteItem {
     currency: string;
     source_pick_id?: string | null;
     id?: string | null;
+    dimensions?: string | null;
   };
 }
 
@@ -305,6 +307,18 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
                       <span className="text-muted-foreground">Finish:</span> {item.variant_label}
                     </p>
                   )}
+                  {(() => {
+                    const isActive = activePriceSnapshot?.itemId === savedItem.id;
+                    const dims = isActive
+                      ? (activeDimensionsLabel || dimensionsFromVariantLabel(item.variant_label, item.product?.dimensions))
+                      : dimensionsFromVariantLabel(item.variant_label, item.product?.dimensions);
+                    if (!dims) return null;
+                    return (
+                      <p className="font-body text-[10px] text-foreground/80 mt-0.5 break-words">
+                        <span className="text-muted-foreground">Dimensions:</span> {dims}
+                      </p>
+                    );
+                  })()}
                   {(item.fabric?.name || item.fabric_upcharge_cents) && (
                     <p className="font-body text-[10px] text-foreground/80 mt-0.5 break-words">
                       <span className="text-muted-foreground">Fabric:</span>{" "}
