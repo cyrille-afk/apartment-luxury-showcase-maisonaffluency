@@ -44,7 +44,7 @@ Disallow: /shortlist/
 Disallow: /shared/
 Disallow: /api/
 Disallow: /trade/admin
-Disallow: /trade/login
+Disallow: /reset-password
 Disallow: /trade/ai-layout
 Disallow: /trade/admin/trade-review
 Disallow: /admin/trade-review

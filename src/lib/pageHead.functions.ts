@@ -29,14 +29,6 @@ const slugOf = (v: unknown) => {
 const slugify = (s: string) =>
   String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 
-const clamp = (s: string, max: number) => {
-  const t = s.replace(/\s+/g, " ").trim();
-  if (t.length <= max) return t;
-  const cut = t.slice(0, max - 1);
-  const sp = cut.lastIndexOf(" ");
-  return (sp > max * 0.6 ? cut.slice(0, sp) : cut).trimEnd() + "…";
-};
-
 /** Share-sized 1200×630 JPEG: Cloudinary transform, or Storage image rendering (originals can exceed WhatsApp's ~300KB limit). */
 function shareImage(src: string | null | undefined): string | null {
   if (!src || !/^https:\/\//.test(src)) return null;
@@ -69,6 +61,28 @@ export const getJournalHead = createServerFn({ method: "GET" })
   });
 
 type Pick = { slug: string | null; title: string; subtitle: string | null; image_url: string | null; description: string | null; materials: string | null; designer_id: string | null };
+
+export const getLegacyProductHead = createServerFn({ method: "GET" })
+  .inputValidator((input: { id: string }) => {
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(input?.id || "")) throw new Error("Invalid product id");
+    return input;
+  })
+  .handler(async ({ data }): Promise<PageHeadInput | null> => {
+    const client = publicClient();
+    if (!client) return null;
+    // Resolve only through public projections; never expose private Trade fields.
+    const { data: twin } = await client.from("trade_products_public_rrp").select("source_pick_id").eq("id", data.id).maybeSingle();
+    const { data: row } = await client.from("designer_curator_picks_public" as never)
+      .select("slug, title, subtitle, image_url, description, materials, designer_id")
+      .eq("id", twin?.source_pick_id || data.id).maybeSingle();
+    const pick = row as unknown as Pick | null;
+    if (!pick) return null;
+    const { data: designer } = pick.designer_id
+      ? await client.from("designers").select("name, display_name").eq("id", pick.designer_id).maybeSingle()
+      : { data: null };
+    const text = productSeoText({ name: pick.title, maker: designer?.display_name || designer?.name, description: pick.description, materials: pick.materials });
+    return { ...text, path: `/product/${data.id}`, image: shareImage(pick.image_url), type: "product" };
+  });
 
 export const getProductHead = createServerFn({ method: "GET" })
   .inputValidator((input: { designerSlug?: string; productSlug: string }) => ({

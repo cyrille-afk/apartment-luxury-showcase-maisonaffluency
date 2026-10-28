@@ -75,6 +75,7 @@ const STATIC_ROUTES = [
   { loc: "/journal", changefreq: "weekly", priority: "0.9" },
   { loc: "/contact", changefreq: "monthly", priority: "0.7" },
   { loc: "/trade-program", changefreq: "monthly", priority: "0.8" },
+  { loc: "/trade/login", changefreq: "monthly", priority: "0.5" },
   { loc: "/trade/spec-sheet", changefreq: "weekly", priority: "0.8" },
   { loc: "/new-in", changefreq: "weekly", priority: "0.9" },
   { loc: "/apartment-tour", changefreq: "monthly", priority: "0.8" },

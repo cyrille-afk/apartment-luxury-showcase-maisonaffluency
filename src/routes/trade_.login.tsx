@@ -15,7 +15,8 @@ export const Route = createFileRoute("/trade_/login")({
     { property: "og:description", content: "Sign in to your Trade account or request Google sign-in access from Maison Affluency." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },
-    { name: "robots", content: "noindex, nofollow" },
+    { name: "robots", content: "index, follow" },
+    { property: "og:url", content: "https://www.maisonaffluency.com/trade/login" },
   ] }),
   component: () => (
     <Suspense fallback={null}><TradeLogin /></Suspense>
