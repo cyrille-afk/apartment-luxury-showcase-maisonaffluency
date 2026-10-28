@@ -752,6 +752,14 @@ const TradeProductPage: React.FC = () => {
   const [drawerRefreshKey, setDrawerRefreshKey] = useState(0);
   const [drawerPriceSnapshot, setDrawerPriceSnapshot] = useState<{ itemId: string; retailLabel: string | null; netLabel: string | null; configuration?: string; imageUrl?: string | null; finishes?: { name: string; image_url: string }[] } | null>(null);
   const drawerPricesRef = useRef<{ retailLabel: string | null; netLabel: string | null }>({ retailLabel: null, netLabel: null });
+  // Reopen Co-Pilot after a reload if it was open for this product this session.
+  useEffect(() => {
+    if (!product?.id) return;
+    try {
+      const savedQuote = window.sessionStorage.getItem(`ma-copilot-open-v1:${product.id}`);
+      if (savedQuote) { setActiveQuoteId((cur) => cur || savedQuote); setDrawerOpen(true); }
+    } catch { /* noop */ }
+  }, [product?.id]);
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
   const [customRequestOpen, setCustomRequestOpen] = useState(false);
