@@ -41,6 +41,7 @@ import ActiveSwatchCaption from "@/components/product/ActiveSwatchCaption";
 import PicturedFinishesStrip from "@/components/product/PicturedFinishesStrip";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
 import CopyTearsheetLink from "@/components/trade/CopyTearsheetLink";
+import PresentationModeToggle from "@/components/trade/PresentationModeToggle";
 import { buildTradeCoverSheetPdf } from "@/lib/tradeCoverSheetPdf";
 import CadAssetsSection from "@/components/trade/CadAssetsSection";
 import Product3DViewer from "@/components/trade/Product3DViewer";
@@ -1568,6 +1569,7 @@ const TradeProductPage: React.FC = () => {
     const variantLabelParts = [selectedBase, selectedTop, selectedDualSize, selectedSingleSize]
       .filter(Boolean).map(String);
     if (variantLabelParts.length) params.set("variant", variantLabelParts.join(" · "));
+    if (!showTradePrice) params.set("presentation", "1");
     return `/trade/tearsheets?${params.toString()}`;
   };
 
@@ -2084,6 +2086,7 @@ const TradeProductPage: React.FC = () => {
 
     return (
       <div>
+        <PresentationModeToggle />
         {/* Headline price — identical to the designer-side trade sheet:
             net trade price with the struck retail rate underneath. */}
          <p data-trade-sensitive={showTradePrice ? "" : undefined} className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
@@ -2092,9 +2095,9 @@ const TradeProductPage: React.FC = () => {
               {prefix.trim()}
             </span>
           )}
-           <span className="text-foreground align-middle">{showTradePrice ? netLabel : priceLabels.clientLabel}</span>
+           <span className="text-foreground align-middle">{showTradePrice ? netLabel : retailLabel}</span>
           <span className="ml-2 align-middle font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-             {showTradePrice ? "Net Trade Price" : "Client Price"}
+             {showTradePrice ? "Net Trade Price" : "Retail Price"}
           </span>
         </p>
          {showTradePrice && <span data-client-placeholder aria-hidden="true" className="h-5 w-28 animate-pulse bg-muted/60" />}
@@ -3251,15 +3254,16 @@ const TradeProductPage: React.FC = () => {
 
                 {priceLabels && (
                   <div className="flex flex-col gap-1">
+                    <PresentationModeToggle />
                      {showTradePrice && priceLabels.retailLabel && (
                        <p data-trade-sensitive className="font-body text-[11px] tracking-[0.04em] text-muted-foreground line-through decoration-muted-foreground/50">
                         Retail: {priceLabels.prefix}{priceLabels.retailLabel}
                       </p>
                     )}
                      <p data-trade-sensitive={showTradePrice ? "" : undefined} className="font-display text-2xl leading-none text-foreground">
-                       {priceLabels.prefix}{showTradePrice ? priceLabels.netLabel : priceLabels.clientLabel}{" "}
+                       {priceLabels.prefix}{showTradePrice ? priceLabels.netLabel : priceLabels.retailLabel}{" "}
                       <span className="font-body text-xs tracking-widest uppercase text-muted-foreground">
-                         {showTradePrice ? "Net Trade Price" : "Client Price"}
+                         {showTradePrice ? "Net Trade Price" : "Retail Price"}
                       </span>
                     </p>
                      {showTradePrice && <span data-client-placeholder aria-hidden="true" className="h-6 w-32 animate-pulse bg-muted/60" />}
@@ -3472,7 +3476,7 @@ const TradeProductPage: React.FC = () => {
                       },
                       locked: true,
                     });
-                    navigate(`/trade/tearsheets?${params.toString()}`);
+                    navigate(buildTearsheetHref());
                   }}
                   className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-none font-body text-[10px] uppercase tracking-[0.18em] transition-colors border border-border bg-background text-neutral-900 hover:bg-muted/60 w-full"
                 >

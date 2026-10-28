@@ -6,6 +6,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import { supabase } from "@/integrations/supabase/client";
 import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
 import { findQuoteFinishSwatches } from "@/lib/quoteFinishSwatches";
+import { useClientSafeMode } from "@/lib/clientSafeMode";
+import PresentationModeToggle from "./PresentationModeToggle";
 
 interface QuoteItem {
   id: string;
@@ -49,6 +51,7 @@ const formatPrice = (cents: number, currency: string) => {
 };
 
 const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawerProps) => {
+  const { clientSafe } = useClientSafeMode();
   const [items, setItems] = useState<QuoteItem[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -206,6 +209,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-[380px] sm:w-[420px] flex flex-col">
         <SheetHeader>
+          <PresentationModeToggle />
           <SheetTitle className="font-display text-lg flex items-center gap-2">
             <ShoppingCart className="h-4 w-4" />
             Active Quote
@@ -293,8 +297,8 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
                     <p className="font-body text-[10px] text-foreground/80 mt-0.5 break-words">
                       <span className="text-muted-foreground">Fabric:</span>{" "}
                       {item.fabric?.name || "Selected"}
-                      {item.fabric?.tier ? ` · CAT ${item.fabric.tier}` : ""}
-                      {item.fabric_upcharge_cents ? (
+                      {!clientSafe && item.fabric?.tier ? ` · CAT ${item.fabric.tier}` : ""}
+                      {!clientSafe && item.fabric_upcharge_cents ? (
                         <>
                           {" — "}
                           <span className="text-primary font-medium">
@@ -311,6 +315,8 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
                       Qty: {item.quantity}
                     </span>
                     {(() => {
+                      // Saved unit prices may be net snapshots. Never relabel them as retail.
+                      if (clientSafe) return <span className="font-body text-[10px] text-muted-foreground">Price upon Request</span>;
                       const displayCents = item.unit_price_cents ?? item.product?.trade_price_cents ?? item.product?.rrp_price_cents;
                       const displayCurrency = item.unit_price_cents != null
                         ? (item.unit_price_currency || item.product?.currency || "EUR")
@@ -318,7 +324,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
 
                       if (displayCents) {
                         return (
-                          <div className="flex flex-col">
+                          <div data-trade-sensitive className="flex flex-col">
                             <span className="font-body text-[10px] text-primary font-medium">
                               {formatPrice(displayCents, displayCurrency || "EUR")}
                             </span>

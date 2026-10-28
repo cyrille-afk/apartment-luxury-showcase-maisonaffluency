@@ -16,6 +16,7 @@ import { cachePendingBespokeUpload } from "@/lib/pendingBespokeCache";
 import { isReturningPrivateClient, rememberedPrivateClients, rememberPrivateClient } from "@/lib/returningPrivateClient";
 import PrivateClientWelcome from "./PrivateClientWelcome";
 import { setCartContact } from "@/lib/cartTracking";
+import PresentationModeToggle from "@/components/trade/PresentationModeToggle";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -522,6 +523,7 @@ export default function OrderIntakeSheet({
 
         <div className="flex shrink-0 items-center justify-between px-6 pb-3 pt-4 md:px-8 md:pt-6">
           <div className="flex items-center gap-2">
+            {isTradeAuthorized && <PresentationModeToggle />}
             {step > 0 && (
               <button
                 type="button"
