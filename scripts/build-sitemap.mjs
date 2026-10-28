@@ -14,6 +14,7 @@ import { writeFile, mkdir, readFile } from "node:fs/promises";
 import fs from "node:fs";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
+import { categorySitemapRoutes, readSitemapPages } from "./sitemap-data.mjs";
 
 const ROOT = process.cwd();
 
@@ -32,7 +33,7 @@ try {
 // TanStack Start serves static files from dist/client; fall back to dist for older layouts.
 const DIST = fs.existsSync(path.join(ROOT, "dist", "client")) ? path.join(ROOT, "dist", "client") : path.join(ROOT, "dist");
 // Single global production origin. Every <loc> in the tree is built from this
-// exact prefix — never a relative path, never a staging/preview host, never www.
+// exact prefix — never a relative path, never a staging/preview host, always www.
 const BASE_URL = "https://www.maisonaffluency.com";
 
 // ----- Domain lock ----------------------------------------------------------
@@ -78,6 +79,7 @@ const STATIC_ROUTES = [
   { loc: "/new-in", changefreq: "weekly", priority: "0.9" },
   { loc: "/apartment-tour", changefreq: "monthly", priority: "0.8" },
   { loc: "/studios", changefreq: "weekly", priority: "0.8" },
+  ...categorySitemapRoutes(),
 ];
 
 // ----- XML helpers ----------------------------------------------------------
@@ -133,13 +135,12 @@ async function loadDynamicRoutes() {
 
   // Designers (same filter as prerender-routes.mjs)
   try {
-    const { data, error } = await supabase
+    const data = await readSitemapPages((from, to) => supabase
       .from("designers")
       .select("slug, updated_at")
       .eq("is_published", true)
       .eq("trade_only", false)
-      .not("slug", "is", null);
-    if (error) throw error;
+      .not("slug", "is", null).order("slug").range(from, to));
     for (const d of data ?? []) {
       if (!d.slug) continue;
       routes.push({
@@ -151,18 +152,17 @@ async function loadDynamicRoutes() {
     }
     console.log(`[sitemap] designers: ${data?.length ?? 0}`);
   } catch (err) {
-    console.warn(`[sitemap] designers query failed (skipped): ${err?.message ?? err}`);
+    throw new Error(`[sitemap] designers query failed: ${err?.message ?? err}`);
   }
 
   // Journal articles (same filter as prerender-routes.mjs)
   try {
-    const { data, error } = await supabase
+    const data = await readSitemapPages((from, to) => supabase
       .from("journal_articles")
       .select("slug, updated_at")
       .eq("is_published", true)
       .not("published_at", "is", null)
-      .not("slug", "is", null);
-    if (error) throw error;
+      .not("slug", "is", null).order("slug").range(from, to));
     for (const a of data ?? []) {
       if (!a.slug) continue;
       routes.push({
@@ -174,17 +174,16 @@ async function loadDynamicRoutes() {
     }
     console.log(`[sitemap] journal: ${data?.length ?? 0}`);
   } catch (err) {
-    console.warn(`[sitemap] journal query failed (skipped): ${err?.message ?? err}`);
+    throw new Error(`[sitemap] journal query failed: ${err?.message ?? err}`);
   }
 
   // Studios (public directory pages, not prerendered but indexable)
   try {
-    const { data, error } = await supabase
+    const data = await readSitemapPages((from, to) => supabase
       .from("featured_studios_public")
       .select("slug, updated_at")
       .eq("is_published", true)
-      .not("slug", "is", null);
-    if (error) throw error;
+      .not("slug", "is", null).order("slug").range(from, to));
     for (const s of data ?? []) {
       if (!s.slug) continue;
       routes.push({
@@ -196,7 +195,7 @@ async function loadDynamicRoutes() {
     }
     console.log(`[sitemap] studios: ${data?.length ?? 0}`);
   } catch (err) {
-    console.warn(`[sitemap] studios query failed (skipped): ${err?.message ?? err}`);
+    throw new Error(`[sitemap] studios query failed: ${err?.message ?? err}`);
   }
 
   // Trade products (public "Price upon Request" pages)
@@ -240,7 +239,7 @@ async function loadDynamicRoutes() {
     }
     console.log(`[sitemap] products: ${products.length}`);
   } catch (err) {
-    console.warn(`[sitemap] products query failed (skipped): ${err?.message ?? err}`);
+    throw new Error(`[sitemap] products query failed: ${err?.message ?? err}`);
   }
 
   return routes;

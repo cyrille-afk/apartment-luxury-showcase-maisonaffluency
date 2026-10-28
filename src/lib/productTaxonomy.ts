@@ -1,28 +1,7 @@
-export const CATEGORY_ORDER = ["Tables", "Seating", "Lighting", "Bedroom", "Storage", "Rugs", "Décor"];
+import taxonomy from "@/data/productTaxonomy.json";
 
-export const SUBCATEGORY_MAP: Record<string, string[]> = {
-  Tables: ["Coffee Tables", "Consoles", "Desks", "Dining Tables", "Side Tables"],
-  Seating: ["Armchairs", "Daybeds & Benches", "Chairs", "Ottomans & Stools", "Sofas"],
-  Lighting: ["Ceiling Lights", "Floor Lights", "Table Lights", "Wall Lights"],
-  Bedroom: ["Bedding", "Beds", "Bedside Tables", "Sofa-Beds"],
-  Storage: ["Bars", "Bookcases", "Buffets, Cabinets And Sideboards"],
-  Rugs: ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"],
-  Décor: [
-    "Books",
-    "Boxes",
-    "Candle Holders",
-    "Cushions & Throws",
-    "Decorative Objects",
-    "Desk Accessories",
-    "Folding Screens & Window Décor",
-    "Magazine Holders",
-    "Mirrors",
-    "Tableware & Linens",
-    "Trays & Change Trays",
-    "Vases & Vessels",
-    "Wall Décor",
-  ],
-};
+export const CATEGORY_ORDER = taxonomy.categories;
+export const SUBCATEGORY_MAP: Record<string, string[]> = taxonomy.subcategories;
 
 
 // Map non-canonical category values to canonical taxonomy labels
