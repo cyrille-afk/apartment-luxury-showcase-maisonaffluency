@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { priceDifferences, priceValue, startPriceAttempt, finishPriceAttempt, getPriceAttempts } from "./adminPriceHistory";
+import { priceDifferences, priceValue, durableAttemptRows, startPriceAttempt, finishPriceAttempt, getPriceAttempts, type DurablePriceAttempt } from "./adminPriceHistory";
 describe("admin price history", () => {
   it("records previous and new main prices in cents", () => {
     expect(priceDifferences({ trade_price_cents: 399000 }, { trade_price_cents: 499000 })).toEqual([{ label: "Main price", before: 399000, after: 499000 }]);
@@ -23,4 +23,10 @@ describe("admin price history", () => {
     expect(getPriceAttempts().find((row) => row.id === id)).toBeUndefined();
   });
   it("does not render missing prices as free", () => { expect(priceValue(0, "EUR")).toBe("Price upon Request"); });
+  const durable: DurablePriceAttempt = { id: "persisted", user_id: "admin", product_name: "Chair", created_at: "2026-10-28T02:13:00Z", completed_at: "2026-10-28T02:13:01Z", status: "Failed", old_data: { currency: "EUR", trade_price_cents: 399000 }, new_data: { currency: "EUR", trade_price_cents: 499000 } };
+  it("restores failed values and server timestamps without session state", () => {
+    expect(durableAttemptRows(JSON.parse(JSON.stringify([durable])))).toEqual([{ id: "persisted", userId: "admin", product: "Chair", currency: "EUR", timestamp: "2026-10-28T02:13:01Z", status: "Failed", changes: [{ label: "Main price", before: 399000, after: 499000 }] }]);
+  });
+  it("never calls an interrupted save successful", () => { expect(durableAttemptRows([{ ...durable, status: "Saving", completed_at: null }])[0].status).toBe("Unconfirmed"); });
+  it("does not duplicate confirmed changes from the authoritative audit log", () => { expect(durableAttemptRows([{ ...durable, status: "Saved" }])).toEqual([]); });
 });

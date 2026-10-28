@@ -1,4 +1,4 @@
-export type PriceSnapshot = { title?: string; product_name?: string; currency?: string; trade_price_cents?: number | null; price_per_sqm_cents?: number | null; size_variants?: unknown };
+export type PriceSnapshot = { title?: string; product_name?: string; currency?: string; price_prefix?: string | null; trade_price_cents?: number | null; price_per_sqm_cents?: number | null; size_variants?: unknown };
 export type PriceDifference = { label: string; before: number | null; after: number | null };
 const amount = (value: unknown): number | null => typeof value === "number" && Number.isFinite(value) ? value : null;
 function variants(snapshot: PriceSnapshot) {
@@ -45,4 +45,15 @@ export function startPriceAttempt(attempt: Omit<PriceAttempt, "id" | "timestamp"
 export function finishPriceAttempt(id: string, status: "Saved" | "Failed" | "Unconfirmed") {
   attempts = status === "Saved" ? attempts.filter((row) => row.id !== id) : attempts.map((row) => row.id === id ? { ...row, status } : row);
   emit();
+}
+export type DurablePriceAttempt = { id: string; user_id: string; product_name: string; created_at: string; completed_at: string | null; status: "Saving" | "Saved" | "Failed" | "Unconfirmed"; old_data: PriceSnapshot; new_data: PriceSnapshot };
+export function durableAttemptRows(records: DurablePriceAttempt[]) {
+  return records.filter((row) => row.status !== "Saved").map((row) => ({
+    id: row.id, userId: row.user_id, product: row.product_name,
+    currency: row.new_data.currency ?? row.old_data.currency ?? "EUR",
+    timestamp: row.completed_at ?? row.created_at,
+    // A disconnected browser cannot establish whether an unfinished request committed.
+    status: row.status === "Saving" ? "Unconfirmed" as const : row.status,
+    changes: priceDifferences(row.old_data, row.new_data),
+  }));
 }
