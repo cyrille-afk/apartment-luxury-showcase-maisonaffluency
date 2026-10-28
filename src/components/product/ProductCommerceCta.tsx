@@ -6,6 +6,7 @@ import { Link, useLocation, useNavigate } from "@/lib/router-compat";
 import { getCart, shouldUseFullPageCart, useCart, formatMoney, cartSubtotalCents, setQuantity as setCartQuantity, removeFromCart } from "@/lib/cart";
 import { Loader2, Minus, Plus } from "lucide-react";
 import SelectionDrawer, { type PaymentMethod } from "@/components/product/SelectionDrawer";
+import { dimensionsFromVariantLabel } from "@/lib/drawerDimensions";
 import BespokeConfigurationDialog from "@/components/product/BespokeConfigurationDialog";
 import OrderIntakeSheet, { type OrderIntakeDetails } from "@/components/product/OrderIntakeSheet";
 import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
@@ -637,7 +638,7 @@ export default function ProductCommerceCta({
           professionalWorkspace={isTradeWorkspace}
           isOpen={miniCartOpen}
           onClose={() => setMiniCartOpen(false)}
-          lines={cartItems.length > 1 ? cartItems.map((item) => ({ key: item.key, brand: item.designerName, title: item.title, configuration: item.finishLabel, imageUrl: item.imageUrl, quantity: item.quantity, priceLabel: item.unitPriceCents > 0 ? formatMoney(item.unitPriceCents * item.quantity, item.currency) : "Price upon Request", netPriceLabel: isTradeWorkspace && item.unitPriceCents > 0 ? formatMoney((item.netUnitPriceCents ?? apply(item.unitPriceCents)) * item.quantity, item.currency) : null, leadTime: item.leadTime })) : undefined}
+          lines={cartItems.length > 1 ? cartItems.map((item) => ({ key: item.key, brand: item.designerName, title: item.title, configuration: item.finishLabel, dimensionsLabel: dimensionsFromVariantLabel(item.finishLabel), imageUrl: item.imageUrl, quantity: item.quantity, priceLabel: item.unitPriceCents > 0 ? formatMoney(item.unitPriceCents * item.quantity, item.currency) : "Price upon Request", netPriceLabel: isTradeWorkspace && item.unitPriceCents > 0 ? formatMoney((item.netUnitPriceCents ?? apply(item.unitPriceCents)) * item.quantity, item.currency) : null, leadTime: item.leadTime })) : undefined}
           onLineQuantityChange={setCartQuantity}
           onRemoveLine={removeFromCart}
           subtotalLabel={cartItems.length > 1 ? formatMoney(cartSubtotalCents(cartItems), cartItems[0]?.currency) : undefined}
@@ -646,6 +647,7 @@ export default function ProductCommerceCta({
           brand={designerName}
           title={productTitle}
           configuration={orderFinishLabel || (selectedFinishes.length ? selectedFinishes.join(" / ") : null)}
+          dimensionsLabel={dimensionsLabel}
           leadTime={leadTime}
           priceLabel={
             quoteOnlySelection ? "Price upon Request" : retailLabel || rrpLabel || null
