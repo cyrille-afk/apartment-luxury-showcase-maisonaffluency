@@ -1,4 +1,5 @@
 import { absoluteUrl } from "@/config/site";
+import { seoDescription, seoText } from "@/lib/seoText";
 
 /**
  * Server-rendered social preview tags (WhatsApp, LinkedIn, Slack read only the
@@ -15,6 +16,8 @@ export type PageHeadInput = {
 };
 
 export function buildPageHead({ title, description, path, image, imageAlt, type = "website" }: PageHeadInput) {
+  title = seoText(title, 60);
+  description = seoDescription(description, "Explore the curated furniture and design collection at Maison Affluency.");
   const url = absoluteUrl(path);
   const meta: Array<Record<string, string>> = [
     { title },

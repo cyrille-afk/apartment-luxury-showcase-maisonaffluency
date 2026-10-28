@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { toOgImage } from "@/lib/ogImage";
 import type { PageHeadInput } from "@/lib/pageHead";
+import { productSeoText, seoDescription, seoTitle } from "@/lib/seoText";
 
 /**
  * Public-only lookups for server-rendered link previews. Uses the publishable
@@ -56,10 +57,10 @@ export const getJournalHead = createServerFn({ method: "GET" })
       .eq("is_published", true)
       .maybeSingle();
     if (!a) return null;
-    const title = `${clamp(a.title || "Journal", 50)} — Maison Affluency`;
+    const title = seoTitle(a.title || "Journal");
     return {
       title,
-      description: clamp(a.excerpt || "Design stories and curatorial insights from the Maison Affluency Journal.", 160),
+      description: seoDescription(a.excerpt, "Design stories and curatorial insights from the Maison Affluency Journal."),
       path: `/journal/${a.slug}`,
       image: shareImage(a.cover_image_url),
       imageAlt: a.title || undefined,
@@ -106,11 +107,7 @@ export const getProductHead = createServerFn({ method: "GET" })
     }
     const maker = designer?.display_name || designer?.name || "";
     const name = pick.title.replace(/\s+/g, " ").trim();
-    const title = `${name}${maker ? ` by ${maker}` : ""} — Maison Affluency`;
-    const description = clamp(
-      pick.description || `${name}${maker ? ` by ${maker}` : ""}. ${pick.materials || "Collectible design at Maison Affluency."}`,
-      155,
-    );
+    const { title, description } = productSeoText({ name, maker, description: pick.description, materials: pick.materials });
     const path = data.designerSlug ? `/designers/${data.designerSlug}/${data.productSlug}` : `/products/${data.productSlug}`;
     return { title, description, path, image: shareImage(pick.image_url), imageAlt: title, type: "product" };
   });

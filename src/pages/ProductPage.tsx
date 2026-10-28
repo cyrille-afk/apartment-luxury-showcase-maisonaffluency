@@ -14,6 +14,8 @@ import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLin
 import { looksLikeDimension } from "@/lib/rugPricing";
 import LegacyRouteRedirect from "@/components/LegacyRouteRedirect";
 import NotFound from "@/pages/NotFound";
+import { productSeoText } from "@/lib/seoText";
+import { toOgImage } from "@/lib/ogImage";
 
 const specIcon = (symbol: string, className = "") => (
   <SpecGlyph symbol={symbol} className={className} />
@@ -123,10 +125,11 @@ const ProductPage = () => {
   const hasMultipleImages = allImages.length > 1;
 
   const canonicalUrl = absoluteUrl(location.pathname);
-  const pageTitle = `${product.product_name} by ${product.brand_name} — Maison Affluency`;
-  const pageDescription = product.description
-    ? product.description.slice(0, 155)
-    : `Discover ${product.product_name} by ${product.brand_name}. ${product.materials ? `Crafted in ${product.materials}.` : ""} Available through Maison Affluency's curated collection.`;
+  const { title: pageTitle, description: pageDescription } = productSeoText({
+    name: product.product_name, maker: product.brand_name,
+    description: product.description, materials: product.materials,
+  });
+  const shareImage = allImages[0] && /^https:\/\//.test(allImages[0]) ? toOgImage(allImages[0]) : null;
 
   // JSON-LD Product schema
   const jsonLd = {
@@ -171,7 +174,8 @@ const ProductPage = () => {
         <meta property="og:description" content={pageDescription} />
         <meta property="og:type" content="product" />
         <meta property="og:url" content={canonicalUrl} />
-        {allImages[0] && <meta property="og:image" content={allImages[0]} />}
+        {shareImage && <meta property="og:image" content={shareImage} />}
+        {shareImage && <meta name="twitter:image" content={shareImage} />}
         <meta name="twitter:card" content="summary_large_image" />
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
         <script type="application/ld+json">{JSON.stringify(breadcrumbLd)}</script>
