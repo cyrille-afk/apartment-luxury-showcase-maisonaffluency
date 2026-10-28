@@ -79,6 +79,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { normalizeFinishOption } from "@/lib/finishNormalization";
 import StudioSaveButton from "@/components/product/StudioSaveButton";
 import PresentationModeToggle from "@/components/trade/PresentationModeToggle";
+import RetailPrice from "@/components/product/RetailPrice";
 import {
   PublicSpecTable,
   TradeExclusiveCard,
@@ -2843,8 +2844,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                       </div>
                     ) : displayRrpLabel ? (
                       <div data-felix-target={presentation ? "client-view-product-price" : undefined} className="mt-6">
-                        {presentation && <span className="font-body text-[10px] uppercase text-muted-foreground">Retail Price</span>}
-                        <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
+                        {presentation ? <RetailPrice label={displayRrpLabel} /> : <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
                           {(() => {
                             const spaceIdx = displayRrpLabel.indexOf(" ");
                             if (spaceIdx === -1) return <span className="text-foreground">{displayRrpLabel}</span>;
@@ -2857,7 +2857,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                               </>
                             );
                           })()}
-                        </p>
+                        </p>}
                         {isTradeUnverifiedView && (
                           <p className="mt-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-amber-600">
                             Trade Program Verification Pending

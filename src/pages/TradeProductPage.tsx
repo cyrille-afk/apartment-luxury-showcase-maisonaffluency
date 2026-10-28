@@ -42,6 +42,7 @@ import PicturedFinishesStrip from "@/components/product/PicturedFinishesStrip";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
 import CopyTearsheetLink from "@/components/trade/CopyTearsheetLink";
 import PresentationModeToggle from "@/components/trade/PresentationModeToggle";
+import RetailPrice from "@/components/product/RetailPrice";
 import { buildTradeCoverSheetPdf } from "@/lib/tradeCoverSheetPdf";
 import CadAssetsSection from "@/components/trade/CadAssetsSection";
 import Product3DViewer from "@/components/trade/Product3DViewer";
@@ -2127,7 +2128,7 @@ const TradeProductPage: React.FC = () => {
         <PresentationModeToggle />
         {/* Headline price — identical to the designer-side trade sheet:
             net trade price with the struck retail rate underneath. */}
-         <p data-trade-sensitive={showTradePrice ? "" : undefined} className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
+          {!showTradePrice ? <RetailPrice label={`${prefix}${retailLabel}`} /> : <p data-trade-sensitive className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
           {prefix && (
             <span className="text-muted-foreground text-[11px] uppercase tracking-[0.22em] align-middle mr-2">
               {prefix.trim()}
@@ -2137,7 +2138,7 @@ const TradeProductPage: React.FC = () => {
           <span className="ml-2 align-middle font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
              {showTradePrice ? "Net Trade Price" : "Retail Price"}
           </span>
-        </p>
+        </p>}
          {showTradePrice && <span data-client-placeholder aria-hidden="true" className="h-5 w-28 animate-pulse bg-muted/60" />}
          {showTradePrice && retailLabel && (
            <p data-trade-sensitive className="mt-1 font-body text-[11px] tracking-[0.04em] text-muted-foreground">
@@ -3298,12 +3299,12 @@ const TradeProductPage: React.FC = () => {
                         Retail: {priceLabels.prefix}{priceLabels.retailLabel}
                       </p>
                     )}
-                     <p data-trade-sensitive={showTradePrice ? "" : undefined} className="font-display text-2xl leading-none text-foreground">
+                     {!showTradePrice ? <RetailPrice label={`${priceLabels.prefix}${priceLabels.retailLabel}`} /> : <p data-trade-sensitive className="font-display text-2xl leading-none text-foreground">
                        {priceLabels.prefix}{showTradePrice ? priceLabels.netLabel : priceLabels.retailLabel}{" "}
                       <span className="font-body text-xs tracking-widest uppercase text-muted-foreground">
                          {showTradePrice ? "Net Trade Price" : "Retail Price"}
                       </span>
-                    </p>
+                    </p>}
                      {showTradePrice && <span data-client-placeholder aria-hidden="true" className="h-6 w-32 animate-pulse bg-muted/60" />}
                   </div>
                 )}

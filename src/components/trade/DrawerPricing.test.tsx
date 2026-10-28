@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, expect, it } from "vitest";
 import DrawerPricing from "./DrawerPricing";
 import PresentationModeToggle from "./PresentationModeToggle";
@@ -21,4 +21,17 @@ it("never substitutes a saved net snapshot for unknown retail in Presentation", 
   render(<DrawerPricing netLabel="€20,340" />);
   expect(screen.queryByText("€20,340")).toBeNull();
   expect(screen.getByText("Price upon Request")).toBeTruthy();
+});
+it("one toggle removes net amounts from every active workspace summary together", () => {
+  setClientSafeMode(false);
+  render(<><PresentationModeToggle /><section aria-label="Line"><DrawerPricing retailLabel="€22,600" netLabel="€20,340" /></section><section aria-label="Summary"><DrawerPricing retailLabel="€45,200" netLabel="€40,680" /></section></>);
+  const line = within(screen.getByRole("region", { name: "Line" }));
+  const summary = within(screen.getByRole("region", { name: "Summary" }));
+  expect(line.getByText("€20,340")).toBeTruthy();
+  expect(summary.getByText("€40,680")).toBeTruthy();
+  fireEvent.click(screen.getByRole("switch", { name: "Presentation Mode" }));
+  expect(line.queryByText("€20,340")).toBeNull();
+  expect(summary.queryByText("€40,680")).toBeNull();
+  expect(line.getByText("€22,600")).toBeTruthy();
+  expect(summary.getByText("€45,200")).toBeTruthy();
 });
