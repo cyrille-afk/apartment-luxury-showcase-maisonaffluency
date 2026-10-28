@@ -750,7 +750,7 @@ const TradeProductPage: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeQuoteId, setActiveQuoteId] = useState<string | null>(null);
   const [drawerRefreshKey, setDrawerRefreshKey] = useState(0);
-  const [drawerPriceSnapshot, setDrawerPriceSnapshot] = useState<{ itemId: string; retailLabel: string | null; netLabel: string | null } | null>(null);
+  const [drawerPriceSnapshot, setDrawerPriceSnapshot] = useState<{ itemId: string; retailLabel: string | null; netLabel: string | null; configuration?: string; imageUrl?: string | null; finishes?: { name: string; image_url: string }[] } | null>(null);
   const drawerPricesRef = useRef<{ retailLabel: string | null; netLabel: string | null }>({ retailLabel: null, netLabel: null });
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
@@ -1116,7 +1116,11 @@ const TradeProductPage: React.FC = () => {
         // and pre-fill shipping (CBM / kg / mode / origin country) from the
         // catalogue so the per-line shipping estimator is accurate from day one.
         if (itemId) {
-          setDrawerPriceSnapshot({ itemId: String(itemId), ...selectedDrawerPrices });
+          setDrawerPriceSnapshot({ itemId: String(itemId), ...selectedDrawerPrices,
+            configuration: felixSelection?.finishes?.map((finish) => `${finish.label}: ${finish.name}`).join(" · "),
+            imageUrl: images[galleryActiveIndex ?? 0] || resolvedImageUrl,
+            finishes: felixSelection?.finishes?.filter((finish) => !!finish.imageUrl).map((finish) => ({ name: finish.name, image_url: finish.imageUrl || "" })),
+          });
           const patch: any = {};
           if (variantLabel) patch.variant_label = variantLabel;
           // Ensure the finish-specific image sticks even when the RPC merged
