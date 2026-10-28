@@ -4,6 +4,7 @@ import { CldPicture } from "@/components/ui/CldPicture";
 import { Button } from "@/components/ui/button";
 import { useParams, useNavigate, Link, useLocation, Navigate } from "@/lib/router-compat";
 import { absoluteUrl } from "@/config/site";
+import { productSeoText } from "@/lib/seoText";
 import { Helmet } from "react-helmet-async";
 import { Heart, Pin, FileText, Layers, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft, Truck, Loader2, Award, Compass } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -2382,9 +2383,10 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
       {(() => {
         const canonical = absoluteUrl(location.pathname);
         const ogImg = toOgImage(product.image_url || images[0] || null);
-        const desc =
-          (product.description?.replace(/\s+/g, " ").trim().slice(0, 155)) ||
-          `${product.title} by ${designerDisplay}. ${product.materials || "Collectible design at Maison Affluency."}`.slice(0, 155);
+        const { title: metaTitle, description: desc } = productSeoText({
+          name: product.title, maker: designerDisplay,
+          description: product.description, materials: product.materials,
+        });
         const ldDims = parseDimensions(product.dimensions);
 
         // ---- Offer ---------------------------------------------------------
@@ -2442,11 +2444,11 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
         return (
           <Helmet key={location.pathname}>
             <meta name="robots" content="index, follow" />
-            <title>{pageTitle} — Maison Affluency</title>
+            <title>{metaTitle}</title>
             <meta name="description" content={desc} />
             <meta property="og:type" content="product" />
             <meta property="og:site_name" content="Maison Affluency" />
-            <meta property="og:title" content={`${pageTitle} — Maison Affluency`} />
+            <meta property="og:title" content={metaTitle} />
             <meta property="og:description" content={desc} />
             <meta property="og:url" content={canonical} />
             <meta property="og:image" content={ogImg} />
@@ -2454,7 +2456,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
             <meta property="og:image:height" content="630" />
             <meta property="og:image:alt" content={`${product.title} by ${designerDisplay}`} />
             <meta name="twitter:card" content="summary_large_image" />
-            <meta name="twitter:title" content={`${pageTitle} — Maison Affluency`} />
+            <meta name="twitter:title" content={metaTitle} />
             <meta name="twitter:description" content={desc} />
             <meta name="twitter:image" content={ogImg} />
             <script type="application/ld+json">{JSON.stringify(productLd)}</script>

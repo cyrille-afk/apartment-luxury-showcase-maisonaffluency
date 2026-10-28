@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef, useCallback, lazy, Suspense } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { Helmet } from "react-helmet-async";
 import Hero from "@/components/Hero";
 import Navigation from "@/components/Navigation";
 import useScrollDepthTracking from "@/hooks/useScrollDepthTracking";
@@ -437,10 +436,6 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
 
   return (
     <>
-      <Helmet>
-        <title>Maison Affluency | Luxury Furniture &amp; Collectible Design</title>
-        <meta name="description" content="Discover exceptional collectible furniture, bespoke interiors, and contemporary design by world-renowned designers and ateliers. Based in Singapore." />
-      </Helmet>
       {showScrollProgress && showOverlays && (
         <Suspense fallback={null}>
           <ScrollProgress />

@@ -1,4 +1,5 @@
 import { absoluteUrl } from "@/config/site";
+import { seoDescription, seoText } from "@/lib/seoText";
 
 /**
  * Server-rendered social preview tags (WhatsApp, LinkedIn, Slack read only the
@@ -15,6 +16,8 @@ export type PageHeadInput = {
 };
 
 export function buildPageHead({ title, description, path, image, imageAlt, type = "website" }: PageHeadInput) {
+  title = seoText(title, 60);
+  description = seoDescription(description, "Explore the curated furniture and design collection at Maison Affluency.");
   const url = absoluteUrl(path);
   const meta: Array<Record<string, string>> = [
     { title },
@@ -51,7 +54,7 @@ const TRADE_IMAGE = "https://www.maisonaffluency.com/trade-program-hero-authenti
 
 export const STATIC_PAGE_HEADS = {
   home: {
-    title: "Maison Affluency — Curated Luxury Furniture & Collectible Design",
+    title: "Maison Affluency | Luxury Furniture & Collectible Design",
     description: "Discover exceptional collectible furniture, bespoke interiors, and contemporary design by world-renowned designers and ateliers. Based in Singapore.",
     path: "/",
     image: HOME_IMAGE,

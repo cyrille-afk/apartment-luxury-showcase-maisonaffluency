@@ -37,8 +37,6 @@ const Journal = () => {
   return (
     <>
       <Helmet>
-        <title>Journal — Maison Affluency</title>
-        <meta name="description" content="Design stories, designer interviews, and curatorial insights from Maison Affluency — Singapore's premier destination for collectible luxury furniture." />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Blog",

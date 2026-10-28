@@ -1,5 +1,12 @@
 # Roadmap
 
+## Technical SEO findings
+- [x] Bound product titles and descriptions consistently in server and client metadata.
+- [x] Add 44 canonical category/subcategory pages and public sign-in to the sitemap; preserve record-specific lastmod and abort incomplete reads.
+- [x] Verify www domains, social previews, crawler rules, single static-page titles, product pages and metadata; 20 regression tests pass.
+- [x] Leave the collectible-design article suggestion unchanged (technical SEO only).
+- [ ] Sitemap scanner verdict: remaining requests to index password recovery and retired registration are intentionally not implemented; recovery is noindex, registration redirects to the application page.
+
 ## Rename Pouenat -> Maison Pouenat (everywhere the brand is shown)
 
 - [x] Database: guarded rename across designer profiles, parent-house labels, product
@@ -31,3 +38,4 @@
 - [ ] Publish the preview so the renamed listings, directory and catalogue files go live
       (designer profile pages already read the database live).
 - [ ] Sync the project to GitHub — the rename is not in the repository yet.
+- [ ] Publish the technical SEO corrections; the live website still serves the previous page tags and sitemap.

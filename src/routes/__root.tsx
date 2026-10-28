@@ -62,8 +62,6 @@ if (typeof window !== "undefined") bootClient();
 const SITE_TITLE = "Maison Affluency | Luxury Collectible Design Singapore";
 const SITE_DESCRIPTION =
   "Curated luxury collectible furniture, bespoke interiors, and contemporary design by world-renowned designers and ateliers in Singapore.";
-const SITE_IMAGE =
-  "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772516480/WhatsApp_Image_2026-03-03_at_1.40.10_PM_cs23b7.jpg";
 const HERO = "https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_{w}%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj";
 const hero = (w: number) => HERO.replace("{w}", String(w));
 
@@ -91,14 +89,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { property: "og:title", content: SITE_TITLE },
       { property: "og:description", content: SITE_DESCRIPTION },
-      { property: "og:url", content: "https://www.maisonaffluency.com/" },
-      { property: "og:image", content: SITE_IMAGE },
-      { property: "og:image:width", content: "1200" },
-      { property: "og:image:height", content: "630" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: SITE_TITLE },
       { name: "twitter:description", content: SITE_DESCRIPTION },
-      { name: "twitter:image", content: SITE_IMAGE },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },

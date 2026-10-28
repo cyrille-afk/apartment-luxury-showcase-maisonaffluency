@@ -516,11 +516,6 @@ const TradeLanding = () => {
   return (
     <>
       <Helmet>
-        <title>Trade Program — Maison Affluency</title>
-        <meta
-          name="description"
-          content="Trade Program for architects & interior designers — exclusive pricing, dedicated advisors, custom sourcing, and consolidated insured shipping."
-        />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "WebPage",

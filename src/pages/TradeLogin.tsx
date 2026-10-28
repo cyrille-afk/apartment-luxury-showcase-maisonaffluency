@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "@/lib/router-compat";
 import { useAuth } from "@/hooks/useAuth";
-import { Helmet } from "react-helmet-async";
 import { X, Loader2, CircleCheck, CircleAlert, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
@@ -170,21 +169,6 @@ const TradeLogin = () => {
 
   return (
     <div className="min-h-screen bg-card flex flex-col">
-      <Helmet>
-        <title>Trade Account Sign In — Maison Affluency</title>
-        <meta name="description" content="Sign in to the Maison Affluency Trade Portal. Exclusive access for architects and interior designers to trade pricing, spec sheets, and curated collections." />
-        <meta property="og:title" content="Trade Account Sign In — Maison Affluency" />
-        <meta property="og:description" content="Exclusive access for architects and interior designers to trade pricing, spec sheets, and curated collections." />
-        <meta property="og:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1773468211/FHMPRJ-033_W26_SCENE_5.jpg_rfvh62.jpg" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:url" content="https://www.maisonaffluency.com/trade/login" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Trade Account Sign In — Maison Affluency" />
-        <meta name="twitter:description" content="Exclusive access for architects and interior designers to trade pricing, spec sheets, and curated collections." />
-        <meta name="twitter:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1773468211/FHMPRJ-033_W26_SCENE_5.jpg_rfvh62.jpg" />
-        <meta name="robots" content="noindex, nofollow" />
-      </Helmet>
 
       {/* Brand mark pinned to the upper-left corner, RH-style */}
       <header className="flex items-start justify-between px-6 pt-6 md:px-10 md:pt-8">

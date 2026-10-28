@@ -2,7 +2,6 @@ import { setDarkIosChrome } from "@/lib/iosChrome";
 import React, { lazy, Suspense } from "react";
 import { useSearchParams, Navigate } from "@/lib/router-compat";
 import { categoryUrl } from "@/lib/categorySlugs";
-import { Helmet } from "react-helmet-async";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import { markDesignersLandingScrollLock, releaseDesignersLandingScrollLock } from "@/lib/designersScrollLock";
 
@@ -69,13 +68,6 @@ const PublicDesigners = () => {
 
   return (
     <>
-      <Helmet>
-        <title>Designers & Ateliers — Maison Affluency</title>
-        <meta
-          name="description"
-          content="Discover our curated selection of ateliers and designers — from historical masters to contemporary creators of collectible furniture and lighting."
-        />
-      </Helmet>
 
       <ScrollLockedDesigners initialLetter={initialLetter} initialExpand={initialExpand} />
     </>

@@ -45,8 +45,6 @@ const ApartmentTour = () => {
   return (
     <>
       <Helmet>
-        <title>A Private Apartment Tour — Maison Affluency Singapore</title>
-        <meta name="description" content="Cinematic tour of a bespoke Singapore apartment by Maison Affluency — collectible furniture, artisan craft, panoramic skyline views." />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@graph": [

@@ -13,6 +13,7 @@ import JournalMarkdown from "@/components/journal/JournalMarkdown";
 import { fetchArticleBySlug, CATEGORY_LABELS, type JournalArticle as Article } from "@/lib/journal";
 import { useAuth } from "@/hooks/useAuth";
 import NotFound from "@/pages/NotFound";
+import { seoTitle as buildSeoTitle, seoDescription as buildSeoDescription } from "@/lib/seoText";
 
 const PdfViewer = lazy(() => import("@/components/journal/PdfViewer"));
 
@@ -97,38 +98,8 @@ const JournalArticlePage = () => {
     const lastSpace = cut.lastIndexOf(" ");
     return (lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).trimEnd() + "…";
   };
-  const BRAND = "Maison Affluency";
-  const titleBase = (article.title || "Journal").trim();
-  // Try full brand suffix, then short separator, then bare title, then padded.
-  const candidates = [
-    `${titleBase} — ${BRAND}`,
-    `${titleBase} | ${BRAND}`,
-    titleBase,
-  ];
-  let seoTitle = candidates.find((c) => c.length >= 40 && c.length <= 60) || "";
-  if (!seoTitle) {
-    if (titleBase.length > 60) {
-      seoTitle = clamp(titleBase, 60);
-    } else if (titleBase.length < 40) {
-      // pad with brand fragment until ≥40
-      seoTitle = clamp(`${titleBase} — ${BRAND} Journal`, 60);
-    } else {
-      seoTitle = titleBase;
-    }
-  }
-
-  const rawDesc = (article.excerpt || "").trim();
-  const padTail = ` Read the full feature on the ${BRAND} Journal.`;
-  let seoDesc = rawDesc;
-  if (seoDesc.length > 160) seoDesc = clamp(seoDesc, 160);
-  if (seoDesc.length < 140) {
-    const combined = (seoDesc + (seoDesc.endsWith(".") ? "" : ".") + padTail).trim();
-    seoDesc = clamp(combined, 160);
-    // final pad if still short
-    if (seoDesc.length < 140) {
-      seoDesc = clamp((seoDesc + " Curated collectible design from Singapore.").trim(), 160);
-    }
-  }
+  const seoTitle = buildSeoTitle(article.title || "Journal");
+  const seoDesc = buildSeoDescription(article.excerpt, "Design stories and curatorial insights from the Maison Affluency Journal.");
 
   return (
     <>

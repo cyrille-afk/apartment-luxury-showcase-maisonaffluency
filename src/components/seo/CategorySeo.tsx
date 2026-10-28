@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import { OG_FALLBACK } from "@/lib/ogImage";
+import { categoryHeadData } from "@/lib/categoryHead";
 
 interface Props {
   category: string;
@@ -14,15 +14,11 @@ interface Props {
  * (react-helmet-async resolves to the most recently mounted matching tag).
  */
 export default function CategorySeo({ category, subcategory, categorySlug, subcategorySlug }: Props) {
-  const label = subcategory ? `${subcategory} — ${category}` : category;
   const path = subcategorySlug
     ? `/products-category/${categorySlug}/${subcategorySlug}`
     : `/products-category/${categorySlug}`;
   const canonical = `https://www.maisonaffluency.com${path}`;
-  const title = `${label} — Maison Affluency`;
-  const description = subcategory
-    ? `Explore curated ${subcategory.toLowerCase()} from world-renowned designers and ateliers — collectible ${category.toLowerCase()} at Maison Affluency.`
-    : `Discover collectible ${category.toLowerCase()} from world-renowned designers and ateliers at Maison Affluency.`;
+  const { title, description } = categoryHeadData(category, subcategory, path);
 
   const collectionLd = {
     "@context": "https://schema.org",
@@ -47,20 +43,6 @@ export default function CategorySeo({ category, subcategory, categorySlug, subca
 
   return (
     <Helmet>
-      <title>{title}</title>
-      <meta name="description" content={description} />
-      <meta property="og:type" content="website" />
-      <meta property="og:site_name" content="Maison Affluency" />
-      <meta property="og:title" content={title} />
-      <meta property="og:description" content={description} />
-      <meta property="og:url" content={canonical} />
-      <meta property="og:image" content={OG_FALLBACK} />
-      <meta property="og:image:width" content="1200" />
-      <meta property="og:image:height" content="630" />
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content={title} />
-      <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={OG_FALLBACK} />
       <script type="application/ld+json">{JSON.stringify(collectionLd)}</script>
       <script type="application/ld+json">{JSON.stringify(crumbsLd)}</script>
     </Helmet>

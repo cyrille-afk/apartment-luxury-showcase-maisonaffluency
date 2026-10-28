@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronUp } from "lucide-react";
 import { useState } from "react";
@@ -44,13 +43,6 @@ const PublicGallery = () => {
 
   return (
     <>
-      <Helmet>
-        <title>Interactive Gallery — Maison Affluency</title>
-        <meta
-          name="description"
-          content="Explore our Singapore gallery — room-by-room interiors with collectible furniture, bespoke lighting, and artisan rugs by world-renowned designers."
-        />
-      </Helmet>
 
       <div className="min-h-screen bg-background text-foreground">
         <Navigation />
