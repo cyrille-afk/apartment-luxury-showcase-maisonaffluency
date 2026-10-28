@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { felixLineCents, felixQuantity, formatFelixMoney } from "@/lib/felixQuoteQuantity";
 import { felixQuoteFinishes } from "@/lib/felixQuoteFinishes";
+import { useClientSafeMode } from "@/lib/clientSafeMode";
 
 /**
  * Proactive nudge shown inline in the concierge chat stream after the user
@@ -47,12 +48,13 @@ interface Props {
 }
 
 export function ProactiveTearsheetCard({ data, resolved, onGenerate, onAddToBoard, onDismiss, onQuantityChange }: Props) {
+  const { clientSafe } = useClientSafeMode();
   // Finishes (upholstery, frame finish, …) live in the right column of the
   // 2-col card; everything else (SKU, trade price, lead time) stays below.
   const finishRows = felixQuoteFinishes(data);
   const specRows: { label: string; value: string }[] = [];
   if (data.sku) specRows.push({ label: "SKU", value: data.sku });
-  if (data.tradePriceLabel) specRows.push({ label: "Trade price", value: `${data.tradePriceLabel} (Member benefit)` });
+  if (!clientSafe && data.tradePriceLabel) specRows.push({ label: "Trade price", value: `${data.tradePriceLabel} (Member benefit)` });
   if (data.leadTimeLabel) specRows.push({ label: "Lead time", value: data.leadTimeLabel });
 
   const isResolved = !!resolved;
@@ -117,7 +119,7 @@ export function ProactiveTearsheetCard({ data, resolved, onGenerate, onAddToBoar
       {specRows.length > 0 && (
         <div className="px-3 py-2 space-y-0.5">
           {specRows.map((row, index) => (
-            <div key={`${row.label}-${index}`} className="flex items-center gap-2 text-[11px]">
+            <div key={`${row.label}-${index}`} data-trade-sensitive={row.label === "Trade price" ? "" : undefined} className="flex items-center gap-2 text-[11px]">
               <span className="font-body uppercase tracking-[0.1em] text-[9px] text-muted-foreground w-24 shrink-0 break-words">
                 {row.label}
               </span>

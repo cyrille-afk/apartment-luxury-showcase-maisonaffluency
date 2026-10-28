@@ -27,6 +27,7 @@ import ClientPicker, { type PickedClient } from "@/components/trade/ClientPicker
 import { assertTearsheetBoardProject, requireTearsheetProject } from "@/lib/tearsheetProjectScope";
 import TearsheetBoardSharing from "@/components/trade/TearsheetBoardSharing";
 import TearsheetBoardInvitationStatus from "@/components/trade/TearsheetBoardInvitationStatus";
+import { useClientSafeMode, getClientSafeMode } from "@/lib/clientSafeMode";
 
 interface TearsheetProduct {
   id: string;
@@ -109,6 +110,8 @@ export default function TradeTearsheets() {
   const [filterCategory, setFilterCategory] = useState("");
   const [filterSubcategory, setFilterSubcategory] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
+  const { clientSafe } = useClientSafeMode();
+  const presentationExport = clientSafe || searchParams.get("presentation") === "1";
   const filterProjectId = searchParams.get("project");
   const { projects, loading: projectsLoading } = useProjects({ activeOnly: false });
   const selectedProject = projects.find((project) => project.id === filterProjectId);
@@ -749,6 +752,7 @@ export default function TradeTearsheets() {
         dimensionsDisplay,
         materialsDisplay,
         leadTimeDisplay,
+        presentation: getClientSafeMode() || presentationExport,
       }),
     );
     win.document.close();
@@ -922,7 +926,7 @@ export default function TradeTearsheets() {
                     ? `${selectedProduct.currency === "USD" ? "$" : selectedProduct.currency === "GBP" ? "£" : selectedProduct.currency === "SGD" ? "S$" : "€"}${(snapshotPriceCents / 100).toLocaleString()}`
                     : "Price Upon Request"],
                 ] as const).map(([label, val]) => (
-                  <div key={label}>
+                  <div key={label} data-trade-sensitive={label === "Trade Price" ? "" : undefined} hidden={label === "Trade Price" && presentationExport}>
                     <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
                     <p className="font-body text-sm text-foreground mt-0.5 whitespace-pre-line">{val || "—"}</p>
                   </div>

@@ -134,6 +134,7 @@ const TradeBoardBuilder = () => {
     if (item.wood_label) params.set("wood", item.wood_label);
     if (item.variant_label) params.set("variant", item.variant_label);
     params.set("fromBoard", id || "");
+    if (new URLSearchParams(location.search).get("presentation") === "1") params.set("presentation", "1");
     navigate(`/trade/tearsheets?${params.toString()}`, {
       state: { from: location.pathname + location.search },
     });
@@ -144,7 +145,8 @@ const TradeBoardBuilder = () => {
   const [finishes, setFinishes] = useState<Record<string, FinishSelection>>({});
   const [finishItem, setFinishItem] = useState<BoardItem | null>(null);
   const [resolvedClient, setResolvedClient] = useState<PickedClient | null>(null);
-  const { clientSafe } = useClientSafeMode();
+  const { clientSafe: sharedClientSafe } = useClientSafeMode();
+  const clientSafe = sharedClientSafe || new URLSearchParams(location.search).get("presentation") === "1";
   const applyFinish = async (item: BoardItem, sel: FinishSelection) => {
     setFinishes((f) => ({ ...f, [item.id]: sel }));
     const patch = { variant_label: sel.label, fabric_label: sel.top ?? null, wood_label: sel.base ?? null };

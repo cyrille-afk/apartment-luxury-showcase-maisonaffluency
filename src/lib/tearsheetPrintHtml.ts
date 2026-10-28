@@ -38,6 +38,8 @@ export interface TearsheetPrintInput {
   leadTimeDisplay: string | null;
   /** Injectable for deterministic tests. Defaults to `new Date()`. */
   now?: Date;
+  /** Client-facing exports omit the entire internal price row. */
+  presentation?: boolean;
 }
 
 const esc = (s?: string | null) =>
@@ -105,7 +107,7 @@ export function buildTearsheetPrintHtml(input: TearsheetPrintInput): string {
         <div><p class="label">Dimensions</p><p class="value" style="white-space:pre-line">${esc(dimensionsDisplay) || "—"}</p></div>
         <div><p class="label">Materials</p><p class="value" style="white-space:pre-line">${esc(materialsDisplay) || "—"}</p></div>
         <div><p class="label">Lead Time</p><p class="value">${esc(leadTimeDisplay) || "—"}</p></div>
-        <div><p class="label">Trade Price</p><p class="value">${esc(priceStr)}</p></div>
+        ${input.presentation ? "" : `<div><p class="label">Trade Price</p><p class="value">${esc(priceStr)}</p></div>`}
         ${selectedProduct.description ? `<div style="grid-column:1/3"><p class="label">Description</p><p class="value">${esc(selectedProduct.description)}</p></div>` : ""}
       </div>
       <div class="footer">
