@@ -180,6 +180,7 @@ export default function ProductCommerceCta({
   placingOrder = false,
   selectedFinishes = [],
   orderFinishLabel = null,
+  dimensionsLabel = null,
   finishOptions,
   finishVariants,
   finishSelectionRequired = false,
