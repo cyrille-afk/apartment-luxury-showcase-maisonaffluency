@@ -1,0 +1,22 @@
+import { act, cleanup, render, screen } from "@testing-library/react";
+import { afterEach, expect, it, vi } from "vitest";
+import ProductPageContainer from "./ProductPageContainer";
+import { setClientSafeMode } from "@/lib/clientSafeMode";
+vi.mock("@/lib/router-compat", () => ({ useLocation: () => ({ pathname: "/trade/products/sofa", search: "", state: null }), useParams: () => ({}), Navigate: () => null }));
+vi.mock("@/hooks/useAuth", () => ({ useAuth: () => ({ user: {}, rolesLoaded: true, isTradeUser: true, tradeStatus: "approved" }) }));
+vi.mock("@tanstack/react-query", () => ({ useQuery: () => ({}) }));
+vi.mock("@/contexts/ProductConfigContext", () => ({ ProductConfigProvider: ({ children }: { children: React.ReactNode }) => children }));
+vi.mock("./TradeProductPage", () => ({ default: () => <div>Active workspace</div> }));
+vi.mock("./PublicProductPage", () => ({ default: () => <div>Editorial presentation</div> }));
+afterEach(() => { cleanup(); setClientSafeMode(false); });
+it("keeps the active workspace mounted when its eye switch enables Presentation, then restores editorial on close", async () => {
+  setClientSafeMode(false);
+  render(<ProductPageContainer isInsideTradePortal />);
+  await screen.findByText("Active workspace");
+  act(() => window.dispatchEvent(new CustomEvent("ma:product-workspace-open", { detail: true })));
+  act(() => setClientSafeMode(true));
+  expect(screen.queryByText("Active workspace")).toBeTruthy();
+  expect(screen.queryByText("Editorial presentation")).toBeNull();
+  act(() => window.dispatchEvent(new CustomEvent("ma:product-workspace-open", { detail: false })));
+  await screen.findByText("Editorial presentation");
+});

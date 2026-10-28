@@ -8,6 +8,7 @@ import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
 import { findQuoteFinishSwatches } from "@/lib/quoteFinishSwatches";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 import PresentationModeToggle from "./PresentationModeToggle";
+import DrawerPricing from "./DrawerPricing";
 
 interface QuoteItem {
   id: string;
@@ -43,6 +44,7 @@ interface QuoteDrawerProps {
   quoteId: string | null;
   /** Bump this number to trigger a re-fetch (e.g. after adding an item) */
   refreshKey?: number;
+  activePriceSnapshot?: { itemId: string; retailLabel: string | null; netLabel: string | null; configuration?: string; imageUrl?: string | null; finishes?: { name: string; image_url: string }[] } | null;
 }
 
 const formatPrice = (cents: number, currency: string) => {
@@ -50,10 +52,15 @@ const formatPrice = (cents: number, currency: string) => {
   return new Intl.NumberFormat("en-US", { style: "currency", currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
 };
 
-const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawerProps) => {
+const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceSnapshot }: QuoteDrawerProps) => {
   const { clientSafe } = useClientSafeMode();
   const [items, setItems] = useState<QuoteItem[]>([]);
   const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    window.dispatchEvent(new CustomEvent("ma:product-workspace-open", { detail: true }));
+    return () => { window.dispatchEvent(new CustomEvent("ma:product-workspace-open", { detail: false })); };
+  }, [open]);
 
   useEffect(() => {
     if (!open || !quoteId) return;
@@ -209,7 +216,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-[380px] sm:w-[420px] flex flex-col">
         <SheetHeader>
-          <PresentationModeToggle />
+          <div className="flex justify-start pr-8"><PresentationModeToggle /></div>
           <SheetTitle className="font-display text-lg flex items-center gap-2">
             <ShoppingCart className="h-4 w-4" />
             Active Quote
@@ -235,8 +242,11 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
               <p className="font-body text-sm text-muted-foreground">No items yet</p>
             </div>
           ) : (
-            items.map((item) => (
-              <div key={item.id} className="grid grid-cols-[88px_minmax(0,1fr)_32px] gap-4 p-4 rounded-lg border border-border hover:border-foreground/10 transition-colors">
+            items.map((savedItem) => {
+              const active = activePriceSnapshot?.itemId === savedItem.id ? activePriceSnapshot : null;
+              const item = active ? { ...savedItem, image_url: active.imageUrl || savedItem.image_url, variant_label: active.configuration || savedItem.variant_label, variant_swatches: active.finishes?.length ? active.finishes : savedItem.variant_swatches } : savedItem;
+              return (
+              <div key={item.id} className="relative grid grid-cols-[80px_minmax(0,1fr)] gap-3 p-3 pr-7 rounded-lg border border-border hover:border-foreground/10 transition-colors">
                 <div className="flex flex-col gap-2 min-w-0">
                   <div className="w-20 h-20 rounded bg-muted/30 overflow-hidden shrink-0">
                     {(item.image_url || item.product?.image_url) ? (
@@ -310,60 +320,31 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
                     </p>
                   )}
 
-                  <div className="flex items-center gap-2 mt-0.5">
+                  <div className="flex flex-col items-start mt-1">
                     <span className="font-body text-[10px] text-muted-foreground">
                       Qty: {item.quantity}
                     </span>
                     {(() => {
-                      // Saved unit prices may be net snapshots. Never relabel them as retail.
-                      if (clientSafe) {
-                        const retail = !item.variant_label ? item.product?.rrp_price_cents : null;
-                        return <span className="font-body text-[10px] text-muted-foreground">{retail && retail > 0 ? `Retail Price: ${formatPrice(retail, item.product.currency || "EUR")}` : "Price upon Request"}</span>;
-                      }
+                      const snapshot = activePriceSnapshot?.itemId === item.id ? activePriceSnapshot : null;
+                      const retail = !item.variant_label && !item.fabric_id ? item.product?.rrp_price_cents : null;
                       const displayCents = item.unit_price_cents ?? item.product?.trade_price_cents ?? item.product?.rrp_price_cents;
                       const displayCurrency = item.unit_price_cents != null
                         ? (item.unit_price_currency || item.product?.currency || "EUR")
                         : (item.product?.currency || "EUR");
 
-                      if (displayCents) {
-                        return (
-                          <div data-trade-sensitive className="flex flex-col">
-                            <span className="font-body text-[10px] text-primary font-medium">
-                              {formatPrice(displayCents, displayCurrency || "EUR")}
-                            </span>
-                            {/* Only show "Catalog:" reference when it makes sense:
-                                 - no variant was picked (product-level trade_price is the true reference), AND
-                                 - the paid price is LOWER than catalog (real discount, not an upcharge from picking a pricier variant).
-                                 Once a variant is chosen, the product-level trade_price_cents
-                                 no longer corresponds to that variant, so the reference is misleading. */}
-                            {item.product?.trade_price_cents
-                              && !item.variant_label
-                              && displayCents < item.product.trade_price_cents && (
-                              <span className="font-body text-[8px] text-muted-foreground/60">
-                                Catalog: {formatPrice(item.product.trade_price_cents, item.product.currency)}
-                              </span>
-                            )}
-                          </div>
-                        );
-                      } else {
-                        return (
-                          <span className="font-body text-[9px] text-muted-foreground/60 italic">
-                            Price upon Request
-                          </span>
-                        );
-                      }
+                      return <DrawerPricing retailLabel={snapshot?.retailLabel ?? (retail && retail > 0 ? formatPrice(retail, item.product.currency || "EUR") : null)} netLabel={snapshot?.netLabel ?? (displayCents && displayCents > 0 ? formatPrice(displayCents, displayCurrency) : null)} />;
                     })()}
                   </div>
                 </div>
                 <button
                   onClick={() => removeItem(item.id)}
-                  className="p-1.5 text-muted-foreground hover:text-destructive transition-colors shrink-0"
+                  className="absolute right-1 top-2 p-1.5 text-muted-foreground hover:text-destructive transition-colors shrink-0"
                   title="Remove"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </div>
-            ))
+            ); })
           )}
         </div>
 

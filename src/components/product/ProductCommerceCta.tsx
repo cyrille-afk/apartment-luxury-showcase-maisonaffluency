@@ -634,10 +634,11 @@ export default function ProductCommerceCta({
           professionalWorkspace={isTradeWorkspace}
           isOpen={miniCartOpen}
           onClose={() => setMiniCartOpen(false)}
-          lines={cartItems.length > 1 ? cartItems.map((item) => ({ key: item.key, brand: item.designerName, title: item.title, configuration: item.finishLabel, imageUrl: item.imageUrl, quantity: item.quantity, priceLabel: item.unitPriceCents > 0 ? formatMoney(item.unitPriceCents * item.quantity, item.currency) : "Price upon Request", leadTime: item.leadTime })) : undefined}
+          lines={cartItems.length > 1 ? cartItems.map((item) => ({ key: item.key, brand: item.designerName, title: item.title, configuration: item.finishLabel, imageUrl: item.imageUrl, quantity: item.quantity, priceLabel: item.unitPriceCents > 0 ? formatMoney(item.unitPriceCents * item.quantity, item.currency) : "Price upon Request", netPriceLabel: isTradeWorkspace && item.unitPriceCents > 0 ? formatMoney((item.netUnitPriceCents ?? apply(item.unitPriceCents)) * item.quantity, item.currency) : null, leadTime: item.leadTime })) : undefined}
           onLineQuantityChange={setCartQuantity}
           onRemoveLine={removeFromCart}
           subtotalLabel={cartItems.length > 1 ? formatMoney(cartSubtotalCents(cartItems), cartItems[0]?.currency) : undefined}
+          netSubtotalLabel={isTradeWorkspace && cartItems.length > 1 ? formatMoney(cartItems.reduce((total, item) => total + (item.netUnitPriceCents ?? apply(item.unitPriceCents)) * item.quantity, 0), cartItems[0]?.currency) : undefined}
           onViewCart={!isTradeWorkspace && cartItems.length > 1 ? () => { setMiniCartOpen(false); navigate("/cart"); } : undefined}
           brand={designerName}
           title={productTitle}
@@ -646,6 +647,7 @@ export default function ProductCommerceCta({
           priceLabel={
             quoteOnlySelection ? "Price upon Request" : retailLabel || rrpLabel || null
           }
+          netPriceLabel={quoteOnlySelection ? null : displayNet}
           imageUrl={imageUrl}
           quantity={cartItems.length === 1 ? cartItems[0].quantity : quantity}
           onQuantityChange={quoteOnlySelection ? setQuantity : handleDrawerQuantity}
