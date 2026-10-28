@@ -23,7 +23,10 @@ export function formatDrawerDimensions(
     if (looksLikeDimension(raw)) return raw;
   }
   const fb = (fallback || "").trim();
-  if (fb && looksLikeDimension(fb)) return fb;
+  if (fb) {
+    const formattedFallback = formatDrawerDimensions(fb, null);
+    if (formattedFallback) return formattedFallback;
+  }
   return null;
 }
 

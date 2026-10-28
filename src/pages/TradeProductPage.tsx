@@ -1792,6 +1792,18 @@ const TradeProductPage: React.FC = () => {
       )?.variant ?? null
     : null;
 
+  // Model dimensions shown inside the Quote & Order Workspace drawers —
+  // mirrors the main page's dimension row and follows the selected size variant.
+  const drawerDimensionsLabel = formatDrawerDimensions(
+    (dualVariant as any)?.label ||
+      (singleAxisActive as any)?.label ||
+      selectedDualSize ||
+      selectedSingleSize ||
+      product?.dimensions ||
+      null,
+    product?.dimensions || null,
+  );
+
   // Cross-axis availability: when a material is picked, disable sizes that
   // don't exist for that material (and vice versa). Keeps both dropdowns
   // honest about what combinations are actually offered.
