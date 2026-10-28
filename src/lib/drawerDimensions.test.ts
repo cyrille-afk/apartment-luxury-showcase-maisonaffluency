@@ -24,6 +24,12 @@ describe("formatDrawerDimensions", () => {
     ).toBe("W 240 x D 155 x H 75 cm");
   });
 
+  it("formats pipe-shaped fallback dimensions with the model name", () => {
+    expect(
+      formatDrawerDimensions(null, "Saint Honoré 240 | W 240 x D 155 x H 75 cm"),
+    ).toBe("Saint Honoré 240: W 240 x D 155 x H 75 cm");
+  });
+
   it("returns null when nothing looks like a dimension", () => {
     expect(formatDrawerDimensions("Solid Oak", "Solid oak frame")).toBeNull();
     expect(formatDrawerDimensions(null, null)).toBeNull();
