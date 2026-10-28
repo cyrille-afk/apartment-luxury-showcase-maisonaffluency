@@ -1,5 +1,11 @@
 # Roadmap
 
+## Technical SEO findings
+- [ ] Bound product titles and descriptions consistently in server and client metadata.
+- [ ] Add canonical category/subcategory pages to the existing sitemap; preserve trustworthy lastmod and fail on incomplete reads.
+- [ ] Verify domain, social previews, crawler rules and metadata against current output; update only fully resolved findings.
+- [ ] Leave the collectible-design article suggestion unchanged (technical SEO only).
+
 ## Rename Pouenat -> Maison Pouenat (everywhere the brand is shown)
 
 - [x] Database: guarded rename across designer profiles, parent-house labels, product
