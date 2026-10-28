@@ -9,6 +9,7 @@ import SelectionDrawer, { type PaymentMethod } from "@/components/product/Select
 import BespokeConfigurationDialog from "@/components/product/BespokeConfigurationDialog";
 import OrderIntakeSheet, { type OrderIntakeDetails } from "@/components/product/OrderIntakeSheet";
 import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
+import { useAuth } from "@/hooks/useAuth";
 
 import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
@@ -215,6 +216,10 @@ export default function ProductCommerceCta({
 
   
   const { clientSafe } = useClientSafeMode();
+  const { user, profile: professionalProfile, rolesLoaded, isAdmin, isTradeUser, tradeStatus } = useAuth();
+  const isTradeWorkspace = /^\/trade(?:\/|$)/.test(location.pathname) &&
+    tradeApproved && !clientSafe && Boolean(user) && rolesLoaded &&
+    (isAdmin || isTradeUser || tradeStatus === "approved");
   const { data: pricing } = useTradeProductPricing(productId, tradeApproved);
   const { discountPct, apply } = useTradeDiscount();
 
@@ -282,6 +287,18 @@ export default function ProductCommerceCta({
   };
 
   const startIntent = (target: "order" | "bespoke") => {
+    if (isTradeWorkspace && user) {
+      // Use the authenticated professional, not remembered public intake data.
+      checkoutForm.update({
+        buyerProfile: "designer",
+        email: user.email || professionalProfile?.email || "",
+        guestName: [professionalProfile?.first_name, professionalProfile?.last_name].filter(Boolean).join(" "),
+      });
+      setIntakeFor(null);
+      setDesktopDirectBespoke(false);
+      runIntent(target);
+      return;
+    }
     const desktop = typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
     if (target === "bespoke" && desktop) {
       setDesktopDirectBespoke(true);
@@ -322,7 +339,7 @@ export default function ProductCommerceCta({
     const handler = () => startIntent("order");
     window.addEventListener(orderTriggerEvent, handler);
     return () => window.removeEventListener(orderTriggerEvent, handler);
-  }, [orderTriggerEvent]);
+  }, [orderTriggerEvent, isTradeWorkspace, user, professionalProfile, quantity, onPlaceOrder]);
 
   /**
    * Secondary CTA: bespoke / customisation enquiries open a centred overlay
@@ -540,7 +557,7 @@ export default function ProductCommerceCta({
         {tradeApproved ? (
           <>
             <QuantitySelector value={quantity} onChange={setQuantity} />
-            {/* Ordering always starts with the shared client-type intake. */}
+            {/* Trade Studio orders continue directly; public views retain intake. */}
             <Button type="button" data-commerce-primary onClick={primaryAction} disabled={placingOrder} className={primaryBtn}>
               {placingOrder && <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />}
               {placingOrder ? "Opening checkout…" : primaryLabel}
@@ -669,7 +686,7 @@ export default function ProductCommerceCta({
           ahead of both the order drawer and the bespoke dialog. */}
       {(
         <OrderIntakeSheet
-          isOpen={intakeFor !== null}
+          isOpen={!isTradeWorkspace && intakeFor !== null}
           onClose={() => setIntakeFor(null)}
           onComplete={completeIntake}
           mode={desktopDirectBespoke ? "quote" : "order"}
