@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Presentation price protection
+- [ ] Align Presentation retail labels and typography across product prices and open drawer/header summaries; verify simultaneous ON/OFF updates.
 - [x] Persist mode across product pages, drawer remounts and app reloads/resume; signed-in browser verified ON/OFF across two products and reloads, with drawer remount/resume covered by tests (13 regressions pass).
 - [x] Add synchronized Presentation Mode controls beside product prices and at drawer headers.
 - [x] Show retail-only client prices and omit trade values from presentation tearsheets and copied previews; unknown quote retail is Price upon Request, never relabelled net.
