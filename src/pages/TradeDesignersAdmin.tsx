@@ -504,8 +504,8 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
         const current = states[feedbackKey];
         return current?.revision === revision ? { ...states, [feedbackKey]: { revision, status: "saving" } } : states;
       });
-      try {
       let priceAttemptId: string | undefined;
+      try {
       if (isPrice && user) {
         const { data: before } = await supabase.from("designer_curator_picks")
           .select("title,currency,trade_price_cents,price_per_sqm_cents,size_variants").eq("id", id).maybeSingle();
