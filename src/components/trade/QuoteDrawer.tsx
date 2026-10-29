@@ -271,9 +271,24 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
                 QU-{quoteId.slice(0, 6).toUpperCase()}
               </span>
             )}
+            {quoteMeta && (() => {
+              const meta = quoteStatusMeta(quoteMeta.status);
+              const StatusIcon = meta.icon;
+              return (
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-body uppercase tracking-wider ${meta.className}`}>
+                  <StatusIcon className="h-3 w-3" />
+                  {meta.label}
+                </span>
+              );
+            })()}
           </SheetTitle>
           <SheetDescription className="font-body text-xs">
             {items.length} {items.length === 1 ? "line item" : "line items"} · {totalQuantity} {totalQuantity === 1 ? "unit" : "units"} in this quote
+            {(() => {
+              const lastActivity = quoteLastActivity(quoteMeta?.updated_at, items.map((i) => i.created_at));
+              const label = formatQuoteDate(lastActivity);
+              return label ? <span className="block mt-0.5 text-muted-foreground">Last updated {label}</span> : null;
+            })()}
           </SheetDescription>
         </SheetHeader>
 
