@@ -25,9 +25,12 @@ export function quoteDrawerRetail(line: RetailLine): { cents: number; currency: 
   const variants = line.product?.size_variants ?? [];
   if (variants.some((variant) => (variant.price_cents ?? 0) > 0)) {
     const selection = ` ${key(line.variant_label || "")} `;
+    // Saved labels omit fixed axes (e.g. every sofa size has Solid Oak).
+    const axes = ["base", "top", "size", "label"] as const;
+    const variableAxes = axes.filter((axis) => new Set(variants.map((variant) => key(variant[axis] || ""))).size > 1);
     const matched = variants.filter((variant) => {
-      const axes = [variant.base, variant.top, variant.size, variant.label].filter((axis): axis is string => Boolean(axis));
-      return axes.length > 0 && axes.every((axis) => selection.includes(` ${key(axis)} `));
+      const required = variableAxes.map((axis) => variant[axis]).filter((value): value is string => Boolean(value));
+      return required.every((value) => selection.includes(` ${key(value)} `));
     });
     // Never choose a cheapest/starting variant for a saved configuration.
     if (matched.length !== 1) return null;

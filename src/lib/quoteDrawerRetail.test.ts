@@ -15,6 +15,16 @@ describe("saved quote drawer retail", () => {
   it("matches every selected variant axis", () => {
     expect(quoteDrawerRetail({ product: { ...product, size_variants: [{ base: "Oak", top: "Marble", size: "280 cm", price_cents: 2260000 }, { base: "Oak", top: "Glass", size: "280 cm", price_cents: 2000000 }] }, variant_label: "Oak · Marble · 280 cm" })?.cents).toBe(2260000);
   });
+  it("restores €22,600 for a saved Saint Honoré 280 label that omits its fixed Solid Oak axis", () => {
+    const variants = [
+      { base: "Solid Oak", top: "COM", label: "Saint Honoré 240 | W 240 x D 155 x H 75 cm", price_cents: 1460000 },
+      { base: "Solid Oak", top: "Selected Pierre Frey fabric", label: "Saint Honoré 240 | W 240 x D 155 x H 75 cm", price_cents: 2050000 },
+      { base: "Solid Oak", top: "COM", label: "Saint Honoré 280 | W 280 x D 160 x H 75 cm", price_cents: 1670000 },
+      { base: "Solid Oak", top: "Selected Pierre Frey fabric", label: "Saint Honoré 280 | W 280 x D 160 x H 75 cm", price_cents: 2260000 },
+    ];
+    expect(quoteDrawerRetail({ product: { ...product, size_variants: variants }, variant_label: "Selected Pierre Frey fabric · Saint Honoré 280 | W 280 x D 160 x H 75 cm" })?.cents).toBe(2260000);
+    expect(quoteDrawerRetail({ product: { ...product, size_variants: variants }, variant_label: "Selected Pierre Frey fabric" })).toBeNull();
+  });
   it("does not invent retail for missing or ambiguous selected variants", () => {
     const variants = [{ base: "Oak", top: "Marble", price_cents: 2260000 }, { base: "Oak", top: "Glass", price_cents: 2000000 }];
     expect(quoteDrawerRetail({ product: { ...product, size_variants: variants }, variant_label: "Oak" })).toBeNull();
