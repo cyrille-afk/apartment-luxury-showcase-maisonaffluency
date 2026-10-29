@@ -411,6 +411,35 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
           )}
         </div>
 
+        {!loading && items.length > 0 && (() => {
+          const summary = summarizeQuoteLines(items, clientSafe);
+          return (
+            <div className="border-t border-border pt-3 mt-4 space-y-1.5" data-testid="quote-summary">
+              <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                Quote summary
+              </p>
+              <p className="flex items-baseline justify-between font-body text-xs text-muted-foreground">
+                <span>{summary.lineCount} {summary.lineCount === 1 ? "product line" : "product lines"}</span>
+                <span>{summary.totalUnits} {summary.totalUnits === 1 ? "unit" : "units"} total</span>
+              </p>
+              {summary.totals.map((total) => (
+                <p key={total.currency} className="flex items-baseline justify-between font-body text-sm">
+                  <span className="text-muted-foreground">
+                    {clientSafe ? "Retail total" : total.basis === "retail" ? "Retail total" : "Net total"}
+                    {total.basis === "mixed" ? " (mixed)" : ""}
+                  </span>
+                  <span className="font-medium text-foreground">{formatPrice(total.cents, total.currency)}</span>
+                </p>
+              ))}
+              {summary.unpricedCount > 0 && (
+                <p className="font-body text-[10px] text-muted-foreground">
+                  {summary.unpricedCount} {summary.unpricedCount === 1 ? "line" : "lines"} — Price upon Request
+                </p>
+              )}
+            </div>
+          );
+        })()}
+
         {quoteId && (
           <div className="border-t border-border pt-4 mt-4">
             <Link
