@@ -1,5 +1,8 @@
 # Roadmap
 
+## Order drawer finish pictures
+- [ ] Show the same selected cropped finish samples as Co-Pilot in single-item and multi-item order drawers; verify signed-in rendering without changing quantities or prices.
+
 ## Drawer monitoring findings
 - [x] Prevent order-drawer checkout from adding an already configured cart line again; signed-in quantity 1 → 3 stayed 3 after checkout hand-off.
 - [x] Restore authoritative retail for saved configured quote lines; saved Saint Honoré 280 showed €22,600 in Presentation without net rows. Legacy ambiguous size labels remain Price upon Request rather than guessing.

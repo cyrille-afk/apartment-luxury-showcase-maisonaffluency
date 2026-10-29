@@ -18,6 +18,7 @@ import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { cn } from "@/lib/utils";
 import { setStickyCommerceDockHeight } from "@/lib/stickyCommerceDock";
 import RetailPrice from "@/components/product/RetailPrice";
+import type { SelectedFinishSwatch } from "./SelectedFinishSwatches";
 
 /**
  * Multi-tier product commerce CTA.
@@ -43,6 +44,7 @@ const secondaryBtn =
   "inline-flex h-12 w-full items-center justify-center px-5 rounded-none bg-background text-foreground border border-foreground font-body text-xs uppercase tracking-widest transition-all hover:bg-muted/60";
 
 export interface ProductCommerceCtaProps {
+  selectedFinishSwatches?: SelectedFinishSwatch[];
   productId: string;
   /** Formatted public retail price, e.g. "$8,363" (null → Price upon Request) */
   rrpLabel?: string | null;
@@ -181,6 +183,7 @@ export default function ProductCommerceCta({
   onAddToCart,
   placingOrder = false,
   selectedFinishes = [],
+  selectedFinishSwatches,
   orderFinishLabel = null,
   dimensionsLabel = null,
   finishOptions,
@@ -645,7 +648,7 @@ export default function ProductCommerceCta({
           professionalWorkspace={isTradeWorkspace}
           isOpen={miniCartOpen}
           onClose={() => setMiniCartOpen(false)}
-          lines={cartItems.length > 1 ? cartItems.map((item) => ({ key: item.key, brand: item.designerName, title: item.title, configuration: item.finishLabel, dimensionsLabel: dimensionsFromVariantLabel(item.finishLabel), imageUrl: item.imageUrl, quantity: item.quantity, priceLabel: item.unitPriceCents > 0 ? formatMoney(item.unitPriceCents * item.quantity, item.currency) : "Price upon Request", netPriceLabel: isTradeWorkspace && item.unitPriceCents > 0 ? formatMoney((item.netUnitPriceCents ?? apply(item.unitPriceCents)) * item.quantity, item.currency) : null, leadTime: item.leadTime })) : undefined}
+          lines={cartItems.length > 1 ? cartItems.map((item) => ({ key: item.key, finishes: item.finishSwatches, brand: item.designerName, title: item.title, configuration: item.finishLabel, dimensionsLabel: dimensionsFromVariantLabel(item.finishLabel), imageUrl: item.imageUrl, quantity: item.quantity, priceLabel: item.unitPriceCents > 0 ? formatMoney(item.unitPriceCents * item.quantity, item.currency) : "Price upon Request", netPriceLabel: isTradeWorkspace && item.unitPriceCents > 0 ? formatMoney((item.netUnitPriceCents ?? apply(item.unitPriceCents)) * item.quantity, item.currency) : null, leadTime: item.leadTime })) : undefined}
           onLineQuantityChange={setCartQuantity}
           onRemoveLine={removeFromCart}
           subtotalLabel={cartItems.length > 1 ? formatMoney(cartSubtotalCents(cartItems), cartItems[0]?.currency) : undefined}
@@ -654,6 +657,7 @@ export default function ProductCommerceCta({
           brand={designerName}
           title={productTitle}
           configuration={orderFinishLabel || (selectedFinishes.length ? selectedFinishes.join(" / ") : null)}
+          finishes={selectedFinishSwatches}
           dimensionsLabel={dimensionsLabel}
           leadTime={leadTime}
           priceLabel={

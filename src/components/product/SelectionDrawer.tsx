@@ -17,6 +17,7 @@ import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
 import { supabase } from "@/integrations/supabase/client";
 import PresentationModeToggle from "@/components/trade/PresentationModeToggle";
 import DrawerPricing from "@/components/trade/DrawerPricing";
+import SelectedFinishSwatches, { type SelectedFinishSwatch } from "./SelectedFinishSwatches";
 
 /** Mobile / WhatsApp number: digits, +, spaces, dashes, parentheses — 7–20 chars. */
 const PHONE_RE = /^[+0-9][0-9 ()-]{6,19}$/;
@@ -37,6 +38,7 @@ export type PaymentMethod = "online" | "wire";
 
 export interface DrawerLine {
   key: string;
+  finishes?: SelectedFinishSwatch[];
   brand?: string | null;
   title?: string | null;
   configuration?: string | null;
@@ -50,6 +52,7 @@ export interface DrawerLine {
 }
 
 export interface SelectionDrawerProps {
+  finishes?: SelectedFinishSwatch[];
   professionalWorkspace?: boolean;
   isOpen: boolean;
   onClose: () => void;
@@ -89,6 +92,7 @@ export interface SelectionDrawerProps {
 }
 
 export default function SelectionDrawer({
+  finishes,
   professionalWorkspace = false,
   isOpen,
   onClose,
@@ -260,6 +264,7 @@ export default function SelectionDrawer({
             <div className="flex flex-col divide-y divide-border/50">
               {lines?.map((l) => (
                 <div key={l.key} className="flex gap-4 py-5 first:pt-0">
+                  <div className="flex w-24 flex-none flex-col gap-2">
                   {l.imageUrl && (
                     <img
                       src={l.imageUrl}
@@ -268,6 +273,8 @@ export default function SelectionDrawer({
                       loading="lazy"
                     />
                   )}
+                  <SelectedFinishSwatches finishes={l.finishes} />
+                  </div>
                   <div className="min-w-0 flex-1">
                     {l.brand && (
                       <p className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -354,6 +361,7 @@ export default function SelectionDrawer({
             <>
           {/* 2 · Product info row */}
           <div className="flex gap-4">
+            <div className="flex w-24 flex-none flex-col gap-2">
             {imageUrl && (
               <img
                 src={imageUrl}
@@ -362,6 +370,8 @@ export default function SelectionDrawer({
                 loading="lazy"
               />
             )}
+            <SelectedFinishSwatches finishes={finishes} />
+            </div>
             <div className="min-w-0 flex-1">
               {brand && (
                 <p className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">
