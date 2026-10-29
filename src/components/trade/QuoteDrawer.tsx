@@ -12,6 +12,7 @@ import PresentationModeToggle from "./PresentationModeToggle";
 import DrawerPricing from "./DrawerPricing";
 import { quoteDrawerRetail } from "@/lib/quoteDrawerRetail";
 import { quoteLinePricing, summarizeQuoteLines } from "@/lib/quoteLineSummary";
+import { quoteStatusMeta, quoteLastActivity, formatQuoteDate } from "@/lib/quoteStatusMeta";
 import type { QuoteFinishVariant } from "@/lib/quoteFinishSwatches";
 
 interface QuoteItem {
@@ -26,6 +27,7 @@ interface QuoteItem {
   fabric_meters: number | null;
   fabric_upcharge_cents: number | null;
   fabric_currency: string | null;
+  created_at?: string | null;
   fabric?: { name: string; image_url: string | null; tier: string | null; price_per_lm_cents: number | null; currency: string | null } | null;
   wood_fabric?: { name: string; image_url: string | null } | null;
   variant_swatches?: { name: string; image_url: string }[];
@@ -64,6 +66,7 @@ const formatPrice = (cents: number, currency: string) => {
 const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceSnapshot, activeDimensionsLabel = null }: QuoteDrawerProps) => {
   const { clientSafe } = useClientSafeMode();
   const [items, setItems] = useState<QuoteItem[]>([]);
+  const [quoteMeta, setQuoteMeta] = useState<{ status: string; updated_at: string | null } | null>(null);
   const [loading, setLoading] = useState(false);
   useEffect(() => {
     if (!open) return;
@@ -75,11 +78,19 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
     if (!open || !quoteId) return;
     const fetchItems = async () => {
       setLoading(true);
-      const { data } = await supabase
-        .from("trade_quote_items")
-        .select("id, image_url, quantity, unit_price_cents, unit_price_currency, variant_label, fabric_id, wood_fabric_id, fabric_meters, fabric_upcharge_cents, fabric_currency, fabric:fabrics!fabric_id(name, image_url, tier, price_per_lm_cents, currency), wood_fabric:fabrics!trade_quote_items_wood_fabric_id_fkey(name, image_url), product:trade_products(id, product_name, brand_name, image_url, trade_price_cents, rrp_price_cents, currency, source_pick_id, dimensions, size_variants)")
-        .eq("quote_id", quoteId)
-        .order("created_at", { ascending: false });
+      const [{ data }, { data: quoteRow }] = await Promise.all([
+        supabase
+          .from("trade_quote_items")
+          .select("id, image_url, quantity, unit_price_cents, unit_price_currency, variant_label, fabric_id, wood_fabric_id, fabric_meters, fabric_upcharge_cents, fabric_currency, created_at, fabric:fabrics!fabric_id(name, image_url, tier, price_per_lm_cents, currency), wood_fabric:fabrics!trade_quote_items_wood_fabric_id_fkey(name, image_url), product:trade_products(id, product_name, brand_name, image_url, trade_price_cents, rrp_price_cents, currency, source_pick_id, dimensions, size_variants)")
+          .eq("quote_id", quoteId)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("trade_quotes")
+          .select("status, updated_at")
+          .eq("id", quoteId)
+          .maybeSingle(),
+      ]);
+      setQuoteMeta(quoteRow ? { status: (quoteRow as any).status || "draft", updated_at: (quoteRow as any).updated_at ?? null } : null);
 
       if (data) {
         let mapped: QuoteItem[] = (data as any[]).map((d) => ({
@@ -94,6 +105,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
           fabric_meters: d.fabric_meters ?? null,
           fabric_upcharge_cents: d.fabric_upcharge_cents ?? null,
           fabric_currency: d.fabric_currency ?? null,
+          created_at: d.created_at ?? null,
           fabric: Array.isArray(d.fabric) ? d.fabric[0] : d.fabric,
           wood_fabric: Array.isArray(d.wood_fabric) ? d.wood_fabric[0] : d.wood_fabric,
           product: Array.isArray(d.product) ? d.product[0] : d.product,
@@ -259,9 +271,24 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
                 QU-{quoteId.slice(0, 6).toUpperCase()}
               </span>
             )}
+            {quoteMeta && (() => {
+              const meta = quoteStatusMeta(quoteMeta.status);
+              const StatusIcon = meta.icon;
+              return (
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-body uppercase tracking-wider ${meta.className}`}>
+                  <StatusIcon className="h-3 w-3" />
+                  {meta.label}
+                </span>
+              );
+            })()}
           </SheetTitle>
           <SheetDescription className="font-body text-xs">
             {items.length} {items.length === 1 ? "line item" : "line items"} · {totalQuantity} {totalQuantity === 1 ? "unit" : "units"} in this quote
+            {(() => {
+              const lastActivity = quoteLastActivity(quoteMeta?.updated_at, items.map((i) => i.created_at));
+              const label = formatQuoteDate(lastActivity);
+              return label ? <span className="block mt-0.5 text-muted-foreground">Last updated {label}</span> : null;
+            })()}
           </SheetDescription>
         </SheetHeader>
 

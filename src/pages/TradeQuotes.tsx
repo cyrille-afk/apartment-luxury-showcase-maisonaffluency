@@ -7,7 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio } from "@/hooks/useStudio";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, FileText, Clock, CheckCircle, Send, Trash2, ShoppingCart, ChevronRight, CreditCard, XCircle, FolderOpen } from "lucide-react";
+import { Plus, ShoppingCart, ChevronRight, FolderOpen } from "lucide-react";
+import { quoteStatusConfig, quoteLastActivity, formatQuoteDate } from "@/lib/quoteStatusMeta";
 import { QuoteCardSkeleton } from "@/components/trade/skeletons";
 import QuoteDetail from "@/components/trade/QuoteDetail";
 import { InvoiceStatusDrawer } from "@/components/trade/InvoiceStatusDrawer";
@@ -35,20 +36,13 @@ interface Quote {
   created_at: string;
   updated_at: string;
   item_count: number;
+  last_activity: string | null;
   project_id?: string | null;
   project_name?: string | null;
   profiles?: { first_name: string; last_name: string; company: string; email: string } | null;
 }
 
-const statusConfig: Record<string, { label: string; icon: typeof Clock; className: string }> = {
-  draft: { label: "Draft", icon: FileText, className: "bg-muted text-muted-foreground" },
-  submitted: { label: "Submitted", icon: Send, className: "bg-primary/10 text-primary" },
-  priced: { label: "Priced — Review", icon: Clock, className: "bg-amber-500/10 text-amber-600" },
-  confirmed: { label: "Order Confirmed", icon: CheckCircle, className: "bg-emerald-500/10 text-emerald-600" },
-  deposit_paid: { label: "Deposit Paid", icon: CreditCard, className: "bg-emerald-500/10 text-emerald-600" },
-  paid: { label: "Fully Paid", icon: CheckCircle, className: "bg-emerald-500/10 text-emerald-600" },
-  cancelled: { label: "Cancelled", icon: XCircle, className: "bg-destructive/10 text-destructive" },
-};
+const statusConfig = quoteStatusConfig;
 
 const filterPillClass = (active: boolean) =>
   `inline-flex min-h-[38px] items-center gap-1.5 rounded-full border px-3.5 font-body text-[10px] uppercase tracking-[0.15em] transition-colors ${
@@ -155,7 +149,7 @@ const TradeQuotes = () => {
       quoteIds.length > 0
         ? supabase
             .from("trade_quote_items")
-            .select("quote_id, quantity, unit_price_cents, fabric_upcharge_cents, crating_cents")
+            .select("quote_id, quantity, unit_price_cents, fabric_upcharge_cents, crating_cents, created_at")
             .in("quote_id", quoteIds)
         : Promise.resolve({ data: [] as any[] }),
       projectIds.length > 0
@@ -168,8 +162,10 @@ const TradeQuotes = () => {
 
     const itemCounts: Record<string, number> = {};
     const quoteTotals: Record<string, number> = {};
+    const itemDates: Record<string, string[]> = {};
     (itemsRes.data || []).forEach((item: any) => {
       itemCounts[item.quote_id] = (itemCounts[item.quote_id] || 0) + 1;
+      if (item.created_at) (itemDates[item.quote_id] ||= []).push(item.created_at);
       const qty = Number(item.quantity) || 0;
       const unit = (Number(item.unit_price_cents) || 0) + (Number(item.fabric_upcharge_cents) || 0);
       quoteTotals[item.quote_id] =
@@ -204,6 +200,7 @@ const TradeQuotes = () => {
       (quotesData || []).map((q: any) => ({
         ...q,
         item_count: itemCounts[q.id] || 0,
+        last_activity: quoteLastActivity(q.updated_at, itemDates[q.id] || []),
         profiles: profileMap[q.user_id] || null,
         project_name: q.project_id ? projectMap[q.project_id] || null : null,
       }))
@@ -673,8 +670,9 @@ const TradeQuotes = () => {
                       )}
                     </div>
                     <p className="font-body text-[10px] text-muted-foreground">
-                      Created {new Date(quote.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
-                      {quote.submitted_at && ` · Submitted ${new Date(quote.submitted_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`}
+                      Created {formatQuoteDate(quote.created_at)}
+                      {quote.last_activity && ` · Updated ${formatQuoteDate(quote.last_activity)}`}
+                      {quote.submitted_at && ` · Submitted ${formatQuoteDate(quote.submitted_at)}`}
                     </p>
                     {quote.notes && (
                       <p className="font-body text-xs text-muted-foreground mt-1 italic truncate">"{quote.notes}"</p>
