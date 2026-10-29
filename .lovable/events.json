@@ -1,6 +1,58 @@
 {
   "schema_version": 1,
   "events": {
+    "project.copilot_dimension_selected": {
+      "event_schema_version": 1,
+      "description": "The user changed the size/dimension option on a Trade product page.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "product_id"
+        ],
+        "properties": {
+          "product_id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "project.copilot_finish_selected": {
+      "event_schema_version": 1,
+      "description": "The user changed a finish (fabric, wood, base, top or material) on a Trade product page.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "product_id"
+        ],
+        "properties": {
+          "product_id": {
+            "type": "string"
+          },
+          "has_fabric": {
+            "type": "boolean"
+          },
+          "has_wood": {
+            "type": "boolean"
+          },
+          "has_base": {
+            "type": "boolean"
+          },
+          "has_top": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
     "project.copilot_product_selected": {
       "event_schema_version": 1,
       "description": "A Trade product page opened in the Co-Pilot flow.",
@@ -17,6 +69,60 @@
         "properties": {
           "product_id": {
             "type": "string"
+          }
+        }
+      }
+    },
+    "project.copilot_quote_line_failed": {
+      "event_schema_version": 1,
+      "description": "An Add to Co-Pilot attempt did not persist; stage says where it failed.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "product_id",
+          "stage"
+        ],
+        "properties": {
+          "product_id": {
+            "type": "string"
+          },
+          "stage": {
+            "type": "string",
+            "enum": [
+              "create_quote",
+              "add",
+              "verify",
+              "unexpected"
+            ]
+          }
+        }
+      }
+    },
+    "project.copilot_quote_line_saved": {
+      "event_schema_version": 1,
+      "description": "An Add to Co-Pilot line was confirmed stored on the quote.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "product_id",
+          "quantity"
+        ],
+        "properties": {
+          "product_id": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
           }
         }
       }
