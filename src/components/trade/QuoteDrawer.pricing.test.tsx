@@ -10,10 +10,12 @@ const product = { id: "sofa", source_pick_id: null, product_name: "Saint Honoré
     { base: "Solid Oak", top: "COM", label: "Saint Honoré 280", price_cents: 1670000 },
     { base: "Solid Oak", top: "Selected Pierre Frey fabric", label: "Saint Honoré 280", price_cents: 2260000 },
   ] };
-vi.mock("@/integrations/supabase/client", () => ({ supabase: { from: () => ({ select: () => ({ eq: () => ({ order: async () => ({ data: [
-  { id: "240", product, quantity: 7, variant_label: "Selected Pierre Frey fabric · Saint Honoré 240", unit_price_cents: 1845000, unit_price_currency: "EUR" },
-  { id: "280", product, quantity: 1, variant_label: "Selected Pierre Frey fabric · Saint Honoré 280", fabric_id: "teddy", fabric: { name: "Teddy Mohair", price_per_lm_cents: null }, unit_price_cents: 2034000, unit_price_currency: "EUR" },
-] }) }) }) }) } }));
+vi.mock("@/integrations/supabase/client", () => ({ supabase: { from: (table: string) => ({ select: () => ({ eq: () => table === "trade_quotes"
+  ? { maybeSingle: async () => ({ data: { status: "draft", updated_at: "2026-10-29T08:00:00Z" } }) }
+  : { order: async () => ({ data: [
+  { id: "240", product, quantity: 7, variant_label: "Selected Pierre Frey fabric · Saint Honoré 240", unit_price_cents: 1845000, unit_price_currency: "EUR", created_at: "2026-10-28T09:00:00Z" },
+  { id: "280", product, quantity: 1, variant_label: "Selected Pierre Frey fabric · Saint Honoré 280", fabric_id: "teddy", fabric: { name: "Teddy Mohair", price_per_lm_cents: null }, unit_price_cents: 2034000, unit_price_currency: "EUR", created_at: "2026-10-29T10:00:00Z" },
+] }) } }) }) } }));
 vi.mock("@/lib/hydrateQuotePricesFromPicks", () => ({ hydrateQuotePricesFromPicks: async (items: unknown[]) => items }));
 vi.mock("@tanstack/react-router", () => ({ Link: ({ children, params, onClick }: { children: React.ReactNode; params: { quoteId: string }; onClick: () => void }) => <a href={`/trade/quotes/${encodeURIComponent(params.quoteId)}`} onClick={onClick}>{children}</a> }));
 afterEach(() => { cleanup(); setClientSafeMode(false); });
