@@ -1765,6 +1765,13 @@
       "when": 1793153840645,
       "tag": "0251_restrict_price_audit_direct_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 252,
+      "version": "7",
+      "when": 1793300872920,
+      "tag": "0252_quote_client_shares",
+      "breakpoints": true
     }
   ]
 }

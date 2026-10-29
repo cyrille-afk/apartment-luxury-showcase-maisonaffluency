@@ -7934,6 +7934,47 @@ export type Database = {
         }
         Relationships: []
       }
+      quote_client_shares: {
+        Row: {
+          created_at: string
+          created_by: string
+          expires_at: string
+          id: string
+          quote_id: string
+          revoked_at: string | null
+          snapshot: Json
+          token_hash: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          expires_at?: string
+          id?: string
+          quote_id: string
+          revoked_at?: string | null
+          snapshot: Json
+          token_hash: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          expires_at?: string
+          id?: string
+          quote_id?: string
+          revoked_at?: string | null
+          snapshot?: Json
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_client_shares_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "trade_quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quote_email_log: {
         Row: {
           client_id: string | null
@@ -13279,6 +13320,10 @@ export type Database = {
         Args: { _board_id: string; _email: string; _project_id: string }
         Returns: Json
       }
+      create_quote_client_share: {
+        Args: { _quote_id: string; _snapshot: Json }
+        Returns: string
+      }
       create_visualiser_client_board: {
         Args: {
           _client_id: string
@@ -13536,6 +13581,7 @@ export type Database = {
       get_shared_board: { Args: { _token: string }; Returns: Json }
       get_shared_board_finishes: { Args: { _token: string }; Returns: Json }
       get_shared_board_scene: { Args: { _token: string }; Returns: Json }
+      get_shared_quote: { Args: { _token: string }; Returns: Json }
       get_shared_shortlist: {
         Args: { p_token: string }
         Returns: {
@@ -13966,6 +14012,10 @@ export type Database = {
       restore_curator_pick_version: {
         Args: { _audit_id: string }
         Returns: string
+      }
+      revoke_quote_client_shares: {
+        Args: { _quote_id: string }
+        Returns: number
       }
       revoke_workspace_share: {
         Args: { _board_id: string }

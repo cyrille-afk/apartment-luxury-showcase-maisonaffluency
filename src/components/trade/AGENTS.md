@@ -14,3 +14,4 @@
 - Felix finish snapshots carry selector-derived labels and selected swatch URLs into cards, saved snapshots and PDFs; one shared finish list keeps those views consistent.
 - Felix step order comes from felixTourOrder; special transitions resolve stable step IDs, not numeric indexes — reordering must not skip pricing or quote demonstrations.
 - Local PresentationModeToggle controls reuse clientSafeMode; QuoteDrawer never relabels saved net snapshots as retail, and presentation tearsheet exports omit internal prices in generated HTML, with copied links carrying an explicit presentation flag — protects margins across tabs and downloads.
+- Client quote links (/quote/:token) serve a retail-only snapshot frozen at share time, stored with a hashed token in quote_client_shares (30-day expiry, owner revocable) via SECURITY DEFINER RPCs — the public page never reads trade tables, so net prices can't leak.
