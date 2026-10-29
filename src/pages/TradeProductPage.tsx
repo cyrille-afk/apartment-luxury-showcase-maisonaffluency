@@ -756,6 +756,12 @@ const TradeProductPage: React.FC = () => {
   const drawerPricesRef = useRef<{ retailLabel: string | null; netLabel: string | null }>({ retailLabel: null, netLabel: null });
 
   const [adding, setAdding] = useState(false);
+  const [copilotSave, setCopilotSave] = useState<
+    | { state: "idle" }
+    | { state: "saving" }
+    | { state: "saved"; quoteId: string; at: Date; quantity: number }
+    | { state: "failed"; quoteId?: string | null; message: string }
+  >({ state: "idle" });
   const [added, setAdded] = useState(false);
   const [customRequestOpen, setCustomRequestOpen] = useState(false);
   const [bioExpanded, setBioExpanded] = useState(false);
@@ -966,6 +972,7 @@ const TradeProductPage: React.FC = () => {
     const felixSelection = felixSelectionRef.current;
     const selectedDrawerPrices = { ...drawerPricesRef.current };
     setAdding(true);
+    setCopilotSave({ state: "saving" });
     try {
       const { product, designer } = data;
       let quoteId = activeQuoteId;
@@ -980,6 +987,7 @@ const TradeProductPage: React.FC = () => {
         const { data: q, error } = await createActiveDraftQuote(user.id, { currency: initialCurrency });
         if (error || !q) {
           toast({ title: "Error creating quote", description: error?.message, variant: "destructive" });
+          setCopilotSave({ state: "failed", message: error?.message || "The quote couldn't be created." });
           return;
         }
         quoteId = q.id;
@@ -1116,6 +1124,7 @@ const TradeProductPage: React.FC = () => {
       });
       if (error) {
         toast({ title: "Error", description: error.message, variant: "destructive" });
+        setCopilotSave({ state: "failed", quoteId, message: error.message });
       } else {
         // Persist the chosen variant on the freshly created/merged quote item,
         // and pre-fill shipping (CBM / kg / mode / origin country) from the
@@ -1294,12 +1303,23 @@ const TradeProductPage: React.FC = () => {
           }
 
           if (Object.keys(patch).length > 0) {
-            await supabase
+            const { error: patchError } = await supabase
               .from("trade_quote_items")
               .update(patch)
               .eq("id", itemId as unknown as string);
+            if (patchError) throw new Error(`Line added but its finishes didn't save: ${patchError.message}`);
           }
         }
+        // Confirm the line is really stored on this quote before calling it saved.
+        const { data: savedRow, error: verifyError } = itemId
+          ? await supabase.from("trade_quote_items").select("id, quantity").eq("id", String(itemId)).eq("quote_id", quoteId).maybeSingle()
+          : { data: null, error: null };
+        if (verifyError || !savedRow) {
+          setCopilotSave({ state: "failed", quoteId, message: verifyError?.message || "The line isn't on this quote yet." });
+          setDrawerRefreshKey((k) => k + 1);
+          return;
+        }
+        setCopilotSave({ state: "saved", quoteId, at: new Date(), quantity: (savedRow as any).quantity });
         setAdded(true);
         // Mirror the piece into the global project inventory so the Spatial
         // Visualiser's Project Assets drawer can place it into the room.
@@ -1343,6 +1363,8 @@ const TradeProductPage: React.FC = () => {
         });
         setTimeout(() => setAdded(false), 2500);
       }
+    } catch (err) {
+      setCopilotSave({ state: "failed", message: err instanceof Error ? err.message : "The quote line could not be saved." });
     } finally {
       setAdding(false);
     }
@@ -3378,6 +3400,24 @@ const TradeProductPage: React.FC = () => {
                   ) : null}
                   {added ? "Added to Co-Pilot Workspace" : "Add to Co-Pilot Workspace"}
                 </button>
+                <div aria-live="polite" className="min-h-[18px] -mt-1 text-center font-body text-[11px]">
+                  {copilotSave.state === "saving" && (
+                    <span className="text-muted-foreground">Saving to quote…</span>
+                  )}
+                  {copilotSave.state === "saved" && (
+                    <span className="text-primary">
+                      Saved to QU-{copilotSave.quoteId.slice(0, 6).toUpperCase()} · qty {copilotSave.quantity} · {copilotSave.at.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                    </span>
+                  )}
+                  {copilotSave.state === "failed" && (
+                    <span className="text-destructive">
+                      Not saved{copilotSave.quoteId ? ` to QU-${copilotSave.quoteId.slice(0, 6).toUpperCase()}` : ""}: {copilotSave.message}{" "}
+                      <button type="button" onClick={handleAddToQuote} disabled={adding} className="underline underline-offset-2 font-medium">
+                        Retry
+                      </button>
+                    </span>
+                  )}
+                </div>
 
                 {/* Utility links — Favorite / Pin / Fabric & Finishes PDF */}
                 <div className="mt-1 border-t border-border/40 pt-4">
