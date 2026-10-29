@@ -13102,6 +13102,16 @@ export type Database = {
           total_users: number
         }[]
       }
+      admin_paid_orders_monthly: {
+        Args: { _include_test?: boolean; _months?: number }
+        Returns: {
+          currency: string
+          month: string
+          order_count: number
+          source: string
+          total_cents: number
+        }[]
+      }
       admin_price_list_audit: { Args: never; Returns: Json }
       admin_price_list_content_inventory: { Args: never; Returns: Json }
       admin_queue_overview: { Args: never; Returns: Json }
