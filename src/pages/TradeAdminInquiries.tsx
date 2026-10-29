@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { inquirySearchWhere, matchesInquirySearch } from "@/lib/inquirySearch";
+import { deduplicateInquiryFinish } from "@/lib/inquiryMessage";
 import { useEffect, useState, useMemo } from "react";
 import { Inbox, Mail, Phone, Package, User, Clock, ExternalLink, FileText, X, CheckCircle2, MessageCircle, Send, Trash2, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -496,7 +497,7 @@ export default function TradeAdminInquiries() {
                 <div className="mt-4">
                   <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Message</div>
                   <div className="mt-1 whitespace-pre-wrap rounded-lg border border-border bg-background/50 p-3 text-sm">
-                    {selected.message}
+                    {deduplicateInquiryFinish(selected.message)}
                   </div>
                 </div>
 

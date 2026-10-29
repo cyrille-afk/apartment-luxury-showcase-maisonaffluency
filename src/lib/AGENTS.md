@@ -1,4 +1,5 @@
 # src/lib rules
+- Enquiry submission and inbox display share inquiryMessage's exact structured-finish deduplication; preserve distinct choices and free notes — historical duplicate lines need no record rewrites.
 - Comparator PDF exports use comparatorExport's explicit field/value allowlist; client mode strips supplier/notes/trade values, internal trade fields require existing visibility, and disabled sections omit swatches too — export configuration cannot rely on screen-hidden rows for privacy.
 - Comparator search and alphabet transitions use shared pure draft helpers that clear the competing filter without replacing selections — keeps UI and persisted interaction state consistent.
 - Comparator material menus expand recognised present families through the shared taxonomy; family-wide choices use distinct labels from non-selectable headers — prevents missing species and duplicate-looking group names without changing recorded finish data.
