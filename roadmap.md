@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Stripe signature alerts
-- [ ] Exclude cryptographically proven deliberately corrupted daily smoke notices from existing alerts, retaining audit records.
-- [ ] Alert on unexpected signature rejections through the existing watchdog; test and verify deployment.
+- [x] Exclude cryptographically proven deliberately corrupted daily smoke notices from existing alerts, retaining audit records.
+- [x] Alert on unexpected signature rejections through the existing watchdog; 14 tests and both startup checks pass. Live known-test rejection produced no alert; unexpected rejection sent email; repeat invocation was throttled.
 
 ## Active quote hand-off
 - [x] Pass the active saved quote ID to Open Quote Builder and distinguish line items from unit quantities without changing saved quantities.
