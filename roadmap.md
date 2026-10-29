@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Order drawer finish pictures
-- [ ] Show the same selected cropped finish samples as Co-Pilot in single-item and multi-item order drawers; verify signed-in rendering without changing quantities or prices.
+- [x] Show the same selected cropped finish samples as Co-Pilot; signed-in Saint Honoré verified loaded Teddy Mohair/Solid Oak samples in single-item and multi-item drawers, with 29 checkout/pricing/persistence regressions passing.
 
 ## Drawer monitoring findings
 - [x] Prevent order-drawer checkout from adding an already configured cart line again; signed-in quantity 1 → 3 stayed 3 after checkout hand-off.
