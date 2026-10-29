@@ -148,6 +148,9 @@ export const findQuoteFinishSwatches = (
     .sort(bySortOrder);
 
   for (const part of variantCandidates(variant)) {
+    // "Selected Pierre Frey fabric" / "Client's own material" style placeholders
+    // name no colourway — matching them would list the whole fabric library.
+    if (/^\s*(selected|choice of|client'?s own|com\b|to be confirmed|tbc)\b/i.test(part)) continue;
     const sizeBefore = matches.length;
 
     // Try single best-match first (exact / fuzzy / token-overlap).
