@@ -1772,6 +1772,13 @@
       "when": 1793300872920,
       "tag": "0252_quote_client_shares",
       "breakpoints": true
+    },
+    {
+      "idx": 253,
+      "version": "7",
+      "when": 1793308131472,
+      "tag": "0253_admin_paid_orders_monthly",
+      "breakpoints": true
     }
   ]
 }
