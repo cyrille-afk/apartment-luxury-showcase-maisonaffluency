@@ -151,7 +151,6 @@ const StudioGallery = () => {
     if (product.hidden_in_trade) {
       if (product.public_product_slug) navigate(`/designers/collection-particuliere/${product.public_product_slug}`, {
         state: { from: location.pathname + location.search },
-        preventScrollReset: true,
       });
       return;
     }
