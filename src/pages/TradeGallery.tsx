@@ -151,12 +151,14 @@ const StudioGallery = () => {
     if (product.hidden_in_trade) {
       if (product.public_product_slug) navigate(`/designers/collection-particuliere/${product.public_product_slug}`, {
         state: { from: location.pathname + location.search },
+        preventScrollReset: true,
       });
       return;
     }
     if (product.trade_product_id) {
       navigate(`/trade/products/${product.trade_product_id}`, {
         state: { from: location.pathname + location.search },
+        preventScrollReset: true,
       });
       return;
     }
@@ -171,6 +173,7 @@ const StudioGallery = () => {
     const productSlug = slugifyForUrl(product.product_name);
     navigate(`/trade/products/${designerSlug}/${productSlug}`, {
       state: { from: location.pathname + location.search },
+        preventScrollReset: true,
     });
   }, [designerSlugMap, navigate, location.pathname, location.search]);
 
