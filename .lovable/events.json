@@ -126,6 +126,55 @@
           }
         }
       }
+    },
+    "project.order_paid": {
+      "event_schema_version": 1,
+      "description": "A checkout payment (card, PayNow or wallet) was confirmed by Stripe as succeeded or processing.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "order_value_cents",
+          "charged_cents",
+          "currency",
+          "method",
+          "is_deposit",
+          "payment_status"
+        ],
+        "properties": {
+          "order_value_cents": {
+            "type": "number"
+          },
+          "charged_cents": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "card",
+              "paynow",
+              "wallet"
+            ]
+          },
+          "is_deposit": {
+            "type": "boolean"
+          },
+          "payment_status": {
+            "type": "string",
+            "enum": [
+              "succeeded",
+              "processing"
+            ]
+          }
+        }
+      }
     }
   }
 }

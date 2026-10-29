@@ -1410,6 +1410,10 @@ function PaymentForm({
       });
       if (error) throw new Error(error.message);
       if (paymentIntent?.status === "succeeded" || paymentIntent?.status === "processing") {
+        window.__lovableEvents?.track?.("project.order_paid", {
+          order_value_cents: total, charged_cents: chargeNow, currency: String(currency).toUpperCase(),
+          method: paynow ? "paynow" : "card", is_deposit: chargeNow < total, payment_status: paymentIntent.status,
+        });
         onPaid(paymentIntent.id);
         return;
       }
@@ -1502,7 +1506,15 @@ function PaymentForm({
               toast.error(error.message || "Payment could not be completed.");
               return;
             }
-            if (paymentIntent) onPaid(paymentIntent.id);
+            if (paymentIntent) {
+              if (paymentIntent.status === "succeeded" || paymentIntent.status === "processing") {
+                window.__lovableEvents?.track?.("project.order_paid", {
+                  order_value_cents: total, charged_cents: chargeNow, currency: String(currency).toUpperCase(),
+                  method: "wallet", is_deposit: chargeNow < total, payment_status: paymentIntent.status,
+                });
+              }
+              onPaid(paymentIntent.id);
+            }
           }}
         />
         <p className="text-xs font-light leading-relaxed text-muted-foreground">
