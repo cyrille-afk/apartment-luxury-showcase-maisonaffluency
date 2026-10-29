@@ -9,6 +9,7 @@ export async function checkStripeDeliveries(db: ReturnType<typeof createClient>,
   try {
     const { count, error } = await db.from('security_audit_events').select('id', { count: 'exact', head: true })
       .eq('source', 'stripe-webhook').eq('event_type', 'stripe_signature_rejected')
+      .or('details->>classification.is.null,details->>classification.neq.expected_smoke_test')
       .gte('occurred_at', new Date(now.getTime() - SIGNATURE_WINDOW_MINUTES * 60000).toISOString());
     if (error) throw new Error('Signature telemetry could not be read');
     rejected = count ?? 0;
