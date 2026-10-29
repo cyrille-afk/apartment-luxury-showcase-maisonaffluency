@@ -12,6 +12,7 @@ import PresentationModeToggle from "./PresentationModeToggle";
 import DrawerPricing from "./DrawerPricing";
 import { quoteDrawerRetail } from "@/lib/quoteDrawerRetail";
 import { quoteLinePricing, summarizeQuoteLines } from "@/lib/quoteLineSummary";
+import { quoteStatusMeta, quoteLastActivity, formatQuoteDate } from "@/lib/quoteStatusMeta";
 import type { QuoteFinishVariant } from "@/lib/quoteFinishSwatches";
 
 interface QuoteItem {
