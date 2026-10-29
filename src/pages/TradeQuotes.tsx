@@ -200,6 +200,7 @@ const TradeQuotes = () => {
       (quotesData || []).map((q: any) => ({
         ...q,
         item_count: itemCounts[q.id] || 0,
+        last_activity: quoteLastActivity(q.updated_at, itemDates[q.id] || []),
         profiles: profileMap[q.user_id] || null,
         project_name: q.project_id ? projectMap[q.project_id] || null : null,
       }))
@@ -669,8 +670,9 @@ const TradeQuotes = () => {
                       )}
                     </div>
                     <p className="font-body text-[10px] text-muted-foreground">
-                      Created {new Date(quote.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
-                      {quote.submitted_at && ` · Submitted ${new Date(quote.submitted_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`}
+                      Created {formatQuoteDate(quote.created_at)}
+                      {quote.last_activity && ` · Updated ${formatQuoteDate(quote.last_activity)}`}
+                      {quote.submitted_at && ` · Submitted ${formatQuoteDate(quote.submitted_at)}`}
                     </p>
                     {quote.notes && (
                       <p className="font-body text-xs text-muted-foreground mt-1 italic truncate">"{quote.notes}"</p>
