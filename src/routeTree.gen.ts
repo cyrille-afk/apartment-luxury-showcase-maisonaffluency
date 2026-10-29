@@ -84,6 +84,7 @@ import { Route as PreviewSplatRouteImport } from './routes/preview_.$'
 import { Route as ProductIdRouteImport } from './routes/product_.$id'
 import { Route as ProductsCategoryCategorySlugRouteImport } from './routes/products-category_.$categorySlug'
 import { Route as ProductsProductSlugRouteImport } from './routes/products_.$productSlug'
+import { Route as QuoteTokenRouteImport } from './routes/quote_.$token'
 import { Route as SettingsStudioRouteImport } from './routes/settings.studio'
 import { Route as ShopSplatRouteImport } from './routes/shop_.$'
 import { Route as ShortlistTokenRouteImport } from './routes/shortlist_.$token'
@@ -641,6 +642,11 @@ const ProductsCategoryCategorySlugRoute =
 const ProductsProductSlugRoute = ProductsProductSlugRouteImport.update({
   id: '/products_/$productSlug',
   path: '/products/$productSlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuoteTokenRoute = QuoteTokenRouteImport.update({
+  id: '/quote_/$token',
+  path: '/quote/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsStudioRoute = SettingsStudioRouteImport.update({
@@ -1669,6 +1675,7 @@ export interface FileRoutesByFullPath {
   '/product/$id': typeof ProductIdRoute
   '/products-category/$categorySlug': typeof ProductsCategoryCategorySlugRoute
   '/products/$productSlug': typeof ProductsProductSlugRoute
+  '/quote/$token': typeof QuoteTokenRoute
   '/settings/studio': typeof SettingsStudioRoute
   '/shop/$': typeof ShopSplatRoute
   '/shortlist/$token': typeof ShortlistTokenRoute
@@ -1927,6 +1934,7 @@ export interface FileRoutesByTo {
   '/product/$id': typeof ProductIdRoute
   '/products-category/$categorySlug': typeof ProductsCategoryCategorySlugRoute
   '/products/$productSlug': typeof ProductsProductSlugRoute
+  '/quote/$token': typeof QuoteTokenRoute
   '/settings/studio': typeof SettingsStudioRoute
   '/shop/$': typeof ShopSplatRoute
   '/shortlist/$token': typeof ShortlistTokenRoute
@@ -2187,6 +2195,7 @@ export interface FileRoutesById {
   '/product_/$id': typeof ProductIdRoute
   '/products-category_/$categorySlug': typeof ProductsCategoryCategorySlugRoute
   '/products_/$productSlug': typeof ProductsProductSlugRoute
+  '/quote_/$token': typeof QuoteTokenRoute
   '/settings/studio': typeof SettingsStudioRoute
   '/shop_/$': typeof ShopSplatRoute
   '/shortlist_/$token': typeof ShortlistTokenRoute
@@ -2448,6 +2457,7 @@ export interface FileRouteTypes {
     | '/product/$id'
     | '/products-category/$categorySlug'
     | '/products/$productSlug'
+    | '/quote/$token'
     | '/settings/studio'
     | '/shop/$'
     | '/shortlist/$token'
@@ -2706,6 +2716,7 @@ export interface FileRouteTypes {
     | '/product/$id'
     | '/products-category/$categorySlug'
     | '/products/$productSlug'
+    | '/quote/$token'
     | '/settings/studio'
     | '/shop/$'
     | '/shortlist/$token'
@@ -2965,6 +2976,7 @@ export interface FileRouteTypes {
     | '/product_/$id'
     | '/products-category_/$categorySlug'
     | '/products_/$productSlug'
+    | '/quote_/$token'
     | '/settings/studio'
     | '/shop_/$'
     | '/shortlist_/$token'
@@ -3225,6 +3237,7 @@ export interface RootRouteChildren {
   ProductIdRoute: typeof ProductIdRoute
   ProductsCategoryCategorySlugRoute: typeof ProductsCategoryCategorySlugRoute
   ProductsProductSlugRoute: typeof ProductsProductSlugRoute
+  QuoteTokenRoute: typeof QuoteTokenRoute
   ShopSplatRoute: typeof ShopSplatRoute
   ShortlistTokenRoute: typeof ShortlistTokenRoute
   SpecSheetsSlugRoute: typeof SpecSheetsSlugRoute
@@ -3783,6 +3796,13 @@ declare module '@tanstack/react-router' {
       path: '/products/$productSlug'
       fullPath: '/products/$productSlug'
       preLoaderRoute: typeof ProductsProductSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quote_/$token': {
+      id: '/quote_/$token'
+      path: '/quote/$token'
+      fullPath: '/quote/$token'
+      preLoaderRoute: typeof QuoteTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings/studio': {
@@ -5459,6 +5479,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProductIdRoute: ProductIdRoute,
   ProductsCategoryCategorySlugRoute: ProductsCategoryCategorySlugRoute,
   ProductsProductSlugRoute: ProductsProductSlugRoute,
+  QuoteTokenRoute: QuoteTokenRoute,
   ShopSplatRoute: ShopSplatRoute,
   ShortlistTokenRoute: ShortlistTokenRoute,
   SpecSheetsSlugRoute: SpecSheetsSlugRoute,
