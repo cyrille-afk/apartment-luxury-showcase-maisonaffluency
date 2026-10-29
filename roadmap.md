@@ -1,5 +1,10 @@
 # Roadmap
 
+## Drawer monitoring findings
+- [ ] Verify and prevent order-drawer checkout from adding an already configured cart line again.
+- [ ] Restore authoritative retail pricing for saved configured quote lines without exposing net prices in Presentation.
+- [ ] Run regressions and signed-in drawer flows; resolve confirmed monitoring findings.
+
 ## Presentation price protection
 - [x] Align Presentation retail labels and typography across product prices and drawer summaries; signed-in ON/OFF verified four synchronized blocks with matching computed type/color, phone fit, unchanged URL, and 15 passing regressions.
 - [x] Persist mode across product pages, drawer remounts and app reloads/resume; signed-in browser verified ON/OFF across two products and reloads, with drawer remount/resume covered by tests (13 regressions pass).
