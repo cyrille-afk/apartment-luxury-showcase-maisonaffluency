@@ -12,7 +12,7 @@ vi.mock('@/contexts/CheckoutFormContext', () => ({ useCheckoutForm: () => ({ buy
 vi.mock('@/hooks/useTradeProductPricing', () => ({ useTradeProductPricing: () => ({ data: null }) }));
 vi.mock('@/hooks/useTradeDiscount', () => ({ useTradeDiscount: () => ({ discountPct: 0, apply: (price: number) => price }) }));
 vi.mock('@/lib/clientSafeMode', () => ({ useClientSafeMode: () => ({ clientSafe: mocks.clientSafe }) }));
-vi.mock('./SelectionDrawer', () => ({ default: ({ onCheckout }: { onCheckout: (method: string) => void }) => <button onClick={() => onCheckout('online')}>Checkout selection</button> }));
+vi.mock('./SelectionDrawer', () => ({ default: ({ onCheckout, onQuantityChange }: { onCheckout: (method: string) => void; onQuantityChange: (quantity: number) => void }) => <><button onClick={() => onCheckout('online')}>Checkout selection</button><button onClick={() => onCheckout('wire')}>Checkout wire</button><button onClick={() => onQuantityChange(3)}>Set drawer quantity to 3</button></> }));
 vi.mock('./BespokeConfigurationDialog', () => ({ default: () => null }));
 vi.mock('./OrderIntakeSheet', () => ({ default: (props: { isOpen: boolean; onComplete: (details: unknown) => void }) => { mocks.intake(props); return props.isOpen ? <button onClick={() => props.onComplete({ profile: 'private', city: 'London', email: 'client@example.com', notes: '', phone: '', company: '' })}>Complete intake</button> : null; } }));
 
@@ -37,6 +37,50 @@ describe('mobile order intake', () => {
 });
 
 describe('product selection checkout hand-off', () => {
+  it.each(['Checkout selection', 'Checkout wire'])('hands off a saved Trade line once via %s without adding the page quantity again', (checkout) => {
+    mocks.pathname = '/trade/products/chair';
+    mocks.items = [{ key: 'chair', quantity: 1 }] as CartItem[];
+    const placeOrder = vi.fn();
+    const add = vi.fn();
+    render(<ProductCommerceCta productId="chair" dockOnly tradeApproved onPlaceOrder={placeOrder} onAddToCart={add} />);
+    fireEvent.click(screen.getByRole('button', { name: /^Place Order$/ }));
+    fireEvent.click(screen.getByRole('button', { name: checkout }));
+    expect(add).toHaveBeenCalledTimes(1);
+    expect(add).toHaveBeenCalledWith(1);
+    expect(placeOrder).not.toHaveBeenCalled();
+    expect(mocks.items[0].quantity).toBe(1);
+    expect(mocks.navigate).toHaveBeenCalledWith('/cart');
+  });
+
+  it('does not re-add the page quantity after a Trade drawer quantity edit', async () => {
+    const cart = await import('@/lib/cart');
+    const setQuantity = vi.spyOn(cart, 'setQuantity');
+    mocks.pathname = '/trade/products/chair';
+    mocks.items = [{ key: 'chair', quantity: 1 }] as CartItem[];
+    const placeOrder = vi.fn();
+    const add = vi.fn();
+    render(<ProductCommerceCta productId="chair" dockOnly tradeApproved onPlaceOrder={placeOrder} onAddToCart={add} />);
+    fireEvent.click(screen.getByRole('button', { name: /^Place Order$/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Set drawer quantity to 3' }));
+    expect(setQuantity).toHaveBeenCalledWith('chair', 3);
+    fireEvent.click(screen.getByRole('button', { name: 'Checkout selection' }));
+    expect(add).toHaveBeenCalledTimes(1);
+    expect(placeOrder).not.toHaveBeenCalled();
+    expect(mocks.navigate).toHaveBeenCalledWith('/cart');
+    setQuantity.mockRestore();
+  });
+
+  it('hands off multiple Trade lines without rewriting any quantities', () => {
+    mocks.pathname = '/trade/products/chair';
+    mocks.items = [{ key: 'chair', quantity: 1 }, { key: 'table', quantity: 2 }] as CartItem[];
+    const placeOrder = vi.fn();
+    render(<ProductCommerceCta productId="chair" dockOnly tradeApproved onPlaceOrder={placeOrder} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Checkout selection' }));
+    expect(placeOrder).not.toHaveBeenCalled();
+    expect(mocks.items.map((item) => item.quantity)).toEqual([1, 2]);
+    expect(mocks.navigate).toHaveBeenCalledWith('/cart');
+  });
+
   it('bypasses intake for an authenticated desktop Trade workspace order and inherits the professional session', () => {
     mocks.pathname = '/trade/products/chair';
     vi.stubGlobal('matchMedia', () => ({ matches: true, addEventListener() {}, removeEventListener() {} }));

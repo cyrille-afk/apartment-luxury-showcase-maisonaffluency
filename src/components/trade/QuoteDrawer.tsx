@@ -10,6 +10,8 @@ import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { dimensionsFromVariantLabel } from "@/lib/drawerDimensions";
 import PresentationModeToggle from "./PresentationModeToggle";
 import DrawerPricing from "./DrawerPricing";
+import { quoteDrawerRetail } from "@/lib/quoteDrawerRetail";
+import type { QuoteFinishVariant } from "@/lib/quoteFinishSwatches";
 
 interface QuoteItem {
   id: string;
@@ -26,6 +28,7 @@ interface QuoteItem {
   fabric?: { name: string; image_url: string | null; tier: string | null; price_per_lm_cents: number | null; currency: string | null } | null;
   wood_fabric?: { name: string; image_url: string | null } | null;
   variant_swatches?: { name: string; image_url: string }[];
+  woodRetail?: { cents: number; currency: string } | null;
   product: {
     product_name: string;
     brand_name: string;
@@ -36,6 +39,7 @@ interface QuoteItem {
     source_pick_id?: string | null;
     id?: string | null;
     dimensions?: string | null;
+    size_variants?: QuoteFinishVariant[] | null;
   };
 }
 
@@ -72,7 +76,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
       setLoading(true);
       const { data } = await supabase
         .from("trade_quote_items")
-        .select("id, image_url, quantity, unit_price_cents, unit_price_currency, variant_label, fabric_id, wood_fabric_id, fabric_meters, fabric_upcharge_cents, fabric_currency, fabric:fabrics!fabric_id(name, image_url, tier, price_per_lm_cents, currency), wood_fabric:fabrics!trade_quote_items_wood_fabric_id_fkey(name, image_url), product:trade_products(id, product_name, brand_name, image_url, trade_price_cents, rrp_price_cents, currency, source_pick_id, dimensions)")
+        .select("id, image_url, quantity, unit_price_cents, unit_price_currency, variant_label, fabric_id, wood_fabric_id, fabric_meters, fabric_upcharge_cents, fabric_currency, fabric:fabrics!fabric_id(name, image_url, tier, price_per_lm_cents, currency), wood_fabric:fabrics!trade_quote_items_wood_fabric_id_fkey(name, image_url), product:trade_products(id, product_name, brand_name, image_url, trade_price_cents, rrp_price_cents, currency, source_pick_id, dimensions, size_variants)")
         .eq("quote_id", quoteId)
         .order("created_at", { ascending: false });
 
@@ -97,6 +101,31 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
         // Fallback: prefer freshest price from designer_curator_picks when the
         // mirror row is missing or stale.
         mapped = await hydrateQuotePricesFromPicks(mapped, "product");
+
+        // The frame swatch can override the variant/catalogue retail basis.
+        // Resolve only the saved product + fabric pair, never a net unit price.
+        const woodPickIds = [...new Set(mapped.filter((item) => item.wood_fabric_id)
+          .map((item) => item.product?.source_pick_id).filter((id): id is string => Boolean(id)))];
+        if (woodPickIds.length) {
+          const { data: frameRows, error: frameError } = await supabase.from("product_fabrics")
+            .select("pick_id, fabric_id, price_cents_a, fabric:fabrics(currency)")
+            .in("pick_id", woodPickIds);
+          for (const item of mapped) {
+            if (!item.wood_fabric_id || !item.product?.source_pick_id) continue;
+            if (frameError) {
+              item.product = { ...item.product, rrp_price_cents: null, size_variants: null };
+              continue;
+            }
+            const rows = (frameRows ?? []).filter((row) => row.pick_id === item.product.source_pick_id && row.fabric_id === item.wood_fabric_id && (row.price_cents_a ?? 0) > 0);
+            if (rows.length === 1) {
+              const row = rows[0];
+              const fabric = Array.isArray(row.fabric) ? row.fabric[0] : row.fabric;
+              if (row.price_cents_a) item.woodRetail = { cents: row.price_cents_a, currency: fabric?.currency || item.product.currency || "EUR" };
+            } else if (rows.length > 1) {
+              item.product = { ...item.product, rrp_price_cents: null, size_variants: null };
+            }
+          }
+        }
 
         // Multi-axis finish swatches: dual/triple-axis products (e.g. Angelo
         // M/R table = Base · Top · Size all in stone) only get ONE swatch id
@@ -342,13 +371,13 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
                     </span>
                     {(() => {
                       const snapshot = activePriceSnapshot?.itemId === item.id ? activePriceSnapshot : null;
-                      const retail = !item.variant_label && !item.fabric_id ? item.product?.rrp_price_cents : null;
+                      const retail = quoteDrawerRetail(savedItem);
                       const displayCents = item.unit_price_cents ?? item.product?.trade_price_cents ?? item.product?.rrp_price_cents;
                       const displayCurrency = item.unit_price_cents != null
                         ? (item.unit_price_currency || item.product?.currency || "EUR")
                         : (item.product?.currency || "EUR");
 
-                      return <DrawerPricing retailLabel={snapshot?.retailLabel ?? (retail && retail > 0 ? formatPrice(retail, item.product.currency || "EUR") : null)} netLabel={snapshot?.netLabel ?? (displayCents && displayCents > 0 ? formatPrice(displayCents, displayCurrency) : null)} />;
+                      return <DrawerPricing retailLabel={snapshot ? snapshot.retailLabel : retail ? formatPrice(retail.cents, retail.currency) : null} netLabel={snapshot?.netLabel ?? (displayCents && displayCents > 0 ? formatPrice(displayCents, displayCurrency) : null)} />;
                     })()}
                   </div>
                 </div>

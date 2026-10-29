@@ -1,5 +1,10 @@
 # Roadmap
 
+## Drawer monitoring findings
+- [x] Prevent order-drawer checkout from adding an already configured cart line again; signed-in quantity 1 → 3 stayed 3 after checkout hand-off.
+- [x] Restore authoritative retail for saved configured quote lines; saved Saint Honoré 280 showed €22,600 in Presentation without net rows. Legacy ambiguous size labels remain Price upon Request rather than guessing.
+- [x] Verify signed-in drawer flows and 34 passing regressions; resolve both confirmed monitoring findings.
+
 ## Presentation price protection
 - [x] Align Presentation retail labels and typography across product prices and drawer summaries; signed-in ON/OFF verified four synchronized blocks with matching computed type/color, phone fit, unchanged URL, and 15 passing regressions.
 - [x] Persist mode across product pages, drawer remounts and app reloads/resume; signed-in browser verified ON/OFF across two products and reloads, with drawer remount/resume covered by tests (13 regressions pass).
