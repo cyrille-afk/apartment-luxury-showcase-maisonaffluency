@@ -1,5 +1,9 @@
 # Roadmap
 
+## Active quote hand-off
+- [x] Pass the active saved quote ID to Open Quote Builder and distinguish line items from unit quantities without changing saved quantities.
+- [ ] Verify the exact saved quote opens from its drawer, with matching finishes and quantities.
+
 ## Order drawer finish pictures
 - [x] Show the same selected cropped finish samples as Co-Pilot; signed-in Saint Honoré verified loaded Teddy Mohair/Solid Oak samples in single-item and multi-item drawers, with 29 checkout/pricing/persistence regressions passing.
 
