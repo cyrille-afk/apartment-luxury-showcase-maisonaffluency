@@ -11,6 +11,7 @@ import { dimensionsFromVariantLabel } from "@/lib/drawerDimensions";
 import PresentationModeToggle from "./PresentationModeToggle";
 import DrawerPricing from "./DrawerPricing";
 import { quoteDrawerRetail } from "@/lib/quoteDrawerRetail";
+import { quoteLinePricing, summarizeQuoteLines } from "@/lib/quoteLineSummary";
 import type { QuoteFinishVariant } from "@/lib/quoteFinishSwatches";
 
 interface QuoteItem {
