@@ -44,12 +44,7 @@ export function buildSharedQuoteSnapshot(quoteId: string, clientName: string | n
   const lines: SharedQuoteLine[] = items.map((item) => {
     const pricing = quoteLinePricing(item, true);
     const finish = [item.fabric?.name, item.wood_fabric?.name].filter(Boolean).join(" · ") || item.variant_label || null;
-    let dimensions: string | null = null;
-    try {
-      dimensions = (dimensionsFromVariantLabel as (...a: unknown[]) => string | null)(item.variant_label, item.product?.size_variants, item.product?.dimensions) || item.product?.dimensions || null;
-    } catch {
-      dimensions = item.product?.dimensions || null;
-    }
+    const dimensions = dimensionsFromVariantLabel(item.variant_label, item.product?.dimensions ?? null);
     return {
       name: item.product?.product_name || "Piece",
       maker: item.product?.brand_name || null,
