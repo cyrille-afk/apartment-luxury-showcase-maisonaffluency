@@ -28,6 +28,9 @@ it("opens the exact active quote without treating unit quantity as separate line
   expect(link.getAttribute("href")).toBe("/trade/quotes/e3ccd6-active-quote");
   expect(screen.getByText("2 line items · 8 units in this quote")).toBeTruthy();
   expect(screen.getByText("Qty: 7")).toBeTruthy();
+  // Status chip + last-updated date (newest item created_at beats quote.updated_at).
+  expect(screen.getByText("Draft")).toBeTruthy();
+  expect(screen.getByText("Last updated 29 Oct 2026")).toBeTruthy();
   fireEvent.click(link);
   expect(onOpenChange).toHaveBeenCalledWith(false);
 });
