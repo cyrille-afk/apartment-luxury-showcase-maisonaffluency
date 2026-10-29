@@ -149,7 +149,7 @@ const TradeQuotes = () => {
       quoteIds.length > 0
         ? supabase
             .from("trade_quote_items")
-            .select("quote_id, quantity, unit_price_cents, fabric_upcharge_cents, crating_cents")
+            .select("quote_id, quantity, unit_price_cents, fabric_upcharge_cents, crating_cents, created_at")
             .in("quote_id", quoteIds)
         : Promise.resolve({ data: [] as any[] }),
       projectIds.length > 0
@@ -162,8 +162,10 @@ const TradeQuotes = () => {
 
     const itemCounts: Record<string, number> = {};
     const quoteTotals: Record<string, number> = {};
+    const itemDates: Record<string, string[]> = {};
     (itemsRes.data || []).forEach((item: any) => {
       itemCounts[item.quote_id] = (itemCounts[item.quote_id] || 0) + 1;
+      if (item.created_at) (itemDates[item.quote_id] ||= []).push(item.created_at);
       const qty = Number(item.quantity) || 0;
       const unit = (Number(item.unit_price_cents) || 0) + (Number(item.fabric_upcharge_cents) || 0);
       quoteTotals[item.quote_id] =
