@@ -1,5 +1,9 @@
 # Roadmap
 
+## Stripe signature alerts
+- [ ] Exclude cryptographically proven deliberately corrupted daily smoke notices from existing alerts, retaining audit records.
+- [ ] Alert on unexpected signature rejections through the existing watchdog; test and verify deployment.
+
 ## Active quote hand-off
 - [x] Pass the active saved quote ID to Open Quote Builder and distinguish line items from unit quantities without changing saved quantities.
 - [x] Signed-in verification: QU-E3CCD6 contains one Saint Honoré Sofa line with quantity seven; its drawer link opens that exact saved quote, with quantity unchanged. Three drawer regressions pass; build OK.
