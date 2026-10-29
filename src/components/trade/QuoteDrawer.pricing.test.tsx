@@ -11,12 +11,24 @@ const product = { id: "sofa", source_pick_id: null, product_name: "Saint Honoré
     { base: "Solid Oak", top: "Selected Pierre Frey fabric", label: "Saint Honoré 280", price_cents: 2260000 },
   ] };
 vi.mock("@/integrations/supabase/client", () => ({ supabase: { from: () => ({ select: () => ({ eq: () => ({ order: async () => ({ data: [
-  { id: "240", product, quantity: 1, variant_label: "Selected Pierre Frey fabric · Saint Honoré 240", unit_price_cents: 1845000, unit_price_currency: "EUR" },
+  { id: "240", product, quantity: 7, variant_label: "Selected Pierre Frey fabric · Saint Honoré 240", unit_price_cents: 1845000, unit_price_currency: "EUR" },
   { id: "280", product, quantity: 1, variant_label: "Selected Pierre Frey fabric · Saint Honoré 280", fabric_id: "teddy", fabric: { name: "Teddy Mohair", price_per_lm_cents: null }, unit_price_cents: 2034000, unit_price_currency: "EUR" },
 ] }) }) }) }) } }));
 vi.mock("@/lib/hydrateQuotePricesFromPicks", () => ({ hydrateQuotePricesFromPicks: async (items: unknown[]) => items }));
-vi.mock("@/lib/router-compat", () => ({ Link: ({ children }: { children: React.ReactNode }) => <span>{children}</span> }));
+vi.mock("@tanstack/react-router", () => ({ Link: ({ children, params, onClick }: { children: React.ReactNode; params: { quoteId: string }; onClick: () => void }) => <a href={`/trade/quotes/${encodeURIComponent(params.quoteId)}`} onClick={onClick}>{children}</a> }));
 afterEach(() => { cleanup(); setClientSafeMode(false); });
+
+it("opens the exact active quote without treating unit quantity as separate lines", async () => {
+  const onOpenChange = vi.fn();
+  render(<QuoteDrawer open onOpenChange={onOpenChange} quoteId="e3ccd6-active-quote" />);
+  await waitFor(() => expect(screen.getByText("€22,600")).toBeTruthy());
+  const link = screen.getByRole("link", { name: "Open Quote Builder" });
+  expect(link.getAttribute("href")).toBe("/trade/quotes/e3ccd6-active-quote");
+  expect(screen.getByText("2 line items · 8 units in this quote")).toBeTruthy();
+  expect(screen.getByText("Qty: 7")).toBeTruthy();
+  fireEvent.click(link);
+  expect(onOpenChange).toHaveBeenCalledWith(false);
+});
 
 it("restores saved configured retail across every quote line without an active page snapshot", async () => {
   setClientSafeMode(false);

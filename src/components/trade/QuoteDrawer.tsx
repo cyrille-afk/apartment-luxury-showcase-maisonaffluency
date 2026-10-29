@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "@/lib/router-compat";
+import { Link } from "@tanstack/react-router";
 import { ShoppingCart, Trash2, Package, ArrowRight } from "lucide-react";
 import { DrawerItemSkeleton } from "@/components/trade/skeletons";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
@@ -243,7 +243,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
     setItems((prev) => prev.filter((i) => i.id !== itemId));
   };
 
-  const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
+  const totalQuantity = items.reduce((sum, i) => sum + i.quantity, 0);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -260,7 +260,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
             )}
           </SheetTitle>
           <SheetDescription className="font-body text-xs">
-            {itemCount} {itemCount === 1 ? "item" : "items"} in this quote
+            {items.length} {items.length === 1 ? "line item" : "line items"} · {totalQuantity} {totalQuantity === 1 ? "unit" : "units"} in this quote
           </SheetDescription>
         </SheetHeader>
 
@@ -396,7 +396,8 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
         {quoteId && (
           <div className="border-t border-border pt-4 mt-4">
             <Link
-              to="/trade/quotes"
+              to="/trade/quotes/$quoteId"
+              params={{ quoteId }}
               onClick={() => onOpenChange(false)}
               className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-foreground text-background rounded-md font-body text-xs uppercase tracking-wider hover:bg-foreground/90 transition-colors"
             >
