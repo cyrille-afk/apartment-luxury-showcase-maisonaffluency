@@ -164,6 +164,17 @@ export default function OrderLedger() {
         body: { orderId: order.id },
       });
       if (error) throw error;
+      if (order.status !== "paid") {
+        window.__lovableEvents?.track?.("project.order_paid", {
+          order_value_cents: order.total_cents ?? 0,
+          charged_cents: order.total_cents ?? 0,
+          currency: String(order.currency || "EUR").toUpperCase(),
+          method: "bank_transfer",
+          is_deposit: false,
+          payment_status: "succeeded",
+          source: "admin_marked",
+        });
+      }
       toast({
         title: `${order.order_ref} marked paid`,
         description: (data as { emailed?: boolean })?.emailed

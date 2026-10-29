@@ -128,8 +128,8 @@
       }
     },
     "project.order_paid": {
-      "event_schema_version": 1,
-      "description": "A checkout payment (card, PayNow or wallet) was confirmed by Stripe as succeeded or processing.",
+      "event_schema_version": 2,
+      "description": "An order was paid: Stripe confirmed a card/PayNow/wallet checkout, or an admin marked a bank-transfer order paid (source=admin_marked).",
       "privacy": {
         "contains_pii": false,
         "purpose": "product_analytics"
@@ -160,7 +160,8 @@
             "enum": [
               "card",
               "paynow",
-              "wallet"
+              "wallet",
+              "bank_transfer"
             ]
           },
           "is_deposit": {
@@ -171,6 +172,13 @@
             "enum": [
               "succeeded",
               "processing"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "checkout",
+              "admin_marked"
             ]
           }
         }
