@@ -1,0 +1,42 @@
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, expect, it, vi } from "vitest";
+import { setClientSafeMode } from "@/lib/clientSafeMode";
+import QuoteDrawer from "./QuoteDrawer";
+
+const product = { id: "sofa", source_pick_id: null, product_name: "Saint Honoré Sofa", brand_name: "Pierre Augustin Rose", rrp_price_cents: 1460000, trade_price_cents: 1460000, currency: "EUR", image_url: null,
+  size_variants: [
+    { base: "Solid Oak", top: "COM", label: "Saint Honoré 240", price_cents: 1460000 },
+    { base: "Solid Oak", top: "Selected Pierre Frey fabric", label: "Saint Honoré 240", price_cents: 2050000 },
+    { base: "Solid Oak", top: "COM", label: "Saint Honoré 280", price_cents: 1670000 },
+    { base: "Solid Oak", top: "Selected Pierre Frey fabric", label: "Saint Honoré 280", price_cents: 2260000 },
+  ] };
+vi.mock("@/integrations/supabase/client", () => ({ supabase: { from: () => ({ select: () => ({ eq: () => ({ order: async () => ({ data: [
+  { id: "240", product, quantity: 1, variant_label: "Selected Pierre Frey fabric · Saint Honoré 240", unit_price_cents: 1845000, unit_price_currency: "EUR" },
+  { id: "280", product, quantity: 1, variant_label: "Selected Pierre Frey fabric · Saint Honoré 280", fabric_id: "teddy", fabric: { name: "Teddy Mohair", price_per_lm_cents: null }, unit_price_cents: 2034000, unit_price_currency: "EUR" },
+] }) }) }) }) } }));
+vi.mock("@/lib/hydrateQuotePricesFromPicks", () => ({ hydrateQuotePricesFromPicks: async (items: unknown[]) => items }));
+vi.mock("@/lib/router-compat", () => ({ Link: ({ children }: { children: React.ReactNode }) => <span>{children}</span> }));
+afterEach(() => { cleanup(); setClientSafeMode(false); });
+
+it("restores saved configured retail across every quote line without an active page snapshot", async () => {
+  setClientSafeMode(false);
+  render(<QuoteDrawer open onOpenChange={vi.fn()} quoteId="quote" />);
+  await waitFor(() => expect(screen.getByText("€22,600")).toBeTruthy());
+  expect(screen.getByText("€20,500")).toBeTruthy();
+  expect(screen.getByText("€20,340")).toBeTruthy();
+  expect(screen.getByText("€18,450")).toBeTruthy();
+  fireEvent.click(screen.getByRole("switch", { name: "Presentation Mode" }));
+  expect(screen.queryByText("€20,340")).toBeNull();
+  expect(screen.queryByText("€18,450")).toBeNull();
+  expect(screen.getByText("€22,600")).toBeTruthy();
+  expect(screen.getByText("€20,500")).toBeTruthy();
+});
+
+it("keeps the live active-line retail snapshot ahead of catalogue retail", async () => {
+  setClientSafeMode(true);
+  render(<QuoteDrawer open onOpenChange={vi.fn()} quoteId="quote" activePriceSnapshot={{ itemId: "280", retailLabel: "€23,000", netLabel: "€20,700" }} />);
+  await waitFor(() => expect(screen.getByText("€23,000")).toBeTruthy());
+  expect(screen.queryByText("€22,600")).toBeNull();
+  expect(screen.queryByText("€20,700")).toBeNull();
+  expect(screen.getByText("€20,500")).toBeTruthy();
+});
