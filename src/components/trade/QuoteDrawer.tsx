@@ -27,6 +27,7 @@ interface QuoteItem {
   fabric_meters: number | null;
   fabric_upcharge_cents: number | null;
   fabric_currency: string | null;
+  created_at?: string | null;
   fabric?: { name: string; image_url: string | null; tier: string | null; price_per_lm_cents: number | null; currency: string | null } | null;
   wood_fabric?: { name: string; image_url: string | null } | null;
   variant_swatches?: { name: string; image_url: string }[];
@@ -104,6 +105,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
           fabric_meters: d.fabric_meters ?? null,
           fabric_upcharge_cents: d.fabric_upcharge_cents ?? null,
           fabric_currency: d.fabric_currency ?? null,
+          created_at: d.created_at ?? null,
           fabric: Array.isArray(d.fabric) ? d.fabric[0] : d.fabric,
           wood_fabric: Array.isArray(d.wood_fabric) ? d.wood_fabric[0] : d.wood_fabric,
           product: Array.isArray(d.product) ? d.product[0] : d.product,
