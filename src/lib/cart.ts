@@ -12,6 +12,8 @@ export interface CartItem {
   title: string;
   designerName: string;
   finishLabel: string | null;
+  /** Display-only selected cropped samples; never used to calculate prices. */
+  finishSwatches?: { name: string; image_url: string }[];
   /** Structured variant axes (base × top × size) used to re-price server-side. */
   variant?: { base: string | null; top: string | null; size: string | null } | null;
   pairing?: PairingReference | null;
@@ -378,7 +380,7 @@ export function addToCart(item: Omit<CartItem, "key" | "quantity"> & { quantity?
   setUserEmptied(false);
   const existing = items.find((i) => i.key === key);
   if (existing) {
-    commitExplicit(items.map((i) => (i.key === key ? { ...i, quantity: i.quantity + qty } : i)));
+    commitExplicit(items.map((i) => (i.key === key ? { ...i, finishSwatches: item.finishSwatches ?? i.finishSwatches, quantity: i.quantity + qty } : i)));
   } else {
     commitExplicit([...items, { ...item, finishLabel: item.finishLabel ?? null, key, quantity: qty }]);
   }

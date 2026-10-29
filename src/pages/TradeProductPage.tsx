@@ -2022,6 +2022,7 @@ const TradeProductPage: React.FC = () => {
       title: product.title,
       designerName: designerDisplay,
       finishLabel,
+      finishSwatches: felixSelectionRef.current?.finishes?.filter((finish) => !!finish.imageUrl).map((finish) => ({ name: finish.name, image_url: finish.imageUrl || "" })),
       variant: { base: selectedBase, top: selectedTop, size: selectedDualSize || selectedSingleSize },
       imageUrl: product.image_url || null,
       leadTime: product.lead_time || null,
@@ -3724,6 +3725,7 @@ const TradeProductPage: React.FC = () => {
         selectedFinishes={[selectedBase, selectedTop, selectedDualSize, selectedSingleSize, selectedFabric?.name].filter((value): value is string => typeof value === "string" && value.length > 0)}
         orderFinishLabel={selectorQuoteFinishes?.pickId === product.id ? selectorQuoteFinishes.finishes.map((finish) => `${finish.label}: ${finish.name}`).join(" · ") : [selectedWoodPrice?.name || selectedBaseDisplay || selectedBase, selectedTopDisplay || selectedTop, selectedDualSize || selectedSingleSize, selectedFabric?.name].filter(Boolean).join(" · ")}
         dimensionsLabel={drawerDimensionsLabel}
+        selectedFinishSwatches={felixSelectionRef.current?.finishes?.filter((finish) => !!finish.imageUrl).map((finish) => ({ name: finish.name, image_url: finish.imageUrl || "" }))}
         onAddToCart={(orderQuantity) => handleProceedToOrder(orderQuantity, true)}
         onPlaceOrder={() => currentRrpCents() ? handleProceedToOrder() : setCustomRequestOpen(true)}
       />
