@@ -36,20 +36,13 @@ interface Quote {
   created_at: string;
   updated_at: string;
   item_count: number;
+  last_activity: string | null;
   project_id?: string | null;
   project_name?: string | null;
   profiles?: { first_name: string; last_name: string; company: string; email: string } | null;
 }
 
-const statusConfig: Record<string, { label: string; icon: typeof Clock; className: string }> = {
-  draft: { label: "Draft", icon: FileText, className: "bg-muted text-muted-foreground" },
-  submitted: { label: "Submitted", icon: Send, className: "bg-primary/10 text-primary" },
-  priced: { label: "Priced — Review", icon: Clock, className: "bg-amber-500/10 text-amber-600" },
-  confirmed: { label: "Order Confirmed", icon: CheckCircle, className: "bg-emerald-500/10 text-emerald-600" },
-  deposit_paid: { label: "Deposit Paid", icon: CreditCard, className: "bg-emerald-500/10 text-emerald-600" },
-  paid: { label: "Fully Paid", icon: CheckCircle, className: "bg-emerald-500/10 text-emerald-600" },
-  cancelled: { label: "Cancelled", icon: XCircle, className: "bg-destructive/10 text-destructive" },
-};
+const statusConfig = quoteStatusConfig;
 
 const filterPillClass = (active: boolean) =>
   `inline-flex min-h-[38px] items-center gap-1.5 rounded-full border px-3.5 font-body text-[10px] uppercase tracking-[0.15em] transition-colors ${
