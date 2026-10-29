@@ -988,6 +988,7 @@ const TradeProductPage: React.FC = () => {
         if (error || !q) {
           toast({ title: "Error creating quote", description: error?.message, variant: "destructive" });
           setCopilotSave({ state: "failed", message: error?.message || "The quote couldn't be created." });
+          window.__lovableEvents?.track?.("project.copilot_quote_line_failed", { product_id: product.id, stage: "create_quote" });
           return;
         }
         quoteId = q.id;
@@ -1125,6 +1126,7 @@ const TradeProductPage: React.FC = () => {
       if (error) {
         toast({ title: "Error", description: error.message, variant: "destructive" });
         setCopilotSave({ state: "failed", quoteId, message: error.message });
+        window.__lovableEvents?.track?.("project.copilot_quote_line_failed", { product_id: product.id, stage: "add" });
       } else {
         // Persist the chosen variant on the freshly created/merged quote item,
         // and pre-fill shipping (CBM / kg / mode / origin country) from the
@@ -1316,10 +1318,12 @@ const TradeProductPage: React.FC = () => {
           : { data: null, error: null };
         if (verifyError || !savedRow) {
           setCopilotSave({ state: "failed", quoteId, message: verifyError?.message || "The line isn't on this quote yet." });
+          window.__lovableEvents?.track?.("project.copilot_quote_line_failed", { product_id: product.id, stage: "verify" });
           setDrawerRefreshKey((k) => k + 1);
           return;
         }
         setCopilotSave({ state: "saved", quoteId, at: new Date(), quantity: (savedRow as any).quantity });
+        window.__lovableEvents?.track?.("project.copilot_quote_line_saved", { product_id: product.id, quantity: Number((savedRow as any).quantity) || 1 });
         setAdded(true);
         // Mirror the piece into the global project inventory so the Spatial
         // Visualiser's Project Assets drawer can place it into the room.
@@ -1365,6 +1369,7 @@ const TradeProductPage: React.FC = () => {
       }
     } catch (err) {
       setCopilotSave({ state: "failed", message: err instanceof Error ? err.message : "The quote line could not be saved." });
+      window.__lovableEvents?.track?.("project.copilot_quote_line_failed", { product_id: data.product.id, stage: "unexpected" });
     } finally {
       setAdding(false);
     }
@@ -1541,6 +1546,39 @@ const TradeProductPage: React.FC = () => {
     if (selection?.productId !== data.product.id) return;
     window.dispatchEvent(new CustomEvent("concierge:update_product_selection", { detail: selection }));
   });
+
+  // Co-Pilot analytics: product opened, and finish/dimension changes made by the
+  // user (a pointer/key gesture in the last second — never automatic defaults).
+  const lastGestureRef = useRef(0);
+  useEffect(() => {
+    const mark = () => { lastGestureRef.current = Date.now(); };
+    document.addEventListener("pointerdown", mark, true);
+    document.addEventListener("keydown", mark, true);
+    return () => {
+      document.removeEventListener("pointerdown", mark, true);
+      document.removeEventListener("keydown", mark, true);
+    };
+  }, []);
+  const trackedPid = data?.product?.id ?? null;
+  useEffect(() => {
+    if (!trackedPid) return;
+    window.__lovableEvents?.track?.("project.copilot_product_selected", { product_id: trackedPid });
+  }, [trackedPid]);
+  const finishKey = [selectedFabric?.name, selectedWoodPrice?.name, selectedBase, selectedTop, selectedSingleMaterial].map((v) => v ?? "").join("|");
+  useEffect(() => {
+    if (!trackedPid || Date.now() - lastGestureRef.current > 1000) return;
+    window.__lovableEvents?.track?.("project.copilot_finish_selected", {
+      product_id: trackedPid,
+      has_fabric: !!selectedFabric, has_wood: !!selectedWoodPrice, has_base: !!selectedBase, has_top: !!selectedTop,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [finishKey]);
+  const dimensionKey = [selectedDualSize, selectedSingleSize, selectedVariantIdx].map((v) => v ?? "").join("|");
+  useEffect(() => {
+    if (!trackedPid || Date.now() - lastGestureRef.current > 1000) return;
+    window.__lovableEvents?.track?.("project.copilot_dimension_selected", { product_id: trackedPid });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dimensionKey]);
 
   // Reopen Co-Pilot only after a genuine page reload (never when arriving from
   // a gallery click), for the same quote the drawer was showing.
