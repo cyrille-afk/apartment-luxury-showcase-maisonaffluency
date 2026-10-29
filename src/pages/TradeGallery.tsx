@@ -1,3 +1,4 @@
+import { useRouter } from "@tanstack/react-router";
 import { parseBudgetAmount, parseGallerySearch, matchesSize, priceForSize, activeBudgetPresetId, budgetPresetFields, budgetPresetLabel, BUDGET_PRESETS, type PricedVariant } from "@/lib/gallerySearchIntent";
 import { useState, useMemo, useEffect, useCallback, useRef, lazy, Suspense } from "react";
 import { readSavedViews, saveView, deleteView, type TradeSavedView } from "@/lib/tradeSavedViews";
@@ -147,6 +148,16 @@ const StudioGallery = () => {
   const { picks: galleryPicks, isLoading: galleryPicksLoading } = useDesignerGalleryPicks(galleryDesigner, { trade: true });
   useTradeGalleryScroll(location.pathname, location.search, { search, brand: selectedBrand, category: selectedCategory, subcategory: selectedSubcategory, edition: selectedEdition, sortBy, viewMode }, productsLoading || designerLoading || galleryPicksLoading);
 
+  // Keep the gallery still while the product page loads, then open it at its top
+  // (the router's default reset fired before the new page painted, so the
+  // gallery visibly jumped to its own top first).
+  const tsRouter = useRouter();
+  const scrollTopWhenResolved = useCallback(() => {
+    const off = tsRouter.subscribe("onResolved", () => {
+      off();
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+    });
+  }, [tsRouter]);
   const openProductSheet = useCallback((product: TradeProduct) => {
     if (product.hidden_in_trade) {
       if (product.public_product_slug) navigate(`/designers/collection-particuliere/${product.public_product_slug}`, {
@@ -157,7 +168,9 @@ const StudioGallery = () => {
     if (product.trade_product_id) {
       navigate(`/trade/products/${product.trade_product_id}`, {
         state: { from: location.pathname + location.search },
+        preventScrollReset: true,
       });
+      scrollTopWhenResolved();
       return;
     }
 
@@ -171,8 +184,10 @@ const StudioGallery = () => {
     const productSlug = slugifyForUrl(product.product_name);
     navigate(`/trade/products/${designerSlug}/${productSlug}`, {
       state: { from: location.pathname + location.search },
+      preventScrollReset: true,
     });
-  }, [designerSlugMap, navigate, location.pathname, location.search]);
+    scrollTopWhenResolved();
+  }, [designerSlugMap, navigate, location.pathname, location.search, scrollTopWhenResolved]);
 
   // Price lookup from trade_products table
   const [priceLookup, setPriceLookup] = useState<Map<string, { cents: number; currency: string; price_unit?: string; price_prefix?: string | null; brand_name?: string | null; variants?: PricedVariant[] }>>(new Map());
