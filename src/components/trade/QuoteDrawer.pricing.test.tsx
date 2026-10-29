@@ -35,7 +35,7 @@ it("shows unit price and line total per line plus a quote summary", async () => 
   await waitFor(() => expect(screen.getByTestId("quote-summary")).toBeTruthy());
   // Line 1: 7 × €18,450 net = €129,150; Line 2: 1 × €20,340 net.
   expect(screen.getByText("€129,150")).toBeTruthy();
-  expect(screen.getAllByText(/Unit price \(net\)/)).toHaveLength(2);
+  expect(screen.getAllByText("Unit price")).toHaveLength(2);
   expect(screen.getByText("Line total · 7 units")).toBeTruthy();
   // Summary: 2 product lines, 8 units, net total €149,490.
   expect(screen.getByText("2 product lines")).toBeTruthy();
