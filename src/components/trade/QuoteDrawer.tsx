@@ -383,11 +383,10 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
                     {(() => {
                       const pricing = quoteLinePricing(savedItem, clientSafe);
                       if (!pricing) return null;
-                      const basisLabel = pricing.basis === "net" ? "net" : "retail";
                       return (
                         <div className="mt-1.5 w-full border-t border-border/60 pt-1.5 space-y-0.5 font-body text-[10px]">
                           <p className="flex items-baseline justify-between gap-2 text-muted-foreground">
-                            <span>Unit price ({basisLabel})</span>
+                            <span>Unit price</span>
                             <span className="text-foreground">{formatPrice(pricing.unitCents, pricing.currency)}</span>
                           </p>
                           <p className="flex items-baseline justify-between gap-2">
@@ -425,8 +424,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
               {summary.totals.map((total) => (
                 <p key={total.currency} className="flex items-baseline justify-between font-body text-sm">
                   <span className="text-muted-foreground">
-                    {clientSafe ? "Retail total" : total.basis === "retail" ? "Retail total" : "Net total"}
-                    {total.basis === "mixed" ? " (mixed)" : ""}
+                    {clientSafe ? "Retail total" : "Quote total"}
                   </span>
                   <span className="font-medium text-foreground">{formatPrice(total.cents, total.currency)}</span>
                 </p>
