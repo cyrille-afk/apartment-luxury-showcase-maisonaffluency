@@ -882,7 +882,9 @@ const TradeProductPage: React.FC = () => {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      setActiveQuoteId(await fetchActiveDraftQuoteId(user.id));
+      const id = await fetchActiveDraftQuoteId(user.id);
+      // A quote restored after reload wins; don't swap the drawer's quote underneath it.
+      setActiveQuoteId((cur) => cur || id);
     })();
   }, [user]);
 
@@ -1518,13 +1520,20 @@ const TradeProductPage: React.FC = () => {
     window.dispatchEvent(new CustomEvent("concierge:update_product_selection", { detail: selection }));
   });
 
-  // Reopen Co-Pilot after a reload if it was open for this product this session.
+  // Reopen Co-Pilot only after a genuine page reload (never when arriving from
+  // a gallery click), for the same quote the drawer was showing.
   useEffect(() => {
     if (!data?.product?.id) return;
     const pid = data.product.id;
     try {
-      const savedQuote = window.sessionStorage.getItem(`ma-copilot-open-v1:${pid}`);
-      if (savedQuote) { setActiveQuoteId((cur) => cur || savedQuote); setDrawerOpen(true); }
+      const key = `ma-copilot-open-v1:${pid}`;
+      const savedQuote = window.sessionStorage.getItem(key);
+      if (!savedQuote) return;
+      const nav = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+      const isReload = nav?.type === "reload" && performance.now() < 15000;
+      if (!isReload) { window.sessionStorage.removeItem(key); return; }
+      setActiveQuoteId(savedQuote);
+      setDrawerOpen(true);
     } catch { /* noop */ }
   }, [data?.product?.id]);
 
