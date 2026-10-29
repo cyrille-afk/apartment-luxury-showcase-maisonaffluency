@@ -17,6 +17,7 @@ import { isReturningPrivateClient, rememberedPrivateClients, rememberPrivateClie
 import PrivateClientWelcome from "./PrivateClientWelcome";
 import { setCartContact } from "@/lib/cartTracking";
 import PresentationModeToggle from "@/components/trade/PresentationModeToggle";
+import { deduplicateInquiryFinish } from "@/lib/inquiryMessage";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -267,7 +268,7 @@ export default function OrderIntakeSheet({
         return;
       }
     }
-    const message = [
+    const message = deduplicateInquiryFinish([
       productTitle ? `Product: ${productTitle}` : "",
       designerName ? `Designer: ${designerName}` : "",
       finish ? `Selected finish: ${finish}` : "",
@@ -280,7 +281,7 @@ export default function OrderIntakeSheet({
       d.notes || "Quote requested from the product page.",
     ]
       .filter(Boolean)
-      .join("\n");
+      .join("\n"));
 
     try {
       const { error } = await supabase.functions.invoke("send-inquiry", {
