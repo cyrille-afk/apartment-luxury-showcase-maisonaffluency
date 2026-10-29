@@ -245,12 +245,19 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
             }
           }
         }
+        if (cancelled) return;
         setItems(mapped);
       }
-      setLoading(false);
+      if (!cancelled) setLoading(false);
     };
+    let cancelled = false;
     fetchItems();
+    // A slower response for a previous quote must never overwrite this one.
+    return () => { cancelled = true; };
   }, [open, quoteId, refreshKey]);
+
+  // Never show another quote's lines under this quote's number.
+  useEffect(() => { setItems([]); setQuoteMeta(null); }, [quoteId]);
 
   const removeItem = async (itemId: string) => {
     await supabase.from("trade_quote_items").delete().eq("id", itemId);
