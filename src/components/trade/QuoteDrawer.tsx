@@ -380,6 +380,23 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
 
                       return <DrawerPricing retailLabel={snapshot ? snapshot.retailLabel : retail ? formatPrice(retail.cents, retail.currency) : null} netLabel={snapshot?.netLabel ?? (displayCents && displayCents > 0 ? formatPrice(displayCents, displayCurrency) : null)} />;
                     })()}
+                    {(() => {
+                      const pricing = quoteLinePricing(savedItem, clientSafe);
+                      if (!pricing) return null;
+                      const basisLabel = pricing.basis === "net" ? "net" : "retail";
+                      return (
+                        <div className="mt-1.5 w-full border-t border-border/60 pt-1.5 space-y-0.5 font-body text-[10px]">
+                          <p className="flex items-baseline justify-between gap-2 text-muted-foreground">
+                            <span>Unit price ({basisLabel})</span>
+                            <span className="text-foreground">{formatPrice(pricing.unitCents, pricing.currency)}</span>
+                          </p>
+                          <p className="flex items-baseline justify-between gap-2">
+                            <span className="text-muted-foreground">Line total · {item.quantity} {item.quantity === 1 ? "unit" : "units"}</span>
+                            <span className="font-medium text-foreground">{formatPrice(pricing.lineTotalCents, pricing.currency)}</span>
+                          </p>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
                 <button
