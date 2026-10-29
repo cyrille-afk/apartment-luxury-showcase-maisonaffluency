@@ -502,6 +502,12 @@ export default function ProductCommerceCta({
 
   const goToCheckout = () => {
     setMiniCartOpen(false);
+    // The professional drawer already persisted its configured basket on open.
+    // Checkout is a hand-off, never another additive product-page write.
+    if (isTradeWorkspace && cartItems.length > 0) {
+      navigate("/cart");
+      return;
+    }
     if (cartItems.length > 1) {
       navigate("/checkout", { state: { lines: cartItems.map((item) => ({
         title: item.title, designer: item.designerName, finishLabel: item.finishLabel,
