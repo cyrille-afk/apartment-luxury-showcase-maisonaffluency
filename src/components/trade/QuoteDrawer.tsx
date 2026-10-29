@@ -91,6 +91,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
           .eq("id", quoteId)
           .maybeSingle(),
       ]);
+      if (cancelled) return;
       setQuoteMeta(quoteRow ? { status: (quoteRow as any).status || "draft", updated_at: (quoteRow as any).updated_at ?? null } : null);
 
       if (data) {
@@ -245,12 +246,19 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
             }
           }
         }
+        if (cancelled) return;
         setItems(mapped);
       }
-      setLoading(false);
+      if (!cancelled) setLoading(false);
     };
+    let cancelled = false;
     fetchItems();
+    // A slower response for a previous quote must never overwrite this one.
+    return () => { cancelled = true; };
   }, [open, quoteId, refreshKey]);
+
+  // Never show another quote's lines under this quote's number.
+  useEffect(() => { setItems([]); setQuoteMeta(null); }, [quoteId]);
 
   const removeItem = async (itemId: string) => {
     await supabase.from("trade_quote_items").delete().eq("id", itemId);
@@ -342,7 +350,11 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
                           />
                         )
                       )}
-                      {item.fabric?.image_url && (
+                      {item.fabric?.image_url && !(item.variant_swatches || []).some((s) =>
+                        s.image_url === item.fabric?.image_url
+                        || (!!item.fabric?.name && s.name.trim().toLowerCase().includes(item.fabric.name.trim().toLowerCase()))
+                        || (!!item.fabric?.name && item.fabric.name.trim().toLowerCase().includes(s.name.trim().toLowerCase())),
+                      ) && (
                         <img
                           src={item.fabric.image_url}
                           alt={item.fabric.name || "Fabric"}
