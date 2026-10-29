@@ -987,6 +987,7 @@ const TradeProductPage: React.FC = () => {
         const { data: q, error } = await createActiveDraftQuote(user.id, { currency: initialCurrency });
         if (error || !q) {
           toast({ title: "Error creating quote", description: error?.message, variant: "destructive" });
+          setCopilotSave({ state: "failed", message: error?.message || "The quote couldn't be created." });
           return;
         }
         quoteId = q.id;
@@ -3399,6 +3400,24 @@ const TradeProductPage: React.FC = () => {
                   ) : null}
                   {added ? "Added to Co-Pilot Workspace" : "Add to Co-Pilot Workspace"}
                 </button>
+                <div aria-live="polite" className="min-h-[18px] -mt-1 text-center font-body text-[11px]">
+                  {copilotSave.state === "saving" && (
+                    <span className="text-muted-foreground">Saving to quote…</span>
+                  )}
+                  {copilotSave.state === "saved" && (
+                    <span className="text-primary">
+                      Saved to QU-{copilotSave.quoteId.slice(0, 6).toUpperCase()} · qty {copilotSave.quantity} · {copilotSave.at.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                    </span>
+                  )}
+                  {copilotSave.state === "failed" && (
+                    <span className="text-destructive">
+                      Not saved{copilotSave.quoteId ? ` to QU-${copilotSave.quoteId.slice(0, 6).toUpperCase()}` : ""}: {copilotSave.message}{" "}
+                      <button type="button" onClick={handleAddToQuote} disabled={adding} className="underline underline-offset-2 font-medium">
+                        Retry
+                      </button>
+                    </span>
+                  )}
+                </div>
 
                 {/* Utility links — Favorite / Pin / Fabric & Finishes PDF */}
                 <div className="mt-1 border-t border-border/40 pt-4">
