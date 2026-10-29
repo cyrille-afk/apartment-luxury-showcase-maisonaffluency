@@ -203,7 +203,7 @@ serve(async (req) => {
     });
   }
 
-  const headline = delivery.reasons.length ? "Live Stripe webhook delivery alert" : !probe || probeError
+  const headline = delivery.signatureRejections > 0 ? "Unexpected Stripe webhook signature rejection" : delivery.reasons.length ? "Live Stripe webhook delivery alert" : !probe || probeError
     ? "Queue worker health probe failed"
     : !probe.boot.stripe
     ? "Queue worker startup check failed"

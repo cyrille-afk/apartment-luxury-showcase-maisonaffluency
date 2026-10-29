@@ -14,11 +14,11 @@ describe('Stripe delivery monitoring', () => {
   it('allows normal delivery latency', () => {
     expect(missingLiveDeliveries([event], new Set(), new Set(['*']), 1119)).toEqual([]);
   });
-  it('alerts at five rejected signatures but not four', () => {
-    expect(signatureSpike(4)).toBe(false); expect(signatureSpike(5)).toBe(true);
+  it('alerts on even one unexpected rejection, but not zero', () => {
+    expect(signatureSpike(0)).toBe(false); expect(signatureSpike(1)).toBe(true);
   });
   it('never infers live mode from unverified payloads', () => {
     expect(deliveryReasons([], 5)[0]).toContain('live/test origin cannot be trusted');
-    expect(deliveryReasons([], 4)).toEqual([]);
+    expect(deliveryReasons([], 0)).toEqual([]);
   });
 });

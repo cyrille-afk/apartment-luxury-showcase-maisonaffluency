@@ -19,6 +19,7 @@ import type Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { loadStripeTestCreds } from "../_shared/stripeCreds.ts";
 import { getStripe } from "../_shared/stripeClient.ts";
+import { isExpectedSmokeRejection } from "../_shared/stripeSignatureRejection.ts";
 import { corsHeaders } from "npm:@supabase/supabase-js@2.108.2/cors";
 
 const { stripe, creds } = await getStripe("auto");
@@ -75,13 +76,29 @@ serve(async (req) => {
   }
   if (!event) {
     logAck("signature_rejected", elapsed(), null, null);
-    console.error("[STRIPE-WEBHOOK] signature verification failed:", lastErr?.message);
-    // No body, claimed mode, event ID or signature is trusted or stored.
+    console.error("[STRIPE-WEBHOOK] signature verification failed");
+    // Test exclusion requires a repaired TEST signature and a recent accepted
+    // receipt. Claimed test markers alone never suppress an alert.
     const db = createClient(Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '');
-    const telemetry = db.from('security_audit_events').insert({
+    const recordRejection = async () => {
+      const testSecret = testCreds?.webhookSecret;
+      const expectedTest = testSecret ? await isExpectedSmokeRejection(body, signature,
+        (raw, repaired) => stripe.webhooks.constructEventAsync(raw, repaired, testSecret),
+        async (eventId) => {
+          const { data, error } = await db.from('webhook_events').select('event_id')
+            .eq('provider', 'stripe').eq('event_id', eventId)
+            .eq('payload->>livemode', 'false').eq('event_type', 'invoice.paid')
+            .gte('created_at', new Date(Date.now() - 300000).toISOString()).maybeSingle();
+          return !error && Boolean(data);
+        }) : false;
+      const { error } = await db.from('security_audit_events').insert({
       source: 'stripe-webhook', event_type: 'stripe_signature_rejected',
-      details: { reason: 'signature_verification_failed', mode: 'unverified' },
-    }).then(({ error }) => { if (error) console.error('[STRIPE-WEBHOOK] signature telemetry write failed'); });
+      details: { reason: 'signature_verification_failed', mode: 'unverified',
+        classification: expectedTest ? 'expected_smoke_test' : 'unexpected' },
+      });
+      if (error) console.error('[STRIPE-WEBHOOK] signature telemetry write failed');
+    };
+    const telemetry = recordRejection();
     const runtime = (globalThis as unknown as { EdgeRuntime?: { waitUntil(p: PromiseLike<unknown>): void } }).EdgeRuntime;
     if (runtime) runtime.waitUntil(telemetry); else await telemetry;
     return new Response('Webhook signature verification failed', { status: 400, headers: corsHeaders });
