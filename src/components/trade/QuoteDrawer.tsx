@@ -9,6 +9,7 @@ import { findQuoteFinishSwatches } from "@/lib/quoteFinishSwatches";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { dimensionsFromVariantLabel } from "@/lib/drawerDimensions";
 import PresentationModeToggle from "./PresentationModeToggle";
+import ShareQuoteWithClient from "./ShareQuoteWithClient";
 import DrawerPricing from "./DrawerPricing";
 import { quoteDrawerRetail } from "@/lib/quoteDrawerRetail";
 import { quoteLinePricing, summarizeQuoteLines } from "@/lib/quoteLineSummary";
@@ -262,7 +263,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-[380px] sm:w-[420px] flex flex-col">
         <SheetHeader>
-          <div className="flex justify-start pr-8"><PresentationModeToggle /></div>
+          <div className="flex items-center justify-between gap-3 pr-8"><PresentationModeToggle />{quoteId && <ShareQuoteWithClient quoteId={quoteId} />}</div>
           <SheetTitle className="font-display text-lg flex items-center gap-2">
             <ShoppingCart className="h-4 w-4" />
             Active Quote
