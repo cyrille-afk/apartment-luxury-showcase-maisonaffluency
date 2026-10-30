@@ -53,7 +53,12 @@ Deno.serve(async (req) => {
       .maybeSingle()
     if (!data) return null
     const name = [data.first_name, data.last_name].filter(Boolean).join(' ').trim()
-    return name || null
+    if (!name) return null
+    // Profiles record names in uppercase; emails greet in title case.
+    return name
+      .split(/\s+/u)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(' ')
   }
 
 
