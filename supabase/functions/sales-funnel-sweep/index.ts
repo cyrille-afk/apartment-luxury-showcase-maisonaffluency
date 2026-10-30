@@ -41,6 +41,22 @@ Deno.serve(async (req) => {
   const sent: string[] = []
   const internalRows: { stage: string; label: string; age: string }[] = []
 
+  // Resolve a human greeting name from the account profile when the tracked
+  // record itself never captured one (intake collects email only).
+  const resolveName = async (fallback: unknown, email: unknown): Promise<string | null> => {
+    if (typeof fallback === 'string' && fallback.trim()) return fallback.trim()
+    if (typeof email !== 'string' || !email.trim()) return null
+    const { data } = await supabase
+      .from('profiles')
+      .select('first_name, last_name')
+      .eq('email', email.trim().toLowerCase())
+      .maybeSingle()
+    if (!data) return null
+    const name = [data.first_name, data.last_name].filter(Boolean).join(' ').trim()
+    return name || null
+  }
+
+
   // Weekend protection: client reminders never fire on Saturday or Sunday.
   // The daily 09:00 job simply defers them to Monday morning.
   const weekday = new Date().getUTCDay()
