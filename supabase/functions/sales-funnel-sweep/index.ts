@@ -41,6 +41,27 @@ Deno.serve(async (req) => {
   const sent: string[] = []
   const internalRows: { stage: string; label: string; age: string }[] = []
 
+  // Resolve a human greeting name from the account profile when the tracked
+  // record itself never captured one (intake collects email only).
+  const resolveName = async (fallback: unknown, email: unknown): Promise<string | null> => {
+    if (typeof fallback === 'string' && fallback.trim()) return fallback.trim()
+    if (typeof email !== 'string' || !email.trim()) return null
+    const { data } = await supabase
+      .from('profiles')
+      .select('first_name, last_name')
+      .eq('email', email.trim().toLowerCase())
+      .maybeSingle()
+    if (!data) return null
+    const name = [data.first_name, data.last_name].filter(Boolean).join(' ').trim()
+    if (!name) return null
+    // Profiles record names in uppercase; emails greet in title case.
+    return name
+      .split(/\s+/u)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(' ')
+  }
+
+
   // Weekend protection: client reminders never fire on Saturday or Sunday.
   // The daily 09:00 job simply defers them to Monday morning.
   const weekday = new Date().getUTCDay()
@@ -128,7 +149,7 @@ Deno.serve(async (req) => {
     // Second nudge only after a further 72h of silence.
     if (n === 2 && cart.last_reminder_at && cart.last_reminder_at > HOURS(72)) continue
     const ok = await send('cart', cart.id, n, 'Abandoned basket', cart.email as string, 'cart-reminder', {
-      recipientName: cart.name,
+      recipientName: await resolveName(cart.name, cart.email),
       lines: Array.isArray(cart.items) ? cart.items : [],
       cartUrl: `${SITE}/cart`,
       secondReminder: n === 2,
@@ -191,7 +212,7 @@ Deno.serve(async (req) => {
       n = 2
     }
     await send('quote_unpaid', q.id, n, 'Sent quote unpaid', email, 'quote-payment-reminder', {
-      recipientName: link.payer_name || q.ship_to_name || q.client_name,
+      recipientName: await resolveName(link.payer_name || q.ship_to_name || q.client_name, email),
       quoteRef: ref,
       currency: link.currency ?? q.currency ?? 'EUR',
       amountFormatted: money(link.amount_cents ?? 0),
