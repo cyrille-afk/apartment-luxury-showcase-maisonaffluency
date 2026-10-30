@@ -144,7 +144,7 @@ Deno.serve(async (req) => {
     // Second nudge only after a further 72h of silence.
     if (n === 2 && cart.last_reminder_at && cart.last_reminder_at > HOURS(72)) continue
     const ok = await send('cart', cart.id, n, 'Abandoned basket', cart.email as string, 'cart-reminder', {
-      recipientName: cart.name,
+      recipientName: await resolveName(cart.name, cart.email),
       lines: Array.isArray(cart.items) ? cart.items : [],
       cartUrl: `${SITE}/cart`,
       secondReminder: n === 2,
