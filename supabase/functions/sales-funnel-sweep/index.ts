@@ -207,7 +207,7 @@ Deno.serve(async (req) => {
       n = 2
     }
     await send('quote_unpaid', q.id, n, 'Sent quote unpaid', email, 'quote-payment-reminder', {
-      recipientName: link.payer_name || q.ship_to_name || q.client_name,
+      recipientName: await resolveName(link.payer_name || q.ship_to_name || q.client_name, email),
       quoteRef: ref,
       currency: link.currency ?? q.currency ?? 'EUR',
       amountFormatted: money(link.amount_cents ?? 0),
