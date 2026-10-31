@@ -8,6 +8,11 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
 import { emitOgManifestPlugin, emitVersionPlugin, environmentRobotsPlugin } from "./vite.plugins";
 
+// Pin the Worker compatibility date: nitro otherwise stamps the build date into
+// dist/wrangler.json, which can be newer than the workerd binary wrangler ships
+// and crashes `preview`/deploy with "newest date supported by this server binary".
+process.env.COMPATIBILITY_DATE ||= "2025-09-01";
+
 const buildId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
 export default defineConfig({
