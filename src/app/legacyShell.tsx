@@ -1,6 +1,6 @@
 /* Shared route helpers and lazy page components ported from the pre-TanStack App.tsx. */
 import AdminOnly from "@/components/trade/AdminOnly";
-import { isCollectionLanding, shouldResetRouteScroll } from "@/lib/collectionScrollPolicy";
+import { isCollectionLanding, isProductDetailPath, shouldResetRouteScroll } from "@/lib/collectionScrollPolicy";
 import { isTradeGalleryListing, readTradeGalleryState } from "@/lib/tradeGalleryState";
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import LegacyRouteRedirect from "@/components/LegacyRouteRedirect";
