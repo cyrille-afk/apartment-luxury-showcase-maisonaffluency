@@ -476,7 +476,7 @@ export function PreviewViewContinuity() {
   const anchorIdRef = useRef<string | undefined>(undefined);
 
   const isLockedDesignersLanding = location.pathname === "/designers" && !location.search;
-  const requiresStableTop = isCollectionLanding(location.pathname) || isProductDetailPath(location.pathname);
+  const requiresStableTop = isCollectionLanding(location.pathname);
 
 
   useEffect(() => {
