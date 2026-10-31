@@ -1355,6 +1355,8 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     // Axis filters that match no swatch (e.g. "Base in Teak & Top in Marble 1"
     // vs library names) don't group anything, so fall back to material groups.
     if (isOolMinibar || isRugProduct || axisModeActive || hideBaseAccordion) return null;
+    // An admin-set picker label ("Select Your Finish") means one dropdown.
+    if (woodLabel && woodLabel.trim()) return null;
     if (woodFilter && woodTiles.some((f) => woodFilter(f.name))) return null;
     if (topTiles.length > 0 || woodTiles.length < 2) return null;
     const keyOf = (f: Fabric) => (f.raw_category || f.category || "").trim();
