@@ -524,7 +524,7 @@ export default function OrderIntakeSheet({
           />
         </div>
 
-        <div className="flex shrink-0 items-center justify-between px-6 pb-3 pt-4 md:px-8 md:pt-6">
+        <div className="flex shrink-0 items-center justify-between px-6 pb-3 pt-[calc(1rem+env(safe-area-inset-top))] md:px-8 md:pt-6">
           <div className="flex items-center gap-2">
             {(isTradeAuthorized || showPresentationToggle) && <PresentationModeToggle />}
             {step > 0 && (

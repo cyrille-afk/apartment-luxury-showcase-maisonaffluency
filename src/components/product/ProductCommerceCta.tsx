@@ -265,7 +265,7 @@ export default function ProductCommerceCta({
   const isUnpriced =
     !tradeApproved &&
     (!rrpLabel || rrpLabel.trim().toLowerCase() === "price upon request");
-  const mobilePrimaryLabel = "Place Order";
+  const mobilePrimaryLabel = isUnpriced ? "Request a Quote" : "Place Order";
 
   // Public: PLACE ORDER writes the configured piece into the shared cart state
   // and slides open the "Your Selection" drawer — never the account wall.
@@ -450,7 +450,7 @@ export default function ProductCommerceCta({
 
   // Mobile: PLACE ORDER follows the same in-canvas selection drawer path.
   const handleMobilePrimary = () => {
-    startIntent("order");
+    startIntent(isUnpriced ? "bespoke" : "order");
   };
 
   // Sticky banners dispatch this instead of navigating to /cart. Only the
