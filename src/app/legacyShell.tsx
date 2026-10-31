@@ -390,7 +390,7 @@ export function ScrollToTopOnNavigate() {
       (window.matchMedia?.("(max-width: 767px)").matches ||
         window.matchMedia?.("(display-mode: standalone)").matches ||
         (window.navigator as any).standalone === true);
-    const requiresStableTop = isCollectionLanding(location.pathname);
+    const requiresStableTop = isCollectionLanding(location.pathname) || isProductDetailPath(location.pathname);
     const prefersReduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     const smooth = !isLockedDesignersLanding && !requiresStableTop && state?.smoothScroll !== false && !prefersReduced;
     const behavior: ScrollBehavior = smooth ? "smooth" : "instant";
@@ -476,7 +476,7 @@ export function PreviewViewContinuity() {
   const anchorIdRef = useRef<string | undefined>(undefined);
 
   const isLockedDesignersLanding = location.pathname === "/designers" && !location.search;
-  const requiresStableTop = isCollectionLanding(location.pathname);
+  const requiresStableTop = isCollectionLanding(location.pathname) || isProductDetailPath(location.pathname);
 
 
   useEffect(() => {
