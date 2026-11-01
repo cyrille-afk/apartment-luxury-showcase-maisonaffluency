@@ -1269,7 +1269,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     aria-expanded={tradeMenuOpen}
                     data-utility-trade
                     onClick={openTradeMenu}
-                    className={cn("group/trade relative flex h-auto items-center gap-1.5 rounded-none p-0 font-body text-[12px] uppercase tracking-[0.2em] font-medium text-muted-foreground hover:bg-transparent hover:text-foreground transition-colors whitespace-nowrap py-2", tradePartner && "text-primary border-b border-primary")}
+                    className={cn("group/trade relative flex h-auto items-center gap-1.5 rounded-none border border-foreground/30 px-4 py-2 font-body text-[12px] uppercase tracking-[0.2em] font-medium text-muted-foreground hover:bg-transparent hover:text-foreground hover:border-foreground/70 transition-colors whitespace-nowrap", tradePartner && "text-primary border-primary/50 hover:border-primary")}
                   >
                     <span className="link-underline-grow">{tradePartner ? "Trade Dashboard" : "Trade"}</span>
                     {/* Inline "PRO" capsule on the same line as the word: a quiet B2B marker
