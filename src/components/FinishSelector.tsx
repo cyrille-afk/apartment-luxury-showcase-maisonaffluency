@@ -1779,7 +1779,11 @@ export default function FinishSelector({ pickId, className, productTitle, produc
             </div>
           )}
         </div>
-      ) : !axisModeActive && (showUpholsterySection || fabrics.some(isFabricCategory)) && renderAccordion({
+      ) : !axisModeActive && (
+        fabrics.some(isFabricCategory)
+        // Seating made only of stone/wood/metal (e.g. Kisseh Stool) has no upholstery to pick.
+        || (showUpholsterySection && (fabrics.length === 0 || !!upholsteryLabel?.trim()))
+      ) && renderAccordion({
         isOpen: open,
         onToggle: () => setOpen((v) => !v),
         label: isRugProduct
