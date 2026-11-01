@@ -464,7 +464,9 @@ function singularizeSub(s: string): string {
         {crumbs.length > 1 && <Breadcrumbs items={crumbs} className="mb-4" />}
         {/* Header */}
         <div className={`flex items-center justify-between ${compactTop ? "mb-4" : "mb-8"}`}>
-          <div>
+          <div className="flex min-w-0 items-center gap-5">
+            {(roomSlug || showAll) && <CollectionFilterTrigger open={roomFiltersOpen} onClick={() => setRoomFiltersOpen(!roomFiltersOpen)} />}
+            <div>
             <h2 className="font-display text-2xl md:text-3xl text-foreground">
               {filterLabel}
             </h2>
@@ -495,6 +497,7 @@ function singularizeSub(s: string): string {
               </p>
             )}
 
+            </div>
           </div>
           <div className="flex items-center gap-3">
             {/* Grid columns toggle — desktop only */}
