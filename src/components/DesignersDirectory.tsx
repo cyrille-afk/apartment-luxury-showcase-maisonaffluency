@@ -2101,18 +2101,14 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                   </SheetContent>
                 </Sheet>
               </div>
-          </div>
-
-
-
-          {/* Results count */}
+          {/* Results count stays inside the mobile utility bar. */}
           {(searchQuery || activeFilterCount > 0) && (
             mode === "products" && picksLoading ? (
-              <div className="flex items-center gap-2 mb-4 w-64" aria-label="Loading pieces count">
+              <div className="flex items-center gap-2 w-64" aria-label="Loading pieces count">
                 <div className="h-3 w-56 rounded bg-muted animate-pulse" />
               </div>
             ) : (
-              <p className="text-left text-[10px] text-muted-foreground mb-4 font-body tracking-wider">
+              <p className="text-left text-[10px] text-muted-foreground font-body tracking-wider">
                 {filteredPicks
                   ? `${filteredPicks.length} piece${filteredPicks.length !== 1 ? 's' : ''} found`
                   : `${totalCount} designer${totalCount !== 1 ? 's' : ''} found`}
@@ -2121,6 +2117,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               </p>
             )
           )}
+          </div>
 
           {/* Desktop: typographic runway — bridges the hero and the card grid.
               Left track carries the section identity, right track carries the
@@ -2239,6 +2236,11 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                 </button>
               )}
             </div>
+            {(searchQuery || activeFilterCount > 0) && (
+              <p className="ml-auto text-[10px] text-muted-foreground font-body whitespace-nowrap">
+                {filteredPicks ? `${filteredPicks.length} pieces` : `${totalCount} designers`}
+              </p>
+            )}
           </div>
 
 
