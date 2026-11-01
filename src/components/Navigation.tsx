@@ -1272,7 +1272,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     className={cn("group/trade relative ml-5 flex h-auto items-center gap-1.5 rounded-none p-0 font-body text-[12px] uppercase tracking-[0.2em] font-extrabold text-foreground hover:bg-transparent hover:text-foreground transition-colors whitespace-nowrap py-2", tradePartner && "text-primary border-b border-primary")}
                   >
                     <span aria-hidden="true" className="h-1.5 w-1.5 shrink-0 rounded-full bg-[hsl(var(--gold))] transition-transform duration-300 group-hover/trade:scale-125" />
-                    <span className="link-underline-grow">{tradePartner ? "Trade Dashboard" : "Trade"}</span>
+                    <span className="link-underline-grow font-['Cinzel',serif] text-[13px] font-bold tracking-[0.16em]">{tradePartner ? "Trade Dashboard" : "Trade"}</span>
                     {/* Inline "PRO" capsule on the same line as the word: a quiet B2B marker
                         that brightens in step with the dropdown it opens. */}
                     {!tradePartner && (
