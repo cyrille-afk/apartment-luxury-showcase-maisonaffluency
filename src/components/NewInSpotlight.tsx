@@ -258,6 +258,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
 
       <div className="flex gap-6 md:gap-8">
       {pickCategoryOptions.length > 1 && (
+        <div className="hidden md:block">
         <RoomCollectionFilters
           facets={["category"]}
           options={{ category: pickCategoryOptions, designer: [], leadTime: [], craft: [], handmade: [], material: [] }}
@@ -267,6 +268,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
           onChange={(_key, value) => setPickCategory(value)}
           onClear={() => setPickCategory(null)}
         />
+        </div>
       )}
       <div className={cn("grid min-w-0 flex-1 items-stretch gap-6 md:gap-8", mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
         {filteredPicks.map((pick) => {
