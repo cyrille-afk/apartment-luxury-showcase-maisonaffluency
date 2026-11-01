@@ -127,6 +127,102 @@
         }
       }
     },
+    "project.directory_letter_selected": {
+      "event_schema_version": 1,
+      "description": "A visitor selects a letter on the directory A–Z ribbon.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "letter",
+          "surface"
+        ],
+        "properties": {
+          "letter": {
+            "type": "string",
+            "pattern": "^[A-Z]$"
+          },
+          "surface": {
+            "type": "string",
+            "enum": [
+              "desktop",
+              "mobile"
+            ]
+          }
+        }
+      }
+    },
+    "project.directory_modal_dismissed": {
+      "event_schema_version": 1,
+      "description": "A visitor dismisses the directory modal using Escape, an outside click or its close button; fires once per dismissal.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reason",
+          "surface"
+        ],
+        "properties": {
+          "reason": {
+            "type": "string",
+            "enum": [
+              "escape",
+              "outside",
+              "close_button"
+            ]
+          },
+          "surface": {
+            "type": "string",
+            "enum": [
+              "desktop",
+              "mobile"
+            ]
+          }
+        }
+      }
+    },
+    "project.directory_search_changed": {
+      "event_schema_version": 1,
+      "description": "A visitor edits a nonempty directory search; records only character count and matching designer count, never search text.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "character_count",
+          "result_count",
+          "surface"
+        ],
+        "properties": {
+          "character_count": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "result_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "surface": {
+            "type": "string",
+            "enum": [
+              "desktop",
+              "mobile"
+            ]
+          }
+        }
+      }
+    },
     "project.order_paid": {
       "event_schema_version": 2,
       "description": "An order was paid: Stripe confirmed a card/PayNow/wallet checkout, or an admin marked a bank-transfer order paid (source=admin_marked).",

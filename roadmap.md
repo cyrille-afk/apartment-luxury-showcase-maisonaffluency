@@ -1,5 +1,9 @@
 # Roadmap
 
+## Directory analytics
+- [x] Track search edits, A–Z choices and dismissal reasons without search text; designer profile views use existing page-view analytics (verified published data), not duplicate click-based views.
+- [x] Three new event schemas registered (nine total), compatibility validation passes; real desktop flow asserts result counts, A/C, all three dismissal reasons, no duplicate dismissal and no raw text. Browser regression and three filter tests pass; preview build OK. Published collection awaits publication.
+
 ## Visual directory overlay
 - [x] Filter the four-column matrix live, make the full A–Z ribbon select initial-only results with an underline, and dismiss instantly outside or on Escape.
 - [x] Signed-in loaded directory verified: Amelie returns one card; A/C return only matching initials, letters remain usable after no results, and Escape/outside clicks unmount instantly. Three unit tests pass; preview build OK. GitHub sync required.
