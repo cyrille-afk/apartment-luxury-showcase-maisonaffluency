@@ -448,6 +448,25 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   const [categoriesExpanded, setCategoriesExpanded] = useState(false);
   const [categoryPanelOpen, setCategoryPanelOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const accountMenuCloseTimer = useRef<number | null>(null);
+  const cancelAccountMenuClose = () => {
+    if (accountMenuCloseTimer.current !== null) {
+      window.clearTimeout(accountMenuCloseTimer.current);
+      accountMenuCloseTimer.current = null;
+    }
+  };
+  const openAccountMenu = () => {
+    cancelAccountMenuClose();
+    setTradeMenuOpen(false);
+    setAccountMenuOpen(true);
+  };
+  const scheduleAccountMenuClose = () => {
+    cancelAccountMenuClose();
+    accountMenuCloseTimer.current = window.setTimeout(() => setAccountMenuOpen(false), 200);
+  };
+  useEffect(() => () => {
+    if (accountMenuCloseTimer.current !== null) window.clearTimeout(accountMenuCloseTimer.current);
+  }, []);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [contactExpanded, setContactExpanded] = useState(false);
@@ -1323,12 +1342,20 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                 </div>
               )}
 
-              {!tradePartner && <DropdownMenu onOpenChange={(o) => setAccountMenuOpen(o)}>
-                <DropdownMenuTrigger aria-label="Account menu" title="Account" className="relative group p-1 outline-hidden">
+              {!tradePartner && <DropdownMenu modal={false} open={accountMenuOpen} onOpenChange={(open) => { cancelAccountMenuClose(); setAccountMenuOpen(open); if (open) setTradeMenuOpen(false); }}>
+                <DropdownMenuTrigger asChild>
+                <Button variant="ghost" type="button" aria-label="Account menu" title="Account" className="relative group h-auto rounded-none p-1 outline-hidden hover:bg-transparent"
+                  onPointerEnter={(event) => { if (event.pointerType === "mouse") openAccountMenu(); }}
+                  onPointerLeave={(event) => { if (event.pointerType === "mouse") scheduleAccountMenuClose(); }}>
                   <span className="sr-only">Account menu</span>
                   <User className="w-[16px] h-[16px] text-muted-foreground group-hover:text-foreground transition-colors" strokeWidth={1.25} />
+                </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" sideOffset={122} className="bg-background border border-border shadow-lg z-50 min-w-[200px] translate-x-[44px]">
+                <DropdownMenuContent align="end" sideOffset={0}
+                  onPointerEnter={(event) => { if (event.pointerType === "mouse") cancelAccountMenuClose(); }}
+                  onPointerLeave={(event) => { if (event.pointerType === "mouse") scheduleAccountMenuClose(); }}
+                  className="border-0 bg-transparent p-0 pt-[122px] shadow-none z-50 min-w-[200px] translate-x-[44px]">
+                  <div className="rounded-md border border-border bg-background p-1 shadow-lg">
                   {user ? (
                     <>
                       <div className="px-4 py-2.5 border-b border-border">
@@ -1377,6 +1404,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                       </DropdownMenuItem>
                     </>
                   )}
+                  </div>
                 </DropdownMenuContent>
               </DropdownMenu>}
 
