@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Minimal gallery utility capsules
-- [ ] Share pure black/white capsule styling, spacious icon padding and a centered flex row without an enclosing grid frame.
-- [ ] Verify open/closed gallery controls and outer-edge alignment in Public and signed-in Trade.
+- [x] Share pure black/white capsule styling, spacious icon padding and a centered flex row without an enclosing grid frame.
+- [x] Public and signed-in Trade Presentation verified open → closed: both capsules 36px with 8px/16px padding and 15px icons; all centerlines 528.5px, left panel/trigger 307px, right grid/capsule 1639px. Three regression tests pass; preview build OK. GitHub sync required.
 
 ## Profile grid alignment and capsule symmetry
 - [x] Biography image, closed product grid and open filter panel share the same measured left edge (307px on the reference desktop).
