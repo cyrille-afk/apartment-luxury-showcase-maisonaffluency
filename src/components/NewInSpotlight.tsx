@@ -453,7 +453,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
           <div className="grid grid-cols-12 gap-x-10 items-start w-full">
             {/* Left Column — constrained editorial hero */}
             <div className="flex flex-col col-span-12 md:col-span-5">
-              <div className="flex h-[320px] w-full items-center justify-center overflow-hidden bg-[hsl(var(--canvas))]">
+              <div className="flex h-[320px] w-full items-center justify-start overflow-hidden bg-[hsl(var(--canvas))]">
                 <CldPicture
                   src={portraitImage}
                   alt={`${displayName} portrait`}
