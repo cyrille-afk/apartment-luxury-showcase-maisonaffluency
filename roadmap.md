@@ -1,5 +1,9 @@
 # Roadmap
 
+## Installed-app opening
+- [ ] Remove unnecessary no-token sign-in wait and initial homepage hydration mismatch; keep genuine QR sign-in protected.
+- [ ] Verify stable mobile homepage startup and investigate observed live response delay.
+
 ## Collection title alignment
 - [x] FILTERS aligns to the collection grid's left edge; the independent Curators' Picks title is centered between edge controls. Browser measurements verified identical control/title centerlines closed → open → closed, unchanged 3 → 4 → 3 density; three regression tests pass, preview build OK.
 

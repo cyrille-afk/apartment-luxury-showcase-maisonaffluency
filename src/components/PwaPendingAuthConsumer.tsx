@@ -39,12 +39,19 @@ export function PwaPendingAuthConsumer({ children }: { children: ReactNode }) {
       const launchToken = takeLaunchToken();
       if (launchToken && claimFirstLaunchToken(launchToken)) storePendingAuthToken(launchToken, MOBILE_SYNC_TTL_SECONDS);
     }
+    // Ordinary/repeated icon launches have no handshake to protect. Do not
+    // hold the homepage behind account restoration when there is no code.
+    const token = readPendingAuthToken();
+    if (!token) {
+      ran.current = true;
+      setIsPwaBooting(false);
+      setPhase("ready");
+      return;
+    }
     // Let restoration finish first so its older null session cannot overwrite
     // the new OTP session. The AuthProvider remains mounted above this gate.
     if (loading) return;
     ran.current = true;
-    const token = readPendingAuthToken();
-    if (!token) { setIsPwaBooting(false); setPhase("ready"); return; }
     void runHandshake(token);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, setIsPwaBooting]);
@@ -119,7 +126,7 @@ export function PwaPendingAuthConsumer({ children }: { children: ReactNode }) {
 
   // SSR and ordinary browsers render children while checking (effects never
   // run on the server); only the installed app holds them for the handshake.
-  if (phase === "ready" || (phase === "checking" && (typeof window === "undefined" || !isInstalledPwaDisplay()))) return children;
+  if (phase === "ready" || phase === "checking") return children;
   return (
     <main className="min-h-[100dvh] bg-background text-foreground flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-sm text-center">
