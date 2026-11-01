@@ -12,6 +12,7 @@ import { queryKeys } from "@/lib/queryKeys";
 import { getCachedCatalog } from "@/lib/catalogSource";
 import { useAllDesigners, type Designer } from "@/hooks/useDesigner";
 import { useAuth } from "@/hooks/useAuth";
+import { shouldShowCatalogueFootnote } from "@/lib/catalogueFootnote";
 import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";
 import { useParentBrandDesigners } from "@/hooks/useParentBrandDesigners";
@@ -1593,7 +1594,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const hideCuratorPickFavorite = isMobile || isStandalone;
 
   // ─── Public favorites (localStorage-backed) with auth gate ───
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
   const [favIds, setFavIds] = useState<Set<string>>(() => {
     try {
@@ -2009,7 +2010,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
 
         <div className="relative">
           {/* Mobile: Search above, Filter below */}
-          <div data-sticky-filter-bar className="relative bg-background flex flex-col items-start gap-2 pt-3 pb-2 mb-2 md:mb-6 md:hidden">
+          <div data-sticky-filter-bar className="relative bg-background flex flex-col items-start gap-2 pt-3 pb-2 mb-2 md:hidden">
             {mode !== "products" && (
               <div className="w-[70%] max-w-[16rem]">
                 <AlphabetDesignerPicker
@@ -2100,23 +2101,14 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                   </SheetContent>
                 </Sheet>
               </div>
-          </div>
-
-          {/* Editorial framing: the grid below is a digital edit, not the full index. */}
-          <p className="font-serif text-neutral-400 text-xs tracking-wider italic text-center w-full mt-4 md:hidden">
-            Displaying a digital edit of our current physical catalog. Discover our complete index of over 300 global
-            masters and contemporary ateliers through our private trade desk or concierge service.
-          </p>
-
-
-          {/* Results count */}
+          {/* Results count stays inside the mobile utility bar. */}
           {(searchQuery || activeFilterCount > 0) && (
             mode === "products" && picksLoading ? (
-              <div className="flex items-center gap-2 mb-4 w-64" aria-label="Loading pieces count">
+              <div className="flex items-center gap-2 w-64" aria-label="Loading pieces count">
                 <div className="h-3 w-56 rounded bg-muted animate-pulse" />
               </div>
             ) : (
-              <p className="text-left text-[10px] text-muted-foreground mb-4 font-body tracking-wider">
+              <p className="text-left text-[10px] text-muted-foreground font-body tracking-wider">
                 {filteredPicks
                   ? `${filteredPicks.length} piece${filteredPicks.length !== 1 ? 's' : ''} found`
                   : `${totalCount} designer${totalCount !== 1 ? 's' : ''} found`}
@@ -2125,6 +2117,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               </p>
             )
           )}
+          </div>
 
           {/* Desktop: typographic runway — bridges the hero and the card grid.
               Left track carries the section identity, right track carries the
@@ -2200,7 +2193,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
           )}
 
           {/* Desktop: Filter + Search row */}
-          <div data-sticky-filter-bar className="hidden md:flex relative bg-background pt-4 pb-3 items-center gap-6 mb-6">
+          <div data-sticky-filter-bar className="hidden md:flex relative bg-background pt-4 pb-2 items-center gap-6 mb-2">
             <button
               onPointerDown={() => {
                 filterScrollYRef.current = window.scrollY;
@@ -2243,13 +2236,13 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                 </button>
               )}
             </div>
+            {(searchQuery || activeFilterCount > 0) && (
+              <p className="ml-auto text-[10px] text-muted-foreground font-body whitespace-nowrap">
+                {filteredPicks ? `${filteredPicks.length} pieces` : `${totalCount} designers`}
+              </p>
+            )}
           </div>
 
-          {/* Editorial framing: the grid below is a digital edit, not the full index. */}
-          <p className="font-serif text-neutral-400 text-xs tracking-wider italic text-center w-full mt-4 hidden md:block">
-            Displaying a digital edit of our current physical catalog. Discover our complete index of over 300 global
-            masters and contemporary ateliers through our private trade desk or concierge service.
-          </p>
 
 
 
@@ -2398,6 +2391,11 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               Join Our Trade Program
             </Link>
           </div>
+        )}
+        {shouldShowCatalogueFootnote(Boolean(user), authLoading) && (
+          <p data-catalogue-footnote className="mt-16 mb-2 text-center font-serif text-[11px] leading-relaxed text-muted-foreground/50">
+            A curated edit. Further collections through our concierge.
+          </p>
         )}
       </div>
     </div>
