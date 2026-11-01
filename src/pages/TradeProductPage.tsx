@@ -2764,7 +2764,7 @@ const TradeProductPage: React.FC = () => {
                       woodLabelOverride: (product as any).wood_label_override,
                     }).upholsteryLabel
                   }
-                  woodLabel={isBaseOnly && !suppressBaseAsFinish ? "Material Samples" : isOolMinibar ? getBasePlaceholder(product) :
+                  woodLabel={(product as any).wood_label_override?.trim() ? (product as any).wood_label_override.trim() : isBaseOnly && !suppressBaseAsFinish ? "Material Samples" : isOolMinibar ? getBasePlaceholder(product) :
                     resolveFinishSectionLabels({
                       baseAxisLabel: product.base_axis_label,
                       topAxisLabel: product.top_axis_label,
