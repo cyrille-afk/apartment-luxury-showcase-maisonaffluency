@@ -81,8 +81,8 @@ export default function RoomCollectionFilters({
         </SheetContent>
       </Sheet>
       <aside id={fullCatalogue ? "catalogue-filters" : undefined} aria-label="Collection filters" aria-hidden={fullCatalogue && !open ? true : undefined} className={`hidden shrink-0 overflow-hidden transition-[width] duration-300 motion-reduce:transition-none md:block ${open ? "w-48 lg:w-56" : fullCatalogue ? "w-0" : "w-10"}`}>
-        <div className="sticky top-[calc(var(--header-h)+1rem)] max-h-[calc(100vh-var(--header-h)-2rem)] overflow-y-auto pr-2">
-          {!fullCatalogue && <Button variant="ghost" size="icon-sm" onClick={() => setOpen(!open)} title={open ? "Collapse filters" : "Expand filters"} aria-label={open ? "Collapse filters" : "Expand filters"} className="mb-3 border border-border">
+        <div className="sticky top-[calc(var(--header-h)+1rem)] max-h-[calc(100vh-var(--header-h)-2rem)] overflow-y-auto bg-background pr-2">
+          {!fullCatalogue && <Button variant="ghost" size="icon-sm" onClick={() => setOpen(!open)} title={open ? "Collapse filters" : "Expand filters"} aria-label={open ? "Collapse filters" : "Expand filters"} className="mb-3">
             {open ? <ChevronRight className="rotate-180" /> : <SlidersHorizontal />}
           </Button>}
           {open && content}
