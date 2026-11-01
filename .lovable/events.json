@@ -156,6 +156,39 @@
         }
       }
     },
+    "project.directory_modal_dismissed": {
+      "event_schema_version": 1,
+      "description": "A visitor dismisses the directory modal using Escape, an outside click or its close button; fires once per dismissal.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reason",
+          "surface"
+        ],
+        "properties": {
+          "reason": {
+            "type": "string",
+            "enum": [
+              "escape",
+              "outside",
+              "close_button"
+            ]
+          },
+          "surface": {
+            "type": "string",
+            "enum": [
+              "desktop",
+              "mobile"
+            ]
+          }
+        }
+      }
+    },
     "project.directory_search_changed": {
       "event_schema_version": 1,
       "description": "A visitor edits a nonempty directory search; records only character count and matching designer count, never search text.",
