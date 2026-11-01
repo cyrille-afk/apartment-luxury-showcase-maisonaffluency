@@ -4185,6 +4185,42 @@ export type Database = {
         }
         Relationships: []
       }
+      directory_activity_events: {
+        Row: {
+          designer_slug: string | null
+          environment: string
+          id: string
+          kind: string
+          letter: string | null
+          modal_id: string | null
+          occurred_at: string
+          reason: string | null
+          surface: string
+        }
+        Insert: {
+          designer_slug?: string | null
+          environment: string
+          id: string
+          kind: string
+          letter?: string | null
+          modal_id?: string | null
+          occurred_at?: string
+          reason?: string | null
+          surface: string
+        }
+        Update: {
+          designer_slug?: string | null
+          environment?: string
+          id?: string
+          kind?: string
+          letter?: string | null
+          modal_id?: string | null
+          occurred_at?: string
+          reason?: string | null
+          surface?: string
+        }
+        Relationships: []
+      }
       document_downloads: {
         Row: {
           country: string
@@ -13084,6 +13120,10 @@ export type Database = {
         Args: { _id: string; _source: string }
         Returns: undefined
       }
+      admin_directory_activity: {
+        Args: { _days?: number; _environment?: string; _surface?: string }
+        Returns: Json
+      }
       admin_manage_studio_member: {
         Args: {
           _action: string
@@ -13972,6 +14012,19 @@ export type Database = {
         Returns: undefined
       }
       recompute_trade_tier_suggestions: { Args: never; Returns: number }
+      record_directory_activity: {
+        Args: {
+          _designer_slug?: string
+          _environment: string
+          _id: string
+          _kind: string
+          _letter?: string
+          _modal_id?: string
+          _reason?: string
+          _surface: string
+        }
+        Returns: undefined
+      }
       record_email_portal_click: { Args: { p_ref: string }; Returns: undefined }
       record_security_event: {
         Args: {

@@ -1779,6 +1779,13 @@
       "when": 1793308131472,
       "tag": "0253_admin_paid_orders_monthly",
       "breakpoints": true
+    },
+    {
+      "idx": 254,
+      "version": "7",
+      "when": 1793577287414,
+      "tag": "0254_directory_activity_analytics",
+      "breakpoints": true
     }
   ]
 }
