@@ -1,5 +1,8 @@
 # Roadmap
 
+## Product navigation scroll
+- [ ] Reproduce Puzzle Dining Table navigation from the signed-in designer gallery, remove the source-page jump, and verify the transition.
+
 ## GitHub Actions failures
 - [x] Trace activation/checkout startup crashes and six unit failures from actual GitHub job logs.
 - [x] Explicitly enable runtime compatibility; the exact pinned-date/node:fs runtime probe passed. Full application startup awaits the new GitHub run.
