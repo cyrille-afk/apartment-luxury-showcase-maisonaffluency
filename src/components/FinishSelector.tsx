@@ -1363,6 +1363,9 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     const order: string[] = [];
     woodTiles.forEach((f) => { const k = keyOf(f); if (k && !order.includes(k)) order.push(k); });
     if (order.length < 2 || woodTiles.some((f) => !keyOf(f) || /^other$/i.test(keyOf(f)))) return null;
+    // One sample per material (e.g. Jules Lamp: one bronze + one alabaster on a
+    // single variant line) is a fixed composition, not a choice — one dropdown.
+    if (order.every((k) => woodTiles.filter((f) => keyOf(f) === k).length === 1)) return null;
     return order.map((k) => ({
       key: k,
       label: `Select Your ${k} Finish`,
