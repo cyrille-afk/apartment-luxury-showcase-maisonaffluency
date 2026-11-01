@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Visual directory overlay
-- [ ] Filter the four-column matrix live, make the full A–Z ribbon select initial-only results with an underline, and dismiss instantly outside or on Escape.
-- [ ] Verify typing, letter changes, empty results and dismissal against the loaded directory.
+- [x] Filter the four-column matrix live, make the full A–Z ribbon select initial-only results with an underline, and dismiss instantly outside or on Escape.
+- [x] Signed-in loaded directory verified: Amelie returns one card; A/C return only matching initials, letters remain usable after no results, and Escape/outside clicks unmount instantly. Three unit tests pass; preview build OK. GitHub sync required.
 
 ## Minimal gallery utility capsules
 - [x] Share pure black/white capsule styling, spacious icon padding and a centered flex row without an enclosing grid frame.
