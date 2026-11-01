@@ -11,6 +11,7 @@
 - Approved-account activation resends reuse the branded review drawer with one fresh idempotency key per opened resend, retained on retries; never change approval to resend.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Desktop account menus support mouse hover through a non-modal controlled dropdown with a transparent travel bridge and delayed close; retain native click, touch and keyboard activation — keeps header interactions consistent without trapping the pointer.
 - Trade gallery hover specifications use tradeCardMetadata to show only recorded lead times and dimensions; absent values are omitted within the reserved-height block — prevents fabricated delivery promises and measurements without layout shifts.
 - Installed homepage sizing uses initial-document CSS rather than browser-dependent JSX; no-code launches skip auth waiting while genuine QR handshakes retain protection — prevents hydration replacement and delayed repositioning.
 - Designer and collection grids share useFilterGridLayout and a toolbar-level CollectionFilterTrigger; designer toolbars use equal desktop tracks to center the independent gallery title between edge-aligned controls. Keyed Motion cards animate density without remounting images, honoring reduced motion.
