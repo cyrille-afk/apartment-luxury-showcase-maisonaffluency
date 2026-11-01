@@ -2349,9 +2349,12 @@ const TradeProductPage: React.FC = () => {
     const asset: "3d" | number = workspaceAsset === "3d" && !r3d ? 0 : workspaceAsset;
     const photoIdx = typeof asset === "number" ? Math.min(asset, Math.max(0, visibleImages.length - 1)) : null;
     const hoverVisibleIdx = hoveredPreviewImage ? visibleImages.indexOf(hoveredPreviewImage) : -1;
-    const stagePhotoIdx = hoverVisibleIdx >= 0 && !(asset === "3d" && viewer3dOpen) ? hoverVisibleIdx : photoIdx;
     const realIdx = (i: number) => (visibleImageIndices ? (visibleImageIndices[i] ?? i) : i);
     const live3d = asset === "3d" && !!r3d && viewer3dOpen;
+    // Thumbnail hover previews the photo on the stage without committing it;
+    // a click still selects. In live 3D mode the hover drives the model instead.
+    const thumbStageIdx = !live3d && hoverPreviewIdx !== null && hoverPreviewIdx < visibleImages.length ? hoverPreviewIdx : null;
+    const stagePhotoIdx = thumbStageIdx ?? (hoverVisibleIdx >= 0 && !(asset === "3d" && viewer3dOpen) ? hoverVisibleIdx : photoIdx);
     // Configuration carried by a photo: pictured finishes + the mapped variant (size).
     const configForPhoto = (i: number) => {
       const ri = realIdx(i);
@@ -2410,12 +2413,12 @@ const TradeProductPage: React.FC = () => {
                 aria-label={`Show photo ${i + 1}`}
                 aria-pressed={live3d ? (galleryActiveIndex ?? 0) === realIdx(i) : photoIdx === i}
                 title={live3d ? "Hover to preview in 3D · click to apply" : undefined}
-                onMouseEnter={() => live3d && setHoverPreviewIdx(i)}
+                onMouseEnter={() => setHoverPreviewIdx(i)}
                 onMouseLeave={() => setHoverPreviewIdx((h) => (h === i ? null : h))}
-                onFocus={() => live3d && setHoverPreviewIdx(i)}
+                onFocus={() => setHoverPreviewIdx(i)}
                 onBlur={() => setHoverPreviewIdx((h) => (h === i ? null : h))}
                 onClick={() => { if (live3d) lockPhoto(i); else { setWorkspaceAsset(i); setGalleryActiveIndex(realIdx(i)); } }}
-                className={cn(thumbCls(live3d ? (galleryActiveIndex ?? 0) === realIdx(i) : photoIdx === i), live3d && hoverPreviewIdx === i && "border-accent")}
+                className={cn(thumbCls(live3d ? (galleryActiveIndex ?? 0) === realIdx(i) : photoIdx === i), hoverPreviewIdx === i && "border-accent")}
               >
                 <img src={src} alt="" loading="lazy" className="h-full w-full object-cover" />
               </button>
