@@ -1,5 +1,8 @@
 # Roadmap
 
+## Collection title alignment
+- [x] FILTERS aligns to the collection grid's left edge; the independent Curators' Picks title is centered between edge controls. Browser measurements verified identical control/title centerlines closed → open → closed, unchanged 3 → 4 → 3 density; three regression tests pass, preview build OK.
+
 ## Filter grid transformation
 - [x] Keep the FILTERS trigger aligned with density controls; animate four columns open / three closed on designer and collection grids.
 - [x] Michel Amar and Living verified 3 → 4 → 3; trigger/control heights and top positions match exactly, cards/images retain identity, mobile sheet works without overflow; eight tests pass and preview build OK.

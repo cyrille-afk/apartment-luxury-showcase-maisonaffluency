@@ -223,7 +223,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
   }, [designer.biography]);
 
   const renderCuratorsPicksSection = ({
-    barClassName = "flex items-center justify-between mb-6",
+    barClassName = "mb-6",
     titleClassName = "hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground",
     mobileBadgeClassName = "px-4 py-1.5 rounded-full border border-foreground/20 bg-foreground/5 md:hidden",
     mobileTitleClassName = "font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold",
@@ -234,9 +234,11 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
     mobileTitleClassName?: string;
   } = {}) => (
     <>
-      <div className={barClassName}>
-        <div className="flex items-center gap-3">
+      <div className={cn(barClassName, "grid grid-cols-[minmax(0,1fr)_auto] items-center md:grid-cols-3")}>
+        <div className="hidden justify-self-start md:block">
           <CollectionFilterTrigger open={filtersOpen} onClick={() => setFiltersOpen(!filtersOpen)} />
+        </div>
+        <div className="min-w-0 justify-self-start md:justify-self-center">
           <h3 className={titleClassName}>
             Curators' Picks
           </h3>
@@ -244,7 +246,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
             <h3 className={mobileTitleClassName}>Curators' Picks</h3>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-self-end gap-2">
           {/* Mobile toggle */}
           <button
             onClick={() => setMobileGridCols((prev) => (prev === 1 ? 2 : 1))}
@@ -532,7 +534,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
           {!profileOnly && (
             <div className="mt-4 w-full">
               {renderCuratorsPicksSection({
-                barClassName: "flex justify-between items-center w-full border-b border-neutral-100 py-2 mt-2 mb-3 text-[11px] uppercase tracking-widest text-neutral-800",
+                barClassName: "w-full border-b border-neutral-100 py-2 mt-2 mb-3 text-[11px] uppercase tracking-widest text-neutral-800",
                 titleClassName: "hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-800",
                 mobileBadgeClassName: "px-4 py-1.5 rounded-full border border-neutral-800/20 bg-neutral-800/5 md:hidden",
                 mobileTitleClassName: "font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-neutral-800 font-semibold",
