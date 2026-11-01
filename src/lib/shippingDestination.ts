@@ -47,6 +47,7 @@ export const SHIPPING_COUNTRIES: CountryEntry[] = [
 ];
 
 const DEFAULT_ISO = "GB";
+const DEFAULT_DESTINATION: CountryEntry = { iso: DEFAULT_ISO, name: "United Kingdom", currency: "GBP" };
 
 const findEntry = (iso: string | null | undefined): CountryEntry | undefined =>
   iso ? SHIPPING_COUNTRIES.find((c) => c.iso === iso.toUpperCase()) : undefined;
@@ -60,12 +61,12 @@ export const isoToFlag = (iso: string): string => {
 };
 
 export const getCurrentDestination = (): CountryEntry => {
-  if (typeof window === "undefined") return findEntry(DEFAULT_ISO)!;
+  if (typeof window === "undefined") return DEFAULT_DESTINATION;
   try {
     const iso = window.localStorage.getItem(COUNTRY_KEY);
-    return findEntry(iso) ?? findEntry(DEFAULT_ISO)!;
+    return findEntry(iso) ?? DEFAULT_DESTINATION;
   } catch {
-    return findEntry(DEFAULT_ISO)!;
+    return DEFAULT_DESTINATION;
   }
 };
 
@@ -95,7 +96,7 @@ export const setDestination = (iso: string) => {
 
 /** Reactive hook returning the current destination. */
 export const useShippingDestination = (): CountryEntry => {
-  const [dest, setDest] = useState<CountryEntry>(() => getCurrentDestination());
+  const [dest, setDest] = useState<CountryEntry>(DEFAULT_DESTINATION);
 
   useEffect(() => {
     const refresh = () => setDest(getCurrentDestination());
@@ -110,6 +111,7 @@ export const useShippingDestination = (): CountryEntry => {
     window.addEventListener(DEST_EVENT, onCustom as EventListener);
     window.addEventListener(CURRENCY_EVENT, refresh);
     window.addEventListener("storage", onStorage);
+    refresh();
     // Poll once after mount in case the IP-geo detector populated the cache.
     const t = window.setTimeout(refresh, 1500);
     return () => {

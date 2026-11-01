@@ -1,7 +1,7 @@
 import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PwaPendingAuthConsumer } from "../PwaPendingAuthConsumer";
-import { storePendingAuthToken } from "@/lib/pwaPendingAuth";
+import { storePendingAuthToken, claimFirstLaunchToken } from "@/lib/pwaPendingAuth";
 
 const mocks = vi.hoisted(() => ({
   auth: { loading: false, user: null as null | { id: string }, rolesLoaded: false },
@@ -22,6 +22,7 @@ vi.mock("@/integrations/supabase/client", () => ({ supabase: { auth: { getSessio
 const renderGate = () => render(<PwaPendingAuthConsumer><div data-testid="dashboard" /></PwaPendingAuthConsumer>);
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.mocked(claimFirstLaunchToken).mockReturnValue(true);
   window.history.replaceState({}, "", "/");
   mocks.auth = { loading: false, user: null, rolesLoaded: false };
   mocks.standalone = true; mocks.pending = "a".repeat(43);
@@ -107,6 +108,25 @@ describe("installed app startup handshake", () => {
     renderGate();
     expect(screen.getByTestId("dashboard")).toBeInTheDocument();
     expect(mocks.redeem).not.toHaveBeenCalled();
+  });
+  it("opens normally without waiting for account restoration when no code is pending", () => {
+    mocks.auth.loading = true;
+    mocks.pending = null;
+    renderGate();
+    expect(screen.getByTestId("dashboard")).toBeInTheDocument();
+    expect(mocks.booting).toHaveBeenLastCalledWith(false);
+    expect(mocks.getSession).not.toHaveBeenCalled();
+  });
+  it("ignores a repeated claimed icon code even while account restoration is pending", () => {
+    mocks.auth.loading = true;
+    mocks.pending = null;
+    vi.mocked(claimFirstLaunchToken).mockReturnValue(false);
+    window.history.replaceState({}, "", `/?source=pwa&token=${"b".repeat(43)}`);
+    renderGate();
+    expect(screen.getByTestId("dashboard")).toBeInTheDocument();
+    expect(storePendingAuthToken).not.toHaveBeenCalled();
+    expect(mocks.redeem).not.toHaveBeenCalled();
+    expect(window.location.search).toBe("?source=pwa");
   });
   it("keeps routes unmounted when the server rejects a used code", async () => {
     mocks.redeem.mockResolvedValue({ ok: false, reason: "expired" });

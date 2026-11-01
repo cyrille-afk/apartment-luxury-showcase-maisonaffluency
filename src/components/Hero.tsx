@@ -2,7 +2,6 @@ import { useEffect, useState, lazy, Suspense } from "react";
 import { useNavigate } from "@/lib/router-compat";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { trackEvent, trackCTA } from "@/lib/analytics";
-import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import { setDarkIosChrome, clearDarkIosChrome } from "@/lib/iosChrome";
 // Appointment dialog (plus its Turnstile widget) is click-only: keep it out of
 // the homepage critical path.
@@ -55,7 +54,6 @@ const Hero = () => {
     if (tourOpen) setTourMounted(true);
   }, [tourOpen]);
   const [showImageFallback, setShowImageFallback] = useState(false);
-  const isPwa = isPwaStandaloneDisplay();
 
   useEffect(() => {
     // The hero is a full-bleed dark image: paint the iOS chrome black while
@@ -107,9 +105,7 @@ const Hero = () => {
 
   return (
     <section
-      className={`relative flex w-full flex-col justify-between md:h-screen md:overflow-hidden ${
-        isPwa ? "min-h-[100dvh]" : "h-[100svh] min-h-[100svh] overflow-hidden"
-      }`}
+      className="ma-home-hero relative flex w-full flex-col justify-between h-[100svh] min-h-[100svh] overflow-hidden md:h-screen md:overflow-hidden"
     >
       {/* Hero image is rendered by the static <picture id="static-hero"> in
           index.html (fixed, z-index:0, painted from the preloaded bytes
@@ -139,13 +135,7 @@ const Hero = () => {
 
       {/* Text overlay — desktop keeps the previous anchored-top editorial layout;
           mobile/PWA uses a bottom-aligned editorial link stack over the wallpaper. */}
-      <div className={`ma-home-hero-copy relative z-10 flex flex-1 flex-col items-start justify-start px-6 md:h-full md:min-h-0 md:justify-start md:px-32 md:pb-20 md:pt-[24rem] lg:px-48 ${
-        isPwa
-          ? // Standalone has no browser toolbar, so a fixed rem pad reads too high on
-            // the taller viewport — anchor the copy proportionally instead.
-            "min-h-screen pt-[calc(env(safe-area-inset-top)+29vh)] md:pt-[24rem] pb-[calc(env(safe-area-inset-bottom)+2rem)]"
-          : "h-full min-h-0 pt-[calc(env(safe-area-inset-top)+14rem)] pb-0"
-      }`}>
+      <div className="ma-home-hero-copy relative z-10 flex flex-1 flex-col items-start justify-start px-6 h-full min-h-0 pt-[calc(env(safe-area-inset-top)+14rem)] pb-0 md:h-full md:min-h-0 md:justify-start md:px-32 md:pb-20 md:pt-[24rem] lg:px-48">
 
         <div className="w-full max-w-xl md:max-w-4xl md:text-left">
           <h1 className="text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl">
@@ -166,9 +156,7 @@ const Hero = () => {
                 trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" });
                 navigate("/designers");
               }}
-              className={`group flex translate-x-4 items-center gap-4 border border-white/20 bg-white/5 px-6 py-3.5 font-body text-[11px] font-medium uppercase tracking-[0.25em] text-white backdrop-blur-sm transition-all duration-500 ease-out hover:translate-x-12 hover:border-white hover:bg-white hover:text-black md:mt-20 md:translate-x-8 ${
-              isPwa ? "mt-28" : "mt-16"
-            }`}
+              className="ma-home-hero-primary group flex translate-x-4 items-center gap-4 border border-white/20 bg-white/5 px-6 py-3.5 font-body text-[11px] font-medium uppercase tracking-[0.25em] text-white backdrop-blur-sm transition-all duration-500 ease-out hover:translate-x-12 hover:border-white hover:bg-white hover:text-black mt-16 md:mt-20 md:translate-x-8"
             >
               <span>Explore the Collection</span>
               <span aria-hidden="true" className="inline-block transition-transform duration-500 ease-out group-hover:translate-x-1.5">→</span>
@@ -179,11 +167,7 @@ const Hero = () => {
         {/* Mobile / PWA — secondary CTAs centered above the iOS navigation bar */}
         <nav
           aria-label="Hero secondary actions"
-          className={`flex w-full flex-col items-center gap-5 md:hidden ${
-            isPwa
-              ? "mt-auto pb-[calc(env(safe-area-inset-bottom)+0.25rem)] pt-8"
-              : "absolute inset-x-6 bottom-[calc(env(safe-area-inset-bottom)+2.5rem)] w-auto"
-          }`}
+          className="ma-home-hero-secondary flex flex-col items-center gap-5 md:hidden absolute inset-x-6 bottom-[calc(env(safe-area-inset-bottom)+2.5rem)] w-auto"
         >
           <button
             type="button"
