@@ -1,5 +1,9 @@
 # Roadmap
 
+## Profile grid alignment and capsule symmetry
+- [ ] Align biography image, closed product grid and open filter panel on one left axis.
+- [ ] Match filter/grid capsule metrics and verify the shared toolbar axis in the browser.
+
 ## Catalogue listing footnote
 - [x] Remove the full disclaimer above public and Trade grids; add a condensed guest-only bottom footnote and tighten filter spacing.
 - [x] Guest Seating desktop/phone and public designers verified: bottom-only note, uniform 8px toolbar-to-grid gap. Signed-in category and loaded Trade directory omit the note; two visibility tests pass, preview build OK.
