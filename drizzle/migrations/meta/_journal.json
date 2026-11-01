@@ -1786,6 +1786,13 @@
       "when": 1793577287414,
       "tag": "0254_directory_activity_analytics",
       "breakpoints": true
+    },
+    {
+      "idx": 255,
+      "version": "7",
+      "when": 1793577429121,
+      "tag": "0255_directory_activity_explicit_private_grants",
+      "breakpoints": true
     }
   ]
 }
