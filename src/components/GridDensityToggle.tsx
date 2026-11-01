@@ -1,5 +1,6 @@
 import { Grid3X3, LayoutGrid } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 /**
  * Pill-style 3/4-column grid density toggle — the same control used on the
@@ -29,7 +30,9 @@ export default function GridDensityToggle({
         const active = value === cols;
         const Icon = cols === 4 ? LayoutGrid : Grid3X3;
         return (
-          <button
+          <Button
+            variant="ghost"
+            size="collection-capsule"
             key={cols}
             type="button"
             disabled={disabled}
@@ -38,12 +41,12 @@ export default function GridDensityToggle({
             aria-pressed={active}
             title={`Display ${cols} columns`}
             className={cn(
-              "rounded-full p-2 transition-all disabled:opacity-40",
-              active ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground",
+              "shrink-0 transition-all disabled:opacity-40",
+              active ? "bg-foreground text-background hover:bg-foreground hover:text-background" : "text-muted-foreground hover:text-foreground",
             )}
           >
             <Icon size={15} strokeWidth={1.5} />
-          </button>
+          </Button>
         );
       })}
     </div>

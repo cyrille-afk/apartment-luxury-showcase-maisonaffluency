@@ -22,6 +22,7 @@ const buttonVariants = cva(
         lg: "h-11 rounded-control px-8",
         icon: "h-10 w-10",
         "icon-sm": "h-8 w-8",
+        "collection-capsule": "h-9 rounded-full px-2 py-2 font-body text-[11px] leading-none [&_svg]:size-[15px]",
       },
     },
     defaultVariants: {
