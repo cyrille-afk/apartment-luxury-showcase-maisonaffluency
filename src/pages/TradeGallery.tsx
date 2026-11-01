@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import CurrencyToggle, { type DisplayCurrency, convertCents, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import { getSubcategories, type TradeProduct } from "@/lib/tradeProducts";
+import { tradeCardMetadata } from "@/lib/tradeCardMetadata";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { useDesigner } from "@/hooks/useDesigner";
 import { useDesignerGalleryPicks } from "@/hooks/useDesignerGalleryPicks";
@@ -877,6 +878,7 @@ const StudioGallery = () => {
             const isAdded = addedProductIds.has(product.id);
             const price = getProductPrice(product);
             const pinned = isPinned(product.product_name, product.id);
+            const metadata = tradeCardMetadata(product);
             return (
               <div key={product.id} className="group relative min-w-0">
                 <div className="relative aspect-square w-full overflow-hidden bg-[hsl(var(--product-canvas))] cursor-pointer" onClick={() => openProductSheet(product)}>
@@ -1002,8 +1004,8 @@ const StudioGallery = () => {
                    </div>
                    {/* Invisible utility: reserved-height micro metadata that fades in on hover — no layout shift */}
                    <div className="mt-1 flex h-8 flex-col justify-center gap-0.5 overflow-hidden font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground opacity-0 transition-opacity duration-500 group-hover:opacity-100" aria-hidden="true">
-                     <span>Lead Time: 12 Weeks</span>
-                     <span className="truncate">Dimensions: {product.dimensions || "H 73cm x W 252cm"}</span>
+                     {metadata.leadTime && <span>Lead Time: {metadata.leadTime}</span>}
+                     {metadata.dimensions && <span className="truncate">Dimensions: {metadata.dimensions}</span>}
                    </div>
                    <h3 className="mt-1.5 min-h-[2.5rem] font-display text-[14px] leading-snug text-foreground sm:text-[15px] line-clamp-2">
                      {product.product_name}
