@@ -644,26 +644,26 @@ function singularizeSub(s: string): string {
                   </p>
                 )}
               </div>
-               <div className={`flex w-full justify-between px-1 ${roomSlug ? "mt-3 items-baseline gap-1.5 md:gap-4" : "mt-3 h-12 items-start gap-4"}`}>
+               <div className={`mt-3 flex w-full flex-col gap-0.5 px-1 md:flex-row md:justify-between ${roomSlug ? "md:items-baseline md:gap-4" : "md:h-12 md:items-start md:gap-4"}`}>
                 <div className="flex min-w-0 flex-1 flex-col text-left">
                   <Link
                     to={`/designers/${designerSlugify(item.designerId || item.designerName)}`}
                     onClick={(e) => e.stopPropagation()}
-                     className={`group/designer block w-full font-body font-semibold uppercase text-foreground antialiased transition-colors duration-300 ease-in-out hover:text-foreground/70 ${roomSlug ? "break-words text-[9px] leading-tight tracking-normal md:text-[10px] md:tracking-wider" : "truncate whitespace-nowrap text-[10px] tracking-wider"}`}
+                     className={`group/designer block w-full font-body font-semibold uppercase text-foreground antialiased transition-colors duration-300 ease-in-out hover:text-foreground/70 ${roomSlug ? "break-words text-[10px] leading-tight tracking-wider" : "truncate whitespace-nowrap text-[10px] tracking-wider"}`}
                    >
                      <span className="relative inline-block max-w-full pb-1 align-bottom">
                        {item.designerName.includes(' - ') ? item.designerName.split(' - ')[0].trim() : item.designerName}
                        <span aria-hidden="true" className="pointer-events-none absolute bottom-0 left-0 h-px w-full origin-left scale-x-0 bg-current transition-transform duration-300 ease-in-out group-hover:scale-x-100 group-hover/designer:scale-x-100 motion-reduce:transition-none" />
                      </span>
                    </Link>
-                   <h3 className={`mt-0.5 font-body font-medium leading-snug text-muted-foreground antialiased ${roomSlug ? "line-clamp-2 text-[11px] md:text-xs" : "line-clamp-1 text-xs"}`}>
+                   <h3 className={`mt-0.5 font-body font-medium leading-snug text-muted-foreground antialiased ${roomSlug ? "line-clamp-2 text-xs" : "line-clamp-1 text-xs"}`}>
                     {subcategory === "Dining Tables" && !item.pick.title.toLowerCase().includes("table")
                       ? `${item.pick.title} Table`
                       : item.pick.title}
                   </h3>
                 </div>
-                 <div className={`shrink-0 text-right ${roomSlug ? "max-w-[46%]" : "whitespace-nowrap"}`}>
-                   <p className={`font-body font-semibold text-foreground antialiased ${roomSlug ? "text-[9px] leading-tight md:text-xs" : "whitespace-nowrap text-xs"}`}>
+                 <div className={`shrink-0 text-left md:text-right ${roomSlug ? "md:max-w-[46%]" : "md:whitespace-nowrap"}`}>
+                   <p className="whitespace-nowrap font-body text-xs font-semibold text-foreground antialiased">
                      {formatPublicRrpForDestination(publicRrpMap[item.pick.id || ""], destination.currency) || "Price upon Request"}
                   </p>
                 </div>
