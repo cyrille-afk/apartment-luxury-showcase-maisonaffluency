@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Check, FolderOpen, FolderPlus, Heart, Loader2, Plus, Trash2 } from "lucide-react";
 import { useStudio } from "@/hooks/useStudio";
@@ -9,6 +8,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { ensureTradeProductId, type ProductMeta } from "@/lib/ensureTradeProduct";
 import { TRADE_FAVORITES_EVENT } from "@/hooks/useFavorites";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { recentProjectBoards } from "./recentProjectBoards";
 
 export const TRADE_FAVORITE_FOLDERS_EVENT = "trade_favorite_folders_changed";
 
@@ -41,6 +44,8 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
   const [creatingBoard, setCreatingBoard] = useState(false);
   const [newBoardName, setNewBoardName] = useState("");
   const [open, setOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [boardSearch, setBoardSearch] = useState("");
   const [busy, setBusy] = useState(false);
   const [favoriteId, setFavoriteId] = useState<string | null>(null); // trade_favorites.id
   const [realProductId, setRealProductId] = useState<string | null>(null);
@@ -110,18 +115,18 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
   }, [user, resolveRealId, currentStudio?.id]);
 
   useEffect(() => {
-    if (open) refresh();
-  }, [open, refresh]);
+    if (open || drawerOpen) refresh();
+  }, [open, drawerOpen, refresh]);
 
   useEffect(() => {
-    const onSync = () => { if (open) refresh(); };
+    const onSync = () => { if (open || drawerOpen) refresh(); };
     window.addEventListener(TRADE_FAVORITES_EVENT, onSync);
     window.addEventListener(TRADE_FAVORITE_FOLDERS_EVENT, onSync);
     return () => {
       window.removeEventListener(TRADE_FAVORITES_EVENT, onSync);
       window.removeEventListener(TRADE_FAVORITE_FOLDERS_EVENT, onSync);
     };
-  }, [open, refresh]);
+  }, [open, drawerOpen, refresh]);
 
   // Close the menu when the user scrolls the page or resizes the viewport.
   useEffect(() => {
@@ -259,7 +264,8 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
         .single();
       if (error || !data) { toast.error("Could not create project folder"); return; }
       board = data as { id: string; title: string };
-      setBoards((prev) => [board!, ...prev]);
+      const savedBoard = board;
+      setBoards((prev) => [savedBoard, ...prev]);
       setNewBoardName("");
       setCreatingBoard(false);
     } finally {
@@ -288,39 +294,56 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
   const favorited = !!favoriteId;
 
   return (
+    <>
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
         {children}
       </PopoverTrigger>
 
-      {/* Backdrop: closes the menu on tap/scroll and provides a subtle dimmed blur. */}
-      {open && typeof document !== "undefined" &&
-        createPortal(
-          <div
-            aria-hidden="true"
-            className="fixed inset-0 z-[119] bg-black/[0.04] backdrop-blur-[2px] transition-opacity duration-200"
-            onPointerDown={() => setOpen(false)}
-          />,
-          document.body
-        )}
-
       <PopoverContent
         align={align}
         side={side}
-        className="w-72 p-0 bg-background border border-border shadow-[0_22px_60px_-20px_rgba(0,0,0,0.12)] z-[120] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:duration-200 data-[state=closed]:duration-150"
+        className="w-[26rem] max-w-[calc(100vw-2rem)] rounded-sm p-1 bg-background border border-border shadow-xl z-[120]"
         onClick={(e) => e.stopPropagation()}
       >
+        {recentProjectBoards(boards).map((board) => {
+          const done = inBoards.has(board.id);
+          return (
+            <Button key={board.id} variant="ghost" disabled={busy || done}
+              onClick={() => addToBoard(board.id, board.title)}
+              className="w-full h-auto justify-start whitespace-normal rounded-none px-4 py-3 font-mono text-[11px] font-normal uppercase text-foreground text-left hover:bg-muted/40 disabled:opacity-70">
+              {done ? <Check className="shrink-0" /> : <FolderOpen className="shrink-0 text-muted-foreground" />}
+              <span className="min-w-0 break-words leading-relaxed">{board.title}</span>
+            </Button>
+          );
+        })}
+        <div className="border-t border-border mt-1 pt-1">
+          <Button variant="ghost" disabled={busy} onClick={() => { setOpen(false); setCreatingBoard(true); setDrawerOpen(true); }}
+            className="w-full h-auto justify-start rounded-none px-4 py-3 font-mono text-[11px] font-normal uppercase hover:bg-muted/40">
+            <Plus /> New project folder
+          </Button>
+          <Button variant="ghost" onClick={() => { setOpen(false); setDrawerOpen(true); }}
+            className="w-full h-auto justify-start rounded-none px-4 py-3 font-mono text-[11px] font-normal uppercase text-muted-foreground hover:bg-muted/40">
+            <Plus /> View All
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
+    <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
+      <SheetContent side="right" aria-describedby={undefined}
+        overlayClassName="z-[129] bg-foreground/10"
+        className="z-[130] flex flex-col w-full sm:max-w-lg overflow-y-auto bg-background motion-reduce:animate-none motion-reduce:transition-none"
+        onClick={(e) => e.stopPropagation()}>
+        <SheetTitle className="font-mono text-xs font-normal uppercase pr-12 mb-4">Project folders</SheetTitle>
         <div className="px-4 pt-3 pb-2 border-b border-border">
           <p className="font-display text-sm tracking-wide text-foreground flex items-center gap-2">
             Save to folder
             {busy && <Loader2 size={12} className="animate-spin text-muted-foreground" />}
           </p>
-          <p className="font-body text-[11px] text-muted-foreground mt-0.5">
-            Favorite folders for mood and rooms; project folders for client work.
-          </p>
+
         </div>
 
-        <button
+        <Button variant="ghost"
           onClick={handleToggleFavorite}
           disabled={busy}
           className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-muted/50 transition-colors border-b border-border disabled:opacity-50"
@@ -330,7 +353,7 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
             {favorited ? "Saved to favorites" : "Save to favorites"}
           </span>
           {favorited && <Check size={14} className="text-foreground" />}
-        </button>
+        </Button>
 
         <div className="max-h-56 overflow-y-auto">
           <p className="px-4 pt-3 pb-1 font-body text-[10px] uppercase tracking-wider text-muted-foreground">Favorite folders</p>
@@ -359,15 +382,15 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
                   >
                     {checked && <Check size={11} className="text-background" />}
                   </span>
-                  <span className="font-body text-xs text-foreground truncate">{f.name}</span>
+                  <span className="font-mono text-[11px] uppercase text-foreground whitespace-normal break-words text-left">{f.name}</span>
                 </span>
-                <button
+                <Button variant="ghost"
                   onClick={(e) => handleDeleteFolder(f.id, e)}
                   className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
                   title="Delete folder"
                 >
                   <Trash2 size={12} />
-                </button>
+                </Button>
               </div>
             );
           })}
@@ -375,14 +398,14 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
 
         <div className="border-t border-border overflow-hidden">
           {!creating ? (
-            <button
+            <Button variant="ghost"
               onClick={() => setCreating(true)}
               disabled={busy}
               className="w-full flex items-center gap-2 px-4 py-2.5 hover:bg-muted/50 transition-colors animate-in slide-in-from-bottom-2 fade-in duration-200 disabled:opacity-50"
             >
               <FolderPlus size={14} className="text-foreground" />
               <span className="font-body text-xs text-foreground">New favorite folder</span>
-            </button>
+            </Button>
           ) : (
             <div className="px-4 py-3 animate-in slide-in-from-bottom-4 fade-in duration-200">
               <p className="font-display text-xs tracking-wide text-foreground mb-2">New folder</p>
@@ -399,19 +422,19 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
                 className="w-full bg-transparent border-b border-border focus:border-foreground outline-hidden font-body text-xs py-1 placeholder:font-serif placeholder:italic placeholder:text-xs placeholder:text-muted-foreground/60"
               />
               <div className="mt-3 flex items-center gap-3">
-                <button
+                <Button variant="ghost"
                   onClick={handleCreateFolder}
                   disabled={busy || !newName.trim()}
                   className="font-body text-[11px] uppercase tracking-wider text-background bg-foreground px-3 py-1.5 rounded-sm hover:bg-foreground/85 transition-colors disabled:opacity-40"
                 >
                   Create
-                </button>
-                <button
+                </Button>
+                <Button variant="ghost"
                   onClick={() => { setCreating(false); setNewName(""); }}
                   className="font-body text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Cancel
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -419,34 +442,35 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
 
         <div className="border-t border-border">
           <p className="px-4 pt-3 pb-1 font-body text-[10px] uppercase tracking-wider text-muted-foreground">Project folders</p>
-          <div className="max-h-44 overflow-y-auto pb-1">
+          <Input value={boardSearch} onChange={(e) => setBoardSearch(e.target.value)} placeholder="Search project folders" aria-label="Search project folders" className="my-3 font-mono text-xs" />
+          <div className="pb-1">
             {boards.length === 0 && !creatingBoard && (
               <p className="px-4 py-2 font-body text-[11px] text-muted-foreground">No project folders yet.</p>
             )}
-            {boards.map((b) => {
+            {boards.filter((b) => b.title.toLowerCase().includes(boardSearch.toLowerCase())).map((b) => {
               const done = inBoards.has(b.id);
               return (
-                <button
+                <Button variant="ghost"
                   key={b.id}
                   onClick={() => addToBoard(b.id, b.title)}
                   disabled={busy || done}
-                  className="w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-muted/50 transition-colors disabled:cursor-default"
+                  className="w-full flex items-center justify-start gap-2 h-auto whitespace-normal px-4 py-3 text-left hover:bg-muted/50 transition-colors disabled:cursor-default"
                 >
                   {done ? <Check size={14} className="text-foreground shrink-0" /> : <FolderOpen size={14} className="text-muted-foreground shrink-0" />}
-                  <span className="font-body text-xs text-foreground truncate">{b.title}</span>
-                </button>
+                  <span className="font-mono text-[11px] uppercase text-foreground whitespace-normal break-words text-left">{b.title}</span>
+                </Button>
               );
             })}
           </div>
           {!creatingBoard ? (
-            <button
+            <Button variant="ghost"
               onClick={() => setCreatingBoard(true)}
               disabled={busy}
               className="w-full flex items-center gap-2 px-4 py-2.5 border-t border-border hover:bg-muted/50 transition-colors disabled:opacity-50"
             >
               <Plus size={14} className="text-[hsl(var(--gold))]" />
               <span className="font-body text-xs text-foreground">New project folder</span>
-            </button>
+            </Button>
           ) : (
             <div className="px-4 py-3 border-t border-border">
               <input
@@ -462,14 +486,15 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
                 className="w-full bg-transparent border-b border-border focus:border-foreground outline-hidden font-body text-xs py-1 placeholder:font-serif placeholder:italic placeholder:text-xs placeholder:text-muted-foreground/60"
               />
               <div className="mt-3 flex items-center gap-3">
-                <button onClick={handleCreateBoard} disabled={busy || !newBoardName.trim()} className="font-body text-[11px] uppercase tracking-wider text-background bg-foreground px-3 py-1.5 rounded-sm hover:bg-foreground/85 transition-colors disabled:opacity-40">Create</button>
-                <button onClick={() => { setCreatingBoard(false); setNewBoardName(""); }} className="font-body text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors">Cancel</button>
+                <Button variant="ghost" onClick={handleCreateBoard} disabled={busy || !newBoardName.trim()} className="font-body text-[11px] uppercase tracking-wider text-background bg-foreground px-3 py-1.5 rounded-sm hover:bg-foreground/85 transition-colors disabled:opacity-40">Create</Button>
+                <Button variant="ghost" onClick={() => { setCreatingBoard(false); setNewBoardName(""); }} className="font-body text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors">Cancel</Button>
               </div>
             </div>
           )}
         </div>
-      </PopoverContent>
-    </Popover>
+      </SheetContent>
+    </Sheet>
+    </>
   );
 };
 

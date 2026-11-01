@@ -1,5 +1,9 @@
 # Roadmap
 
+## Trade folder quick save
+- [x] Simplify the popover to three recent boards and project actions; preserve full names and add the advanced right drawer.
+- [x] Signed-in Jules & Jim saved to an existing board and read membership back on reopen; View All opens the full-height drawer, search filters boards and New Project Folder opens creation. Recent-board regression passes; preview build OK.
+
 ## Product navigation scroll
 - [x] Remove premature router-resolution/global resets; signed-in Puzzle picture click keeps every gallery frame at 855px, product opens at top, and Back restores 855px; ten navigation regressions pass, preview build OK.
 
