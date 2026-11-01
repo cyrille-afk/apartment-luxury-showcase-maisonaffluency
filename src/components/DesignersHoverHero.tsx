@@ -18,7 +18,9 @@ import { usePublishedMakerCount } from "@/hooks/usePublishedMakerCount";
 import { setDarkIosChrome, clearDarkIosChrome } from "@/lib/iosChrome";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "@/lib/router-compat";
-import { motion, animate } from "framer-motion";
+import { motion, animate, AnimatePresence, useReducedMotion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { filterDesignerDirectory } from "@/lib/designerDirectoryFilter";
 import SilentLink from "@/components/SilentLink";
 import { Search, X, ImageIcon, ArrowRight } from "lucide-react";
 
@@ -648,6 +650,8 @@ const DesignersHoverHero = () => {
   const [desktopSearchExpanded, setDesktopSearchExpanded] = useState(false);
   const [desktopDirectoryMode, setDesktopDirectoryMode] = useState<"search" | "az">("az");
   const [searchQuery, setSearchQuery] = useState("");
+  const [desktopDirectoryLetter, setDesktopDirectoryLetter] = useState<string | null>(null);
+  const reduceDirectoryMotion = useReducedMotion();
   const restoredLetterRef = useRef<string | null>(null);
   const [expandedLetters, setExpandedLetters] = useState<Set<string>>(() => {
     if (typeof window !== "undefined") {
@@ -692,7 +696,6 @@ const DesignersHoverHero = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchTriggerRef = useRef<HTMLButtonElement>(null);
   const desktopSearchDockRef = useRef<HTMLInputElement>(null);
-  const searchCloseTimerRef = useRef<number | null>(null);
   const suppressSearchFocusOpenRef = useRef(false);
   const searchScrollRef = useRef<HTMLDivElement>(null);
   const [isRestoringLetter, setIsRestoringLetter] = useState(false);
@@ -1321,22 +1324,19 @@ const DesignersHoverHero = () => {
   };
 
   const openDesignerSearch = (mode: "search" | "az" = "search") => {
-    if (searchCloseTimerRef.current !== null) {
-      window.clearTimeout(searchCloseTimerRef.current);
-      searchCloseTimerRef.current = null;
-    }
     if (!isDesktopViewport) {
       setDropdownPos(null);
       setSearchOpen(true);
       return;
     }
     setDesktopDirectoryMode(mode);
-    setSearchQuery("");
+    setDesktopDirectoryLetter(mode === "az" ? "A" : null);
     setDropdownPos(getDesktopSearchTarget());
     setDesktopSearchExpanded(false);
     setSearchOpen(true);
     window.requestAnimationFrame(() => {
       window.requestAnimationFrame(() => {
+        if (!document.body.classList.contains("designer-directory-open")) return;
         setDropdownPos(getDesktopSearchTarget());
         setDesktopSearchExpanded(true);
       });
@@ -1344,22 +1344,16 @@ const DesignersHoverHero = () => {
   };
 
   const closeDesignerSearch = () => {
-    if (!isDesktopViewport) {
-      setSearchOpen(false);
-      return;
-    }
     setDesktopSearchExpanded(false);
-    if (searchCloseTimerRef.current !== null) window.clearTimeout(searchCloseTimerRef.current);
-    searchCloseTimerRef.current = window.setTimeout(() => {
-      setSearchOpen(false);
-      setDropdownPos(null);
-      searchCloseTimerRef.current = null;
+    setSearchOpen(false);
+    setDropdownPos(null);
+    if (isDesktopViewport) {
       suppressSearchFocusOpenRef.current = true;
       desktopSearchDockRef.current?.focus({ preventScroll: true });
       window.requestAnimationFrame(() => {
         suppressSearchFocusOpenRef.current = false;
       });
-    }, 400);
+    }
   };
 
   // Scroll a letter row (and its expanded card grid) into view inside the
@@ -1424,7 +1418,15 @@ const DesignersHoverHero = () => {
     document.documentElement.style.overflow = "hidden";
     document.documentElement.style.overscrollBehavior = "none";
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeDesignerSearch();
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closeDesignerSearch();
+      }
+    };
+    const onOutsidePointer = (e: PointerEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target?.closest("#designers-search-sheet, [aria-label='Designer directory controls']")) return;
+      closeDesignerSearch();
     };
     const onWheel = (e: WheelEvent) => {
       const target = e.target as HTMLElement | null;
@@ -1433,6 +1435,7 @@ const DesignersHoverHero = () => {
       if (e.cancelable) e.preventDefault();
     };
     window.addEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onOutsidePointer, true);
     document.addEventListener("wheel", onWheel, { passive: false, capture: true });
     // Delay focus so the slide-up animation is visible before the keyboard opens.
     const t = window.setTimeout(() => {
@@ -1445,14 +1448,11 @@ const DesignersHoverHero = () => {
       document.documentElement.style.overflow = htmlOverflow;
       document.documentElement.style.overscrollBehavior = htmlOverscroll;
       window.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onOutsidePointer, true);
       document.removeEventListener("wheel", onWheel, { capture: true });
       window.clearTimeout(t);
     };
   }, [searchOpen, isDesktopViewport, desktopDirectoryMode]);
-
-  useEffect(() => () => {
-    if (searchCloseTimerRef.current !== null) window.clearTimeout(searchCloseTimerRef.current);
-  }, []);
 
   // Accent-insensitive search key: "Amelie" must match "Amélie".
   const foldSearch = (s: string) =>
@@ -1484,8 +1484,8 @@ const DesignersHoverHero = () => {
   }, [allDesigners, searchQuery, firstPickMap]);
 
   const availableLetters = useMemo(
-    () => new Set(groupedResults.map(([letter]) => letter)),
-    [groupedResults],
+    () => new Set(allDesigners.filter((d) => d.is_published && !d.trade_only).map((d) => lastNameInitial(d.name))),
+    [allDesigners],
   );
 
   // Flat list for the mobile-first bottom sheet: fast visual scan, no A–Z index.
@@ -1499,13 +1499,14 @@ const DesignersHoverHero = () => {
         image_url: (d.image_url as string | null) ?? null,
         first_pick_image_url: firstPickMap?.get(d.id) ?? null,
       }));
-    const q = foldSearch(searchQuery.trim());
-    const filtered = q
-      ? list.filter((d) => foldSearch(d.name).includes(q) || foldSearch(d.slug).includes(q))
-      : list;
+    const filtered = filterDesignerDirectory(list, searchQuery, desktopDirectoryLetter);
     filtered.sort((a, b) => sortNameKey(a.name).localeCompare(sortNameKey(b.name)));
     return filtered;
-  }, [allDesigners, searchQuery, firstPickMap]);
+  }, [allDesigners, searchQuery, firstPickMap, desktopDirectoryLetter]);
+
+  useEffect(() => {
+    searchScrollRef.current?.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+  }, [searchQuery, desktopDirectoryLetter]);
 
 
   // Zero-state: curated "Featured Masters" from the hero groupings, sorted.
@@ -1534,6 +1535,7 @@ const DesignersHoverHero = () => {
       setActiveAccordionLetter("A");
       // Clear any typed query so reopening the sheet never shows a stale search.
       setSearchQuery("");
+      setDesktopDirectoryLetter(null);
     }
     prevSearchOpenRef.current = searchOpen;
     if (!searchOpen) return;
@@ -2370,6 +2372,7 @@ const DesignersHoverHero = () => {
             }}
             onChange={(event) => {
               setSearchQuery(event.target.value);
+              setDesktopDirectoryLetter(null);
               if (!searchOpen) openDesignerSearch("search");
             }}
             placeholder="Search directory"
@@ -2407,7 +2410,7 @@ const DesignersHoverHero = () => {
         data-testid="designers-search-backdrop"
         onClick={closeDesignerSearch}
         className={cn(
-          "fixed inset-x-0 bottom-0 top-[var(--header-h)] z-[70] bg-black/30 backdrop-blur-[4px] transition-[opacity,backdrop-filter] duration-300 ease-out",
+          "fixed inset-x-0 bottom-0 top-[var(--header-h)] z-[70] bg-black/30 backdrop-blur-[4px]",
           searchOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0 backdrop-blur-none",
         )}
         aria-hidden="true"
@@ -2469,7 +2472,10 @@ const DesignersHoverHero = () => {
                   ref={searchInputRef}
                   type="text"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setDesktopDirectoryLetter(null);
+                  }}
                   placeholder={`Search ${makerCountLabel} designers…`}
                   autoCorrect="off"
                   autoCapitalize="none"
@@ -2667,50 +2673,22 @@ const DesignersHoverHero = () => {
                   </div>
 
                   {/* Desktop: use each designer's first Curators' Pick, with portrait fallback. */}
-                  <div className="relative hidden lg:block">
-                    <div className="flex flex-col pb-2">
-                      {isSearching ? (
-                        flatResults.length === 0 ? (
-                          <p className="px-4 py-8 text-center text-sm font-body text-white/50">
-                            No designers match “{searchQuery}”.
-                          </p>
-                        ) : (
-                          <div className="pr-1">
-                            <div className="grid grid-cols-4 gap-4 px-0 pt-2 pb-4">
-                              {flatResults.map((d: any) => (
-                                <DesignerGridCard
-                                  key={d.slug}
-                                  designer={d}
-                                  showDiscoverCta
-                                />
-                              ))}
-                            </div>
-                          </div>
-                        )
-                      ) : (
-                        (() => {
-                          const activePair = groupedResults.find(([l]) => l === activeAccordionLetter);
-                          const items = activePair ? activePair[1] : [];
-                          return items.length === 0 ? (
-                            <p className="px-4 py-8 text-center text-sm font-body text-white/50">
-                              Select a letter to browse designers.
-                            </p>
-                          ) : (
-                            <div className="pr-1">
-                              <div className="grid grid-cols-4 gap-4 px-0 pt-2 pb-4">
-                                {items.map((d: any, i: number) => (
-                                  <DesignerGridCard
-                                    key={d.slug}
-                                    designer={d}
-                                    priority={i < 8}
-                                    showDiscoverCta
-                                  />
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        })()
-                      )}
+                  <div className="relative hidden lg:block pr-1">
+                    <div data-testid="directory-visual-grid" className="relative grid grid-cols-4 gap-4 px-0 pt-2 pb-4">
+                      <AnimatePresence mode="popLayout" initial={false}>
+                        {flatResults.map((designer, index) => (
+                          <motion.div
+                            key={designer.slug}
+                            layout={!reduceDirectoryMotion}
+                            initial={{ opacity: reduceDirectoryMotion ? 1 : 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0, pointerEvents: "none" }}
+                            transition={{ duration: reduceDirectoryMotion ? 0 : 0.18 }}
+                          >
+                            <DesignerGridCard designer={designer} priority={index < 8} showDiscoverCta />
+                          </motion.div>
+                        ))}
+                      </AnimatePresence>
                     </div>
                   </div>
 
@@ -2723,31 +2701,32 @@ const DesignersHoverHero = () => {
             <div className="hidden w-full shrink-0 bg-[#0a0a0a]/95 px-4 backdrop-blur lg:block">
                 <div className="flex w-full items-center justify-between border-t border-white/10 py-4 min-h-[44px]">
                   {Array.from({ length: 26 }, (_, index) => String.fromCharCode(65 + index)).map((letter) => {
-                    const isActive = activeAccordionLetter === letter;
+                    const isActive = !isSearching && desktopDirectoryLetter === letter;
                     const hasDesigners = availableLetters.has(letter);
                     return (
-                      <button
+                      <Button
                         key={letter}
                         type="button"
+                        variant="ghost"
                         disabled={!hasDesigners}
                         onClick={hasDesigners ? () => {
                           setSearchQuery("");
+                          setDesktopDirectoryLetter(letter);
                           rememberDesignersAzLetter(letter);
                           setRestoredOnlyLetter(null);
-                          setExpandedLetters(new Set([letter]));
-                          setActiveAccordionLetter(letter);
                         } : undefined}
                         className={cn(
-                          "flex h-10 flex-1 items-center justify-center text-center font-body text-[22px] leading-none uppercase tracking-wider transition-all duration-150 ease-in-out",
+                          "flex h-10 flex-1 rounded-none px-0 items-center justify-center text-center font-body text-[22px] leading-none uppercase tracking-wider transition-all duration-150 ease-in-out text-background hover:bg-transparent hover:text-background",
                           !hasDesigners && "opacity-30 pointer-events-none cursor-default",
                           hasDesigners && (isActive
-                            ? "font-bold text-white underline underline-offset-8"
-                            : "text-white/50 hover:font-bold hover:text-white")
+                            ? "font-bold underline decoration-solid underline-offset-8"
+                            : "opacity-50 hover:opacity-100")
                         )}
+                        aria-pressed={isActive}
                         aria-label={hasDesigners ? `Show designers starting with ${letter}` : `No designers under ${letter}`}
                       >
                         {letter}
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>

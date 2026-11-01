@@ -1,5 +1,9 @@
 # Roadmap
 
+## Visual directory overlay
+- [ ] Filter the four-column matrix live, make the full A–Z ribbon select initial-only results with an underline, and dismiss instantly outside or on Escape.
+- [ ] Verify typing, letter changes, empty results and dismissal against the loaded directory.
+
 ## Minimal gallery utility capsules
 - [x] Share pure black/white capsule styling, spacious icon padding and a centered flex row without an enclosing grid frame.
 - [x] Public and signed-in Trade Presentation verified open → closed: both capsules 36px with 8px/16px padding and 15px icons; all centerlines 528.5px, left panel/trigger 307px, right grid/capsule 1639px. Three regression tests pass; preview build OK. GitHub sync required.
