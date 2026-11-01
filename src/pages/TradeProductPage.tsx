@@ -2938,8 +2938,8 @@ const TradeProductPage: React.FC = () => {
                 <ExpandableSpec
                   icon={specIcon(baseAxisIsDim ? "📐" : "⬗")}
                   text={withImperialPerLine(baseOptions.join("\n"))}
-                  placeholder={product.wood_label_override || getBasePlaceholder(product)}
-                  selectedValueLabel={product.wood_label_override?.replace(/^select\s+(?:your\s+|the\s+)?/i, "") || formatVariantAxisLabel(product.base_axis_label) || undefined}
+                  placeholder={getBasePlaceholder(product)}
+                  selectedValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
                   singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
                   emphasized
                   value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : null}
