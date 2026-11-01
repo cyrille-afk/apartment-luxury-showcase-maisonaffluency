@@ -1,5 +1,5 @@
 import { useProductDesignNotes } from "@/hooks/useProductDesignNotes";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { CldPicture } from "@/components/ui/CldPicture";
 import { Button } from "@/components/ui/button";
 import { useParams, useNavigate, Link, useLocation, Navigate } from "@/lib/router-compat";
@@ -1748,9 +1748,13 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
 
 
 
+  useLayoutEffect(() => {
+    if (isLoading || !data?.product) return;
+    productScrollRef.current?.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+  }, [isLoading, data?.product?.id]);
+
   useEffect(() => {
-    productScrollRef.current?.scrollTo({ top: 0 });
-    window.scrollTo({ top: 0 });
     // Reset gallery to first image on product change — the route component is
     // reused across slug changes, so a stale activeIndex from the previous
     // product would persist (e.g. landing on picture 3).

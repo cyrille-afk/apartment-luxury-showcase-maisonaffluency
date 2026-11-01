@@ -1,5 +1,8 @@
 # Roadmap
 
+## Product navigation scroll
+- [x] Remove premature router-resolution/global resets; signed-in Puzzle picture click keeps every gallery frame at 855px, product opens at top, and Back restores 855px; ten navigation regressions pass, preview build OK.
+
 ## GitHub Actions failures
 - [x] Trace activation/checkout startup crashes and six unit failures from actual GitHub job logs.
 - [x] Explicitly enable runtime compatibility; the exact pinned-date/node:fs runtime probe passed. Full application startup awaits the new GitHub run.
