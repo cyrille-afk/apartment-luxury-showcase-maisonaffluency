@@ -50,6 +50,7 @@ import {
 } from "@/app/legacyShell";
 import {
   CRITICAL_STYLE,
+  HOME_STANDALONE_STYLE,
   HEAD_INLINE_SCRIPTS,
   JSON_LD_BLOCKS,
   NOSCRIPT_HTML,
@@ -133,7 +134,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         media: "(min-width: 641px)",
       },
     ],
-    styles: [{ children: CRITICAL_STYLE }],
+    styles: [{ children: CRITICAL_STYLE + HOME_STANDALONE_STYLE }],
     scripts: [
       ...HEAD_INLINE_SCRIPTS.map((children) => ({ children })),
       ...JSON_LD_BLOCKS.map((children) => ({ type: "application/ld+json", children })),

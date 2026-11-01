@@ -1,5 +1,15 @@
-/* Document head/body markup ported verbatim from the pre-TanStack index.html. */
+/* Document head/body markup ported from the pre-TanStack index.html. */
+export const HOME_STANDALONE_STYLE = `
+@media (max-width: 767px) {
+  html.ma-installed .ma-home-hero { height:auto; min-height:100dvh; overflow:visible; }
+  html.ma-installed .ma-home-hero-copy { height:auto; min-height:100vh; padding-top:calc(env(safe-area-inset-top) + 29vh); padding-bottom:calc(env(safe-area-inset-bottom) + 2rem); }
+  html.ma-installed .ma-home-hero-primary { margin-top:7rem; }
+  html.ma-installed .ma-home-hero-secondary { position:static; width:100%; margin-top:auto; padding-top:2rem; padding-bottom:calc(env(safe-area-inset-bottom) + .25rem); }
+  html.ma-installed #static-hero-copy { padding-top:calc(env(safe-area-inset-top) + 29vh)!important; }
+}
+`;
 export const HEAD_INLINE_SCRIPTS: string[] = [
+ "(function(){var installed=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;var hint=new URLSearchParams(window.location.search).get('source')==='pwa'&&window.matchMedia('(max-width: 767px)').matches;if(installed||hint)document.documentElement.classList.add('ma-installed')})();",
  "(function () {\n        var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;\n        var ua = window.navigator.userAgent;\n        var ios = /iPad|iPhone|iPod/.test(ua) || (window.navigator.platform === 'MacIntel' && window.navigator.maxTouchPoints > 1);\n        var safari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);\n        if (ios && safari && !standalone) document.documentElement.classList.add('ios-safari-browser');\n        window.__maStandaloneDisplay = standalone;\n      })();",
  "(function () {\n        // Only the dark hero landing keeps black iOS chrome on first paint.\n        // Every other route (bios, product pages) is a light surface.\n        var darkRoute = window.location.pathname === '/' || window.location.pathname === '/designers';\n        if (darkRoute) document.documentElement.classList.add('ios-chrome-dark');\n        (document.getElementById('mobile-theme-color') || { setAttribute: function () {} })\n          .setAttribute('content', darkRoute ? '#000000' : '#ffffff');\n      })();",
  "(function(){\n        if (!/^\\/designers(\\/)?($|\\?|#)/.test(window.location.pathname)) return;\n        var base = \"https://res.cloudinary.com/dif1oamtj/image/upload\";\n        var id = \"v1772160681/Casque-Bar-Cabinet_10_alexander-lamont_1_ydnjp2.jpg\";\n        var isMobile = window.matchMedia(\"(max-width: 767px)\").matches;\n        var widths = isMobile ? [480,720,960,1280] : [960,1280,1600,1920];\n        var srcset = widths.map(function(w){ return base+\"/w_\"+w+\",q_auto:eco,f_auto/\"+id+\" \"+w+\"w\"; }).join(\", \");\n        var href = base+\"/w_\"+widths[2]+\",q_auto:eco,f_auto/\"+id;\n        var l = document.createElement(\"link\");\n        l.rel = \"preload\"; l.as = \"image\"; l.href = href;\n        l.setAttribute(\"imagesrcset\", srcset);\n        l.setAttribute(\"imagesizes\", \"100vw\");\n        l.setAttribute(\"fetchpriority\", \"high\");\n        document.head.appendChild(l);\n      })();",

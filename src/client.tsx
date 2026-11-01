@@ -5,7 +5,11 @@ const start = () => {
   void import("./app/hydrateClient").then((m) => m.hydrateClient());
 };
 
-if (window.location.pathname === "/") {
+const installedLaunch = window.matchMedia?.("(display-mode: standalone)").matches === true ||
+  (window.navigator as Navigator & { standalone?: boolean }).standalone === true ||
+  new URLSearchParams(window.location.search).get("source") === "pwa";
+
+if (window.location.pathname === "/" && !installedLaunch) {
   requestAnimationFrame(() => setTimeout(start, 0));
 } else {
   start();
