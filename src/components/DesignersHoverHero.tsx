@@ -1413,6 +1413,7 @@ const DesignersHoverHero = () => {
   // keyboard opens as usual — no custom keyboard.
   useEffect(() => {
     if (!searchOpen) return;
+    directoryDismissedRef.current = false;
     document.body.classList.add("designer-directory-open");
     return () => document.body.classList.remove("designer-directory-open");
   }, [searchOpen]);
