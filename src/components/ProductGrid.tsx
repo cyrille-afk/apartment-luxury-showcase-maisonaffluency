@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Heart, X, Scale, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import GridDensityToggle from "@/components/GridDensityToggle";
@@ -30,7 +30,8 @@ import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";
 import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
 import { getParentCategoryFromSubcategory as parentOfSub } from "@/lib/categoryNormalization";
-import RoomCollectionFilters, { type RoomFacet, type RoomFacetValues, type RoomFacetOptions } from "@/components/RoomCollectionFilters";
+import RoomCollectionFilters, { CollectionFilterTrigger, type RoomFacet, type RoomFacetValues, type RoomFacetOptions } from "@/components/RoomCollectionFilters";
+import { useFilterGridLayout } from "@/components/useFilterGridLayout";
 import { LEAD_TIME_BUCKETS, leadTimeBuckets } from "@/lib/leadTimeBuckets";
 import { originToCountries } from "@/lib/productOrigin";
 import { ROOM_MATERIAL_CATEGORIES, roomMaterialCategories } from "@/lib/roomMaterialCategories";
@@ -243,13 +244,8 @@ const ProductGrid = ({ sectionScope, roomSlug, roomCategory, roomSubcategory, co
   // The database-backed public catalogue is authoritative. Never merge the
   // legacy hardcoded roster here: it can contain drafts or trade-only makers.
   const allProducts: ProductItem[] = useMemo(() => dbPicks || [], [dbPicks]);
-  const [gridCols, setGridCols] = useState<3 | 4>(() => roomSlug ? 3 : 4);
-  const [roomFiltersOpen, setRoomFiltersOpen] = useState(() => !showAll);
-  const toggleCatalogueFilters = () => {
-    const nextOpen = !roomFiltersOpen;
-    setRoomFiltersOpen(nextOpen);
-    setGridCols(nextOpen ? 3 : 4);
-  };
+  const { open: roomFiltersOpen, columns: gridCols, changeOpen: setRoomFiltersOpen, changeColumns: setGridCols } = useFilterGridLayout(roomSlug || showAll ? 3 : 4);
+  const reducedMotion = useReducedMotion();
   const [roomFacets, setRoomFacets] = useState<RoomFacetValues>(EMPTY_ROOM_FACETS);
   const gridRef = useRef<HTMLElement>(null);
   // Shop by Room: open the category-discovery lightbox variant instead of navigating.
@@ -536,7 +532,7 @@ function singularizeSub(s: string): string {
               </TooltipProvider>
             </div>}
             {roomSlug || showAll ? (
-              <GridDensityToggle value={showAll && roomFiltersOpen ? 3 : gridCols} onChange={(next) => { setGridCols(next); if (showAll && next === 4) setRoomFiltersOpen(false); }} />
+              <GridDensityToggle value={gridCols} onChange={setGridCols} />
             ) : showAll && !isActive ? null : (
             <button
               onClick={handleClearFilter}
@@ -549,10 +545,10 @@ function singularizeSub(s: string): string {
           </div>
         </div>
 
-        {showAll && <Button variant="outline" size="icon-sm" className="mb-5 hidden md:inline-flex" aria-label={roomFiltersOpen ? "Hide catalogue filters" : "Show catalogue filters"} title={roomFiltersOpen ? "Hide catalogue filters" : "Show catalogue filters"} aria-expanded={roomFiltersOpen} aria-controls="catalogue-filters" onClick={toggleCatalogueFilters}><SlidersHorizontal className="size-4" /></Button>}
-        <div className={roomSlug || showAll ? `md:flex md:items-start transition-[gap] duration-300 motion-reduce:transition-none ${roomSlug || roomFiltersOpen ? "md:gap-6 lg:gap-8" : "md:gap-0"}` : ""}>
+        <div className={roomSlug || showAll ? `md:flex md:items-start transition-[gap] duration-350 motion-reduce:transition-none ${roomFiltersOpen ? "md:gap-6 lg:gap-8" : "md:gap-0"}` : ""}>
         {(roomSlug || showAll) && <RoomCollectionFilters
           fullCatalogue={showAll}
+          toolbarTrigger
           options={roomOptions}
           availableMaterials={availableRoomMaterials}
           catalogMaterials={catalogMaterials}
@@ -567,11 +563,12 @@ function singularizeSub(s: string): string {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className={`grid min-w-0 flex-1 grid-cols-2 ${roomSlug ? (gridCols === 4 ? 'md:grid-cols-3 lg:grid-cols-4' : 'lg:grid-cols-3') : showAll && roomFiltersOpen ? 'md:grid-cols-3' : gridCols === 4 ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4 md:gap-6 transition-all duration-300 motion-reduce:transition-none`}
+          className={`grid min-w-0 flex-1 grid-cols-2 ${gridCols === 4 ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4 md:gap-6`}
         >
           {renderedItems.map((item) => (
-            <div
+            <motion.div
               key={item.pick.id || `${item.designerId}-${item.pick.title}`}
+              layout transition={{ layout: { duration: reducedMotion ? 0 : 0.35, ease: [0.16, 1, 0.3, 1] } }}
               data-catalog-card
                className={`group flex h-full cursor-pointer flex-col [contain:layout_style] ${roomSlug ? "" : "justify-between"}`}
               tabIndex={0}
@@ -668,7 +665,7 @@ function singularizeSub(s: string): string {
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </motion.div>
         </div>

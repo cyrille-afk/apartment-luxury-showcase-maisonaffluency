@@ -9,6 +9,12 @@ export type RoomFacet = "category" | "designer" | "leadTime" | "craft" | "handma
 export type RoomFacetValues = Record<RoomFacet, string | null>;
 export type RoomFacetOptions = Record<RoomFacet, string[]>;
 
+export function CollectionFilterTrigger({ open, onClick }: { open: boolean; onClick: () => void }) {
+  return <Button variant="ghost" onClick={onClick} aria-expanded={open} aria-label={open ? "Collapse filters" : "Expand filters"} className="hidden h-[41px] shrink-0 items-center gap-2 px-0 font-body text-[11px] font-medium uppercase tracking-wider text-foreground md:inline-flex">
+    <SlidersHorizontal className="size-[15px]" strokeWidth={1.5} /> Filters
+  </Button>;
+}
+
 // Trade sourcing order: lead time first (opens by default), then categories, then materials.
 const FACETS: { key: RoomFacet; label: string }[] = [
   { key: "leadTime", label: "Production Lead Time" },
@@ -20,9 +26,10 @@ const FACETS: { key: RoomFacet; label: string }[] = [
 ];
 
 export default function RoomCollectionFilters({
-  options, availableMaterials, catalogMaterials, values, onChange, onClear, open: openProp, onOpenChange, fullCatalogue = false, facets,
+  options, availableMaterials, catalogMaterials, values, onChange, onClear, open: openProp, onOpenChange, fullCatalogue = false, facets, toolbarTrigger = false,
 }: {
   facets?: RoomFacet[];
+  toolbarTrigger?: boolean;
   open?: boolean;
   fullCatalogue?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -80,9 +87,9 @@ export default function RoomCollectionFilters({
           {content}
         </SheetContent>
       </Sheet>
-      <aside id={fullCatalogue ? "catalogue-filters" : undefined} aria-label="Collection filters" aria-hidden={fullCatalogue && !open ? true : undefined} className={`hidden shrink-0 overflow-hidden transition-[width] duration-300 motion-reduce:transition-none md:block ${open ? "w-48 lg:w-56" : fullCatalogue ? "w-0" : "w-10"}`}>
+      <aside id={fullCatalogue ? "catalogue-filters" : undefined} aria-label="Collection filters" aria-hidden={!open && (fullCatalogue || toolbarTrigger) ? true : undefined} className={`hidden shrink-0 overflow-hidden transition-[width] duration-350 motion-reduce:transition-none md:block ${open ? "w-48 lg:w-56" : fullCatalogue || toolbarTrigger ? "w-0" : "w-10"}`}>
         <div className="sticky top-[calc(var(--header-h)+1rem)] max-h-[calc(100vh-var(--header-h)-2rem)] overflow-y-auto bg-background pr-2">
-          {!fullCatalogue && <Button variant="ghost" size="icon-sm" onClick={() => setOpen(!open)} title={open ? "Collapse filters" : "Expand filters"} aria-label={open ? "Collapse filters" : "Expand filters"} className="mb-3">
+          {!fullCatalogue && !toolbarTrigger && <Button variant="ghost" size="icon-sm" onClick={() => setOpen(!open)} title={open ? "Collapse filters" : "Expand filters"} aria-label={open ? "Collapse filters" : "Expand filters"} className="mb-3">
             {open ? <ChevronRight className="rotate-180" /> : <SlidersHorizontal />}
           </Button>}
           {open && content}
