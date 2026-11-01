@@ -11,6 +11,7 @@
 - Approved-account activation resends reuse the branded review drawer with one fresh idempotency key per opened resend, retained on retries; never change approval to resend.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Worker builds explicitly enable Nitro Cloudflare Node compatibility alongside the pinned compatibility date — bundled server dependencies require node:fs before browser tests can start.
 - Presentation state reconciles browser storage on subscriber remount and focus/pageshow; product/drawer lifetimes cannot reset the saved mode.
 - DrawerPricing keeps retail/net separate; saved quote retail resolves through quoteDrawerRetail from unambiguous catalogue variants, frame overrides and saved same-currency fabric surcharges, never saved net amounts. Presentation prices reuse RetailPrice across product and workspace summaries for synchronized typography and explicit retail labels. Quote snapshots bind to saved line IDs and cart net snapshots are display-only. Open workspaces hold the product layout through mode changes; closing restores editorial — no margin leaks or remounts.
 - Trade marketing carousel uses an isolated public preview, original asset pointers, contain-only screenshots and CSS scroll snapping — preserves exact captures without changing portal navigation.
