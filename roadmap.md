@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Profile grid alignment and capsule symmetry
-- [ ] Align biography image, closed product grid and open filter panel on one left axis.
-- [ ] Match filter/grid capsule metrics and verify the shared toolbar axis in the browser.
+- [x] Biography image, closed product grid and open filter panel share the same measured left edge (307px on the reference desktop).
+- [x] Browser verified closed → open → closed: both capsules 36px high, open padding 8px and type 11px identical, heading/control centerlines identical; three layout tests pass and preview build OK. Signed-in Trade shared header checked.
 
 ## Catalogue listing footnote
 - [x] Remove the full disclaimer above public and Trade grids; add a condensed guest-only bottom footnote and tighten filter spacing.
