@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
 import { getCachedCatalog } from "@/lib/catalogSource";
+import { filterPublicPicks } from "@/lib/publicCatalogVisibility";
 import { useAllDesigners, type Designer } from "@/hooks/useDesigner";
 import { useAuth } from "@/hooks/useAuth";
 import { shouldShowCatalogueFootnote } from "@/lib/catalogueFootnote";
@@ -349,7 +350,7 @@ function useFullCuratorPicks(enabled: boolean) {
     queryFn: async () => {
       const cached = await getCachedCatalog();
       let picks: any[] | null;
-      let designers: Array<{ id: string; name: string; slug: string; founder?: string | null }> | null;
+      let designers: Array<{ id: string; name: string; slug: string; founder?: string | null; is_published?: boolean | null; trade_only?: boolean | null }> | null;
       if (cached) {
         picks = cached.picks as any[];
         designers = cached.designers as any[];
@@ -362,30 +363,29 @@ function useFullCuratorPicks(enabled: boolean) {
           ),
           supabase
             .from("designers")
-            .select("id, name, slug, founder"),
+            .select("id, name, slug, founder, is_published, trade_only"),
         ]);
         picks = picksRes.data as any[] | null;
         designers = designersRes.data as any[] | null;
       }
       if (!picks) return [];
       const designerMap = new Map((designers || []).map((d: any) => [d.id, { name: d.name, slug: d.slug, founder: d.founder }]));
-      // Picks whose designer isn't in the public list belong to trade-only/unpublished
-      // designers. We keep them in the grid but mark them so the UI can render a
-      // "Trade Only" placeholder instead of broken brand info.
+      // Public grids never surface pieces from Trade Only or unpublished
+      // designers — not even as a placeholder card.
       // Finish-specific duplicates (e.g. Clam Chair "Oiled Walnut") are tagged
       // "profile-only": they belong on the designer profile, never in category grids.
-      const visiblePicks = (picks as any[]).filter(
+      const visiblePicks = filterPublicPicks(picks as any[], designers).filter(
         (p) => !((p.tags as string[] | null) || []).includes("profile-only"),
       );
       return sortCuratorPicks(visiblePicks).map((p): PickItem => {
 
-        const d = designerMap.get(p.designer_id);
+        const d = designerMap.get(p.designer_id)!;
         return {
           ...p,
-          designer_name: d?.name || "Trade Only",
-          designer_slug: d?.slug || "",
-          designer_founder: d?.founder || null,
-          is_trade_only: !d,
+          designer_name: d.name,
+          designer_slug: d.slug,
+          designer_founder: d.founder || null,
+          is_trade_only: false,
         };
       });
 
