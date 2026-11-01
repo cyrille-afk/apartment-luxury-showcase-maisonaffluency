@@ -1463,7 +1463,7 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
         )}
       </div>
       {/* Info below the card */}
-        <div className="mt-3 flex h-12 w-full items-start justify-between gap-4 px-1">
+        <div className="mt-3 flex w-full flex-col gap-0.5 px-1 md:h-12 md:flex-row md:items-start md:justify-between md:gap-4">
           <div className="flex min-w-0 flex-1 flex-col text-left">
             {pick.is_trade_only ? (
               <>
@@ -1502,7 +1502,7 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
               );
             })()}
           </div>
-          <p className="shrink-0 whitespace-nowrap text-right font-body text-xs font-semibold text-foreground antialiased">
+          <p className="shrink-0 whitespace-nowrap text-left font-body text-xs font-semibold text-foreground antialiased md:text-right">
             {formatPublicRrpForDestination(rrp, destinationCurrency) || "Price upon Request"}
           </p>
       </div>
