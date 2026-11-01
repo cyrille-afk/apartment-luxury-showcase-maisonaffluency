@@ -1001,7 +1001,7 @@ const StudioGallery = () => {
                      )}
                    </div>
                    {/* Invisible utility: reserved-height micro metadata that fades in on hover — no layout shift */}
-                   <div className="mt-1 flex h-8 flex-col justify-center gap-0.5 overflow-hidden font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground/0 transition-colors duration-500 group-hover:text-muted-foreground/70" aria-hidden="true">
+                   <div className="mt-1 flex h-8 flex-col justify-center gap-0.5 overflow-hidden font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground opacity-0 transition-opacity duration-500 group-hover:opacity-100" aria-hidden="true">
                      <span>Lead Time: 12 Weeks</span>
                      <span className="truncate">Dimensions: {product.dimensions || "H 73cm x W 252cm"}</span>
                    </div>
