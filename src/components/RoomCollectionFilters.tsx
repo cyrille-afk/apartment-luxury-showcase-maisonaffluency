@@ -42,7 +42,7 @@ export default function RoomCollectionFilters({
 
   const content = (
     <>
-      <div className="flex items-center justify-between border-b border-border pb-3">
+      <div className="flex items-center justify-between pb-3">
         <span className="font-body text-xs font-semibold uppercase tracking-wider text-foreground">Filters</span>
       </div>
       <Button variant="ghost" size="sm" onClick={onClear} disabled={!activeCount} className="my-2 h-8 justify-start px-0 font-body text-[10px] uppercase tracking-wider text-foreground disabled:opacity-40">
@@ -50,7 +50,7 @@ export default function RoomCollectionFilters({
       </Button>
       <Accordion type="multiple" defaultValue={["leadTime"]} className="w-full">
         {FACETS.filter(({ key }) => facets ? facets.includes(key) : key !== "craft").map(({ key, label }) => (
-          <AccordionItem key={key} value={key} className="border-border">
+          <AccordionItem key={key} value={key} className="border-transparent">
             <AccordionTrigger className="py-3 text-left font-body text-[11px] font-medium uppercase tracking-wider text-foreground hover:no-underline [&>svg]:size-3">
               {label}{values[key] && <span className="ml-auto mr-2 size-1.5 rounded-full bg-primary" />}
             </AccordionTrigger>
