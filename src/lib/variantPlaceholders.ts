@@ -152,10 +152,11 @@ export function resolveFinishSectionLabels(input: {
   }
 
   // Positional default: base labels the upholstery picker, top labels wood.
+  // An upholstery axis label must never name the wood/finish picker.
   return {
     upholsteryLabel: basePlaceholder,
     woodLabel:
       override ||
-      (input.isUpholstered && topPlaceholder ? topPlaceholder : basePlaceholder),
+      (input.isUpholstered && topPlaceholder ? topPlaceholder : baseIsUphol ? null : basePlaceholder),
   };
 }
