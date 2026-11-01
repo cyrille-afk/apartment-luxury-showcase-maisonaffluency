@@ -146,13 +146,11 @@ function pickGridImage(d: { slug?: string; first_pick_image_url?: string | null;
  */
 function DesignerGridCard({
   designer,
-  onNavigate,
   priority = false,
   useCardPhoto = false,
   showDiscoverCta = false,
 }: {
   designer: { slug: string; name: string; first_pick_image_url?: string | null; hero_image_url: string | null; image_url: string | null };
-  onNavigate?: () => void;
   priority?: boolean;
   /** Use the designer's own card photo (studio/portrait) instead of the first curator pick. */
   useCardPhoto?: boolean;
@@ -222,7 +220,6 @@ function DesignerGridCard({
       onClick={(event) => {
         event.preventDefault();
         rememberLetter();
-        onNavigate?.();
         void warmProfile().then(() => {
           navigate(`/designers/${designer.slug}`, {
             state: { fromDesignersHero: true, fromDesignersAZ: true },
@@ -2572,7 +2569,6 @@ const DesignersHoverHero = () => {
                             <DesignerGridCard
                               key={d.slug}
                               designer={d}
-                              onNavigate={() => setSearchOpen(false)}
                             />
                           ))}
                         </div>
@@ -2659,7 +2655,6 @@ const DesignersHoverHero = () => {
                                       key={d.slug}
                                       designer={d}
                                       priority={i < 4}
-                                      onNavigate={() => setSearchOpen(false)}
                                     />
                                   ))}
                                 </div>
@@ -2687,7 +2682,6 @@ const DesignersHoverHero = () => {
                                   key={d.slug}
                                   designer={d}
                                   showDiscoverCta
-                                  onNavigate={() => setSearchOpen(false)}
                                 />
                               ))}
                             </div>
@@ -2710,7 +2704,6 @@ const DesignersHoverHero = () => {
                                     designer={d}
                                     priority={i < 8}
                                     showDiscoverCta
-                                    onNavigate={() => setSearchOpen(false)}
                                   />
                                 ))}
                               </div>

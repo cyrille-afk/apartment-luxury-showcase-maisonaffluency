@@ -9,6 +9,7 @@ import {
   useParams as tsParams,
   useSearch as tsSearch,
   useRouter,
+  useRouterState,
   Link as TSLink,
   Outlet as TSOutlet,
   RouterProvider,
@@ -94,8 +95,20 @@ export function useNavigate(): NavigateFn {
 
 // ---------- useLocation ----------
 
+// A destination URL can be published while the directory is still mounted.
+// Keep its facets, viewport lock and global page effects on the source until
+// the router commits the profile. Other routes retain their existing behavior.
+function useDirectoryStableLocation() {
+  return useRouterState({
+    select: (state) =>
+      state.resolvedLocation?.pathname === "/designers" && state.location.pathname !== "/designers"
+        ? state.resolvedLocation
+        : state.location,
+  });
+}
+
 export function useLocation() {
-  const loc = tsLocation();
+  const loc = useDirectoryStableLocation();
   return useMemo(
     () => ({
       pathname: loc.pathname,
@@ -139,7 +152,7 @@ export function useNavigationType(): NavigationType {
 // ---------- useSearchParams (@/lib/router-compat compat) ----------
 
 export function useSearchParams(): [URLSearchParams, (init: URLSearchParams | Record<string, string> | ((prev: URLSearchParams) => URLSearchParams), opts?: { replace?: boolean }) => void] {
-  const loc = tsLocation();
+  const loc = useDirectoryStableLocation();
   const nav = tsNavigate();
   const router = useRouter();
   const params = useMemo(() => new URLSearchParams(loc.searchStr ?? ""), [loc.searchStr]);
