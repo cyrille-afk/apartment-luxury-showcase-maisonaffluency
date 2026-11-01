@@ -1,5 +1,9 @@
 # Roadmap
 
+## Trade folder quick save
+- [ ] Simplify the popover to three recent boards and project actions; preserve full names and add the advanced right drawer.
+- [ ] Verify signed-in saving and drawer opening with existing project records.
+
 ## Product navigation scroll
 - [x] Remove premature router-resolution/global resets; signed-in Puzzle picture click keeps every gallery frame at 855px, product opens at top, and Back restores 855px; ten navigation regressions pass, preview build OK.
 
