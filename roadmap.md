@@ -1,5 +1,8 @@
 # Roadmap
 
+## Collection title alignment
+- [ ] Place FILTERS at the collection grid's left edge, center the independent Curators' Picks title, and align right-hand grid controls on the same axis; verify closed/open layouts.
+
 ## Filter grid transformation
 - [x] Keep the FILTERS trigger aligned with density controls; animate four columns open / three closed on designer and collection grids.
 - [x] Michel Amar and Living verified 3 → 4 → 3; trigger/control heights and top positions match exactly, cards/images retain identity, mobile sheet works without overflow; eight tests pass and preview build OK.
