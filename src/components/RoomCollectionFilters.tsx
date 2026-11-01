@@ -19,8 +19,9 @@ const FACETS: { key: RoomFacet; label: string }[] = [
 ];
 
 export default function RoomCollectionFilters({
-  options, availableMaterials, catalogMaterials, values, onChange, onClear, open: openProp, onOpenChange, fullCatalogue = false,
+  options, availableMaterials, catalogMaterials, values, onChange, onClear, open: openProp, onOpenChange, fullCatalogue = false, facets,
 }: {
+  facets?: RoomFacet[];
   open?: boolean;
   fullCatalogue?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -46,7 +47,7 @@ export default function RoomCollectionFilters({
         <X className="size-3" /> Clear All Filters {activeCount > 0 && `(${activeCount})`}
       </Button>
       <Accordion type="multiple" defaultValue={[]} className="w-full">
-        {FACETS.filter(({ key }) => fullCatalogue ? key !== "leadTime" : key !== "craft").map(({ key, label }) => (
+        {FACETS.filter(({ key }) => facets ? facets.includes(key) : fullCatalogue ? key !== "leadTime" : key !== "craft").map(({ key, label }) => (
           <AccordionItem key={key} value={key} className="border-border">
             <AccordionTrigger className="py-3 text-left font-body text-[11px] font-medium uppercase tracking-wider text-foreground hover:no-underline [&>svg]:size-3">
               {label}{values[key] && <span className="ml-auto mr-2 size-1.5 rounded-full bg-primary" />}

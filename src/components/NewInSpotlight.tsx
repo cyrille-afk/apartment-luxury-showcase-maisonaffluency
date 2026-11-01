@@ -5,6 +5,8 @@ import { motion, type Transition } from "framer-motion";
 import { ArrowRight, FileText, Maximize2, Instagram } from "lucide-react";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import GridDensityToggle from "@/components/GridDensityToggle";
+import RoomCollectionFilters, { type RoomFacetValues } from "@/components/RoomCollectionFilters";
+import { inferSubcategory } from "@/lib/productTaxonomy";
 import { InventoryBadgeStack } from "@/components/ui/InventoryBadge";
 import ShareMenu from "@/components/ShareMenu";
 import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
@@ -108,6 +110,15 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
   const isUnderlaid = variant === "underlaid";
   const [gridCols, setGridCols] = useState<3 | 4>(3);
   const [mobileGridCols, setMobileGridCols] = useState<1 | 2>(2);
+  const [pickCategory, setPickCategory] = useState<string | null>(null);
+  const pickCategoryOf = (p: DesignerCuratorPick) => inferSubcategory(p.category ?? undefined, (p as any).subcategory ?? undefined, p.title) || null;
+  const pickCategoryOptions = useMemo(
+    () => Array.from(new Set(picks.map(pickCategoryOf).filter(Boolean) as string[])).sort((a, b) => a.localeCompare(b)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [picks],
+  );
+  const filteredPicks = pickCategory ? picks.filter((p) => pickCategoryOf(p) === pickCategory) : picks;
+  const facetValues: RoomFacetValues = { category: pickCategory, designer: null, leadTime: null, craft: null, handmade: null, material: null };
   const [ctaPressed, setCtaPressed] = useState(false);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
   const igWithImages = instagramPosts.filter((p) => p.image_url);
@@ -245,8 +256,22 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
         </div>
       </div>
 
-      <div className={cn("grid items-stretch gap-6 md:gap-8", mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
-        {picks.map((pick) => {
+      <div className="flex gap-6 md:gap-8">
+      {pickCategoryOptions.length > 1 && (
+        <div className="hidden md:block">
+        <RoomCollectionFilters
+          facets={["category"]}
+          options={{ category: pickCategoryOptions, designer: [], leadTime: [], craft: [], handmade: [], material: [] }}
+          availableMaterials={new Set()}
+          catalogMaterials={new Set()}
+          values={facetValues}
+          onChange={(_key, value) => setPickCategory(value)}
+          onClear={() => setPickCategory(null)}
+        />
+        </div>
+      )}
+      <div className={cn("grid min-w-0 flex-1 items-stretch gap-6 md:gap-8", mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
+        {filteredPicks.map((pick) => {
           const alternateImage = pick.hover_image_url
             || ((pick as any).gallery_images as string[] | null | undefined)?.find((url) => url && url !== pick.image_url)
             || null;
@@ -400,6 +425,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
             </div>
           );
         })}
+      </div>
       </div>
     </>
   );
