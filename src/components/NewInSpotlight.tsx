@@ -111,7 +111,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
   const [gridCols, setGridCols] = useState<3 | 4>(3);
   const [mobileGridCols, setMobileGridCols] = useState<1 | 2>(2);
   const [pickCategory, setPickCategory] = useState<string | null>(null);
-  const pickCategoryOf = (p: DesignerCuratorPick) => inferSubcategory(p.category, (p as any).subcategory, p.title) || null;
+  const pickCategoryOf = (p: DesignerCuratorPick) => inferSubcategory(p.category ?? undefined, (p as any).subcategory ?? undefined, p.title) || null;
   const pickCategoryOptions = useMemo(
     () => Array.from(new Set(picks.map(pickCategoryOf).filter(Boolean) as string[])).sort((a, b) => a.localeCompare(b)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
