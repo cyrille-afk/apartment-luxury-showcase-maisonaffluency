@@ -11,6 +11,7 @@
 - Approved-account activation resends reuse the branded review drawer with one fresh idempotency key per opened resend, retained on retries; never change approval to resend.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Installed homepage sizing uses initial-document CSS rather than browser-dependent JSX; no-code launches skip auth waiting while genuine QR handshakes retain protection — prevents hydration replacement and delayed repositioning.
 - Designer and collection grids share useFilterGridLayout and a toolbar-level CollectionFilterTrigger; designer toolbars use equal desktop tracks to center the independent gallery title between edge-aligned controls. Keyed Motion cards animate density without remounting images, honoring reduced motion.
 - Product navigation suppresses router/global scroll resets; product pages reset instantly in a layout effect only once data is ready — resolved URLs can precede visible content and must not scroll the outgoing gallery.
 - Departing /designers keeps compatibility location/search readers on the resolved directory until destination commit; designer search stays mounted during profile warm-up — prevents outgoing facets, viewport locks and search results changing before the profile opens without changing other routes' redirect semantics.
