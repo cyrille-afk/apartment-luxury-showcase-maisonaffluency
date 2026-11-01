@@ -11,7 +11,7 @@
 - Approved-account activation resends reuse the branded review drawer with one fresh idempotency key per opened resend, retained on retries; never change approval to resend.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
-- Designer and collection grids share useFilterGridLayout and a toolbar-level CollectionFilterTrigger; keyed Motion cards animate density without remounting images, honoring reduced motion.
+- Designer and collection grids share useFilterGridLayout and a toolbar-level CollectionFilterTrigger; designer toolbars use equal desktop tracks to center the independent gallery title between edge-aligned controls. Keyed Motion cards animate density without remounting images, honoring reduced motion.
 - Product navigation suppresses router/global scroll resets; product pages reset instantly in a layout effect only once data is ready — resolved URLs can precede visible content and must not scroll the outgoing gallery.
 - Worker builds pin a compatibility date no earlier than 2025-09-15 with Node compatibility on — older dates lack node:fs, which bundled server dependencies import, so every page returns 500.
 - Presentation state reconciles browser storage on subscriber remount and focus/pageshow; product/drawer lifetimes cannot reset the saved mode.

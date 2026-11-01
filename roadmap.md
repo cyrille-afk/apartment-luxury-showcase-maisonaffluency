@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Collection title alignment
-- [ ] Place FILTERS at the collection grid's left edge, center the independent Curators' Picks title, and align right-hand grid controls on the same axis; verify closed/open layouts.
+- [x] FILTERS aligns to the collection grid's left edge; the independent Curators' Picks title is centered between edge controls. Browser measurements verified identical control/title centerlines closed → open → closed, unchanged 3 → 4 → 3 density; three regression tests pass, preview build OK.
 
 ## Filter grid transformation
 - [x] Keep the FILTERS trigger aligned with density controls; animate four columns open / three closed on designer and collection grids.
