@@ -9,13 +9,14 @@ export type RoomFacet = "category" | "designer" | "leadTime" | "craft" | "handma
 export type RoomFacetValues = Record<RoomFacet, string | null>;
 export type RoomFacetOptions = Record<RoomFacet, string[]>;
 
+// Trade sourcing order: lead time first (opens by default), then categories, then materials.
 const FACETS: { key: RoomFacet; label: string }[] = [
+  { key: "leadTime", label: "Production Lead Time" },
   { key: "category", label: "Categories" },
+  { key: "material", label: "Materials" },
   { key: "designer", label: "Designers/Artists" },
-  { key: "leadTime", label: "Lead Time" },
   { key: "craft", label: "Craft Type" },
   { key: "handmade", label: "Handcrafted in" },
-  { key: "material", label: "Materials" },
 ];
 
 export default function RoomCollectionFilters({
@@ -46,8 +47,8 @@ export default function RoomCollectionFilters({
       <Button variant="ghost" size="sm" onClick={onClear} disabled={!activeCount} className="my-2 h-8 justify-start px-0 font-body text-[10px] uppercase tracking-wider text-foreground disabled:opacity-40">
         <X className="size-3" /> Clear All Filters {activeCount > 0 && `(${activeCount})`}
       </Button>
-      <Accordion type="multiple" defaultValue={[]} className="w-full">
-        {FACETS.filter(({ key }) => facets ? facets.includes(key) : fullCatalogue ? key !== "leadTime" : key !== "craft").map(({ key, label }) => (
+      <Accordion type="multiple" defaultValue={["leadTime"]} className="w-full">
+        {FACETS.filter(({ key }) => facets ? facets.includes(key) : key !== "craft").map(({ key, label }) => (
           <AccordionItem key={key} value={key} className="border-border">
             <AccordionTrigger className="py-3 text-left font-body text-[11px] font-medium uppercase tracking-wider text-foreground hover:no-underline [&>svg]:size-3">
               {label}{values[key] && <span className="ml-auto mr-2 size-1.5 rounded-full bg-primary" />}

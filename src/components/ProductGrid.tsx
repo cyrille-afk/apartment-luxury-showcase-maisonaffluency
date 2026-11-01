@@ -31,6 +31,7 @@ import AuthGateDialog from "@/components/AuthGateDialog";
 import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
 import { getParentCategoryFromSubcategory as parentOfSub } from "@/lib/categoryNormalization";
 import RoomCollectionFilters, { type RoomFacet, type RoomFacetValues, type RoomFacetOptions } from "@/components/RoomCollectionFilters";
+import { LEAD_TIME_BUCKETS, leadTimeBuckets } from "@/lib/leadTimeBuckets";
 import { originToCountries } from "@/lib/productOrigin";
 import { ROOM_MATERIAL_CATEGORIES, roomMaterialCategories } from "@/lib/roomMaterialCategories";
 
@@ -44,7 +45,7 @@ function roomFacetValues(item: ProductItem): Record<RoomFacet, string[]> {
     category: category ? [category] : [],
     // Dagmar's founder owns the house; he is not a designer credit on its pieces.
     designer: Array.from(new Set([item.designerName, item.reeditionBy === "Aaron Fitzgerald" ? undefined : item.reeditionBy, item.attributedDesigner].filter(Boolean) as string[])),
-    leadTime: pick.lead_time ? [pick.lead_time.trim()] : [],
+    leadTime: leadTimeBuckets(pick.lead_time),
     craft: Array.from(new Set([
       ...(pick.tags || []).filter((tag) => /marquetry|lacquer|weav|knott|carv|cast|blown|glassblow|ceramic|woodwork|metalwork|upholster|embroid|forg/i.test(tag)),
       ...[
@@ -381,6 +382,10 @@ function singularizeSub(s: string): string {
     for (const key of ROOM_FACET_KEYS) {
       if (key === "material") {
         options.material = [...ROOM_MATERIAL_CATEGORIES];
+        continue;
+      }
+      if (key === "leadTime") {
+        options.leadTime = [...LEAD_TIME_BUCKETS];
         continue;
       }
       const values = new Set<string>();

@@ -5,6 +5,8 @@ import { motion, type Transition } from "framer-motion";
 import { ArrowRight, FileText, Maximize2, Instagram } from "lucide-react";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import GridDensityToggle from "@/components/GridDensityToggle";
+import { LEAD_TIME_BUCKETS, leadTimeBuckets } from "@/lib/leadTimeBuckets";
+import { roomMaterialCategories } from "@/lib/roomMaterialCategories";
 import RoomCollectionFilters, { type RoomFacetValues } from "@/components/RoomCollectionFilters";
 import { inferSubcategory } from "@/lib/productTaxonomy";
 import { InventoryBadgeStack } from "@/components/ui/InventoryBadge";
@@ -111,14 +113,20 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
   const [gridCols, setGridCols] = useState<3 | 4>(3);
   const [mobileGridCols, setMobileGridCols] = useState<1 | 2>(2);
   const [pickCategory, setPickCategory] = useState<string | null>(null);
+  const [pickLeadTime, setPickLeadTime] = useState<string | null>(null);
+  const [pickMaterial, setPickMaterial] = useState<string | null>(null);
   const pickCategoryOf = (p: DesignerCuratorPick) => inferSubcategory(p.category ?? undefined, (p as any).subcategory ?? undefined, p.title) || null;
   const pickCategoryOptions = useMemo(
     () => Array.from(new Set(picks.map(pickCategoryOf).filter(Boolean) as string[])).sort((a, b) => a.localeCompare(b)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [picks],
   );
-  const filteredPicks = pickCategory ? picks.filter((p) => pickCategoryOf(p) === pickCategory) : picks;
-  const facetValues: RoomFacetValues = { category: pickCategory, designer: null, leadTime: null, craft: null, handmade: null, material: null };
+  const pickMaterialSet = useMemo(() => new Set(picks.flatMap((p) => roomMaterialCategories(p.materials, p.title))), [picks]);
+  const filteredPicks = picks.filter((p) =>
+    (!pickCategory || pickCategoryOf(p) === pickCategory)
+    && (!pickLeadTime || leadTimeBuckets((p as any).lead_time).includes(pickLeadTime))
+    && (!pickMaterial || roomMaterialCategories(p.materials, p.title).includes(pickMaterial)));
+  const facetValues: RoomFacetValues = { category: pickCategory, designer: null, leadTime: pickLeadTime, craft: null, handmade: null, material: pickMaterial };
   const [ctaPressed, setCtaPressed] = useState(false);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
   const igWithImages = instagramPosts.filter((p) => p.image_url);
@@ -257,16 +265,16 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
       </div>
 
       <div className="flex gap-6 md:gap-8">
-      {pickCategoryOptions.length > 1 && (
+      {picks.length > 1 && (
         <div className="hidden md:block">
         <RoomCollectionFilters
-          facets={["category"]}
-          options={{ category: pickCategoryOptions, designer: [], leadTime: [], craft: [], handmade: [], material: [] }}
-          availableMaterials={new Set()}
-          catalogMaterials={new Set()}
+          facets={["leadTime", "category", "material"]}
+          options={{ category: pickCategoryOptions, designer: [], leadTime: [...LEAD_TIME_BUCKETS], craft: [], handmade: [], material: [...pickMaterialSet].sort((a, b) => a.localeCompare(b)) }}
+          availableMaterials={pickMaterialSet}
+          catalogMaterials={pickMaterialSet}
           values={facetValues}
-          onChange={(_key, value) => setPickCategory(value)}
-          onClear={() => setPickCategory(null)}
+          onChange={(key, value) => key === "leadTime" ? setPickLeadTime(value) : key === "material" ? setPickMaterial(value) : setPickCategory(value)}
+          onClear={() => { setPickCategory(null); setPickLeadTime(null); setPickMaterial(null); }}
         />
         </div>
       )}
