@@ -1,8 +1,9 @@
 # Roadmap
 
 ## Installed-app opening
-- [ ] Remove unnecessary no-token sign-in wait and initial homepage hydration mismatch; keep genuine QR sign-in protected.
-- [ ] Verify stable mobile homepage startup and investigate observed live response delay.
+- [x] Remove unnecessary no-token sign-in wait and initial homepage hydration mismatch; keep genuine QR sign-in protected. 29 startup regressions pass; preview build OK.
+- [x] Verify unchanged headline position before/after startup on installed-style phone, browser phone and desktop; Collection opens and repeated launch has no sign-in splash.
+- [ ] Live response latency remains 4–7 seconds before the document arrives; hosting diagnostics are unavailable. Findings sent to the platform team. Preview corrections require publication and GitHub sync; actual installed iOS launch remains unverified.
 
 ## Collection title alignment
 - [x] FILTERS aligns to the collection grid's left edge; the independent Curators' Picks title is centered between edge controls. Browser measurements verified identical control/title centerlines closed → open → closed, unchanged 3 → 4 → 3 density; three regression tests pass, preview build OK.
