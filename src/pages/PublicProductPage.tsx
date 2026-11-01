@@ -663,7 +663,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
           }).upholsteryLabel
         }
         secondaryUpholsteryLabel={frameOnLabel ? getTopPlaceholder(product) : null}
-        woodLabel={isBaseOnly && !suppressBaseAsFinish ? "Material Samples" : isOolMinibar ? getBasePlaceholder(product) :
+        woodLabel={framePickerLabel?.trim() ? framePickerLabel.trim() : isBaseOnly && !suppressBaseAsFinish ? "Material Samples" : isOolMinibar ? getBasePlaceholder(product) :
           resolveFinishSectionLabels({
             baseAxisLabel: product.base_axis_label,
             topAxisLabel: product.top_axis_label,
