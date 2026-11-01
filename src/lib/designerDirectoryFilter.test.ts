@@ -10,8 +10,8 @@ const designers = [
 
 describe("visual directory filtering", () => {
   it("filters immediately from the first typed character, overriding the letter", () => {
-    expect(filterDesignerDirectory(designers, "C", "A").map(d => d.slug))
-      .toEqual(["andrea-claire-studio", "cc-tapis", "michel-amar-studio"]);
+    expect(filterDesignerDirectory(designers, "M", "A").map(d => d.slug))
+      .toEqual(["amelie-vermersch", "michel-amar-studio"]);
     expect(filterDesignerDirectory(designers, "amelie", null).map(d => d.slug))
       .toEqual(["amelie-vermersch"]);
   });
