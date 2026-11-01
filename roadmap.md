@@ -2,9 +2,9 @@
 
 ## GitHub Actions failures
 - [x] Trace activation/checkout startup crashes and six unit failures from actual GitHub job logs.
-- [ ] Enable required runtime compatibility and verify the startup fix.
-- [ ] Update stale test mocks/hydration waits and run the failing unit suite.
-- [ ] Confirm new GitHub checks after the corrected code reaches the repository.
+- [x] Explicitly enable runtime compatibility; the exact pinned-date/node:fs runtime probe passed. Full application startup awaits the new GitHub run.
+- [x] Update stale test mocks/hydration waits; all 2,132 unit tests pass (nine existing skips), preview build OK.
+- [ ] Confirm activation/checkout checks after corrected code reaches GitHub; current runs still use the prior Helios commit, so repository sync is required.
 
 ## Stripe signature alerts
 - [x] Exclude cryptographically proven deliberately corrupted daily smoke notices from existing alerts, retaining audit records.
