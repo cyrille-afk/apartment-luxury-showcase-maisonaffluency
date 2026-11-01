@@ -33,7 +33,8 @@ export default function RoomCollectionFilters({
   onChange: (key: RoomFacet, value: string | null) => void;
   onClear: () => void;
 }) {
-  const [openState, setOpenState] = useState(() => !fullCatalogue);
+  // Drawer starts closed on every page; only the FILTERS toggle shows until clicked.
+  const [openState, setOpenState] = useState(false);
   const open = openProp ?? openState;
   const setOpen = (v: boolean) => { setOpenState(v); onOpenChange?.(v); };
   const [mobileOpen, setMobileOpen] = useState(false);
