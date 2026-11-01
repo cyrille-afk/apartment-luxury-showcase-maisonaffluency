@@ -1000,6 +1000,11 @@ const StudioGallery = () => {
                        <span className="font-sans text-[10px] uppercase tracking-[0.14em] text-muted-foreground shrink-0">Price upon Request</span>
                      )}
                    </div>
+                   {/* Invisible utility: reserved-height micro metadata that fades in on hover — no layout shift */}
+                   <div className="mt-1 flex h-4 items-center justify-between gap-3 overflow-hidden font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground/0 transition-colors duration-500 group-hover:text-muted-foreground/70" aria-hidden="true">
+                     <span className="shrink-0">Lead Time: 12 Weeks</span>
+                     <span className="truncate">Dimensions: {product.dimensions || "H 73cm x W 252cm"}</span>
+                   </div>
                    <h3 className="mt-1.5 min-h-[2.5rem] font-display text-[14px] leading-snug text-foreground sm:text-[15px] line-clamp-2">
                      {product.product_name}
                    </h3>
