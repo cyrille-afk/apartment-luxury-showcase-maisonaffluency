@@ -21,6 +21,7 @@ import { Link, useNavigate } from "@/lib/router-compat";
 import { motion, animate, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { filterDesignerDirectory } from "@/lib/designerDirectoryFilter";
+import { recordDirectoryActivity } from "@/lib/directoryActivity";
 import SilentLink from "@/components/SilentLink";
 import { Search, X, ImageIcon, ArrowRight } from "lucide-react";
 
@@ -648,6 +649,7 @@ const DesignersHoverHero = () => {
   const [showPortalCursor, setShowPortalCursor] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const directoryDismissedRef = useRef(true);
+  const activityModalRef = useRef<string | null>(null);
   const [desktopSearchExpanded, setDesktopSearchExpanded] = useState(false);
   const [desktopDirectoryMode, setDesktopDirectoryMode] = useState<"search" | "az">("az");
   const [searchQuery, setSearchQuery] = useState("");
@@ -1351,6 +1353,7 @@ const DesignersHoverHero = () => {
       window.__lovableEvents?.track?.("project.directory_modal_dismissed", {
         reason, surface: isDesktopViewport ? "desktop" : "mobile",
       });
+      recordDirectoryActivity('dismiss', activityModalRef.current, { reason });
     }
     setDesktopSearchExpanded(false);
     setSearchOpen(false);
@@ -1414,6 +1417,8 @@ const DesignersHoverHero = () => {
   useEffect(() => {
     if (!searchOpen) return;
     directoryDismissedRef.current = false;
+    activityModalRef.current = crypto.randomUUID();
+    recordDirectoryActivity('open', activityModalRef.current);
     document.body.classList.add("designer-directory-open");
     return () => document.body.classList.remove("designer-directory-open");
   }, [searchOpen]);
@@ -2384,6 +2389,7 @@ const DesignersHoverHero = () => {
               setDesktopDirectoryLetter(null);
               if (!searchOpen) openDesignerSearch("search");
               if (event.target.value.trim()) {
+                recordDirectoryActivity('search', activityModalRef.current);
                 window.__lovableEvents?.track?.("project.directory_search_changed", {
                   character_count: event.target.value.trim().length,
                   result_count: filterDesignerDirectory(allDesigners.filter(d => d.is_published && !d.trade_only), event.target.value, null).length,
@@ -2492,6 +2498,7 @@ const DesignersHoverHero = () => {
                     setSearchQuery(e.target.value);
                     setDesktopDirectoryLetter(null);
                     if (e.target.value.trim()) {
+                      recordDirectoryActivity('search', activityModalRef.current);
                       window.__lovableEvents?.track?.("project.directory_search_changed", {
                         character_count: e.target.value.trim().length,
                         result_count: filterDesignerDirectory(allDesigners.filter(d => d.is_published && !d.trade_only), e.target.value, null).length,
@@ -2551,6 +2558,7 @@ const DesignersHoverHero = () => {
                           setExpandedLetters(new Set([letter]));
                           setActiveAccordionLetter(letter);
                           if (!isDesktopViewport) scrollLetterIntoView(letter);
+                          recordDirectoryActivity('letter', activityModalRef.current, { letter });
                           window.__lovableEvents?.track?.("project.directory_letter_selected", {
                             letter, surface: isDesktopViewport ? "desktop" : "mobile",
                           });
@@ -2740,6 +2748,7 @@ const DesignersHoverHero = () => {
                           setDesktopDirectoryLetter(letter);
                           rememberDesignersAzLetter(letter);
                           setRestoredOnlyLetter(null);
+                          recordDirectoryActivity('letter', activityModalRef.current, { letter });
                           window.__lovableEvents?.track?.("project.directory_letter_selected", {
                             letter, surface: "desktop",
                           });
