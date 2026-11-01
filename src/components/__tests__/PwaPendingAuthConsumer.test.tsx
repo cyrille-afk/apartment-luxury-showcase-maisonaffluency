@@ -15,7 +15,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@tanstack/react-router", () => ({ useNavigate: () => mocks.navigate }));
 vi.mock("@/hooks/useAuth", () => ({ useAuth: () => ({ ...mocks.auth, setIsPwaBooting: mocks.booting }) }));
 vi.mock("@/lib/pwaMode", () => ({ isInstalledPwaDisplay: () => mocks.standalone }));
-vi.mock("@/lib/pwaPendingAuth", () => ({ readPendingAuthToken: () => mocks.pending, clearPendingAuthToken: mocks.clear, storePendingAuthToken: vi.fn((token) => { mocks.pending = token; }) }));
+vi.mock("@/lib/pwaPendingAuth", () => ({ readPendingAuthToken: () => mocks.pending, clearPendingAuthToken: mocks.clear, storePendingAuthToken: vi.fn((token) => { mocks.pending = token; }), claimFirstLaunchToken: vi.fn(() => true) }));
 vi.mock("@/lib/mobileSync.functions", () => ({ redeemMobileSyncToken: mocks.redeem, MOBILE_SYNC_TTL_SECONDS: 120 }));
 vi.mock("@/integrations/supabase/client", () => ({ supabase: { auth: { getSession: mocks.getSession, verifyOtp: mocks.verify } } }));
 
@@ -116,7 +116,7 @@ describe("installed app startup handshake", () => {
     expect(screen.queryByTestId("dashboard")).toBeNull();
     expect(mocks.verify).not.toHaveBeenCalled();
     expect(mocks.clear).toHaveBeenCalled();
-    await act(async () => screen.getByRole("button", { name: "Sign in" }).click());
+    await act(async () => screen.getByRole("button", { name: "Trade sign in" }).click());
     expect(mocks.navigate).toHaveBeenCalledWith({ to: "/trade/login", search: { next: "/trade" }, replace: true });
   });
   it("keeps a possibly unconsumed token on network failure", async () => {

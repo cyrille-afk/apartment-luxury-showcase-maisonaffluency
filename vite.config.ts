@@ -16,6 +16,9 @@ process.env.COMPATIBILITY_DATE ||= "2025-09-01";
 const buildId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
 export default defineConfig({
+  // The pinned date predates default Node compatibility; the built server's
+  // dependencies import node:fs, so explicitly enable the supported runtime.
+  nitro: { cloudflare: { nodeCompat: true } },
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this

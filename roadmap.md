@@ -1,5 +1,11 @@
 # Roadmap
 
+## GitHub Actions failures
+- [x] Trace activation/checkout startup crashes and six unit failures from actual GitHub job logs.
+- [ ] Enable required runtime compatibility and verify the startup fix.
+- [ ] Update stale test mocks/hydration waits and run the failing unit suite.
+- [ ] Confirm new GitHub checks after the corrected code reaches the repository.
+
 ## Stripe signature alerts
 - [x] Exclude cryptographically proven deliberately corrupted daily smoke notices from existing alerts, retaining audit records.
 - [x] Alert on unexpected signature rejections through the existing watchdog; 14 tests and both startup checks pass. Live known-test rejection produced no alert; unexpected rejection sent email; repeat invocation was throttled.
