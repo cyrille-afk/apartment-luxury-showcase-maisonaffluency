@@ -14,6 +14,7 @@ const buttonVariants = cva(
         outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
+        "collection-active": "collection-capsule-active",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
@@ -22,7 +23,7 @@ const buttonVariants = cva(
         lg: "h-11 rounded-control px-8",
         icon: "h-10 w-10",
         "icon-sm": "h-8 w-8",
-        "collection-capsule": "h-9 rounded-full px-2 py-2 font-body text-[11px] leading-none [&_svg]:size-[15px]",
+        "collection-capsule": "h-9 min-w-11 rounded-full px-4 py-2 font-body text-[11px] leading-none [&_svg]:size-[15px]",
       },
     },
     defaultVariants: {

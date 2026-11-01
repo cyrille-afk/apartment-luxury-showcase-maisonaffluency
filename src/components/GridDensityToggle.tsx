@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 
 /**
  * Pill-style 3/4-column grid density toggle — the same control used on the
- * room category pages (ProductGrid). Desktop only; the active icon renders
- * as a filled dark chip, the inactive one as a light outline.
+ * room category pages (ProductGrid). Desktop only; the active icon shares
+ * the filter capsule styling; no outer frame offsets the gallery edge.
  */
 export default function GridDensityToggle({
   value,
@@ -22,7 +22,7 @@ export default function GridDensityToggle({
   return (
     <div
       className={cn(
-        "hidden md:flex items-center gap-1 rounded-full border border-border bg-background/80 p-1 shadow-sm backdrop-blur-sm",
+        "hidden md:flex items-center gap-1",
         className,
       )}
     >
@@ -31,7 +31,7 @@ export default function GridDensityToggle({
         const Icon = cols === 4 ? LayoutGrid : Grid3X3;
         return (
           <Button
-            variant="ghost"
+            variant={active ? "collection-active" : "ghost"}
             size="collection-capsule"
             key={cols}
             type="button"
@@ -42,7 +42,7 @@ export default function GridDensityToggle({
             title={`Display ${cols} columns`}
             className={cn(
               "shrink-0 transition-all disabled:opacity-40",
-              active ? "bg-foreground text-background hover:bg-foreground hover:text-background" : "text-muted-foreground hover:text-foreground",
+              !active && "text-muted-foreground hover:text-foreground",
             )}
           >
             <Icon size={15} strokeWidth={1.5} />

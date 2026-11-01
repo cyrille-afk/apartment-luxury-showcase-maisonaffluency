@@ -234,11 +234,11 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
     mobileTitleClassName?: string;
   } = {}) => (
     <>
-      <div className={cn(barClassName, "grid grid-cols-[minmax(0,1fr)_auto] items-center md:grid-cols-3")}>
-        <div className="hidden justify-self-start md:block">
+      <div className={cn(barClassName, "grid grid-cols-[minmax(0,1fr)_auto] items-center md:flex")}>
+        <div className="hidden min-w-0 flex-1 items-center justify-start md:flex">
           <CollectionFilterTrigger open={filtersOpen} onClick={() => setFiltersOpen(!filtersOpen)} />
         </div>
-        <div className="min-w-0 justify-self-start md:justify-self-center">
+        <div className="min-w-0 justify-self-start md:flex md:flex-1 md:items-center md:justify-center">
           <h3 className={titleClassName}>
             Curators' Picks
           </h3>
@@ -246,7 +246,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
             <h3 className={mobileTitleClassName}>Curators' Picks</h3>
           </div>
         </div>
-        <div className="flex items-center justify-self-end gap-2">
+        <div className="flex items-center justify-self-end justify-end gap-2 md:min-w-0 md:flex-1">
           {/* Mobile toggle */}
           <button
             onClick={() => setMobileGridCols((prev) => (prev === 1 ? 2 : 1))}

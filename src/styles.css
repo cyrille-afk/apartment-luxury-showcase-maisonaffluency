@@ -2,6 +2,16 @@
 @import "tailwindcss" source("../src");
 @config "../tailwind.legacy.config.ts";
 
+:root {
+  --collection-control-background: #000000;
+  --collection-control-foreground: #ffffff;
+}
+.collection-capsule-active,
+.collection-capsule-active:hover {
+  background-color: var(--collection-control-background);
+  color: var(--collection-control-foreground);
+}
+
 /* Editorial carousel: original captures are always contained, never cropped. */
 .approval-email-brand,
 .approval-email-portal-preview { letter-spacing: 0.05em; }

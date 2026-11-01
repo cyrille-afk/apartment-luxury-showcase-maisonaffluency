@@ -11,11 +11,10 @@ export type RoomFacetValues = Record<RoomFacet, string | null>;
 export type RoomFacetOptions = Record<RoomFacet, string[]>;
 
 export function CollectionFilterTrigger({ open, onClick }: { open: boolean; onClick: () => void }) {
-  // Open state mirrors the active grid-density capsule: solid foreground pill,
-  // background-colored text/icon. Closed state is the borderless text default.
-  return <Button variant="ghost" size="collection-capsule" onClick={onClick} aria-expanded={open} aria-label={open ? "Collapse filters" : "Expand filters"} className={cn(
+  // Open state shares the active grid-density variant and size.
+  return <Button variant={open ? "collection-active" : "ghost"} size="collection-capsule" onClick={onClick} aria-expanded={open} aria-label={open ? "Collapse filters" : "Expand filters"} className={cn(
     "hidden shrink-0 items-center gap-2 font-medium uppercase tracking-wider transition-all md:inline-flex",
-    open ? "bg-foreground text-background hover:bg-foreground hover:text-background" : "px-0 text-foreground",
+    !open && "px-0 text-foreground",
   )}>
     {open ? <X className="size-[15px]" strokeWidth={1.5} /> : <SlidersHorizontal className="size-[15px]" strokeWidth={1.5} />} {open ? "Close Filters" : "Filters"}
   </Button>;
