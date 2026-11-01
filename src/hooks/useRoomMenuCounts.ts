@@ -4,6 +4,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getCachedCatalog } from "@/lib/catalogSource";
+import { filterPublicPicks } from "@/lib/publicCatalogVisibility";
 import type { RoomSlug } from "@/lib/roomCategories";
 import { pickMatchesRoom, pickMatchesFilter } from "@/lib/roomMatching";
 import type { CuratorPick } from "@/components/FeaturedDesigners";
@@ -12,13 +13,19 @@ import type { CuratorPick } from "@/components/FeaturedDesigners";
  *  visitors, direct public view for signed-in users). */
 async function loadCatalogPool(): Promise<CuratorPick[]> {
   const cached = await getCachedCatalog();
-  if (cached?.picks?.length) return cached.picks as unknown as CuratorPick[];
-  const { data, error } = await supabase
-    .from("designer_curator_picks_public")
-    .select("id, title, subtitle, category, subcategory, tags, image_url")
-    .not("image_url", "is", null);
+  if (cached?.picks?.length) {
+    return filterPublicPicks(cached.picks, cached.designers) as unknown as CuratorPick[];
+  }
+  const [{ data, error }, designersRes] = await Promise.all([
+    supabase
+      .from("designer_curator_picks_public")
+      .select("id, designer_id, title, subtitle, category, subcategory, tags, image_url")
+      .not("image_url", "is", null),
+    supabase.from("designers").select("id, is_published, trade_only"),
+  ]);
   if (error) throw error;
-  return (data ?? []).map((row: any) => ({
+  if (designersRes.error) throw designersRes.error;
+  return filterPublicPicks((data ?? []) as any[], designersRes.data as any[]).map((row: any) => ({
     id: row.id,
     title: row.title,
     subtitle: row.subtitle,
