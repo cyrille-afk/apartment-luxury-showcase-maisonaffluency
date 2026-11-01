@@ -2,7 +2,7 @@
 
 ## Catalogue listing footnote
 - [x] Remove the full disclaimer above public and Trade grids; add a condensed guest-only bottom footnote and tighten filter spacing.
-- [ ] Verify guest and signed-in listings, placement, and visibility regressions.
+- [x] Guest Seating desktop/phone and public designers verified: bottom-only note, uniform 8px toolbar-to-grid gap. Signed-in category and loaded Trade directory omit the note; two visibility tests pass, preview build OK.
 
 ## Installed-app opening
 - [x] Remove unnecessary no-token sign-in wait and initial homepage hydration mismatch; keep genuine QR sign-in protected. 29 startup regressions pass; preview build OK.
