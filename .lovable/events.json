@@ -127,6 +127,35 @@
         }
       }
     },
+    "project.directory_letter_selected": {
+      "event_schema_version": 1,
+      "description": "A visitor selects a letter on the directory A–Z ribbon.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "letter",
+          "surface"
+        ],
+        "properties": {
+          "letter": {
+            "type": "string",
+            "pattern": "^[A-Z]$"
+          },
+          "surface": {
+            "type": "string",
+            "enum": [
+              "desktop",
+              "mobile"
+            ]
+          }
+        }
+      }
+    },
     "project.directory_search_changed": {
       "event_schema_version": 1,
       "description": "A visitor edits a nonempty directory search; records only character count and matching designer count, never search text.",
