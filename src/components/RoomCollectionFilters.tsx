@@ -11,7 +11,7 @@ export type RoomFacetOptions = Record<RoomFacet, string[]>;
 
 export function CollectionFilterTrigger({ open, onClick }: { open: boolean; onClick: () => void }) {
   return <Button variant="ghost" onClick={onClick} aria-expanded={open} aria-label={open ? "Collapse filters" : "Expand filters"} className="hidden h-[41px] shrink-0 items-center gap-2 px-0 font-body text-[11px] font-medium uppercase tracking-wider text-foreground md:inline-flex">
-    <SlidersHorizontal className="size-[15px]" strokeWidth={1.5} /> Filters
+    {open ? <X className="size-[15px]" strokeWidth={1.5} /> : <SlidersHorizontal className="size-[15px]" strokeWidth={1.5} />} {open ? "Close Filters" : "Filters"}
   </Button>;
 }
 
@@ -49,11 +49,8 @@ export default function RoomCollectionFilters({
 
   const content = (
     <>
-      <div className="flex items-center justify-between pb-3">
-        <span className="font-body text-xs font-semibold uppercase tracking-wider text-foreground">Filters</span>
-      </div>
-      <Button variant="ghost" size="sm" onClick={onClear} disabled={!activeCount} className="my-2 h-8 justify-start px-0 font-body text-[10px] uppercase tracking-wider text-foreground disabled:opacity-40">
-        <X className="size-3" /> Clear All Filters {activeCount > 0 && `(${activeCount})`}
+      <Button variant="ghost" size="sm" onClick={onClear} disabled={!activeCount} className="mb-2 h-8 justify-start gap-2 px-0 font-body text-[10px] uppercase tracking-wider text-foreground disabled:opacity-40">
+        <X className="size-4" /> Clear All Filters {activeCount > 0 && `(${activeCount})`}
       </Button>
       <Accordion type="multiple" defaultValue={["leadTime"]} className="w-full">
         {FACETS.filter(({ key }) => facets ? facets.includes(key) : key !== "craft").map(({ key, label }) => (
