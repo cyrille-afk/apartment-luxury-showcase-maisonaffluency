@@ -332,7 +332,7 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
     <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
       <SheetContent side="right" aria-describedby={undefined}
         overlayClassName="z-[129] bg-foreground/10"
-        className="z-[130] flex flex-col w-full sm:max-w-lg overflow-y-auto bg-background"
+        className="z-[130] flex flex-col w-full sm:max-w-lg overflow-y-auto bg-background motion-reduce:animate-none motion-reduce:transition-none"
         onClick={(e) => e.stopPropagation()}>
         <SheetTitle className="font-mono text-xs font-normal uppercase pr-12 mb-4">Project folders</SheetTitle>
         <div className="px-4 pt-3 pb-2 border-b border-border">
@@ -454,7 +454,7 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
                   key={b.id}
                   onClick={() => addToBoard(b.id, b.title)}
                   disabled={busy || done}
-                  className="w-full flex items-center gap-2 h-auto whitespace-normal px-4 py-3 text-left hover:bg-muted/50 transition-colors disabled:cursor-default"
+                  className="w-full flex items-center justify-start gap-2 h-auto whitespace-normal px-4 py-3 text-left hover:bg-muted/50 transition-colors disabled:cursor-default"
                 >
                   {done ? <Check size={14} className="text-foreground shrink-0" /> : <FolderOpen size={14} className="text-muted-foreground shrink-0" />}
                   <span className="font-mono text-[11px] uppercase text-foreground whitespace-normal break-words text-left">{b.title}</span>
