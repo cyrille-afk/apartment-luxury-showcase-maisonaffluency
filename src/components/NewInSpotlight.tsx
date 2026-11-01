@@ -1,13 +1,14 @@
 import { useState, useMemo } from "react";
 import { CldPicture } from "@/components/ui/CldPicture";
 import { Link, useNavigate, useLocation } from "@/lib/router-compat";
-import { motion, type Transition } from "framer-motion";
+import { motion, useReducedMotion, type Transition } from "framer-motion";
 import { ArrowRight, FileText, Maximize2, Instagram } from "lucide-react";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import GridDensityToggle from "@/components/GridDensityToggle";
 import { LEAD_TIME_BUCKETS, leadTimeBuckets } from "@/lib/leadTimeBuckets";
 import { roomMaterialCategories } from "@/lib/roomMaterialCategories";
-import RoomCollectionFilters, { type RoomFacetValues } from "@/components/RoomCollectionFilters";
+import RoomCollectionFilters, { CollectionFilterTrigger, type RoomFacetValues } from "@/components/RoomCollectionFilters";
+import { useFilterGridLayout } from "@/components/useFilterGridLayout";
 import { inferSubcategory } from "@/lib/productTaxonomy";
 import { InventoryBadgeStack } from "@/components/ui/InventoryBadge";
 import ShareMenu from "@/components/ShareMenu";
@@ -110,7 +111,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer.id);
   const dest = useShippingDestination();
   const isUnderlaid = variant === "underlaid";
-  const [gridCols, setGridCols] = useState<3 | 4>(3);
+  const { open: filtersOpen, columns: gridCols, changeOpen: setFiltersOpen, changeColumns: setGridCols } = useFilterGridLayout();
+  const reducedMotion = useReducedMotion();
   const [mobileGridCols, setMobileGridCols] = useState<1 | 2>(2);
   const [pickCategory, setPickCategory] = useState<string | null>(null);
   const [pickLeadTime, setPickLeadTime] = useState<string | null>(null);
@@ -234,6 +236,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
     <>
       <div className={barClassName}>
         <div className="flex items-center gap-3">
+          <CollectionFilterTrigger open={filtersOpen} onClick={() => setFiltersOpen(!filtersOpen)} />
           <h3 className={titleClassName}>
             Curators' Picks
           </h3>
@@ -264,10 +267,11 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
         </div>
       </div>
 
-      <div className="flex gap-6 md:gap-8">
+      <div className={cn("flex transition-[gap] duration-350 motion-reduce:transition-none", filtersOpen ? "gap-6 md:gap-8" : "gap-0")}>
       {picks.length > 1 && (
         <div className="hidden md:block">
         <RoomCollectionFilters
+          toolbarTrigger open={filtersOpen} onOpenChange={setFiltersOpen}
           facets={["leadTime", "category", "material"]}
           options={{ category: pickCategoryOptions, designer: [], leadTime: [...LEAD_TIME_BUCKETS], craft: [], handmade: [], material: [...pickMaterialSet].sort((a, b) => a.localeCompare(b)) }}
           availableMaterials={pickMaterialSet}
@@ -292,8 +296,9 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
           const cardEditionLine = profileEditionLine({ ...pick, founder: designer.founder, pageDesignerName }) || houseEditionLabel;
 
           return (
-            <div
+            <motion.div
               key={pick.id}
+              layout transition={{ layout: { duration: reducedMotion ? 0 : 0.35, ease: [0.16, 1, 0.3, 1] } }}
               className="group flex h-full min-w-0 flex-col justify-between cursor-pointer"
               onClick={() => {
                 const item = lightboxItems.find((li) => li.id === pick.id);
@@ -430,7 +435,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
                 </p>
               </div>
             </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>
