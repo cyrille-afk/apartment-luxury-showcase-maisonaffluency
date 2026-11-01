@@ -31,6 +31,7 @@ import AuthGateDialog from "@/components/AuthGateDialog";
 import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
 import { getParentCategoryFromSubcategory as parentOfSub } from "@/lib/categoryNormalization";
 import RoomCollectionFilters, { type RoomFacet, type RoomFacetValues, type RoomFacetOptions } from "@/components/RoomCollectionFilters";
+import { LEAD_TIME_BUCKETS, leadTimeBuckets } from "@/lib/leadTimeBuckets";
 import { originToCountries } from "@/lib/productOrigin";
 import { ROOM_MATERIAL_CATEGORIES, roomMaterialCategories } from "@/lib/roomMaterialCategories";
 
