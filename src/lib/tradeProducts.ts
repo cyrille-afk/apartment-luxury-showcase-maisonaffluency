@@ -30,6 +30,7 @@ export interface TradeProduct {
   materials?: string;
   materials_description?: string | null;
   dimensions?: string;
+  size_variants?: Array<{ label?: string | null }>;
   lead_time?: string | null;
   origin?: string | null;
   description?: string;
