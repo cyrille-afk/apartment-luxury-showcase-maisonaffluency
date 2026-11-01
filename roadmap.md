@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Product navigation scroll
-- [ ] Reproduce Puzzle Dining Table navigation from the signed-in designer gallery, remove the source-page jump, and verify the transition.
+- [x] Remove premature router-resolution/global resets; signed-in Puzzle picture click keeps every gallery frame at 855px, product opens at top, and Back restores 855px; ten navigation regressions pass, preview build OK.
 
 ## GitHub Actions failures
 - [x] Trace activation/checkout startup crashes and six unit failures from actual GitHub job logs.
