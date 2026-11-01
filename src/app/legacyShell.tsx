@@ -379,6 +379,9 @@ export function ScrollToTopOnNavigate() {
     // Same-route query updates are in-page filters; keep the user at the
     // directory instead of jumping back to the route hero.
     if (!shouldResetRouteScroll(prevPath, location.pathname)) return;
+    // A pending product URL is not proof that its content has mounted.
+    // The product's layout effect resets before its first content paint.
+    if (isProductDetailPath(location.pathname)) return;
     if (navType === "POP") return;
     if (isTradeGalleryListing(location.pathname) && (readTradeGalleryState(location.pathname).scrollY ?? 0) > 0) return;
     if (location.hash) return;

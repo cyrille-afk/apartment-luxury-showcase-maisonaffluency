@@ -894,8 +894,12 @@ const TradeProductPage: React.FC = () => {
     })();
   }, [user]);
 
+  useLayoutEffect(() => {
+    if (isLoading || !data?.product) return;
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+  }, [isLoading, data?.product?.id]);
+
   useEffect(() => {
-    window.scrollTo({ top: 0 });
     // Reset gallery to first image when navigating between products — the page
     // component instance is reused across slug changes, so stale index from the
     // previous product would otherwise persist (e.g. land on picture 3).

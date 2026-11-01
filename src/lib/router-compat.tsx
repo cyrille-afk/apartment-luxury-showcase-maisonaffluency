@@ -35,6 +35,7 @@ import {
   type ReactNode,
 } from "react";
 import { cn } from "@/lib/utils";
+import { isProductDetailPath } from "@/lib/collectionScrollPolicy";
 
 // ---------- shared URL parsing ----------
 
@@ -86,7 +87,7 @@ export function useNavigate(): NavigateFn {
       hash,
       state: options?.state as never,
       replace: options?.replace,
-      resetScroll: options?.preventScrollReset ? false : undefined,
+      resetScroll: options?.preventScrollReset || isProductDetailPath(pathname) ? false : undefined,
     });
   }, [tsNav, router]) as NavigateFn;
 }
@@ -192,6 +193,7 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
       hash={hash}
       replace={replace}
       state={state as never}
+      resetScroll={isProductDetailPath(pathname) ? false : undefined}
       {...((rest ?? {}) as Record<string, unknown>)}
     >
       {children}
