@@ -50,6 +50,7 @@ export function PwaPendingAuthConsumer({ children }: { children: ReactNode }) {
     }
     // Let restoration finish first so its older null session cannot overwrite
     // the new OTP session. The AuthProvider remains mounted above this gate.
+    setPhase("signing-in");
     if (loading) return;
     ran.current = true;
     void runHandshake(token);
