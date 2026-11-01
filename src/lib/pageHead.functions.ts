@@ -65,10 +65,11 @@ type Pick = { slug: string | null; title: string; subtitle: string | null; image
 
 export const getLegacyProductHead = createServerFn({ method: "GET" })
   .inputValidator((input: { id: string }) => {
-    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(input?.id || "")) throw new Error("Invalid product id");
-    return input;
+    return { id: String(input?.id || "") };
   })
   .handler(async ({ data }): Promise<PageHeadInput | null> => {
+    // Unknown or non-UUID ids (e.g. a mistyped /product/<slug>) fall back to the generic head, never a 500.
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(data.id)) return null;
     const client = publicClient();
     if (!client) return null;
     // Resolve only through public projections; never expose private Trade fields.
