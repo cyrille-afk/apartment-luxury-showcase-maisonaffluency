@@ -1,5 +1,9 @@
 # Roadmap
 
+## Catalogue listing footnote
+- [x] Remove the full disclaimer above public and Trade grids; add a condensed guest-only bottom footnote and tighten filter spacing.
+- [ ] Verify guest and signed-in listings, placement, and visibility regressions.
+
 ## Installed-app opening
 - [x] Remove unnecessary no-token sign-in wait and initial homepage hydration mismatch; keep genuine QR sign-in protected. 29 startup regressions pass; preview build OK.
 - [x] Verify unchanged headline position before/after startup on installed-style phone, browser phone and desktop; Collection opens and repeated launch has no sign-in splash.

@@ -12,6 +12,7 @@ import { queryKeys } from "@/lib/queryKeys";
 import { getCachedCatalog } from "@/lib/catalogSource";
 import { useAllDesigners, type Designer } from "@/hooks/useDesigner";
 import { useAuth } from "@/hooks/useAuth";
+import { shouldShowCatalogueFootnote } from "@/lib/catalogueFootnote";
 import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";
 import { useParentBrandDesigners } from "@/hooks/useParentBrandDesigners";
@@ -1593,7 +1594,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const hideCuratorPickFavorite = isMobile || isStandalone;
 
   // ─── Public favorites (localStorage-backed) with auth gate ───
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
   const [favIds, setFavIds] = useState<Set<string>>(() => {
     try {
@@ -2009,7 +2010,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
 
         <div className="relative">
           {/* Mobile: Search above, Filter below */}
-          <div data-sticky-filter-bar className="relative bg-background flex flex-col items-start gap-2 pt-3 pb-2 mb-2 md:mb-6 md:hidden">
+          <div data-sticky-filter-bar className="relative bg-background flex flex-col items-start gap-2 pt-3 pb-2 mb-2 md:hidden">
             {mode !== "products" && (
               <div className="w-[70%] max-w-[16rem]">
                 <AlphabetDesignerPicker
@@ -2102,11 +2103,6 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               </div>
           </div>
 
-          {/* Editorial framing: the grid below is a digital edit, not the full index. */}
-          <p className="font-serif text-neutral-400 text-xs tracking-wider italic text-center w-full mt-4 md:hidden">
-            Displaying a digital edit of our current physical catalog. Discover our complete index of over 300 global
-            masters and contemporary ateliers through our private trade desk or concierge service.
-          </p>
 
 
           {/* Results count */}
@@ -2200,7 +2196,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
           )}
 
           {/* Desktop: Filter + Search row */}
-          <div data-sticky-filter-bar className="hidden md:flex relative bg-background pt-4 pb-3 items-center gap-6 mb-6">
+          <div data-sticky-filter-bar className="hidden md:flex relative bg-background pt-4 pb-2 items-center gap-6 mb-2">
             <button
               onPointerDown={() => {
                 filterScrollYRef.current = window.scrollY;
@@ -2245,11 +2241,6 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
             </div>
           </div>
 
-          {/* Editorial framing: the grid below is a digital edit, not the full index. */}
-          <p className="font-serif text-neutral-400 text-xs tracking-wider italic text-center w-full mt-4 hidden md:block">
-            Displaying a digital edit of our current physical catalog. Discover our complete index of over 300 global
-            masters and contemporary ateliers through our private trade desk or concierge service.
-          </p>
 
 
 
@@ -2398,6 +2389,11 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               Join Our Trade Program
             </Link>
           </div>
+        )}
+        {shouldShowCatalogueFootnote(Boolean(user), authLoading) && (
+          <p data-catalogue-footnote className="mt-16 mb-2 text-center font-serif text-[11px] leading-relaxed text-muted-foreground/50">
+            A curated edit. Further collections through our concierge.
+          </p>
         )}
       </div>
     </div>
