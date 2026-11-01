@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Filter grid transformation
-- [ ] Keep the FILTERS trigger aligned with density controls; animate four columns open / three closed on designer and collection grids.
-- [ ] Verify live opening/closing, stable cards, mobile behavior and regressions.
+- [x] Keep the FILTERS trigger aligned with density controls; animate four columns open / three closed on designer and collection grids.
+- [x] Michel Amar and Living verified 3 → 4 → 3; trigger/control heights and top positions match exactly, cards/images retain identity, mobile sheet works without overflow; eight tests pass and preview build OK.
 
 ## Trade folder quick save
 - [x] Simplify the popover to three recent boards and project actions; preserve full names and add the advanced right drawer.
