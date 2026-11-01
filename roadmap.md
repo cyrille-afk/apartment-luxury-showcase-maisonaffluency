@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Directory analytics
-- [ ] Verify automatically updating Directory Activity dashboard, consented open/search/letter/dismiss/profile recording, matched-opening rates and admin-only reads; new operational feed keeps injected analytics untouched and preview separate.
+- [x] Signed-in Directory Activity verified: real search/initial/dismiss/profile activity reads back, 2/2 matched openings show 100%, filters work; five tests pass, anonymous reads/aggregate execution revoked, nine existing event schemas valid. Published tracking requires publication; new operational feed preserves injected events and separates preview.
 - [x] Track search edits, A–Z choices and dismissal reasons without search text; designer profile views use existing page-view analytics (verified published data), not duplicate click-based views.
 - [x] Three new event schemas registered (nine total), compatibility validation passes; real desktop flow asserts result counts, A/C, all three dismissal reasons, no duplicate dismissal and no raw text. Browser regression and three filter tests pass; preview build OK. Published collection awaits publication.
 
