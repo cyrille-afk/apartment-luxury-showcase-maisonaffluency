@@ -15,3 +15,5 @@
 
 - Room shortlist covers pass allowlisted plain-text cover, closing-message and contact fields to the shared PDF generator; closing-page text wraps and continues across unnumbered pages, with only valid email and HTTP(S) links; device-local metadata stays scoped by account, room and saved shortlist ID, separate from public share snapshots — prevents unsafe links, clipping and cross-shortlist reuse.
 - Quote & Proforma list filtering (status, inclusive From/To dates, quick ranges) lives in src/lib/quoteFilters.ts as pure functions with unit tests in quoteFilters.test.ts — the page only renders them, so the rules stay testable and can't drift between views. Dates compare the studio's local calendar day, matching what the quote card prints.
+
+- Desktop→phone QR sign-in uses one-time 2-minute tokens (hashed in mobile_sync_tokens, service-role only) via src/lib/mobileSync.functions.ts and /auth/sync — no reusable session in the QR; installed apps ignore already-claimed launch codes (iOS replays them).
