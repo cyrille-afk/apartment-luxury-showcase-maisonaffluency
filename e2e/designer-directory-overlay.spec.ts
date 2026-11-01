@@ -7,6 +7,11 @@ test("visual directory filters live and dismisses immediately", async ({ page })
   await page.goto("/designers");
   await page.waitForFunction(() => Array.from(document.querySelectorAll("input"))
     .some(input => Object.keys(input).some(key => key.startsWith("__reactProps"))));
+  await page.evaluate(() => {
+    const events: Array<{ name: string; properties?: Record<string, unknown> }> = [];
+    Object.assign(window, { directoryTestEvents: events });
+    window.__lovableEvents = { track: (name, properties) => { events.push({ name, properties }); return null; } };
+  });
   const input = page.getByPlaceholder("Search directory", { exact: true });
   await input.click();
   const dialog = page.getByRole("dialog", { name: "Browse designers A to Z" });
@@ -36,4 +41,20 @@ test("visual directory filters live and dismisses immediately", async ({ page })
   if (!bounds) throw new Error("Directory panel is not visible");
   await page.mouse.click(bounds.x - 30, bounds.y + 100);
   await expect(dialog).toHaveCount(0, { timeout: 500 });
+  await input.click();
+  await expect(dialog).toBeVisible();
+  await page.getByRole("button", { name: "Close search", exact: true }).filter({ visible: true }).click();
+  await expect(dialog).toHaveCount(0, { timeout: 500 });
+  const events = await page.evaluate(() => (window as unknown as {
+    directoryTestEvents: Array<{ name: string; properties: Record<string, unknown> }>;
+  }).directoryTestEvents);
+  expect(events.filter(event => event.name === "project.directory_search_changed").map(event => event.properties))
+    .toEqual([
+      { character_count: 6, result_count: 1, surface: "desktop" },
+      { character_count: 13, result_count: 0, surface: "desktop" },
+    ]);
+  expect(events.filter(event => event.name === "project.directory_letter_selected").map(event => event.properties.letter)).toEqual(["A", "C"]);
+  expect(events.filter(event => event.name === "project.directory_modal_dismissed").map(event => event.properties.reason)).toEqual(["escape", "outside", "close_button"]);
+  expect(JSON.stringify(events)).not.toContain("Amelie");
+  expect(JSON.stringify(events)).not.toContain("zzz-unmatched");
 });

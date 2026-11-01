@@ -647,6 +647,7 @@ const DesignersHoverHero = () => {
   const [isStandalone, setIsStandalone] = useState(() => isPwaStandaloneDisplay());
   const [showPortalCursor, setShowPortalCursor] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const directoryDismissedRef = useRef(true);
   const [desktopSearchExpanded, setDesktopSearchExpanded] = useState(false);
   const [desktopDirectoryMode, setDesktopDirectoryMode] = useState<"search" | "az">("az");
   const [searchQuery, setSearchQuery] = useState("");
@@ -1324,6 +1325,7 @@ const DesignersHoverHero = () => {
   };
 
   const openDesignerSearch = (mode: "search" | "az" = "search") => {
+    directoryDismissedRef.current = false;
     if (!isDesktopViewport) {
       setDropdownPos(null);
       setSearchOpen(true);
@@ -1343,7 +1345,13 @@ const DesignersHoverHero = () => {
     });
   };
 
-  const closeDesignerSearch = () => {
+  const closeDesignerSearch = (reason: "escape" | "outside" | "close_button" = "close_button") => {
+    if (searchOpen && !directoryDismissedRef.current) {
+      directoryDismissedRef.current = true;
+      window.__lovableEvents?.track?.("project.directory_modal_dismissed", {
+        reason, surface: isDesktopViewport ? "desktop" : "mobile",
+      });
+    }
     setDesktopSearchExpanded(false);
     setSearchOpen(false);
     setDropdownPos(null);
@@ -1420,13 +1428,13 @@ const DesignersHoverHero = () => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
-        closeDesignerSearch();
+        closeDesignerSearch("escape");
       }
     };
     const onOutsidePointer = (e: PointerEvent) => {
       const target = e.target as HTMLElement | null;
       if (target?.closest("#designers-search-sheet, [aria-label='Designer directory controls']")) return;
-      closeDesignerSearch();
+      closeDesignerSearch("outside");
     };
     const onWheel = (e: WheelEvent) => {
       const target = e.target as HTMLElement | null;
@@ -2374,6 +2382,13 @@ const DesignersHoverHero = () => {
               setSearchQuery(event.target.value);
               setDesktopDirectoryLetter(null);
               if (!searchOpen) openDesignerSearch("search");
+              if (event.target.value.trim()) {
+                window.__lovableEvents?.track?.("project.directory_search_changed", {
+                  character_count: event.target.value.trim().length,
+                  result_count: filterDesignerDirectory(allDesigners.filter(d => d.is_published && !d.trade_only), event.target.value, null).length,
+                  surface: "desktop",
+                });
+              }
             }}
             placeholder="Search directory"
             autoCorrect="off"
@@ -2386,7 +2401,7 @@ const DesignersHoverHero = () => {
           {searchOpen && (
             <button
               type="button"
-              onClick={closeDesignerSearch}
+              onClick={() => closeDesignerSearch("close_button")}
               aria-label="Close search"
               className="p-1 text-background/55 transition-colors hover:text-background focus-visible:outline-hidden focus-visible:text-background"
             >
@@ -2408,7 +2423,7 @@ const DesignersHoverHero = () => {
       <div
         key="designers-search-backdrop"
         data-testid="designers-search-backdrop"
-        onClick={closeDesignerSearch}
+        onClick={() => closeDesignerSearch("outside")}
         className={cn(
           "fixed inset-x-0 bottom-0 top-[var(--header-h)] z-[70] bg-black/30 backdrop-blur-[4px]",
           searchOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0 backdrop-blur-none",
@@ -2475,6 +2490,13 @@ const DesignersHoverHero = () => {
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
                     setDesktopDirectoryLetter(null);
+                    if (e.target.value.trim()) {
+                      window.__lovableEvents?.track?.("project.directory_search_changed", {
+                        character_count: e.target.value.trim().length,
+                        result_count: filterDesignerDirectory(allDesigners.filter(d => d.is_published && !d.trade_only), e.target.value, null).length,
+                        surface: "mobile",
+                      });
+                    }
                   }}
                   placeholder={`Search ${makerCountLabel} designers…`}
                   autoCorrect="off"
@@ -2489,7 +2511,7 @@ const DesignersHoverHero = () => {
                 />
                 <button
                   type="button"
-                  onClick={closeDesignerSearch}
+                  onClick={() => closeDesignerSearch("close_button")}
                   aria-label="Close search"
                   className={cn(
                     "absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white/50 hover:text-white transition-colors",
@@ -2528,6 +2550,9 @@ const DesignersHoverHero = () => {
                           setExpandedLetters(new Set([letter]));
                           setActiveAccordionLetter(letter);
                           if (!isDesktopViewport) scrollLetterIntoView(letter);
+                          window.__lovableEvents?.track?.("project.directory_letter_selected", {
+                            letter, surface: isDesktopViewport ? "desktop" : "mobile",
+                          });
                         }}
                         className={cn(
                           "shrink-0 w-7 h-7 flex items-center justify-center rounded-full font-serif text-[13px] transition-colors",
@@ -2714,6 +2739,9 @@ const DesignersHoverHero = () => {
                           setDesktopDirectoryLetter(letter);
                           rememberDesignersAzLetter(letter);
                           setRestoredOnlyLetter(null);
+                          window.__lovableEvents?.track?.("project.directory_letter_selected", {
+                            letter, surface: "desktop",
+                          });
                         } : undefined}
                         className={cn(
                           "flex h-10 flex-1 rounded-none px-0 items-center justify-center text-center font-body text-[22px] leading-none uppercase tracking-wider transition-all duration-150 ease-in-out text-background hover:bg-transparent hover:text-background",
