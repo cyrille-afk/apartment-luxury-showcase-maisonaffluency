@@ -993,12 +993,12 @@ const TradeProductPage: React.FC = () => {
   const felixSelectionRef = useRef<ProactiveTearsheetData | null>(null);
   const { addToInventory } = useProjectInventory();
 
-  const handleAddToQuote = useCallback(async (confirmed: boolean = false) => {
+  const handleAddToQuote = useCallback(async (confirmed: boolean = false, forceNewQuote: boolean = false) => {
     if (!user || !data) return;
     // Reusing an existing draft quote requires an explicit confirmation that
     // shows the quote number and date first (confirmed === true comes from the
     // dialog's "Add to this quote" action).
-    if (activeQuoteId && confirmed !== true) {
+    if (activeQuoteId && !forceNewQuote && confirmed !== true) {
       const { data: q } = await supabase
         .from("trade_quotes")
         .select("created_at")
@@ -1013,7 +1013,7 @@ const TradeProductPage: React.FC = () => {
     setCopilotSave({ state: "saving" });
     try {
       const { product, designer } = data;
-      let quoteId = activeQuoteId;
+      let quoteId = forceNewQuote ? null : activeQuoteId;
       if (!quoteId) {
         const quoteCurrencies = ["SGD", "USD", "EUR", "GBP"];
         const productCurrency = data?.pricing?.currency || "EUR";
@@ -1395,7 +1395,7 @@ const TradeProductPage: React.FC = () => {
         });
         setDrawerRefreshKey((k) => k + 1);
         setDrawerOpen(true);
-        try { window.sessionStorage.setItem(`ma-copilot-open-v1:${product.id}`, activeQuoteId || quoteId); } catch { /* noop */ }
+        try { window.sessionStorage.setItem(`ma-copilot-open-v1:${product.id}`, quoteId); } catch { /* noop */ }
         if (felixSelection) {
           window.dispatchEvent(new CustomEvent("concierge:propose_tearsheet_proactive", { detail: { ...structuredClone(felixSelection), lockedAt: Date.now() } }));
         }
@@ -3733,7 +3733,7 @@ const TradeProductPage: React.FC = () => {
                 setQuoteConfirm(null);
                 forgetActiveQuote();
                 setActiveQuoteId(null);
-                void handleAddToQuote(true);
+                void handleAddToQuote(true, true);
               }}
             >
               Start a new quote
