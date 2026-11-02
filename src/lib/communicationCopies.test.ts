@@ -30,6 +30,17 @@ const payload = { to: 'concierge@maisonaffluency.com', subject: 'Inquiry', html:
   unsubscribe_token: 'original-token', queued_at: '2026-10-06T03:00:00Z' }
 
 describe('operational inbox copies', () => {
+  it('sends Cyrille and Grégoire one copy when the same inquiry reaches concierge twice', async () => {
+    const client = mockClient({ persistLog: true })
+    await ensureCommunicationCopies(client, 'transactional_emails', { ...payload, idempotency_key: 'inquiry-notify-abc-concierge@maisonaffluency.com' })
+    await ensureCommunicationCopies(client, 'transactional_emails', { ...payload, message_id: 'second', idempotency_key: 'inquiry-notify-abc-cyrille@maisonaffluency.com' })
+    expect(client.rpc).toHaveBeenCalledTimes(2)
+  })
+  it('adds no extra copies to a trade decision concierge copy (named copies already sent)', async () => {
+    const client = mockClient()
+    await ensureCommunicationCopies(client, 'transactional_emails', { ...payload, label: 'trade-approval-copy-concierge', idempotency_key: 'trade-approval-copy-concierge-app-1' })
+    expect(client.rpc).not.toHaveBeenCalled()
+  })
   it('copies a customer inquiry reply once to both staff without recursive copies', async () => {
     const client = mockClient()
     await ensureCommunicationCopies(client, 'transactional_emails', { ...payload, to: 'client@example.com', label: 'inquiry-reply' })
