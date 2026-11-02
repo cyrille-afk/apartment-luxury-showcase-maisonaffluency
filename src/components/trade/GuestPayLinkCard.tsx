@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Copy, Link2, Loader2, Check, Trash2, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { PRODUCTION_ORIGIN } from "@/lib/environmentIndexingGuard";
 
 type PayLink = {
   id: string;
