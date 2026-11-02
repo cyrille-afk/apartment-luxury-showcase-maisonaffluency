@@ -21,7 +21,7 @@ import { Link, useNavigate } from "@/lib/router-compat";
 import { motion, animate, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { filterDesignerDirectory, directorySearchDetails, directoryRefinement } from "@/lib/designerDirectoryFilter";
-import { recordDirectoryActivity, prepareDirectoryProfile } from "@/lib/directoryActivity";
+import { recordDirectoryActivity, recordDirectoryRefinement, prepareDirectoryProfile } from "@/lib/directoryActivity";
 import SilentLink from "@/components/SilentLink";
 import { Search, X, ImageIcon, ArrowRight } from "lucide-react";
 
@@ -2392,6 +2392,7 @@ const DesignersHoverHero = () => {
             }}
             onClick={() => {
               if (!searchOpen) openDesignerSearch("search");
+              if (refinement) recordDirectoryRefinement(activityModalRef.current, { ...details, refinement });
             }}
             onChange={(event) => {
               const refinement = directoryRefinement(searchQuery, event.target.value);
@@ -2512,6 +2513,7 @@ const DesignersHoverHero = () => {
                   onChange={(e) => {
                     const refinement = directoryRefinement(searchQuery, e.target.value);
                     const details = directorySearchDetails(allDesigners.filter(d => d.is_published && !d.trade_only), e.target.value);
+                    if (refinement) recordDirectoryRefinement(activityModalRef.current, { ...details, refinement });
                     if (refinement) window.__lovableEvents?.track?.('project.directory_search_refined', {
                       ...details, refinement, surface: isDesktopViewport ? 'desktop' : 'mobile',
                     });
@@ -2579,6 +2581,7 @@ const DesignersHoverHero = () => {
                             refinement: 'letter', letter, surface: isDesktopViewport ? 'desktop' : 'mobile',
                           });
                           rememberDesignersAzLetter(letter);
+                          if (searchQuery.trim()) recordDirectoryRefinement(activityModalRef.current, { ...directorySearchDetails(allDesigners.filter(d => d.is_published && !d.trade_only), searchQuery), refinement: 'letter', letter });
                           setRestoredOnlyLetter(null);
                           setExpandedLetters(new Set([letter]));
                           setActiveAccordionLetter(letter);
@@ -2776,6 +2779,7 @@ const DesignersHoverHero = () => {
                             refinement: 'letter', letter, surface: 'desktop',
                           });
                           setSearchQuery("");
+                          if (searchQuery.trim()) recordDirectoryRefinement(activityModalRef.current, { ...directorySearchDetails(allDesigners.filter(d => d.is_published && !d.trade_only), ''), refinement: 'letter', letter });
                           setDesktopDirectoryLetter(letter);
                           rememberDesignersAzLetter(letter);
                           setRestoredOnlyLetter(null);
