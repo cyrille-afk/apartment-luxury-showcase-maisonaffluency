@@ -2,20 +2,23 @@ import { assertEquals, assertRejects } from 'https://deno.land/std@0.224.0/asser
 import { prepareTradeActivation, completeTradeActivation } from './tradeActivation.ts'
 import type { SupabaseClient } from 'npm:@supabase/supabase-js@2'
 
-function fixture(status = 'approved', existing = false) {
+function fixture(status = 'approved', existing = false, previousEmail?: string) {
   const calls: string[] = []
   const chain = {
     select() { return this }, eq() { return this },
-    maybeSingle() { return Promise.resolve({ data: { id: 'account', status, user_id: null }, error: null }) },
+    maybeSingle() { return Promise.resolve({ data: { id: 'account', status, user_id: null, signup_id: previousEmail ? 'signup' : null }, error: null }) },
     update() { calls.push('update'); return this },
     upsert() { calls.push('upsert'); return Promise.resolve({ error: null }) },
     then(resolve: (value: unknown) => void) { resolve({ error: null }) },
   }
   const service = {
-    from: () => chain,
+    from: (table: string) => table === 'trade_program_signups' ? {
+      select() { return this }, eq() { return this },
+      maybeSingle() { return Promise.resolve({ data: { email: previousEmail }, error: null }) },
+    } : chain,
     auth: { admin: {
-      generateLink: ({ type }: { type: string }) => {
-        calls.push(type)
+      generateLink: ({ type, email }: { type: string; email: string }) => {
+        calls.push(previousEmail ? `${type}:${email}` : type)
         if (type === 'invite' && existing) return Promise.resolve({ error: { code: 'email_exists', message: 'Already registered' } })
         return Promise.resolve({ data: { properties: { hashed_token: 'test-proof' }, user: { id: 'user' } }, error: null })
       },
@@ -38,6 +41,17 @@ Deno.test('existing applicant reuses their account for email-proven password set
   const { service, calls } = fixture('approved', true)
   await prepareTradeActivation(service, 'test@example.com')
   assertEquals(calls, ['invite', 'recovery'])
+})
+Deno.test('email correction invalidates the original recipient recovery link before new setup issuance', async () => {
+  const { service, calls } = fixture('approved', false, 'pola@pola.ar')
+  await prepareTradeActivation(service, 'pola@pola.ae')
+  assertEquals(calls, ['recovery:pola@pola.ar', 'invite:pola@pola.ae', 'recovery:pola@pola.ae'])
+})
+Deno.test('each fresh resend replaces the recovery token for the same account', async () => {
+  const { service, calls } = fixture('approved', true)
+  await prepareTradeActivation(service, 'test@example.com')
+  await prepareTradeActivation(service, 'test@example.com')
+  assertEquals(calls, ['invite', 'recovery', 'invite', 'recovery'])
 })
 Deno.test('approval is rechecked before linking roles', async () => {
   const { service, calls } = fixture('rejected')
