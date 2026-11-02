@@ -1,5 +1,9 @@
 # Roadmap
 
+## Inquiry reply button
+- [x] Both Reply actions open an in-app composer; signed-in cancel/reopen restores the draft and saved history shows the exact reply and Sent status.
+- [x] Existing admin-checked branded sender derives recipients from saved inquiries; real test reply and both staff copies have sent records. Invalid authentication rejected, 12 tests pass, startup/live checks pass, preview build OK; removed only the test inquiry.
+
 ## Google-access inquiry alerts
 - [x] Add distinct Twilio WhatsApp notifications using existing staff recipients without creating applications or granting access.
 - [x] Six tests pass; deployed service starts and a real authenticated request saves successfully. Three Twilio sends were accepted then rejected with 63016 (outside the reply window); per-recipient callbacks recorded failures.

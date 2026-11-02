@@ -21,6 +21,7 @@ import { template as featuredMagazineUpdate } from './featured-magazine-update.t
 import { template as scrapeFailureAlert } from './scrape-failure-alert.tsx'
 import { template as inquiryConfirmation } from './inquiry-confirmation.tsx'
 import { template as inquiryNotification } from './inquiry-notification.tsx'
+import { template as inquiryReply } from './inquiry-reply.tsx'
 import { template as commissionStatement } from './commission-statement.tsx'
 import { template as manualShippingQuoteRequest } from './manual-shipping-quote-request.tsx'
 import { template as tradeVerificationChecklist } from './trade-verification-checklist.tsx'
@@ -66,6 +67,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'scrape-failure-alert': scrapeFailureAlert,
   'inquiry-confirmation': inquiryConfirmation,
   'inquiry-notification': inquiryNotification,
+  'inquiry-reply': inquiryReply,
   'commission-statement': commissionStatement,
   'manual-shipping-quote-request': manualShippingQuoteRequest,
   'trade-verification-checklist': tradeVerificationChecklist,

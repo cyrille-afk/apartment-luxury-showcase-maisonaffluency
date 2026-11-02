@@ -26,6 +26,14 @@ const payload = { to: 'concierge@maisonaffluency.com', subject: 'Inquiry', html:
   unsubscribe_token: 'original-token', queued_at: '2026-10-06T03:00:00Z' }
 
 describe('operational inbox copies', () => {
+  it('copies a customer inquiry reply once to both staff without recursive copies', async () => {
+    const client = mockClient()
+    await ensureCommunicationCopies(client, 'transactional_emails', { ...payload, to: 'client@example.com', label: 'inquiry-reply' })
+    expect(client.rpc.mock.calls.map(call => call[1].payload.to).sort()).toEqual(['cyrille@maisonaffluency.com', 'gregoire@maisonaffluency.com'])
+    const copy = client.rpc.mock.calls[0][1].payload
+    await ensureCommunicationCopies(client, 'transactional_emails', copy)
+    expect(client.rpc).toHaveBeenCalledTimes(2)
+  })
   it('matches only the two exact inboxes, case-insensitively, never auth mail', () => {
     expect(requiresCommunicationCopies('transactional_emails', ' TRADE@maisonaffluency.com ')).toBe(true)
     expect(requiresCommunicationCopies('transactional_emails', payload.to)).toBe(true)
