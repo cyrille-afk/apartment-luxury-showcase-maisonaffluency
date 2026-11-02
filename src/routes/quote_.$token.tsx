@@ -123,7 +123,7 @@ function SharedQuotePage() {
                 {l.maker && <p className="text-sm font-medium text-primary break-words">{l.maker}</p>}
                 <h2 className="font-display text-2xl sm:text-3xl leading-tight mt-2 break-words">{l.name}</h2>
                 {(l.finish || l.dimensions) && <dl className="mt-5 space-y-3 text-sm">
-                  {l.finish && <div className="grid grid-cols-[88px_minmax(0,1fr)] gap-3"><dt className="text-muted-foreground">Finish</dt><dd className="break-words">{l.finish}</dd></div>}
+                  {l.finish && l.finish.trim() !== l.dimensions?.trim() && <div className="grid grid-cols-[88px_minmax(0,1fr)] gap-3"><dt className="text-muted-foreground">Finish</dt><dd className="break-words">{l.finish}</dd></div>}
                   {l.dimensions && <div className="grid grid-cols-[88px_minmax(0,1fr)] gap-3"><dt className="text-muted-foreground">Dimensions</dt><dd className="break-words">{l.dimensions}</dd></div>}
                 </dl>}
                 <div className="mt-6 pt-4 border-t border-border grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">

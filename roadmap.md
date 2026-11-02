@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Branded client quote pages
-- [ ] Refine Maison Affluency branding, product imagery, maker credits and configuration details without changing client-safe prices or access.
-- [ ] Verify the existing shared quote on desktop and mobile, plus unavailable-link branding.
+- [x] Refine Maison Affluency branding, product imagery, maker credits and configuration details without changing client-safe prices or access.
+- [x] Existing shared Angelo quote verified on desktop and mobile: authentic image loads, no overflow/runtime errors, branded unavailable state; six quote privacy/identity tests pass and preview build OK.
 
 ## Readable quote links and previews
 - [x] Newly copied quote links include recorded maker/product names with unchanged secure tokens; old links remain valid.
