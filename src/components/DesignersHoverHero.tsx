@@ -20,7 +20,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "@/lib/router-compat";
 import { motion, animate, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { filterDesignerDirectory } from "@/lib/designerDirectoryFilter";
+import { filterDesignerDirectory, directorySearchDetails, directoryRefinement } from "@/lib/designerDirectoryFilter";
 import { recordDirectoryActivity, prepareDirectoryProfile } from "@/lib/directoryActivity";
 import SilentLink from "@/components/SilentLink";
 import { Search, X, ImageIcon, ArrowRight } from "lucide-react";
@@ -152,6 +152,7 @@ function DesignerGridCard({
   priority = false,
   useCardPhoto = false,
   showDiscoverCta = false,
+  searchDetails,
 }: {
   designer: { slug: string; name: string; first_pick_image_url?: string | null; hero_image_url: string | null; image_url: string | null };
   priority?: boolean;
@@ -159,6 +160,7 @@ function DesignerGridCard({
   useCardPhoto?: boolean;
   /** Desktop directory grid: reveal a "Discover the Curation" label under the name on hover. */
   showDiscoverCta?: boolean;
+  searchDetails?: ReturnType<typeof directorySearchDetails>;
 }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -225,6 +227,12 @@ function DesignerGridCard({
         rememberLetter();
         void warmProfile().then(() => {
           prepareDirectoryProfile(designer.slug);
+          if (searchDetails && searchDetails.query_kind !== 'empty') {
+            window.__lovableEvents?.track?.('project.directory_search_result_selected', {
+              ...searchDetails, designer_slug: designer.slug,
+              surface: window.innerWidth >= 1024 ? 'desktop' : 'mobile',
+            });
+          }
           navigate(`/designers/${designer.slug}`, {
             state: { fromDesignersHero: true, fromDesignersAZ: true },
           });
@@ -2386,12 +2394,18 @@ const DesignersHoverHero = () => {
               if (!searchOpen) openDesignerSearch("search");
             }}
             onChange={(event) => {
+              const refinement = directoryRefinement(searchQuery, event.target.value);
+              const details = directorySearchDetails(allDesigners.filter(d => d.is_published && !d.trade_only), event.target.value);
+              if (refinement) window.__lovableEvents?.track?.('project.directory_search_refined', {
+                ...details, refinement, surface: 'desktop',
+              });
               setSearchQuery(event.target.value);
               setDesktopDirectoryLetter(null);
               if (!searchOpen) openDesignerSearch("search");
               if (event.target.value.trim()) {
                 recordDirectoryActivity('search', activityModalRef.current);
                 window.__lovableEvents?.track?.("project.directory_search_changed", {
+                  ...details,
                   character_count: event.target.value.trim().length,
                   result_count: filterDesignerDirectory(allDesigners.filter(d => d.is_published && !d.trade_only), event.target.value, null).length,
                   surface: "desktop",
@@ -2496,14 +2510,20 @@ const DesignersHoverHero = () => {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => {
+                    const refinement = directoryRefinement(searchQuery, e.target.value);
+                    const details = directorySearchDetails(allDesigners.filter(d => d.is_published && !d.trade_only), e.target.value);
+                    if (refinement) window.__lovableEvents?.track?.('project.directory_search_refined', {
+                      ...details, refinement, surface: isDesktopViewport ? 'desktop' : 'mobile',
+                    });
                     setSearchQuery(e.target.value);
                     setDesktopDirectoryLetter(null);
                     if (e.target.value.trim()) {
                       recordDirectoryActivity('search', activityModalRef.current);
                       window.__lovableEvents?.track?.("project.directory_search_changed", {
+                        ...details,
                         character_count: e.target.value.trim().length,
                         result_count: filterDesignerDirectory(allDesigners.filter(d => d.is_published && !d.trade_only), e.target.value, null).length,
-                        surface: "mobile",
+                        surface: isDesktopViewport ? 'desktop' : 'mobile',
                       });
                     }
                   }}
@@ -2554,6 +2574,10 @@ const DesignersHoverHero = () => {
                         key={letter}
                         type="button"
                         onClick={() => {
+                          if (searchQuery.trim()) window.__lovableEvents?.track?.('project.directory_search_refined', {
+                            ...directorySearchDetails(allDesigners.filter(d => d.is_published && !d.trade_only), searchQuery),
+                            refinement: 'letter', letter, surface: isDesktopViewport ? 'desktop' : 'mobile',
+                          });
                           rememberDesignersAzLetter(letter);
                           setRestoredOnlyLetter(null);
                           setExpandedLetters(new Set([letter]));
@@ -2610,6 +2634,7 @@ const DesignersHoverHero = () => {
                             <DesignerGridCard
                               key={d.slug}
                               designer={d}
+                              searchDetails={directorySearchDetails(allDesigners.filter(d => d.is_published && !d.trade_only), searchQuery)}
                             />
                           ))}
                         </div>
@@ -2695,6 +2720,7 @@ const DesignersHoverHero = () => {
                                     <DesignerGridCard
                                       key={d.slug}
                                       designer={d}
+                                      searchDetails={directorySearchDetails(allDesigners.filter(d => d.is_published && !d.trade_only), searchQuery)}
                                       priority={i < 4}
                                     />
                                   ))}
@@ -2720,7 +2746,7 @@ const DesignersHoverHero = () => {
                             exit={{ opacity: 0, pointerEvents: "none" }}
                             transition={{ duration: reduceDirectoryMotion ? 0 : 0.18 }}
                           >
-                            <DesignerGridCard designer={designer} priority={index < 8} showDiscoverCta />
+                            <DesignerGridCard designer={designer} priority={index < 8} showDiscoverCta searchDetails={directorySearchDetails(allDesigners.filter(d => d.is_published && !d.trade_only), searchQuery)} />
                           </motion.div>
                         ))}
                       </AnimatePresence>
@@ -2745,6 +2771,10 @@ const DesignersHoverHero = () => {
                         variant="ghost"
                         disabled={!hasDesigners}
                         onClick={hasDesigners ? () => {
+                          if (searchQuery.trim()) window.__lovableEvents?.track?.('project.directory_search_refined', {
+                            ...directorySearchDetails(allDesigners.filter(d => d.is_published && !d.trade_only), ''),
+                            refinement: 'letter', letter, surface: 'desktop',
+                          });
                           setSearchQuery("");
                           setDesktopDirectoryLetter(letter);
                           rememberDesignersAzLetter(letter);
