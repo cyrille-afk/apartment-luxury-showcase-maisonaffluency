@@ -3404,7 +3404,7 @@ const TradeProductPage: React.FC = () => {
                 <ShoppingCart size={14} />
                 Proceed to Order
               </Button>
-              <Button variant="outline" onClick={handleAddToQuote} disabled={adding} className={cn("w-full rounded-none font-body text-xs uppercase", added && "border-primary text-primary")}>
+              <Button variant="outline" onClick={() => void handleAddToQuote()} disabled={adding} className={cn("w-full rounded-none font-body text-xs uppercase", added && "border-primary text-primary")}>
                 {adding ? <DotCircleLoader size="sm" /> : added ? <Check size={14} /> : null}
                 {added ? "Added to Co-Pilot Workspace" : "Add to Co-Pilot Workspace"}
               </Button>
