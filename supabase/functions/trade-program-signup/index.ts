@@ -49,6 +49,8 @@ Deno.serve(async (req) => {
   const businessRegNumber = body.businessRegNumber
     ? String(body.businessRegNumber).trim().slice(0, 120)
     : null
+  const contactName = String(body.contactName ?? body.firstName ?? '').replace(/\s+/g, ' ').trim().slice(0, 120) || null
+  const country = String(body.country ?? '').replace(/\s+/g, ' ').trim().slice(0, 80) || null
 
   if (!email || email.length > 254 || !EMAIL_RE.test(email)) {
     return json({ error: 'A valid work email is required' }, 400)
