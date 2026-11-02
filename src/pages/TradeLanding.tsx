@@ -21,6 +21,7 @@ import Turnstile from "@/components/Turnstile";
 
 import ShippingTermsExplainer from "@/components/trade/ShippingTermsExplainer";
 import { MoodboardControls, MoodboardResults, useMoodboardSourcing } from "@/components/trade/OneClickMoodboard";
+import { COUNTRY_DIAL_OPTIONS } from "@/lib/phonePlaceholder";
 import { getTradeProgramShareUrl, TRADE_PROGRAM_SHARE_IMAGE } from "@/lib/tradeShareUrl";
 // Guarded share URL: falls back to the static OG bridge unless the clean route is
 // verified to serve Trade Program tags to crawlers (see src/lib/tradeShareUrl.ts).
@@ -250,6 +251,7 @@ const HeroJoinForm = ({
   const credentialFileRef = useRef<HTMLInputElement>(null);
   const [prefillParams] = useSearchParams();
   const prefillEmail = (prefillParams.get("email") || "").slice(0, 254);
+  const prefillName = (prefillParams.get("name") || "").slice(0, 120);
   const prefillFirm = (prefillParams.get("firm") || prefillParams.get("company") || "").slice(0, 200);
   const prefillPhone = (prefillParams.get("phone") || "").slice(0, 30);
   const prefillWebsite = (prefillParams.get("website") || "").slice(0, 300);
