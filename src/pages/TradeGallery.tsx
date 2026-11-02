@@ -151,10 +151,15 @@ const StudioGallery = () => {
   // Warm the product page code on hover so a click swaps straight to the
   // product instead of collapsing the gallery into a short loading screen
   // (which made the browser snap the page up before the product appeared).
-  const warmTradeProductPage = useCallback(() => {
+  const queryClient = useQueryClient();
+  const { isAdmin: viewerIsAdmin } = useAuth();
+  const warmTradeProductPage = useCallback((product?: TradeProduct) => {
     void import("@/pages/ProductPageContainer");
-    void import("@/pages/TradeProductPage");
-  }, []);
+    void import("@/pages/TradeProductPage").then(({ tradeProductPageQueryOptions }) => {
+      if (!product?.trade_product_id || product.hidden_in_trade) return;
+      void queryClient.prefetchQuery(tradeProductPageQueryOptions(product.trade_product_id, undefined, undefined, viewerIsAdmin));
+    });
+  }, [queryClient, viewerIsAdmin]);
 
   // Product pages own their reset once actual product content is mounted;
   // router resolution can occur while the outgoing gallery is still visible.
@@ -889,7 +894,7 @@ const StudioGallery = () => {
             const pinned = isPinned(product.product_name, product.id);
             const metadata = tradeCardMetadata(product);
             return (
-              <div key={product.id} data-trade-card={product.product_name} className="group relative min-w-0" onPointerEnter={warmTradeProductPage} onFocusCapture={warmTradeProductPage}>
+              <div key={product.id} data-trade-card={product.product_name} className="group relative min-w-0" onPointerEnter={() => warmTradeProductPage(product)} onFocusCapture={() => warmTradeProductPage(product)}>
                 <div className="relative aspect-square w-full overflow-hidden bg-[hsl(var(--product-canvas))] cursor-pointer" onClick={() => openProductSheet(product)}>
                   {product.image_url ? (
                     <>
