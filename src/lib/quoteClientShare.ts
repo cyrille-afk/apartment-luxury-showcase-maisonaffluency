@@ -9,6 +9,8 @@ export type SharedQuoteLine = {
   dimensions: string | null;
   materials?: string | null;
   finishOptions?: string[];
+  /** Selected finish swatches (cropped library images) recorded on the line. */
+  finishSwatches?: { name: string; image: string | null }[];
   quantity: number;
   unitCents: number | null;
   lineTotalCents: number | null;
@@ -28,8 +30,8 @@ export type SharedQuoteSnapshot = {
 
 export type ShareSourceLine = QuoteSummaryLine & {
   image_url?: string | null;
-  fabric?: (QuoteSummaryLine["fabric"] & { name?: string | null }) | null;
-  wood_fabric?: { name?: string | null } | null;
+  fabric?: (QuoteSummaryLine["fabric"] & { name?: string | null; image_url?: string | null }) | null;
+  wood_fabric?: { name?: string | null; image_url?: string | null } | null;
   product?: (QuoteSummaryLine["product"] & {
     product_name?: string | null;
     brand_name?: string | null;
@@ -47,16 +49,27 @@ export type ShareSourceLine = QuoteSummaryLine & {
 export function buildSharedQuoteSnapshot(quoteId: string, clientName: string | null, items: ShareSourceLine[]): SharedQuoteSnapshot {
   const lines: SharedQuoteLine[] = items.map((item) => {
     const pricing = quoteLinePricing(item, true);
-    const finish = [item.fabric?.name, item.wood_fabric?.name].filter(Boolean).join(" · ") || item.variant_label || null;
     const dimensions = dimensionsFromVariantLabel(item.variant_label, item.product?.dimensions ?? null);
+    // Selected finish = the recorded choices, never the size segment.
+    const labelFinishes = (item.variant_label || "").split(" · ").map((s) => s.trim())
+      .filter((s) => s && !dimensionsFromVariantLabel(s, null));
+    const finishNames = [...new Set([...labelFinishes, item.wood_fabric?.name, item.fabric?.name]
+      .filter((v): v is string => !!v && !!v.trim()).map((v) => v.trim()))];
+    const finish = finishNames.join(" · ") || null;
+    const finishSwatches = [item.wood_fabric, item.fabric]
+      .filter((f): f is { name?: string | null; image_url?: string | null } => !!f?.name)
+      .map((f) => ({ name: String(f.name).trim(), image: f.image_url || null }));
     return {
       name: item.product?.product_name || "Piece",
       maker: item.product?.brand_name || null,
       image: item.image_url || item.product?.image_url || null,
       finish,
       dimensions,
-      materials: item.product?.materials?.trim() || null,
-      finishOptions: [...new Set((item.product?.available_finishes ?? []).map((value) => value.trim()).filter(Boolean))],
+      // The catalogue's full material/finish range is only shown when the
+      // client hasn't been given a specific selection.
+      materials: finish ? null : item.product?.materials?.trim() || null,
+      finishOptions: finish ? [] : [...new Set((item.product?.available_finishes ?? []).map((value) => value.trim()).filter(Boolean))],
+      finishSwatches,
       quantity: Math.max(0, Number(item.quantity) || 0),
       unitCents: pricing?.unitCents ?? null,
       lineTotalCents: pricing?.lineTotalCents ?? null,

@@ -15,6 +15,14 @@ describe("buildSharedQuoteSnapshot", () => {
     expect(s.lines[0].materials).toBeNull();
     expect(s.lines[0].finishOptions).toEqual([]);
   });
+  it("shows the chosen finish with its swatch instead of the full catalogue stone list", () => {
+    const product = { product_name: "Angelo M/H High Table", materials: "Natural Stone: Kynos, Grafite, Travertino Rosso", available_finishes: ["Kynos", "Grafite"] };
+    const s = buildSharedQuoteSnapshot("28f3303b-0000", null, [{ quantity: 1, unit_price_cents: null, unit_price_currency: null, variant_label: "Ø 110 × H 92 cm · Travertino Rosso", wood_fabric: { name: "Travertino Rosso", image_url: "https://x/tr.jpg" }, product }]);
+    expect(s.lines[0].finish).toBe("Travertino Rosso");
+    expect(s.lines[0].finishSwatches).toEqual([{ name: "Travertino Rosso", image: "https://x/tr.jpg" }]);
+    expect(s.lines[0].materials).toBeNull();
+    expect(s.lines[0].finishOptions).toEqual([]);
+  });
   it("uses retail price, never the net trade price", () => {
     const s = buildSharedQuoteSnapshot("e3ccd6aa-0000", "Mrs Tan", [
       { quantity: 7, unit_price_cents: 2034000, unit_price_currency: "EUR", product: { product_name: "Saint Honoré Sofa", rrp_price_cents: 2250000, currency: "EUR" } },
