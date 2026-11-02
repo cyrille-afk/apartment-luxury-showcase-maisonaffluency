@@ -327,8 +327,19 @@ const HeroJoinForm = ({
         <input id={ghost ? "mobile-email" : "email"} type="email" name="email" defaultValue={prefillEmail} required maxLength={254} autoComplete="email" placeholder="Your work email" className={inputCls} />
       </div>
       <div>
+        <label htmlFor={ghost ? "mobile-fullName" : "fullName"} className={labelCls}>Full Name</label>
+        <input id={ghost ? "mobile-fullName" : "fullName"} name="fullName" defaultValue={prefillName} required minLength={2} maxLength={120} autoComplete="name" placeholder="Your full name" className={inputCls} />
+      </div>
+      <div>
         <label htmlFor={ghost ? "mobile-company" : "company"} className={labelCls}>Company / Firm Name</label>
         <input id={ghost ? "mobile-company" : "company"} name="company" defaultValue={prefillFirm} required maxLength={200} autoComplete="organization" placeholder="Studio name" className={inputCls} />
+      </div>
+      <div>
+        <label htmlFor={ghost ? "mobile-country" : "country"} className={labelCls}>Country</label>
+        <select id={ghost ? "mobile-country" : "country"} name="country" required defaultValue="" autoComplete="country-name" className={inputCls}>
+          <option value="" disabled>Select your country</option>
+          {COUNTRY_DIAL_OPTIONS.map((c) => <option key={c.country} value={c.country}>{c.country}</option>)}
+        </select>
       </div>
       <div>
         <label htmlFor={ghost ? "mobile-phone" : "phone"} className={labelCls}>Phone Number</label>
@@ -440,8 +451,10 @@ const TradeLanding = () => {
     const phoneNumber = ((formData.get("phone") as string) || "").trim();
     const websiteUrl = ((formData.get("website") as string) || "").trim();
     const businessRegNumber = ((formData.get("regNumber") as string) || "").trim();
+    const contactName = ((formData.get("fullName") as string) || "").replace(/\s+/g, " ").trim().slice(0, 120);
+    const country = ((formData.get("country") as string) || "").trim();
     const validation = tradeApplicationSchema.safeParse({ email, companyName, phoneNumber, websiteUrl });
-    if (!validation.success || businessRegNumber.length < 3) {
+    if (!validation.success || businessRegNumber.length < 3 || contactName.length < 2 || !country) {
       setJoinError("Please complete all required fields with valid details.");
       return;
     }
@@ -475,7 +488,7 @@ const TradeLanding = () => {
     const tokenKey = `ma_trade_signup_token_${email.trim().toLowerCase()}`;
     const continuationToken = (() => { try { return localStorage.getItem(tokenKey) || undefined; } catch { return undefined; } })();
     const { data: signupData, error } = await supabase.functions.invoke("trade-program-signup", {
-      body: { email, completeApplication: true, source: (searchParams.get("source") || "").slice(0, 80) || undefined, intent: (searchParams.get("intent") || "").slice(0, 80) || undefined, contactName: (searchParams.get("name") || "").slice(0, 120) || undefined, companyName, phoneNumber, websiteUrl, businessRegNumber, document, "cf-turnstile-response": turnstileToken, ...(continuationToken ? { continuationToken } : {}) },
+      body: { email, completeApplication: true, source: (searchParams.get("source") || "").slice(0, 80) || undefined, intent: (searchParams.get("intent") || "").slice(0, 80) || undefined, contactName, country, companyName, phoneNumber, websiteUrl, businessRegNumber, document, "cf-turnstile-response": turnstileToken, ...(continuationToken ? { continuationToken } : {}) },
     });
     setJoinLoading(false);
     setTurnstileToken("");
