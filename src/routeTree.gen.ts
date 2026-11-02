@@ -195,6 +195,7 @@ import { Route as TradeAdminCuratedPairingsRouteImport } from './routes/trade.ad
 import { Route as TradeAdminDescriptorTaxonomyRouteImport } from './routes/trade.admin_.descriptor-taxonomy'
 import { Route as TradeAdminDesignNoteCoverageRouteImport } from './routes/trade.admin_.design-note-coverage'
 import { Route as TradeAdminDesignNoteResearchRouteImport } from './routes/trade.admin_.design-note-research'
+import { Route as TradeAdminDirectoryActivityRouteImport } from './routes/trade.admin_.directory-activity'
 import { Route as TradeAdminDuplicateScanRouteImport } from './routes/trade.admin_.duplicate-scan'
 import { Route as TradeAdminDuplicatesRouteImport } from './routes/trade.admin_.duplicates'
 import { Route as TradeAdminEmailDeliverabilityRouteImport } from './routes/trade.admin_.email-deliverability'
@@ -1217,6 +1218,12 @@ const TradeAdminDesignNoteResearchRoute =
     path: '/admin/design-note-research',
     getParentRoute: () => TradeRoute,
   } as any)
+const TradeAdminDirectoryActivityRoute =
+  TradeAdminDirectoryActivityRouteImport.update({
+    id: '/admin_/directory-activity',
+    path: '/admin/directory-activity',
+    getParentRoute: () => TradeRoute,
+  } as any)
 const TradeAdminDuplicateScanRoute = TradeAdminDuplicateScanRouteImport.update({
   id: '/admin_/duplicate-scan',
   path: '/admin/duplicate-scan',
@@ -1786,6 +1793,7 @@ export interface FileRoutesByFullPath {
   '/trade/admin/descriptor-taxonomy': typeof TradeAdminDescriptorTaxonomyRoute
   '/trade/admin/design-note-coverage': typeof TradeAdminDesignNoteCoverageRoute
   '/trade/admin/design-note-research': typeof TradeAdminDesignNoteResearchRoute
+  '/trade/admin/directory-activity': typeof TradeAdminDirectoryActivityRoute
   '/trade/admin/duplicate-scan': typeof TradeAdminDuplicateScanRoute
   '/trade/admin/duplicates': typeof TradeAdminDuplicatesRoute
   '/trade/admin/email-deliverability': typeof TradeAdminEmailDeliverabilityRoute
@@ -2045,6 +2053,7 @@ export interface FileRoutesByTo {
   '/trade/admin/descriptor-taxonomy': typeof TradeAdminDescriptorTaxonomyRoute
   '/trade/admin/design-note-coverage': typeof TradeAdminDesignNoteCoverageRoute
   '/trade/admin/design-note-research': typeof TradeAdminDesignNoteResearchRoute
+  '/trade/admin/directory-activity': typeof TradeAdminDirectoryActivityRoute
   '/trade/admin/duplicate-scan': typeof TradeAdminDuplicateScanRoute
   '/trade/admin/duplicates': typeof TradeAdminDuplicatesRoute
   '/trade/admin/email-deliverability': typeof TradeAdminEmailDeliverabilityRoute
@@ -2306,6 +2315,7 @@ export interface FileRoutesById {
   '/trade/admin_/descriptor-taxonomy': typeof TradeAdminDescriptorTaxonomyRoute
   '/trade/admin_/design-note-coverage': typeof TradeAdminDesignNoteCoverageRoute
   '/trade/admin_/design-note-research': typeof TradeAdminDesignNoteResearchRoute
+  '/trade/admin_/directory-activity': typeof TradeAdminDirectoryActivityRoute
   '/trade/admin_/duplicate-scan': typeof TradeAdminDuplicateScanRoute
   '/trade/admin_/duplicates': typeof TradeAdminDuplicatesRoute
   '/trade/admin_/email-deliverability': typeof TradeAdminEmailDeliverabilityRoute
@@ -2568,6 +2578,7 @@ export interface FileRouteTypes {
     | '/trade/admin/descriptor-taxonomy'
     | '/trade/admin/design-note-coverage'
     | '/trade/admin/design-note-research'
+    | '/trade/admin/directory-activity'
     | '/trade/admin/duplicate-scan'
     | '/trade/admin/duplicates'
     | '/trade/admin/email-deliverability'
@@ -2827,6 +2838,7 @@ export interface FileRouteTypes {
     | '/trade/admin/descriptor-taxonomy'
     | '/trade/admin/design-note-coverage'
     | '/trade/admin/design-note-research'
+    | '/trade/admin/directory-activity'
     | '/trade/admin/duplicate-scan'
     | '/trade/admin/duplicates'
     | '/trade/admin/email-deliverability'
@@ -3087,6 +3099,7 @@ export interface FileRouteTypes {
     | '/trade/admin_/descriptor-taxonomy'
     | '/trade/admin_/design-note-coverage'
     | '/trade/admin_/design-note-research'
+    | '/trade/admin_/directory-activity'
     | '/trade/admin_/duplicate-scan'
     | '/trade/admin_/duplicates'
     | '/trade/admin_/email-deliverability'
@@ -4575,6 +4588,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TradeAdminDesignNoteResearchRouteImport
       parentRoute: typeof TradeRoute
     }
+    '/trade/admin_/directory-activity': {
+      id: '/trade/admin_/directory-activity'
+      path: '/admin/directory-activity'
+      fullPath: '/trade/admin/directory-activity'
+      preLoaderRoute: typeof TradeAdminDirectoryActivityRouteImport
+      parentRoute: typeof TradeRoute
+    }
     '/trade/admin_/duplicate-scan': {
       id: '/trade/admin_/duplicate-scan'
       path: '/admin/duplicate-scan'
@@ -5177,6 +5197,7 @@ interface TradeRouteChildren {
   TradeAdminDescriptorTaxonomyRoute: typeof TradeAdminDescriptorTaxonomyRoute
   TradeAdminDesignNoteCoverageRoute: typeof TradeAdminDesignNoteCoverageRoute
   TradeAdminDesignNoteResearchRoute: typeof TradeAdminDesignNoteResearchRoute
+  TradeAdminDirectoryActivityRoute: typeof TradeAdminDirectoryActivityRoute
   TradeAdminDuplicateScanRoute: typeof TradeAdminDuplicateScanRoute
   TradeAdminDuplicatesRoute: typeof TradeAdminDuplicatesRoute
   TradeAdminEmailDeliverabilityRoute: typeof TradeAdminEmailDeliverabilityRoute
@@ -5330,6 +5351,7 @@ const TradeRouteChildren: TradeRouteChildren = {
   TradeAdminDescriptorTaxonomyRoute: TradeAdminDescriptorTaxonomyRoute,
   TradeAdminDesignNoteCoverageRoute: TradeAdminDesignNoteCoverageRoute,
   TradeAdminDesignNoteResearchRoute: TradeAdminDesignNoteResearchRoute,
+  TradeAdminDirectoryActivityRoute: TradeAdminDirectoryActivityRoute,
   TradeAdminDuplicateScanRoute: TradeAdminDuplicateScanRoute,
   TradeAdminDuplicatesRoute: TradeAdminDuplicatesRoute,
   TradeAdminEmailDeliverabilityRoute: TradeAdminEmailDeliverabilityRoute,

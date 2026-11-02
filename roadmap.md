@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Directory analytics
-- [ ] Add an admin directory activity dashboard with searches, A–Z selections, profile views and dismissal trends; confirm supported ongoing data access and modal-open denominator before choosing storage or presenting rates.
+- [x] Signed-in Directory Activity verified: real search/initial/dismiss/profile activity reads back, 2/2 matched openings show 100%, filters work; five tests pass, anonymous reads/aggregate execution revoked, nine existing event schemas valid. Published tracking requires publication; new operational feed preserves injected events and separates preview.
 - [x] Track search edits, A–Z choices and dismissal reasons without search text; designer profile views use existing page-view analytics (verified published data), not duplicate click-based views.
 - [x] Three new event schemas registered (nine total), compatibility validation passes; real desktop flow asserts result counts, A/C, all three dismissal reasons, no duplicate dismissal and no raw text. Browser regression and three filter tests pass; preview build OK. Published collection awaits publication.
 

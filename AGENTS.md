@@ -11,6 +11,7 @@
 - Approved-account activation resends reuse the branded review drawer with one fresh idempotency key per opened resend, retained on retries; never change approval to resend.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Directory Activity is an admin-only operational analytics feed alongside unchanged injected events; consent/GPC guard anonymous bounded RPC writes, preview traffic stays separate, profile paths record on committed navigation, and dismissal rates match unique openings to their eventual dismissal rather than search edits. No historical reconstruction or raw search/identity storage.
 - Desktop visual directory search and initial filters share designerDirectoryFilter; typing clears the selected initial and letter selection clears text, with the ribbon derived from the unfiltered visible catalogue. Keyed cards fade without delaying filtering, and dismissal unmounts immediately — prevents stale letter restrictions and closing-animation waits.
 - Catalogue listing footnotes use the shared guest-visibility predicate after the full listing; Trade listings omit them and toolbars keep no disclaimer spacer — prevents account-context drift and empty space above artwork.
 - Desktop account menus support mouse hover through a non-modal controlled dropdown with a transparent travel bridge and delayed close; retain native click, touch and keyboard activation — keeps header interactions consistent without trapping the pointer.

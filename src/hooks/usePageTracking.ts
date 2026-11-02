@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useLocation } from "@/lib/router-compat";
 import { initScrollDepthTracking } from "@/lib/analytics";
 import { hasConsent } from "@/lib/consent/consentStore";
+import { profileSlug, recordDirectoryActivity } from '@/lib/directoryActivity';
 
 
 /**
@@ -11,6 +12,11 @@ import { hasConsent } from "@/lib/consent/consentStore";
  */
 const usePageTracking = () => {
   const location = useLocation();
+
+  useEffect(() => {
+    const slug = profileSlug(location.pathname);
+    if (slug) recordDirectoryActivity('profile', null, { designerSlug: slug });
+  }, [location.pathname]);
 
   // Initialize scroll depth tracking once
   useEffect(() => {
