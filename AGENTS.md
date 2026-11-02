@@ -11,6 +11,7 @@
 - Password-setup resends reuse the review drawer and retain attempt keys on retry; never change approval. Verified activation links the account; the queue reads user_id for setup status.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Client quote presentation and loading/unavailable states share the route-local QuoteShell; display only the existing secure retail snapshot with recorded maker, product and configuration fields — keeps branding consistent without new catalogue or pricing reads.
 - Shared quote links use quoteSharePresentation and token-validated quoteShareHead server reads for named addresses and crawler metadata; src/lib/AGENTS.md owns the privacy/compatibility rules — one identity source preserves old links.
 - Quote/payment link analytics emit injected events directly after successful copies or confirmed existing email sends, without tokens or recipients; visits use native /quote/ and /pay/ page views — avoids double-counting visits and treating a copy as a send.
 - Inquiry Reply actions open InquiryReplyDialog with account/inquiry-scoped drafts and email-log history; the existing sender verifies admins, derives recipients from saved inquiries and retains attempt keys on retry — never mailto-only sends or caller-supplied recipients.
