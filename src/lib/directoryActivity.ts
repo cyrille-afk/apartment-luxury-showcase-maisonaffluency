@@ -5,6 +5,21 @@ export type DirectoryDay = { day: string; searches: number; letters: number; pro
 export type DirectoryActivity = { updated_at: string; started_at: string | null; days: DirectoryDay[]; letters: { letter: string; count: number }[]; reasons: { reason: string; count: number }[] };
 export type DesignerView = { designer_slug: string; occurred_at: string; modal_id?: string | null };
 export const SEARCH_ATTRIBUTION_STARTED = '2026-11-02T00:12:00Z';
+export type DirectoryRefinement = { modal_id: string | null; occurred_at: string; search_details: { refinement: string; match_kind: string; matched_designers: string[]; result_count: number; letter?: string } };
+export function refinementOutcomes(edits: DirectoryRefinement[], views: DesignerView[], names: Record<string, string>) {
+  const groups = new Map<string, DirectoryRefinement[]>();
+  for (const edit of edits) if (edit.modal_id) groups.set(edit.modal_id, [...(groups.get(edit.modal_id) ?? []), edit]);
+  const journeys = [...groups].map(([id, events]) => {
+    events.sort((a, b) => a.occurred_at.localeCompare(b.occurred_at));
+    const view = views.filter(v => v.modal_id === id && v.occurred_at >= (events[0]?.occurred_at ?? '')).sort((a, b) => a.occurred_at.localeCompare(b.occurred_at))[0];
+    const steps = events.filter(e => !view || e.occurred_at <= view.occurred_at);
+    const final = steps.at(-1);
+    const linked = view && final && !['clear', 'letter'].includes(final.search_details.refinement) ? view : undefined;
+    return { id, steps, final, view: linked, designer: linked ? names[linked.designer_slug] ?? linked.designer_slug : null, refined: steps.some(e => ['extend','shorten','replace'].includes(e.search_details.refinement)) };
+  }).sort((a,b) => (b.final?.occurred_at ?? '').localeCompare(a.final?.occurred_at ?? ''));
+  const refined = journeys.filter(j => j.refined);
+  return { journeys, refined: refined.length, reached: refined.filter(j => j.view).length, rate: dismissalRate(refined.length, refined.filter(j => j.view).length) };
+}
 export function searchOutcomes(searches: { modal_id: string | null; occurred_at: string }[], views: DesignerView[]) {
   const firstSearch = new Map<string, string>();
   for (const search of searches) if (search.modal_id && (!firstSearch.has(search.modal_id) || search.occurred_at < (firstSearch.get(search.modal_id) ?? ''))) firstSearch.set(search.modal_id, search.occurred_at);
@@ -44,6 +59,18 @@ export function profileSlug(path: string): string | null {
   return path.match(/^\/(?:designers|trade\/gallery)\/([a-z0-9][a-z0-9-]{0,159})\/?$/)?.[1] ?? null;
 }
 let pending: Promise<unknown> = Promise.resolve();
+export function recordDirectoryRefinement(modalId: string | null, details: DirectoryRefinement['search_details']) {
+  if (details.refinement === 'clear' && activeDirectory?.modalId === modalId) activeDirectory.searched = false;
+  if (!modalId || typeof window === 'undefined' || !hasConsent('analytics') || (navigator as Navigator & { globalPrivacyControl?: boolean }).globalPrivacyControl) return;
+  const host = window.location.hostname;
+  const environment = host === 'localhost' || host === '127.0.0.1' || host.startsWith('id-preview--') || host.endsWith('-dev.lovable.app') ? 'preview' : 'production';
+  const event = { _id: crypto.randomUUID(), _modal_id: modalId, _surface: window.innerWidth >= 1024 ? 'desktop' : 'mobile', _environment: environment, _details: details };
+  pending = pending.catch(() => undefined).then(async () => {
+    if (!hasConsent('analytics') || (navigator as Navigator & { globalPrivacyControl?: boolean }).globalPrivacyControl) return;
+    const { error } = await supabase.rpc('record_directory_refinement', event);
+    if (error) throw error;
+  });
+}
 // A separate consent-aware operational feed; the injected event pipeline remains unchanged.
 export function recordDirectoryActivity(kind: 'open' | 'search' | 'letter' | 'dismiss' | 'profile', modalId: string | null, details: { letter?: string; reason?: string; designerSlug?: string } = {}) {
   if (kind === 'open' && modalId) activeDirectory = { modalId, searched: false };

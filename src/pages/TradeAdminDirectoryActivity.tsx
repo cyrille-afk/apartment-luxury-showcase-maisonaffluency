@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { Navigate } from '@/lib/router-compat';
 import { supabase } from '@/integrations/supabase/client';
-import { dismissalRate, designerViewRanking, searchOutcomes, SEARCH_ATTRIBUTION_STARTED, type DesignerView, type DirectoryActivity } from '@/lib/directoryActivity';
+import { dismissalRate, designerViewRanking, searchOutcomes, refinementOutcomes, SEARCH_ATTRIBUTION_STARTED, type DirectoryRefinement, type DesignerView, type DirectoryActivity } from '@/lib/directoryActivity';
+import DirectoryRefinementView from './DirectoryRefinementView';
 
 export default function TradeAdminDirectoryActivity() {
   const { isAdmin, rolesLoaded, lookupFailed } = useAuth();
@@ -14,6 +15,7 @@ export default function TradeAdminDirectoryActivity() {
   const [environment, setEnvironment] = useState('production');
   const [surface, setSurface] = useState('all');
   const [selectedDesigner, setSelectedDesigner] = useState('all');
+  const [view, setView] = useState('overview');
   const query = useQuery({
     queryKey: ['directory-activity', days, environment, surface], enabled: rolesLoaded && isAdmin,
     refetchInterval: 60_000,
@@ -38,7 +40,16 @@ export default function TradeAdminDirectoryActivity() {
         for (const row of data ?? []) if (row.designer_slug) views.push({ designer_slug: row.designer_slug, occurred_at: row.occurred_at, modal_id: row.modal_id });
         if (!data || data.length < 1000) break;
       }
-      const slugs = [...new Set(views.map(row => row.designer_slug))];
+      const refinements: DirectoryRefinement[] = [];
+      for (let offset = 0; ; offset += 1000) {
+        let request = supabase.from('directory_activity_events').select('id, modal_id, occurred_at, search_details').eq('kind','refinement').eq('environment',environment).gte('occurred_at',since).order('occurred_at').order('id').range(offset,offset+999);
+        if (surface !== 'all') request = request.eq('surface',surface);
+        const { data, error } = await request;
+        if (error) throw error;
+        for (const row of data ?? []) if (row.search_details) refinements.push(row as unknown as DirectoryRefinement);
+        if (!data || data.length < 1000) break;
+      }
+      const slugs = [...new Set([...views.map(row => row.designer_slug), ...refinements.flatMap(row => row.search_details.matched_designers)])];
       const names: Record<string, string> = {};
       for (let offset = 0; offset < slugs.length; offset += 100) {
         const { data, error } = await supabase.from('designers').select('slug, name').in('slug', slugs.slice(offset, offset + 100));
@@ -55,7 +66,7 @@ export default function TradeAdminDirectoryActivity() {
         if (!data || data.length < 1000) break;
       }
       const outcomes = searchOutcomes(searches, views);
-      return { ranking: designerViewRanking(views, names), views, outcomes, destinations: designerViewRanking(outcomes.destinations, names) };
+      return { ranking: designerViewRanking(views, names), views, outcomes, destinations: designerViewRanking(outcomes.destinations, names), refinements: refinementOutcomes(refinements,views,names), names };
     },
   });
   if (!rolesLoaded) return <p className="text-muted-foreground">{lookupFailed ? 'Access could not be confirmed. Retry from the connection notice.' : 'Checking access…'}</p>;
@@ -76,7 +87,8 @@ export default function TradeAdminDirectoryActivity() {
         <Button variant="ghost" size="icon" title="Refresh activity" aria-label="Refresh activity" disabled={query.isFetching} onClick={() => void query.refetch()}><RefreshCw className="h-4 w-4" /></Button>
       </div>
     </header>
-    {query.isError ? <div className="text-destructive text-sm">Activity could not be loaded. <Button variant="link" onClick={() => void query.refetch()}>Try again</Button></div> : query.isLoading ? <p className="text-muted-foreground">Loading activity…</p> : <>
+    <div role="group" aria-label="Directory dashboard view" className="flex gap-2 border-b border-border pb-3"><Button variant={view === 'overview' ? 'secondary' : 'ghost'} aria-pressed={view === 'overview'} onClick={() => setView('overview')}>Overview</Button><Button variant={view === 'refinements' ? 'secondary' : 'ghost'} aria-pressed={view === 'refinements'} onClick={() => setView('refinements')}>Search refinements</Button></div>
+    {view === 'refinements' ? <DirectoryRefinementView outcomes={designerQuery.data?.refinements} names={designerQuery.data?.names ?? {}} loading={query.isLoading || designerQuery.isLoading} failed={query.isError || designerQuery.isError} retry={() => { void query.refetch(); void designerQuery.refetch(); }} /> : query.isError ? <div className="text-destructive text-sm">Activity could not be loaded. <Button variant="link" onClick={() => void query.refetch()}>Try again</Button></div> : query.isLoading ? <p className="text-muted-foreground">Loading activity…</p> : <>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[["Search edits", totals.searches.toLocaleString()], ["A–Z selections", totals.letters.toLocaleString()], ["Profile views", totals.profiles.toLocaleString()], ["Modal dismissal rate", rate === null ? '—' : `${rate.toFixed(1)}%`]].map(([label,value]) => <div key={label} className="border border-border rounded-md p-5 bg-card"><p className="text-xs text-muted-foreground">{label}</p><p className="font-display text-3xl text-foreground mt-3">{value}</p></div>)}
       </div>
