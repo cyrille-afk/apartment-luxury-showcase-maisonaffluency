@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 import CurrencyToggle, { type DisplayCurrency, convertCents, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import { getSubcategories, type TradeProduct } from "@/lib/tradeProducts";
-import { tradeCardMetadata } from "@/lib/tradeCardMetadata";
+import { tradeCardMetadata, suppressTradeCardBrand } from "@/lib/tradeCardMetadata";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { useDesigner } from "@/hooks/useDesigner";
 import { useDesignerGalleryPicks } from "@/hooks/useDesignerGalleryPicks";
@@ -370,6 +370,7 @@ const StudioGallery = () => {
     price: { cents: number; currency: string; price_unit?: string; price_prefix?: string | null } | null,
     className: string,
     brandName?: string | null,
+    cardUtility = false,
   ) => {
     if (!price) return null;
 
@@ -388,10 +389,10 @@ const StudioGallery = () => {
               RRP: {retailLabel}
             </span>
             <span className="text-muted-foreground/50" aria-hidden="true">|</span>
-            <span className="text-accent font-semibold">
+            <span className={cardUtility ? "text-muted-foreground font-normal" : "text-accent font-semibold"}>
               TRADE: {tradeLabel}
             </span>
-            {capped && (
+            {capped && !cardUtility && (
               <span
                 title={MARGIN_CAP_TOOLTIP}
                 aria-label={MARGIN_CAP_TOOLTIP}
@@ -880,7 +881,7 @@ const StudioGallery = () => {
             const pinned = isPinned(product.product_name, product.id);
             const metadata = tradeCardMetadata(product);
             return (
-              <div key={product.id} className="group relative min-w-0">
+              <div key={product.id} data-trade-card={product.product_name} className="group relative min-w-0">
                 <div className="relative aspect-square w-full overflow-hidden bg-[hsl(var(--product-canvas))] cursor-pointer" onClick={() => openProductSheet(product)}>
                   {product.image_url ? (
                     <>
@@ -994,22 +995,25 @@ const StudioGallery = () => {
                   </div>
                 </div>
                  <div className="flex flex-col pt-2 pb-1 text-left">
-                   <div className="flex items-baseline justify-between gap-3">
-                     <p className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted-foreground line-clamp-1">
-                       {product.brand_name}
-                     </p>
-                     {renderPriceDisplay(price, "font-sans text-[10px] uppercase tracking-[0.14em] inline-flex items-start gap-1.5 flex-wrap justify-end shrink-0 text-right", product.brand_name) || (
-                       <span className="font-sans text-[10px] uppercase tracking-[0.14em] text-muted-foreground shrink-0">Price upon Request</span>
+                   <div data-card-baseline className="grid h-10 grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)] items-center gap-2">
+                     <h3 title={product.product_name} className="min-w-0 truncate font-display text-[14px] leading-snug text-foreground sm:text-[15px]">
+                       {product.product_name}
+                     </h3>
+                     <div className="min-w-0 text-right">
+                       {renderPriceDisplay(price, "font-mono text-[9px] uppercase tracking-normal flex flex-col items-end gap-0.5 whitespace-nowrap tabular-nums [&>span]:max-w-full [&>span]:truncate [&>span[aria-hidden]]:hidden", product.brand_name, true) || (
+                         <span className="block truncate font-mono text-[9px] uppercase tracking-normal text-muted-foreground" title="Price upon Request">Price upon Request</span>
+                       )}
+                     </div>
+                   </div>
+                   <div data-card-utility className="mt-1 flex h-12 flex-col gap-0.5 overflow-hidden font-mono text-[9px] uppercase tracking-normal text-muted-foreground">
+                     {!suppressTradeCardBrand(product.brand_name, activeBrand, searchIntent.text) && (
+                       <p data-card-brand className="truncate" title={product.brand_name}>{product.brand_name}</p>
                      )}
-                   </div>
-                   {/* Invisible utility: reserved-height micro metadata that fades in on hover — no layout shift */}
-                   <div className="mt-1 flex h-8 flex-col justify-center gap-0.5 overflow-hidden font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground opacity-0 transition-opacity duration-500 group-hover:opacity-100" aria-hidden="true">
+                     <div data-card-specifications className="flex flex-col gap-0.5 opacity-0 transition-opacity duration-300 motion-reduce:transition-none group-hover:opacity-100 group-focus-within:opacity-100">
                      {metadata.leadTime && <span>Lead Time: {metadata.leadTime}</span>}
-                     {metadata.dimensions && <span className="truncate">Dimensions: {metadata.dimensions}</span>}
+                     {metadata.dimensions && <span className="truncate" title={metadata.dimensions}>Dimensions: {metadata.dimensions}</span>}
+                     </div>
                    </div>
-                   <h3 className="mt-1.5 min-h-[2.5rem] font-display text-[14px] leading-snug text-foreground sm:text-[15px] line-clamp-2">
-                     {product.product_name}
-                   </h3>
                    {product.hidden_in_trade && <p className="font-body text-xs text-muted-foreground" data-trade-sensitive>Public listing · Hidden in Trade</p>}
                    {isAdmin && !product.hidden_in_trade && (
                      <div className="mt-auto flex flex-col items-start gap-1.5 pt-3">

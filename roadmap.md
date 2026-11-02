@@ -1,5 +1,9 @@
 # Roadmap
 
+## Trade card baseline
+- [ ] Suppress repeated studio credits for studio filters/searches, lock names and prices beneath images, and reserve hover metadata below.
+- [ ] Verify actual signed-in cards, no hover movement, and compact/mobile fit.
+
 ## Directory analytics
 - [x] Compare named designers' conversion and selection share for all/refined searched openings; 10 counting tests pass. Signed-in saved preview activity verifies Amélie Vermersch 2/2 all searches and 1/1 refined; period/device filters and published empty state checked, no browser errors.
 - [x] Added Search refinements view with named selections, expandable sequences, catalogue matches and filters; real seven-edit search → Amélie Vermersch → signed-in dashboard verified 1/1 (100%), recorder responses successful and no browser errors; 13 counting/filter tests pass. Published tracking awaits publication; prior refinements remain unknown.

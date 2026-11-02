@@ -1,7 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { tradeCardMetadata } from "./tradeCardMetadata";
+import { tradeCardMetadata, suppressTradeCardBrand } from "./tradeCardMetadata";
 
 describe("Trade card specification provenance", () => {
+  it('suppresses Michel Amar Studio when that studio is filtered or searched', () => {
+    expect(suppressTradeCardBrand('Michel Amar Studio', 'Michel Amar Studio', '')).toBe(true);
+    expect(suppressTradeCardBrand('Michel Amar Studio', null, 'michel amar studio')).toBe(true);
+    expect(suppressTradeCardBrand('Michel Amar Studio', null, 'chair')).toBe(false);
+  });
+  it('preserves different maker and collaboration credits in a studio filter', () => {
+    expect(suppressTradeCardBrand('Emma Donnersberg', 'Michel Amar Studio', '')).toBe(false);
+    expect(suppressTradeCardBrand('Michel Amar × Emma Donnersberg', 'Michel Amar Studio', '')).toBe(false);
+    expect(suppressTradeCardBrand('Michel Amar Studio', null, '')).toBe(false);
+  });
   it("uses each piece's recorded lead time, not a universal 12 weeks", () => {
     expect(tradeCardMetadata({ lead_time: "20-22 week" }).leadTime).toBe("20-22 week");
     expect(tradeCardMetadata({ lead_time: "12 -14 weeks" }).leadTime).toBe("12 -14 weeks");
