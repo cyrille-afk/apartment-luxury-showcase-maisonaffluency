@@ -1,5 +1,8 @@
 # Roadmap
 
+## Inline quote recipient
+- [ ] Add a saved recipient email beside quote sharing, validate inline, preserve billing details and verify save → share without navigation.
+
 ## Quote sharing feedback
 - [x] Sharing control tested signed in against the latest saved Angelo quote: server rejects sharing until the client email is saved; inline message remains visible. Nine regressions pass, build OK. Original drawer placement was not reproduced; control verified separately against real data without changing the quote.
 
