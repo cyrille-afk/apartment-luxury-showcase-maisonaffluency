@@ -7,7 +7,7 @@ import { quoteShareUrl } from "@/lib/quoteSharePresentation";
 import { toast } from "sonner";
 
 const ITEM_SELECT =
-  "image_url, quantity, unit_price_cents, unit_price_currency, variant_label, fabric_id, fabric_upcharge_cents, fabric_currency, fabric:fabrics!fabric_id(name, price_per_lm_cents, currency), wood_fabric:fabrics!trade_quote_items_wood_fabric_id_fkey(name), product:trade_products(product_name, brand_name, image_url, rrp_price_cents, currency, dimensions, size_variants)";
+  "image_url, quantity, unit_price_cents, unit_price_currency, variant_label, fabric_id, fabric_upcharge_cents, fabric_currency, fabric:fabrics!fabric_id(name, price_per_lm_cents, currency), wood_fabric:fabrics!trade_quote_items_wood_fabric_id_fkey(name), product:trade_products(product_name, brand_name, image_url, rrp_price_cents, currency, dimensions, materials, available_finishes, size_variants)";
 
 /** Creates a retail-only, expiring client link (30 days) for a quote. */
 export default function ShareQuoteWithClient({ quoteId }: { quoteId: string }) {

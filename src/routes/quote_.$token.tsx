@@ -122,10 +122,15 @@ function SharedQuotePage() {
               <div className="min-w-0 flex flex-col">
                 {l.maker && <p className="text-sm font-medium text-primary break-words">{l.maker}</p>}
                 <h2 className="font-display text-2xl sm:text-3xl leading-tight mt-2 break-words">{l.name}</h2>
-                {(l.finish || l.dimensions) && <dl className="mt-5 space-y-3 text-sm">
-                  {l.finish && l.finish.trim() !== l.dimensions?.trim() && <div className="grid grid-cols-[88px_minmax(0,1fr)] gap-3"><dt className="text-muted-foreground">Finish</dt><dd className="break-words">{l.finish}</dd></div>}
-                  {l.dimensions && <div className="grid grid-cols-[88px_minmax(0,1fr)] gap-3"><dt className="text-muted-foreground">Dimensions</dt><dd className="break-words">{l.dimensions}</dd></div>}
-                </dl>}
+                <section className="mt-5" aria-label={`${l.name} specifications`}>
+                  <h3 className="text-xs font-medium text-foreground mb-3">Specifications</h3>
+                  <dl className="space-y-3 text-sm">
+                    <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-3"><dt className="text-muted-foreground">Dimensions</dt><dd className="break-words">{l.dimensions || "Not specified"}</dd></div>
+                    <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-3"><dt className="text-muted-foreground">Materials</dt><dd className="break-words">{l.materials || "Not specified"}</dd></div>
+                    {l.finish && l.finish.trim() !== l.dimensions?.trim() && <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-3"><dt className="text-muted-foreground">Selected finish</dt><dd className="break-words">{l.finish}</dd></div>}
+                    <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-3"><dt className="text-muted-foreground">Finish options</dt><dd className="break-words">{l.finishOptions?.length ? l.finishOptions.join(" · ") : "Not specified"}</dd></div>
+                  </dl>
+                </section>
                 <div className="mt-6 pt-4 border-t border-border grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
                   <div><p className="text-xs text-muted-foreground mb-1">Quantity</p><p>{l.quantity}</p></div>
                   <div><p className="text-xs text-muted-foreground mb-1">Retail unit price</p><p className="tabular-nums">{l.unitCents != null && l.currency ? money(l.unitCents, l.currency) : "Price upon Request"}</p></div>

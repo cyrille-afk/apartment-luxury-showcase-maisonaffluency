@@ -7,6 +7,8 @@ export type SharedQuoteLine = {
   image: string | null;
   finish: string | null;
   dimensions: string | null;
+  materials?: string | null;
+  finishOptions?: string[];
   quantity: number;
   unitCents: number | null;
   lineTotalCents: number | null;
@@ -33,6 +35,8 @@ export type ShareSourceLine = QuoteSummaryLine & {
     brand_name?: string | null;
     image_url?: string | null;
     dimensions?: string | null;
+    materials?: string | null;
+    available_finishes?: string[] | null;
   }) | null;
 };
 
@@ -51,6 +55,8 @@ export function buildSharedQuoteSnapshot(quoteId: string, clientName: string | n
       image: item.image_url || item.product?.image_url || null,
       finish,
       dimensions,
+      materials: item.product?.materials?.trim() || null,
+      finishOptions: [...new Set((item.product?.available_finishes ?? []).map((value) => value.trim()).filter(Boolean))],
       quantity: Math.max(0, Number(item.quantity) || 0),
       unitCents: pricing?.unitCents ?? null,
       lineTotalCents: pricing?.lineTotalCents ?? null,
