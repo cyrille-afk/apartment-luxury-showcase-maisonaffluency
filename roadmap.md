@@ -2,7 +2,8 @@
 
 ## Google-access inquiry alerts
 - [x] Add distinct Twilio WhatsApp notifications using existing staff recipients without creating applications or granting access.
-- [ ] Verify rule tests, deployed request submission, and Twilio delivery status.
+- [x] Six tests pass; deployed service starts and a real authenticated request saves successfully. Three Twilio sends were accepted then rejected with 63016 (outside the reply window); per-recipient callbacks recorded failures.
+- [ ] WhatsApp must approve the submitted Google-access utility template before out-of-window delivery works; approval is pending. No automatic replay of failed sends.
 
 ## Trade card baseline
 - [x] Suppress repeated studio credits for studio filters/searches, lock names and prices beneath images, and reserve hover metadata below.
