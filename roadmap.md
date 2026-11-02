@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Directory analytics
-- [ ] Link searched directory openings to actual destination profile views; show conversion, daily outcomes and named destinations without guessing historical links.
+- [x] Search-to-profile conversion, daily outcomes and named destinations verified through real Amelie search → Amélie Vermersch profile → dashboard (1/1, 100% preview); four counting tests pass, build OK. Historical links remain unknown; live tracking requires publication.
 - [x] Named designer ranking, last-viewed time and selectable daily trends verified signed-in against stored Michel Amar Studio views (2 published / 4 preview); period/device filters work and three counting tests pass, preview build OK.
 - [x] Signed-in Directory Activity verified: real search/initial/dismiss/profile activity reads back, 2/2 matched openings show 100%, filters work; five tests pass, anonymous reads/aggregate execution revoked, nine existing event schemas valid. Published tracking requires publication; new operational feed preserves injected events and separates preview.
 - [x] Track search edits, A–Z choices and dismissal reasons without search text; designer profile views use existing page-view analytics (verified published data), not duplicate click-based views.
