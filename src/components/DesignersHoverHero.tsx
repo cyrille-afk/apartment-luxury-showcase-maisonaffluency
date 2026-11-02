@@ -2732,20 +2732,17 @@ const DesignersHoverHero = () => {
                   {/* Desktop: use each designer's first Curators' Pick, with portrait fallback. */}
                   <div className="relative hidden lg:block pr-1">
                     <div data-testid="directory-visual-grid" className="relative grid grid-cols-4 gap-4 px-0 pt-2 pb-4">
-                      <AnimatePresence mode="popLayout" initial={false}>
                         {flatResults.map((designer, index) => (
                           <motion.div
                             key={designer.slug}
                             layout={!reduceDirectoryMotion}
                             initial={{ opacity: reduceDirectoryMotion ? 1 : 0 }}
                             animate={{ opacity: 1 }}
-                            exit={{ opacity: 0, pointerEvents: "none" }}
                             transition={{ duration: reduceDirectoryMotion ? 0 : 0.18 }}
                           >
                             <DesignerGridCard designer={designer} priority={index < 8} showDiscoverCta searchDetails={directorySearchDetails(allDesigners.filter(d => d.is_published && !d.trade_only), searchQuery)} />
                           </motion.div>
                         ))}
-                      </AnimatePresence>
                     </div>
                   </div>
 
