@@ -4195,6 +4195,7 @@ export type Database = {
           modal_id: string | null
           occurred_at: string
           reason: string | null
+          search_details: Json | null
           surface: string
         }
         Insert: {
@@ -4206,6 +4207,7 @@ export type Database = {
           modal_id?: string | null
           occurred_at?: string
           reason?: string | null
+          search_details?: Json | null
           surface: string
         }
         Update: {
@@ -4217,6 +4219,7 @@ export type Database = {
           modal_id?: string | null
           occurred_at?: string
           reason?: string | null
+          search_details?: Json | null
           surface?: string
         }
         Relationships: []
@@ -14021,6 +14024,16 @@ export type Database = {
           _letter?: string
           _modal_id?: string
           _reason?: string
+          _surface: string
+        }
+        Returns: undefined
+      }
+      record_directory_refinement: {
+        Args: {
+          _details: Json
+          _environment: string
+          _id: string
+          _modal_id: string
           _surface: string
         }
         Returns: undefined
