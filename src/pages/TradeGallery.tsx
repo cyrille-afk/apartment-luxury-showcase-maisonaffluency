@@ -148,6 +148,14 @@ const StudioGallery = () => {
   const { picks: galleryPicks, isLoading: galleryPicksLoading } = useDesignerGalleryPicks(galleryDesigner, { trade: true });
   useTradeGalleryScroll(location.pathname, location.search, { search, brand: selectedBrand, category: selectedCategory, subcategory: selectedSubcategory, edition: selectedEdition, sortBy, viewMode }, productsLoading || designerLoading || galleryPicksLoading);
 
+  // Warm the product page code on hover so a click swaps straight to the
+  // product instead of collapsing the gallery into a short loading screen
+  // (which made the browser snap the page up before the product appeared).
+  const warmTradeProductPage = useCallback(() => {
+    void import("@/pages/ProductPageContainer");
+    void import("@/pages/TradeProductPage");
+  }, []);
+
   // Product pages own their reset once actual product content is mounted;
   // router resolution can occur while the outgoing gallery is still visible.
   const openProductSheet = useCallback((product: TradeProduct) => {
@@ -881,7 +889,7 @@ const StudioGallery = () => {
             const pinned = isPinned(product.product_name, product.id);
             const metadata = tradeCardMetadata(product);
             return (
-              <div key={product.id} data-trade-card={product.product_name} className="group relative min-w-0">
+              <div key={product.id} data-trade-card={product.product_name} className="group relative min-w-0" onPointerEnter={warmTradeProductPage} onFocusCapture={warmTradeProductPage}>
                 <div className="relative aspect-square w-full overflow-hidden bg-[hsl(var(--product-canvas))] cursor-pointer" onClick={() => openProductSheet(product)}>
                   {product.image_url ? (
                     <>
