@@ -27,13 +27,13 @@ export default function DesignerConversionView({ searches, refinements, names, l
         <option value="all">All searches</option><option value="refined">Refined searches</option>
       </select>
     </header>
-    <p className="text-sm text-muted-foreground">{searched.toLocaleString()} {scope === 'all' ? 'searched' : 'refined'} directory openings · {reached.toLocaleString()} reached a profile</p>
+    <p className="text-sm text-muted-foreground">{searched.toLocaleString()} {scope === 'all' ? 'searched' : 'refined'} directory {searched === 1 ? 'opening' : 'openings'} · {reached.toLocaleString()} reached a profile</p>
     <p className="text-xs text-muted-foreground">Conversion = openings that selected this designer ÷ all {scope === 'all' ? 'searched' : 'refined'} openings. Selection share = this designer’s share of successful openings. Each opening counts once, at its first committed profile view. These are search-to-profile rates, not rates per card shown or evidence of confirmed relevance. Earlier unlinked activity is excluded.</p>
     {ranked.length ? <>
       <div className="h-80" aria-label="Top ten designer conversion rates"><ResponsiveContainer width="100%" height="100%">
-        <BarChart data={ranked.slice(0, 10)} margin={{ top: 8, right: 12, bottom: 8, left: 0 }}>
-          <CartesianGrid stroke="hsl(var(--border))" vertical={false} />
-          <XAxis dataKey="name" hide /><YAxis domain={[0, 100]} unit="%" />
+        <BarChart layout="vertical" data={ranked.slice(0, 10)} margin={{ top: 8, right: 12, bottom: 8, left: 0 }}>
+          <CartesianGrid stroke="hsl(var(--border))" horizontal={false} />
+          <XAxis type="number" domain={[0, 100]} unit="%" /><YAxis type="category" dataKey="name" width={160} tick={{ fontSize: 11 }} />
           <Tooltip formatter={value => `${Number(value).toFixed(1)}%`} labelFormatter={(_, payload) => payload[0]?.payload.name ?? ''} />
           <Bar name="Search-to-profile conversion" dataKey="conversionRate" fill="hsl(var(--primary))" maxBarSize={64} />
         </BarChart>
