@@ -3411,7 +3411,7 @@ const TradeProductPage: React.FC = () => {
               <div aria-live="polite" className="text-center font-body text-[11px] empty:hidden">
                 {copilotSave.state === "saving" && <span className="text-muted-foreground">Saving to quote…</span>}
                 {copilotSave.state === "saved" && <span className="text-primary">Saved to QU-{copilotSave.quoteId.slice(0, 6).toUpperCase()} · qty {copilotSave.quantity} · {copilotSave.at.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>}
-                {copilotSave.state === "failed" && <span className="text-destructive">Not saved{copilotSave.quoteId ? ` to QU-${copilotSave.quoteId.slice(0, 6).toUpperCase()}` : ""}: {copilotSave.message}{" "}<Button variant="link" onClick={handleAddToQuote} disabled={adding} className="h-auto p-0 text-[11px]">Retry</Button></span>}
+                {copilotSave.state === "failed" && <span className="text-destructive">Not saved{copilotSave.quoteId ? ` to QU-${copilotSave.quoteId.slice(0, 6).toUpperCase()}` : ""}: {copilotSave.message}{" "}<Button variant="link" onClick={() => void handleAddToQuote(true)} disabled={adding} className="h-auto p-0 text-[11px]">Retry</Button></span>}
               </div>
               {finishesMissingImages.length > 0 && <p className="font-body text-[11px] text-muted-foreground italic">Heads up — no reference image on file for <span className="text-foreground">{finishesMissingImages.join(", ")}</span>. A note will be attached to the quote so our concierge can confirm visuals.</p>}
               <Button variant="outline" onClick={() => setCustomRequestOpen(true)} className="w-full rounded-none font-body text-[10px] uppercase">
