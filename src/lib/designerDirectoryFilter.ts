@@ -1,7 +1,26 @@
-import { brandInitial } from "@/lib/nameFormat";
+import { brandInitial, displayDesignerName, sortNameKey } from "@/lib/nameFormat";
 
 const fold = (value: string) =>
   value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+/** A single character always uses the same brand initial as the A–Z ribbon. */
+export function directorySearchInitial(query: string): string | null {
+  const initial = fold(query.trim()).charAt(0).toUpperCase();
+  return /^[A-Z]$/.test(initial) ? initial : null;
+}
+
+function matchesNamePrefix(name: string, search: string): boolean {
+  if (search.length === 1) return brandInitial(name) === search.toUpperCase();
+  const displayed = fold(displayDesignerName(name).trim());
+  if (displayed.startsWith(search) || sortNameKey(name).startsWith(search)) return true;
+  // Collaborators and credited people retain first/last-name prefixes, not
+  // arbitrary substrings or slug aliases. Ignore a trailing studio label.
+  return displayed.split(/\s+(?:&|and|[-–—])\s+/).some(part => {
+    const person = part.replace(/\s+(?:studio|atelier)$/i, "");
+    const lastName = person.split(/\s+/).at(-1) ?? "";
+    return person.startsWith(search) || lastName.startsWith(search);
+  });
+}
 
 /** Search takes precedence; letter selection is a separate, catalogue-wide filter. */
 export function filterDesignerDirectory<T extends { name: string; slug: string }>(
@@ -9,7 +28,7 @@ export function filterDesignerDirectory<T extends { name: string; slug: string }
 ): T[] {
   const search = fold(query.trim());
   return designers.filter((designer) => search
-    ? fold(designer.name).includes(search) || fold(designer.slug).includes(search)
+    ? matchesNamePrefix(designer.name, search)
     : !letter || brandInitial(designer.name) === letter.toUpperCase());
 }
 

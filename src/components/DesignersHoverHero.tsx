@@ -20,7 +20,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "@/lib/router-compat";
 import { motion, animate, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { filterDesignerDirectory, directorySearchDetails, directoryRefinement } from "@/lib/designerDirectoryFilter";
+import { filterDesignerDirectory, directorySearchDetails, directoryRefinement, directorySearchInitial } from "@/lib/designerDirectoryFilter";
 import { recordDirectoryActivity, recordDirectoryRefinement, prepareDirectoryProfile } from "@/lib/directoryActivity";
 import SilentLink from "@/components/SilentLink";
 import { Search, X, ImageIcon, ArrowRight } from "lucide-react";
@@ -1477,10 +1477,6 @@ const DesignersHoverHero = () => {
     };
   }, [searchOpen, isDesktopViewport, desktopDirectoryMode]);
 
-  // Accent-insensitive search key: "Amelie" must match "Amélie".
-  const foldSearch = (s: string) =>
-    s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-
   const { groupedResults, totalResults } = useMemo(() => {
     const list = (allDesigners as any[])
       .filter((d) => d.is_published && !d.trade_only)
@@ -1491,10 +1487,7 @@ const DesignersHoverHero = () => {
         image_url: (d.image_url as string | null) ?? null,
         first_pick_image_url: firstPickMap?.get(d.id) ?? null,
       }));
-    const q = foldSearch(searchQuery.trim());
-    const filtered = q
-      ? list.filter((d) => foldSearch(d.name).includes(q) || foldSearch(d.slug).includes(q))
-      : list;
+    const filtered = filterDesignerDirectory(list, searchQuery, null);
     filtered.sort((a, b) => sortNameKey(a.name).localeCompare(sortNameKey(b.name)));
     const groups = new Map<string, typeof filtered>();
     for (const d of filtered) {
@@ -2765,7 +2758,7 @@ const DesignersHoverHero = () => {
             <div className="hidden w-full shrink-0 bg-[#0a0a0a]/95 px-4 backdrop-blur lg:block">
                 <div className="flex w-full items-center justify-between border-t border-white/10 py-4 min-h-[44px]">
                   {Array.from({ length: 26 }, (_, index) => String.fromCharCode(65 + index)).map((letter) => {
-                    const isActive = !isSearching && desktopDirectoryLetter === letter;
+                    const isActive = (directorySearchInitial(searchQuery) ?? desktopDirectoryLetter) === letter;
                     const hasDesigners = availableLetters.has(letter);
                     return (
                       <Button
