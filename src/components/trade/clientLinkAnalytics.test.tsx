@@ -7,7 +7,7 @@ const mocks = vi.hoisted(() => ({ rpc: vi.fn(), from: vi.fn(), invoke: vi.fn(), 
 vi.mock("@/integrations/supabase/client", () => ({ supabase: { rpc: mocks.rpc, from: mocks.from, functions: { invoke: mocks.invoke } } }));
 vi.mock("@/hooks/use-toast", () => ({ useToast: () => ({ toast: mocks.toast }) }));
 vi.mock("sonner", () => ({ toast: { error: mocks.toast, success: mocks.toast } }));
-vi.mock("@/lib/quoteClientShare", () => ({ buildSharedQuoteSnapshot: () => ({}) }));
+vi.mock("@/lib/quoteClientShare", () => ({ buildSharedQuoteSnapshot: () => ({ lines: [{ name: "Test piece", maker: "Test maker" }] }) }));
 
 const link = { id: "test-link", token: "private-token", amount_cents: 60000, currency: "EUR", label: "Deposit", payer_email: "test@example.com", status: "active", created_at: "2026-11-02" };
 const track = vi.fn();
