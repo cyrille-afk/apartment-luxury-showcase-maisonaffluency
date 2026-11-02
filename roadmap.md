@@ -1,5 +1,9 @@
 # Roadmap
 
+## Quote and guest-payment link analytics
+- [ ] Track successful link copies and existing email sends without recipient data or link tokens.
+- [ ] Verify both link types' native visit analytics, event schemas and success/failure behavior; identify any missing send flow.
+
 ## Product sidebar cleanup
 - [x] Keep one price/quantity/checkout area after configuration and specifications; group utilities at its base.
 - [x] Signed-in Jules & Jim verified one price stack, no sidebar-local toggles, quantity round-trip, Light Solid Oak sample selection and global Studio → Client → Studio. Client removes the transaction sidebar and net prices; 16 regressions pass, preview build OK. GitHub sync required.
