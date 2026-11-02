@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Loader2, PauseCircle, RefreshCw, X } from "lucide-react";
+import { CheckCircle2, Loader2, Mail, PauseCircle, RefreshCw, X } from "lucide-react";
 import VisualThemeAnalysis, { type VisualThemeDna } from "@/components/trade/VisualThemeAnalysis";
 import { WaitingClock } from "@/components/trade/TimeToApproval";
 import { updateTradeApplication, declineAndDeleteTradeApplication, resendTradeActivation } from "@/lib/tradeApplicationActions";
@@ -34,6 +34,7 @@ type Account = {
   website_or_ig: string | null;
   business_reg_number: string | null;
   status: "pending_review" | "on_hold" | "approved" | "rejected";
+  user_id: string | null;
   created_at: string;
   radar_score: number | null;
   radar_flag: string | null;
@@ -135,7 +136,7 @@ export default function TradeApplicationsQueue() {
       let q = supabase
         .from("trade_accounts")
         .select(
-          "id, email, studio_name, contact_name, country, website_or_ig, business_reg_number, status, created_at, radar_score, radar_flag, radar_status, studio_aesthetic_dna(status, aesthetic_label, aesthetic_summary, dominant_tones, historical_affinities, materials, image_urls, error)",
+          "id, email, studio_name, contact_name, country, website_or_ig, business_reg_number, status, user_id, created_at, radar_score, radar_flag, radar_status, studio_aesthetic_dna(status, aesthetic_label, aesthetic_summary, dominant_tones, materials, image_urls, error)",
         )
         .order("created_at", { ascending: false })
         .limit(200);
@@ -229,7 +230,7 @@ export default function TradeApplicationsQueue() {
           setReview(current => current ? { ...current, account: { ...a, status: 'approved' }, draft } : null);
           throw new Error('Studio remains approved, but the email could not be queued. Your draft is kept here for retry.');
         }
-        toast.success(`Activation email queued for ${a.email}`);
+        toast.success(`Password-setup email queued for ${a.email}`);
       } else {
         await declineAndDeleteTradeApplication(a, draft);
         toast.success("Decline email queued and trade application permanently deleted.");
@@ -312,6 +313,7 @@ export default function TradeApplicationsQueue() {
                   </div>
                   {a.contact_name && <div className="text-muted-foreground">{a.contact_name}</div>}
                   <div className="text-muted-foreground">{a.email}</div>
+                  {a.status === 'approved' && <div className="text-xs text-muted-foreground">{a.user_id ? 'Account linked to approved studio' : 'Awaiting password setup'}</div>}
                   {(() => {
                     const key = a.email.toLowerCase();
                     const c = portalStats.clicked[key];
@@ -372,8 +374,8 @@ export default function TradeApplicationsQueue() {
                     disabled={busy !== null}
                     className="h-11 rounded-none text-[11px] uppercase tracking-[0.2em]"
                   >
-                    {busy === a.id + "approved" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
-                    {a.status === 'approved' ? 'Resend activation email' : 'Approve Trade Account'}
+                    {busy === a.id + "approved" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : a.status === 'approved' ? <Mail className="mr-2 h-4 w-4" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
+                    {a.status === 'approved' ? 'Resend password-setup email' : 'Approve Trade Account'}
                   </Button>
                   <Button
                     variant="outline"
@@ -437,7 +439,7 @@ export default function TradeApplicationsQueue() {
           })}
         </ul>
       )}
-      {review && <ApplicationNotificationDrawer key={`${review.account.id}-${review.approval}`} recipient={review.account.email} company={review.account.studio_name ?? review.account.email} approval={review.approval} initialDraft={review.draft} busy={busy !== null} error={draftError} onClose={() => setReview(null)} onSend={confirmNotification} />}
+      {review && <ApplicationNotificationDrawer key={`${review.account.id}-${review.approval}`} recipient={review.account.email} company={review.account.studio_name ?? review.account.email} approval={review.approval} activationResend={Boolean(review.resendAttempt)} initialDraft={review.draft} busy={busy !== null} error={draftError} onClose={() => setReview(null)} onSend={confirmNotification} />}
     </section>
   );
 }
