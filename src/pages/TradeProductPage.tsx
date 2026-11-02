@@ -41,7 +41,6 @@ import ActiveSwatchCaption from "@/components/product/ActiveSwatchCaption";
 import PicturedFinishesStrip from "@/components/product/PicturedFinishesStrip";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
 import CopyTearsheetLink from "@/components/trade/CopyTearsheetLink";
-import PresentationModeToggle from "@/components/trade/PresentationModeToggle";
 import RetailPrice from "@/components/product/RetailPrice";
 import { buildTradeCoverSheetPdf } from "@/lib/tradeCoverSheetPdf";
 import CadAssetsSection from "@/components/trade/CadAssetsSection";
@@ -616,7 +615,7 @@ const TradeProductPage: React.FC = () => {
   const TRADE_DISCOUNT = productConfig?.tierDiscountPct ?? tierFallback.discountPct;
   const discountLabel = productConfig?.discountLabel ?? tierFallback.discountLabel;
   const tierLabel = productConfig?.tierLabel ?? tierFallback.tierLabel;
-  const { showTradePrice, setShowTradePrice } = useTradePriceMode();
+  const { showTradePrice } = useTradePriceMode();
   const clientMultiplier = useClientProjectPricing();
 
   // ── Smart back navigation ──
@@ -2202,17 +2201,18 @@ const TradeProductPage: React.FC = () => {
     leadTimeLabel: product.lead_time,
   };
 
+  const transactionUtilityClass = "flex min-h-8 h-auto w-full items-center justify-start gap-1.5 rounded-none px-0 py-1.5 text-left font-mono text-[10px] font-normal uppercase text-muted-foreground hover:text-foreground whitespace-normal leading-snug [&_svg]:size-3";
+
   const renderPrice = () => {
-    if (!priceLabels) return null;
+    if (!priceLabels) return <p className="font-body text-sm text-muted-foreground italic">Price upon Request</p>;
     const { prefix, netLabel, retailLabel, upcharge } = priceLabels;
 
 
     return (
-      <div>
-        <PresentationModeToggle />
+      <div data-product-price-stack>
         {/* Headline price — identical to the designer-side trade sheet:
             net trade price with the struck retail rate underneath. */}
-          {!showTradePrice ? <RetailPrice label={`${prefix}${retailLabel}`} /> : <p data-trade-sensitive className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
+          {!showTradePrice ? <RetailPrice label={`${prefix}${retailLabel}`} /> : <p data-trade-sensitive className="font-display text-2xl leading-tight tabular-nums">
           {prefix && (
             <span className="text-muted-foreground text-[11px] uppercase tracking-[0.22em] align-middle mr-2">
               {prefix.trim()}
@@ -2689,7 +2689,7 @@ const TradeProductPage: React.FC = () => {
           </div>
           )}
 
-          <div className="relative flex flex-col gap-4 lg:min-w-0">
+          <div data-product-sidebar className="relative flex flex-col gap-4 lg:min-w-0">
             <div className="flex items-start justify-between gap-3 order-[-4] md:order-none">
               <div className="min-w-0">
                 <Link
@@ -2715,17 +2715,7 @@ const TradeProductPage: React.FC = () => {
             </div>
 
 
-            {/* Headline trade price — sits above the finish selectors on
-                desktop, exactly like the designer-side trade sheet. */}
-            {effectiveRrpCents ? (
-              <div className="order-[-3] md:order-none">{renderPrice()}</div>
-            ) : (
-              <p className="font-body text-sm text-muted-foreground italic order-[-3] md:order-none">
-                Price upon Request
-              </p>
-            )}
-
-            {/* Collection description — directly below the price */}
+            {/* Collection description remains beneath the product title. */}
             <div className="order-[-2] md:order-none">
               {product.materials_description?.trim() && (isRugCategory(product.category) || (!hasLinkedFabrics && linkedWoodFinishes.length === 0)) && (
                 <LegendDisclosure
@@ -2737,7 +2727,7 @@ const TradeProductPage: React.FC = () => {
 
             {/* Finish selection — mobile: directly under the photography */}
 
-            <div className="flex flex-col gap-2 order-[-5] md:order-none">
+            <div data-product-configuration className="flex flex-col gap-2">
               {!isOolMinibar && isDualAxis && !baseAxisIsDim && !topAxisIsDim && resolve3d() && (
                 <ProductFinishCombinations pickId={product.id} variants={variantsList} size={selectedDualSize}
                   base={selectedBase} top={selectedTop}
@@ -3078,7 +3068,7 @@ const TradeProductPage: React.FC = () => {
             </div>
 
             {/* Dimensions & size pickers — directly below the finish selectors */}
-            <div className="flex flex-col gap-2">
+            <div data-product-specifications className="flex flex-col gap-2">
               {(() => {
                 const sqm = (product as any)?.price_per_sqm_cents as number | null | undefined;
                 const isRugSqm = isRugCategory(product.category) && !!sqm && sqm > 0 && (sizeVariants?.length || 0) > 0;
@@ -3365,159 +3355,56 @@ const TradeProductPage: React.FC = () => {
 
 
 
-            {/* ===== Primary action block — boxed panel identical to the
-                designer-side trade sheet (lead time, price, quantity, CTAs,
-                utility links), followed by the trade-only secondary stack.
-                Pinned to the viewport bottom while the finish drawer scrolls
-                so the order CTA is always reachable. */}
-            <div className="flex flex-col gap-2.5 lg:sticky lg:bottom-0 lg:z-20 lg:-mx-1 lg:border-t lg:border-border/60 lg:bg-background lg:px-1 lg:pb-4 lg:pt-3 lg:shadow-[0_-16px_28px_-20px_hsl(var(--foreground)/0.35)]">
-              <div className="flex flex-col gap-3 rounded-none border border-border/60 bg-muted/30 p-5 md:p-6">
-                {product.lead_time && (
-                  <p className="font-body text-[11px] uppercase tracking-widest text-neutral-500">
-                    Production lead time: {String(product.lead_time).replace(/^lead\s*time:?\s*/i, "")}
-                  </p>
-                )}
-
-                {priceLabels && (
-                  <div className="flex flex-col gap-1">
-                    <PresentationModeToggle />
-                     {showTradePrice && priceLabels.retailLabel && (
-                       <p data-trade-sensitive className="font-body text-[11px] tracking-[0.04em] text-muted-foreground line-through decoration-muted-foreground/50">
-                        Retail: {priceLabels.prefix}{priceLabels.retailLabel}
-                      </p>
-                    )}
-                     {!showTradePrice ? <RetailPrice label={`${priceLabels.prefix}${priceLabels.retailLabel}`} /> : <p data-trade-sensitive className="font-display text-2xl leading-none text-foreground">
-                       {priceLabels.prefix}{showTradePrice ? priceLabels.netLabel : priceLabels.retailLabel}{" "}
-                      <span className="font-body text-xs tracking-widest uppercase text-muted-foreground">
-                         {showTradePrice ? "Net Trade Price" : "Retail Price"}
-                      </span>
-                    </p>}
-                     {showTradePrice && <span data-client-placeholder aria-hidden="true" className="h-6 w-32 animate-pulse bg-muted/60" />}
-                  </div>
-                )}
-
-                {/* Quantity */}
-                <div className="flex items-center justify-between border-y border-border/50 py-2.5">
-                  <span className="font-body text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                    Quantity:
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      aria-label="Decrease quantity"
-                      disabled={quantity <= 1}
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="flex h-8 w-8 items-center justify-center rounded-none border border-transparent text-foreground transition-all hover:border-border hover:bg-muted/50 disabled:opacity-30"
-                    >
-                      <Minus className="h-4 w-4" strokeWidth={1.75} />
-                    </button>
-                    <span className="min-w-8 text-center font-body text-sm font-medium tabular-nums text-foreground">
-                      {quantity}
-                    </span>
-                    <button
-                      type="button"
-                      aria-label="Increase quantity"
-                      disabled={quantity >= 99}
-                      onClick={() => setQuantity(Math.min(99, quantity + 1))}
-                      className="flex h-8 w-8 items-center justify-center rounded-none border border-transparent text-foreground transition-all hover:border-border hover:bg-muted/50 disabled:opacity-30"
-                    >
-                      <Plus className="h-4 w-4" strokeWidth={1.75} />
-                    </button>
-                  </div>
+            {/* One transaction anchor, after all configuration and specifications. */}
+            <div data-product-transaction className="flex flex-col gap-3 border-t border-border/60 pt-5">
+              {product.lead_time && (
+                <p className="font-mono text-[11px] uppercase text-muted-foreground">
+                  Production lead time: {String(product.lead_time).replace(/^lead\s*time:?\s*/i, "")}
+                </p>
+              )}
+              {renderPrice()}
+              <div className="flex items-center justify-between border-y border-border/50 py-2">
+                <span className="font-mono text-[11px] uppercase text-muted-foreground">Quantity</span>
+                <div className="flex items-center gap-1">
+                  <Button type="button" variant="ghost" size="icon-sm" aria-label="Decrease quantity" disabled={quantity <= 1} onClick={() => setQuantity(Math.max(1, quantity - 1))}>
+                    <Minus strokeWidth={1.75} />
+                  </Button>
+                  <span data-product-quantity className="min-w-8 text-center font-mono text-sm tabular-nums">{quantity}</span>
+                  <Button type="button" variant="ghost" size="icon-sm" aria-label="Increase quantity" disabled={quantity >= 99} onClick={() => setQuantity(Math.min(99, quantity + 1))}>
+                    <Plus strokeWidth={1.75} />
+                  </Button>
                 </div>
+              </div>
+              <Button data-commerce-primary onClick={() => window.dispatchEvent(new Event("ma:open-workspace-order"))} className="w-full gap-2 rounded-none bg-foreground text-background hover:bg-foreground/90 font-body text-xs uppercase">
+                <ShoppingCart size={14} />
+                Proceed to Order
+              </Button>
+              <Button variant="outline" onClick={handleAddToQuote} disabled={adding} className={cn("w-full rounded-none font-body text-xs uppercase", added && "border-primary text-primary")}>
+                {adding ? <DotCircleLoader size="sm" /> : added ? <Check size={14} /> : null}
+                {added ? "Added to Co-Pilot Workspace" : "Add to Co-Pilot Workspace"}
+              </Button>
+              <div aria-live="polite" className="text-center font-body text-[11px] empty:hidden">
+                {copilotSave.state === "saving" && <span className="text-muted-foreground">Saving to quote…</span>}
+                {copilotSave.state === "saved" && <span className="text-primary">Saved to QU-{copilotSave.quoteId.slice(0, 6).toUpperCase()} · qty {copilotSave.quantity} · {copilotSave.at.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>}
+                {copilotSave.state === "failed" && <span className="text-destructive">Not saved{copilotSave.quoteId ? ` to QU-${copilotSave.quoteId.slice(0, 6).toUpperCase()}` : ""}: {copilotSave.message}{" "}<Button variant="link" onClick={handleAddToQuote} disabled={adding} className="h-auto p-0 text-[11px]">Retry</Button></span>}
+              </div>
+              {finishesMissingImages.length > 0 && <p className="font-body text-[11px] text-muted-foreground italic">Heads up — no reference image on file for <span className="text-foreground">{finishesMissingImages.join(", ")}</span>. A note will be attached to the quote so our concierge can confirm visuals.</p>}
+              <Button variant="outline" onClick={() => setCustomRequestOpen(true)} className="w-full rounded-none font-body text-[10px] uppercase">
+                <Wand2 size={13} /> Request Customisation
+              </Button>
 
-                {/* Primary CTA — shared intake before the existing order path */}
-                <Button
-                  data-commerce-primary
-                  onClick={() => window.dispatchEvent(new Event("ma:open-workspace-order"))}
-                  className="flex items-center justify-center gap-2 px-5 py-3 rounded-none font-body text-xs uppercase tracking-[0.18em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
-                >
-                  <ShoppingCart size={14} />
-                  Proceed to Order
+              {/* All secondary utilities share the transaction's outer grid lines. */}
+              <div data-product-utilities className="grid grid-cols-2 gap-x-4 gap-y-1 border-t border-border/40 pt-3">
+                <FavoriteFolderPicker pickId={favoriteId} align="start" side="top">
+                  <Button variant="ghost" onClick={(e) => e.stopPropagation()} className={cn(transactionUtilityClass, favorited && "text-destructive hover:text-destructive")}>
+                    <Heart size={12} strokeWidth={1.25} className={cn("shrink-0", favorited && "fill-current")} />{favorited ? "Saved" : "Favorite"}
+                  </Button>
+                </FavoriteFolderPicker>
+                <Button variant="ghost" onClick={() => togglePin(compareItem)} disabled={compareItems.length >= 3 && !pinned} className={cn(transactionUtilityClass, pinned && "text-accent-foreground")}>
+                  <Pin size={12} strokeWidth={1.25} className={cn("shrink-0", pinned && "fill-current")} />{pinned ? "Pinned" : "Pin to Selection"}
                 </Button>
-
-                {/* Secondary — co-pilot workspace (quote) */}
-                <button
-                  onClick={handleAddToQuote}
-                  disabled={adding}
-                  className={cn(
-                    "flex items-center justify-center gap-2 px-5 py-3 rounded-none font-body text-xs uppercase tracking-[0.18em] transition-all w-full border",
-                    added
-                      ? "border-emerald-600 text-emerald-700 bg-background"
-                      : "border-foreground/40 bg-background text-foreground hover:bg-muted/60",
-                    adding && "opacity-60"
-                  )}
-                >
-                  {adding ? (
-                    <DotCircleLoader size="sm" />
-                  ) : added ? (
-                    <Check size={14} />
-                  ) : null}
-                  {added ? "Added to Co-Pilot Workspace" : "Add to Co-Pilot Workspace"}
-                </button>
-                <div aria-live="polite" className="min-h-[18px] -mt-1 text-center font-body text-[11px]">
-                  {copilotSave.state === "saving" && (
-                    <span className="text-muted-foreground">Saving to quote…</span>
-                  )}
-                  {copilotSave.state === "saved" && (
-                    <span className="text-primary">
-                      Saved to QU-{copilotSave.quoteId.slice(0, 6).toUpperCase()} · qty {copilotSave.quantity} · {copilotSave.at.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
-                    </span>
-                  )}
-                  {copilotSave.state === "failed" && (
-                    <span className="text-destructive">
-                      Not saved{copilotSave.quoteId ? ` to QU-${copilotSave.quoteId.slice(0, 6).toUpperCase()}` : ""}: {copilotSave.message}{" "}
-                      <button type="button" onClick={handleAddToQuote} disabled={adding} className="underline underline-offset-2 font-medium">
-                        Retry
-                      </button>
-                    </span>
-                  )}
-                </div>
-
-                {/* Utility links — Favorite / Pin / Fabric & Finishes PDF */}
-                <div className="mt-1 border-t border-border/40 pt-4">
-                  <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-2 px-2">
-                    <FavoriteFolderPicker pickId={favoriteId} align="start" side="top">
-                      <button
-                        onClick={(e) => e.stopPropagation()}
-                        className={cn(
-                          "inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors hover:text-foreground",
-                          favorited && "text-destructive hover:text-destructive"
-                        )}
-                      >
-                        <Heart size={12} strokeWidth={1.25} className={cn("shrink-0", favorited && "fill-current")} />
-                        {favorited ? "Saved" : "Favorite"}
-                      </button>
-                    </FavoriteFolderPicker>
-
-                    <button
-                      onClick={() => togglePin(compareItem)}
-                      className={cn(
-                        "inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors hover:text-foreground",
-                        pinned && "text-[hsl(var(--gold))] hover:text-[hsl(var(--gold))]",
-                        compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
-                      )}
-                    >
-                      <Pin size={12} strokeWidth={1.25} className={cn("shrink-0", pinned && "fill-current")} />
-                      {pinned ? "Pinned" : "Pin to Selection"}
-                    </button>
-
-                    {(product.pdf_url || product.pdf_urls?.some((entry) => !/^fabric\s*(?:&|and)\s*finishes\b/i.test(entry.label)) || pricing?.spec_sheet_url) ? (
-                      <SpecSheetButton
-                        pdfUrl={product.pdf_url || pricing?.spec_sheet_url || null}
-                        pdfUrls={product.pdf_urls?.filter((entry) => !/^fabric\s*(?:&|and)\s*finishes\b/i.test(entry.label))}
-                        brandName={designerDisplay}
-                        productName={product.title}
-                        variant="button"
-                        className="inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors hover:text-foreground cursor-pointer"
-                        icon={<FileText size={12} strokeWidth={1.25} className="shrink-0" />}
-                      />
-                    ) : null}
-                    {priceLabels && showTradePrice && (
-                      <button
-                        type="button"
-                        data-trade-sensitive
-                        onClick={() => {
+                {priceLabels && showTradePrice && (
+                  <Button type="button" variant="ghost" data-trade-sensitive onClick={() => {
                           const blob = buildTradeCoverSheetPdf({
                             productName: product.title,
                             brand: designerDisplay,
@@ -3537,70 +3424,18 @@ const TradeProductPage: React.FC = () => {
                           a.download = `${product.title.replace(/[^\w]+/g, "_")}_Trade_Cover_Sheet.pdf`;
                           a.click();
                           setTimeout(() => URL.revokeObjectURL(url), 60000);
-                        }}
-                        className="inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors hover:text-foreground cursor-pointer"
-                      >
-                        <FileText size={12} strokeWidth={1.25} className="shrink-0" />
-                        Trade Cover Sheet
-                      </button>
-                    )}
-                    <FinishesPdfButton
-                      pickId={product.id}
-                      productName={product.title}
-                      brandName={designerDisplay}
-                      documents={product.pdf_urls}
-                      className="inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors hover:text-foreground cursor-pointer"
-                      icon={<Layers size={12} strokeWidth={1.25} className="shrink-0" />}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {finishesMissingImages.length > 0 && (
-                <p className="font-body text-[11px] text-muted-foreground italic">
-                  Heads up — no reference image on file for{" "}
-                  <span className="text-foreground">{finishesMissingImages.join(", ")}</span>. A note
-                  will be attached to the quote so our concierge can confirm visuals.
-                </p>
-              )}
-
-
-
-
-              {/* Uniform secondary stack — identical widths, sharp corners,
-                  consistent thin neutral outlines */}
-              <div className="flex flex-col gap-2">
-                <button
-                  onClick={() => setCustomRequestOpen(true)}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-none font-body text-[10px] uppercase tracking-[0.18em] transition-colors border border-border bg-background text-neutral-900 hover:bg-muted/60 w-full"
-                >
-                  <Wand2 size={13} />
-                  Request Customisation
-                </button>
-
-            {/* 3D model viewer moved beneath the photo (left column) as a
-                collapsed accordion. Finish selectors act as its legend here. */}
-
-            {/* Draft a tearsheet with the currently-selected fabric / wood finishes.
-                Visible whenever the product has linked swatches. Disabled while
-                swatches load and until at least one finish is chosen. */}
-            {(finishesLoading || hasLinkedFabrics || linkedWoodFinishes.length > 0) && (
-              (selectedFabric || selectedWoodPrice || selectedTop || selectedBase || selectedSingleMaterial) && !finishesLoading ? (
-                <>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const params = new URLSearchParams();
-                    params.set("product", product.id);
+                  }} className={transactionUtilityClass}>
+                    <FileText size={12} strokeWidth={1.25} />Trade Cover Sheet
+                  </Button>
+                )}
+                <FinishesPdfButton pickId={product.id} productName={product.title} brandName={designerDisplay} documents={product.pdf_urls} className={transactionUtilityClass} icon={<Layers size={12} strokeWidth={1.25} />} />
+                {(finishesLoading || hasLinkedFabrics || linkedWoodFinishes.length > 0) && (
+                  <>
+                    <Button type="button" variant="ghost" disabled={finishesLoading || !(selectedFabric || selectedWoodPrice || selectedTop || selectedBase || selectedSingleMaterial)} onClick={() => {
                     const fabricName = selectedFabric?.name || selectedTopDisplay || selectedTop || null;
                     const woodName = selectedWoodPrice?.name || selectedBaseDisplay || selectedBase || selectedSingleMaterial || null;
-                    if (fabricName) params.set("fabric", String(fabricName));
-                    if (selectedFabric?.image_url) params.set("fabricImg", selectedFabric.image_url);
-                    if (woodName) params.set("wood", String(woodName));
-                    if (selectedWoodPrice?.image_url) params.set("woodImg", selectedWoodPrice.image_url);
                     const variantLabelParts = [selectedBase, selectedTop, selectedDualSize, selectedSingleSize]
                       .filter(Boolean).map(String);
-                    if (variantLabelParts.length) params.set("variant", variantLabelParts.join(" · "));
                     // Persist product + locked finishes into the concierge session
                     // so the Tearsheet Builder and Quote flow can carry them forward.
                     updateConciergeSession({
@@ -3621,34 +3456,16 @@ const TradeProductPage: React.FC = () => {
                       locked: true,
                     });
                     navigate(buildTearsheetHref());
-                  }}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-none font-body text-[10px] uppercase tracking-[0.18em] transition-colors border border-border bg-background text-neutral-900 hover:bg-muted/60 w-full"
-                >
-                  <FileText size={13} />
-                  Draft Tearsheet with These Finishes
-                </button>
-                <CopyTearsheetLink path={buildTearsheetHref()} variant="block" />
-                </>
-              ) : (
-                <button
-                  type="button"
-                  disabled
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-none font-body text-[10px] uppercase tracking-[0.18em] transition-colors border border-border bg-background text-neutral-900 opacity-50 cursor-not-allowed w-full"
-                >
-                  {finishesLoading ? (
-                    <>
-                      <Loader2 size={13} className="animate-spin" />
-                      Loading finishes…
-                    </>
-                  ) : (
-                    <>
-                      <FileText size={13} />
-                      Draft Tearsheet with These Finishes
-                    </>
-                  )}
-                </button>
-              )
-            )}
+                    }} className={transactionUtilityClass}>
+                      {finishesLoading ? <Loader2 size={13} className="animate-spin" /> : <FileText size={13} />}
+                      {finishesLoading ? "Loading finishes…" : "Draft Tearsheet"}
+                    </Button>
+                    <CopyTearsheetLink path={buildTearsheetHref()} className={transactionUtilityClass} />
+                  </>
+                )}
+                {(product.pdf_url || product.pdf_urls?.some((entry) => !/^fabric\s*(?:&|and)\s*finishes\b/i.test(entry.label)) || pricing?.spec_sheet_url) && (
+                  <SpecSheetButton pdfUrl={product.pdf_url || pricing?.spec_sheet_url || null} pdfUrls={product.pdf_urls?.filter((entry) => !/^fabric\s*(?:&|and)\s*finishes\b/i.test(entry.label))} brandName={designerDisplay} productName={product.title} variant="button" className={transactionUtilityClass} icon={<FileText size={12} strokeWidth={1.25} />} />
+                )}
               </div>
             </div>
 
