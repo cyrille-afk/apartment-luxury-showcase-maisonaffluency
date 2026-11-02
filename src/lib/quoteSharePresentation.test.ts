@@ -1,9 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { quoteAccessToken, quoteShareIdentity, quoteShareUrl } from "./quoteSharePresentation";
+import { quoteAccessToken, quoteShareIdentity, quoteShareUrl, quoteShareSlug, namedQuoteShareUrl } from "./quoteSharePresentation";
 
 const token = "a".repeat(48);
 const snapshot = { lines: [{ name: "Angelo M/H High Table", maker: "Alinea", image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1780460960/stool-with-table-3_822x822_fjngmc.jpg", finish: null, dimensions: null, quantity: 1, unitCents: null, lineTotalCents: null, currency: null }] };
 describe("quote link identity", () => {
+  it("creates names-only quote addresses with no access token", () => {
+    expect(quoteShareSlug(snapshot)).toBe("alinea-angelo-m-h-high-table");
+    expect(namedQuoteShareUrl(quoteShareSlug(snapshot))).toBe("https://www.maisonaffluency.com/quote/alinea-angelo-m-h-high-table");
+    expect(namedQuoteShareUrl(quoteShareSlug(snapshot))).not.toContain(token);
+  });
   it("includes Alinea and Angelo M/H High Table in a production address while retaining the original token", () => {
     expect(quoteShareUrl(token, snapshot)).toBe(`https://www.maisonaffluency.com/quote/alinea-angelo-m-h-high-table--${token}`);
     expect(quoteAccessToken(`alinea-angelo-m-h-high-table--${token}`)).toBe(token);

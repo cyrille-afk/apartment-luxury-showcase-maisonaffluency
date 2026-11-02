@@ -5,6 +5,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ rpc: vi.fn(), token: "a".repeat(48), component: null as null | (() => React.ReactNode) }));
 vi.mock("@/integrations/supabase/client", () => ({ supabase: { rpc: mocks.rpc } }));
 vi.mock("@/lib/quoteShareHead.functions", () => ({ getQuoteShareHead: vi.fn() }));
+vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
+vi.mock("@/lib/namedQuoteAccess.functions", () => ({ readNamedQuote: vi.fn(async () => null), requestNamedQuoteCode: vi.fn(), verifyNamedQuoteCode: vi.fn() }));
 vi.mock("@tanstack/react-router", () => ({
   createFileRoute: () => (options: { component: () => React.ReactNode }) => {
     mocks.component = options.component;
