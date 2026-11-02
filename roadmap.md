@@ -2,7 +2,7 @@
 
 ## Trade card baseline
 - [x] Suppress repeated studio credits for studio filters/searches, lock names and prices beneath images, and reserve hover metadata below.
-- [ ] Verify actual signed-in cards, no hover movement, and compact/mobile fit.
+- [x] Signed-in Jules & Jim verified: no repeated studio label, recorded specs fade in, identical baseline positions before/after hover in three/four columns; phone has no page overflow. Five rule tests pass, preview build OK. Narrow cards truncate long names/prices to retain the requested single-line baseline.
 
 ## Directory analytics
 - [x] Compare named designers' conversion and selection share for all/refined searched openings; 10 counting tests pass. Signed-in saved preview activity verifies Amélie Vermersch 2/2 all searches and 1/1 refined; period/device filters and published empty state checked, no browser errors.
