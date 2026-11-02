@@ -775,6 +775,9 @@ const TradeProductPage: React.FC = () => {
   const drawerPricesRef = useRef<{ retailLabel: string | null; netLabel: string | null }>({ retailLabel: null, netLabel: null });
 
   const [adding, setAdding] = useState(false);
+  // Confirmation gate: before reusing a remembered draft quote, show its
+  // number and creation date so additions never land in a stale quote silently.
+  const [quoteConfirm, setQuoteConfirm] = useState<{ quoteId: string; createdAt: string | null } | null>(null);
   const [copilotSave, setCopilotSave] = useState<
     | { state: "idle" }
     | { state: "saving" }
@@ -990,8 +993,20 @@ const TradeProductPage: React.FC = () => {
   const felixSelectionRef = useRef<ProactiveTearsheetData | null>(null);
   const { addToInventory } = useProjectInventory();
 
-  const handleAddToQuote = useCallback(async () => {
+  const handleAddToQuote = useCallback(async (confirmed: boolean = false) => {
     if (!user || !data) return;
+    // Reusing an existing draft quote requires an explicit confirmation that
+    // shows the quote number and date first (confirmed === true comes from the
+    // dialog's "Add to this quote" action).
+    if (activeQuoteId && confirmed !== true) {
+      const { data: q } = await supabase
+        .from("trade_quotes")
+        .select("created_at")
+        .eq("id", activeQuoteId)
+        .maybeSingle();
+      setQuoteConfirm({ quoteId: activeQuoteId, createdAt: (q as { created_at?: string } | null)?.created_at ?? null });
+      return;
+    }
     const felixSelection = felixSelectionRef.current;
     const selectedDrawerPrices = { ...drawerPricesRef.current };
     setAdding(true);
