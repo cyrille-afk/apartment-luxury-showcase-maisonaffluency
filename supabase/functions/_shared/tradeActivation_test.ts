@@ -1,5 +1,5 @@
 import { assertEquals, assertRejects } from 'https://deno.land/std@0.224.0/assert/mod.ts'
-import { prepareTradeActivation, completeTradeActivation } from './tradeActivation.ts'
+import { prepareTradeActivation, completeTradeActivation, revokePreviousTradeSetup } from './tradeActivation.ts'
 import type { SupabaseClient } from 'npm:@supabase/supabase-js@2'
 
 function fixture(status = 'approved', existing = false, previousEmail?: string) {
@@ -52,6 +52,11 @@ Deno.test('each fresh resend replaces the recovery token for the same account', 
   await prepareTradeActivation(service, 'test@example.com')
   await prepareTradeActivation(service, 'test@example.com')
   assertEquals(calls, ['invite', 'recovery', 'invite', 'recovery'])
+})
+Deno.test('retry repair invalidates only the original email and preserves the latest queued link', async () => {
+  const { service, calls } = fixture('approved', false, 'pola@pola.ar')
+  await revokePreviousTradeSetup(service, 'pola@pola.ae')
+  assertEquals(calls, ['recovery:pola@pola.ar'])
 })
 Deno.test('approval is rechecked before linking roles', async () => {
   const { service, calls } = fixture('rejected')
