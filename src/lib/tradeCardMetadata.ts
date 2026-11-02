@@ -1,4 +1,13 @@
 import type { TradeProduct } from "./tradeProducts";
+import { normalizeBrandToParent } from "./brandNormalization";
+
+/** Suppress only the repeated maker, never a different collaborator credit. */
+export function suppressTradeCardBrand(brand: string, activeBrand: string | null, search: string): boolean {
+  const key = (value: string) => normalizeBrandToParent(value).normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+  const maker = key(brand);
+  return Boolean(maker && ((activeBrand && key(activeBrand) === maker) || key(search) === maker));
+}
 
 type CardProduct = Pick<TradeProduct, "lead_time" | "dimensions" | "size_variants">;
 
