@@ -244,9 +244,19 @@ export function useTradeProductBySlug(
   productSlug: string | undefined,
 ) {
   const { isAdmin } = useAuth();
-  return useQuery({
+  return useQuery(tradeProductPageQueryOptions(tradeProductIdParam, designerSlug, productSlug, isAdmin));
+}
+
+/** Shared so the Trade Gallery can prefetch a product on hover. */
+export function tradeProductPageQueryOptions(
+  tradeProductIdParam: string | undefined,
+  designerSlug: string | undefined,
+  productSlug: string | undefined,
+  isAdmin: boolean,
+) {
+  return {
     queryKey: [...queryKeys.tradeProductPage(tradeProductIdParam, designerSlug, productSlug), isAdmin ? "admin" : "member"],
-    queryFn: async () => {
+    queryFn: async (): Promise<TradeProductPageData | null> => {
       if (tradeProductIdParam) {
         const selectCols = "id, product_name, brand_name, image_url, gallery_images, materials, dimensions, description, category, subcategory, lead_time, origin, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, spec_sheet_url, glb_url, source_pick_id";
         let { data: tradeProduct } = await supabase
@@ -584,7 +594,7 @@ export function useTradeProductBySlug(
     },
     enabled: !!tradeProductIdParam || (!!designerSlug && !!productSlug),
     staleTime: 5 * 60_000,
-  });
+  };
 }
 
 const TradeProductPage: React.FC = () => {
