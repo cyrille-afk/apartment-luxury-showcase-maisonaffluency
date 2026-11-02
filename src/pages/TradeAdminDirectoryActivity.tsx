@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { Navigate } from '@/lib/router-compat';
 import { supabase } from '@/integrations/supabase/client';
-import { dismissalRate, designerViewRanking, type DesignerView, type DirectoryActivity } from '@/lib/directoryActivity';
+import { dismissalRate, designerViewRanking, searchOutcomes, SEARCH_ATTRIBUTION_STARTED, type DesignerView, type DirectoryActivity } from '@/lib/directoryActivity';
 
 export default function TradeAdminDirectoryActivity() {
   const { isAdmin, rolesLoaded, lookupFailed } = useAuth();
@@ -31,11 +31,11 @@ export default function TradeAdminDirectoryActivity() {
       const since = `${firstDay}T00:00:00+08:00`;
       const views: DesignerView[] = [];
       for (let offset = 0; ; offset += 1000) {
-        let request = supabase.from('directory_activity_events').select('id, designer_slug, occurred_at').eq('kind', 'profile').eq('environment', environment).gte('occurred_at', since).order('occurred_at').order('id').range(offset, offset + 999);
+        let request = supabase.from('directory_activity_events').select('id, designer_slug, occurred_at, modal_id').eq('kind', 'profile').eq('environment', environment).gte('occurred_at', since).order('occurred_at').order('id').range(offset, offset + 999);
         if (surface !== 'all') request = request.eq('surface', surface);
         const { data, error } = await request;
         if (error) throw error;
-        for (const row of data ?? []) if (row.designer_slug) views.push({ designer_slug: row.designer_slug, occurred_at: row.occurred_at });
+        for (const row of data ?? []) if (row.designer_slug) views.push({ designer_slug: row.designer_slug, occurred_at: row.occurred_at, modal_id: row.modal_id });
         if (!data || data.length < 1000) break;
       }
       const slugs = [...new Set(views.map(row => row.designer_slug))];
@@ -45,7 +45,17 @@ export default function TradeAdminDirectoryActivity() {
         if (error) throw error;
         for (const row of data ?? []) names[row.slug] = row.name;
       }
-      return { ranking: designerViewRanking(views, names), views };
+      const searches: { modal_id: string | null; occurred_at: string }[] = [];
+      for (let offset = 0; ; offset += 1000) {
+        let request = supabase.from('directory_activity_events').select('id, modal_id, occurred_at').eq('kind', 'search').eq('environment', environment).gte('occurred_at', since > SEARCH_ATTRIBUTION_STARTED ? since : SEARCH_ATTRIBUTION_STARTED).order('occurred_at').order('id').range(offset, offset + 999);
+        if (surface !== 'all') request = request.eq('surface', surface);
+        const { data, error } = await request;
+        if (error) throw error;
+        searches.push(...(data ?? []));
+        if (!data || data.length < 1000) break;
+      }
+      const outcomes = searchOutcomes(searches, views);
+      return { ranking: designerViewRanking(views, names), views, outcomes, destinations: designerViewRanking(outcomes.destinations, names) };
     },
   });
   if (!rolesLoaded) return <p className="text-muted-foreground">{lookupFailed ? 'Access could not be confirmed. Retry from the connection notice.' : 'Checking access…'}</p>;
@@ -71,6 +81,15 @@ export default function TradeAdminDirectoryActivity() {
         {[["Search edits", totals.searches.toLocaleString()], ["A–Z selections", totals.letters.toLocaleString()], ["Profile views", totals.profiles.toLocaleString()], ["Modal dismissal rate", rate === null ? '—' : `${rate.toFixed(1)}%`]].map(([label,value]) => <div key={label} className="border border-border rounded-md p-5 bg-card"><p className="text-xs text-muted-foreground">{label}</p><p className="font-display text-3xl text-foreground mt-3">{value}</p></div>)}
       </div>
       <p className="text-xs text-muted-foreground">{query.data?.started_at ? `Ongoing tracking since ${new Date(query.data.started_at).toLocaleDateString('en-SG', { timeZone: 'Asia/Singapore' })}.` : 'No consented activity recorded for this traffic source yet.'} Historical searches are not reconstructed. Search edits count nonempty input changes, not unique searches.</p>
+      <section aria-label="Search to profile outcomes" className="space-y-4">
+        <h2 className="font-display text-lg">Searches leading to designer profiles</h2>
+        {designerQuery.isLoading ? <p className="text-muted-foreground text-sm">Loading search outcomes…</p> : designerQuery.isError ? <p className="text-destructive text-sm">Search outcomes could not be loaded.</p> : <>
+          <div className="flex flex-wrap gap-x-12 gap-y-4"><div><p className="text-xs text-muted-foreground">Search-to-profile rate</p><p className="font-display text-3xl mt-2">{designerQuery.data?.outcomes?.rate == null ? '—' : `${designerQuery.data.outcomes.rate.toFixed(1)}%`}</p></div><div><p className="text-xs text-muted-foreground">Searched openings</p><p className="font-display text-3xl mt-2">{designerQuery.data?.outcomes?.searched ?? 0}</p></div><div><p className="text-xs text-muted-foreground">Reached a profile</p><p className="font-display text-3xl mt-2">{designerQuery.data?.outcomes?.reached ?? 0}</p></div></div>
+          <p className="text-xs text-muted-foreground">Each directory opening with typed search counts once. Only a searched result followed by an actual profile view counts as success; A–Z browsing and unrelated views are excluded. Linked tracking starts 2 November 2026, 08:12 Singapore; earlier outcomes are unknown. Opening a profile indicates interest, not confirmed relevance.</p>
+          {!!designerQuery.data?.destinations?.length && <table className="w-full text-sm"><thead><tr className="border-b border-border text-muted-foreground"><th className="text-left py-3 font-normal">Designer reached from search</th><th className="text-right py-3 font-normal">Successful searched openings</th></tr></thead><tbody>{designerQuery.data.destinations.map(row => <tr key={row.slug} className="border-b border-border"><td className="py-3">{row.name}</td><td className="py-3 text-right">{row.views}</td></tr>)}</tbody></table>}
+          <div className="h-56"><ResponsiveContainer width="100%" height="100%"><LineChart data={rows.map(row => { const outcomes = designerQuery.data?.outcomes; const ids = [...(outcomes?.firstSearch ?? [])].filter(([,at]) => new Date(new Date(at).getTime()+8*3600000).toISOString().slice(0,10) === row.day).map(([id]) => id); return { date: row.day.slice(5), searched: ids.length, reached: ids.filter(id => outcomes?.reachedIds.has(id)).length }; })}><CartesianGrid stroke="hsl(var(--border))" vertical={false}/><XAxis dataKey="date"/><YAxis allowDecimals={false}/><Tooltip/><Legend/><Line name="Searched openings" dataKey="searched" stroke="hsl(var(--gold))" dot={{r:3}}/><Line name="Reached a profile" dataKey="reached" stroke="hsl(var(--primary))" dot={{r:3}}/></LineChart></ResponsiveContainer></div>
+        </>}
+      </section>
       <section className="space-y-4" aria-label="Designer profile views">
         <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-display text-lg">Designers being viewed</h2><select aria-label="Designer view trend" className="bg-background text-foreground border border-border p-2 text-xs max-w-full" value={selectedDesigner} onChange={e => setSelectedDesigner(e.target.value)}><option value="all">All designers</option>{designerRows.map(row => <option key={row.slug} value={row.slug}>{row.name}</option>)}</select></div>
         {designerQuery.isError ? <p className="text-sm text-destructive">Designer views could not be loaded. <Button variant="link" onClick={() => void designerQuery.refetch()}>Try again</Button></p> : designerQuery.isLoading ? <p className="text-sm text-muted-foreground">Loading designer views…</p> : designerRows.length ? <>
