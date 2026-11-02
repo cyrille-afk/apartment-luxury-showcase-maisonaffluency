@@ -67,6 +67,17 @@ export type ShareSourceLine = QuoteSummaryLine & {
 };
 
 const fkey = (v: string) => v.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+/** One-letter spelling slips between price rows and swatch names (Kynos/Kyknos). */
+const nearlySame = (a: string, b: string) => {
+  if (a.length < 5 || b.length < 5 || Math.abs(a.length - b.length) > 1) return false;
+  let i = 0, j = 0, edits = 0;
+  while (i < a.length && j < b.length) {
+    if (a[i] === b[j]) { i++; j++; continue; }
+    if (++edits > 1) return false;
+    if (a.length > b.length) i++; else if (b.length > a.length) j++; else { i++; j++; }
+  }
+  return edits + (a.length - i) + (b.length - j) <= 1;
+};
 const isDim = (v: string | null | undefined) => !!v && !!dimensionsFromVariantLabel(v, null);
 
 /**
@@ -96,7 +107,8 @@ export function buildFinishChoices(item: ShareSourceLine, swatches: QuoteFinishS
       const key = fkey(name);
       if (!key || seen.has(key)) continue;
       seen.add(key);
-      const swatch = findQuoteFinishSwatch([name], swatches);
+      const swatch = findQuoteFinishSwatch([name], swatches)
+        ?? swatches.find((sw) => sw.image_url && nearlySame(fkey(sw.name), key)) ?? null;
       choices.push({
         key, name, image: swatch?.image_url || null, fabricId: swatch?.fabric_id || null,
         variantLabel: [sizePart, name].filter(Boolean).join(" · "),
