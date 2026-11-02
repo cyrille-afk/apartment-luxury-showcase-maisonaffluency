@@ -1013,6 +1013,31 @@ const TradeProductPage: React.FC = () => {
     setCopilotSave({ state: "saving" });
     try {
       const { product, designer } = data;
+      // The finish header can show a finish (e.g. mirrored from the photo)
+      // that was never committed to the Top axis. Resolve it from the same
+      // selector snapshot so the quote line records what the user sees.
+      const svAll: any[] = (data?.pricing?.size_variants ?? []) as any[];
+      const normTop = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
+      const resolveTopFromName = (name: string | null | undefined): string | null => {
+        if (!name) return null;
+        const n = normTop(name);
+        const tops = [...new Set(svAll.map((v) => v?.top).filter(Boolean).map(String))];
+        return tops.find((t) => normTop(t) === n)
+          || tops.find((t) => t.split(/\s*\/\s*|,\s*/).some((part) => normTop(part) === n))
+          || null;
+      };
+      let selectedTop = selectedTopComponent;
+      let selectedTopDisplay = selectedTopDisplayComponent;
+      if (!selectedTop && activeVariantContext.isDualAxis && felixSelection?.finishes?.length) {
+        for (const f of felixSelection.finishes) {
+          const resolved = resolveTopFromName(f.name);
+          if (resolved) {
+            selectedTop = resolved;
+            selectedTopDisplay = /\s\/\s/.test(resolved) ? f.name.trim() : null;
+            break;
+          }
+        }
+      }
       let quoteId = forceNewQuote ? null : activeQuoteId;
       if (!quoteId) {
         const quoteCurrencies = ["SGD", "USD", "EUR", "GBP"];
