@@ -29,6 +29,7 @@ export default function ShareQuoteWithClient({ quoteId }: { quoteId: string }) {
       // (lovableproject.com / id-preview--*.lovable.app) is useless to recipients.
       const url = `${PRODUCTION_ORIGIN}/quote/${token}`;
       await navigator.clipboard.writeText(url);
+      window.__lovableEvents?.track?.("project.client_link_copied", { link_type: "quote" });
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
       toast.success("Client link copied — retail prices only, valid for 30 days.");
