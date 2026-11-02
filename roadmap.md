@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Aggregate quote opens
-- [ ] Count successful client-side shared quote reads as Quote opens with empty event properties; exclude unavailable, failed, abandoned and crawler-only requests.
-- [ ] Validate event schema, privacy regression tests and real shared-quote browser flow.
+- [x] Count successful client-side shared quote reads as Quote opens with empty event properties; exclude unavailable, failed, abandoned and crawler-only requests.
+- [x] Schema validates (14 events); six open/privacy regressions and five link tests pass. Real shared quote browser navigation emitted exactly project.quote_opened with {} and build OK. Published collection requires publication; automatic platform page-view telemetry is unchanged.
 
 ## Quote product specifications
 - [x] Add compact dimensions, materials, selected finish and finish options from the saved share snapshot, retaining older links and retail-only pricing.
