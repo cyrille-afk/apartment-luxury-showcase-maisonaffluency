@@ -993,6 +993,8 @@ const TradeProductPage: React.FC = () => {
   const felixSelectionRef = useRef<ProactiveTearsheetData | null>(null);
   const { addToInventory } = useProjectInventory();
 
+  const selectedTopComponent = selectedTop;
+  const selectedTopDisplayComponent = selectedTopDisplay;
   const handleAddToQuote = useCallback(async (confirmed: boolean = false, forceNewQuote: boolean = false) => {
     if (!user || !data) return;
     // Reusing an existing draft quote requires an explicit confirmation that
