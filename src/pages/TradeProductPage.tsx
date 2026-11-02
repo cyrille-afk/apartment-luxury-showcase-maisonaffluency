@@ -244,7 +244,17 @@ export function useTradeProductBySlug(
   productSlug: string | undefined,
 ) {
   const { isAdmin } = useAuth();
-  return useQuery({
+  return useQuery(tradeProductPageQueryOptions(tradeProductIdParam, designerSlug, productSlug, isAdmin));
+}
+
+/** Shared so the Trade Gallery can prefetch a product on hover. */
+export function tradeProductPageQueryOptions(
+  tradeProductIdParam: string | undefined,
+  designerSlug: string | undefined,
+  productSlug: string | undefined,
+  isAdmin: boolean,
+) {
+  return {
     queryKey: [...queryKeys.tradeProductPage(tradeProductIdParam, designerSlug, productSlug), isAdmin ? "admin" : "member"],
     queryFn: async () => {
       if (tradeProductIdParam) {
@@ -584,7 +594,7 @@ export function useTradeProductBySlug(
     },
     enabled: !!tradeProductIdParam || (!!designerSlug && !!productSlug),
     staleTime: 5 * 60_000,
-  });
+  };
 }
 
 const TradeProductPage: React.FC = () => {

@@ -28,6 +28,8 @@ import { creditsDesigner } from "@/lib/designerCollaboration";
 import { isTradeProductMarkedHidden, useHiddenTradeProductIds } from "@/hooks/useHiddenTradeProductIds";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "@tanstack/react-router";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useBrandDiscountCaps, effectiveDiscountForBrand, MARGIN_CAP_TOOLTIP } from "@/lib/brandDiscountCap";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
@@ -147,6 +149,22 @@ const StudioGallery = () => {
   const { data: galleryDesigner, isLoading: designerLoading } = useDesigner(routeBrandSlug, { includeTradeOnly: true });
   const { picks: galleryPicks, isLoading: galleryPicksLoading } = useDesignerGalleryPicks(galleryDesigner, { trade: true });
   useTradeGalleryScroll(location.pathname, location.search, { search, brand: selectedBrand, category: selectedCategory, subcategory: selectedSubcategory, edition: selectedEdition, sortBy, viewMode }, productsLoading || designerLoading || galleryPicksLoading);
+
+  // Warm the product page code on hover so a click swaps straight to the
+  // product instead of collapsing the gallery into a short loading screen
+  // (which made the browser snap the page up before the product appeared).
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  const warmTradeProductPage = useCallback((product?: TradeProduct) => {
+    if (product?.trade_product_id && !product.hidden_in_trade) {
+      void router.preloadRoute({ to: "/trade/products/$id", params: { id: product.trade_product_id } }).catch(() => {});
+    }
+    void import("@/pages/ProductPageContainer");
+    void import("@/pages/TradeProductPage").then(({ tradeProductPageQueryOptions }) => {
+      if (!product?.trade_product_id || product.hidden_in_trade) return;
+      void queryClient.prefetchQuery(tradeProductPageQueryOptions(product.trade_product_id, undefined, undefined, isAdmin));
+    });
+  }, [queryClient, isAdmin, router]);
 
   // Product pages own their reset once actual product content is mounted;
   // router resolution can occur while the outgoing gallery is still visible.
@@ -881,7 +899,7 @@ const StudioGallery = () => {
             const pinned = isPinned(product.product_name, product.id);
             const metadata = tradeCardMetadata(product);
             return (
-              <div key={product.id} data-trade-card={product.product_name} className="group relative min-w-0">
+              <div key={product.id} data-trade-card={product.product_name} className="group relative min-w-0" onPointerEnter={() => warmTradeProductPage(product)} onFocusCapture={() => warmTradeProductPage(product)}>
                 <div className="relative aspect-square w-full overflow-hidden bg-[hsl(var(--product-canvas))] cursor-pointer" onClick={() => openProductSheet(product)}>
                   {product.image_url ? (
                     <>

@@ -1,3 +1,4 @@
+import { heldTradePageHeight, setHeldTradePageHeight } from "@/lib/tradePageHeightHold";
 import { lazy, Suspense, useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
@@ -334,6 +335,16 @@ function BackToTopButton() {
 }
 
 const TradeLayout = () => {
+  // Last rendered page height, used to hold layout while the next page loads.
+  const outletObserver = useRef<ResizeObserver | null>(null);
+  const outletHeightRef = useCallback((el: HTMLDivElement | null) => {
+    outletObserver.current?.disconnect();
+    if (!el || typeof ResizeObserver === "undefined") return;
+    outletObserver.current = new ResizeObserver(([entry]) => {
+      if (!el.querySelector("[data-trade-page-loading]")) setHeldTradePageHeight(entry.contentRect.height);
+    });
+    outletObserver.current.observe(el);
+  }, []);
   const { user, loading, sessionExpired, applicationStatus, isAdmin, isTradeUser, profile, rolesLoaded, lookupFailed, refreshRoles, signOut } = useAuth();
   const [retryingRecovery, setRetryingRecovery] = useState(false);
   // Once the shell has rendered, never unmount it again for a transient auth
@@ -645,9 +656,14 @@ const TradeLayout = () => {
                   <ProjectWorkspaceBreadcrumb />
                 </div>
               )}
+              <div ref={outletHeightRef}>
               <Suspense fallback={
-                <div data-trade-page-loading role="status" aria-label="Loading workspace" className="flex items-center justify-center py-20">
-                  <DotCircleLoader size="sm" className="text-muted-foreground" />
+                // Holds the outgoing page's height so the browser never snaps the
+                // window up while the next page (e.g. a product) is loading.
+                <div data-trade-page-loading role="status" aria-label="Loading workspace" style={{ minHeight: heldTradePageHeight() || undefined }} className="relative">
+                  <div className="sticky top-1/2 flex items-center justify-center py-20">
+                    <DotCircleLoader size="sm" className="text-muted-foreground" />
+                  </div>
                 </div>
               }>
                 <StudioSetupNavigationGate locked={studioLocked} ready={!isTradeUser || (rolesLoaded && !studioSetupLoading)}>
@@ -655,6 +671,7 @@ const TradeLayout = () => {
                   <Outlet />
                 </StudioSetupNavigationGate>
               </Suspense>
+              </div>
             </ToolsBreadcrumbProvider>
           </main>
 
