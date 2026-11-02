@@ -334,6 +334,17 @@ function BackToTopButton() {
 }
 
 const TradeLayout = () => {
+  // Last rendered page height, used to hold layout while the next page loads.
+  const lastOutletHeight = useRef(0);
+  const outletObserver = useRef<ResizeObserver | null>(null);
+  const outletHeightRef = useCallback((el: HTMLDivElement | null) => {
+    outletObserver.current?.disconnect();
+    if (!el || typeof ResizeObserver === "undefined") return;
+    outletObserver.current = new ResizeObserver(([entry]) => {
+      if (!el.querySelector("[data-trade-page-loading]")) lastOutletHeight.current = entry.contentRect.height;
+    });
+    outletObserver.current.observe(el);
+  }, []);
   const { user, loading, sessionExpired, applicationStatus, isAdmin, isTradeUser, profile, rolesLoaded, lookupFailed, refreshRoles, signOut } = useAuth();
   const [retryingRecovery, setRetryingRecovery] = useState(false);
   // Once the shell has rendered, never unmount it again for a transient auth
