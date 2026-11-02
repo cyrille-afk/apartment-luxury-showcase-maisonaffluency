@@ -1,5 +1,8 @@
 # Roadmap
 
+## Quote-open engagement dashboard
+- [ ] Show private daily aggregate Quote opens without names, quote identifiers or tokens; confirm a supported read connection to the existing analytics stream before implementation.
+
 ## Aggregate quote opens
 - [x] Count successful client-side shared quote reads as Quote opens with empty event properties; exclude unavailable, failed, abandoned and crawler-only requests.
 - [x] Schema validates (14 events); six open/privacy regressions and five link tests pass. Real shared quote browser navigation emitted exactly project.quote_opened with {} and build OK. Published collection requires publication; automatic platform page-view telemetry is unchanged.
