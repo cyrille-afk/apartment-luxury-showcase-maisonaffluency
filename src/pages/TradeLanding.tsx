@@ -21,7 +21,6 @@ import Turnstile from "@/components/Turnstile";
 
 import ShippingTermsExplainer from "@/components/trade/ShippingTermsExplainer";
 import { MoodboardControls, MoodboardResults, useMoodboardSourcing } from "@/components/trade/OneClickMoodboard";
-import { COUNTRY_DIAL_OPTIONS } from "@/lib/phonePlaceholder";
 import { getTradeProgramShareUrl, TRADE_PROGRAM_SHARE_IMAGE } from "@/lib/tradeShareUrl";
 // Guarded share URL: falls back to the static OG bridge unless the clean route is
 // verified to serve Trade Program tags to crawlers (see src/lib/tradeShareUrl.ts).
@@ -225,6 +224,12 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
 };
 
 /* ─── Hero Join Form ─── */
+const ISO_REGIONS = "AD AE AF AG AI AL AM AO AR AT AU AW AZ BA BB BD BE BF BG BH BI BJ BM BN BO BR BS BT BW BY BZ CA CD CF CG CH CI CL CM CN CO CR CU CV CY CZ DE DJ DK DM DO DZ EC EE EG ER ES ET FI FJ FR GA GB GD GE GH GI GM GN GQ GR GT GW GY HK HN HR HT HU ID IE IL IN IQ IR IS IT JM JO JP KE KG KH KM KN KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MG MK ML MM MN MO MR MT MU MV MW MX MY MZ NA NE NG NI NL NO NP NZ OM PA PE PG PH PK PL PR PS PT PY QA RO RS RU RW SA SB SC SD SE SG SI SK SL SM SN SO SR SS ST SV SY SZ TD TG TH TJ TL TM TN TO TR TT TW TZ UA UG US UY UZ VA VC VE VN VU WS YE ZA ZM ZW".split(" ");
+const APPLICATION_COUNTRIES: string[] = (() => {
+  const names = new Intl.DisplayNames(["en"], { type: "region" });
+  return ISO_REGIONS.map((c) => names.of(c) || c).sort((a, b) => a.localeCompare(b));
+})();
+
 interface HeroJoinFormProps {
   ghost?: boolean;
   submitted: boolean;
@@ -338,9 +343,9 @@ const HeroJoinForm = ({
       </div>
       <div>
         <label htmlFor={ghost ? "mobile-country" : "country"} className={labelCls}>Country</label>
-        <select id={ghost ? "mobile-country" : "country"} name="country" required defaultValue="" autoComplete="country-name" className={inputCls}>
+        <select id={ghost ? "mobile-country" : "country"} name="country" required defaultValue="" autoComplete="country-name" className={cn(inputCls, "text-xs uppercase")}>
           <option value="" disabled>Select your country</option>
-          {COUNTRY_DIAL_OPTIONS.map((c) => <option key={c.country} value={c.country}>{c.country}</option>)}
+          {APPLICATION_COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
       </div>
       <div>
