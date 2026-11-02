@@ -78,7 +78,6 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { normalizeFinishOption } from "@/lib/finishNormalization";
 import StudioSaveButton from "@/components/product/StudioSaveButton";
-import PresentationModeToggle from "@/components/trade/PresentationModeToggle";
 import RetailPrice from "@/components/product/RetailPrice";
 import {
   PublicSpecTable,
@@ -2830,7 +2829,6 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                         <CurrencyToggle compact value={displayCurrency} onChange={setDisplayCurrency} />
                       </div>
                     )}
-                    {presentation && <PresentationModeToggle />}
                     {isTradeVerifiedView && mockNetDisplay ? (
                       <div className="mt-6">
                         <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">

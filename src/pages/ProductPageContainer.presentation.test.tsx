@@ -9,6 +9,17 @@ vi.mock("@/contexts/ProductConfigContext", () => ({ ProductConfigProvider: ({ ch
 vi.mock("./TradeProductPage", () => ({ default: () => <div>Active workspace</div> }));
 vi.mock("./PublicProductPage", () => ({ default: () => <div>Editorial presentation</div> }));
 afterEach(() => { cleanup(); setClientSafeMode(false); });
+it("global Client mode replaces the Studio sidebar, and Studio mode restores it", async () => {
+  setClientSafeMode(false);
+  render(<ProductPageContainer isInsideTradePortal />);
+  await screen.findByText("Active workspace");
+  act(() => setClientSafeMode(true));
+  await screen.findByText("Editorial presentation");
+  expect(screen.queryByText("Active workspace")).toBeNull();
+  act(() => setClientSafeMode(false));
+  await screen.findByText("Active workspace");
+  expect(screen.queryByText("Editorial presentation")).toBeNull();
+});
 it("keeps the active workspace mounted when its eye switch enables Presentation, then restores editorial on close", async () => {
   setClientSafeMode(false);
   render(<ProductPageContainer isInsideTradePortal />);
