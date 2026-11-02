@@ -19,9 +19,19 @@ export const Route = createFileRoute("/quote_/$token")({
       { property: "og:title", content: preview.title },
       { property: "og:description", content: preview.description },
       { property: "og:url", content: `${PRODUCTION_ORIGIN}/quote/${encodeURIComponent(params.token)}` },
+      { property: "og:site_name", content: "Maison Affluency" },
       { name: "twitter:title", content: preview.title },
       { name: "twitter:description", content: preview.description },
-      ...(preview.image ? [{ property: "og:image", content: preview.image }, { name: "twitter:image", content: preview.image }] : []),
+      ...(preview.image
+        ? [
+            { property: "og:image", content: preview.image },
+            { property: "og:image:width", content: "1200" },
+            { property: "og:image:height", content: "630" },
+            { property: "og:image:alt", content: preview.imageAlt ?? preview.title },
+            { name: "twitter:image", content: preview.image },
+            { name: "twitter:image:alt", content: preview.imageAlt ?? preview.title },
+          ]
+        : []),
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: preview.image ? "summary_large_image" : "summary" },
       { name: "robots", content: "noindex, nofollow" },
