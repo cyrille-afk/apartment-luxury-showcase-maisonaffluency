@@ -1,5 +1,9 @@
 # Roadmap
 
+## Password-setup resend security
+- [ ] Ensure fresh setup emails invalidate older recovery links, including previous recipient addresses, without changing approval or rotating on retries.
+- [ ] Verify old-link rejection and latest-link success with disposable accounts and run activation regressions.
+
 ## Names-only private quote addresses
 - [x] Newly copied quote addresses use persisted maker/product names with readable word suffixes for collisions; clients verify saved email before access. Legacy links preserved; old links do not silently change.
 - [x] Added locked recipient-bound OTP/session RPCs and HttpOnly cookies; 25 regressions pass, clean gate rejects unknown recipients, legacy supplied link loads, build OK. Existing private-client email template/delivery reused.
