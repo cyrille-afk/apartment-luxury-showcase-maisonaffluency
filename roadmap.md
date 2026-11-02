@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Trade card baseline
-- [ ] Suppress repeated studio credits for studio filters/searches, lock names and prices beneath images, and reserve hover metadata below.
+- [x] Suppress repeated studio credits for studio filters/searches, lock names and prices beneath images, and reserve hover metadata below.
 - [ ] Verify actual signed-in cards, no hover movement, and compact/mobile fit.
 
 ## Directory analytics
