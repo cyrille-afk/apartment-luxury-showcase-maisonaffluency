@@ -1,5 +1,8 @@
 # Roadmap
 
+## Quote sharing feedback
+- [ ] Verify Share with Client against a saved quote and keep blockers/results visible beside the button, including the required saved client email.
+
 ## Password-setup resend security
 - [x] Fresh setup emails replace native recovery tokens; corrected-recipient issuance and retries also invalidate original signup-address tokens without changing approval or rotating the latest queued link.
 - [x] Live disposable verification rejected both older same-address and old-address links and verified the latest link; test records cleaned up. Eight helper and four page regressions pass; deployed services boot/live checks pass. Pola’s previous-address access repaired via the original attempt key without sending another email or replacing her latest link.
