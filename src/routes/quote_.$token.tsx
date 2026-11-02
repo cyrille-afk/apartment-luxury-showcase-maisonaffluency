@@ -8,8 +8,8 @@ import { PRODUCTION_ORIGIN } from "@/lib/environmentIndexingGuard";
 
 export const Route = createFileRoute("/quote_/$token")({
   loader: ({ params }) => getQuoteShareHead({ data: { segment: params.token } }),
-  errorComponent: () => <main className="min-h-screen flex items-center justify-center font-body text-sm text-muted-foreground">Your quote is temporarily unavailable. Please try again.</main>,
-  notFoundComponent: () => <main className="min-h-screen flex items-center justify-center font-body text-sm text-muted-foreground">This quote link is unavailable.</main>,
+  errorComponent: () => <QuoteNotice title="Your quote is temporarily unavailable" detail="Please try again in a moment." />,
+  notFoundComponent: () => <QuoteNotice title="This quote link is unavailable" detail="Please ask your designer for a current quote link." />,
   head: ({ loaderData, params }) => {
     const preview = loaderData ?? quoteShareIdentity(null);
     return {
@@ -46,6 +46,39 @@ type Shared = SharedQuoteSnapshot & { shared_at: string; expires_at: string };
 const money = (cents: number, currency: string) =>
   new Intl.NumberFormat("en-GB", { style: "currency", currency, minimumFractionDigits: 2 }).format(cents / 100);
 
+const date = (value: string) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(value));
+
+function QuoteShell({ children }: { children: React.ReactNode }) {
+  return (
+    <main className="min-h-screen bg-background text-foreground font-body">
+      <header className="bg-primary text-primary-foreground border-b border-accent">
+        <div className="mx-auto max-w-5xl px-6 py-8 sm:px-10 sm:py-10 text-center">
+          <p className="font-brand text-2xl sm:text-3xl font-semibold">Maison Affluency</p>
+          <div className="mx-auto mt-4 h-px w-12 bg-accent" />
+        </div>
+      </header>
+      <div className="mx-auto max-w-5xl px-6 sm:px-10">{children}</div>
+      <footer className="mx-auto max-w-5xl px-6 sm:px-10 pb-8 pt-12">
+        <div className="border-t border-border pt-6 flex flex-col sm:flex-row sm:justify-between gap-2 text-xs text-muted-foreground">
+          <p className="font-brand text-base text-foreground">Maison Affluency</p>
+          <p>maisonaffluency.com</p>
+        </div>
+      </footer>
+    </main>
+  );
+}
+
+function QuoteNotice({ title, detail }: { title: string; detail?: string }) {
+  return (
+    <QuoteShell>
+      <div className="py-24 text-center" role="status">
+        <h1 className="font-display text-2xl">{title}</h1>
+        {detail && <p className="mt-4 text-sm text-muted-foreground">{detail}</p>}
+      </div>
+    </QuoteShell>
+  );
+}
+
 function SharedQuotePage() {
   const { token } = Route.useParams();
   const [state, setState] = useState<{ status: "loading" | "missing" | "ready"; data?: Shared }>({ status: "loading" });
@@ -61,55 +94,61 @@ function SharedQuotePage() {
     return () => { live = false; };
   }, [token]);
 
-  if (state.status === "loading") return <main className="min-h-screen flex items-center justify-center font-body text-sm text-muted-foreground">Loading your quote…</main>;
+  if (state.status === "loading") return <QuoteNotice title="Loading your quote…" />;
   if (state.status === "missing" || !state.data)
-    return (
-      <main className="min-h-screen flex flex-col items-center justify-center gap-2 px-6 text-center">
-        <h1 className="font-display text-2xl">This link is no longer available</h1>
-        <p className="font-body text-sm text-muted-foreground">It may have expired or been withdrawn. Please ask your designer for a new link.</p>
-      </main>
-    );
+    return <QuoteNotice title="This link is no longer available" detail="It may have expired or been withdrawn. Please ask your designer for a new link." />;
 
   const q = state.data;
   return (
-    <main className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto max-w-3xl px-6 py-12">
-        <p className="font-body text-[11px] uppercase tracking-[0.3em] text-muted-foreground">Maison Affluency</p>
-        <h1 className="font-display text-3xl mt-2">Quote {q.quoteRef}</h1>
-        {q.clientName && <p className="font-body text-sm text-muted-foreground mt-1">Prepared for {q.clientName}</p>}
-        <p className="font-body text-xs text-muted-foreground mt-1">
-          {q.lineCount} {q.lineCount === 1 ? "piece" : "pieces"} · {q.totalUnits} {q.totalUnits === 1 ? "unit" : "units"} · Retail prices
-        </p>
+    <QuoteShell>
+      <section className="py-10 sm:py-12 border-b border-border flex flex-col sm:flex-row sm:justify-between sm:items-end gap-6">
+        <div className="min-w-0">
+          <p className="text-xs text-muted-foreground mb-3">Your quotation</p>
+          <h1 className="font-display text-3xl sm:text-4xl break-words">Quote {q.quoteRef}</h1>
+          {q.clientName && <p className="text-sm mt-4 break-words"><span className="text-muted-foreground">Prepared for </span>{q.clientName}</p>}
+        </div>
+        <div className="text-sm text-muted-foreground sm:text-right shrink-0 space-y-2">
+          <p>{q.lineCount} {q.lineCount === 1 ? "piece" : "pieces"} · {q.totalUnits} {q.totalUnits === 1 ? "unit" : "units"}</p>
+          <p>Shared {date(q.shared_at)}</p>
+        </div>
+      </section>
 
-        <ul className="mt-8 divide-y divide-border border-y border-border">
+        <ul className="divide-y divide-border">
           {q.lines.map((l, i) => (
-            <li key={i} className="flex gap-4 py-5">
-              {l.image && <img src={l.image} alt={l.name} className="h-24 w-24 object-cover rounded-sm bg-muted shrink-0" loading="lazy" />}
-              <div className="flex-1 min-w-0">
-                <h2 className="font-display text-lg leading-tight">{l.name}</h2>
-                {l.maker && <p className="font-body text-xs uppercase tracking-wider text-muted-foreground">{l.maker}</p>}
-                {l.finish && <p className="font-body text-xs mt-1">{l.finish}</p>}
-                {l.dimensions && <p className="font-body text-xs text-muted-foreground">{l.dimensions}</p>}
-                <div className="font-body text-xs mt-2 grid grid-cols-3 gap-2">
-                  <span>Qty {l.quantity}</span>
-                  <span>{l.unitCents != null && l.currency ? `Unit ${money(l.unitCents, l.currency)}` : "Price upon Request"}</span>
-                  <span className="text-right font-medium">{l.lineTotalCents != null && l.currency ? money(l.lineTotalCents, l.currency) : ""}</span>
+            <li key={i} className="grid grid-cols-1 sm:grid-cols-[220px_minmax(0,1fr)] gap-6 sm:gap-8 py-8 sm:py-10">
+              <div className="aspect-square bg-muted flex items-center justify-center overflow-hidden">
+                {l.image ? <img src={l.image} alt={`${l.name}${l.maker ? ` by ${l.maker}` : ""}`} className="h-full w-full object-contain" loading={i === 0 ? "eager" : "lazy"} /> : <span className="font-display text-4xl text-muted-foreground" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>}
+              </div>
+              <div className="min-w-0 flex flex-col">
+                {l.maker && <p className="text-sm font-medium text-primary break-words">{l.maker}</p>}
+                <h2 className="font-display text-2xl sm:text-3xl leading-tight mt-2 break-words">{l.name}</h2>
+                {(l.finish || l.dimensions) && <dl className="mt-5 space-y-3 text-sm">
+                  {l.finish && <div className="grid grid-cols-[88px_minmax(0,1fr)] gap-3"><dt className="text-muted-foreground">Finish</dt><dd className="break-words">{l.finish}</dd></div>}
+                  {l.dimensions && <div className="grid grid-cols-[88px_minmax(0,1fr)] gap-3"><dt className="text-muted-foreground">Dimensions</dt><dd className="break-words">{l.dimensions}</dd></div>}
+                </dl>}
+                <div className="mt-6 pt-4 border-t border-border grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
+                  <div><p className="text-xs text-muted-foreground mb-1">Quantity</p><p>{l.quantity}</p></div>
+                  <div><p className="text-xs text-muted-foreground mb-1">Retail unit price</p><p className="tabular-nums">{l.unitCents != null && l.currency ? money(l.unitCents, l.currency) : "Price upon Request"}</p></div>
+                  {l.lineTotalCents != null && l.currency && <div className="col-span-2 sm:col-span-1 sm:text-right"><p className="text-xs text-muted-foreground mb-1">Line total</p><p className="font-medium tabular-nums">{money(l.lineTotalCents, l.currency)}</p></div>}
                 </div>
               </div>
             </li>
           ))}
         </ul>
 
-        <div className="mt-6 space-y-1 text-right font-body">
+        <section className="border-t border-border py-8 sm:py-10 flex flex-col sm:flex-row sm:justify-between gap-5">
+          <h2 className="font-display text-2xl">Quotation summary</h2>
+          <div className="space-y-3 sm:text-right">
           {q.totals.map((t) => (
-            <p key={t.currency} className="text-base"><span className="text-xs uppercase tracking-widest text-muted-foreground mr-3">Retail total</span>{money(t.cents, t.currency)}</p>
+            <div key={t.currency}><p className="text-xs text-muted-foreground mb-1">Retail total · {t.currency}</p><p className="font-display text-3xl tabular-nums">{money(t.cents, t.currency)}</p></div>
           ))}
           {q.unpricedCount > 0 && <p className="text-xs text-muted-foreground">{q.unpricedCount} piece{q.unpricedCount === 1 ? "" : "s"} Price upon Request</p>}
+          </div>
+        </section>
+        <div className="border-l-2 border-accent pl-4 text-xs leading-relaxed text-muted-foreground space-y-1">
+          <p>Available until {date(q.expires_at)}.</p>
+          <p>Prices are indicative and exclude delivery and taxes.</p>
         </div>
-        <p className="mt-10 font-body text-[11px] text-muted-foreground">
-          Shared {new Date(q.shared_at).toLocaleDateString("en-GB")} · available until {new Date(q.expires_at).toLocaleDateString("en-GB")}. Prices are indicative and exclude delivery and taxes.
-        </p>
-      </div>
-    </main>
+    </QuoteShell>
   );
 }

@@ -1,5 +1,9 @@
 # Roadmap
 
+## Branded client quote pages
+- [ ] Refine Maison Affluency branding, product imagery, maker credits and configuration details without changing client-safe prices or access.
+- [ ] Verify the existing shared quote on desktop and mobile, plus unavailable-link branding.
+
 ## Readable quote links and previews
 - [x] Newly copied quote links include recorded maker/product names with unchanged secure tokens; old links remain valid.
 - [x] Supplied QU-42891A verified on legacy/named URLs: SSR preview says Angelo M/H High Table by Alinea, client summary loads, invalid token shows unavailable. Authentic letterboxed JPEG is 1200×630 / 20KB; 59 tests pass, build OK. Live addresses/previews await publication.
