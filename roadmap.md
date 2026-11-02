@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Directory analytics
-- [ ] Compare named designers' search-to-profile conversion rates with explicit searched-opening denominators; verify counting and signed-in dashboard.
+- [x] Compare named designers' conversion and selection share for all/refined searched openings; 10 counting tests pass. Signed-in saved preview activity verifies Amélie Vermersch 2/2 all searches and 1/1 refined; period/device filters and published empty state checked, no browser errors.
 - [x] Added Search refinements view with named selections, expandable sequences, catalogue matches and filters; real seven-edit search → Amélie Vermersch → signed-in dashboard verified 1/1 (100%), recorder responses successful and no browser errors; 13 counting/filter tests pass. Published tracking awaits publication; prior refinements remain unknown.
 - [x] Catalogue-only search matches, refinement categories and selected designer events added; ten unit tests and eleven schemas pass. Python browser verifies seven refinements → Amélie Vermersch profile with no raw text. Project browser suite blocked by missing Chromium; dashboard breakdown unchanged, published collection awaits publication.
 - [x] Search-to-profile conversion, daily outcomes and named destinations verified through real Amelie search → Amélie Vermersch profile → dashboard (1/1, 100% preview); four counting tests pass, build OK. Historical links remain unknown; live tracking requires publication.
