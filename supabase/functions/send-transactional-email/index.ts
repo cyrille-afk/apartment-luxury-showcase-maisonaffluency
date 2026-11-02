@@ -4,7 +4,7 @@ import { enhanceApprovalEmailHtml } from '../_shared/approvalEmailHtml.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { TEMPLATES } from '../_shared/transactional-email-templates/registry.tsx'
-import { prepareTradeActivation } from '../_shared/tradeActivation.ts'
+import { prepareTradeActivation, revokePreviousTradeSetup } from '../_shared/tradeActivation.ts'
 import { welcomeDesignerData } from '../_shared/welcomeDesignerCount.ts'
 import { displayNameForContact } from '../_shared/quoteContactDisplay.ts'
 import { canSendStudioInvite } from './studioInvite.ts'
@@ -435,6 +435,10 @@ Deno.serve(async (req) => {
   }
 
   if (templateName === 'trade-approval') {
+    // Retry may repair old-address revocation, but must preserve the currently
+    // queued setup token. Only prepareTradeActivation issues a fresh token.
+    try { await revokePreviousTradeSetup(supabase, effectiveRecipient) }
+    catch { return new Response(JSON.stringify({ error: 'Could not revoke previous setup access' }), { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }) }
     const { data: prior, error: priorError } = await supabase.from('email_send_log')
       .select('id').eq('template_name', templateName).eq('recipient_email', effectiveRecipient)
       .contains('metadata', { idempotency_key: idempotencyKey }).in('status', ['pending', 'sent']).limit(1)
