@@ -1,5 +1,9 @@
 # Roadmap
 
+## Inquiry reply button
+- [ ] Replace external-mail-only Reply actions with an in-app composer, saved drafts, and visible queued/sent/failed history.
+- [ ] Use the existing admin-checked branded email sender with stored inquiry recipients; verify a real send and clean up only the test inquiry.
+
 ## Google-access inquiry alerts
 - [x] Add distinct Twilio WhatsApp notifications using existing staff recipients without creating applications or granting access.
 - [x] Six tests pass; deployed service starts and a real authenticated request saves successfully. Three Twilio sends were accepted then rejected with 63016 (outside the reply window); per-recipient callbacks recorded failures.

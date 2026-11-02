@@ -8,6 +8,7 @@ import { prepareTradeActivation } from '../_shared/tradeActivation.ts'
 import { welcomeDesignerData } from '../_shared/welcomeDesignerCount.ts'
 import { displayNameForContact } from '../_shared/quoteContactDisplay.ts'
 import { canSendStudioInvite } from './studioInvite.ts'
+import { validInquiryReply, inquiryReplyRecipient } from '../_shared/inquiryReply.ts'
 
 // Configuration baked in at scaffold time — do NOT change these manually.
 // To update, re-run the email domain setup flow.
@@ -61,6 +62,7 @@ Deno.serve(async (req) => {
   let messageId: string
   let templateData: Record<string, any> = {}
   let studioInviteEvent: { studio_id: string; invite_id: string; email: string; role: string; actor_id: string } | null = null
+  let inquiryReplyId: string | null = null
   try {
     const body = await req.json()
     templateName = body.templateName || body.template_name
@@ -115,7 +117,21 @@ Deno.serve(async (req) => {
         privileged = (roles?.length ?? 0) > 0
       }
     }
-    if (templateName === 'studio-teammate-invite') {
+    if (templateName === 'inquiry-reply') {
+      if (!privileged || !callerId) return deny(403, 'Only signed-in administrators can reply')
+      if (!validInquiryReply(templateData, idempotencyKey)) return deny(400, 'Invalid reply draft')
+      inquiryReplyId = String(templateData.inquiryId)
+      const { data: inquiry, error: inquiryError } = await svc.from('inquiries').select('email, name').eq('id', inquiryReplyId).maybeSingle()
+      if (inquiryError) return deny(500, 'Could not read inquiry')
+      if (!inquiry) return deny(404, 'Inquiry not found')
+      const resolved = inquiryReplyRecipient(inquiry, templateData)
+      recipientEmail = resolved.recipientEmail
+      templateData = resolved.templateData
+      const { data: prior, error: priorError } = await svc.from('email_send_log').select('id')
+        .eq('template_name', templateName).contains('metadata', { idempotency_key: idempotencyKey }).in('status', ['pending', 'sent']).limit(1)
+      if (priorError) return deny(500, 'Could not verify reply retry')
+      if (prior?.length) return Response.json({ success: true, queued: true }, { headers: corsHeaders })
+    } else if (templateName === 'studio-teammate-invite') {
       if (!callerId) return deny(401, 'Sign in required')
       const uuid = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
       const match = new RegExp(`^studio-invite-(${uuid})-(${uuid})$`, 'i').exec(idempotencyKey)
@@ -474,13 +490,15 @@ Deno.serve(async (req) => {
   // The dispatcher (process-email-queue) handles sending, retries, and rate-limit backoff.
 
   // Log pending BEFORE enqueue so we have a record even if enqueue crashes
-  await supabase.from('email_send_log').insert({
+  const { error: pendingLogError } = await supabase.from('email_send_log').insert({
     message_id: messageId,
     template_name: templateName,
     recipient_email: effectiveRecipient,
     status: 'pending',
-    metadata: { idempotency_key: idempotencyKey },
+    metadata: { idempotency_key: idempotencyKey, ...(inquiryReplyId ? { inquiry_id: inquiryReplyId, subject: resolvedSubject, body: templateData.bodyText } : {}) },
   })
+
+  if (pendingLogError) return Response.json({ error: 'Could not record email attempt' }, { status: 500, headers: corsHeaders })
 
   const { error: enqueueError } = await supabase.rpc('enqueue_email', {
     queue_name: 'transactional_emails',
