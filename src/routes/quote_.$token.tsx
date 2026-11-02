@@ -6,7 +6,7 @@ import { getQuoteShareHead } from "@/lib/quoteShareHead.functions";
 import { quoteAccessToken, quoteShareIdentity } from "@/lib/quoteSharePresentation";
 import { PRODUCTION_ORIGIN } from "@/lib/environmentIndexingGuard";
 import { useServerFn } from "@tanstack/react-start";
-import { readNamedQuote, requestNamedQuoteCode, verifyNamedQuoteCode } from "@/lib/namedQuoteAccess.functions";
+import { changeNamedQuoteFinish, readNamedQuote, requestNamedQuoteCode, verifyNamedQuoteCode } from "@/lib/namedQuoteAccess.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -89,6 +89,18 @@ function SharedQuotePage() {
   const readQuote = useServerFn(readNamedQuote);
   const requestCode = useServerFn(requestNamedQuoteCode);
   const verifyCode = useServerFn(verifyNamedQuoteCode);
+  const changeFinish = useServerFn(changeNamedQuoteFinish);
+  const [changing, setChanging] = useState<number | null>(null);
+  const [changeError, setChangeError] = useState<{ line: number; message: string } | null>(null);
+  const pickFinish = async (line: number, choice: string) => {
+    if (quoteAccessToken(token)) return;
+    setChanging(line); setChangeError(null);
+    try {
+      const data = await changeFinish({ data: { slug: token, line, choice } });
+      setState({ status: "ready", data: data as unknown as Shared });
+    } catch { setChangeError({ line, message: "That finish couldn't be saved. Please try again." }); }
+    finally { setChanging(null); }
+  };
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [codeSent, setCodeSent] = useState(false);
@@ -180,12 +192,39 @@ function SharedQuotePage() {
                     {(() => {
                       const hasFinish = !!l.finish && l.finish.trim() !== l.dimensions?.trim();
                       const swatches = (l.finishSwatches ?? []).filter((sw) => sw.image);
+                      const choices = l.finishChoices ?? [];
+                      const editable = choices.length > 1 && !!l.itemId && !quoteAccessToken(token);
+                      const designerChoice = choices.find((c) => c.key === l.designerFinishKey);
                       return <>
+                        <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-3"><dt className="text-muted-foreground">Materials</dt><dd className="break-words">{l.materials || "Not specified"}</dd></div>
                         {hasFinish && <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-3"><dt className="text-muted-foreground">Selected finish</dt><dd className="break-words">
-                          {swatches.length > 0 ? <ul className="flex flex-wrap gap-4">{swatches.map((sw) => <li key={sw.name} className="flex items-center gap-3"><img src={sw.image!} alt={sw.name} className="h-14 w-14 object-cover border border-border" loading="lazy" /><span>{sw.name}</span></li>)}</ul> : l.finish}
+                          {swatches.length > 0 ? <ul className="flex flex-wrap gap-4">{swatches.map((sw) => <li key={sw.name} className="flex items-center gap-3"><img src={sw.image!} alt={sw.name} className="h-14 w-14 object-cover border border-border" loading="lazy" /><span>{sw.name}{l.clientChanged ? <span className="block text-xs text-muted-foreground">Your choice</span> : <span className="block text-xs text-accent">Chosen by your designer</span>}</span></li>)}</ul> : l.finish}
+                          {l.clientChanged && designerChoice && <p className="mt-2 text-xs text-muted-foreground">Your designer recommended {designerChoice.name}.</p>}
                         </dd></div>}
-                        {!hasFinish && <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-3"><dt className="text-muted-foreground">Materials</dt><dd className="break-words">{l.materials || "Not specified"}</dd></div>}
-                        {!hasFinish && !!l.finishOptions?.length && <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-3"><dt className="text-muted-foreground">Finish options</dt><dd className="break-words">{l.finishOptions.join(" · ")}</dd></div>}
+                        {editable && <div className="pt-2">
+                          <dt className="text-muted-foreground mb-3">{l.finishLabel ? `Change ${l.finishLabel.toLowerCase()}` : "Change finish"}</dt>
+                          <dd>
+                            <ul className="grid grid-cols-3 sm:grid-cols-5 gap-3" aria-label={`${l.name} finishes`}>
+                              {choices.map((c) => {
+                                const selected = c.key === l.selectedFinishKey;
+                                const isDesigner = c.key === l.designerFinishKey;
+                                return <li key={c.key}>
+                                  <button type="button" disabled={changing !== null || selected} aria-pressed={selected} onClick={() => pickFinish(i, c.key)}
+                                    className={`w-full text-left disabled:cursor-default ${selected ? "" : "opacity-80 hover:opacity-100"}`}>
+                                    <span className={`block aspect-square bg-muted overflow-hidden border-2 ${selected ? "border-primary" : isDesigner ? "border-accent" : "border-transparent"}`}>
+                                      {c.image ? <img src={c.image} alt="" className="h-full w-full object-cover" loading="lazy" /> : <span className="flex h-full items-center justify-center p-1 text-center text-[10px] text-muted-foreground">No sample image</span>}
+                                    </span>
+                                    <span className="mt-1 block text-xs leading-snug">{c.name}</span>
+                                    {isDesigner && <span className="block text-[10px] text-accent">Designer's choice</span>}
+                                    <span className="block text-[11px] text-muted-foreground tabular-nums">{c.unitCents != null && c.currency ? money(c.unitCents, c.currency) : "Price upon Request"}</span>
+                                  </button>
+                                </li>;
+                              })}
+                            </ul>
+                            <p role="status" className="mt-2 min-h-4 text-xs text-muted-foreground">{changing === i ? "Saving your choice…" : changeError?.line === i ? <span className="text-destructive">{changeError.message}</span> : "Changing a finish updates the price and your designer's quote."}</p>
+                          </dd>
+                        </div>}
+                        {!hasFinish && !editable && !!l.finishOptions?.length && <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-3"><dt className="text-muted-foreground">Finish options</dt><dd className="break-words">{l.finishOptions.join(" · ")}</dd></div>}
                       </>;
                     })()}
                   </dl>
