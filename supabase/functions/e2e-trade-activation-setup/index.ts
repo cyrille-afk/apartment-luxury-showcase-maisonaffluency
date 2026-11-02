@@ -45,6 +45,37 @@ Deno.serve(async (req) => {
   });
   const body = await req.json().catch(() => ({}));
   try {
+    if (body.action === 'verify-resend') {
+      const original = `e2e-activation-${crypto.randomUUID()}@${DOMAIN}`;
+      const corrected = `e2e-activation-${crypto.randomUUID()}@${DOMAIN}`;
+      let signupId: string | undefined;
+      try {
+        const signup = await svc.from('trade_program_signups').insert({ email: original }).select('id').single();
+        if (signup.error) throw new Error('Could not create disposable signup');
+        signupId = signup.data.id;
+        const acct = await svc.from('trade_accounts').insert({ email: original, signup_id: signupId, status: 'approved' }).select('id').single();
+        if (acct.error) throw new Error('Could not create disposable application');
+        const first = new URL(await prepareTradeActivation(svc, original)).searchParams.get('token_hash');
+        const second = new URL(await prepareTradeActivation(svc, original)).searchParams.get('token_hash');
+        if (!first || !second) throw new Error('Missing disposable setup proof');
+        const publicClient = createClient(Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_ANON_KEY') ?? '', { auth: { persistSession: false, autoRefreshToken: false } });
+        const stale = await publicClient.auth.verifyOtp({ type: 'recovery', token_hash: first });
+        if (!stale.error) throw new Error('Old same-address setup proof was accepted');
+        const changed = await svc.from('trade_accounts').update({ email: corrected }).eq('id', acct.data.id);
+        if (changed.error) throw new Error('Could not correct disposable recipient');
+        const latest = new URL(await prepareTradeActivation(svc, corrected)).searchParams.get('token_hash');
+        if (!latest) throw new Error('Missing latest disposable setup proof');
+        const oldAddress = await publicClient.auth.verifyOtp({ type: 'recovery', token_hash: second });
+        if (!oldAddress.error) throw new Error('Old-address setup proof was accepted');
+        const current = await publicClient.auth.verifyOtp({ type: 'recovery', token_hash: latest });
+        if (current.error || current.data.user?.email !== corrected) throw new Error('Latest setup proof failed');
+        return json({ ok: true, olderSameEmailRejected: true, olderCorrectedEmailRejected: true, latestLinkVerified: true });
+      } finally {
+        await cleanup(svc, corrected);
+        await cleanup(svc, original);
+        if (signupId) await svc.from('trade_program_signups').delete().eq('id', signupId);
+      }
+    }
     if (body.action === "cleanup") {
       const email = String(body.email ?? "").toLowerCase();
       if (!EMAIL_RE.test(email) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: "Invalid email" }, 400);
