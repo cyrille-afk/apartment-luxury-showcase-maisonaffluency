@@ -35,7 +35,7 @@ export function InquiryReplyDialog({ inquiry, onClose }: { inquiry: ReplyInquiry
       try { sessionStorage.setItem(storageKey, JSON.stringify({ subject, body, key })); } catch { /* storage unavailable */ }
     }
   }, [ready, storageKey, subject, body, key, queued]);
-  const { data: history } = useQuery({
+  const { data: history, error: historyError } = useQuery({
     queryKey: ["inquiry-replies", inquiry?.id], enabled: !!inquiry,
     refetchInterval: inquiry ? 3000 : false,
     queryFn: async () => {
@@ -45,11 +45,17 @@ export function InquiryReplyDialog({ inquiry, onClose }: { inquiry: ReplyInquiry
         .eq("template_name", "inquiry-reply").contains("metadata", { inquiry_id: inquiry.id })
         .order("created_at", { ascending: false }).limit(30);
       if (error) throw error;
-      return data || [];
+      const attempts = data || [];
+      const ids = attempts.map(row => row.message_id).filter((id): id is string => !!id);
+      if (!ids.length) return attempts;
+      const { data: statuses, error: statusError } = await supabase.from("email_send_log")
+        .select("message_id, status, created_at").in("message_id", ids).order("created_at", { ascending: false }).limit(100);
+      if (statusError) throw statusError;
+      return attempts.map(row => ({ ...row, status: statuses?.find(s => s.message_id === row.message_id)?.status || row.status }));
     },
   });
   const seen = new Set<string>();
-  const messages = (history || []).filter(row => { if (seen.has(row.message_id)) return false; seen.add(row.message_id); return true; });
+  const messages = (history || []).filter(row => { const id = row.message_id || row.id; if (seen.has(id)) return false; seen.add(id); return true; });
   return <Dialog open={!!inquiry} onOpenChange={open => { if (!open && !sending) onClose(); }}>
     <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto" hideClose={sending}>
       <DialogHeader><DialogTitle>Reply to {inquiry?.name}</DialogTitle><DialogDescription>{inquiry?.email}</DialogDescription></DialogHeader>
@@ -74,6 +80,7 @@ export function InquiryReplyDialog({ inquiry, onClose }: { inquiry: ReplyInquiry
           {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
           <div className="flex justify-end gap-2"><Button type="button" variant="outline" onClick={onClose} disabled={sending}>Cancel</Button><Button type="submit" disabled={sending || !ready || !body.trim() || !subject.trim()}><Send />{sending ? "Sending…" : "Send reply"}</Button></div>
         </form>}
+        {historyError && <p role="alert" className="text-sm text-destructive">Reply history couldn’t load. Please reopen this reply.</p>}
         {!!messages.length && <section className="border-t border-border pt-4"><h3 className="mb-3 flex items-center gap-2 text-sm font-medium"><Mail className="size-4" />Reply history</h3>
           {messages.map(row => { const meta = row.metadata as Record<string, unknown> | null; return <div key={row.id} className="mb-3 text-sm">
             <p className="text-muted-foreground">{row.status === "sent" ? "Sent" : row.status === "pending" ? "Queued" : row.status === "suppressed" ? "Not sent — opted out" : "Sending failed"} · {new Date(row.created_at).toLocaleString()}</p>
