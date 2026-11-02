@@ -3,6 +3,17 @@ import { hasConsent } from '@/lib/consent/consentStore';
 
 export type DirectoryDay = { day: string; searches: number; letters: number; profiles: number; opens: number; dismissed: number };
 export type DirectoryActivity = { updated_at: string; started_at: string | null; days: DirectoryDay[]; letters: { letter: string; count: number }[]; reasons: { reason: string; count: number }[] };
+export type DesignerView = { designer_slug: string; occurred_at: string };
+export function designerViewRanking(views: DesignerView[], names: Record<string, string>) {
+  const grouped = new Map<string, { slug: string; name: string; views: number; lastViewed: string }>();
+  for (const view of views) {
+    const row = grouped.get(view.designer_slug) ?? { slug: view.designer_slug, name: names[view.designer_slug] ?? view.designer_slug, views: 0, lastViewed: view.occurred_at };
+    row.views++;
+    if (view.occurred_at > row.lastViewed) row.lastViewed = view.occurred_at;
+    grouped.set(row.slug, row);
+  }
+  return [...grouped.values()].sort((a, b) => b.views - a.views || a.name.localeCompare(b.name));
+}
 export function dismissalRate(opens: number, dismissed: number): number | null {
   return opens > 0 ? dismissed / opens * 100 : null;
 }
