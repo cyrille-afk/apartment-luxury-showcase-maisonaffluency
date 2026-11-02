@@ -44,6 +44,15 @@ describe("client link analytics", () => {
     await waitFor(() => expect(mocks.toast).toHaveBeenCalled());
     expect(track).not.toHaveBeenCalled();
   });
+  it("does not create or copy a link when the server requires a saved client email", async () => {
+    mocks.rpc.mockResolvedValue({ data: null, error: { message: "save client email before sharing" } });
+    render(<ShareQuoteWithClient quoteId="test-quote" />);
+    fireEvent.click(screen.getByRole("button", { name: "Share with client" }));
+    await waitFor(() => expect(screen.getByRole("alert")).toBeTruthy());
+    expect(writeText).not.toHaveBeenCalled();
+    expect(track).not.toHaveBeenCalled();
+    expect(mocks.rpc).toHaveBeenCalledExactlyOnceWith("create_named_quote_share", expect.objectContaining({ _quote_id: "test-quote" }));
+  });
   it("tracks existing and newly created guest link copies, but never a send", async () => {
     render(<GuestPayLinkCard quoteId="test-quote" currency="EUR" orderTotalCents={100000} />);
     fireEvent.click(await screen.findByRole("button", { name: "Copy" }));
