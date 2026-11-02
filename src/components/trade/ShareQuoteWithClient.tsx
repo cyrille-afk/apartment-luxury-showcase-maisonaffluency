@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link2, Loader2, Check, Ban } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { buildSharedQuoteSnapshot, type ShareSourceLine } from "@/lib/quoteClientShare";
+import { PRODUCTION_ORIGIN } from "@/lib/environmentIndexingGuard";
 import { toast } from "sonner";
 
 const ITEM_SELECT =
