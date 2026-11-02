@@ -1,5 +1,9 @@
 # Roadmap
 
+## Approved studio password setup
+- [ ] Expose a clear admin password-setup resend action for approved studios without altering their approval.
+- [ ] Verify activation securely links the verified account to its already approved studio, with regression tests and an end-to-end check.
+
 ## Inquiry reply button
 - [x] Both Reply actions open an in-app composer; signed-in cancel/reopen restores the draft and saved history shows the exact reply and Sent status.
 - [x] Existing admin-checked branded sender derives recipients from saved inquiries; real test reply and both staff copies have sent records. Invalid authentication rejected, 12 tests pass, startup/live checks pass, preview build OK; removed only the test inquiry.
