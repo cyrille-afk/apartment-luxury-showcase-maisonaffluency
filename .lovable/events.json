@@ -242,6 +242,73 @@
         }
       }
     },
+    "project.directory_search_refined": {
+      "event_schema_version": 1,
+      "description": "A visitor starts, extends, shortens, replaces or clears a directory search, or switches to an initial; stores catalogue matches only.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "refinement",
+          "result_count",
+          "surface",
+          "match_kind",
+          "canonical_designer",
+          "matched_designers"
+        ],
+        "properties": {
+          "refinement": {
+            "type": "string",
+            "enum": [
+              "initial",
+              "extend",
+              "shorten",
+              "replace",
+              "clear",
+              "letter"
+            ]
+          },
+          "letter": {
+            "type": "string",
+            "pattern": "^[A-Z]$"
+          },
+          "result_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "surface": {
+            "type": "string",
+            "enum": [
+              "desktop",
+              "mobile"
+            ]
+          },
+          "match_kind": {
+            "type": "string",
+            "enum": [
+              "empty",
+              "exact_designer",
+              "partial_designer",
+              "unmatched"
+            ]
+          },
+          "canonical_designer": {
+            "type": "string"
+          },
+          "matched_designers": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
     "project.order_paid": {
       "event_schema_version": 2,
       "description": "An order was paid: Stripe confirmed a card/PayNow/wallet checkout, or an admin marked a bank-transfer order paid (source=admin_marked).",
