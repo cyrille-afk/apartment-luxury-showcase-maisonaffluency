@@ -1,5 +1,9 @@
 # Roadmap
 
+## Quote product specifications
+- [ ] Add compact dimensions, materials, selected finish and finish options from the saved share snapshot, retaining older links and retail-only pricing.
+- [ ] Verify snapshot privacy tests and real quote desktop/mobile rendering; older snapshots need a newly copied share to include added fields.
+
 ## Branded client quote pages
 - [x] Refine Maison Affluency branding, product imagery, maker credits and configuration details without changing client-safe prices or access.
 - [x] Existing shared Angelo quote verified on desktop and mobile: authentic image loads, no overflow/runtime errors, branded unavailable state; six quote privacy/identity tests pass and preview build OK.
