@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Readable quote links and previews
-- [ ] Include recorded maker/product names in newly copied quote addresses while preserving old tokens.
-- [ ] Serve token-validated designer/product previews without recipient or pricing metadata; verify the supplied link and unavailable links.
+- [x] Newly copied quote links include recorded maker/product names with unchanged secure tokens; old links remain valid.
+- [x] Supplied QU-42891A verified on legacy/named URLs: SSR preview says Angelo M/H High Table by Alinea, client summary loads, invalid token shows unavailable. Authentic letterboxed JPEG is 1200×630 / 20KB; 59 tests pass, build OK. Live addresses/previews await publication.
 
 ## Quote and guest-payment link analytics
 - [x] Track successful quote/guest-payment copies and confirmed existing guest-payment email sends, without recipients or tokens; failures do not emit.
