@@ -3706,6 +3706,49 @@ const TradeProductPage: React.FC = () => {
             : undefined
         }
       />
+
+      <AlertDialog open={!!quoteConfirm} onOpenChange={(open) => { if (!open) setQuoteConfirm(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Add to an existing quote?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This product will be added to quote{" "}
+              <span className="font-medium text-foreground">
+                QU-{quoteConfirm?.quoteId.slice(0, 6).toUpperCase()}
+              </span>
+              {quoteConfirm?.createdAt && (
+                <>
+                  {" "}created on{" "}
+                  {new Date(quoteConfirm.createdAt).toLocaleDateString([], { day: "numeric", month: "long", year: "numeric" })}
+                </>
+              )}
+              . You can add it there or start a new quote instead.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setQuoteConfirm(null);
+                forgetActiveQuote();
+                setActiveQuoteId(null);
+                void handleAddToQuote(true);
+              }}
+            >
+              Start a new quote
+            </Button>
+            <AlertDialogAction
+              onClick={() => {
+                setQuoteConfirm(null);
+                void handleAddToQuote(true);
+              }}
+            >
+              Add to this quote
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
      </div>
   );
 };
