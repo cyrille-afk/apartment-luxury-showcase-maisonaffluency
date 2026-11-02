@@ -2,7 +2,7 @@
 
 ## SEO failing findings review
 - [x] Fresh foundations scan: all eight checks pass, including sitemap; verified published www host, 44 category pages, sign-in entry and page-specific lastmod sources. Four sitemap tests pass; no code correction needed.
-- [ ] Optional collectible-design investment article remains a stale content suggestion, not a technical failure; requires explicit content approval before research and drafting.
+- [ ] User approved researching and drafting the collectible-design guide; save an unpublished, sourced journal draft without return promises.
 
 ## Inline quote recipient
 - [x] Add a saved recipient email beside quote sharing; Share saves it first, invalid or failed saves block sharing, and unrelated billing details and address-book contacts are preserved.
