@@ -7973,13 +7973,79 @@ export type Database = {
         }
         Relationships: []
       }
+      quote_access_challenges: {
+        Row: {
+          attempts: number
+          code_hash: string
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          share_id: string
+        }
+        Insert: {
+          attempts?: number
+          code_hash: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          share_id: string
+        }
+        Update: {
+          attempts?: number
+          code_hash?: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          share_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_access_challenges_share_id_fkey"
+            columns: ["share_id"]
+            isOneToOne: false
+            referencedRelation: "quote_client_shares"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quote_access_sessions: {
+        Row: {
+          expires_at: string
+          share_id: string
+          token_hash: string
+        }
+        Insert: {
+          expires_at: string
+          share_id: string
+          token_hash: string
+        }
+        Update: {
+          expires_at?: string
+          share_id?: string
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_access_sessions_share_id_fkey"
+            columns: ["share_id"]
+            isOneToOne: false
+            referencedRelation: "quote_client_shares"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quote_client_shares: {
         Row: {
           created_at: string
           created_by: string
           expires_at: string
           id: string
+          public_slug: string | null
           quote_id: string
+          recipient_email: string | null
           revoked_at: string | null
           snapshot: Json
           token_hash: string
@@ -7989,7 +8055,9 @@ export type Database = {
           created_by: string
           expires_at?: string
           id?: string
+          public_slug?: string | null
           quote_id: string
+          recipient_email?: string | null
           revoked_at?: string | null
           snapshot: Json
           token_hash: string
@@ -7999,7 +8067,9 @@ export type Database = {
           created_by?: string
           expires_at?: string
           id?: string
+          public_slug?: string | null
           quote_id?: string
+          recipient_email?: string | null
           revoked_at?: string | null
           snapshot?: Json
           token_hash?: string
@@ -13369,6 +13439,10 @@ export type Database = {
         Args: { _board_id: string; _email: string; _role: string }
         Returns: Json
       }
+      create_named_quote_share: {
+        Args: { _quote_id: string; _slug: string; _snapshot: Json }
+        Returns: string
+      }
       create_project_board_view_invite: {
         Args: { _board_id: string; _email: string; _project_id: string }
         Returns: Json
@@ -13674,6 +13748,10 @@ export type Database = {
       }
       get_trade_only_collectible_slugs: { Args: never; Returns: string[] }
       get_user_studio_ids: { Args: { _user_id: string }; Returns: string[] }
+      get_verified_quote: {
+        Args: { _session: string; _slug: string }
+        Returns: Json
+      }
       grant_video_pass: {
         Args: { _credits: number; _session: string; _user: string }
         Returns: boolean
@@ -14080,6 +14158,10 @@ export type Database = {
       }
       release_ingestion_lease: { Args: { _owner: string }; Returns: undefined }
       remap_product_descriptors: { Args: never; Returns: number }
+      request_quote_access: {
+        Args: { _email: string; _slug: string }
+        Returns: Json
+      }
       resend_expired_project_board_invite: {
         Args: { _board_id: string; _invite_id: string; _project_id: string }
         Returns: Json
@@ -14211,6 +14293,10 @@ export type Database = {
       }
       validate_portal_session: { Args: { _token: string }; Returns: Json }
       verified_order_email: { Args: never; Returns: string }
+      verify_quote_access: {
+        Args: { _code: string; _email: string; _slug: string }
+        Returns: string
+      }
       webhook_events_has_work: { Args: never; Returns: boolean }
       webhook_queue_dispatch: { Args: never; Returns: undefined }
       webhook_queue_status: { Args: never; Returns: Json }
