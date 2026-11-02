@@ -50,11 +50,34 @@ test("visual directory filters live and dismisses immediately", async ({ page })
   }).directoryTestEvents);
   expect(events.filter(event => event.name === "project.directory_search_changed").map(event => event.properties))
     .toEqual([
-      { character_count: 6, result_count: 1, surface: "desktop" },
-      { character_count: 13, result_count: 0, surface: "desktop" },
+      { character_count: 6, result_count: 1, surface: "desktop", match_kind: 'partial_designer', canonical_designer: 'none', matched_designers: ['amelie-vermersch'] },
+      { character_count: 13, result_count: 0, surface: "desktop", match_kind: 'unmatched', canonical_designer: 'none', matched_designers: [] },
     ]);
   expect(events.filter(event => event.name === "project.directory_letter_selected").map(event => event.properties.letter)).toEqual(["A", "C"]);
   expect(events.filter(event => event.name === "project.directory_modal_dismissed").map(event => event.properties.reason)).toEqual(["escape", "outside", "close_button"]);
   expect(JSON.stringify(events)).not.toContain("Amelie");
   expect(JSON.stringify(events)).not.toContain("zzz-unmatched");
+});
+
+test('search refinements retain catalogue matches and selected designer outcomes', async ({ page }) => {
+  test.setTimeout(120_000);
+  await page.goto('/designers');
+  await page.waitForFunction(() => Array.from(document.querySelectorAll('input')).some(input => Object.keys(input).some(key => key.startsWith('__reactProps'))));
+  await page.evaluate(() => {
+    const events: Array<{ name: string; properties?: Record<string, unknown> }> = [];
+    Object.assign(window, { directoryTestEvents: events });
+    window.__lovableEvents = { track: (name, properties) => { events.push({ name, properties }); return null; } };
+  });
+  const input = page.getByPlaceholder('Search directory', { exact: true });
+  await input.click();
+  const grid = page.getByTestId('directory-visual-grid');
+  await expect(grid.getByRole('link').first()).toBeVisible({ timeout: 60_000 });
+  for (const value of ['Am', 'Amelie', 'Am', 'Michel', '', 'private@example.com', 'Amelie']) await input.fill(value);
+  await expect(grid.getByRole('link')).toHaveCount(1);
+  await grid.getByRole('link', { name: 'View Amélie Vermersch', exact: true }).click();
+  await expect(page).toHaveURL(/\/designers\/amelie-vermersch$/);
+  const events = await page.evaluate(() => (window as unknown as { directoryTestEvents: Array<{ name: string; properties: Record<string, unknown> }> }).directoryTestEvents);
+  expect(events.filter(e => e.name === 'project.directory_search_refined').map(e => e.properties.refinement)).toEqual(['initial', 'extend', 'shorten', 'replace', 'clear', 'initial', 'replace']);
+  expect(events.filter(e => e.name === 'project.directory_search_result_selected').map(e => e.properties.designer_slug)).toEqual(['amelie-vermersch']);
+  expect(JSON.stringify(events)).not.toContain('private@example.com');
 });
