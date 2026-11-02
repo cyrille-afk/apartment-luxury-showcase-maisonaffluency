@@ -13414,6 +13414,15 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      client_change_quote_finish: {
+        Args: {
+          _choice: string
+          _line: number
+          _session: string
+          _slug: string
+        }
+        Returns: Json
+      }
       commit_admin_price_save: { Args: { _id: string }; Returns: Json }
       compute_curator_pick_slug: {
         Args: { _subtitle: string; _title: string }
