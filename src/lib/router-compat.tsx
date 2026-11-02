@@ -82,7 +82,7 @@ export function useNavigate(): NavigateFn {
       return;
     }
     const { pathname, search, hash } = parseTo(to);
-    tsNav({
+    const go = () => tsNav({
       to: pathname,
       search: search as never,
       hash,
@@ -90,6 +90,11 @@ export function useNavigate(): NavigateFn {
       replace: options?.replace,
       resetScroll: options?.preventScrollReset || isProductDetailPath(pathname) ? false : undefined,
     });
+    // Product pages are lazily rendered; inside a transition React keeps the
+    // outgoing listing on screen instead of swapping in a short loading
+    // screen, which made the browser snap the page to the top first.
+    if (isProductDetailPath(pathname)) startTransition(() => { void go(); });
+    else go();
   }, [tsNav, router]) as NavigateFn;
 }
 
