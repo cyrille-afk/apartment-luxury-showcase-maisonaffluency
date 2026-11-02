@@ -994,7 +994,7 @@ const StudioGallery = () => {
                     )}
                   </div>
                   {(metadata.leadTime || metadata.dimensions) && (
-                    <div data-card-specifications className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex flex-col gap-0.5 bg-background/95 py-1 text-left font-mono text-[9px] uppercase tracking-normal text-muted-foreground opacity-0 transition-opacity duration-300 motion-reduce:transition-none group-hover:opacity-100 group-focus-within:opacity-100">
+                    <div data-card-specifications className="pointer-events-none absolute inset-x-0 bottom-14 z-30 flex flex-col gap-0.5 bg-background/95 py-1 text-left font-mono text-[9px] uppercase tracking-normal text-muted-foreground opacity-0 transition-opacity duration-300 motion-reduce:transition-none group-hover:opacity-100 group-focus-within:opacity-100">
                       {metadata.leadTime && <span>Lead Time: {metadata.leadTime}</span>}
                       {metadata.dimensions && <span className="truncate" title={metadata.dimensions}>Dimensions: {metadata.dimensions}</span>}
                     </div>
