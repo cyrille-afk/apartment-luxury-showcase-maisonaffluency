@@ -58,7 +58,7 @@ describe("visual directory filtering", () => {
   });
   it("A displays only names beginning with A", () => {
     expect(filterDesignerDirectory(designers, "", "A").map(d => d.slug))
-      .toEqual(["amelie-vermersch", "andrea-claire-studio"]);
+      .toEqual(["amelie-vermersch", "andrea-claire-studio", "hidden-ce-alias"]);
   });
   it("clearing filters restores the whole matrix and unmatched text returns no cards", () => {
     expect(filterDesignerDirectory(designers, "", null)).toEqual(designers);
