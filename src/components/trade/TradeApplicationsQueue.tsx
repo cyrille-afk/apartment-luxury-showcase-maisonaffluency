@@ -136,7 +136,7 @@ export default function TradeApplicationsQueue() {
       let q = supabase
         .from("trade_accounts")
         .select(
-          "id, email, studio_name, contact_name, country, website_or_ig, business_reg_number, status, user_id, created_at, radar_score, radar_flag, radar_status, studio_aesthetic_dna(status, aesthetic_label, aesthetic_summary, dominant_tones, materials, image_urls, error)",
+          "id, email, studio_name, contact_name, country, website_or_ig, business_reg_number, status, user_id, created_at, radar_score, radar_flag, radar_status, studio_aesthetic_dna(status, aesthetic_label, aesthetic_summary, dominant_tones, historical_affinities, materials, image_urls, error)",
         )
         .order("created_at", { ascending: false })
         .limit(200);

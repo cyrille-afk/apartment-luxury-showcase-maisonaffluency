@@ -1,12 +1,16 @@
 import { describe, expect, it, vi } from 'vitest';
-import { completeTradeActivation } from '../../supabase/functions/_shared/tradeActivation';
 import type { SupabaseClient } from '@supabase/supabase-js';
+
+// Deno-only type imports must not enter the app's TypeScript module graph.
+const activationModule = '../../supabase/functions/_shared/tradeActivation.ts';
+const { completeTradeActivation } = await import(/* @vite-ignore */ activationModule);
 
 function fixture({ confirmed = true, owner = null as string | null, status = 'approved' } = {}) {
   const writes: { table: string; data: unknown }[] = [];
   const filters: { table: string; column: string; value: unknown }[] = [];
   const service = {
     auth: { admin: { getUserById: vi.fn(async () => ({ data: { user: { email: 'integrha@yahoo.com', email_confirmed_at: confirmed ? '2026-11-02' : null } }, error: null })) } },
+    functions: { invoke: async () => ({ error: null }) },
     from: (table: string) => {
       const chain = {
         select: () => chain,
@@ -14,6 +18,8 @@ function fixture({ confirmed = true, owner = null as string | null, status = 'ap
         maybeSingle: async () => ({ data: { id: 'approved-studio', status, user_id: owner }, error: null }),
         update: (data: unknown) => { writes.push({ table, data }); return chain; },
         upsert: async (data: unknown) => { writes.push({ table, data }); return { error: null }; },
+        insert: async () => ({ error: null }),
+        in: async () => ({ data: [], error: null }),
         then: (resolve: (value: unknown) => void) => resolve({ error: null }),
       };
       return chain;
@@ -24,8 +30,7 @@ function fixture({ confirmed = true, owner = null as string | null, status = 'ap
 
 describe('Approved studio activation linking', () => {
   it('links Juliana’s verified account to the existing approved studio without approving again', async () => {
-    // Already linked to this same user avoids activation-notification side effects in this unit test.
-    const { service, writes, filters } = fixture({ owner: 'juliana-account' });
+    const { service, writes, filters } = fixture();
     await expect(completeTradeActivation(service, 'juliana-account')).resolves.toEqual({ ok: true });
     expect(writes).toContainEqual({ table: 'trade_accounts', data: { user_id: 'juliana-account' } });
     expect(filters).toContainEqual({ table: 'trade_accounts', column: 'email', value: 'integrha@yahoo.com' });
