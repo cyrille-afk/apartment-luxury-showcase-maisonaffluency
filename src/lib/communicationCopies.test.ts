@@ -4,17 +4,21 @@ import { ensureCommunicationCopies, requiresCommunicationCopies } from '../../su
 
 vi.stubGlobal('crypto', webcrypto)
 
-function mockClient(options: { suppressed?: string; used?: string; fail?: string } = {}) {
+function mockClient(options: { suppressed?: string; used?: string; fail?: string; persistLog?: boolean } = {}) {
+  const logged = new Set<string>()
   const rpc = vi.fn(async (_name, args) => ({ error: args.payload.to === options.fail ? new Error('offline') : null }))
   const from = vi.fn((table: string) => {
     let email = ''
     const query = {
       select: () => query,
+      limit: () => query,
       eq: (_field: string, value: string) => { email = value; return query },
-      maybeSingle: async () => ({ error: null, data: table === 'suppressed_emails'
+      maybeSingle: async () => ({ error: null, data: table === 'email_send_log'
+        ? (logged.has(email) ? { id: 'logged' } : null)
+        : table === 'suppressed_emails'
         ? (email === options.suppressed ? { id: 'blocked' } : null)
         : { token: `token-${email}`, used_at: email === options.used ? '2026-10-06' : null } }),
-      insert: vi.fn(async () => ({ error: null })),
+      insert: vi.fn(async (row: { message_id: string }) => { if (options.persistLog) logged.add(row.message_id); return { error: null } }),
     }
     return query
   })
