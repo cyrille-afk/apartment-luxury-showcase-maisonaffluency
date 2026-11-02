@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Quote sharing feedback
-- [ ] Verify Share with Client against a saved quote and keep blockers/results visible beside the button, including the required saved client email.
+- [x] Sharing control tested signed in against the latest saved Angelo quote: server rejects sharing until the client email is saved; inline message remains visible. Nine regressions pass, build OK. Original drawer placement was not reproduced; control verified separately against real data without changing the quote.
 
 ## Password-setup resend security
 - [x] Fresh setup emails replace native recovery tokens; corrected-recipient issuance and retries also invalidate original signup-address tokens without changing approval or rotating the latest queued link.
