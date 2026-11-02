@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { phoneCountryMismatch } from "@/lib/phoneCountry";
 import { CheckCircle2, Loader2, Mail, PauseCircle, RefreshCw, X } from "lucide-react";
 import VisualThemeAnalysis, { type VisualThemeDna } from "@/components/trade/VisualThemeAnalysis";
 import { WaitingClock } from "@/components/trade/TimeToApproval";
@@ -31,6 +32,7 @@ type Account = {
   studio_name: string | null;
   contact_name: string | null;
   country: string | null;
+  phone_number: string | null;
   website_or_ig: string | null;
   business_reg_number: string | null;
   status: "pending_review" | "on_hold" | "approved" | "rejected";
@@ -136,7 +138,7 @@ export default function TradeApplicationsQueue() {
       let q = supabase
         .from("trade_accounts")
         .select(
-          "id, email, studio_name, contact_name, country, website_or_ig, business_reg_number, status, user_id, created_at, radar_score, radar_flag, radar_status, studio_aesthetic_dna(status, aesthetic_label, aesthetic_summary, dominant_tones, historical_affinities, materials, image_urls, error)",
+          "id, email, studio_name, contact_name, country, phone_number, website_or_ig, business_reg_number, status, user_id, created_at, radar_score, radar_flag, radar_status, studio_aesthetic_dna(status, aesthetic_label, aesthetic_summary, dominant_tones, historical_affinities, materials, image_urls, error)",
         )
         .order("created_at", { ascending: false })
         .limit(200);
@@ -313,6 +315,8 @@ export default function TradeApplicationsQueue() {
                   </div>
                   {a.contact_name && <div className="text-muted-foreground">{a.contact_name}</div>}
                   <div className="text-muted-foreground">{a.email}</div>
+                  {(a.country || a.phone_number) && <div className="text-xs text-muted-foreground">{[a.country, a.phone_number].filter(Boolean).join(" · ")}</div>}
+                  {(() => { const m = phoneCountryMismatch(a.phone_number, a.country); return m ? <Badge variant="destructive" className="rounded-none text-[10px] uppercase tracking-wider">Country mismatch · {m}</Badge> : null; })()}
                   {a.status === 'approved' && <div className="text-xs text-muted-foreground">{a.user_id ? 'Account linked to approved studio' : 'Awaiting password setup'}</div>}
                   {(() => {
                     const key = a.email.toLowerCase();

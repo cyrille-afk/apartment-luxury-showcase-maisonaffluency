@@ -1,3 +1,4 @@
+import { prefillCountryForPhone } from "@/lib/phoneCountry";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { captureOutreachClick } from "@/lib/outreachLink";
 import { motion } from "framer-motion";
@@ -350,7 +351,7 @@ const HeroJoinForm = ({
       </div>
       <div>
         <label htmlFor={ghost ? "mobile-phone" : "phone"} className={labelCls}>Phone Number</label>
-        <input id={ghost ? "mobile-phone" : "phone"} type="tel" name="phone" defaultValue={prefillPhone} required minLength={7} maxLength={30} autoComplete="tel" placeholder="E.G., +1 212 555 0199" className={inputCls} />
+        <input id={ghost ? "mobile-phone" : "phone"} type="tel" name="phone" defaultValue={prefillPhone} required minLength={7} maxLength={30} autoComplete="tel" placeholder="E.G., +1 212 555 0199" className={inputCls} onBlur={(e) => { const sel = e.currentTarget.form?.elements.namedItem("country") as HTMLSelectElement | null; const guess = prefillCountryForPhone(e.currentTarget.value); if (sel && !sel.value && guess && APPLICATION_COUNTRIES.includes(guess)) sel.value = guess; }} />
       </div>
       <div>
         <label htmlFor={ghost ? "mobile-website" : "website"} className={labelCls}>Website or Instagram Handle</label>
