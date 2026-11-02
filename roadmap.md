@@ -1,5 +1,9 @@
 # Roadmap
 
+## Readable quote links and previews
+- [ ] Include recorded maker/product names in newly copied quote addresses while preserving old tokens.
+- [ ] Serve token-validated designer/product previews without recipient or pricing metadata; verify the supplied link and unavailable links.
+
 ## Quote and guest-payment link analytics
 - [x] Track successful quote/guest-payment copies and confirmed existing guest-payment email sends, without recipients or tokens; failures do not emit.
 - [x] Native /quote/ and /pay/ page views count visits without duplicate events; last-seven-day published query currently returns no visits. Two new schemas validate (13 total), 54 tests pass and preview build OK. Quote sharing is copy-only: external WhatsApp/email sends are not observable. Signed-in workspace inspected, but real copy/send end-to-end was not completed (current projectless quote has no Share control; no customer email sent).
