@@ -1,3 +1,4 @@
+import { heldTradePageHeight, setHeldTradePageHeight } from "@/lib/tradePageHeightHold";
 import { lazy, Suspense, useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
@@ -335,13 +336,12 @@ function BackToTopButton() {
 
 const TradeLayout = () => {
   // Last rendered page height, used to hold layout while the next page loads.
-  const lastOutletHeight = useRef(0);
   const outletObserver = useRef<ResizeObserver | null>(null);
   const outletHeightRef = useCallback((el: HTMLDivElement | null) => {
     outletObserver.current?.disconnect();
     if (!el || typeof ResizeObserver === "undefined") return;
     outletObserver.current = new ResizeObserver(([entry]) => {
-      if (!el.querySelector("[data-trade-page-loading]")) lastOutletHeight.current = entry.contentRect.height;
+      if (!el.querySelector("[data-trade-page-loading]")) setHeldTradePageHeight(entry.contentRect.height);
     });
     outletObserver.current.observe(el);
   }, []);
@@ -660,7 +660,7 @@ const TradeLayout = () => {
               <Suspense fallback={
                 // Holds the outgoing page's height so the browser never snaps the
                 // window up while the next page (e.g. a product) is loading.
-                <div data-trade-page-loading role="status" aria-label="Loading workspace" style={{ minHeight: lastOutletHeight.current || undefined }} className="relative">
+                <div data-trade-page-loading role="status" aria-label="Loading workspace" style={{ minHeight: heldTradePageHeight() || undefined }} className="relative">
                   <div className="sticky top-1/2 flex items-center justify-center py-20">
                     <DotCircleLoader size="sm" className="text-muted-foreground" />
                   </div>
