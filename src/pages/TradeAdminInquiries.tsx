@@ -9,6 +9,8 @@ import { useEffect, useState, useMemo } from "react";
 import { Inbox, Mail, Phone, Package, User, Clock, ExternalLink, FileText, X, CheckCircle2, MessageCircle, Send, Trash2, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { InquiryReplyDialog, type ReplyInquiry } from "@/components/trade/InquiryReplyDialog";
 
 type InquiryRow = {
   id: string;
@@ -97,6 +99,7 @@ export default function TradeAdminInquiries() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [quoteKind, setQuoteKind] = useState<"public" | "trade">("public");
   const [notesDraft, setNotesDraft] = useState<string>("");
+  const [replyInquiry, setReplyInquiry] = useState<ReplyInquiry | null>(null);
 
   // Debounce the box so typing doesn't fire a request per keystroke.
   useEffect(() => {
@@ -348,12 +351,12 @@ export default function TradeAdminInquiries() {
                       )}
                     </div>
                     <div className="mt-2 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                      <a
-                        href={`mailto:${r.email}?subject=${encodeURIComponent(`Re: ${r.product_name || "Your Maison Affluency inquiry"}`)}`}
+                      <Button type="button" variant="outline" size="sm"
+                        onClick={() => setReplyInquiry(r)}
                         className="flex items-center gap-1 rounded-md border border-border px-2 py-1 text-[11px] text-muted-foreground hover:border-accent/50 hover:text-accent"
                       >
                         <Mail className="h-3 w-3" /> Reply
-                      </a>
+                      </Button>
                       {whatsappHref(r.phone) && (
                         <a
                           href={whatsappHref(r.phone)!}
@@ -440,12 +443,12 @@ export default function TradeAdminInquiries() {
 
                 {/* Primary actions */}
                 <div className="mt-4 flex flex-wrap items-center gap-2">
-                  <a
-                    href={`mailto:${selected.email}?subject=${encodeURIComponent(`Re: ${selected.product_name || "Your Maison Affluency inquiry"}`)}`}
+                  <Button type="button" size="sm"
+                    onClick={() => setReplyInquiry(selected)}
                     className="flex items-center gap-1.5 rounded-md bg-accent px-3.5 py-2 text-xs font-heading text-accent-foreground hover:opacity-90"
                   >
                     <Mail className="h-3.5 w-3.5" /> Reply by email
-                  </a>
+                  </Button>
                   {whatsappHref(selected.phone) && (
                     <a
                       href={whatsappHref(selected.phone)!}
@@ -669,6 +672,7 @@ export default function TradeAdminInquiries() {
           </div>
         </div>
       </div>
+      <InquiryReplyDialog inquiry={replyInquiry} onClose={() => setReplyInquiry(null)} />
     </div>
   );
 }
