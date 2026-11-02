@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Quote-open engagement dashboard
-- [ ] Show private daily aggregate Quote opens without names, quote identifiers or tokens; confirm a supported read connection to the existing analytics stream before implementation.
+- [ ] Show private daily aggregate Quote opens without names, quote identifiers or tokens. Blocked: the existing analytics stream has no verified app-readable aggregate connection; temporary agent query credentials cannot be embedded in the app. A dated snapshot is possible but is not live tracking.
 
 ## Aggregate quote opens
 - [x] Count successful client-side shared quote reads as Quote opens with empty event properties; exclude unavailable, failed, abandoned and crawler-only requests.
