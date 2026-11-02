@@ -162,9 +162,11 @@ export function buildSharedQuoteSnapshot(quoteId: string, clientName: string | n
       finishOptions: finish || fc.choices.length ? [] : [...new Set((item.product?.available_finishes ?? []).map((value) => value.trim()).filter(Boolean))],
       finishSwatches,
       quantity: Math.max(0, Number(item.quantity) || 0),
-      unitCents: pricing?.unitCents ?? null,
-      lineTotalCents: pricing?.lineTotalCents ?? null,
-      currency: pricing?.currency ?? null,
+      // Bundled price rows ("A / B / C") are saved as the single clicked name,
+      // so fall back to that finish's own retail when catalogue lookup can't match.
+      unitCents: pricing?.unitCents ?? designerChoice?.unitCents ?? null,
+      lineTotalCents: pricing?.lineTotalCents ?? (designerChoice?.unitCents != null ? designerChoice.unitCents * Math.max(0, Number(item.quantity) || 0) : null),
+      currency: pricing?.currency ?? designerChoice?.currency ?? null,
     };
   });
   const summary = summarizeQuoteLines(items, true);
