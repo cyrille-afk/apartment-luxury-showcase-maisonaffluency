@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Quote and guest-payment link analytics
-- [ ] Track successful link copies and existing email sends without recipient data or link tokens.
-- [ ] Verify both link types' native visit analytics, event schemas and success/failure behavior; identify any missing send flow.
+- [x] Track successful quote/guest-payment copies and confirmed existing guest-payment email sends, without recipients or tokens; failures do not emit.
+- [x] Native /quote/ and /pay/ page views count visits without duplicate events; last-seven-day published query currently returns no visits. Two new schemas validate (13 total), 54 tests pass and preview build OK. Quote sharing is copy-only: external WhatsApp/email sends are not observable. Signed-in workspace inspected, but real copy/send end-to-end was not completed (current projectless quote has no Share control; no customer email sent).
 
 ## Product sidebar cleanup
 - [x] Keep one price/quantity/checkout area after configuration and specifications; group utilities at its base.

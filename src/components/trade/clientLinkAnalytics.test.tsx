@@ -24,7 +24,7 @@ beforeEach(() => {
     for (const key of ["select", "eq", "insert"]) query[key] = () => query;
     query.order = () => Promise.resolve({ data: table === "trade_quote_items" ? [{ quantity: 1 }] : [link], error: null });
     query.maybeSingle = () => Promise.resolve({ data: { client_name: "Test" }, error: null });
-    query.single = () => Promise.resolve({ data: link, error: null });
+    query.single = () => Promise.resolve({ data: { ...link, id: "new-test-link" }, error: null });
     return query;
   });
 });
