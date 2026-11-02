@@ -170,14 +170,16 @@ export function buildSharedQuoteSnapshot(quoteId: string, clientName: string | n
     };
   });
   const summary = summarizeQuoteLines(items, true);
+  const byCurrency = new Map<string, number>();
+  for (const l of lines) if (l.lineTotalCents != null && l.currency) byCurrency.set(l.currency, (byCurrency.get(l.currency) ?? 0) + l.lineTotalCents);
   return {
     version: 1,
     quoteRef: `QU-${quoteId.slice(0, 6).toUpperCase()}`,
     clientName,
     lines,
-    totals: summary.totals.map(({ currency, cents }) => ({ currency, cents })),
+    totals: [...byCurrency].map(([currency, cents]) => ({ currency, cents })),
     lineCount: summary.lineCount,
     totalUnits: summary.totalUnits,
-    unpricedCount: summary.unpricedCount,
+    unpricedCount: lines.filter((l) => l.lineTotalCents == null).length,
   };
 }
