@@ -271,7 +271,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-[380px] sm:w-[420px] flex flex-col">
         <SheetHeader>
-          <div className="flex items-center justify-between gap-3 pr-8"><PresentationModeToggle />{quoteId && <ShareQuoteWithClient quoteId={quoteId} />}</div>
+          <div className="flex min-w-0 flex-col items-start gap-3 pr-8"><PresentationModeToggle />{quoteId && <ShareQuoteWithClient quoteId={quoteId} />}</div>
           <SheetTitle className="font-display text-lg flex items-center gap-2">
             <ShoppingCart className="h-4 w-4" />
             Active Quote
