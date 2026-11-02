@@ -54,7 +54,7 @@ async function queueStaffCopy(client: QueueClient, original: EmailPayload, recip
 }
 
 export async function ensureCommunicationCopies(client: QueueClient, queue: string, payload: EmailPayload) {
-  if (!requiresCommunicationCopies(queue, payload.to)) return
+  if (!requiresCommunicationCopies(queue, payload.to) && !(queue === 'transactional_emails' && payload.label === 'inquiry-reply' && !String(payload.idempotency_key).startsWith('inbox-copy:'))) return
   // Two named staff notifications for this event; each has independent retries.
   await Promise.all([
     queueStaffCopy(client, payload, 'cyrille@maisonaffluency.com'),
