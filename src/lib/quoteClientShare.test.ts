@@ -15,13 +15,27 @@ describe("buildSharedQuoteSnapshot", () => {
     expect(s.lines[0].materials).toBeNull();
     expect(s.lines[0].finishOptions).toEqual([]);
   });
-  it("shows the chosen finish with its swatch instead of the full catalogue stone list", () => {
+  it("shows the chosen finish with its cropped swatch", () => {
     const product = { product_name: "Angelo M/H High Table", materials: "Natural Stone: Kynos, Grafite, Travertino Rosso", available_finishes: ["Kynos", "Grafite"] };
     const s = buildSharedQuoteSnapshot("28f3303b-0000", null, [{ quantity: 1, unit_price_cents: null, unit_price_currency: null, variant_label: "Ø 110 × H 92 cm · Travertino Rosso", wood_fabric: { name: "Travertino Rosso", image_url: "https://x/tr.jpg" }, product }]);
     expect(s.lines[0].finish).toBe("Travertino Rosso");
     expect(s.lines[0].finishSwatches).toEqual([{ name: "Travertino Rosso", image: "https://x/tr.jpg" }]);
-    expect(s.lines[0].materials).toBeNull();
     expect(s.lines[0].finishOptions).toEqual([]);
+  });
+  it("offers each finish at the recorded size with its own retail price and swatch, marking the designer's choice", () => {
+    const size_variants = [
+      { base: "Ø 90 × H 92 cm", top: "Kynos", price_cents: 921600 },
+      { base: "Ø 110 × H 92 cm", top: "Kynos", price_cents: 977300 },
+      { base: "Ø 110 × H 92 cm", top: "Travertino Rosso / Grey Saint Laurent", price_cents: 1241500 },
+    ];
+    const swatches = [{ name: "Kyknos", image_url: "https://x/k.jpg", fabric_id: "k" }, { name: "Travertino Rosso", image_url: "https://x/tr.jpg", fabric_id: "tr" }];
+    const s = buildSharedQuoteSnapshot("28f3303b-0000", null, [{ id: "line-1", quantity: 1, unit_price_cents: null, unit_price_currency: null, variant_label: "Ø 110 × H 92 cm · Travertino Rosso", product: { product_name: "Angelo", currency: "EUR", size_variants, source_pick_id: "p" } }], { p: swatches });
+    const line = s.lines[0];
+    expect(line.finishChoices?.map((c) => [c.name, c.unitCents])).toEqual([["Kynos", 977300], ["Travertino Rosso", 1241500], ["Grey Saint Laurent", 1241500]]);
+    expect(line.finishChoices?.[0].image).toBe("https://x/k.jpg");
+    expect(line.designerFinishKey).toBe("travertino-rosso");
+    expect(line.finishSwatches).toEqual([{ name: "Travertino Rosso", image: "https://x/tr.jpg" }]);
+    expect(line.itemId).toBe("line-1");
   });
   it("uses retail price, never the net trade price", () => {
     const s = buildSharedQuoteSnapshot("e3ccd6aa-0000", "Mrs Tan", [
