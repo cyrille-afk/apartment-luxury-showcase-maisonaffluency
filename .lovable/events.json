@@ -309,6 +309,61 @@
         }
       }
     },
+    "project.directory_search_result_selected": {
+      "event_schema_version": 1,
+      "description": "A searched directory result is selected after its profile data loads; join the selection to a subsequent native profile page view to measure outcomes, not proven relevance.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "designer_slug",
+          "result_count",
+          "surface",
+          "match_kind",
+          "canonical_designer",
+          "matched_designers"
+        ],
+        "properties": {
+          "designer_slug": {
+            "type": "string"
+          },
+          "result_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "surface": {
+            "type": "string",
+            "enum": [
+              "desktop",
+              "mobile"
+            ]
+          },
+          "match_kind": {
+            "type": "string",
+            "enum": [
+              "empty",
+              "exact_designer",
+              "partial_designer",
+              "unmatched"
+            ]
+          },
+          "canonical_designer": {
+            "type": "string"
+          },
+          "matched_designers": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
     "project.order_paid": {
       "event_schema_version": 2,
       "description": "An order was paid: Stripe confirmed a card/PayNow/wallet checkout, or an admin marked a bank-transfer order paid (source=admin_marked).",
