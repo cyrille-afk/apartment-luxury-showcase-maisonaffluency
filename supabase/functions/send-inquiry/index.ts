@@ -12,7 +12,8 @@ import { googleAccessInquiryAlert, GOOGLE_ACCESS_TEMPLATE_SID } from "../_shared
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const ADMIN_EMAILS = ["concierge@maisonaffluency.com", "cyrille@maisonaffluency.com"];
+// inquiry-notification always delivers to concierge; the email queue copies Cyrille and Grégoire once per event.
+const ADMIN_EMAILS = ["concierge@maisonaffluency.com"];
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
