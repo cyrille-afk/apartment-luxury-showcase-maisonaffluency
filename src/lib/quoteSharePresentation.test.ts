@@ -16,13 +16,14 @@ describe("quote link identity", () => {
   it("uses recorded product/maker identity, never the decorative slug, with no recipient or price fields", () => {
     const preview = quoteShareIdentity(snapshot);
     expect(preview.title).toBe("Angelo M/H High Table by Alinea — Maison Affluency");
-    expect(Object.keys(preview)).toEqual(["title", "description", "image"]);
-    expect(preview.image).toContain("w_1200,h_630,c_pad,b_white,q_70,f_jpg");
+    expect(Object.keys(preview)).toEqual(["title", "description", "image", "imageAlt"]);
+    expect(preview.image).toContain("w_1200,h_630,c_pad,b_rgb:FAF9F5,q_70,f_jpg");
+    expect(preview.imageAlt).toBe("Angelo M/H High Table by Alinea");
   });
   it("handles multiple pieces without misrepresenting the first piece as the entire quote", () => {
     expect(quoteShareIdentity({ lines: [snapshot.lines[0], snapshot.lines[0]] }).title).toContain("+ 1 more");
   });
   it("keeps unavailable previews generic and contains no claimed product identity", () => {
-    expect(quoteShareIdentity(null)).toEqual({ title: "Quote unavailable — Maison Affluency", description: "Please ask your designer for a current quote link.", image: null });
+    expect(quoteShareIdentity(null)).toEqual({ title: "Quote unavailable — Maison Affluency", description: "Please ask your designer for a current quote link.", image: null, imageAlt: null });
   });
 });

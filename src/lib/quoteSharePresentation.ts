@@ -20,16 +20,16 @@ export function quoteShareUrl(token: string, snapshot: QuoteIdentity): string {
 /** Preview text excludes client names, prices, finishes and internal quote information. */
 export function quoteShareIdentity(snapshot: QuoteIdentity | null) {
   const first = snapshot?.lines[0];
-  if (!first) return { title: "Quote unavailable — Maison Affluency", description: "Please ask your designer for a current quote link.", image: null };
+  if (!first) return { title: "Quote unavailable — Maison Affluency", description: "Please ask your designer for a current quote link.", image: null, imageAlt: null };
   const name = first.name.replace(/\s+/g, " ").trim();
   const maker = first.maker?.replace(/\s+/g, " ").trim();
   const extra = snapshot.lines.length - 1;
   const subject = `${name}${maker ? ` by ${maker}` : ""}`;
   const title = `${subject}${extra > 0 ? ` + ${extra} more` : ""} — Maison Affluency`;
   const description = `View the shared quote for ${subject}${extra > 0 ? ` and ${extra} other piece${extra === 1 ? "" : "s"}` : ""}.`;
-  // Letterbox the authentic product photo; never generate or outpaint preview images.
+  // Letterbox the authentic product photo on the brand bone ground; never generate or outpaint preview images.
   const image = first.image?.startsWith("https://res.cloudinary.com/dif1oamtj/image/upload/")
-    ? first.image.replace("/image/upload/", "/image/upload/w_1200,h_630,c_pad,b_white,q_70,f_jpg/")
+    ? first.image.replace("/image/upload/", "/image/upload/w_1200,h_630,c_pad,b_rgb:FAF9F5,q_70,f_jpg/")
     : null;
-  return { title, description, image };
+  return { title, description, image, imageAlt: image ? subject : null };
 }
