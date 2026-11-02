@@ -104,7 +104,17 @@ import RugSizeColourPicker, { type RugSelection } from "@/components/rug/RugSize
 import SpecGlyph from "@/components/product/SpecGlyph";
 import AlsoContainsFinishes from "@/components/product/AlsoContainsFinishes";
 import { firstPublicVariantDimensionLabel } from "@/lib/productVariantSpecs";
-import { createActiveDraftQuote, fetchActiveDraftQuoteId } from "@/lib/activeProjectId";
+import { createActiveDraftQuote, fetchActiveDraftQuoteId, forgetActiveQuote } from "@/lib/activeProjectId";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { addToCart } from "@/lib/cart";
 import NotFound from "@/pages/NotFound";
 import ProductCommerceCta from "@/components/product/ProductCommerceCta";
