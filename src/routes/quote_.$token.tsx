@@ -177,9 +177,17 @@ function SharedQuotePage() {
                   <h3 className="text-xs font-medium text-foreground mb-3">Specifications</h3>
                   <dl className="space-y-3 text-sm">
                     <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-3"><dt className="text-muted-foreground">Dimensions</dt><dd className="break-words">{l.dimensions || "Not specified"}</dd></div>
-                    <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-3"><dt className="text-muted-foreground">Materials</dt><dd className="break-words">{l.materials || "Not specified"}</dd></div>
-                    {l.finish && l.finish.trim() !== l.dimensions?.trim() && <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-3"><dt className="text-muted-foreground">Selected finish</dt><dd className="break-words">{l.finish}</dd></div>}
-                    <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-3"><dt className="text-muted-foreground">Finish options</dt><dd className="break-words">{l.finishOptions?.length ? l.finishOptions.join(" · ") : "Not specified"}</dd></div>
+                    {(() => {
+                      const hasFinish = !!l.finish && l.finish.trim() !== l.dimensions?.trim();
+                      const swatches = (l.finishSwatches ?? []).filter((sw) => sw.image);
+                      return <>
+                        {hasFinish && <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-3"><dt className="text-muted-foreground">Selected finish</dt><dd className="break-words">
+                          {swatches.length > 0 ? <ul className="flex flex-wrap gap-4">{swatches.map((sw) => <li key={sw.name} className="flex items-center gap-3"><img src={sw.image!} alt={sw.name} className="h-14 w-14 object-cover border border-border" loading="lazy" /><span>{sw.name}</span></li>)}</ul> : l.finish}
+                        </dd></div>}
+                        {!hasFinish && <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-3"><dt className="text-muted-foreground">Materials</dt><dd className="break-words">{l.materials || "Not specified"}</dd></div>}
+                        {!hasFinish && !!l.finishOptions?.length && <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-3"><dt className="text-muted-foreground">Finish options</dt><dd className="break-words">{l.finishOptions.join(" · ")}</dd></div>}
+                      </>;
+                    })()}
                   </dl>
                 </section>
                 <div className="mt-6 pt-4 border-t border-border grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">

@@ -54,8 +54,7 @@ export function buildSharedQuoteSnapshot(quoteId: string, clientName: string | n
     const labelFinishes = (item.variant_label || "").split(" · ").map((s) => s.trim())
       .filter((s) => s && !dimensionsFromVariantLabel(s, null));
     const finishNames = [...new Set([...labelFinishes, item.wood_fabric?.name, item.fabric?.name]
-      .filter((v): v is string => !!v && !!v.trim()).map((v) => v.trim()))]
-      .filter((name, _i, all) => !all.some((other) => other !== name && other.toLowerCase().includes(name.toLowerCase()) === false && false));
+      .filter((v): v is string => !!v && !!v.trim()).map((v) => v.trim()))];
     const finish = finishNames.join(" · ") || null;
     const finishSwatches = [item.wood_fabric, item.fabric]
       .filter((f): f is { name?: string | null; image_url?: string | null } => !!f?.name)
