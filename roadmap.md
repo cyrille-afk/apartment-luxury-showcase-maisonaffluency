@@ -1,5 +1,9 @@
 # Roadmap
 
+## Names-only private quote addresses
+- [ ] Replace newly copied quote addresses with maker/product names only; clients verify their email before access. Preserve legacy links and private pricing.
+- [ ] Reuse existing email verification, bind access to recorded recipients, and verify clean address + recipient isolation + expiry/revocation.
+
 ## Quote-open engagement dashboard
 - [ ] Show private daily aggregate Quote opens without names, quote identifiers or tokens. Blocked: the existing analytics stream has no verified app-readable aggregate connection; temporary agent query credentials cannot be embedded in the app. A dated snapshot is possible but is not live tracking.
 - [x] User chose a dated aggregate report: published query for 26 October–2 November records zero Quote opens; report explicitly treats collection as unconfirmed, not zero engagement. Light/dark/mobile checked; standalone HTML delivered without names or tokens.
