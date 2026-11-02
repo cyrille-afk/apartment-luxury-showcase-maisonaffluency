@@ -29,6 +29,7 @@ import { isTradeProductMarkedHidden, useHiddenTradeProductIds } from "@/hooks/us
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "@tanstack/react-router";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useBrandDiscountCaps, effectiveDiscountForBrand, MARGIN_CAP_TOOLTIP } from "@/lib/brandDiscountCap";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
@@ -153,13 +154,17 @@ const StudioGallery = () => {
   // product instead of collapsing the gallery into a short loading screen
   // (which made the browser snap the page up before the product appeared).
   const queryClient = useQueryClient();
+  const router = useRouter();
   const warmTradeProductPage = useCallback((product?: TradeProduct) => {
+    if (product?.trade_product_id && !product.hidden_in_trade) {
+      void router.preloadRoute({ to: "/trade/products/$id", params: { id: product.trade_product_id } }).catch(() => {});
+    }
     void import("@/pages/ProductPageContainer");
     void import("@/pages/TradeProductPage").then(({ tradeProductPageQueryOptions }) => {
       if (!product?.trade_product_id || product.hidden_in_trade) return;
       void queryClient.prefetchQuery(tradeProductPageQueryOptions(product.trade_product_id, undefined, undefined, isAdmin));
     });
-  }, [queryClient, isAdmin]);
+  }, [queryClient, isAdmin, router]);
 
   // Product pages own their reset once actual product content is mounted;
   // router resolution can occur while the outgoing gallery is still visible.
