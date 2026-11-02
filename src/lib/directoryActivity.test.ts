@@ -1,7 +1,41 @@
 import { describe, expect, it } from 'vitest';
-import { dismissalRate, profileSlug, designerViewRanking, searchOutcomes, refinementOutcomes, type DirectoryRefinement } from './directoryActivity';
+import { dismissalRate, profileSlug, designerViewRanking, designerConversionRanking, searchOutcomes, refinementOutcomes, type DirectoryRefinement } from './directoryActivity';
 const edit = (modal_id: string, refinement: string, seconds: number): DirectoryRefinement => ({ modal_id, occurred_at: `2026-11-02T00:12:${String(seconds).padStart(2,'0')}Z`, search_details: { refinement, match_kind: 'partial_designer', matched_designers: ['emma'], result_count: 1 } });
 describe('directory activity rules', () => {
+  it('compares designer conversions against all searched openings, not just successes', () => {
+    const destinations = [
+      { modal_id: 'a', designer_slug: 'emma', occurred_at: '2026-11-02T00:12:10Z' },
+      { modal_id: 'b', designer_slug: 'emma', occurred_at: '2026-11-02T00:12:11Z' },
+      { modal_id: 'c', designer_slug: 'michel', occurred_at: '2026-11-02T00:12:12Z' },
+    ];
+    const rows = designerConversionRanking(destinations, { emma: 'Emma Donnersberg', michel: 'Michel Amar Studio' }, 4);
+    expect(rows.map(row => [row.name, row.views, row.conversionRate])).toEqual([
+      ['Emma Donnersberg', 2, 50], ['Michel Amar Studio', 1, 25],
+    ]);
+    expect(rows[0]?.selectionShare).toBeCloseTo(66.6667);
+    expect(rows[1]?.selectionShare).toBeCloseTo(33.3333);
+  });
+  it('counts only the first profile per searched opening and excludes unlinked views', () => {
+    const rows = designerConversionRanking([
+      { modal_id: 'a', designer_slug: 'michel', occurred_at: '2026-11-02T00:12:11Z' },
+      { modal_id: 'a', designer_slug: 'emma', occurred_at: '2026-11-02T00:12:10Z' },
+      { modal_id: 'a', designer_slug: 'emma', occurred_at: '2026-11-02T00:12:12Z' },
+      { modal_id: null, designer_slug: 'michel', occurred_at: '2026-11-02T00:12:13Z' },
+    ], {}, 2);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.slug).toBe('emma');
+    expect(rows[0]?.views).toBe(1);
+    expect(rows[0]?.conversionRate).toBe(50);
+  });
+  it('uses refined openings as the denominator only for refined search comparison', () => {
+    const outcomes = refinementOutcomes([edit('a', 'extend', 0), edit('b', 'replace', 0), edit('c', 'initial', 0)], [
+      { modal_id: 'a', designer_slug: 'emma', occurred_at: '2026-11-02T00:12:10Z' },
+      { modal_id: 'c', designer_slug: 'emma', occurred_at: '2026-11-02T00:12:11Z' },
+    ], {});
+    const destinations = outcomes.journeys.flatMap(journey => journey.refined && journey.view ? [journey.view] : []);
+    expect(designerConversionRanking(destinations, {}, outcomes.refined)[0]?.conversionRate).toBe(50);
+    expect(designerConversionRanking([], {}, 0)).toEqual([]);
+  });
   it('connects refinements to named committed profile opens, not unrelated views', () => {
     const result = refinementOutcomes([edit('a','initial',0), edit('a','extend',1), edit('b','initial',0), edit('b','replace',2)], [{ modal_id:'a', designer_slug:'emma', occurred_at:'2026-11-02T00:12:10Z' }, { modal_id:null, designer_slug:'emma', occurred_at:'2026-11-02T00:12:11Z' }], { emma:'Emma Donnersberg' });
     expect(result.refined).toBe(2); expect(result.reached).toBe(1); expect(result.rate).toBe(50);

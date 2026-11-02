@@ -52,6 +52,19 @@ export function designerViewRanking(views: DesignerView[], names: Record<string,
   }
   return [...grouped.values()].sort((a, b) => b.views - a.views || a.name.localeCompare(b.name));
 }
+export function designerConversionRanking(destinations: DesignerView[], names: Record<string, string>, searched: number) {
+  const firstByOpening = new Map<string, DesignerView>();
+  for (const view of destinations) {
+    if (!view.modal_id) continue;
+    const previous = firstByOpening.get(view.modal_id);
+    if (!previous || view.occurred_at < previous.occurred_at) firstByOpening.set(view.modal_id, view);
+  }
+  return designerViewRanking([...firstByOpening.values()], names).map(row => ({
+    ...row,
+    conversionRate: dismissalRate(searched, row.views),
+    selectionShare: dismissalRate(firstByOpening.size, row.views),
+  }));
+}
 export function dismissalRate(opens: number, dismissed: number): number | null {
   return opens > 0 ? dismissed / opens * 100 : null;
 }
