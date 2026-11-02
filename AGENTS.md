@@ -8,7 +8,7 @@
 - Felix/Benefits: max-w-[1500px] px-6; Felix left, results right, one useMoodboardSourcing; Benefits 50/50, text left.
 - Admin application actions save review metadata before app-email sends; decline-and-delete queues the notice before deleting, with stable per-application/template idempotency keys — failures must not erase the record.
 - Approve/decline drafts act only on confirmation; shared copy/parser owns greetings and escaped templates; approvalEmailHtml styles send/preview CTAs alike — no editable HTML.
-- Approved-account activation resends reuse the branded review drawer with one fresh idempotency key per opened resend, retained on retries; never change approval to resend.
+- Password-setup resends reuse the review drawer and retain attempt keys on retry; never change approval. Verified activation links the account; the queue reads user_id for setup status.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
 - Inquiry Reply actions open InquiryReplyDialog with account/inquiry-scoped drafts and email-log history; the existing sender verifies admins, derives recipients from saved inquiries and retains attempt keys on retry — never mailto-only sends or caller-supplied recipients.

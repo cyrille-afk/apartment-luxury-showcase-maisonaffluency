@@ -8,11 +8,11 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '
 import { parseDraftBody, type NotificationDraft } from '../../../supabase/functions/_shared/applicationNotificationCopy';
 
 type Props = {
-  recipient: string; company: string; approval: boolean; initialDraft: NotificationDraft;
+  recipient: string; company: string; approval: boolean; activationResend?: boolean; initialDraft: NotificationDraft;
   busy: boolean; error: string | null; onClose: () => void; onSend: (draft: NotificationDraft) => void;
 };
 
-export default function ApplicationNotificationDrawer({ recipient, company, approval, initialDraft, busy, error, onClose, onSend }: Props) {
+export default function ApplicationNotificationDrawer({ recipient, company, approval, activationResend = false, initialDraft, busy, error, onClose, onSend }: Props) {
   const [draft, setDraft] = useState(initialDraft);
   const [previewMode, setPreviewMode] = useState<'styled' | 'plain'>('styled');
   const blocks = parseDraftBody(draft.body);
@@ -38,7 +38,7 @@ export default function ApplicationNotificationDrawer({ recipient, company, appr
   return <Sheet open onOpenChange={open => { if (!open && !busy) onClose(); }}>
     <SheetContent side="right" className="flex w-full flex-col bg-background text-foreground sm:max-w-[780px]" onEscapeKeyDown={e => { if (busy) e.preventDefault(); }} onPointerDownOutside={e => { if (busy) e.preventDefault(); }}>
       <SheetHeader className="shrink-0 border-b border-border pb-5 pr-8">
-        <SheetTitle className="font-serif text-2xl">Review {approval ? 'Approval' : 'Decline'} Email</SheetTitle>
+        <SheetTitle className="font-serif text-2xl">{activationResend ? 'Resend Password-Setup Email' : `Review ${approval ? 'Approval' : 'Decline'} Email`}</SheetTitle>
         <SheetDescription>{company}</SheetDescription>
       </SheetHeader>
       <div className="min-h-0 flex-1 space-y-6 overflow-y-auto py-5">
@@ -82,6 +82,7 @@ export default function ApplicationNotificationDrawer({ recipient, company, appr
         </section>
       </div>
       <footer className="shrink-0 space-y-3 border-t border-border pt-4">
+        {activationResend && <p className="text-sm text-muted-foreground">Studio approval stays unchanged. After password setup, the verified account is linked to this approved studio.</p>}
         {!approval && <p className="text-sm text-muted-foreground">Confirming rejects this application and permanently deletes its record once the notice is queued.</p>}
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
