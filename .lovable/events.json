@@ -474,6 +474,19 @@
           }
         }
       }
+    },
+    "project.quote_opened": {
+      "event_schema_version": 1,
+      "description": "Quote opens: a valid shared quote successfully loaded in the browser. Counts successful quote access only, not preview impressions, clicks or metadata crawler requests; no client, quote, URL or token properties.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      }
     }
   }
 }
