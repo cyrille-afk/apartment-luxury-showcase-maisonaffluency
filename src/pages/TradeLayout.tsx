@@ -645,9 +645,14 @@ const TradeLayout = () => {
                   <ProjectWorkspaceBreadcrumb />
                 </div>
               )}
+              <div ref={outletHeightRef}>
               <Suspense fallback={
-                <div data-trade-page-loading role="status" aria-label="Loading workspace" className="flex items-center justify-center py-20">
-                  <DotCircleLoader size="sm" className="text-muted-foreground" />
+                // Holds the outgoing page's height so the browser never snaps the
+                // window up while the next page (e.g. a product) is loading.
+                <div data-trade-page-loading role="status" aria-label="Loading workspace" style={{ minHeight: lastOutletHeight.current || undefined }} className="relative">
+                  <div className="sticky top-1/2 flex items-center justify-center py-20">
+                    <DotCircleLoader size="sm" className="text-muted-foreground" />
+                  </div>
                 </div>
               }>
                 <StudioSetupNavigationGate locked={studioLocked} ready={!isTradeUser || (rolesLoaded && !studioSetupLoading)}>
@@ -655,6 +660,7 @@ const TradeLayout = () => {
                   <Outlet />
                 </StudioSetupNavigationGate>
               </Suspense>
+              </div>
             </ToolsBreadcrumbProvider>
           </main>
 
