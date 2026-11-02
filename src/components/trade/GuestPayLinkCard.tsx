@@ -107,8 +107,13 @@ export default function GuestPayLinkCard({ quoteId, currency, orderTotalCents = 
       return;
     }
     setLinks((prev) => [data as PayLink, ...prev]);
-    await navigator.clipboard.writeText(linkUrl((data as PayLink).token)).catch(() => {});
-    toast({ title: "Pay Now link created", description: "The link is copied — paste it into WhatsApp or email." });
+    try {
+      await navigator.clipboard.writeText(linkUrl((data as PayLink).token));
+      window.__lovableEvents?.track?.("project.client_link_copied", { link_type: "guest_payment" });
+      toast({ title: "Pay Now link created", description: "The link is copied — paste it into WhatsApp or email." });
+    } catch {
+      toast({ title: "Pay Now link created", description: "It couldn't be copied. Use Copy below to try again.", variant: "destructive" });
+    }
   };
 
 
@@ -138,14 +143,20 @@ export default function GuestPayLinkCard({ quoteId, currency, orderTotalCents = 
       toast({ title: "Email not sent", description: err ?? "Please try again.", variant: "destructive" });
       return;
     }
+    window.__lovableEvents?.track?.("project.client_link_sent", { link_type: "guest_payment", channel: "email" });
     await load();
     toast({ title: "Quotation sent", description: `Pay Now link emailed to ${email.trim()}.` });
   };
 
   const handleCopy = async (link: PayLink) => {
-    await navigator.clipboard.writeText(linkUrl(link.token)).catch(() => {});
-    setCopiedId(link.id);
-    setTimeout(() => setCopiedId(null), 1800);
+    try {
+      await navigator.clipboard.writeText(linkUrl(link.token));
+      window.__lovableEvents?.track?.("project.client_link_copied", { link_type: "guest_payment" });
+      setCopiedId(link.id);
+      setTimeout(() => setCopiedId(null), 1800);
+    } catch {
+      toast({ title: "Link not copied", description: "Please try Copy again.", variant: "destructive" });
+    }
   };
 
   const handleRevoke = async (link: PayLink) => {

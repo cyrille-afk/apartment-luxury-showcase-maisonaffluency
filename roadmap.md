@@ -1,5 +1,9 @@
 # Roadmap
 
+## Quote and guest-payment link analytics
+- [x] Track successful quote/guest-payment copies and confirmed existing guest-payment email sends, without recipients or tokens; failures do not emit.
+- [x] Native /quote/ and /pay/ page views count visits without duplicate events; last-seven-day published query currently returns no visits. Two new schemas validate (13 total), 54 tests pass and preview build OK. Quote sharing is copy-only: external WhatsApp/email sends are not observable. Signed-in workspace inspected, but real copy/send end-to-end was not completed (current projectless quote has no Share control; no customer email sent).
+
 ## Product sidebar cleanup
 - [x] Keep one price/quantity/checkout area after configuration and specifications; group utilities at its base.
 - [x] Signed-in Jules & Jim verified one price stack, no sidebar-local toggles, quantity round-trip, Light Solid Oak sample selection and global Studio → Client → Studio. Client removes the transaction sidebar and net prices; 16 regressions pass, preview build OK. GitHub sync required.

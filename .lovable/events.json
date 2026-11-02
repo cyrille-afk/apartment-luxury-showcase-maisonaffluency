@@ -1,6 +1,60 @@
 {
   "schema_version": 1,
   "events": {
+    "project.client_link_copied": {
+      "event_schema_version": 1,
+      "description": "A quote or guest payment link was successfully written to the clipboard, including automatic copying after creation.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "link_type"
+        ],
+        "properties": {
+          "link_type": {
+            "type": "string",
+            "enum": [
+              "quote",
+              "guest_payment"
+            ]
+          }
+        }
+      }
+    },
+    "project.client_link_sent": {
+      "event_schema_version": 1,
+      "description": "The existing client quote/payment email sender confirmed a successful email send containing a guest payment link; never fires for a clipboard copy or mail composer.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "link_type",
+          "channel"
+        ],
+        "properties": {
+          "link_type": {
+            "type": "string",
+            "enum": [
+              "guest_payment"
+            ]
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "email"
+            ]
+          }
+        }
+      }
+    },
     "project.copilot_dimension_selected": {
       "event_schema_version": 1,
       "description": "The user changed the size/dimension option on a Trade product page.",
