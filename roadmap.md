@@ -1,5 +1,9 @@
 # Roadmap
 
+## Aggregate quote opens
+- [ ] Count successful client-side shared quote reads as Quote opens with empty event properties; exclude unavailable, failed, abandoned and crawler-only requests.
+- [ ] Validate event schema, privacy regression tests and real shared-quote browser flow.
+
 ## Quote product specifications
 - [x] Add compact dimensions, materials, selected finish and finish options from the saved share snapshot, retaining older links and retail-only pricing.
 - [x] Snapshot/privacy/analytics tests pass (16); real older Angelo quote renders specifications on desktop/mobile with no overflow or runtime errors and build OK. Old snapshots retain recorded dimensions and show missing new fields as Not specified; newly copied shares include recorded materials and finish options. A new-share end-to-end creation was not exercised.

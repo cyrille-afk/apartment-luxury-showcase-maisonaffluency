@@ -90,6 +90,7 @@ function SharedQuotePage() {
     supabase.rpc("get_shared_quote", { _token: accessToken }).then(({ data, error }) => {
       if (!live) return;
       setState(error || !data ? { status: "missing" } : { status: "ready", data: data as unknown as Shared });
+      if (!error && data) window.__lovableEvents?.track?.("project.quote_opened", {});
     });
     return () => { live = false; };
   }, [token]);
