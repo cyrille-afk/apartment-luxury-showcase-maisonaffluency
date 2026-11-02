@@ -11,11 +11,24 @@ export function requiresCommunicationCopies(queue: string, recipient: unknown): 
   return inbox === 'concierge@maisonaffluency.com' || inbox === 'trade@maisonaffluency.com'
 }
 
+// One event = one staff copy per person. Senders sometimes key per recipient
+// (`…-concierge@…`) or per named copy (`…-copy-concierge-…`); strip both so
+// every inbox-bound variant of the same event maps to one staff identity.
+export function communicationEventKey(original: EmailPayload): string {
+  return String(original.idempotency_key || original.message_id || '')
+    .replace(/-[^\s@-]+@[^\s@-]+\.[a-z]{2,}$/i, '')
+    .replace(/-copy-(concierge|cyrille|gregoire)(?=-|$)/i, '')
+}
+
 async function queueStaffCopy(client: QueueClient, original: EmailPayload, recipient: string) {
-  const key = `inbox-copy:${original.idempotency_key || original.message_id}:${String(original.to).trim().toLowerCase()}:${recipient}`
+  const key = `inbox-copy:${communicationEventKey(original)}:${recipient}`
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(key))
   const hex = Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('')
   const messageId = `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-a${hex.slice(17, 20)}-${hex.slice(20, 32)}`
+  const { data: already, error: logError } = await client.from('email_send_log')
+    .select('id').eq('message_id', messageId).limit(1).maybeSingle()
+  if (logError) throw new Error('Failed to check existing staff copy')
+  if (already) return
   const { data: suppressed, error: suppressionError } = await client.from('suppressed_emails')
     .select('id').eq('email', recipient).maybeSingle()
   if (suppressionError) throw new Error('Failed to verify staff copy suppression')
@@ -54,6 +67,9 @@ async function queueStaffCopy(client: QueueClient, original: EmailPayload, recip
 }
 
 export async function ensureCommunicationCopies(client: QueueClient, queue: string, payload: EmailPayload) {
+  // Named decision copies (trade-approval-copy-concierge etc.) already send
+  // Cyrille and Grégoire their own copy for the event — never add a second.
+  if (/-copy-concierge$/.test(String(payload.label ?? ''))) return
   if (!requiresCommunicationCopies(queue, payload.to) && !(queue === 'transactional_emails' && payload.label === 'inquiry-reply' && !String(payload.idempotency_key).startsWith('inbox-copy:'))) return
   // Two named staff notifications for this event; each has independent retries.
   await Promise.all([

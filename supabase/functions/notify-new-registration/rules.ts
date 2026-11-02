@@ -1,4 +1,5 @@
-export const ADMIN_EMAILS = ["concierge@maisonaffluency.com", "cyrille@maisonaffluency.com", "gregoire@maisonaffluency.com"];
+// inquiry-notification always delivers to concierge; the email queue copies Cyrille and Grégoire once per event.
+export const ADMIN_EMAILS = ["concierge@maisonaffluency.com"];
 export function pendingRecipients(recipients: string[], done: Record<string, unknown>): string[] {
   return [...new Set(recipients)].filter((recipient) => !done[recipient]);
 }

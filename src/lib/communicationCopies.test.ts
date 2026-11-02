@@ -4,17 +4,21 @@ import { ensureCommunicationCopies, requiresCommunicationCopies } from '../../su
 
 vi.stubGlobal('crypto', webcrypto)
 
-function mockClient(options: { suppressed?: string; used?: string; fail?: string } = {}) {
+function mockClient(options: { suppressed?: string; used?: string; fail?: string; persistLog?: boolean } = {}) {
+  const logged = new Set<string>()
   const rpc = vi.fn(async (_name, args) => ({ error: args.payload.to === options.fail ? new Error('offline') : null }))
   const from = vi.fn((table: string) => {
     let email = ''
     const query = {
       select: () => query,
+      limit: () => query,
       eq: (_field: string, value: string) => { email = value; return query },
-      maybeSingle: async () => ({ error: null, data: table === 'suppressed_emails'
+      maybeSingle: async () => ({ error: null, data: table === 'email_send_log'
+        ? (logged.has(email) ? { id: 'logged' } : null)
+        : table === 'suppressed_emails'
         ? (email === options.suppressed ? { id: 'blocked' } : null)
         : { token: `token-${email}`, used_at: email === options.used ? '2026-10-06' : null } }),
-      insert: vi.fn(async () => ({ error: null })),
+      insert: vi.fn(async (row: { message_id: string }) => { if (options.persistLog) logged.add(row.message_id); return { error: null } }),
     }
     return query
   })
@@ -26,6 +30,17 @@ const payload = { to: 'concierge@maisonaffluency.com', subject: 'Inquiry', html:
   unsubscribe_token: 'original-token', queued_at: '2026-10-06T03:00:00Z' }
 
 describe('operational inbox copies', () => {
+  it('sends Cyrille and Grégoire one copy when the same inquiry reaches concierge twice', async () => {
+    const client = mockClient({ persistLog: true })
+    await ensureCommunicationCopies(client, 'transactional_emails', { ...payload, idempotency_key: 'inquiry-notify-abc-concierge@maisonaffluency.com' })
+    await ensureCommunicationCopies(client, 'transactional_emails', { ...payload, message_id: 'second', idempotency_key: 'inquiry-notify-abc-cyrille@maisonaffluency.com' })
+    expect(client.rpc).toHaveBeenCalledTimes(2)
+  })
+  it('adds no extra copies to a trade decision concierge copy (named copies already sent)', async () => {
+    const client = mockClient()
+    await ensureCommunicationCopies(client, 'transactional_emails', { ...payload, label: 'trade-approval-copy-concierge', idempotency_key: 'trade-approval-copy-concierge-app-1' })
+    expect(client.rpc).not.toHaveBeenCalled()
+  })
   it('copies a customer inquiry reply once to both staff without recursive copies', async () => {
     const client = mockClient()
     await ensureCommunicationCopies(client, 'transactional_emails', { ...payload, to: 'client@example.com', label: 'inquiry-reply' })

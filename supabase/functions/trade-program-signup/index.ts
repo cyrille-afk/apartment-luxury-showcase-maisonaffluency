@@ -3,7 +3,8 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 import { sendTradeRequestWhatsApp } from '../_shared/twilioWhatsAppSender.ts'
 import { scoreTradeApplication } from '../_shared/tradeRadar.ts'
 
-const ADMIN_EMAILS = ['concierge@maisonaffluency.com', 'cyrille@maisonaffluency.com']
+// inquiry-notification always delivers to concierge; the email queue copies Cyrille and Grégoire once per event.
+const ADMIN_EMAILS = ['concierge@maisonaffluency.com']
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

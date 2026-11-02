@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ADMIN_EMAILS, alertCopy, pendingRecipients, isPublicAccountAlert, CUSTOMER_ACCOUNT_TEMPLATE_SID } from "../../supabase/functions/notify-new-registration/rules";
 describe("registration alerts", () => {
   it("uses all three staff inboxes", () => {
-    expect(ADMIN_EMAILS).toEqual(["concierge@maisonaffluency.com", "cyrille@maisonaffluency.com", "gregoire@maisonaffluency.com"]);
+    expect(ADMIN_EMAILS).toEqual(["concierge@maisonaffluency.com"]);
   });
   it("retries only unsuccessful recipients without duplicating successful sends", () => {
     expect(pendingRecipients(["a", "b", "b"], { a: true })).toEqual(["b"]);
