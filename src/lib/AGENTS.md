@@ -19,3 +19,4 @@
 - Quote & Proforma list filtering (status, inclusive From/To dates, quick ranges) lives in src/lib/quoteFilters.ts as pure functions with unit tests in quoteFilters.test.ts — the page only renders them, so the rules stay testable and can't drift between views. Dates compare the studio's local calendar day, matching what the quote card prints.
 
 - Desktop→phone QR sign-in uses one-time 2-minute tokens (hashed in mobile_sync_tokens, service-role only) via src/lib/mobileSync.functions.ts and /auth/sync — no reusable session in the QR; installed apps ignore already-claimed launch codes (iOS replays them).
+- Client quote finish changes go through the service-only client_change_quote_finish RPC behind the verified quote cookie; only choices frozen in the share snapshot (with their retail prices) are accepted, the saved line's unit price scales by the retail ratio, and the owner gets a notification — clients can never set arbitrary prices.
