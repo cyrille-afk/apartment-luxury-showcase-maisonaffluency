@@ -11,8 +11,8 @@ const designers = [
 describe("visual directory filtering", () => {
   it('identifies exact and partial catalogue searches without retaining typed text', () => {
     expect(directorySearchDetails(designers, 'Amelie Vermersch').canonical_designer).toBe('amelie-vermersch');
-    expect(directorySearchDetails(designers, 'amelie')).toEqual({ query_kind: 'partial_designer', canonical_designer: 'none', matched_designers: ['amelie-vermersch'], result_count: 1 });
-    expect(directorySearchDetails(designers, 'private@example.com')).toEqual({ query_kind: 'unmatched', canonical_designer: 'none', matched_designers: [], result_count: 0 });
+    expect(directorySearchDetails(designers, 'amelie')).toEqual({ match_kind: 'partial_designer', canonical_designer: 'none', matched_designers: ['amelie-vermersch'], result_count: 1 });
+    expect(directorySearchDetails(designers, 'private@example.com')).toEqual({ match_kind: 'unmatched', canonical_designer: 'none', matched_designers: [], result_count: 0 });
   });
   it('distinguishes initial searches, extensions, shortening, replacement and clearing', () => {
     expect(directoryRefinement('', 'Am')).toBe('initial');

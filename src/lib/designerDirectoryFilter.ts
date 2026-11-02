@@ -19,7 +19,7 @@ export function directorySearchDetails(designers: { name: string; slug: string }
   const matches = filterDesignerDirectory(designers, query, null);
   const exact = normalized ? matches.find(d => fold(d.name) === normalized || fold(d.slug) === normalized) : undefined;
   return {
-    query_kind: !normalized ? 'empty' : exact ? 'exact_designer' : matches.length ? 'partial_designer' : 'unmatched',
+    match_kind: !normalized ? 'empty' : exact ? 'exact_designer' : matches.length ? 'partial_designer' : 'unmatched',
     canonical_designer: exact?.slug ?? 'none',
     matched_designers: normalized ? matches.slice(0, 10).map(d => d.slug) : [],
     result_count: matches.length,

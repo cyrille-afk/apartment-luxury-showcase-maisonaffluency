@@ -227,7 +227,7 @@ function DesignerGridCard({
         rememberLetter();
         void warmProfile().then(() => {
           prepareDirectoryProfile(designer.slug);
-          if (searchDetails && searchDetails.query_kind !== 'empty') {
+          if (searchDetails && searchDetails.match_kind !== 'empty') {
             window.__lovableEvents?.track?.('project.directory_search_result_selected', {
               ...searchDetails, designer_slug: designer.slug,
               surface: window.innerWidth >= 1024 ? 'desktop' : 'mobile',
