@@ -24,6 +24,11 @@ export function rememberActiveQuoteId(quoteId: string, projectId: string | null 
   } catch {}
 }
 
+/** Forget the remembered active draft quote (e.g. user chose "Start a new quote"). */
+export function forgetActiveQuote() {
+  clearRememberedQuote();
+}
+
 const clearRememberedQuote = () => {
   try {
     sessionStorage.removeItem(ACTIVE_QUOTE_STORAGE_KEY);

@@ -104,7 +104,17 @@ import RugSizeColourPicker, { type RugSelection } from "@/components/rug/RugSize
 import SpecGlyph from "@/components/product/SpecGlyph";
 import AlsoContainsFinishes from "@/components/product/AlsoContainsFinishes";
 import { firstPublicVariantDimensionLabel } from "@/lib/productVariantSpecs";
-import { createActiveDraftQuote, fetchActiveDraftQuoteId } from "@/lib/activeProjectId";
+import { createActiveDraftQuote, fetchActiveDraftQuoteId, forgetActiveQuote } from "@/lib/activeProjectId";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { addToCart } from "@/lib/cart";
 import NotFound from "@/pages/NotFound";
 import ProductCommerceCta from "@/components/product/ProductCommerceCta";
@@ -765,6 +775,9 @@ const TradeProductPage: React.FC = () => {
   const drawerPricesRef = useRef<{ retailLabel: string | null; netLabel: string | null }>({ retailLabel: null, netLabel: null });
 
   const [adding, setAdding] = useState(false);
+  // Confirmation gate: before reusing a remembered draft quote, show its
+  // number and creation date so additions never land in a stale quote silently.
+  const [quoteConfirm, setQuoteConfirm] = useState<{ quoteId: string; createdAt: string | null } | null>(null);
   const [copilotSave, setCopilotSave] = useState<
     | { state: "idle" }
     | { state: "saving" }
@@ -980,8 +993,20 @@ const TradeProductPage: React.FC = () => {
   const felixSelectionRef = useRef<ProactiveTearsheetData | null>(null);
   const { addToInventory } = useProjectInventory();
 
-  const handleAddToQuote = useCallback(async () => {
+  const handleAddToQuote = useCallback(async (confirmed: boolean = false) => {
     if (!user || !data) return;
+    // Reusing an existing draft quote requires an explicit confirmation that
+    // shows the quote number and date first (confirmed === true comes from the
+    // dialog's "Add to this quote" action).
+    if (activeQuoteId && confirmed !== true) {
+      const { data: q } = await supabase
+        .from("trade_quotes")
+        .select("created_at")
+        .eq("id", activeQuoteId)
+        .maybeSingle();
+      setQuoteConfirm({ quoteId: activeQuoteId, createdAt: (q as { created_at?: string } | null)?.created_at ?? null });
+      return;
+    }
     const felixSelection = felixSelectionRef.current;
     const selectedDrawerPrices = { ...drawerPricesRef.current };
     setAdding(true);
@@ -3379,14 +3404,14 @@ const TradeProductPage: React.FC = () => {
                 <ShoppingCart size={14} />
                 Proceed to Order
               </Button>
-              <Button variant="outline" onClick={handleAddToQuote} disabled={adding} className={cn("w-full rounded-none font-body text-xs uppercase", added && "border-primary text-primary")}>
+              <Button variant="outline" onClick={() => void handleAddToQuote()} disabled={adding} className={cn("w-full rounded-none font-body text-xs uppercase", added && "border-primary text-primary")}>
                 {adding ? <DotCircleLoader size="sm" /> : added ? <Check size={14} /> : null}
                 {added ? "Added to Co-Pilot Workspace" : "Add to Co-Pilot Workspace"}
               </Button>
               <div aria-live="polite" className="text-center font-body text-[11px] empty:hidden">
                 {copilotSave.state === "saving" && <span className="text-muted-foreground">Saving to quote…</span>}
                 {copilotSave.state === "saved" && <span className="text-primary">Saved to QU-{copilotSave.quoteId.slice(0, 6).toUpperCase()} · qty {copilotSave.quantity} · {copilotSave.at.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>}
-                {copilotSave.state === "failed" && <span className="text-destructive">Not saved{copilotSave.quoteId ? ` to QU-${copilotSave.quoteId.slice(0, 6).toUpperCase()}` : ""}: {copilotSave.message}{" "}<Button variant="link" onClick={handleAddToQuote} disabled={adding} className="h-auto p-0 text-[11px]">Retry</Button></span>}
+                {copilotSave.state === "failed" && <span className="text-destructive">Not saved{copilotSave.quoteId ? ` to QU-${copilotSave.quoteId.slice(0, 6).toUpperCase()}` : ""}: {copilotSave.message}{" "}<Button variant="link" onClick={() => void handleAddToQuote(true)} disabled={adding} className="h-auto p-0 text-[11px]">Retry</Button></span>}
               </div>
               {finishesMissingImages.length > 0 && <p className="font-body text-[11px] text-muted-foreground italic">Heads up — no reference image on file for <span className="text-foreground">{finishesMissingImages.join(", ")}</span>. A note will be attached to the quote so our concierge can confirm visuals.</p>}
               <Button variant="outline" onClick={() => setCustomRequestOpen(true)} className="w-full rounded-none font-body text-[10px] uppercase">
@@ -3681,6 +3706,49 @@ const TradeProductPage: React.FC = () => {
             : undefined
         }
       />
+
+      <AlertDialog open={!!quoteConfirm} onOpenChange={(open) => { if (!open) setQuoteConfirm(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Add to an existing quote?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This product will be added to quote{" "}
+              <span className="font-medium text-foreground">
+                QU-{quoteConfirm?.quoteId.slice(0, 6).toUpperCase()}
+              </span>
+              {quoteConfirm?.createdAt && (
+                <>
+                  {" "}created on{" "}
+                  {new Date(quoteConfirm.createdAt).toLocaleDateString([], { day: "numeric", month: "long", year: "numeric" })}
+                </>
+              )}
+              . You can add it there or start a new quote instead.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setQuoteConfirm(null);
+                forgetActiveQuote();
+                setActiveQuoteId(null);
+                void handleAddToQuote(true);
+              }}
+            >
+              Start a new quote
+            </Button>
+            <AlertDialogAction
+              onClick={() => {
+                setQuoteConfirm(null);
+                void handleAddToQuote(true);
+              }}
+            >
+              Add to this quote
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
      </div>
   );
 };
