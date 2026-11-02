@@ -16,7 +16,7 @@ export function requiresCommunicationCopies(queue: string, recipient: unknown): 
 // every inbox-bound variant of the same event maps to one staff identity.
 export function communicationEventKey(original: EmailPayload): string {
   return String(original.idempotency_key || original.message_id || '')
-    .replace(/-[^\s@]+@[^\s@-]+\.[a-z]{2,}$/i, '')
+    .replace(/-[^\s@-]+@[^\s@-]+\.[a-z]{2,}$/i, '')
     .replace(/-copy-(concierge|cyrille|gregoire)(?=-|$)/i, '')
 }
 
@@ -67,6 +67,9 @@ async function queueStaffCopy(client: QueueClient, original: EmailPayload, recip
 }
 
 export async function ensureCommunicationCopies(client: QueueClient, queue: string, payload: EmailPayload) {
+  // Named decision copies (trade-approval-copy-concierge etc.) already send
+  // Cyrille and Grégoire their own copy for the event — never add a second.
+  if (/-copy-concierge$/.test(String(payload.label ?? ''))) return
   if (!requiresCommunicationCopies(queue, payload.to) && !(queue === 'transactional_emails' && payload.label === 'inquiry-reply' && !String(payload.idempotency_key).startsWith('inbox-copy:'))) return
   // Two named staff notifications for this event; each has independent retries.
   await Promise.all([
