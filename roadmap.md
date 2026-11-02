@@ -1,5 +1,9 @@
 # Roadmap
 
+## Product sidebar cleanup
+- [ ] Keep one price/quantity/checkout area after configuration and specifications; group utilities at its base.
+- [ ] Remove sidebar mode toggles; verify global Studio/Client mode, finish and quantity changes in the signed-in product page.
+
 ## Approved studio password setup
 - [x] Approved studios show Resend password-setup email and stored setup/link status; Juliana’s review composer verified without sending or changing her approval.
 - [x] 24 regression tests pass and preview build OK. Disposable email verification → password setup → automatic approved-account link confirmed in saved records and signed-in Studio Settings; test account removed. Juliana remains unlinked until she activates; her email was not resent during testing.
