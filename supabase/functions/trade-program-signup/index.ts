@@ -49,6 +49,8 @@ Deno.serve(async (req) => {
   const businessRegNumber = body.businessRegNumber
     ? String(body.businessRegNumber).trim().slice(0, 120)
     : null
+  const contactName = String(body.contactName ?? body.firstName ?? '').replace(/\s+/g, ' ').trim().slice(0, 120) || null
+  const country = String(body.country ?? '').replace(/\s+/g, ' ').trim().slice(0, 80) || null
 
   if (!email || email.length > 254 || !EMAIL_RE.test(email)) {
     return json({ error: 'A valid work email is required' }, 400)
@@ -62,6 +64,12 @@ Deno.serve(async (req) => {
   }
   if (step === 3 && (!websiteUrl || websiteUrl.length < 3)) {
     return json({ error: 'Please provide either your website or Instagram handle to expedite review' }, 400)
+  }
+  if (step === 3 && (!contactName || contactName.length < 2)) {
+    return json({ error: 'Your full name is required' }, 400)
+  }
+  if (step === 3 && (!country || country.length < 2)) {
+    return json({ error: 'Your country is required' }, 400)
   }
   if (step === 3 && (!businessRegNumber || businessRegNumber.length < 3)) {
     return json({ error: 'A business registration or tax ID is required' }, 400)
@@ -267,7 +275,8 @@ Deno.serve(async (req) => {
     const acctFields: Record<string, unknown> = {
       email,
       studio_name: clean(row?.company_name) || null,
-      contact_name: body.contactName ? String(body.contactName).trim().slice(0, 120) : body.firstName ? String(body.firstName).trim().slice(0, 100) : null,
+      contact_name: contactName,
+      country,
       phone_number: phoneNumber,
       website_or_ig: clean(row?.portfolio_reference ?? row?.website_url) || null,
       business_reg_number: row?.business_reg_number ?? null,

@@ -224,6 +224,12 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
 };
 
 /* ─── Hero Join Form ─── */
+const ISO_REGIONS = "AD AE AF AG AI AL AM AO AR AT AU AW AZ BA BB BD BE BF BG BH BI BJ BM BN BO BR BS BT BW BY BZ CA CD CF CG CH CI CL CM CN CO CR CU CV CY CZ DE DJ DK DM DO DZ EC EE EG ER ES ET FI FJ FR GA GB GD GE GH GI GM GN GQ GR GT GW GY HK HN HR HT HU ID IE IL IN IQ IR IS IT JM JO JP KE KG KH KM KN KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MG MK ML MM MN MO MR MT MU MV MW MX MY MZ NA NE NG NI NL NO NP NZ OM PA PE PG PH PK PL PR PS PT PY QA RO RS RU RW SA SB SC SD SE SG SI SK SL SM SN SO SR SS ST SV SY SZ TD TG TH TJ TL TM TN TO TR TT TW TZ UA UG US UY UZ VA VC VE VN VU WS YE ZA ZM ZW".split(" ");
+const APPLICATION_COUNTRIES: string[] = (() => {
+  const names = new Intl.DisplayNames(["en"], { type: "region" });
+  return ISO_REGIONS.map((c) => names.of(c) || c).sort((a, b) => a.localeCompare(b));
+})();
+
 interface HeroJoinFormProps {
   ghost?: boolean;
   submitted: boolean;
@@ -250,6 +256,7 @@ const HeroJoinForm = ({
   const credentialFileRef = useRef<HTMLInputElement>(null);
   const [prefillParams] = useSearchParams();
   const prefillEmail = (prefillParams.get("email") || "").slice(0, 254);
+  const prefillName = (prefillParams.get("name") || "").slice(0, 120);
   const prefillFirm = (prefillParams.get("firm") || prefillParams.get("company") || "").slice(0, 200);
   const prefillPhone = (prefillParams.get("phone") || "").slice(0, 30);
   const prefillWebsite = (prefillParams.get("website") || "").slice(0, 300);
@@ -327,8 +334,19 @@ const HeroJoinForm = ({
         <input id={ghost ? "mobile-email" : "email"} type="email" name="email" defaultValue={prefillEmail} required maxLength={254} autoComplete="email" placeholder="Your work email" className={inputCls} />
       </div>
       <div>
+        <label htmlFor={ghost ? "mobile-fullName" : "fullName"} className={labelCls}>Full Name</label>
+        <input id={ghost ? "mobile-fullName" : "fullName"} name="fullName" defaultValue={prefillName} required minLength={2} maxLength={120} autoComplete="name" placeholder="Your full name" className={inputCls} />
+      </div>
+      <div>
         <label htmlFor={ghost ? "mobile-company" : "company"} className={labelCls}>Company / Firm Name</label>
         <input id={ghost ? "mobile-company" : "company"} name="company" defaultValue={prefillFirm} required maxLength={200} autoComplete="organization" placeholder="Studio name" className={inputCls} />
+      </div>
+      <div>
+        <label htmlFor={ghost ? "mobile-country" : "country"} className={labelCls}>Country</label>
+        <select id={ghost ? "mobile-country" : "country"} name="country" required defaultValue="" autoComplete="country-name" className={cn(inputCls, "text-xs uppercase")}>
+          <option value="" disabled>Select your country</option>
+          {APPLICATION_COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
+        </select>
       </div>
       <div>
         <label htmlFor={ghost ? "mobile-phone" : "phone"} className={labelCls}>Phone Number</label>
@@ -440,8 +458,10 @@ const TradeLanding = () => {
     const phoneNumber = ((formData.get("phone") as string) || "").trim();
     const websiteUrl = ((formData.get("website") as string) || "").trim();
     const businessRegNumber = ((formData.get("regNumber") as string) || "").trim();
+    const contactName = ((formData.get("fullName") as string) || "").replace(/\s+/g, " ").trim().slice(0, 120);
+    const country = ((formData.get("country") as string) || "").trim();
     const validation = tradeApplicationSchema.safeParse({ email, companyName, phoneNumber, websiteUrl });
-    if (!validation.success || businessRegNumber.length < 3) {
+    if (!validation.success || businessRegNumber.length < 3 || contactName.length < 2 || !country) {
       setJoinError("Please complete all required fields with valid details.");
       return;
     }
@@ -475,7 +495,7 @@ const TradeLanding = () => {
     const tokenKey = `ma_trade_signup_token_${email.trim().toLowerCase()}`;
     const continuationToken = (() => { try { return localStorage.getItem(tokenKey) || undefined; } catch { return undefined; } })();
     const { data: signupData, error } = await supabase.functions.invoke("trade-program-signup", {
-      body: { email, completeApplication: true, source: (searchParams.get("source") || "").slice(0, 80) || undefined, intent: (searchParams.get("intent") || "").slice(0, 80) || undefined, contactName: (searchParams.get("name") || "").slice(0, 120) || undefined, companyName, phoneNumber, websiteUrl, businessRegNumber, document, "cf-turnstile-response": turnstileToken, ...(continuationToken ? { continuationToken } : {}) },
+      body: { email, completeApplication: true, source: (searchParams.get("source") || "").slice(0, 80) || undefined, intent: (searchParams.get("intent") || "").slice(0, 80) || undefined, contactName, country, companyName, phoneNumber, websiteUrl, businessRegNumber, document, "cf-turnstile-response": turnstileToken, ...(continuationToken ? { continuationToken } : {}) },
     });
     setJoinLoading(false);
     setTurnstileToken("");
