@@ -2,19 +2,32 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { SharedQuoteSnapshot } from "@/lib/quoteClientShare";
+import { getQuoteShareHead } from "@/lib/quoteShareHead.functions";
+import { quoteAccessToken, quoteShareIdentity } from "@/lib/quoteSharePresentation";
+import { PRODUCTION_ORIGIN } from "@/lib/environmentIndexingGuard";
 
 export const Route = createFileRoute("/quote_/$token")({
-  head: () => ({
+  loader: ({ params }) => getQuoteShareHead({ data: { segment: params.token } }),
+  errorComponent: () => <main className="min-h-screen flex items-center justify-center font-body text-sm text-muted-foreground">Your quote is temporarily unavailable. Please try again.</main>,
+  notFoundComponent: () => <main className="min-h-screen flex items-center justify-center font-body text-sm text-muted-foreground">This quote link is unavailable.</main>,
+  head: ({ loaderData, params }) => {
+    const preview = loaderData ?? quoteShareIdentity(null);
+    return {
     meta: [
-      { title: "Your Quote — Maison Affluency" },
-      { name: "description", content: "A curated, itemised selection prepared for you by your designer." },
-      { property: "og:title", content: "Your Quote — Maison Affluency" },
-      { property: "og:description", content: "A curated, itemised selection prepared for you by your designer." },
+      { title: preview.title },
+      { name: "description", content: preview.description },
+      { property: "og:title", content: preview.title },
+      { property: "og:description", content: preview.description },
+      { property: "og:url", content: `${PRODUCTION_ORIGIN}/quote/${encodeURIComponent(params.token)}` },
+      { name: "twitter:title", content: preview.title },
+      { name: "twitter:description", content: preview.description },
+      ...(preview.image ? [{ property: "og:image", content: preview.image }, { name: "twitter:image", content: preview.image }] : []),
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { name: "twitter:card", content: preview.image ? "summary_large_image" : "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
-  }),
+  };
+  },
   component: SharedQuotePage,
 });
 
@@ -29,7 +42,9 @@ function SharedQuotePage() {
 
   useEffect(() => {
     let live = true;
-    supabase.rpc("get_shared_quote", { _token: token }).then(({ data, error }) => {
+    const accessToken = quoteAccessToken(token);
+    if (!accessToken) { setState({ status: "missing" }); return; }
+    supabase.rpc("get_shared_quote", { _token: accessToken }).then(({ data, error }) => {
       if (!live) return;
       setState(error || !data ? { status: "missing" } : { status: "ready", data: data as unknown as Shared });
     });
