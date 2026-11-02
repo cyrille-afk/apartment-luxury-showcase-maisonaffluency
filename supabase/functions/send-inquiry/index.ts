@@ -3,9 +3,12 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { z } from "https://esm.sh/zod@3.22.4";
 import {
   getWhatsAppStatusCallback,
+  getAdminWhatsAppRecipients,
+  getTemplateApprovalStatus,
   sendAdminWhatsApp,
   sendTradeRequestWhatsApp,
 } from "../_shared/twilioWhatsAppSender.ts";
+import { googleAccessInquiryAlert, GOOGLE_ACCESS_TEMPLATE_SID } from "../_shared/googleAccessInquiryAlert.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -446,6 +449,39 @@ const handler = async (req: Request): Promise<Response> => {
     if (insertErr) {
       console.error("Inquiry insert failed:", insertErr);
       throw new Error(`Inquiry insert failed: ${insertErr.message}`);
+    }
+
+    // Google-access requests remain inquiries, never applications. Wait for the
+    // bounded send and per-recipient audit so the runtime cannot discard it on return.
+    const googleAlert = googleAccessInquiryAlert({ source: resolvedSource, subject, message, name, email });
+    if (googleAlert) {
+      try {
+        const recipients = await getAdminWhatsAppRecipients();
+        const templateStatus = await getTemplateApprovalStatus(GOOGLE_ACCESS_TEMPLATE_SID);
+        const usedTemplate = templateStatus === "approved";
+        const results = await Promise.all((recipients.length ? recipients : [null]).map(async recipient => {
+          const result = await sendAdminWhatsApp({
+            body: googleAlert.body,
+            recipients: recipient ? [recipient] : [],
+            statusCallback: getWhatsAppStatusCallback(),
+            ...(usedTemplate ? { contentSid: GOOGLE_ACCESS_TEMPLATE_SID, contentVariables: googleAlert.contentVariables } : {}),
+          });
+          return {
+            channel: "twilio_whatsapp", event: googleAlert.event,
+            status: result.ok ? "queued" : "failed",
+            provider_message_id: result.sid,
+            payload: { inquiry_id: idStem, recipient, used_template: usedTemplate, template_status: templateStatus, twilio_status: result.status },
+            error: result.error,
+          };
+        }));
+        const { error: alertError } = await supabase.from("admin_alert_log").insert(results);
+        if (alertError) console.error("Google-access WhatsApp audit failed:", alertError.message);
+      } catch (err) {
+        await supabase.from("admin_alert_log").insert({
+          channel: "twilio_whatsapp", event: googleAlert.event, status: "failed",
+          payload: { inquiry_id: idStem }, error: err instanceof Error ? err.message : "Google-access alert failed",
+        });
+      }
     }
 
     // WhatsApp alert for product quote requests — intentionally not awaited so
