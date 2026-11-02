@@ -21,7 +21,7 @@ import { Link, useNavigate } from "@/lib/router-compat";
 import { motion, animate, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { filterDesignerDirectory } from "@/lib/designerDirectoryFilter";
-import { recordDirectoryActivity } from "@/lib/directoryActivity";
+import { recordDirectoryActivity, prepareDirectoryProfile } from "@/lib/directoryActivity";
 import SilentLink from "@/components/SilentLink";
 import { Search, X, ImageIcon, ArrowRight } from "lucide-react";
 
@@ -224,6 +224,7 @@ function DesignerGridCard({
         event.preventDefault();
         rememberLetter();
         void warmProfile().then(() => {
+          prepareDirectoryProfile(designer.slug);
           navigate(`/designers/${designer.slug}`, {
             state: { fromDesignersHero: true, fromDesignersAZ: true },
           });
