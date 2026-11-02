@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Copy, Link2, Loader2, Check, Trash2, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { PRODUCTION_ORIGIN } from "@/lib/environmentIndexingGuard";
 
 type PayLink = {
   id: string;
@@ -79,7 +80,8 @@ export default function GuestPayLinkCard({ quoteId, currency, orderTotalCents = 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quoteId]);
 
-  const linkUrl = (token: string) => `${window.location.origin}/pay/${token}`;
+  // Client-facing payment links must use the production domain, not the preview origin.
+  const linkUrl = (token: string) => `${PRODUCTION_ORIGIN}/pay/${token}`;
 
   const handleCreate = async () => {
     const cents = Math.round(Number(amount) * 100);

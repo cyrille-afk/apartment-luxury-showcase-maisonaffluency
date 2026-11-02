@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link2, Loader2, Check, Ban } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { buildSharedQuoteSnapshot, type ShareSourceLine } from "@/lib/quoteClientShare";
+import { PRODUCTION_ORIGIN } from "@/lib/environmentIndexingGuard";
 import { toast } from "sonner";
 
 const ITEM_SELECT =
@@ -24,7 +25,9 @@ export default function ShareQuoteWithClient({ quoteId }: { quoteId: string }) {
       const snapshot = buildSharedQuoteSnapshot(quoteId, quote?.client_name ?? null, items as unknown as ShareSourceLine[]);
       const { data: token, error: rpcError } = await supabase.rpc("create_quote_client_share", { _quote_id: quoteId, _snapshot: snapshot as never });
       if (rpcError || !token) throw rpcError;
-      const url = `${window.location.origin}/quote/${token}`;
+      // Client-facing links must use the production domain — the preview origin
+      // (lovableproject.com / id-preview--*.lovable.app) is useless to recipients.
+      const url = `${PRODUCTION_ORIGIN}/quote/${token}`;
       await navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
