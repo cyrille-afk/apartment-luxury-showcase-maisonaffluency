@@ -2,6 +2,7 @@
 
 ## Quote-open engagement dashboard
 - [ ] Show private daily aggregate Quote opens without names, quote identifiers or tokens. Blocked: the existing analytics stream has no verified app-readable aggregate connection; temporary agent query credentials cannot be embedded in the app. A dated snapshot is possible but is not live tracking.
+- [x] User chose a dated aggregate report: published query for 26 October–2 November records zero Quote opens; report explicitly treats collection as unconfirmed, not zero engagement. Light/dark/mobile checked; standalone HTML delivered without names or tokens.
 
 ## Aggregate quote opens
 - [x] Count successful client-side shared quote reads as Quote opens with empty event properties; exclude unavailable, failed, abandoned and crawler-only requests.
