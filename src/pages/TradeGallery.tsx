@@ -993,6 +993,12 @@ const StudioGallery = () => {
                       </a>
                     )}
                   </div>
+                  {(metadata.leadTime || metadata.dimensions) && (
+                    <div data-card-specifications className="pointer-events-none absolute inset-x-0 bottom-14 z-30 flex flex-col gap-0.5 bg-background/95 py-1 text-left font-mono text-[9px] uppercase tracking-normal text-muted-foreground opacity-0 transition-opacity duration-300 motion-reduce:transition-none group-hover:opacity-100 group-focus-within:opacity-100">
+                      {metadata.leadTime && <span>Lead Time: {metadata.leadTime}</span>}
+                      {metadata.dimensions && <span className="truncate" title={metadata.dimensions}>Dimensions: {metadata.dimensions}</span>}
+                    </div>
+                  )}
                 </div>
                  <div className="flex flex-col pt-2 pb-1 text-left">
                    <div data-card-baseline className="grid h-10 grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)] items-center gap-2">
@@ -1005,15 +1011,9 @@ const StudioGallery = () => {
                        )}
                      </div>
                    </div>
-                   <div data-card-utility className="mt-1 flex h-12 flex-col gap-0.5 overflow-hidden font-mono text-[9px] uppercase tracking-normal text-muted-foreground">
-                     {!suppressTradeCardBrand(product.brand_name, activeBrand, searchIntent.text) && (
-                       <p data-card-brand className="truncate" title={product.brand_name}>{product.brand_name}</p>
-                     )}
-                     <div data-card-specifications className="flex flex-col gap-0.5 opacity-0 transition-opacity duration-300 motion-reduce:transition-none group-hover:opacity-100 group-focus-within:opacity-100">
-                     {metadata.leadTime && <span>Lead Time: {metadata.leadTime}</span>}
-                     {metadata.dimensions && <span className="truncate" title={metadata.dimensions}>Dimensions: {metadata.dimensions}</span>}
-                     </div>
-                   </div>
+                   {!suppressTradeCardBrand(product.brand_name, activeBrand, searchIntent.text) && (
+                     <p data-card-brand className="mt-1 truncate font-mono text-[9px] uppercase tracking-normal text-muted-foreground" title={product.brand_name}>{product.brand_name}</p>
+                   )}
                    {product.hidden_in_trade && <p className="font-body text-xs text-muted-foreground" data-trade-sensitive>Public listing · Hidden in Trade</p>}
                    {isAdmin && !product.hidden_in_trade && (
                      <div className="mt-auto flex flex-col items-start gap-1.5 pt-3">
