@@ -190,8 +190,8 @@
       }
     },
     "project.directory_search_changed": {
-      "event_schema_version": 1,
-      "description": "A visitor edits a nonempty directory search; records only character count and matching designer count, never search text.",
+      "event_schema_version": 2,
+      "description": "A visitor edits a nonempty directory search; records bounded catalogue matches, counts and match category, never typed text.",
       "privacy": {
         "contains_pii": false,
         "purpose": "product_analytics"
@@ -219,6 +219,147 @@
               "desktop",
               "mobile"
             ]
+          },
+          "match_kind": {
+            "type": "string",
+            "enum": [
+              "empty",
+              "exact_designer",
+              "partial_designer",
+              "unmatched"
+            ]
+          },
+          "canonical_designer": {
+            "type": "string"
+          },
+          "matched_designers": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "project.directory_search_refined": {
+      "event_schema_version": 1,
+      "description": "A visitor starts, extends, shortens, replaces or clears a directory search, or switches to an initial; stores catalogue matches only.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "refinement",
+          "result_count",
+          "surface",
+          "match_kind",
+          "canonical_designer",
+          "matched_designers"
+        ],
+        "properties": {
+          "refinement": {
+            "type": "string",
+            "enum": [
+              "initial",
+              "extend",
+              "shorten",
+              "replace",
+              "clear",
+              "letter"
+            ]
+          },
+          "letter": {
+            "type": "string",
+            "pattern": "^[A-Z]$"
+          },
+          "result_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "surface": {
+            "type": "string",
+            "enum": [
+              "desktop",
+              "mobile"
+            ]
+          },
+          "match_kind": {
+            "type": "string",
+            "enum": [
+              "empty",
+              "exact_designer",
+              "partial_designer",
+              "unmatched"
+            ]
+          },
+          "canonical_designer": {
+            "type": "string"
+          },
+          "matched_designers": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "project.directory_search_result_selected": {
+      "event_schema_version": 1,
+      "description": "A searched directory result is selected after its profile data loads; join the selection to a subsequent native profile page view to measure outcomes, not proven relevance.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "designer_slug",
+          "result_count",
+          "surface",
+          "match_kind",
+          "canonical_designer",
+          "matched_designers"
+        ],
+        "properties": {
+          "designer_slug": {
+            "type": "string"
+          },
+          "result_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "surface": {
+            "type": "string",
+            "enum": [
+              "desktop",
+              "mobile"
+            ]
+          },
+          "match_kind": {
+            "type": "string",
+            "enum": [
+              "empty",
+              "exact_designer",
+              "partial_designer",
+              "unmatched"
+            ]
+          },
+          "canonical_designer": {
+            "type": "string"
+          },
+          "matched_designers": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "string"
+            }
           }
         }
       }
