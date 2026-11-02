@@ -46,3 +46,15 @@ export const verifyNamedQuoteCode = createServerFn({ method: "POST" })
     setCookie(cookieName(data.slug), token, { httpOnly: true, secure: getRequestUrl().protocol === "https:", sameSite: "strict", path: "/", maxAge: 86400 });
     return { ok: true };
   });
+/** Verified client switches a line's finish; updates the saved quote and price. */
+export const changeNamedQuoteFinish = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => z.object({ slug: locator, line: z.number().int().min(0).max(500), choice: z.string().min(1).max(200).regex(/^[a-z0-9-]+$/) }).parse(input))
+  .handler(async ({ data }) => {
+    setResponseHeader("Cache-Control", "private, no-store");
+    const token = getCookie(cookieName(data.slug));
+    if (!token) throw new Error("Please verify your email again to change this finish.");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: quote, error } = await supabaseAdmin.rpc("client_change_quote_finish", { _slug: data.slug, _session: token, _line: data.line, _choice: data.choice });
+    if (error || !quote) throw new Error("The finish could not be changed. Please try again.");
+    return quote;
+  });

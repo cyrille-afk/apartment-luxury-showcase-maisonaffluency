@@ -2,6 +2,7 @@ import { useEffect, useId, useState } from "react";
 import { Link2, Loader2, Check, Ban, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { buildSharedQuoteSnapshot, type ShareSourceLine } from "@/lib/quoteClientShare";
+import type { QuoteFinishSwatch } from "@/lib/quoteFinishSwatches";
 // quoteShareUrl locks client-facing addresses to PRODUCTION_ORIGIN.
 import { namedQuoteShareUrl, quoteShareSlug } from "@/lib/quoteSharePresentation";
 import { toast } from "sonner";
@@ -9,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 const ITEM_SELECT =
-  "image_url, quantity, unit_price_cents, unit_price_currency, variant_label, fabric_id, fabric_upcharge_cents, fabric_currency, fabric:fabrics!fabric_id(name, image_url, price_per_lm_cents, currency), wood_fabric:fabrics!trade_quote_items_wood_fabric_id_fkey(name, image_url), product:trade_products(product_name, brand_name, image_url, rrp_price_cents, currency, dimensions, materials, available_finishes, size_variants)";
+  "id, image_url, quantity, unit_price_cents, unit_price_currency, variant_label, fabric_id, fabric_upcharge_cents, fabric_currency, fabric:fabrics!fabric_id(name, image_url, price_per_lm_cents, currency), wood_fabric:fabrics!trade_quote_items_wood_fabric_id_fkey(name, image_url), product:trade_products(product_name, brand_name, image_url, rrp_price_cents, currency, dimensions, materials, available_finishes, size_variants, source_pick_id, top_axis_label, base_axis_label)";
 
 /** Creates a retail-only, expiring client link (30 days) for a quote. */
 export default function ShareQuoteWithClient({ quoteId }: { quoteId: string }) {
@@ -90,7 +91,16 @@ export default function ShareQuoteWithClient({ quoteId }: { quoteId: string }) {
       if (quoteError) throw quoteError;
       if (error) throw error;
       if (!items?.length) { notify("Add at least one piece before sharing this quote.", true); return; }
-      const snapshot = buildSharedQuoteSnapshot(quoteId, quote?.client_name ?? null, items as unknown as ShareSourceLine[]);
+      const pickIds = [...new Set((items as unknown as ShareSourceLine[]).map((i) => i.product?.source_pick_id).filter((v): v is string => !!v))];
+      const swatchesByPick: Record<string, QuoteFinishSwatch[]> = {};
+      if (pickIds.length) {
+        const { data: sw } = await supabase.from("product_fabric_swatches_public").select("pick_id, fabric_id, name, image_url, category, sort_order, is_active").in("pick_id", pickIds);
+        for (const row of sw ?? []) {
+          if (!row.pick_id || row.is_active === false) continue;
+          (swatchesByPick[row.pick_id] ??= []).push(row as QuoteFinishSwatch);
+        }
+      }
+      const snapshot = buildSharedQuoteSnapshot(quoteId, quote?.client_name ?? null, items as unknown as ShareSourceLine[], swatchesByPick);
       const { data: slug, error: rpcError } = await supabase.rpc("create_named_quote_share", { _quote_id: quoteId, _snapshot: snapshot as never, _slug: quoteShareSlug(snapshot) });
       if (rpcError || !slug) {
         if (rpcError?.message.includes("save client email")) { notify("Save the client's email in this quote before sharing.", true); return; }
