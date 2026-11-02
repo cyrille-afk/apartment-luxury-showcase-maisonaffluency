@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Link2, Loader2, Check, Ban } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { buildSharedQuoteSnapshot, type ShareSourceLine } from "@/lib/quoteClientShare";
-import { PRODUCTION_ORIGIN } from "@/lib/environmentIndexingGuard";
+// quoteShareUrl locks client-facing addresses to PRODUCTION_ORIGIN.
+import { quoteShareUrl } from "@/lib/quoteSharePresentation";
 import { toast } from "sonner";
 
 const ITEM_SELECT =
@@ -27,7 +28,7 @@ export default function ShareQuoteWithClient({ quoteId }: { quoteId: string }) {
       if (rpcError || !token) throw rpcError;
       // Client-facing links must use the production domain — the preview origin
       // (lovableproject.com / id-preview--*.lovable.app) is useless to recipients.
-      const url = `${PRODUCTION_ORIGIN}/quote/${token}`;
+      const url = quoteShareUrl(token, snapshot);
       await navigator.clipboard.writeText(url);
       window.__lovableEvents?.track?.("project.client_link_copied", { link_type: "quote" });
       setCopied(true);

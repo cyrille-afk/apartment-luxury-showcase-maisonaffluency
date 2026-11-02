@@ -1,4 +1,5 @@
 # src/lib rules
+- Quote share addresses use a decorative maker/product slug plus the unchanged secret token in one segment; preview reads use the existing expiry/revocation RPC with a publishable client, exposing only recorded product/maker identity and its authentic photo — old tokens stay valid and no recipient/pricing metadata enters previews.
 - Enquiry submission and inbox display share inquiryMessage's exact structured-finish deduplication; preserve distinct choices and free notes — historical duplicate lines need no record rewrites.
 - Comparator PDF exports use comparatorExport's explicit field/value allowlist; client mode strips supplier/notes/trade values, internal trade fields require existing visibility, and disabled sections omit swatches too — export configuration cannot rely on screen-hidden rows for privacy.
 - Comparator search and alphabet transitions use shared pure draft helpers that clear the competing filter without replacing selections — keeps UI and persisted interaction state consistent.
