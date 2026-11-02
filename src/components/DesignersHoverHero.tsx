@@ -2392,7 +2392,6 @@ const DesignersHoverHero = () => {
             }}
             onClick={() => {
               if (!searchOpen) openDesignerSearch("search");
-              if (refinement) recordDirectoryRefinement(activityModalRef.current, { ...details, refinement });
             }}
             onChange={(event) => {
               const refinement = directoryRefinement(searchQuery, event.target.value);
@@ -2403,6 +2402,7 @@ const DesignersHoverHero = () => {
               setSearchQuery(event.target.value);
               setDesktopDirectoryLetter(null);
               if (!searchOpen) openDesignerSearch("search");
+              if (refinement) recordDirectoryRefinement(activityModalRef.current, { ...details, refinement });
               if (event.target.value.trim()) {
                 recordDirectoryActivity('search', activityModalRef.current);
                 window.__lovableEvents?.track?.("project.directory_search_changed", {
