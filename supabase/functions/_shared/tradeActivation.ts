@@ -2,10 +2,31 @@ import type { SupabaseClient } from 'npm:@supabase/supabase-js@2'
 import { welcomeTaxStatus } from './welcomeTaxStatus.ts'
 
 /** Runtime applicant activation only; never used to mint agent test sessions. */
+export async function revokePreviousTradeSetup(service: SupabaseClient, recipient: string) {
+  const email = recipient.trim().toLowerCase()
+  const { data: account, error } = await service.from('trade_accounts').select('id,email,status,signup_id').eq('email', email).maybeSingle()
+  if (error || account?.status !== 'approved') throw new Error('A saved approved application is required')
+  // Auth stores one recovery token per user: generating a fresh recovery link
+  // replaces it atomically. Also replace the original registration address's
+  // token when an unactivated application's email has been corrected.
+  if (account.signup_id) {
+    const { data: signup, error: signupError } = await service.from('trade_program_signups')
+      .select('email').eq('id', account.signup_id).maybeSingle()
+    if (signupError) throw new Error('Could not verify previous setup access')
+    const previousEmail = signup?.email?.trim().toLowerCase()
+    if (previousEmail && previousEmail !== email) {
+      const rotated = await service.auth.admin.generateLink({ type: 'recovery', email: previousEmail })
+      if (rotated.error && !['user_not_found', 'email_not_found'].includes(rotated.error.code ?? '')) {
+        throw new Error('Could not revoke previous setup access')
+      }
+      // Never send or return the replacement for the previous address.
+    }
+  }
+}
+
 export async function prepareTradeActivation(service: SupabaseClient, recipient: string) {
   const email = recipient.trim().toLowerCase()
-  const { data: account, error } = await service.from('trade_accounts').select('id,email,status').eq('email', email).maybeSingle()
-  if (error || account?.status !== 'approved') throw new Error('A saved approved application is required')
+  await revokePreviousTradeSetup(service, email)
   const invited = await service.auth.admin.generateLink({ type: 'invite', email })
   if (invited.error && !['email_exists', 'user_already_exists'].includes(invited.error.code ?? '') &&
       !/already.*(registered|exists)/i.test(invited.error.message)) throw new Error('Could not prepare sign-in access')

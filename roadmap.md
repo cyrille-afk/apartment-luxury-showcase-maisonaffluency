@@ -1,5 +1,9 @@
 # Roadmap
 
+## Password-setup resend security
+- [x] Fresh setup emails replace native recovery tokens; corrected-recipient issuance and retries also invalidate original signup-address tokens without changing approval or rotating the latest queued link.
+- [x] Live disposable verification rejected both older same-address and old-address links and verified the latest link; test records cleaned up. Eight helper and four page regressions pass; deployed services boot/live checks pass. Pola’s previous-address access repaired via the original attempt key without sending another email or replacing her latest link.
+
 ## Names-only private quote addresses
 - [x] Newly copied quote addresses use persisted maker/product names with readable word suffixes for collisions; clients verify saved email before access. Legacy links preserved; old links do not silently change.
 - [x] Added locked recipient-bound OTP/session RPCs and HttpOnly cookies; 25 regressions pass, clean gate rejects unknown recipients, legacy supplied link loads, build OK. Existing private-client email template/delivery reused.
