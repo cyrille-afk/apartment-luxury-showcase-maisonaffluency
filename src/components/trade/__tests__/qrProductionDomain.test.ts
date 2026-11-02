@@ -38,6 +38,24 @@ describe("Trade dashboard QR codes are production-locked", () => {
     });
   }
 
+  // Client-facing share links (quote share, guest payment) must never be built
+  // from window.location.origin — the preview origin is useless to recipients.
+  const SHARE_LINK_FILES = [
+    "src/components/trade/ShareQuoteWithClient.tsx",
+    "src/components/trade/GuestPayLinkCard.tsx",
+  ];
+  for (const file of SHARE_LINK_FILES) {
+    describe(file, () => {
+      const src = read(file);
+      it("builds links from PRODUCTION_ORIGIN", () => {
+        expect(src).toContain("PRODUCTION_ORIGIN");
+      });
+      it("never builds a link from window.location.origin", () => {
+        expect(src).not.toMatch(/`\$\{window\.location\.origin\}/);
+      });
+    });
+  }
+
   it("magic-link handoff builds /trade/launch on the production origin", () => {
     const src = read("supabase/functions/trade-mobile-magic-link/index.ts");
     expect(src).toMatch(/const PRODUCTION_ORIGIN = "https:\/\/maisonaffluency\.com"/);
