@@ -5,6 +5,10 @@ import type { SharedQuoteSnapshot } from "@/lib/quoteClientShare";
 import { getQuoteShareHead } from "@/lib/quoteShareHead.functions";
 import { quoteAccessToken, quoteShareIdentity } from "@/lib/quoteSharePresentation";
 import { PRODUCTION_ORIGIN } from "@/lib/environmentIndexingGuard";
+import { useServerFn } from "@tanstack/react-start";
+import { readNamedQuote, requestNamedQuoteCode, verifyNamedQuoteCode } from "@/lib/namedQuoteAccess.functions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/quote_/$token")({
   loader: ({ params }) => getQuoteShareHead({ data: { segment: params.token } }),
@@ -81,12 +85,28 @@ function QuoteNotice({ title, detail }: { title: string; detail?: string }) {
 
 function SharedQuotePage() {
   const { token } = Route.useParams();
-  const [state, setState] = useState<{ status: "loading" | "missing" | "ready"; data?: Shared }>({ status: "loading" });
+  const [state, setState] = useState<{ status: "loading" | "missing" | "gate" | "ready"; data?: Shared }>({ status: "loading" });
+  const readQuote = useServerFn(readNamedQuote);
+  const requestCode = useServerFn(requestNamedQuoteCode);
+  const verifyCode = useServerFn(verifyNamedQuoteCode);
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
+  const [codeSent, setCodeSent] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [feedback, setFeedback] = useState("");
 
   useEffect(() => {
     let live = true;
     const accessToken = quoteAccessToken(token);
-    if (!accessToken) { setState({ status: "missing" }); return; }
+    if (!accessToken) {
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(token) || token === "invalid") { setState({ status: "missing" }); return; }
+      readQuote({ data: { slug: token } }).then((data) => {
+        if (!live) return;
+        setState(data ? { status: "ready", data: data as unknown as Shared } : { status: "gate" });
+        if (data) window.__lovableEvents?.track?.("project.quote_opened", {});
+      }).catch(() => { if (live) { setState({ status: "gate" }); setFeedback("Your quote could not be loaded. Please verify your email again."); } });
+      return () => { live = false; };
+    }
     supabase.rpc("get_shared_quote", { _token: accessToken }).then(({ data, error }) => {
       if (!live) return;
       setState(error || !data ? { status: "missing" } : { status: "ready", data: data as unknown as Shared });
@@ -95,7 +115,37 @@ function SharedQuotePage() {
     return () => { live = false; };
   }, [token]);
 
+  const submitAccess = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setBusy(true); setFeedback("");
+    try {
+      if (!codeSent) {
+        await requestCode({ data: { slug: token, email } });
+        setCodeSent(true);
+      } else {
+        const result = await verifyCode({ data: { slug: token, email, code } });
+        if (!result.ok) { setFeedback("That code is incorrect or has expired. Please try again."); return; }
+        const data = await readQuote({ data: { slug: token } });
+        if (!data) { setFeedback("This quote is no longer available. Please ask for a new link."); return; }
+        setState({ status: "ready", data: data as unknown as Shared });
+        window.__lovableEvents?.track?.("project.quote_opened", {});
+      }
+    } catch { setFeedback("Access could not be verified. Please try again shortly."); }
+    finally { setBusy(false); }
+  };
+
   if (state.status === "loading") return <QuoteNotice title="Loading your quote…" />;
+  if (state.status === "gate") return <QuoteShell><section className="max-w-md mx-auto py-16 sm:py-24">
+    <h1 className="font-display text-3xl">Your private quote</h1>
+    <p className="mt-4 text-sm text-muted-foreground">{codeSent ? "If this email is linked to an available quote, a verification code has been sent. Enter it below." : "Verify the email address your designer used for this quote."}</p>
+    <form className="mt-8 space-y-5" onSubmit={submitAccess}>
+      <div><label htmlFor="quote-email" className="text-sm">Email address</label><Input id="quote-email" className="mt-2" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" disabled={busy || codeSent} /></div>
+      {codeSent && <div><label htmlFor="quote-code" className="text-sm">Verification code</label><Input id="quote-code" className="mt-2" value={code} onChange={(e) => setCode(e.target.value)} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required disabled={busy} /></div>}
+      <p role="status" className="min-h-5 text-sm text-destructive">{feedback}</p>
+      <Button type="submit" className="w-full" disabled={busy}>{busy ? "Please wait…" : codeSent ? "Open quote" : "Send verification code"}</Button>
+      {codeSent && <Button type="button" variant="link" disabled={busy} onClick={() => { setCodeSent(false); setCode(""); setFeedback(""); }}>Change email or request a new code</Button>}
+    </form>
+  </section></QuoteShell>;
   if (state.status === "missing" || !state.data)
     return <QuoteNotice title="This link is no longer available" detail="It may have expired or been withdrawn. Please ask your designer for a new link." />;
 

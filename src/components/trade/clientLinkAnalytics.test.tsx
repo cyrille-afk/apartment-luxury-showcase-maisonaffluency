@@ -18,7 +18,7 @@ beforeEach(() => {
   Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText } });
   writeText.mockResolvedValue(undefined);
   mocks.invoke.mockResolvedValue({ data: { success: true }, error: null });
-  mocks.rpc.mockResolvedValue({ data: "private-quote-token", error: null });
+  mocks.rpc.mockResolvedValue({ data: "test-maker-test-piece", error: null });
   mocks.from.mockImplementation((table: string) => {
     const query: Record<string, unknown> = {};
     for (const key of ["select", "eq", "insert"]) query[key] = () => query;
@@ -35,6 +35,7 @@ describe("client link analytics", () => {
     render(<ShareQuoteWithClient quoteId="test-quote" />);
     fireEvent.click(screen.getByRole("button", { name: "Share with client" }));
     await waitFor(() => expect(track).toHaveBeenCalledExactlyOnceWith("project.client_link_copied", { link_type: "quote" }));
+    expect(writeText).toHaveBeenCalledWith("https://www.maisonaffluency.com/quote/test-maker-test-piece");
   });
   it("does not track a rejected quote clipboard write", async () => {
     writeText.mockRejectedValue(new Error("Denied"));

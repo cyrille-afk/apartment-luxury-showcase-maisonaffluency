@@ -1,5 +1,10 @@
 # Roadmap
 
+## Names-only private quote addresses
+- [x] Newly copied quote addresses use persisted maker/product names with readable word suffixes for collisions; clients verify saved email before access. Legacy links preserved; old links do not silently change.
+- [x] Added locked recipient-bound OTP/session RPCs and HttpOnly cookies; 25 regressions pass, clean gate rejects unknown recipients, legacy supplied link loads, build OK. Existing private-client email template/delivery reused.
+- [ ] Complete real recipient email → code → quote verification: supplied quote has no saved client, billing email or source inquiry; no client code was sent or recipient invented. Save its client email, then create a new share. Publication also required.
+
 ## Quote-open engagement dashboard
 - [ ] Show private daily aggregate Quote opens without names, quote identifiers or tokens. Blocked: the existing analytics stream has no verified app-readable aggregate connection; temporary agent query credentials cannot be embedded in the app. A dated snapshot is possible but is not live tracking.
 - [x] User chose a dated aggregate report: published query for 26 October–2 November records zero Quote opens; report explicitly treats collection as unconfirmed, not zero engagement. Light/dark/mobile checked; standalone HTML delivered without names or tokens.

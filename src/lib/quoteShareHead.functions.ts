@@ -9,7 +9,7 @@ export const getQuoteShareHead = createServerFn({ method: "GET" })
   .inputValidator((input: { segment: string }) => ({ token: quoteAccessToken(String(input?.segment ?? "")) }))
   .handler(async ({ data }) => {
     setResponseHeader("Cache-Control", "private, no-store");
-    if (!data.token) return quoteShareIdentity(null);
+    if (!data.token) return { title: "Private quote — Maison Affluency", description: "Verify your email to view your private Maison Affluency quote.", image: null, imageAlt: null };
     const url = process.env["SUPABASE_URL"];
     const key = process.env["SUPABASE_PUBLISHABLE_KEY"];
     if (!url || !key) throw new Error("Quote preview is temporarily unavailable.");

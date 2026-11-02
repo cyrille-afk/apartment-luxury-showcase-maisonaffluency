@@ -17,6 +17,15 @@ export function quoteShareUrl(token: string, snapshot: QuoteIdentity): string {
   return `${PRODUCTION_ORIGIN}/quote/${slug}--${token}`;
 }
 
+export function quoteShareSlug(snapshot: QuoteIdentity): string {
+  const first = snapshot.lines[0];
+  return slugify(first ? [first.maker, first.name, snapshot.lines.length > 1 ? "selection" : null].filter(Boolean).join(" ") : "quote").slice(0, 140).replace(/-+$/g, "") || "quote";
+}
+
+export function namedQuoteShareUrl(slug: string): string {
+  return `${PRODUCTION_ORIGIN}/quote/${encodeURIComponent(slug)}`;
+}
+
 /** Preview text excludes client names, prices, finishes and internal quote information. */
 export function quoteShareIdentity(snapshot: QuoteIdentity | null) {
   const first = snapshot?.lines[0];
