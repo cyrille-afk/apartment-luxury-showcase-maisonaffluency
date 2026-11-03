@@ -1,5 +1,9 @@
 # Roadmap
 
+## Homepage overlay header
+- [x] Apply the homepage-only two-row frosted overlay; retain shared menu handlers and Trade PRO, move Gallery left and add Search right.
+- [x] Desktop glass/solid hover, Living menu and Search verified; fresh phone visit opens menu without overflow. Two navigation tests pass; build OK. GitHub sync and publication required for live visual update.
+
 ## SEO failing findings review
 - [x] Fresh foundations scan: all eight checks pass, including sitemap; verified published www host, 44 category pages, sign-in entry and page-specific lastmod sources. Four sitemap tests pass; no code correction needed.
 - [x] Saved “Collectible Design: A Guide to Informed Collecting” through the journal editor as an unpublished draft: 956 words, Getty/e15/Christie's/RICS citations, authentic Alexander Lamont cover and internal links; US keyword/SERP research completed. Admin preview verified desktop/phone, no overflow; anonymous access remains hidden. Content finding stays open until publication.

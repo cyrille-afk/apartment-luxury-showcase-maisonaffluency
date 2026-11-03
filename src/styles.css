@@ -5,6 +5,85 @@
 :root {
   --collection-control-background: #000000;
   --collection-control-foreground: #ffffff;
+  --homepage-header-paper: oklch(1 0 0);
+  --homepage-header-ink: oklch(0.18 0 0);
+  --homepage-header-glass: color-mix(in oklab, var(--homepage-header-paper) 25%, transparent);
+  --homepage-header-divider: color-mix(in oklab, var(--homepage-header-ink) 5%, transparent);
+}
+
+/* Homepage-only overlay; shared page headers and portal navigation stay unchanged. */
+[data-site-header].homepage-overlay-header {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--homepage-header-glass);
+  color: var(--homepage-header-ink);
+  backdrop-filter: blur(12px);
+  transition: background-color 300ms ease-in-out, backdrop-filter 300ms ease-in-out;
+}
+.homepage-overlay-header [data-header-top-row] {
+  min-height: 88px;
+  border-bottom-color: var(--homepage-header-divider);
+}
+.homepage-overlay-header [data-header-primary-row] {
+  min-height: 56px;
+  gap: 40px;
+  padding-inline: 0;
+}
+.homepage-overlay-header [data-header-primary-row] > button,
+.homepage-overlay-header [data-header-primary-row] > div > button,
+.homepage-overlay-header [data-header-top-row] svg {
+  color: var(--homepage-header-ink);
+}
+.homepage-overlay-header [data-header-top-row] > div:last-child { gap: 20px; }
+.homepage-overlay-header [data-menu-active="true"] { backdrop-filter: none; }
+[data-site-header].homepage-overlay-header:focus-within,
+[data-site-header].homepage-overlay-header[data-menu-active="true"] {
+  background-color: var(--homepage-header-paper);
+  backdrop-filter: blur(0);
+}
+@media (hover: hover) {
+  [data-site-header].homepage-overlay-header:hover {
+    background-color: var(--homepage-header-paper);
+    backdrop-filter: blur(0);
+  }
+}
+.homepage-mobile-categories {
+  display: flex;
+  gap: 20px;
+  margin-inline: -24px;
+  padding: 8px 24px 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-top: 1px solid var(--homepage-header-divider);
+}
+.homepage-mobile-categories::-webkit-scrollbar { display: none; }
+.homepage-mobile-categories > button {
+  flex-shrink: 0;
+  height: 32px;
+  padding: 0;
+  border-radius: 0;
+  font-size: 11px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0;
+  color: var(--homepage-header-ink);
+}
+@media (min-width: 768px) {
+  .homepage-mobile-categories { display: none; }
+}
+@media (max-width: 767px) {
+  .homepage-overlay-header .md\:hidden > div:first-child { color: var(--homepage-header-ink); }
+  .homepage-overlay-header [aria-label="Toggle menu"] { color: var(--homepage-header-ink); }
+  .homepage-overlay-header [aria-label="Toggle menu"] + * { display: none; }
+}
+@media (min-width: 768px) and (max-width: 1100px) {
+  .homepage-overlay-header [data-header-primary-row] { gap: 24px; }
+  .homepage-overlay-header [data-header-top-row] > div:last-child { gap: 12px; }
+  .homepage-overlay-header [data-utility-trade] { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-site-header].homepage-overlay-header { transition: none; }
 }
 .collection-capsule-active,
 .collection-capsule-active:hover {

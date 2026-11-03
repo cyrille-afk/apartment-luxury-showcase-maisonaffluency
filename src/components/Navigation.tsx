@@ -882,10 +882,10 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
         className="fixed inset-0 z-40 bg-background/25 backdrop-blur-[6px] animate-fade-in"
       />
     )}
-    <nav data-site-header className={cn(
+    <nav data-site-header data-home-overlay={isHomeRoute ? "true" : undefined} data-menu-active={anyDropdownOpen ? "true" : undefined} className={cn(
       "fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top)] transform transition-all duration-300 ease-in-out will-change-transform",
-      navHidden ? "-translate-y-full" : "translate-y-0",
-      location.pathname === "/trade-program"
+      !isHomeRoute && navHidden ? "-translate-y-full" : "translate-y-0",
+      isHomeRoute ? "homepage-overlay-header" : location.pathname === "/trade-program"
         ? "bg-background/90 backdrop-blur-md border-b border-border/30"
         : borderless
         ? "bg-[#FAFAFA] border-b border-transparent md:bg-white md:border-b md:border-zinc-100"
@@ -1245,12 +1245,25 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
           </Sheet>
         </div>
 
+        {isHomeRoute && (
+          <div className="homepage-mobile-categories md:hidden" aria-label="Primary navigation">
+            <Button variant="ghost" onClick={() => handleNavClick("/designers")}>Designers</Button>
+            {(["living", "dining", "bedroom", "office", "lighting", "decor"] as RoomNavKey[]).map((room) => (
+              <Button key={room} variant="ghost" onClick={() => navigateToRoom(room === "living" ? "living-room" : room === "dining" ? "dining-room" : room)}>{room}</Button>
+            ))}
+            <Button variant="ghost" onClick={() => handleNavClick("/journal")}>Journal</Button>
+          </div>
+        )}
+
         {/* Desktop: single-row symmetrical luxury header */}
         <div className="hidden md:flex flex-col items-stretch w-full">
           {/* ROW 1 — wordmark centered independently of its date badge */}
-          <div className="relative flex min-h-16 items-center justify-between border-b border-border/30 py-3">
-            <div className="flex items-center">
+          <div data-header-top-row className="relative flex min-h-16 items-center justify-between border-b border-border/30 py-3">
+            <div className="flex items-center gap-5">
+              {isHomeRoute && <Button variant="ghost" onClick={() => handleNavClick("/gallery")} className="homepage-gallery-link h-auto rounded-none p-0 font-body text-xs uppercase text-foreground hover:bg-transparent">Our Gallery</Button>}
+              {!isHomeRoute &&
               <ShippingDestinationSwitcher compact showIso className="min-h-8 justify-center" />
+              }
             </div>
 
             <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap">
@@ -1259,10 +1272,10 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   MAISON AFFLUENCY
                 </span>
               </button>
-              <span className="absolute left-full top-1/2 ml-5 hidden -translate-y-1/2 items-center gap-5 xl:flex xl:ml-6 xl:gap-6">
+              {!isHomeRoute && <span className="absolute left-full top-1/2 ml-5 hidden -translate-y-1/2 items-center gap-5 xl:flex xl:ml-6 xl:gap-6">
                 <span aria-hidden="true" className="h-3.5 w-px bg-foreground/25" />
                 <span className="font-body text-[7px] uppercase tracking-[0.3em] font-light text-foreground">Est. 2017</span>
-              </span>
+              </span>}
             </div>
 
             <div className="relative z-20 flex shrink-0 items-center gap-5">
@@ -1408,19 +1421,19 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                 </DropdownMenuContent>
               </DropdownMenu>}
 
-              <React.Suspense fallback={favoritesButton}>
+              {isHomeRoute ? <Button variant="ghost" size="icon" aria-label="Search" title="Search" onClick={() => navigate("/search")} className="size-8 rounded-none text-foreground hover:bg-transparent"><Search className="size-4" strokeWidth={1.25} /></Button> : <React.Suspense fallback={favoritesButton}>
                 <FavoritesHoverPreview favCount={favCount}>
                   {favoritesButton}
                 </FavoritesHoverPreview>
-              </React.Suspense>
+              </React.Suspense>}
 
               <CartNavButton />
             </div>
           </div>
 
           {/* ROW 2 — primary navigation bar */}
-          <nav ref={desktopRoomNavRef} className="relative mx-auto flex min-h-12 w-full max-w-[1400px] items-center justify-center gap-10 px-2 py-2 lg:gap-8 lg:px-6 xl:gap-18 xl:px-0 2xl:gap-20">
-              <button
+          <nav ref={desktopRoomNavRef} data-header-primary-row className="relative mx-auto flex min-h-12 w-full max-w-[1400px] items-center justify-center gap-10 px-2 py-2 lg:gap-8 lg:px-6 xl:gap-18 xl:px-0 2xl:gap-20">
+              {!isHomeRoute && <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/gallery"); }}
                 className={cn(
                   "group relative font-body text-[12px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
@@ -1428,7 +1441,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                 )}
               >
                 <span className="link-underline-grow">Our Gallery</span>
-              </button>
+              </button>}
 
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/designers"); }}
@@ -1440,7 +1453,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                 <span className="link-underline-grow">Designers</span>
               </button>
 
-              {(Object.keys(roomNavigation) as RoomNavKey[]).map((room) => (
+              {(isHomeRoute ? ["living", "dining", "bedroom", "office", "lighting", "decor"] as RoomNavKey[] : Object.keys(roomNavigation) as RoomNavKey[]).map((room) => (
                 <div
                   key={room}
                   className="static"
