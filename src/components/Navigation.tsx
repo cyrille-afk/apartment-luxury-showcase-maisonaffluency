@@ -292,6 +292,7 @@ const ProductDropdownPanel = ({ menuKey, onCategoryLink, onRoomNavigate, onFullC
   onPieceNavigate: (href: string) => void;
 }) => {
   const menu = PRODUCT_NAV.find((m) => m.key === menuKey)!;
+  const showShopByRoom = menuKey === "rooms";
   const [previewRoom, setPreviewRoom] = useState(menu.defaultRoom);
   const { data: rawCatalogCount } = useMasterCatalogRawCount();
   const { data: counts } = useCategoryMenuCounts(menu.links.map((l) => ({ key: l.label, category: l.category, subcategory: l.subcategory ?? null })));
@@ -320,6 +321,7 @@ const ProductDropdownPanel = ({ menuKey, onCategoryLink, onRoomNavigate, onFullC
           ))}
         </div>
         </>)}
+        {showShopByRoom && (<>
         <div className="mb-4 mt-6 border-b border-border/50" />
         <div className="mb-3 font-body text-xs font-bold uppercase tracking-widest text-muted-foreground">Shop By Room</div>
         <div className="flex flex-col">
@@ -333,6 +335,7 @@ const ProductDropdownPanel = ({ menuKey, onCategoryLink, onRoomNavigate, onFullC
             </Button>
           ))}
         </div>
+        </>)}
       </div>
       <RoomVisualPreview key={previewRoom} room={previewNav} selectedRoomSlug={previewRoom} onPieceNavigate={onPieceNavigate} />
     </div>
