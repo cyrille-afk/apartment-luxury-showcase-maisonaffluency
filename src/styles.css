@@ -35,7 +35,7 @@ body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-he
 body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-hero > .absolute.inset-x-0 { height: 100%; }
 body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-hero > .absolute.pointer-events-none > .relative { padding-top: calc(var(--header-h) + 24px); }
 .header-trade-entry { position: relative; }
-.header-trade-menu { padding-top: 110px; }
+.header-trade-menu { position: absolute; top: 100%; margin-top: 8px; padding-top: 0; }
 .header-account-menu { padding-top: 110px; }
 /* Strict vertical stack: rows never overlap; one sans family everywhere except the brand mark. */
 .global-overlay-header > div > div.md\:flex { display: flex; flex-direction: column; }
@@ -52,6 +52,7 @@ body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-he
 /* Top-left trade entry: light italic, quiet against the utility links. */
 .global-overlay-header [data-utility-trade],
 .global-overlay-header [data-utility-trade] :is(span, em) {
+  font-size: 14px !important;
   font-weight: 300 !important;
   font-style: italic !important;
   text-transform: none !important;
