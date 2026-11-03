@@ -464,7 +464,7 @@ function singularizeSub(s: string): string {
 
   return (
     <>
-    <section ref={gridRef} id="product-grid" className={`bg-background scroll-header-offset ${compactTop ? "pt-4 pb-12 md:pb-16" : "py-12 md:py-16"}`}>
+    <section ref={gridRef} id="product-grid" className={`bg-background scroll-header-offset ${compactTop && !showAll ? "pt-4 pb-12 md:pb-16" : showAll ? "pt-10 pb-12 md:pt-16 md:pb-16" : "py-12 md:py-16"}`}>
       <div className={`${roomSlug ? "max-w-7xl" : "max-w-[1500px]"} mx-auto px-4 md:px-8`}>
         {/* Breadcrumbs */}
         {crumbs.length > 1 && <Breadcrumbs items={crumbs} className="mb-4" />}
@@ -476,32 +476,24 @@ function singularizeSub(s: string): string {
             <h2 className="font-display text-2xl md:text-3xl text-foreground">
               {filterLabel}
             </h2>
-            {dbPicksLoading && !dbPicks ? (
-              <span
-                className="inline-flex items-center gap-2 mt-1 w-64 align-middle"
-                aria-label="Loading pieces count"
-              >
-                <span className="block h-3 w-56 rounded bg-muted animate-pulse" />
-              </span>
-            ) : (
-              <p className="font-body text-sm text-[hsl(var(--accent))] mt-1">
-                {roomSlug || showAll ? (
-                  <>
-                    Showing {filtered.length} curated {filtered.length === 1 ? "piece" : "pieces"} out of{" "}
-                    {masterCatalogCount || allProducts.length} published pieces currently browseable
-                    {rawCatalogCount ? ` from ${rawCatalogCount} total` : ""} in the master catalogue
-                  </>
-                ) : (
-                  <>
-                    {filtered.length} {filtered.length === 1 ? "piece" : "pieces"} across{" "}
-                    {filterSource === 'collectibles' ? 'Collectible Design'
-                      : filterSource === 'brands' ? 'all Ateliers'
-                      : filterSource === 'designers' ? 'all Designers'
-                      : 'all collections'}
-                  </>
-                )}
-              </p>
-            )}
+            {!(roomSlug || showAll) ? (
+              dbPicksLoading && !dbPicks ? (
+                <span
+                  className="inline-flex items-center gap-2 mt-1 w-64 align-middle"
+                  aria-label="Loading pieces count"
+                >
+                  <span className="block h-3 w-56 rounded bg-muted animate-pulse" />
+                </span>
+              ) : (
+                <p className="font-body text-sm text-[hsl(var(--accent))] mt-1">
+                  {filtered.length} {filtered.length === 1 ? "piece" : "pieces"} across{" "}
+                  {filterSource === 'collectibles' ? 'Collectible Design'
+                    : filterSource === 'brands' ? 'all Ateliers'
+                    : filterSource === 'designers' ? 'all Designers'
+                    : 'all collections'}
+                </p>
+              )
+            ) : null}
 
             </div>
           </div>
