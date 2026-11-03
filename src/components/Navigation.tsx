@@ -9,9 +9,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useQueryClient } from "@tanstack/react-query";
 import { trackCTA } from "@/lib/analytics";
 import { deferHashScrollUntilSheetClosed } from "@/lib/mobileHashNavigation";
-import { useScrollDirection } from "@/hooks/useScrollDirection";
-import { useProgrammaticScrollActive } from "@/lib/programmaticScroll";
-import { useStickyProductBarActive } from "@/lib/stickyProductBar";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -52,7 +49,6 @@ const AuthGateDialog = React.lazy(() => import("@/components/AuthGateDialog"));
 const GalleryDetailsFloatingNav = React.lazy(() => import("@/components/GalleryDetailsFloatingNav"));
 
 // useFeaturedPublicDocument import removed — AD free-download flow discontinued.
-const FavoritesHoverPreview = React.lazy(() => import("@/components/FavoritesHoverPreview"));
 import ShippingDestinationSwitcher from "@/components/ShippingDestinationSwitcher";
 import CartNavButton from "@/components/CartNavButton";
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
@@ -371,7 +367,7 @@ interface NavigationProps {
   alwaysVisible?: boolean;
 }
 
-const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationProps) => {
+const Navigation = (_props: NavigationProps) => {
   useEffect(() => {
     if (!window.matchMedia("(min-width: 768px)").matches) return;
     // Leave first paint to the page, then warm all three menu photos in parallel.
@@ -415,22 +411,6 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   const [authGateMode, setAuthGateMode] = useState<"prompt" | "signup" | "login">("prompt");
   // Global wishlist state (localStorage-backed, shared via WishlistProvider)
   const { count: favCount } = useWishlist();
-  // Rendered both as the Suspense fallback and as the hover-preview trigger so
-  // the wishlist icon is never missing while its preview chunk loads.
-  const favoritesButton = (
-    <button
-      onClick={() => navigate("/favorites")}
-      aria-label="Wishlist"
-      className="relative group p-1 transition-colors hover:text-foreground"
-    >
-      <Heart className="w-[16px] h-[16px] text-muted-foreground" strokeWidth={1.25} />
-      {favCount > 0 && (
-        <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[9px] leading-none px-1">
-          {favCount}
-        </span>
-      )}
-    </button>
-  );
   const navigate = useNavigate();
   const location = useLocation();
   const isOnCategoryRoute = location.pathname.startsWith("/products-category/");
@@ -841,7 +821,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
         className="fixed inset-0 z-40 bg-background/25 backdrop-blur-[6px] animate-fade-in"
       />
     )}
-    <nav data-site-header data-global-overlay="true" data-menu-active={anyDropdownOpen ? "true" : undefined} className="global-overlay-header absolute inset-x-0 top-0 z-50 pt-[env(safe-area-inset-top)]">
+    <nav data-site-header data-global-overlay="true" data-dark-backdrop={location.pathname === "/designers" ? "true" : undefined} data-menu-active={anyDropdownOpen ? "true" : undefined} className="global-overlay-header absolute inset-x-0 top-0 z-50 pt-[env(safe-area-inset-top)]">
 
       <div className="mx-auto w-full max-w-[1500px] px-6">
         {/* Mobile: single row */}

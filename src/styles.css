@@ -19,6 +19,7 @@
   backdrop-filter: blur(12px);
   transition: background-color 300ms ease, backdrop-filter 300ms ease;
   --site-header-height: 176px;
+  --header-current-ink: var(--homepage-header-ink);
 }
 .global-overlay-header [data-header-top-row] {
   min-height: 88px;
@@ -28,7 +29,9 @@
 .global-overlay-header [data-header-top-row] button,
 .global-overlay-header [data-header-top-row] svg,
 .global-overlay-header [data-header-primary-row] button,
-.global-overlay-header [data-header-editorial-row] button { color: var(--homepage-header-ink); letter-spacing: 0; }
+.global-overlay-header [data-header-editorial-row] button { color: var(--header-current-ink, var(--homepage-header-ink)); letter-spacing: 0; }
+.global-overlay-header[data-dark-backdrop="true"] { --header-current-ink: var(--homepage-header-paper); }
+.global-overlay-header[data-dark-backdrop="true"] .font-brand { color: var(--header-current-ink); }
 .header-trade-entry { position: relative; }
 .header-trade-menu { padding-top: 110px; }
 .header-account-menu { padding-top: 110px; }
@@ -51,11 +54,13 @@
 }
 [data-site-header].global-overlay-header:focus-within,
 [data-site-header].global-overlay-header[data-menu-active="true"] {
+  --header-current-ink: var(--homepage-header-ink);
   background-color: var(--homepage-header-paper);
   backdrop-filter: none;
 }
 @media (hover: hover) {
   [data-site-header].global-overlay-header:hover {
+    --header-current-ink: var(--homepage-header-ink);
     background-color: var(--homepage-header-paper);
     backdrop-filter: none;
   }
