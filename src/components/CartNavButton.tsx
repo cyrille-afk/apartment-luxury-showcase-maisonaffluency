@@ -2,6 +2,7 @@ import { useEffect, useState, lazy, Suspense } from "react";
 import { useNavigate } from "@/lib/router-compat";
 import { ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import type { PaymentMethod } from "@/components/product/SelectionDrawer";
 
 // The mini-cart sheet is only reachable after a click, so it stays out of the
@@ -28,9 +29,11 @@ import {
 export default function CartNavButton({
   className,
   iconClassName,
+  label,
 }: {
   className?: string;
   iconClassName?: string;
+  label?: string;
 }) {
   const navigate = useNavigate();
   const items = useCart();
@@ -99,18 +102,19 @@ export default function CartNavButton({
 
   return (
     <>
-      <button
+      <Button variant="ghost" type="button"
         onClick={handleClick}
-        aria-label={count > 0 ? `Your selection, ${count} item${count > 1 ? "s" : ""}` : "Your selection"}
-        className={cn("relative flex min-h-[40px] min-w-[40px] items-center justify-center p-1 transition-colors hover:text-foreground", className)}
+        aria-label={label ?? (count > 0 ? `Your selection, ${count} item${count > 1 ? "s" : ""}` : "Your selection")}
+        className={cn("relative flex min-h-[40px] min-w-[40px] items-center justify-center gap-2 rounded-none p-1 font-body text-xs transition-colors hover:bg-transparent hover:text-foreground", className)}
       >
+        {label && <span className="header-utility-label">{label}</span>}
         <ShoppingBag className={cn("w-[16px] h-[16px] text-muted-foreground", iconClassName)} strokeWidth={1.25} />
         {count > 0 && (
           <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[9px] leading-none px-1">
             {count}
           </span>
         )}
-      </button>
+      </Button>
 
       {drawerMounted && (
         <Suspense fallback={null}>
