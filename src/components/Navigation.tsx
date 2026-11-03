@@ -40,7 +40,7 @@ import intimateDiningAmbient from "@/assets/intimate-dining.jpg";
 import calmingBedroomAmbient from "@/assets/master-suite.jpg";
 import { useRoomPreviewScene } from "@/hooks/useRoomPreviewScene";
 import { useDbCuratorPicks, useMasterCatalogRawCount } from "@/hooks/useDbCuratorPicks";
-import { useRoomMenuCounts } from "@/hooks/useRoomMenuCounts";
+import { useRoomMenuCounts, useCategoryMenuCounts } from "@/hooks/useRoomMenuCounts";
 import type { RoomSlug } from "@/lib/roomCategories";
 import { preloadImage } from "@/lib/curatorPickPreload";
 // Interaction-only surfaces: loaded on demand so the header does not drag the
@@ -213,6 +213,108 @@ const RoomVisualPreview = ({ room, selectedRoomSlug, onPieceNavigate }: { room: 
       Leverage our global designers network and sourcing capabilities to elevate your portfolio of projects
     </p>
   </div>
+  );
+};
+
+// Row 3 product-type menus (The Future Perfect structure). Each opens the same
+// hybrid mega-panel: category links with counts + Shop By Room + room preview.
+type ProductNavKey = "furniture" | "lighting" | "mirrors" | "objects" | "rugs" | "textiles";
+interface ProductNavLink { label: string; category: string; subcategory?: string }
+const PRODUCT_NAV: { key: ProductNavKey; label: string; title: string; category: string; subcategory?: string; defaultRoom: string; links: ProductNavLink[] }[] = [
+  { key: "furniture", label: "Furniture", title: "Furniture", category: "Seating", defaultRoom: "living-room", links: [
+    { label: "Seating", category: "Seating" },
+    { label: "Tables", category: "Tables" },
+    { label: "Storage", category: "Storage" },
+    { label: "Beds & Bedroom", category: "Bedroom" },
+  ] },
+  { key: "lighting", label: "Lighting", title: "Lighting", category: "Lighting", defaultRoom: "dining-room", links: [
+    { label: "Ceiling Lights", category: "Lighting", subcategory: "Ceiling Lights" },
+    { label: "Wall Lights", category: "Lighting", subcategory: "Wall Lights" },
+    { label: "Table Lights", category: "Lighting", subcategory: "Table Lights" },
+    { label: "Floor Lights", category: "Lighting", subcategory: "Floor Lights" },
+  ] },
+  { key: "mirrors", label: "Mirrors", title: "Mirrors", category: "Décor", subcategory: "Mirrors", defaultRoom: "bedroom", links: [
+    { label: "Mirrors", category: "Décor", subcategory: "Mirrors" },
+    { label: "Wall Décor", category: "Décor", subcategory: "Wall Décor" },
+    { label: "Folding Screens", category: "Décor", subcategory: "Folding Screens & Window Décor" },
+  ] },
+  { key: "objects", label: "Objects", title: "Objects", category: "Décor", defaultRoom: "living-room", links: [
+    { label: "Decorative Objects", category: "Décor", subcategory: "Decorative Objects" },
+    { label: "Vases & Vessels", category: "Décor", subcategory: "Vases & Vessels" },
+    { label: "Candle Holders", category: "Décor", subcategory: "Candle Holders" },
+    { label: "Boxes", category: "Décor", subcategory: "Boxes" },
+    { label: "Trays", category: "Décor", subcategory: "Trays & Change Trays" },
+    { label: "Desk Accessories", category: "Décor", subcategory: "Desk Accessories" },
+    { label: "Books", category: "Décor", subcategory: "Books" },
+  ] },
+  { key: "rugs", label: "Rugs", title: "Rugs", category: "Rugs", defaultRoom: "living-room", links: [
+    { label: "Hand-Knotted Rugs", category: "Rugs", subcategory: "Hand-Knotted Rugs" },
+    { label: "Hand-Tufted Rugs", category: "Rugs", subcategory: "Hand-Tufted Rugs" },
+    { label: "Hand-Woven Rugs", category: "Rugs", subcategory: "Hand-Woven Rugs" },
+  ] },
+  { key: "textiles", label: "Textiles", title: "Textiles", category: "Décor", subcategory: "Cushions & Throws", defaultRoom: "bedroom", links: [
+    { label: "Cushions & Throws", category: "Décor", subcategory: "Cushions & Throws" },
+    { label: "Tableware & Linens", category: "Décor", subcategory: "Tableware & Linens" },
+    { label: "Bedding", category: "Bedroom", subcategory: "Bedding" },
+  ] },
+];
+const SHOP_BY_ROOM_LINKS = [
+  { label: "Living Rooms", slug: "living-room", nav: "living" as RoomNavKey },
+  { label: "Dining Rooms", slug: "dining-room", nav: "dining" as RoomNavKey },
+  { label: "Bedrooms", slug: "bedroom", nav: "bedroom" as RoomNavKey },
+  { label: "Office", slug: "office", nav: "office" as RoomNavKey },
+];
+
+const ProductDropdownPanel = ({ menuKey, onCategoryLink, onRoomNavigate, onFullCatalogue, onPieceNavigate }: {
+  menuKey: ProductNavKey;
+  onCategoryLink: (category: string, subcategory?: string) => void;
+  onRoomNavigate: (slug: string) => void;
+  onFullCatalogue: () => void;
+  onPieceNavigate: (href: string) => void;
+}) => {
+  const menu = PRODUCT_NAV.find((m) => m.key === menuKey)!;
+  const [previewRoom, setPreviewRoom] = useState(menu.defaultRoom);
+  const { data: rawCatalogCount } = useMasterCatalogRawCount();
+  const { data: counts } = useCategoryMenuCounts(menu.links.map((l) => ({ key: l.label, category: l.category, subcategory: l.subcategory ?? null })));
+  const previewNav = SHOP_BY_ROOM_LINKS.find((r) => r.slug === previewRoom)?.nav ?? "living";
+  return (
+    <div data-header-panel className="relative flex min-h-[470px] items-start overflow-visible bg-[hsl(var(--collection-card-canvas))]">
+      <div className="w-56 shrink-0 self-stretch border-r border-border/60 py-6 pl-6 pr-4">
+        <button type="button" onClick={onFullCatalogue} className="group -mx-3 -my-2 flex w-[calc(100%+1.5rem)] flex-col items-start px-3 py-3 text-left transition-colors hover:bg-[hsl(var(--accent))]/40 focus-visible:outline-hidden">
+          <span className="font-display text-sm font-bold uppercase tracking-[0.18em] text-foreground group-hover:text-primary">All Categories</span>
+          <span className="mt-1 font-body text-[10px] italic tracking-wide text-muted-foreground">Full Catalogue{typeof rawCatalogCount === "number" ? ` (${rawCatalogCount})` : ""}</span>
+        </button>
+        <div className="mb-5 mt-5 border-b border-border/50" />
+        <Button type="button" variant="ghost" onClick={() => onCategoryLink(menu.category, menu.subcategory)} className="mb-3 h-auto justify-start rounded-none px-0 py-1 font-body text-xs font-semibold uppercase tracking-widest text-foreground hover:bg-transparent">
+          {menu.title}
+        </Button>
+        <div className="ml-1.5 flex flex-col border-l border-border/60 pl-4">
+          {menu.links.map((link) => (
+            <Button key={link.label} type="button" variant="ghost" onClick={() => onCategoryLink(link.category, link.subcategory)} className="group flex min-h-8 h-auto w-full items-center justify-between gap-2 whitespace-normal rounded-sm px-2 py-1.5 text-left font-body text-xs font-normal text-muted-foreground hover:bg-transparent hover:font-medium hover:text-foreground">
+              <span className="flex-1">{link.label}</span>
+              {typeof counts?.[link.label] === "number" && counts[link.label] > 0 && (
+                <span className="text-[9px] font-normal tabular-nums tracking-wider text-muted-foreground/70">{counts[link.label]}</span>
+              )}
+              <ChevronRight className="size-2.5 shrink-0 text-muted-foreground" strokeWidth={1.25} />
+            </Button>
+          ))}
+        </div>
+        <div className="mb-4 mt-6 border-b border-border/50" />
+        <div className="mb-3 font-body text-xs font-bold uppercase tracking-widest text-muted-foreground">Shop By Room</div>
+        <div className="flex flex-col">
+          {SHOP_BY_ROOM_LINKS.map((room) => (
+            <Button key={room.slug} type="button" variant="ghost"
+              onMouseEnter={() => setPreviewRoom(room.slug)} onFocus={() => setPreviewRoom(room.slug)}
+              onClick={() => onRoomNavigate(room.slug)}
+              className="h-auto min-h-8 justify-start gap-2.5 rounded-none px-0 py-1 text-left font-body text-xs uppercase tracking-widest hover:bg-transparent">
+              <span className={cn("size-1.5 shrink-0 rounded-full transition-all", previewRoom === room.slug ? "scale-100 bg-foreground" : "scale-0")} />
+              <span className={cn("tracking-wider", previewRoom === room.slug ? "font-semibold text-foreground" : "font-medium text-muted-foreground/80")}>{room.label}</span>
+            </Button>
+          ))}
+        </div>
+      </div>
+      <RoomVisualPreview key={previewRoom} room={previewNav} selectedRoomSlug={previewRoom} onPieceNavigate={onPieceNavigate} />
+    </div>
   );
 };
 
