@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Global header navigation
+- [x] Browser verified full-strength white dark-header rows, logo and icons at rest/hover, exact 14px italic sentence-case Trade prompt without PRO, readable Trade menu and unchanged light Gallery header; build OK. GitHub sync required.
 - [x] Designer landing uses dark glass (20/20/20 at 70%, 12px blur), including hover/menu states; Gallery stays light. Browser verified readable dropdowns and exact 14px italic natural-case prompt without PRO; build OK.
 - [x] Fixed Trade entry at 14px; browser verified its menu directly beneath the top-row trigger with an exact 8px gap at 800/1280/1946px, hover travel, Join destination, and build OK.
 - [x] Restored exact natural-case Trade prompts; homepage browser confirms italic header with text-transform none, natural-case banner, preserved pill/action, and build OK.
