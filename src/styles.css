@@ -18,7 +18,7 @@
   color: var(--homepage-header-ink);
   backdrop-filter: blur(12px);
   transition: background-color 300ms ease, backdrop-filter 300ms ease;
-  --site-header-height: 176px;
+  --site-header-height: 204px;
   --header-current-ink: var(--homepage-header-ink);
 }
 .global-overlay-header [data-header-top-row] {
@@ -38,22 +38,54 @@ body:has(.global-overlay-header[data-dark-backdrop="true"]) #designers-hover-her
 .header-trade-entry { position: relative; }
 .header-trade-menu { padding-top: 110px; }
 .header-account-menu { padding-top: 110px; }
+/* Strict vertical stack: rows never overlap; one sans family everywhere except the brand mark. */
+.global-overlay-header > div > div.md\:flex { display: flex; flex-direction: column; }
+.global-overlay-header [data-header-top-row] { position: relative; flex: none; padding-block: 20px 16px; }
+.global-overlay-header [data-header-top-row] :is(button, a, span):not(.font-brand),
+.global-overlay-header .header-editorial-row :is(button, a, span),
+.global-overlay-header .header-collection-row > div > button,
+.global-overlay-header .header-collection-row > div > button span,
+.global-overlay-header .header-mobile-collections > button {
+  font-family: var(--font-body) !important;
+  font-style: normal;
+}
+.global-overlay-header [data-header-top-row] :is(button, a):not(:has(.font-brand)) { letter-spacing: 0.14em !important; font-weight: 400; text-transform: uppercase; font-size: 11px; }
 .header-editorial-row, .header-collection-row {
+  position: relative;
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 40px;
-  min-height: 44px;
+  gap: 48px;
+  min-height: 0;
 }
-.header-collection-row { gap: 48px; padding-bottom: 12px; }
-.header-editorial-row > button {
+.header-editorial-row { padding-block: 14px 10px; }
+.header-collection-row { gap: 52px; padding-block: 10px 20px; }
+.global-overlay-header .header-editorial-row > button,
+.global-overlay-header .header-collection-row > div > button {
   border-radius: 0;
   height: auto;
-  padding: 8px 0;
-  font-family: var(--font-body);
-  font-size: 12px;
-  font-weight: 400;
+  padding: 6px 0;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.2em !important;
+  text-transform: uppercase;
   background: transparent;
+  line-height: 1.2;
+}
+/* Homepage: subtle guard so links stay legible over the busy wallpaper. */
+body:has(#root [data-home-route]) [data-site-header].global-overlay-header,
+[data-site-header].global-overlay-header {
+  background-image: linear-gradient(to bottom, color-mix(in oklab, var(--homepage-header-paper) 55%, transparent), color-mix(in oklab, var(--homepage-header-paper) 30%, transparent));
+  box-shadow: 0 1px 0 var(--homepage-header-divider);
+}
+[data-site-header].global-overlay-header[data-dark-backdrop="true"] {
+  background-image: linear-gradient(to bottom, color-mix(in oklab, var(--homepage-header-ink) 45%, transparent), transparent);
+}
+[data-site-header].global-overlay-header:focus-within,
+[data-site-header].global-overlay-header[data-menu-active="true"] { background-image: none; }
+@media (hover: hover) {
+  [data-site-header].global-overlay-header:hover { background-image: none; }
 }
 [data-site-header].global-overlay-header:focus-within,
 [data-site-header].global-overlay-header[data-menu-active="true"] {
