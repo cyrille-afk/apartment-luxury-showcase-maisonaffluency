@@ -14,22 +14,23 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 const PublicGallery = () => {
   const isMobile = useIsMobile();
-  // iOS Safari runs with viewport-fit=cover, so the fixed nav is 96px + the
-  // status-bar inset — taller than the static --header-h constant. Measure the
-  // real nav height so the interlude never tucks under the header.
+  // Track the complete three-row header, including safe-area and font changes.
   const [headerOffset, setHeaderOffset] = useState<number | null>(null);
 
   useEffect(() => {
+    const nav = document.querySelector("[data-site-header]");
     const measure = () => {
-      const nav = document.querySelector("nav");
       const h = nav?.getBoundingClientRect().height;
       if (h) setHeaderOffset(Math.ceil(h));
     };
+    const observer = new ResizeObserver(measure);
+    if (nav) observer.observe(nav);
     measure();
     const raf = requestAnimationFrame(measure);
     window.addEventListener("resize", measure);
     window.addEventListener("orientationchange", measure);
     return () => {
+      observer.disconnect();
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", measure);
       window.removeEventListener("orientationchange", measure);
@@ -49,8 +50,8 @@ const PublicGallery = () => {
         <h1 className="sr-only">Maison Affluency Gallery</h1>
 
         <div
-          className="pt-[var(--header-h)]"
-          style={headerOffset ? { paddingTop: headerOffset } : undefined}
+          className="pt-[calc(var(--header-h)+24px)]"
+          style={headerOffset ? { paddingTop: headerOffset + 24 } : undefined}
         >
           {isMobile ? <Gallery /> : <InteractiveGalleryLookbook />}
         </div>
