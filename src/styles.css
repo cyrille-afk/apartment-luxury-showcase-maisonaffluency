@@ -9,6 +9,7 @@
   --homepage-header-ink: #111111;
   --header-dark-glass: rgba(20, 20, 20, 0.7);
   --header-dark-ink: #ffffff;
+  --font-header-trade: "Times New Roman", Times, serif;
   --homepage-header-glass: color-mix(in oklab, var(--homepage-header-paper) 25%, transparent);
   --homepage-header-divider: color-mix(in oklab, var(--homepage-header-ink) 5%, transparent);
 }
@@ -40,7 +41,7 @@ body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-he
 .header-trade-entry { position: relative; }
 .header-trade-menu { position: absolute; top: 100%; margin-top: 8px; padding-top: 0; }
 .header-account-menu { padding-top: 110px; }
-/* Strict vertical stack: rows never overlap; one sans family everywhere except the brand mark. */
+/* Strict vertical stack; the brand and editorial Trade prompt have dedicated families. */
 .global-overlay-header > div > div.md\:flex { display: flex; flex-direction: column; }
 .global-overlay-header [data-header-top-row] { position: relative; flex: none; padding-block: 20px 16px; }
 .global-overlay-header [data-header-top-row] :is(button, a, span):not(.font-brand),
@@ -53,10 +54,12 @@ body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-he
 }
 .global-overlay-header [data-header-top-row] :is(button, a):not(:has(.font-brand)) { letter-spacing: 0.14em !important; font-weight: 400; text-transform: uppercase; font-size: 11px; }
 /* Top-left trade entry: fixed legible sentence-case italic in every theme. */
-.global-overlay-header [data-utility-trade],
-.global-overlay-header [data-utility-trade] :is(span, em) {
+.global-overlay-header [data-header-top-row] [data-utility-trade],
+.global-overlay-header [data-header-top-row] [data-utility-trade] :is(span, em) {
+  font-family: var(--font-header-trade) !important;
   font-size: 14px !important;
-  font-weight: 300 !important;
+  font-weight: 400 !important;
+  letter-spacing: normal !important;
   font-style: italic !important;
   text-transform: none !important;
 }
