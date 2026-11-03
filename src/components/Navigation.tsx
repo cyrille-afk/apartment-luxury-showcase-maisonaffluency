@@ -238,7 +238,7 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
   const { data: rawCatalogCount } = useMasterCatalogRawCount();
   const { data: roomCounts } = useRoomMenuCounts(roomSlug, roomNavigation[room]);
   return (
-   <div className="relative flex min-h-[470px] items-start overflow-visible bg-[hsl(var(--collection-card-canvas))]">
+   <div data-header-panel className="relative flex min-h-[470px] items-start overflow-visible bg-[hsl(var(--collection-card-canvas))]">
      <div className="w-52 shrink-0 self-stretch border-r border-border/60 py-6 pl-6 pr-4">
       <div className="flex flex-col">
         <button

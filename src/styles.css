@@ -33,7 +33,7 @@
 .global-overlay-header [data-header-top-row] svg,
 .global-overlay-header [data-header-primary-row] button,
 .global-overlay-header [data-header-editorial-row] button { color: var(--header-current-ink, var(--homepage-header-ink)); letter-spacing: 0; }
-.global-overlay-header :is([data-header-top-row], [data-header-editorial-row], .header-collection-row, .header-mobile-collections) :is(button, a, span, svg) { color: var(--header-current-ink); }
+.global-overlay-header :is([data-header-top-row], [data-header-editorial-row], .header-collection-row, .header-mobile-collections) :is(button, a, span, svg):not([data-header-panel] *) { color: var(--header-current-ink); }
 .global-overlay-header .font-brand { color: var(--header-current-ink); }
 body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-hero { height: var(--designers-landing-vh, 100svh); }
 body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-hero > .absolute.inset-x-0 { height: 100%; }
@@ -134,11 +134,11 @@ body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-he
 :is([data-site-header].global-overlay-header[data-header-surface="dark"],
     .dark [data-site-header].global-overlay-header:not([data-header-surface="light"]):not([data-homepage="true"]))
   :is([data-header-top-row], [data-header-editorial-row], .header-collection-row, .header-mobile-collections)
-  :is(button, a, span, svg):not([role="menu"] *):not(.header-account-menu *) {
+  :is(button, a, span, svg):not([role="menu"] *):not(.header-account-menu *):not([data-header-panel] *) {
   color: var(--header-dark-ink) !important;
   opacity: 1 !important;
 }
-.global-overlay-header :is([role="menu"], .header-account-menu, .bg-background) {
+.global-overlay-header :is([role="menu"], .header-account-menu, .bg-background, [data-header-panel]) {
   --header-current-ink: hsl(var(--foreground));
 }
 .header-mobile-collections, .global-overlay-header > div > .header-editorial-row { display: none; }
