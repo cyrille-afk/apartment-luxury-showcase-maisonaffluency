@@ -218,14 +218,30 @@ const RoomVisualPreview = ({ room, selectedRoomSlug, onPieceNavigate }: { room: 
 
 // Row 3 product-type menus (The Future Perfect structure). Each opens the same
 // hybrid mega-panel: category links with counts + Shop By Room + room preview.
-type ProductNavKey = "furniture" | "lighting" | "mirrors" | "objects" | "rugs" | "textiles";
+type ProductNavKey = "furniture" | "seating" | "tables" | "lighting" | "rugs" | "storage" | "decor";
 interface ProductNavLink { label: string; category: string; subcategory?: string }
 const PRODUCT_NAV: { key: ProductNavKey; label: string; title: string; category: string; subcategory?: string; defaultRoom: string; links: ProductNavLink[] }[] = [
-  { key: "furniture", label: "All Categories", title: "Furniture", category: "Seating", defaultRoom: "living-room", links: [
+  { key: "furniture", label: "All Categories", title: "All Categories", category: "Seating", defaultRoom: "living-room", links: [
     { label: "Seating", category: "Seating" },
     { label: "Tables", category: "Tables" },
+    { label: "Lighting", category: "Lighting" },
+    { label: "Rugs", category: "Rugs" },
     { label: "Storage", category: "Storage" },
-    { label: "Beds & Bedroom", category: "Bedroom" },
+    { label: "Decor", category: "Décor" },
+  ] },
+  { key: "seating", label: "Seating", title: "Seating", category: "Seating", defaultRoom: "living-room", links: [
+    { label: "Sofas", category: "Seating", subcategory: "Sofas" },
+    { label: "Armchairs", category: "Seating", subcategory: "Armchairs" },
+    { label: "Chairs", category: "Seating", subcategory: "Chairs" },
+    { label: "Daybeds & Benches", category: "Seating", subcategory: "Daybeds & Benches" },
+    { label: "Ottomans & Stools", category: "Seating", subcategory: "Ottomans & Stools" },
+  ] },
+  { key: "tables", label: "Tables", title: "Tables", category: "Tables", defaultRoom: "dining-room", links: [
+    { label: "Dining Tables", category: "Tables", subcategory: "Dining Tables" },
+    { label: "Coffee Tables", category: "Tables", subcategory: "Coffee Tables" },
+    { label: "Side Tables", category: "Tables", subcategory: "Side Tables" },
+    { label: "Consoles", category: "Tables", subcategory: "Consoles" },
+    { label: "Desks", category: "Tables", subcategory: "Desks" },
   ] },
   { key: "lighting", label: "Lighting", title: "Lighting", category: "Lighting", defaultRoom: "dining-room", links: [
     { label: "Ceiling Lights", category: "Lighting", subcategory: "Ceiling Lights" },
@@ -233,29 +249,23 @@ const PRODUCT_NAV: { key: ProductNavKey; label: string; title: string; category:
     { label: "Table Lights", category: "Lighting", subcategory: "Table Lights" },
     { label: "Floor Lights", category: "Lighting", subcategory: "Floor Lights" },
   ] },
-  { key: "mirrors", label: "Mirrors", title: "Mirrors", category: "Décor", subcategory: "Mirrors", defaultRoom: "bedroom", links: [
-    { label: "Mirrors", category: "Décor", subcategory: "Mirrors" },
-    { label: "Wall Décor", category: "Décor", subcategory: "Wall Décor" },
-    { label: "Folding Screens", category: "Décor", subcategory: "Folding Screens & Window Décor" },
-  ] },
-  { key: "objects", label: "Objects", title: "Objects", category: "Décor", defaultRoom: "living-room", links: [
-    { label: "Decorative Objects", category: "Décor", subcategory: "Decorative Objects" },
-    { label: "Vases & Vessels", category: "Décor", subcategory: "Vases & Vessels" },
-    { label: "Candle Holders", category: "Décor", subcategory: "Candle Holders" },
-    { label: "Boxes", category: "Décor", subcategory: "Boxes" },
-    { label: "Trays", category: "Décor", subcategory: "Trays & Change Trays" },
-    { label: "Desk Accessories", category: "Décor", subcategory: "Desk Accessories" },
-    { label: "Books", category: "Décor", subcategory: "Books" },
-  ] },
   { key: "rugs", label: "Rugs", title: "Rugs", category: "Rugs", defaultRoom: "living-room", links: [
     { label: "Hand-Knotted Rugs", category: "Rugs", subcategory: "Hand-Knotted Rugs" },
     { label: "Hand-Tufted Rugs", category: "Rugs", subcategory: "Hand-Tufted Rugs" },
     { label: "Hand-Woven Rugs", category: "Rugs", subcategory: "Hand-Woven Rugs" },
   ] },
-  { key: "textiles", label: "Textiles", title: "Textiles", category: "Décor", subcategory: "Cushions & Throws", defaultRoom: "bedroom", links: [
+  { key: "storage", label: "Storage", title: "Storage", category: "Storage", defaultRoom: "dining-room", links: [
+    { label: "Bookcases", category: "Storage", subcategory: "Bookcases" },
+    { label: "Bars", category: "Storage", subcategory: "Bars" },
+    { label: "Cabinets & Sideboards", category: "Storage", subcategory: "Buffets, Cabinets And Sideboards" },
+  ] },
+  { key: "decor", label: "Decor", title: "Decor", category: "Décor", defaultRoom: "living-room", links: [
+    { label: "Mirrors", category: "Décor", subcategory: "Mirrors" },
+    { label: "Decorative Objects", category: "Décor", subcategory: "Decorative Objects" },
+    { label: "Vases & Vessels", category: "Décor", subcategory: "Vases & Vessels" },
+    { label: "Wall Décor", category: "Décor", subcategory: "Wall Décor" },
     { label: "Cushions & Throws", category: "Décor", subcategory: "Cushions & Throws" },
-    { label: "Tableware & Linens", category: "Décor", subcategory: "Tableware & Linens" },
-    { label: "Bedding", category: "Bedroom", subcategory: "Bedding" },
+    { label: "Candle Holders", category: "Décor", subcategory: "Candle Holders" },
   ] },
 ];
 const NEW_IN_LINKS = [
@@ -1511,7 +1521,7 @@ const Navigation = (_props: NavigationProps) => {
                   onMouseLeave={scheduleRoomMenuClose}
                 >
                   <Button
-                    ref={menu.key === "lighting" ? lightingTriggerRef : menu.key === "objects" ? decorTriggerRef : undefined}
+                    ref={menu.key === "lighting" ? lightingTriggerRef : menu.key === "decor" ? decorTriggerRef : undefined}
                     type="button"
                     variant="ghost"
                     onMouseEnter={() => { preloadRoomMenuPhotos(); openRoomMenu(menu.key); }}
