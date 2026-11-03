@@ -7,7 +7,7 @@
   --collection-control-foreground: #ffffff;
   --homepage-header-paper: oklch(1 0 0);
   --homepage-header-ink: #111111;
-  --header-dark-glass: rgba(20, 20, 20, 0.7);
+  --header-dark-glass: rgba(20, 20, 20, 0.4);
   --header-dark-ink: #ffffff;
   --font-header-trade: "Times New Roman", Times, serif;
   --homepage-header-glass: color-mix(in oklab, var(--homepage-header-paper) 25%, transparent);
@@ -118,12 +118,14 @@ body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-he
 /* Explicit page surfaces win; otherwise inherit a dark theme ancestor. Keep
    dark glass through hover/focus/menu states rather than flashing white. */
 [data-site-header].global-overlay-header[data-header-surface="dark"],
-.dark [data-site-header].global-overlay-header:not([data-header-surface="light"]):not([data-homepage="true"]) {
+[data-site-header].global-overlay-header[data-header-surface="dark"]:is(:hover, :focus-within, [data-menu-active="true"]),
+.dark [data-site-header].global-overlay-header:not([data-header-surface="light"]):not([data-homepage="true"]),
+.dark [data-site-header].global-overlay-header:not([data-header-surface="light"]):not([data-homepage="true"]):is(:hover, :focus-within, [data-menu-active="true"]) {
   --header-current-ink: var(--header-dark-ink);
   color: var(--header-dark-ink);
-  background-color: var(--header-dark-glass);
-  background-image: none;
-  backdrop-filter: blur(12px);
+  background-color: var(--header-dark-glass) !important;
+  background-image: none !important;
+  backdrop-filter: blur(12px) !important;
 }
 /* Dark row ink stays full-strength, including the wordmark's hover state.
    Dropdown panels keep their own surface/ink rather than inheriting white. */
