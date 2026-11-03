@@ -8,7 +8,7 @@ import { featuredDesigners, type CuratorPick } from "@/components/FeaturedDesign
 import { collectibleDesigners } from "@/components/Collectibles";
 import { cn } from "@/lib/utils";
 import { useCompare } from "@/contexts/CompareContext";
-import { useDbCuratorPicks, useMasterCatalogCount, useMasterCatalogRawCount } from "@/hooks/useDbCuratorPicks";
+import { useDbCuratorPicks } from "@/hooks/useDbCuratorPicks";
 import { useQueryClient } from "@tanstack/react-query";
 import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
 import { inferSubcategory, normalizeCategory } from "@/lib/productTaxonomy";
@@ -229,8 +229,6 @@ function mergeWithDbPicks(hardcoded: ProductItem[], dbPicks: ProductItem[]): Pro
 const ProductGrid = ({ sectionScope, roomSlug, roomCategory, roomSubcategory, compactTop, showAll, searchQuery }: { sectionScope?: "designers" | "collectibles" | "ateliers"; roomSlug?: RoomSlug; roomCategory?: string | null; roomSubcategory?: string | null; compactTop?: boolean; showAll?: boolean; searchQuery?: string }) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { data: dbPicks, isLoading: dbPicksLoading } = useDbCuratorPicks();
-  const { data: masterCatalogCount } = useMasterCatalogCount();
-  const { data: rawCatalogCount } = useMasterCatalogRawCount();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const destination = useShippingDestination();
