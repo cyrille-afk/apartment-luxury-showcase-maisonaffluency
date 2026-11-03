@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Global header navigation
+- [ ] Increase italic Trade entry to fixed 14px and anchor its menu beneath the top-row trigger with an 8px gap; verify hover travel and layout.
 - [x] Restored exact natural-case Trade prompts; homepage browser confirms italic header with text-transform none, natural-case banner, preserved pill/action, and build OK.
 - [x] Search/Cart now use real destination links; Search has a working catalogue field. Browser verified Jules results, empty Cart signed-in/out, editorial destinations, six collection menus, Living/Floor Lights destinations, Account login and Trade application. Saved JS browser regressions could not launch (missing bundled Chromium); Python Chromium checks passed. Nonempty basket checkout unchanged, not exercised.
 - [x] Verified solid white/dark-ink headers on Gallery, Designers and Journal; homepage retains frosted overlay. Gallery secondary menu starts 98px below the main header; preview build OK.
