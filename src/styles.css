@@ -6,7 +6,7 @@
   --collection-control-background: #000000;
   --collection-control-foreground: #ffffff;
   --homepage-header-paper: oklch(1 0 0);
-  --homepage-header-ink: oklch(0.18 0 0);
+  --homepage-header-ink: #111111;
   --header-dark-glass: rgba(20, 20, 20, 0.7);
   --header-dark-ink: oklch(0.98 0 0);
   --homepage-header-glass: color-mix(in oklab, var(--homepage-header-paper) 25%, transparent);
