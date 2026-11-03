@@ -1,5 +1,9 @@
 # Roadmap
 
+## Homepage overlay header
+- [ ] Apply the requested homepage-only two-row frosted header and preserve existing navigation.
+- [ ] Verify hover, menus, centered branding and phone layout.
+
 ## SEO failing findings review
 - [x] Fresh foundations scan: all eight checks pass, including sitemap; verified published www host, 44 category pages, sign-in entry and page-specific lastmod sources. Four sitemap tests pass; no code correction needed.
 - [x] Saved “Collectible Design: A Guide to Informed Collecting” through the journal editor as an unpublished draft: 956 words, Getty/e15/Christie's/RICS citations, authentic Alexander Lamont cover and internal links; US keyword/SERP research completed. Admin preview verified desktop/phone, no overflow; anonymous access remains hidden. Content finding stays open until publication.
