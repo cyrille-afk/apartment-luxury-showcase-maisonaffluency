@@ -429,6 +429,7 @@ const Navigation = (_props: NavigationProps) => {
   const [categoriesExpanded, setCategoriesExpanded] = useState(false);
   const [categoryPanelOpen, setCategoryPanelOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [accountMenuAnchor, setAccountMenuAnchor] = useState<HTMLDivElement | null>(null);
   const accountMenuCloseTimer = useRef<number | null>(null);
   const cancelAccountMenuClose = () => {
     if (accountMenuCloseTimer.current !== null) {
@@ -1256,19 +1257,20 @@ const Navigation = (_props: NavigationProps) => {
             <div className="relative z-20 flex shrink-0 items-center gap-5">
 
 
+              <div ref={setAccountMenuAnchor} className="header-account-entry">
               <DropdownMenu modal={false} open={accountMenuOpen} onOpenChange={(open) => { cancelAccountMenuClose(); setAccountMenuOpen(open); if (open) setTradeMenuOpen(false); }}>
                 <DropdownMenuTrigger asChild>
-                <Button variant="ghost" type="button" aria-label="Account menu" title="Account" className="relative group flex h-auto items-center gap-2 rounded-none p-1 font-body text-xs outline-hidden hover:bg-transparent"
+                <Button variant="ghost" type="button" aria-label="Account menu" className="relative group flex h-auto items-center gap-2 rounded-none p-1 font-body text-xs outline-hidden hover:bg-transparent"
                   onPointerEnter={(event) => { if (event.pointerType === "mouse") openAccountMenu(); }}
                   onPointerLeave={(event) => { if (event.pointerType === "mouse") scheduleAccountMenuClose(); }}>
                   <span className="header-utility-label">Account</span>
                   <User className="w-[16px] h-[16px] text-muted-foreground group-hover:text-foreground transition-colors" strokeWidth={1.25} />
                 </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" sideOffset={8}
+                <DropdownMenuContent portalContainer={accountMenuAnchor} align="end" sideOffset={4} avoidCollisions={false}
                   onPointerEnter={(event) => { if (event.pointerType === "mouse") cancelAccountMenuClose(); }}
                   onPointerLeave={(event) => { if (event.pointerType === "mouse") scheduleAccountMenuClose(); }}
-                  className="border-0 bg-transparent p-0 header-account-menu shadow-none z-[60] min-w-[200px]">
+                  className="border-0 bg-transparent p-0 header-account-menu shadow-none z-[60] min-w-[200px]" data-header-panel>
                   <div className="rounded-md border border-border bg-background p-1 shadow-lg">
                   {tradePartner ? (
                     <>
@@ -1328,6 +1330,7 @@ const Navigation = (_props: NavigationProps) => {
                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>
+              </div>
 
               <Button asChild variant="ghost" className="flex h-auto items-center gap-2 rounded-none p-1 font-body text-xs text-foreground hover:bg-transparent"><Link to="/search" aria-label="Search" title="Search" onClick={closeAllDropdowns}><span className="header-utility-label">Search</span><Search className="size-4" strokeWidth={1.25} /></Link></Button>
               <CartNavButton label="Cart" />
