@@ -33,6 +33,7 @@
 .global-overlay-header [data-header-primary-row] button,
 .global-overlay-header [data-header-editorial-row] button { color: var(--header-current-ink, var(--homepage-header-ink)); letter-spacing: 0; }
 .global-overlay-header :is([data-header-top-row], [data-header-editorial-row], .header-collection-row, .header-mobile-collections) :is(button, a, span, svg) { color: var(--header-current-ink); }
+.global-overlay-header .font-brand { color: var(--header-current-ink); }
 body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-hero { height: var(--designers-landing-vh, 100svh); }
 body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-hero > .absolute.inset-x-0 { height: 100%; }
 body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-hero > .absolute.pointer-events-none > .relative { padding-top: calc(var(--header-h) + 24px); }
