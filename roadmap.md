@@ -1,5 +1,9 @@
 # Roadmap
 
+## Global header navigation
+- [ ] Replace route-specific site headers with one three-row overlay, preserving Trade, account, search, cart and collection menus.
+- [ ] Verify homepage, directory/profile, Gallery, Journal and Trade browsing, hover/menu layering and narrow-screen fit.
+
 ## Expired activation links
 - [x] Show expired/used/missing activation links with the user-confirmed 24-hour validity and a fresh password-setup request; activation session expiry uses the same screen.
 - [x] Reuse existing approval delivery/token replacement after same-host Turnstile verification; 17 regressions pass, preview build OK. Browser verified rejected and missing links, 24-hour explanation and security-proof submission guard. New request emails highlight 24 hours.
