@@ -4,7 +4,7 @@
 - [x] Uploaded all five supplied originals to Cloudinary and updated Helios’s existing samples without changing prices; isolated shared stone links so other products remain unchanged. Public sample readback and signed-in product chooser verified all five images loaded and opened; build OK.
 
 ## Global header navigation
-- [ ] Anchor Account dropdown to its own wrapper at right:0/top:100% with a 4px gap; remove native Account tooltip and verify alignment, category clearance and dismissal.
+- [x] Account-only absolute anchor verified on Home, Designers and Gallery at 1946px: right edges match exactly, gap is 4px, no category overlap or native tooltip; sans text, menu travel, Escape and Log In dialog work; build OK.
 - [x] Browser verified full-strength white dark-header rows, logo and icons at rest/hover, exact 14px italic sentence-case Trade prompt without PRO, readable Trade menu and unchanged light Gallery header; build OK. GitHub sync required.
 - [x] Designer landing uses dark glass (20/20/20 at 70%, 12px blur), including hover/menu states; Gallery stays light. Browser verified readable dropdowns and exact 14px italic natural-case prompt without PRO; build OK.
 - [x] Fixed Trade entry at 14px; browser verified its menu directly beneath the top-row trigger with an exact 8px gap at 800/1280/1946px, hover travel, Join destination, and build OK.
