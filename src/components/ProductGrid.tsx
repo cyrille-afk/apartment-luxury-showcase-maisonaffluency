@@ -577,7 +577,7 @@ function singularizeSub(s: string): string {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className={`grid min-w-0 flex-1 ${showAll ? 'grid-cols-3' : `grid-cols-2 ${gridCols === 4 ? 'md:grid-cols-4' : 'md:grid-cols-3'}`} gap-4 md:gap-6`}
+          className={`grid min-w-0 flex-1 grid-cols-2 ${gridCols === 4 ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4 md:gap-6`}
         >
           {renderedItems.map((item) => (
             <motion.div
