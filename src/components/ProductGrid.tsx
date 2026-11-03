@@ -226,7 +226,7 @@ function mergeWithDbPicks(hardcoded: ProductItem[], dbPicks: ProductItem[]): Pro
   return Array.from(merged.values());
 }
 
-const ProductGrid = ({ sectionScope, roomSlug, roomCategory, roomSubcategory, compactTop, showAll }: { sectionScope?: "designers" | "collectibles" | "ateliers"; roomSlug?: RoomSlug; roomCategory?: string | null; roomSubcategory?: string | null; compactTop?: boolean; showAll?: boolean }) => {
+const ProductGrid = ({ sectionScope, roomSlug, roomCategory, roomSubcategory, compactTop, showAll, searchQuery }: { sectionScope?: "designers" | "collectibles" | "ateliers"; roomSlug?: RoomSlug; roomCategory?: string | null; roomSubcategory?: string | null; compactTop?: boolean; showAll?: boolean; searchQuery?: string }) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { data: dbPicks, isLoading: dbPicksLoading } = useDbCuratorPicks();
   const { data: masterCatalogCount } = useMasterCatalogCount();
@@ -241,6 +241,12 @@ const ProductGrid = ({ sectionScope, roomSlug, roomCategory, roomSubcategory, co
   const [subcategory, setSubcategory] = useState<string | null>(null);
   const [filterSource, setFilterSource] = useState<string | null>(null);
   const [textQuery, setTextQuery] = useState<string | null>(null);
+  useEffect(() => {
+    if (searchQuery === undefined) return;
+    setCategory(null);
+    setSubcategory(null);
+    setTextQuery(searchQuery.trim() || null);
+  }, [searchQuery]);
   // The database-backed public catalogue is authoritative. Never merge the
   // legacy hardcoded roster here: it can contain drafts or trade-only makers.
   const allProducts: ProductItem[] = useMemo(() => dbPicks || [], [dbPicks]);

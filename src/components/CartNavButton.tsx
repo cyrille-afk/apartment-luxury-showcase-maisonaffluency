@@ -1,5 +1,5 @@
 import { useEffect, useState, lazy, Suspense } from "react";
-import { useNavigate } from "@/lib/router-compat";
+import { Link, useNavigate } from "@/lib/router-compat";
 import { ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -102,11 +102,15 @@ export default function CartNavButton({
 
   return (
     <>
-      <Button variant="ghost" type="button"
-        onClick={handleClick}
-        aria-label={label ?? (count > 0 ? `Your selection, ${count} item${count > 1 ? "s" : ""}` : "Your selection")}
+      <Button asChild variant="ghost"
         className={cn("relative flex min-h-[40px] min-w-[40px] items-center justify-center gap-2 rounded-none p-1 font-body text-xs transition-colors hover:bg-transparent hover:text-foreground", className)}
       >
+        <Link to="/cart" aria-label={label ?? (count > 0 ? `Your selection, ${count} item${count > 1 ? "s" : ""}` : "Your selection")} onClick={(event) => {
+          if (items.length > 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
+            event.preventDefault();
+            handleClick();
+          }
+        }}>
         {label && <span className="header-utility-label">{label}</span>}
         <ShoppingBag className={cn("w-[16px] h-[16px] text-muted-foreground", iconClassName)} strokeWidth={1.25} />
         {count > 0 && (
@@ -114,6 +118,7 @@ export default function CartNavButton({
             {count}
           </span>
         )}
+        </Link>
       </Button>
 
       {drawerMounted && (
