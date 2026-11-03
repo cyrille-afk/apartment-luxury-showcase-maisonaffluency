@@ -8,7 +8,7 @@
   --homepage-header-paper: oklch(1 0 0);
   --homepage-header-ink: #111111;
   --header-dark-glass: rgba(20, 20, 20, 0.7);
-  --header-dark-ink: oklch(0.98 0 0);
+  --header-dark-ink: #ffffff;
   --homepage-header-glass: color-mix(in oklab, var(--homepage-header-paper) 25%, transparent);
   --homepage-header-divider: color-mix(in oklab, var(--homepage-header-ink) 5%, transparent);
 }
@@ -52,7 +52,7 @@ body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-he
   font-style: normal;
 }
 .global-overlay-header [data-header-top-row] :is(button, a):not(:has(.font-brand)) { letter-spacing: 0.14em !important; font-weight: 400; text-transform: uppercase; font-size: 11px; }
-/* Top-left trade entry: light italic, quiet against the utility links. */
+/* Top-left trade entry: fixed legible sentence-case italic in every theme. */
 .global-overlay-header [data-utility-trade],
 .global-overlay-header [data-utility-trade] :is(span, em) {
   font-size: 14px !important;
@@ -121,6 +121,15 @@ body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-he
   background-color: var(--header-dark-glass);
   background-image: none;
   backdrop-filter: blur(12px);
+}
+/* Dark row ink stays full-strength, including the wordmark's hover state.
+   Dropdown panels keep their own surface/ink rather than inheriting white. */
+:is([data-site-header].global-overlay-header[data-header-surface="dark"],
+    .dark [data-site-header].global-overlay-header:not([data-header-surface="light"]):not([data-homepage="true"]))
+  :is([data-header-top-row], [data-header-editorial-row], .header-collection-row, .header-mobile-collections)
+  :is(button, a, span, svg):not([role="menu"] *):not(.header-account-menu *) {
+  color: var(--header-dark-ink) !important;
+  opacity: 1 !important;
 }
 .global-overlay-header :is([role="menu"], .header-account-menu, .bg-background) {
   --header-current-ink: hsl(var(--foreground));
