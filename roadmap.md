@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Global header navigation
-- [ ] Replace route-specific site headers with one three-row overlay, preserving Trade, account, search, cart and collection menus.
-- [ ] Verify homepage, directory/profile, Gallery, Journal and Trade browsing, hover/menu layering and narrow-screen fit.
+- [x] Replace shared public site header variants with one three-row overlay; Trade Client Editorial Presentation reuses it while Studio workspace controls stay intact. Preserve Trade, account, search, cart and collection menus.
+- [x] Verified home, Designers/profile, Gallery, Journal and Trade Program rows and Trade/Living menus; Account and Search navigation, directory dialog and signed-in Studio → Presentation → Studio pass. 320/390/768px fit/menu checks pass; three navigation regressions pass, preview build OK. Sync and publication required.
 
 ## Expired activation links
 - [x] Show expired/used/missing activation links with the user-confirmed 24-hour validity and a fresh password-setup request; activation session expiry uses the same screen.

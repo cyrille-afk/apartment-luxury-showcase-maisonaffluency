@@ -77,6 +77,7 @@ body:has(.global-overlay-header[data-dark-backdrop="true"]) #designers-hover-her
 @media (max-width: 767px) {
   .global-overlay-header { --site-header-height: 184px; }
   .global-overlay-header [aria-label="Toggle menu"] { color: var(--header-current-ink); background: transparent; }
+  .global-overlay-header .md\:hidden button, .global-overlay-header .md\:hidden svg { color: var(--header-current-ink); }
   .global-overlay-header .brand-lockup { display: none; }
   .global-overlay-header > div > .header-editorial-row { display: flex; }
   .global-overlay-header [data-header-editorial-row] { gap: 28px; min-height: 40px; }
