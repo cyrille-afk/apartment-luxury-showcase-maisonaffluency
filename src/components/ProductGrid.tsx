@@ -684,7 +684,7 @@ function singularizeSub(s: string): string {
         </motion.div>
         </div>
         {showAll && pageCount > 1 && (
-          <nav aria-label="Catalogue pages" className="mt-16 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 font-body text-sm font-light tracking-[0.12em] text-foreground">
+          <nav aria-label="Catalogue pages" style={{ fontFamily: "var(--font-body)" }} className="mt-16 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 font-body text-sm font-light tracking-[0.12em] text-foreground">
             <button type="button" disabled={currentPage === 1} onClick={() => goToPage(currentPage - 1)} className="px-2 py-1 transition-opacity hover:opacity-60 disabled:pointer-events-none disabled:opacity-30">Previous</button>
             {Array.from({ length: pageCount }, (_, i) => i + 1).map((n) => (
               <button key={n} type="button" aria-current={n === currentPage ? "page" : undefined} onClick={() => goToPage(n)} className={cn("min-w-6 border-b px-1 py-1 transition-opacity hover:opacity-60", n === currentPage ? "border-foreground font-normal" : "border-transparent text-muted-foreground")}>{n}</button>
