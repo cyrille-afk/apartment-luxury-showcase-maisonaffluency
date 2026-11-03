@@ -1265,7 +1265,7 @@ const Navigation = (_props: NavigationProps) => {
                   <User className="w-[16px] h-[16px] text-muted-foreground group-hover:text-foreground transition-colors" strokeWidth={1.25} />
                 </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" sideOffset={0}
+                <DropdownMenuContent align="end" sideOffset={8}
                   onPointerEnter={(event) => { if (event.pointerType === "mouse") cancelAccountMenuClose(); }}
                   onPointerLeave={(event) => { if (event.pointerType === "mouse") scheduleAccountMenuClose(); }}
                   className="border-0 bg-transparent p-0 header-account-menu shadow-none z-[60] min-w-[200px]">
