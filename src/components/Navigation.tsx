@@ -1205,9 +1205,10 @@ const Navigation = (_props: NavigationProps) => {
                     aria-expanded={tradeMenuOpen}
                     data-utility-trade
                     onClick={openTradeMenu}
-                    className="group/trade header-trade-trigger flex h-auto items-center gap-1.5 rounded-none p-0 font-body text-xs font-light text-foreground hover:bg-transparent py-2"
+                    style={{ fontSize: "14px" }}
+                    className="group/trade header-trade-trigger flex h-auto items-center gap-1.5 rounded-none p-0 font-body font-light text-foreground hover:bg-transparent py-2"
                   >
-                    <span className="link-underline-grow italic font-light">Are you a designer or architect?</span>
+                    <span className="link-underline-grow italic font-light" style={{ fontSize: "14px" }}>Are you a designer or architect?</span>
                   </Button>
 
                   <div
