@@ -55,6 +55,10 @@ body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-he
   animation: none !important;
   --header-current-ink: hsl(var(--foreground));
 }
+.header-account-menu [role="menuitem"] {
+  padding-inline: 12px;
+  gap: 8px;
+}
 .global-overlay-header .header-account-menu :is(span, p, [data-radix-collection-item]) {
   font-family: var(--font-body) !important;
   font-weight: 400 !important;
