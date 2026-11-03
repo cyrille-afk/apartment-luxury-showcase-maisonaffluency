@@ -1,8 +1,9 @@
 # Roadmap
 
 ## Expired activation links
-- [ ] Show expired/used/missing activation links with the confirmed 24-hour validity and a fresh password-setup request.
-- [ ] Reuse secure email delivery without changing approval; test eligibility and verify the request screen.
+- [x] Show expired/used/missing activation links with the user-confirmed 24-hour validity and a fresh password-setup request; activation session expiry uses the same screen.
+- [x] Reuse existing approval delivery/token replacement after same-host Turnstile verification; 17 regressions pass, preview build OK. Browser verified rejected and missing links, 24-hour explanation and security-proof submission guard. New request emails highlight 24 hours.
+- [ ] Verify complete real recipient request → email → activation after publication: production bot proof cannot be minted on localhost; no customer email was sent during verification.
 
 ## Homepage overlay header
 - [x] Apply the homepage-only two-row frosted overlay; retain shared menu handlers and Trade PRO, move Gallery left and add Search right.
