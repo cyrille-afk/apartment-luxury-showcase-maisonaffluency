@@ -60,3 +60,25 @@ export function useRoomMenuCounts(room: RoomSlug | null, categories: { category:
     },
   });
 }
+
+/**
+ * Catalogue-wide counts for the product-type mega-menu (Furniture, Lighting,
+ * Mirrors…). Each entry matches via the same grid helper as category pages.
+ */
+export function useCategoryMenuCounts(entries: { key: string; category: string; subcategory?: string | null }[]) {
+  const signature = entries.map((e) => `${e.key}:${e.category}:${e.subcategory ?? ""}`).join("|");
+  return useQuery({
+    queryKey: ["category-menu-counts", signature] as const,
+    staleTime: 30 * 60_000,
+    gcTime: 60 * 60_000,
+    enabled: entries.length > 0,
+    queryFn: async (): Promise<Record<string, number>> => {
+      const pool = await loadCatalogPool();
+      const out: Record<string, number> = {};
+      for (const e of entries) {
+        out[e.key] = pool.filter((pick) => pickMatchesFilter(pick, e.category, e.subcategory ?? null)).length;
+      }
+      return out;
+    },
+  });
+}
