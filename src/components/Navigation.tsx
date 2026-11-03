@@ -291,6 +291,7 @@ const ProductDropdownPanel = ({ menuKey, onCategoryLink, onRoomNavigate, onFullC
   onFullCatalogue: () => void;
   onPieceNavigate: (href: string) => void;
 }) => {
+  void onRoomNavigate;
   const menu = PRODUCT_NAV.find((m) => m.key === menuKey)!;
   const { data: rawCatalogCount } = useMasterCatalogRawCount();
   const { data: counts } = useCategoryMenuCounts(menu.links.map((l) => ({ key: l.label, category: l.category, subcategory: l.subcategory ?? null })));
@@ -319,6 +320,7 @@ const ProductDropdownPanel = ({ menuKey, onCategoryLink, onRoomNavigate, onFullC
         </div>
         </>)}
     </div>
+      <RoomVisualPreview key={menu.defaultRoom} room={SHOP_BY_ROOM_LINKS.find((r) => r.slug === menu.defaultRoom)?.nav ?? "living"} selectedRoomSlug={menu.defaultRoom} onPieceNavigate={onPieceNavigate} />
   );
 };
 
