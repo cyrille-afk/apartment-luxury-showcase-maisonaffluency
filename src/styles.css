@@ -54,7 +54,7 @@ body:has(.global-overlay-header[data-dark-backdrop="true"]) #designers-hover-her
 .global-overlay-header [data-utility-trade],
 .global-overlay-header [data-utility-trade] :is(span, em) {
   font-weight: 300 !important;
-  font-style: italic;
+  font-style: italic !important;
 }
 
 .header-editorial-row, .header-collection-row {
