@@ -283,8 +283,8 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
                         className={cn("group flex min-h-8 h-auto w-full items-center justify-between gap-2 whitespace-normal rounded-sm px-2 py-1.5 text-left font-body text-xs transition-all hover:bg-transparent hover:font-medium hover:text-foreground", isOpen ? "font-medium text-foreground" : "font-normal text-muted-foreground")}
                       >
                         <span className="flex-1">{item.label}</span>
-                        {typeof roomCounts?.[item.label] === "number" && roomCounts[item.label] > 0 && (
-                          <span className="text-[9px] font-normal tabular-nums tracking-wider text-muted-foreground/70">{roomCounts[item.label]}</span>
+                        {typeof roomCounts?.[item.category] === "number" && roomCounts[item.category] > 0 && (
+                          <span className="text-[9px] font-normal tabular-nums tracking-wider text-muted-foreground/70">{roomCounts[item.category]}</span>
                         )}
                         {hasItems && <ChevronRight className={cn("size-2.5 shrink-0 text-muted-foreground transition-transform", isOpen && "rotate-90 text-foreground")} strokeWidth={1.25} />}
                       </Button>
