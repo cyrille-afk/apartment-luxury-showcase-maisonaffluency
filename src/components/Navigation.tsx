@@ -573,7 +573,7 @@ const Navigation = (_props: NavigationProps) => {
   }, []);
   const [servicesOpen, setServicesOpen] = useState(false);
   const [mobileTradeExpanded, setMobileTradeExpanded] = useState(false);
-  const [activeRoomMenu, setActiveRoomMenu] = useState<RoomNavKey | null>(null);
+  const [activeRoomMenu, setActiveRoomMenu] = useState<RoomNavKey | ProductNavKey | null>(null);
   const [activeRoomCategory, setActiveRoomCategory] = useState<number | null>(null);
   const [roomMenuOverflow, setRoomMenuOverflow] = useState(0);
   const [activeMegaCat, setActiveMegaCat] = useState<string | null>(null);
@@ -862,7 +862,7 @@ const Navigation = (_props: NavigationProps) => {
     navigate(categoryUrl(category, subcategory));
   };
 
-  const openRoomMenu = (room: RoomNavKey) => {
+  const openRoomMenu = (room: RoomNavKey | ProductNavKey) => {
     if (roomMenuCloseTimer.current !== null) window.clearTimeout(roomMenuCloseTimer.current);
     if (activeRoomMenu !== room || !megaMenuOpen) setActiveRoomCategory(null);
     setActiveRoomMenu(room);
@@ -1446,104 +1446,42 @@ const Navigation = (_props: NavigationProps) => {
             <Button variant="ghost" data-nav-journal onClick={() => { closeAllDropdowns(); handleNavClick("/journal"); }}>Journal</Button>
           </div>
           <nav ref={desktopRoomNavRef} data-header-primary-row aria-label="Product collections" className="header-collection-row relative">
-              {(["living", "dining", "bedroom", "office", "lighting", "decor"] as RoomNavKey[]).map((room) => (
+              {PRODUCT_NAV.map((menu) => (
                 <div
-                  key={room}
+                  key={menu.key}
                   className="static"
                   onMouseEnter={keepRoomMenuOpen}
                   onMouseLeave={scheduleRoomMenuClose}
                 >
                   <Button
-                    ref={room === "lighting" ? lightingTriggerRef : room === "decor" ? decorTriggerRef : undefined}
+                    ref={menu.key === "lighting" ? lightingTriggerRef : menu.key === "objects" ? decorTriggerRef : undefined}
                     type="button"
                     variant="ghost"
-                     onMouseEnter={() => { if (room === "living" || room === "dining" || room === "bedroom" || room === "office") preloadRoomMenuPhotos(); openRoomMenu(room); }}
-                    onFocus={() => openRoomMenu(room)}
-                    onClick={() => openRoomMenu(room)}
-                    aria-expanded={megaMenuOpen && activeRoomMenu === room}
+                    onMouseEnter={() => { preloadRoomMenuPhotos(); openRoomMenu(menu.key); }}
+                    onFocus={() => openRoomMenu(menu.key)}
+                    onClick={() => openRoomMenu(menu.key)}
+                    aria-expanded={megaMenuOpen && activeRoomMenu === menu.key}
                     className={cn(
                       "group relative h-auto rounded-none p-0 font-body text-[12px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:bg-transparent hover:text-foreground whitespace-nowrap",
-                      megaMenuOpen && activeRoomMenu === room && "text-foreground"
+                      megaMenuOpen && activeRoomMenu === menu.key && "text-foreground"
                     )}
                   >
-                    <span className="link-underline-grow">{room}</span>
+                    <span className="link-underline-grow">{menu.label}</span>
                   </Button>
 
-                  {room !== "decor" && room !== "lighting" && megaMenuOpen && activeRoomMenu === room && (
-                    <div ref={megaMenuRef} data-room-menu={room} className="absolute left-1/2 top-full z-50 mt-1 w-[min(56rem,calc(100vw-48px))] bg-background shadow-xl" style={{ translate: "-50% 0" }}>
-                      <RoomDropdownPanel room={room} activeCategory={activeRoomCategory} onSelectCategory={setActiveRoomCategory} onCategoryNavigate={navigateToRoomCategory} onRoomNavigate={navigateToRoom} onFullCatalogue={() => { setMegaMenuOpen(false); setActiveRoomMenu(null); navigate("/search?view=grid"); }} onPieceNavigate={navigateToPiece} />
-                    </div>
-                  )}
-
-                  {room === "decor" && megaMenuOpen && activeRoomMenu === "decor" && (
-                    <div
-                      ref={megaMenuRef}
-                      data-room-menu="decor"
-                      className="absolute top-full z-50 mt-1 h-auto w-[min(650px,calc(100vw-48px))] overflow-visible bg-background shadow-xl"
-                      style={{ left: lightingDecorCenter ?? "50%", translate: "-50% 0", animation: "megaMenuReveal 240ms cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
-                    >
-                      <style>{`
-                        @keyframes megaMenuReveal {
-                          from { opacity: 0; transform: translateY(-6px); }
-                          to { opacity: 1; transform: translateY(0); }
-                        }
-                      `}</style>
-                      <div className="flex min-h-96 items-stretch overflow-hidden">
-                        <div className="min-h-full w-1/2 shrink-0 border-r border-border/60 px-9 py-8">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={() => navigateFromMegaMenu("Décor")}
-                            className="mb-4 flex h-8 w-auto justify-start rounded-none p-0 font-body text-[13px] font-semibold tracking-normal text-foreground hover:bg-transparent hover:text-foreground"
-                          >
-                            Décor Collections
-                          </Button>
-                          <div className="grid grid-cols-2 gap-x-10">
-                            {DECOR_COLUMNS.map((col, ci) => (
-                              <div key={ci} className="flex flex-col">
-                                {col.map((subcategory) => (
-                                  <Button
-                                    key={subcategory}
-                                    type="button"
-                                    variant="ghost"
-                                    onClick={() => navigateFromMegaMenu("Décor", subcategory)}
-                                    className="mb-3 block h-auto w-full whitespace-normal rounded-none p-0 text-left font-body text-[13px] font-normal tracking-normal text-muted-foreground hover:bg-transparent hover:text-foreground"
-                                  >
-                                    {subcategory}
-                                  </Button>
-                                ))}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="relative min-h-full w-1/2 shrink-0 overflow-hidden bg-[hsl(var(--collection-card-canvas))] p-6">
-                          <img
-                            src={roomAmbientImages.decor.src}
-                            alt={roomAmbientImages.decor.alt}
-                            className="size-full object-contain object-center"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {room === "lighting" && megaMenuOpen && activeRoomMenu === room && (
-                    <div ref={megaMenuRef} data-room-menu={room} className="absolute top-full z-50 mt-1 w-[min(650px,calc(100vw-48px))] bg-background shadow-xl" style={{ left: lightingDecorCenter ?? "50%", translate: "-50% 0" }}>
-                      <div className="flex min-h-96 items-stretch overflow-hidden">
-                        <div className="w-1/2 shrink-0 border-r border-border/60 px-9 py-8">
-                          {roomNavigation.lighting.map((item) => (
-                            <Button key={item.label} type="button" variant="ghost" onClick={() => navigateFromMegaMenu(item.category, item.subcategories[0])} className="flex h-10 w-full justify-start rounded-none p-0 font-body text-[13px] font-normal text-muted-foreground hover:bg-transparent hover:text-foreground">{item.label}</Button>
-                          ))}
-                        </div>
-                        <div className="min-w-0 flex-1 bg-[hsl(var(--collection-card-canvas))] p-6">
-                          <img src={roomAmbientImages.lighting.src} alt={roomAmbientImages.lighting.alt} className="size-full object-contain object-center" />
-                        </div>
-                      </div>
+                  {megaMenuOpen && activeRoomMenu === menu.key && (
+                    <div ref={megaMenuRef} data-room-menu={menu.key} className="absolute left-1/2 top-full z-50 mt-1 w-[min(56rem,calc(100vw-48px))] bg-background shadow-xl" style={{ translate: "-50% 0" }}>
+                      <ProductDropdownPanel
+                        menuKey={menu.key}
+                        onCategoryLink={(category, subcategory) => navigateFromMegaMenu(category, subcategory ?? null)}
+                        onRoomNavigate={navigateToRoom}
+                        onFullCatalogue={() => { setMegaMenuOpen(false); setActiveRoomMenu(null); navigate("/search?view=grid"); }}
+                        onPieceNavigate={navigateToPiece}
+                      />
                     </div>
                   )}
                 </div>
               ))}
-
 
             </nav>
         </div>
