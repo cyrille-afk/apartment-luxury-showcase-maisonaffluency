@@ -291,10 +291,12 @@ const ProductDropdownPanel = ({ menuKey, onCategoryLink, onRoomNavigate, onFullC
   onFullCatalogue: () => void;
   onPieceNavigate: (href: string) => void;
 }) => {
-  void onRoomNavigate;
   const menu = PRODUCT_NAV.find((m) => m.key === menuKey)!;
+  const showShopByRoom = menuKey === "rooms";
+  const [previewRoom, setPreviewRoom] = useState(menu.defaultRoom);
   const { data: rawCatalogCount } = useMasterCatalogRawCount();
   const { data: counts } = useCategoryMenuCounts(menu.links.map((l) => ({ key: l.label, category: l.category, subcategory: l.subcategory ?? null })));
+  const previewNav = SHOP_BY_ROOM_LINKS.find((r) => r.slug === previewRoom)?.nav ?? "living";
   return (
     <div data-header-panel className="relative flex min-h-[470px] items-start overflow-visible bg-[hsl(var(--collection-card-canvas))]">
       <div className="w-56 shrink-0 self-stretch border-r border-border/60 py-6 pl-6 pr-4">
@@ -319,8 +321,23 @@ const ProductDropdownPanel = ({ menuKey, onCategoryLink, onRoomNavigate, onFullC
           ))}
         </div>
         </>)}
-    </div>
-      <RoomVisualPreview key={menu.defaultRoom} room={SHOP_BY_ROOM_LINKS.find((r) => r.slug === menu.defaultRoom)?.nav ?? "living"} selectedRoomSlug={menu.defaultRoom} onPieceNavigate={onPieceNavigate} />
+        {showShopByRoom && (<>
+        <div className="mb-4 mt-6 border-b border-border/50" />
+        <div className="mb-3 font-body text-xs font-bold uppercase tracking-widest text-muted-foreground">Shop By Room</div>
+        <div className="flex flex-col">
+          {SHOP_BY_ROOM_LINKS.map((room) => (
+            <Button key={room.slug} type="button" variant="ghost"
+              onMouseEnter={() => setPreviewRoom(room.slug)} onFocus={() => setPreviewRoom(room.slug)}
+              onClick={() => onRoomNavigate(room.slug)}
+              className="h-auto min-h-8 justify-start gap-2.5 rounded-none px-0 py-1 text-left font-body text-xs uppercase tracking-widest hover:bg-transparent">
+              <span className={cn("size-1.5 shrink-0 rounded-full transition-all", previewRoom === room.slug ? "scale-100 bg-foreground" : "scale-0")} />
+              <span className={cn("tracking-wider", previewRoom === room.slug ? "font-semibold text-foreground" : "font-medium text-muted-foreground/80")}>{room.label}</span>
+            </Button>
+          ))}
+        </div>
+        </>)}
+      </div>
+      <RoomVisualPreview key={previewRoom} room={previewNav} selectedRoomSlug={previewRoom} onPieceNavigate={onPieceNavigate} />
     </div>
   );
 };
