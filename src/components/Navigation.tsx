@@ -1,6 +1,6 @@
 import { ROOM_PREVIEW_SCENES } from "@/lib/roomPreviewScenes";
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
-import { useNavigate, useLocation } from "@/lib/router-compat";
+import { Link, useNavigate, useLocation } from "@/lib/router-compat";
 import { Menu, X, Crown, Search, ChevronDown, ChevronRight, ChevronLeft, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Briefcase, BookOpen, Heart, Pin, User, LogIn, UserPlus, LogOut } from "lucide-react";
 import TradeServicesRequestModal from "@/components/trade/TradeServicesRequestModal";
 import { useWishlist } from "@/contexts/WishlistContext";
@@ -1327,7 +1327,7 @@ const Navigation = (_props: NavigationProps) => {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <Button variant="ghost" aria-label="Search" title="Search" onClick={() => navigate("/search")} className="flex h-auto items-center gap-2 rounded-none p-1 font-body text-xs text-foreground hover:bg-transparent"><span className="header-utility-label">Search</span><Search className="size-4" strokeWidth={1.25} /></Button>
+              <Button asChild variant="ghost" className="flex h-auto items-center gap-2 rounded-none p-1 font-body text-xs text-foreground hover:bg-transparent"><Link to="/search" aria-label="Search" title="Search" onClick={closeAllDropdowns}><span className="header-utility-label">Search</span><Search className="size-4" strokeWidth={1.25} /></Link></Button>
               <CartNavButton label="Cart" />
             </div>
           </div>

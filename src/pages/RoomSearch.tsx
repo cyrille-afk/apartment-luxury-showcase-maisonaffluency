@@ -8,6 +8,7 @@ import { resolveRoomSlug, ROOM_LABELS, type RoomSlug } from "@/lib/roomCategorie
 import { useRoomPreviewScene } from "@/hooks/useRoomPreviewScene";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 // Room hero assets reused from the header mega-menu so the shared link
@@ -168,6 +169,9 @@ export default function RoomSearch() {
   const roomParam = searchParams.get("room");
   const room = resolveRoomSlug(roomParam);
   const gridLanding = searchParams.get("view") === "grid";
+  const query = searchParams.get("q") ?? "";
+  const [searchDraft, setSearchDraft] = useState(query);
+  useEffect(() => { setSearchDraft(query); }, [query]);
   const roomLabel = room ? ROOM_LABELS[room] : "Room not found";
 
   // Original head values captured at mount so unmount restores the
@@ -284,8 +288,20 @@ export default function RoomSearch() {
             </p>
           </div>
         ) : (
-          // No room param: the full catalogue grid (All Categories entry point).
-          <ProductGrid compactTop showAll />
+          <>
+            <form role="search" action="/search" method="get" className="mx-auto flex max-w-[1500px] gap-3 px-6 pt-8 pb-4" onSubmit={(event) => {
+              event.preventDefault();
+              const params = new URLSearchParams(searchParams);
+              const submittedQuery = String(new FormData(event.currentTarget).get("q") ?? "").trim();
+              if (submittedQuery) params.set("q", submittedQuery);
+              else params.delete("q");
+              navigate(`/search${params.size ? `?${params.toString()}` : ""}`);
+            }}>
+              <Input name="q" aria-label="Search catalogue" placeholder="Search designers and pieces" value={searchDraft} onChange={(event) => setSearchDraft(event.target.value)} />
+              <Button type="submit">Search</Button>
+            </form>
+            <ProductGrid compactTop showAll searchQuery={query} />
+          </>
         )}
       </main>
       <Footer />
