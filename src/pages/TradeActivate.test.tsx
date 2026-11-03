@@ -5,6 +5,9 @@ import { HelmetProvider } from 'react-helmet-async';
 import TradeActivate from './TradeActivate';
 
 const mocks = vi.hoisted(() => ({ verifyOtp: vi.fn(), updateUser: vi.fn(), getUser: vi.fn(), refreshSession: vi.fn(), invoke: vi.fn(), navigate: vi.fn() }));
+const requestSetup = vi.hoisted(() => vi.fn());
+vi.mock('@/lib/tradeSetupRequest.functions', () => ({ requestTradePasswordSetup: requestSetup }));
+vi.mock('@/components/Turnstile', () => ({ default: ({ onVerify }: { onVerify: (proof: string) => void }) => <input aria-label="Security proof" onChange={event => onVerify(event.target.value)} /> }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { auth: mocks, functions: { invoke: mocks.invoke } } }));
 vi.mock('@/lib/router-compat', async importOriginal => ({ ...await importOriginal<typeof import('@/lib/router-compat')>(), useNavigate: () => mocks.navigate }));
 const open = () => render(<HelmetProvider><MemoryRouter initialEntries={['/trade/activate?type=recovery&token_hash=' + 'a'.repeat(64)]}><TradeActivate /></MemoryRouter></HelmetProvider>);
@@ -16,6 +19,7 @@ describe('Trade activation password setup', () => {
     mocks.updateUser.mockResolvedValue({ error: null });
     mocks.invoke.mockResolvedValue({ data: { ok: true }, error: null });
     mocks.refreshSession.mockResolvedValue({ error: null });
+    requestSetup.mockResolvedValue({ ok: true });
   });
   it('does not consume the link until the applicant explicitly continues', async () => {
     open(); expect(mocks.verifyOtp).not.toHaveBeenCalled();
@@ -50,5 +54,16 @@ describe('Trade activation password setup', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Retry trade activation' }));
     await waitFor(() => expect(mocks.navigate).toHaveBeenCalled());
     expect(mocks.updateUser).toHaveBeenCalledTimes(1);
+  });
+  it('requests fresh setup without changing approval or verifying a rejected token again', async () => {
+    mocks.verifyOtp.mockResolvedValue({ data: {}, error: { code: 'otp_expired' } });
+    open(); fireEvent.click(screen.getByRole('button', { name: 'Continue activation' }));
+    fireEvent.change(await screen.findByLabelText('Approved application email'), { target: { value: 'studio@example.com' } });
+    fireEvent.change(screen.getByLabelText('Security proof'), { target: { value: 'verified-proof' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Request fresh password-setup link' }));
+    await waitFor(() => expect(requestSetup).toHaveBeenCalledWith({ data: { email: 'studio@example.com', proof: 'verified-proof' } }));
+    expect(mocks.verifyOtp).toHaveBeenCalledTimes(1);
+    expect(mocks.updateUser).not.toHaveBeenCalled();
+    expect(mocks.invoke).not.toHaveBeenCalled();
   });
 });
