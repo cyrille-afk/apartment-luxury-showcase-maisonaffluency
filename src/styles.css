@@ -72,6 +72,11 @@
 @media (min-width: 768px) {
   .homepage-mobile-categories { display: none; }
 }
+@media (max-width: 767px) {
+  .homepage-overlay-header .md\:hidden > div:first-child { color: var(--homepage-header-ink); }
+  .homepage-overlay-header [aria-label="Toggle menu"] { color: var(--homepage-header-ink); }
+  .homepage-overlay-header [aria-label="Toggle menu"] + * { display: none; }
+}
 @media (min-width: 768px) and (max-width: 1100px) {
   .homepage-overlay-header [data-header-primary-row] { gap: 24px; }
   .homepage-overlay-header [data-header-top-row] > div:last-child { gap: 12px; }
