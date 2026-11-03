@@ -1,5 +1,9 @@
 # Roadmap
 
+## Global header navigation
+- [x] Replace shared public site header variants with one three-row overlay; Trade Client Editorial Presentation reuses it while Studio workspace controls stay intact. Preserve Trade, account, search, cart and collection menus.
+- [x] Verified home, Designers/profile, Gallery, Journal and Trade Program rows and Trade/Living menus; Account and Search navigation, directory dialog and signed-in Studio → Presentation → Studio pass. 320/390/768px fit/menu checks pass; three navigation regressions pass, preview build OK. Sync and publication required.
+
 ## Expired activation links
 - [x] Show expired/used/missing activation links with the user-confirmed 24-hour validity and a fresh password-setup request; activation session expiry uses the same screen.
 - [x] Reuse existing approval delivery/token replacement after same-host Turnstile verification; 17 regressions pass, preview build OK. Browser verified rejected and missing links, 24-hour explanation and security-proof submission guard. New request emails highlight 24 hours.

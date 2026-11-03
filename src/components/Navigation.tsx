@@ -9,9 +9,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useQueryClient } from "@tanstack/react-query";
 import { trackCTA } from "@/lib/analytics";
 import { deferHashScrollUntilSheetClosed } from "@/lib/mobileHashNavigation";
-import { useScrollDirection } from "@/hooks/useScrollDirection";
-import { useProgrammaticScrollActive } from "@/lib/programmaticScroll";
-import { useStickyProductBarActive } from "@/lib/stickyProductBar";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -52,7 +49,6 @@ const AuthGateDialog = React.lazy(() => import("@/components/AuthGateDialog"));
 const GalleryDetailsFloatingNav = React.lazy(() => import("@/components/GalleryDetailsFloatingNav"));
 
 // useFeaturedPublicDocument import removed — AD free-download flow discontinued.
-const FavoritesHoverPreview = React.lazy(() => import("@/components/FavoritesHoverPreview"));
 import ShippingDestinationSwitcher from "@/components/ShippingDestinationSwitcher";
 import CartNavButton from "@/components/CartNavButton";
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
@@ -371,7 +367,7 @@ interface NavigationProps {
   alwaysVisible?: boolean;
 }
 
-const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationProps) => {
+const Navigation = (_props: NavigationProps) => {
   useEffect(() => {
     if (!window.matchMedia("(min-width: 768px)").matches) return;
     // Leave first paint to the page, then warm all three menu photos in parallel.
@@ -415,22 +411,6 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   const [authGateMode, setAuthGateMode] = useState<"prompt" | "signup" | "login">("prompt");
   // Global wishlist state (localStorage-backed, shared via WishlistProvider)
   const { count: favCount } = useWishlist();
-  // Rendered both as the Suspense fallback and as the hover-preview trigger so
-  // the wishlist icon is never missing while its preview chunk loads.
-  const favoritesButton = (
-    <button
-      onClick={() => navigate("/favorites")}
-      aria-label="Wishlist"
-      className="relative group p-1 transition-colors hover:text-foreground"
-    >
-      <Heart className="w-[16px] h-[16px] text-muted-foreground" strokeWidth={1.25} />
-      {favCount > 0 && (
-        <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[9px] leading-none px-1">
-          {favCount}
-        </span>
-      )}
-    </button>
-  );
   const navigate = useNavigate();
   const location = useLocation();
   const isOnCategoryRoute = location.pathname.startsWith("/products-category/");
@@ -532,52 +512,11 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   const roomMenuCloseTimer = useRef<number | null>(null);
   // featuredDoc removed — AD free-download flow discontinued.
 
-  // ── Transparent floating header over the home hero ─────────────────────
-  // On "/" while the user is still within the hero (scroll < ~85vh), the
-  // nav floats transparently over the hero image. Past the hero it condenses
-  // into a frosted white bar for legibility on category content.
-  const isHomeRoute = location.pathname === "/";
-  const [scrolledPastHero, setScrolledPastHero] = useState(false);
-  useEffect(() => {
-    if (!isHomeRoute) { setScrolledPastHero(false); return; }
-    const onScroll = () => {
-      // Trigger a bit before the hero ends so the frosted state locks in
-      // before content collides with the header.
-      setScrolledPastHero(window.scrollY > window.innerHeight * 0.75);
-    };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [isHomeRoute]);
-  const isOverHero = isHomeRoute && !scrolledPastHero && !megaMenuOpen;
-
-  // Smart scroll: hide the global nav while scrolling down past the hero,
-  // reveal it again as soon as the user scrolls up.
-  const { direction: scrollDirection, scrollY: navScrollY } = useScrollDirection();
-  const stickyProductBarActive = useStickyProductBarActive();
-  const programmaticScrollActive = useProgrammaticScrollActive();
-  // The contact view is a destination form — the header must stay pinned
-  // there so the user always has a way back out.
   const isContactRoute = location.pathname === "/contact";
   const closeContactView = () => {
-    // "default" key = this page is the first entry of the SPA session, so
-    // there is nothing in-app to go back to — send the visitor home.
     if (location.key !== "default" && window.history.length > 1) navigate(-1);
     else navigate("/");
   };
-  const navHidden =
-    !alwaysVisible &&
-    location.pathname !== "/trade-program" &&
-    !isContactRoute &&
-    // While the product mini bar is docked below the header, the header
-    // stays pinned so the bar never floats in empty space.
-    !stickyProductBarActive &&
-    scrollDirection === "down" &&
-    navScrollY > 240 &&
-    !programmaticScrollActive &&
-    !isOpen &&
-    !megaMenuOpen;
-
   const resetMobilePanels = () => {
     setCategoryPanelOpen(false);
     setExpandedCategory(null);
@@ -882,15 +821,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
         className="fixed inset-0 z-40 bg-background/25 backdrop-blur-[6px] animate-fade-in"
       />
     )}
-    <nav data-site-header data-home-overlay={isHomeRoute ? "true" : undefined} data-menu-active={anyDropdownOpen ? "true" : undefined} className={cn(
-      "fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top)] transform transition-all duration-300 ease-in-out will-change-transform",
-      !isHomeRoute && navHidden ? "-translate-y-full" : "translate-y-0",
-      isHomeRoute ? "homepage-overlay-header" : location.pathname === "/trade-program"
-        ? "bg-background/90 backdrop-blur-md border-b border-border/30"
-        : borderless
-        ? "bg-[#FAFAFA] border-b border-transparent md:bg-white md:border-b md:border-zinc-100"
-        : "bg-[#FAFAFA] border-b border-border/30 md:bg-white md:border-b md:border-zinc-100"
-    )}>
+    <nav data-site-header data-global-overlay="true" data-dark-backdrop={location.pathname === "/designers" ? "true" : undefined} data-menu-active={anyDropdownOpen ? "true" : undefined} className="global-overlay-header absolute inset-x-0 top-0 z-50 pt-[env(safe-area-inset-top)]">
 
       <div className="mx-auto w-full max-w-[1500px] px-6">
         {/* Mobile: single row */}
@@ -905,15 +836,15 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
               </SheetTrigger>
 
               {/* Currency / shipping-destination flag — between burger and the centered logo */}
-              <ShippingDestinationSwitcher compact className="flex min-h-10 min-w-10 px-0 shrink-0" flagClassName="text-lg" />
+              
             </div>
 
             {/* Brand — absolutely centered in the viewport; side groups reserve equal space */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="flex flex-col items-center max-w-[calc(100%-176px)] xsp:max-w-[calc(100%-192px)] pointer-events-auto">
                 <button onClick={scrollToTop} className="group flex min-h-[44px] cursor-pointer items-center whitespace-nowrap">
-                  <span data-testid="mobile-brand-logo" className="font-brand text-[1.1rem] xs:text-[1.45rem] xsp:text-[1.65rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
-                    <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
+                  <span data-testid="mobile-brand-logo" className="font-brand text-[15px] font-normal tracking-normal text-foreground transition-all duration-300 group-hover:text-primary">
+                    MAISON AFFLUENCY
                   </span>
                 </button>
                 <div className="flex items-center gap-2 -mt-0.5 brand-lockup">
@@ -1245,52 +1176,24 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
           </Sheet>
         </div>
 
-        {isHomeRoute && (
-          <div className="homepage-mobile-categories md:hidden" aria-label="Primary navigation">
-            <Button variant="ghost" onClick={() => handleNavClick("/designers")}>Designers</Button>
-            {(["living", "dining", "bedroom", "office", "lighting", "decor"] as RoomNavKey[]).map((room) => (
-              <Button key={room} variant="ghost" onClick={() => navigateToRoom(room === "living" ? "living-room" : room === "dining" ? "dining-room" : room)}>{room}</Button>
-            ))}
-            <Button variant="ghost" onClick={() => handleNavClick("/journal")}>Journal</Button>
-          </div>
-        )}
+        <div data-header-editorial-row className="header-editorial-row md:hidden">
+          <Button variant="ghost" onClick={() => handleNavClick("/designers")}>Designers</Button>
+          <Button variant="ghost" onClick={() => handleNavClick("/gallery")}>Our Gallery</Button>
+          <Button variant="ghost" onClick={() => handleNavClick("/journal")}>Journal</Button>
+        </div>
+        <div className="header-mobile-collections md:hidden" aria-label="Product collections">
+          {(["living", "dining", "bedroom", "office", "lighting", "decor"] as RoomNavKey[]).map((room) => (
+            <Button key={room} variant="ghost" onClick={() => navigateToRoom(room === "living" ? "living-room" : room === "dining" ? "dining-room" : room)}>{room}</Button>
+          ))}
+        </div>
 
         {/* Desktop: single-row symmetrical luxury header */}
         <div className="hidden md:flex flex-col items-stretch w-full">
           {/* ROW 1 — wordmark centered independently of its date badge */}
           <div data-header-top-row className="relative flex min-h-16 items-center justify-between border-b border-border/30 py-3">
-            <div className="flex items-center gap-5">
-              {isHomeRoute && <Button variant="ghost" onClick={() => handleNavClick("/gallery")} className="homepage-gallery-link h-auto rounded-none p-0 font-body text-xs uppercase text-foreground hover:bg-transparent">Our Gallery</Button>}
-              {!isHomeRoute &&
-              <ShippingDestinationSwitcher compact showIso className="min-h-8 justify-center" />
-              }
-            </div>
-
-            <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap">
-              <button onClick={scrollToTop} className="group cursor-pointer">
-                <span className="font-brand text-xl lg:text-3xl font-normal tracking-[0.18em] text-foreground transition-opacity duration-300 group-hover:opacity-70">
-                  MAISON AFFLUENCY
-                </span>
-              </button>
-              {!isHomeRoute && <span className="absolute left-full top-1/2 ml-5 hidden -translate-y-1/2 items-center gap-5 xl:flex xl:ml-6 xl:gap-6">
-                <span aria-hidden="true" className="h-3.5 w-px bg-foreground/25" />
-                <span className="font-body text-[7px] uppercase tracking-[0.3em] font-light text-foreground">Est. 2017</span>
-              </span>}
-            </div>
-
-            <div className="relative z-20 flex shrink-0 items-center gap-5">
-              {isContactRoute && !tradePartner ? (
-                <button
-                  type="button"
-                  onClick={closeContactView}
-                  aria-label="Close contact view and go back"
-                  className="group p-1 outline-hidden"
-                >
-                  <X className="w-[16px] h-[16px] text-muted-foreground group-hover:text-foreground transition-colors" strokeWidth={1.25} />
-                </button>
-              ) : (
+            <div className="header-utility-left">
                 <div
-                  className="flex items-center"
+                  className="header-trade-entry flex items-center"
                   onMouseEnter={openTradeMenu}
                   onMouseLeave={scheduleTradeMenuClose}
                 >
@@ -1301,10 +1204,10 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     aria-expanded={tradeMenuOpen}
                     data-utility-trade
                     onClick={openTradeMenu}
-                    className={cn("group/trade relative ml-5 flex h-auto items-center gap-1.5 rounded-none p-0 font-body text-[12px] uppercase tracking-[0.2em] font-extrabold text-foreground hover:bg-transparent hover:text-foreground transition-colors whitespace-nowrap py-2", tradePartner && "text-primary border-b border-primary")}
+                    className="group/trade header-trade-trigger flex h-auto items-center gap-1.5 rounded-none p-0 font-body text-xs font-normal text-foreground hover:bg-transparent py-2"
                   >
-                    <span aria-hidden="true" className="h-1.5 w-1.5 shrink-0 rounded-full bg-[hsl(var(--gold))] transition-transform duration-300 group-hover/trade:scale-125" />
-                    <span className="link-underline-grow font-['Cinzel',serif] text-[13px] font-bold tracking-[0.16em]">{tradePartner ? "Trade Dashboard" : "Trade"}</span>
+                    
+                    <span className="link-underline-grow">Are you a designer or architect?</span>
                     {/* Inline "PRO" capsule on the same line as the word: a quiet B2B marker
                         that brightens in step with the dropdown it opens. */}
                     {!tradePartner && (
@@ -1327,7 +1230,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     className={cn(
                       // Invisible hover bridge above the card keeps the menu open while the
                       // cursor travels from the TRADE link down into the panel.
-                      "absolute right-0 top-full z-[60] pt-[61px] transition-opacity duration-200",
+                      "absolute left-0 top-full z-[60] header-trade-menu transition-opacity duration-200",
                       "before:absolute before:-top-4 before:left-0 before:h-4 before:w-full before:content-['']",
                       tradeMenuOpen ? "opacity-100 visible" : "opacity-0 invisible"
                     )}
@@ -1353,23 +1256,42 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     </div>
                   </div>
                 </div>
-              )}
+            </div>
 
-              {!tradePartner && <DropdownMenu modal={false} open={accountMenuOpen} onOpenChange={(open) => { cancelAccountMenuClose(); setAccountMenuOpen(open); if (open) setTradeMenuOpen(false); }}>
+            <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap">
+              <button onClick={scrollToTop} className="group cursor-pointer">
+                <span className="font-brand text-xl lg:text-3xl font-normal tracking-[0.18em] text-foreground transition-opacity duration-300 group-hover:opacity-70">
+                  MAISON AFFLUENCY
+                </span>
+              </button>
+
+            </div>
+
+            <div className="relative z-20 flex shrink-0 items-center gap-5">
+
+
+              <DropdownMenu modal={false} open={accountMenuOpen} onOpenChange={(open) => { cancelAccountMenuClose(); setAccountMenuOpen(open); if (open) setTradeMenuOpen(false); }}>
                 <DropdownMenuTrigger asChild>
-                <Button variant="ghost" type="button" aria-label="Account menu" title="Account" className="relative group h-auto rounded-none p-1 outline-hidden hover:bg-transparent"
+                <Button variant="ghost" type="button" aria-label="Account menu" title="Account" className="relative group flex h-auto items-center gap-2 rounded-none p-1 font-body text-xs outline-hidden hover:bg-transparent"
                   onPointerEnter={(event) => { if (event.pointerType === "mouse") openAccountMenu(); }}
                   onPointerLeave={(event) => { if (event.pointerType === "mouse") scheduleAccountMenuClose(); }}>
-                  <span className="sr-only">Account menu</span>
+                  <span className="header-utility-label">Account</span>
                   <User className="w-[16px] h-[16px] text-muted-foreground group-hover:text-foreground transition-colors" strokeWidth={1.25} />
                 </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" sideOffset={0}
                   onPointerEnter={(event) => { if (event.pointerType === "mouse") cancelAccountMenuClose(); }}
                   onPointerLeave={(event) => { if (event.pointerType === "mouse") scheduleAccountMenuClose(); }}
-                  className="border-0 bg-transparent p-0 pt-[122px] shadow-none z-50 min-w-[200px] translate-x-[44px]">
+                  className="border-0 bg-transparent p-0 header-account-menu shadow-none z-[60] min-w-[200px]">
                   <div className="rounded-md border border-border bg-background p-1 shadow-lg">
-                  {user ? (
+                  {tradePartner ? (
+                    <>
+                      <DropdownMenuItem onClick={() => navigate("/trade")}>Go to Studio</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate("/trade/quotes")}>My Quotes</DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => void handleTradeSignOut()}>Sign Out</DropdownMenuItem>
+                    </>
+                  ) : user ? (
                     <>
                       <div className="px-4 py-2.5 border-b border-border">
                         <p className="font-body text-xs text-muted-foreground truncate">{user.email}</p>
@@ -1419,41 +1341,20 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   )}
                   </div>
                 </DropdownMenuContent>
-              </DropdownMenu>}
+              </DropdownMenu>
 
-              {isHomeRoute ? <Button variant="ghost" size="icon" aria-label="Search" title="Search" onClick={() => navigate("/search")} className="size-8 rounded-none text-foreground hover:bg-transparent"><Search className="size-4" strokeWidth={1.25} /></Button> : <React.Suspense fallback={favoritesButton}>
-                <FavoritesHoverPreview favCount={favCount}>
-                  {favoritesButton}
-                </FavoritesHoverPreview>
-              </React.Suspense>}
-
-              <CartNavButton />
+              <Button variant="ghost" aria-label="Search" title="Search" onClick={() => navigate("/search")} className="flex h-auto items-center gap-2 rounded-none p-1 font-body text-xs text-foreground hover:bg-transparent"><span className="header-utility-label">Search</span><Search className="size-4" strokeWidth={1.25} /></Button>
+              <CartNavButton label="Cart" />
             </div>
           </div>
 
-          {/* ROW 2 — primary navigation bar */}
-          <nav ref={desktopRoomNavRef} data-header-primary-row className="relative mx-auto flex min-h-12 w-full max-w-[1400px] items-center justify-center gap-10 px-2 py-2 lg:gap-8 lg:px-6 xl:gap-18 xl:px-0 2xl:gap-20">
-              {!isHomeRoute && <button
-                onClick={() => { setMegaMenuOpen(false); handleNavClick("/gallery"); }}
-                className={cn(
-                  "group relative font-body text-[12px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
-                  (activeSection === "/gallery" || isRouteActive("/gallery")) && "text-foreground"
-                )}
-              >
-                <span className="link-underline-grow">Our Gallery</span>
-              </button>}
-
-              <button
-                onClick={() => { setMegaMenuOpen(false); handleNavClick("/designers"); }}
-                className={cn(
-                  "group relative font-body text-[12px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
-                  (activeSection === "/designers" || isRouteActive("/designers")) && "text-foreground"
-                )}
-              >
-                <span className="link-underline-grow">Designers</span>
-              </button>
-
-              {(isHomeRoute ? ["living", "dining", "bedroom", "office", "lighting", "decor"] as RoomNavKey[] : Object.keys(roomNavigation) as RoomNavKey[]).map((room) => (
+          <div data-header-editorial-row className="header-editorial-row">
+            <Button variant="ghost" onClick={() => { closeAllDropdowns(); handleNavClick("/designers"); }}>Designers</Button>
+            <Button variant="ghost" onClick={() => { closeAllDropdowns(); handleNavClick("/gallery"); }}>Our Gallery</Button>
+            <Button variant="ghost" data-nav-journal onClick={() => { closeAllDropdowns(); handleNavClick("/journal"); }}>Journal</Button>
+          </div>
+          <nav ref={desktopRoomNavRef} data-header-primary-row aria-label="Product collections" className="header-collection-row relative">
+              {(["living", "dining", "bedroom", "office", "lighting", "decor"] as RoomNavKey[]).map((room) => (
                 <div
                   key={room}
                   className="static"
@@ -1551,16 +1452,6 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                 </div>
               ))}
 
-              <button
-                data-nav-journal
-                onClick={() => { setMegaMenuOpen(false); handleNavClick("/journal"); }}
-                className={cn(
-                  "group relative font-body text-[12px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
-                  (activeSection === "/journal" || isRouteActive("/journal")) && "text-foreground"
-                )}
-              >
-                <span className="link-underline-grow">Journal</span>
-              </button>
 
             </nav>
         </div>
