@@ -1469,7 +1469,7 @@ const Navigation = (_props: NavigationProps) => {
           <nav ref={desktopRoomNavRef} data-header-primary-row aria-label="Product collections" className="header-collection-row relative">
               {/* New In — first item in Row 3, minimalist vertical drop-down */}
               <div
-                className="static"
+                className="relative"
                 onMouseEnter={openNewInMenu}
                 onMouseLeave={scheduleNewInMenuClose}
               >
@@ -1487,7 +1487,7 @@ const Navigation = (_props: NavigationProps) => {
                   <span className="link-underline-grow">New In</span>
                 </Button>
                 {newInOpen && (
-                  <div data-room-menu="new-in" className="absolute left-0 top-full z-50 mt-1 w-56 border border-border/50 bg-background py-3 shadow-xl">
+                  <div data-room-menu="new-in" data-header-panel className="absolute left-0 top-full z-50 mt-1 w-56 border border-border/50 bg-background py-3 shadow-xl">
                     {NEW_IN_LINKS.map((link) => (
                       <button
                         key={link.label}
