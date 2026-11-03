@@ -221,7 +221,7 @@ const RoomVisualPreview = ({ room, selectedRoomSlug, onPieceNavigate }: { room: 
 type ProductNavKey = "furniture" | "lighting" | "mirrors" | "objects" | "rugs" | "textiles";
 interface ProductNavLink { label: string; category: string; subcategory?: string }
 const PRODUCT_NAV: { key: ProductNavKey; label: string; title: string; category: string; subcategory?: string; defaultRoom: string; links: ProductNavLink[] }[] = [
-  { key: "furniture", label: "Furniture", title: "Furniture", category: "Seating", defaultRoom: "living-room", links: [
+  { key: "furniture", label: "All Categories", title: "Furniture", category: "Seating", defaultRoom: "living-room", links: [
     { label: "Seating", category: "Seating" },
     { label: "Tables", category: "Tables" },
     { label: "Storage", category: "Storage" },
