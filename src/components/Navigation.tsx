@@ -258,6 +258,14 @@ const PRODUCT_NAV: { key: ProductNavKey; label: string; title: string; category:
     { label: "Bedding", category: "Bedroom", subcategory: "Bedding" },
   ] },
 ];
+const NEW_IN_LINKS = [
+  { label: "Seating", category: "Seating" },
+  { label: "Tables", category: "Tables" },
+  { label: "Lighting", category: "Lighting" },
+  { label: "Rugs", category: "Rugs" },
+  { label: "Storage", category: "Storage" },
+  { label: "Decor", category: "Décor" },
+];
 const SHOP_BY_ROOM_LINKS = [
   { label: "Living Rooms", slug: "living-room", nav: "living" as RoomNavKey },
   { label: "Dining Rooms", slug: "dining-room", nav: "dining" as RoomNavKey },
@@ -867,6 +875,19 @@ const Navigation = (_props: NavigationProps) => {
     if (activeRoomMenu !== room || !megaMenuOpen) setActiveRoomCategory(null);
     setActiveRoomMenu(room);
     setMegaMenuOpen(true);
+    setNewInOpen(false);
+  };
+  const [newInOpen, setNewInOpen] = useState(false);
+  const newInCloseTimer = useRef<number | null>(null);
+  const openNewInMenu = () => {
+    if (newInCloseTimer.current !== null) { window.clearTimeout(newInCloseTimer.current); newInCloseTimer.current = null; }
+    setMegaMenuOpen(false);
+    setActiveRoomMenu(null);
+    setNewInOpen(true);
+  };
+  const scheduleNewInMenuClose = () => {
+    if (newInCloseTimer.current !== null) window.clearTimeout(newInCloseTimer.current);
+    newInCloseTimer.current = window.setTimeout(() => setNewInOpen(false), 180);
   };
 
   const navigateToRoom = (room: string) => {
@@ -1446,6 +1467,42 @@ const Navigation = (_props: NavigationProps) => {
             <Button variant="ghost" data-nav-journal onClick={() => { closeAllDropdowns(); handleNavClick("/journal"); }}>Journal</Button>
           </div>
           <nav ref={desktopRoomNavRef} data-header-primary-row aria-label="Product collections" className="header-collection-row relative">
+              {/* New In — first item in Row 3, minimalist vertical drop-down */}
+              <div
+                className="relative"
+                onMouseEnter={openNewInMenu}
+                onMouseLeave={scheduleNewInMenuClose}
+              >
+                <Button
+                  type="button"
+                  variant="ghost"
+                  aria-haspopup="true"
+                  aria-expanded={newInOpen}
+                  onClick={() => { setNewInOpen(false); navigate("/new-in"); }}
+                  className={cn(
+                    "group relative h-auto rounded-none p-0 font-body text-[12px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:bg-transparent hover:text-foreground whitespace-nowrap",
+                    newInOpen && "text-foreground"
+                  )}
+                >
+                  <span className="link-underline-grow">New In</span>
+                </Button>
+                {newInOpen && (
+                  <div data-room-menu="new-in" data-header-panel className="absolute left-0 top-full z-50 mt-1 w-56 border border-border/50 bg-background py-3 shadow-xl">
+                    {NEW_IN_LINKS.map((link) => (
+                      <button
+                        key={link.label}
+                        type="button"
+                        onMouseEnter={openNewInMenu}
+                        onClick={() => { setNewInOpen(false); navigate(categoryUrl(link.category, null)); }}
+                        className="group flex w-full items-center justify-between gap-2 whitespace-nowrap px-5 py-2 text-left font-body text-xs font-normal text-muted-foreground transition-colors duration-200 hover:bg-[hsl(var(--accent))]/30 hover:text-foreground"
+                      >
+                        <span>{link.label}</span>
+                        <ChevronRight className="size-2.5 shrink-0 text-muted-foreground" strokeWidth={1.25} />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               {PRODUCT_NAV.map((menu) => (
                 <div
                   key={menu.key}
