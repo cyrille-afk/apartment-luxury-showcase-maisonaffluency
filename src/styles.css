@@ -40,7 +40,16 @@ body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-he
 body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-hero > .absolute.pointer-events-none > .relative { padding-top: calc(var(--header-h) + 24px); }
 .header-trade-entry { position: relative; }
 .header-trade-menu { position: absolute; top: 100%; margin-top: 8px; padding-top: 0; }
-.header-account-menu { padding-top: 110px; }
+/* Account dropdown: anchored by the Radix popper right under the ACCOUNT
+   trigger (sideOffset 8); no manual padding offsets. Items share the same
+   clean sans as ACCOUNT/SEARCH/CART — the menu is portaled to <body>, so the
+   header-row font rules never reach it and must be declared here. */
+.header-account-menu :is(span, p, [data-radix-collection-item]) {
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 400 !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}
 /* Strict vertical stack; the brand and editorial Trade prompt have dedicated families. */
 .global-overlay-header > div > div.md\:flex { display: flex; flex-direction: column; }
 .global-overlay-header [data-header-top-row] { position: relative; flex: none; padding-block: 20px 16px; }
