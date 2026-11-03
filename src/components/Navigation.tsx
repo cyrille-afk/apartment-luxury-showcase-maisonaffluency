@@ -218,9 +218,10 @@ const RoomVisualPreview = ({ room, selectedRoomSlug, onPieceNavigate }: { room: 
 
 // Row 3 product-type menus (The Future Perfect structure). Each opens the same
 // hybrid mega-panel: category links with counts + Shop By Room + room preview.
-type ProductNavKey = "furniture" | "seating" | "tables" | "lighting" | "rugs" | "storage" | "decor";
+type ProductNavKey = "rooms" | "furniture" | "seating" | "tables" | "lighting" | "rugs" | "storage" | "decor";
 interface ProductNavLink { label: string; category: string; subcategory?: string }
 const PRODUCT_NAV: { key: ProductNavKey; label: string; title: string; category: string; subcategory?: string; defaultRoom: string; links: ProductNavLink[] }[] = [
+  { key: "rooms", label: "By Rooms", title: "By Rooms", category: "Seating", defaultRoom: "living-room", links: [] },
   { key: "furniture", label: "All Categories", title: "All Categories", category: "Seating", defaultRoom: "living-room", links: [
     { label: "Seating", category: "Seating" },
     { label: "Tables", category: "Tables" },
@@ -302,6 +303,7 @@ const ProductDropdownPanel = ({ menuKey, onCategoryLink, onRoomNavigate, onFullC
           <span className="font-display text-sm font-bold uppercase tracking-[0.18em] text-foreground group-hover:text-primary">All Categories</span>
           <span className="mt-1 font-body text-[10px] italic tracking-wide text-muted-foreground">Full Catalogue{typeof rawCatalogCount === "number" ? ` (${rawCatalogCount})` : ""}</span>
         </button>
+        {menu.links.length > 0 && (<>
         <div className="mb-5 mt-5 border-b border-border/50" />
         <Button type="button" variant="ghost" onClick={() => onCategoryLink(menu.category, menu.subcategory)} className="mb-3 h-auto justify-start rounded-none px-0 py-1 font-body text-xs font-semibold uppercase tracking-widest text-foreground hover:bg-transparent">
           {menu.title}
@@ -317,6 +319,7 @@ const ProductDropdownPanel = ({ menuKey, onCategoryLink, onRoomNavigate, onFullC
             </Button>
           ))}
         </div>
+        </>)}
         <div className="mb-4 mt-6 border-b border-border/50" />
         <div className="mb-3 font-body text-xs font-bold uppercase tracking-widest text-muted-foreground">Shop By Room</div>
         <div className="flex flex-col">
