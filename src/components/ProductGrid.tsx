@@ -467,9 +467,8 @@ function singularizeSub(s: string): string {
         {/* Breadcrumbs */}
         {crumbs.length > 1 && <Breadcrumbs items={crumbs} className="mb-4" />}
         {/* Header */}
-        <div className={showAll ? "flex flex-col items-stretch gap-5 mb-8" : `flex items-center justify-between ${compactTop ? "mb-4" : "mb-8"}`}>
+        <div className={roomSlug || showAll ? `flex flex-col items-stretch gap-5 ${compactTop && !showAll ? "mb-4" : "mb-8"}` : `flex items-center justify-between ${compactTop ? "mb-4" : "mb-8"}`}>
           <div className="flex min-w-0 items-center gap-5">
-            {roomSlug && <CollectionFilterTrigger open={roomFiltersOpen} onClick={() => setRoomFiltersOpen(!roomFiltersOpen)} />}
             <div>
             <h2 className="font-display text-2xl md:text-3xl text-foreground">
               {filterLabel}
@@ -530,9 +529,7 @@ function singularizeSub(s: string): string {
               </Tooltip>
               </TooltipProvider>
             </div>}
-            {roomSlug ? (
-              <GridDensityToggle value={gridCols} onChange={setGridCols} />
-            ) : showAll ? (
+            {roomSlug || showAll ? (
               <>
                 <CollectionFilterTrigger open={roomFiltersOpen} onClick={() => setRoomFiltersOpen(!roomFiltersOpen)} />
                 <GridDensityToggle value={gridCols} onChange={setGridCols} />
