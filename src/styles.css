@@ -7,6 +7,8 @@
   --collection-control-foreground: #ffffff;
   --homepage-header-paper: oklch(1 0 0);
   --homepage-header-ink: oklch(0.18 0 0);
+  --header-dark-glass: rgba(20, 20, 20, 0.7);
+  --header-dark-ink: oklch(0.98 0 0);
   --homepage-header-glass: color-mix(in oklab, var(--homepage-header-paper) 25%, transparent);
   --homepage-header-divider: color-mix(in oklab, var(--homepage-header-ink) 5%, transparent);
 }
@@ -108,6 +110,19 @@ body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-he
     background-color: var(--homepage-header-paper);
     backdrop-filter: none;
   }
+}
+/* Explicit page surfaces win; otherwise inherit a dark theme ancestor. Keep
+   dark glass through hover/focus/menu states rather than flashing white. */
+[data-site-header].global-overlay-header[data-header-surface="dark"],
+.dark [data-site-header].global-overlay-header:not([data-header-surface="light"]):not([data-homepage="true"]) {
+  --header-current-ink: var(--header-dark-ink);
+  color: var(--header-dark-ink);
+  background-color: var(--header-dark-glass);
+  background-image: none;
+  backdrop-filter: blur(12px);
+}
+.global-overlay-header :is([role="menu"], .header-account-menu, .bg-background) {
+  --header-current-ink: hsl(var(--foreground));
 }
 .header-mobile-collections, .global-overlay-header > div > .header-editorial-row { display: none; }
 @media (min-width: 768px) and (max-width: 1100px) {

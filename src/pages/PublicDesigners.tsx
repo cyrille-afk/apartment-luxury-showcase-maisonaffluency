@@ -251,7 +251,7 @@ function ScrollLockedDesigners({
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-foreground">
-      <Navigation />
+      <Navigation surface="dark" />
 
       <div className={locked ? "h-[var(--designers-landing-vh,100lvh)] overflow-hidden" : ""}>
         <h1 className="sr-only">Designers &amp; Ateliers</h1>
