@@ -289,14 +289,15 @@ export default function RoomSearch() {
           </div>
         ) : (
           <>
-            <form role="search" className="mx-auto flex max-w-[1500px] gap-3 px-6 pt-8 pb-4" onSubmit={(event) => {
+            <form role="search" action="/search" method="get" className="mx-auto flex max-w-[1500px] gap-3 px-6 pt-8 pb-4" onSubmit={(event) => {
               event.preventDefault();
               const params = new URLSearchParams(searchParams);
-              if (searchDraft.trim()) params.set("q", searchDraft.trim());
+              const submittedQuery = String(new FormData(event.currentTarget).get("q") ?? "").trim();
+              if (submittedQuery) params.set("q", submittedQuery);
               else params.delete("q");
               navigate(`/search${params.size ? `?${params.toString()}` : ""}`);
             }}>
-              <Input aria-label="Search catalogue" placeholder="Search designers and pieces" value={searchDraft} onChange={(event) => setSearchDraft(event.target.value)} />
+              <Input name="q" aria-label="Search catalogue" placeholder="Search designers and pieces" value={searchDraft} onChange={(event) => setSearchDraft(event.target.value)} />
               <Button type="submit">Search</Button>
             </form>
             <ProductGrid compactTop showAll searchQuery={query} />
