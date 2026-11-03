@@ -1204,25 +1204,9 @@ const Navigation = (_props: NavigationProps) => {
                     aria-expanded={tradeMenuOpen}
                     data-utility-trade
                     onClick={openTradeMenu}
-                    className="group/trade header-trade-trigger flex h-auto items-center gap-1.5 rounded-none p-0 font-body text-xs font-normal text-foreground hover:bg-transparent py-2"
+                    className="group/trade header-trade-trigger flex h-auto items-center gap-1.5 rounded-none p-0 font-body text-xs font-light text-foreground hover:bg-transparent py-2"
                   >
-                    
-                    <span className="link-underline-grow">Are you a designer or architect?</span>
-                    {/* Inline "PRO" capsule on the same line as the word: a quiet B2B marker
-                        that brightens in step with the dropdown it opens. */}
-                    {!tradePartner && (
-                      <span
-                        aria-hidden="true"
-                        className={cn(
-                          "pointer-events-none inline-flex items-center rounded-full border px-1.5 py-0.5 font-body text-[8px] font-semibold uppercase leading-none tracking-[0.15em] transition-all duration-300",
-                          "border-[hsl(var(--gold))]/30 bg-[hsl(var(--gold))]/10 text-[hsl(var(--gold))] opacity-90",
-                          "group-hover/trade:border-[hsl(var(--gold))]/50 group-hover/trade:bg-[hsl(var(--gold))]/20 group-hover/trade:opacity-100",
-                          tradeMenuOpen && "border-[hsl(var(--gold))]/50 bg-[hsl(var(--gold))]/20 opacity-100"
-                        )}
-                      >
-                        PRO
-                      </span>
-                    )}
+                    <span className="link-underline-grow italic font-light">Are you a designer or architect?</span>
                   </Button>
 
                   <div
