@@ -1,3 +1,4 @@
+import Navigation from "@/components/Navigation";
 import { heldTradePageHeight, setHeldTradePageHeight } from "@/lib/tradePageHeightHold";
 import { lazy, Suspense, useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
@@ -565,8 +566,9 @@ const TradeLayout = () => {
            </motion.div>}
          </AnimatePresence>
 
-        <div className="flex-1 flex flex-col min-w-0 transition-[padding-right] duration-300 ease-out xl:pr-[var(--felix-dock-w,0px)]">
-          <header className={`trade-editorial-header min-h-14 h-auto grid grid-cols-[auto_minmax(0,1fr)] gap-y-2 py-1 md:h-16 md:flex md:py-0 items-center border-b border-border px-3 md:px-8 bg-background sticky top-0 z-30 print:hidden pt-[env(safe-area-inset-top)]`}>
+        <div className="relative flex-1 flex flex-col min-w-0 transition-[padding-right] duration-300 ease-out xl:pr-[var(--felix-dock-w,0px)]">
+          {presentation && <Navigation />}
+          <header className={`trade-editorial-header ${presentation ? "mt-[var(--header-h)]" : ""} min-h-14 h-auto grid grid-cols-[auto_minmax(0,1fr)] gap-y-2 py-1 md:h-16 md:flex md:py-0 items-center border-b border-border px-3 md:px-8 bg-background sticky top-0 z-30 print:hidden pt-[env(safe-area-inset-top)]`}>
             {/* Mobile: burger left */}
             <div className="flex items-center gap-2 md:flex-1">
                <div data-trade-sensitive className={studioLocked ? "opacity-50" : undefined}><TradeMobileMenu
@@ -577,15 +579,10 @@ const TradeLayout = () => {
               {/* Desktop: sidebar collapse trigger */}
                <span data-trade-sensitive><SidebarTrigger className="hidden md:inline-flex mr-2 md:mr-3" /></span>
               {/* Desktop: Trade Portal branding */}
-               {presentation ? (
-                 /* Presentation masthead mirrors the public site's centred wordmark. */
-                 <div className={`pointer-events-none absolute inset-x-0 top-0 ${designerRoute ? "hidden md:flex" : "flex"} h-full items-center justify-center pt-[env(safe-area-inset-top)]`}>
-                   <StudioBrand studio={currentStudio} className="font-display text-lg md:text-[26px] font-normal tracking-[0.22em]" />
+               {!presentation && (
+                 <div className="hidden md:flex items-center gap-2">
+                   {showTradePrice ? <span data-trade-sensitive className="inline-flex items-center gap-2"><LayoutDashboard className="h-[18px] w-[18px] text-muted-foreground" /><span className="font-display text-sm text-foreground uppercase tracking-[0.15em]">Trade Portal</span></span> : <StudioBrand studio={currentStudio} />}
                  </div>
-               ) : (
-               <div className="hidden md:flex items-center gap-2">
-                  {showTradePrice ? <span data-trade-sensitive className="inline-flex items-center gap-2"><LayoutDashboard className="h-[18px] w-[18px] text-muted-foreground" /><span className="font-display text-sm text-foreground uppercase tracking-[0.15em]">Trade Portal</span></span> : <StudioBrand studio={currentStudio} />}
-               </div>
                )}
             </div>
             {/* Mobile: centered Trade Portal label removed to avoid overlap with studio switcher */}

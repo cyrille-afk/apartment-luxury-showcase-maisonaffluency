@@ -32,6 +32,9 @@
 .global-overlay-header [data-header-editorial-row] button { color: var(--header-current-ink, var(--homepage-header-ink)); letter-spacing: 0; }
 .global-overlay-header[data-dark-backdrop="true"] { --header-current-ink: var(--homepage-header-paper); }
 .global-overlay-header[data-dark-backdrop="true"] .font-brand { color: var(--header-current-ink); }
+body:has(.global-overlay-header[data-dark-backdrop="true"]) #designers-hover-hero { height: var(--designers-landing-vh, 100svh); }
+body:has(.global-overlay-header[data-dark-backdrop="true"]) #designers-hover-hero > .absolute.inset-x-0 { height: 100%; }
+body:has(.global-overlay-header[data-dark-backdrop="true"]) #designers-hover-hero > .absolute.pointer-events-none > .relative { padding-top: calc(var(--header-h) + 24px); }
 .header-trade-entry { position: relative; }
 .header-trade-menu { padding-top: 110px; }
 .header-account-menu { padding-top: 110px; }
@@ -73,6 +76,7 @@
 }
 @media (max-width: 767px) {
   .global-overlay-header { --site-header-height: 184px; }
+  .global-overlay-header [aria-label="Toggle menu"] { color: var(--header-current-ink); background: transparent; }
   .global-overlay-header .brand-lockup { display: none; }
   .global-overlay-header > div > .header-editorial-row { display: flex; }
   .global-overlay-header [data-header-editorial-row] { gap: 28px; min-height: 40px; }
@@ -94,7 +98,7 @@
     font-weight: 400;
     text-transform: capitalize;
     letter-spacing: 0;
-    color: var(--homepage-header-ink);
+    color: var(--header-current-ink);
   }
 }
 @media (max-width: 359px) {
@@ -1039,12 +1043,13 @@ body[data-tour-step="procurement"] [data-tour-target="procurement"] {
    clears the fixed header during scroll.
    ───────────────────────────────────────────── */
 :root {
-  --header-h: 6.5rem;   /* mobile: 96px nav + small breathing room */
+  --header-h: 10.5rem; /* mobile three-row header */
   --mobile-nav-height: calc(5rem + env(safe-area-inset-top, 0px));
 }
 @media (min-width: 390px) and (max-width: 767px) {
   :root {
     --mobile-nav-height: calc(6rem + env(safe-area-inset-top, 0px));
+    --header-h: calc(11.5rem + env(safe-area-inset-top, 0px));
   }
 }
 @media (min-width: 768px) {
@@ -1075,7 +1080,7 @@ body[data-tour-step="procurement"] [data-tour-target="procurement"] {
 
 /* Extend scroll anchor offset to include safe-area inset on mobile. */
 @media (max-width: 767px) {
-  :root { --header-h: calc(6.5rem + env(safe-area-inset-top)); }
+  :root { --header-h: calc(10.5rem + env(safe-area-inset-top)); }
 }
 
 /* ─────────────────────────────────────────────
