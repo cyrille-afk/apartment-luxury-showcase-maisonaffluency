@@ -821,7 +821,7 @@ const Navigation = (_props: NavigationProps) => {
         className="fixed inset-0 z-40 bg-background/25 backdrop-blur-[6px] animate-fade-in"
       />
     )}
-    <nav data-site-header data-global-overlay="true" data-dark-backdrop={location.pathname === "/designers" ? "true" : undefined} data-menu-active={anyDropdownOpen ? "true" : undefined} className="global-overlay-header absolute inset-x-0 top-0 z-50 pt-[env(safe-area-inset-top)]">
+    <nav data-site-header data-global-overlay="true" data-homepage={location.pathname === "/" ? "true" : "false"} data-designers-page={location.pathname === "/designers" ? "true" : undefined} data-menu-active={anyDropdownOpen ? "true" : undefined} className="global-overlay-header absolute inset-x-0 top-0 z-50 pt-[env(safe-area-inset-top)]">
 
       <div className="mx-auto w-full max-w-[1500px] px-6">
         {/* Mobile: single row */}

@@ -14,9 +14,9 @@
 /* One route-independent editorial header; menus inherit the same surface. */
 [data-site-header].global-overlay-header {
   position: absolute;
-  background-color: var(--homepage-header-glass);
+  background-color: var(--homepage-header-paper);
   color: var(--homepage-header-ink);
-  backdrop-filter: blur(12px);
+  backdrop-filter: none;
   transition: background-color 300ms ease, backdrop-filter 300ms ease;
   --site-header-height: 204px;
   --header-current-ink: var(--homepage-header-ink);
@@ -30,11 +30,10 @@
 .global-overlay-header [data-header-top-row] svg,
 .global-overlay-header [data-header-primary-row] button,
 .global-overlay-header [data-header-editorial-row] button { color: var(--header-current-ink, var(--homepage-header-ink)); letter-spacing: 0; }
-.global-overlay-header[data-dark-backdrop="true"] { --header-current-ink: var(--homepage-header-paper); }
-.global-overlay-header[data-dark-backdrop="true"] .font-brand { color: var(--header-current-ink); }
-body:has(.global-overlay-header[data-dark-backdrop="true"]) #designers-hover-hero { height: var(--designers-landing-vh, 100svh); }
-body:has(.global-overlay-header[data-dark-backdrop="true"]) #designers-hover-hero > .absolute.inset-x-0 { height: 100%; }
-body:has(.global-overlay-header[data-dark-backdrop="true"]) #designers-hover-hero > .absolute.pointer-events-none > .relative { padding-top: calc(var(--header-h) + 24px); }
+.global-overlay-header :is([data-header-top-row], [data-header-editorial-row], .header-collection-row, .header-mobile-collections) :is(button, a, span, svg) { color: var(--header-current-ink); }
+body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-hero { height: var(--designers-landing-vh, 100svh); }
+body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-hero > .absolute.inset-x-0 { height: 100%; }
+body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-hero > .absolute.pointer-events-none > .relative { padding-top: calc(var(--header-h) + 24px); }
 .header-trade-entry { position: relative; }
 .header-trade-menu { padding-top: 110px; }
 .header-account-menu { padding-top: 110px; }
@@ -81,13 +80,14 @@ body:has(.global-overlay-header[data-dark-backdrop="true"]) #designers-hover-her
   line-height: 1.2;
 }
 /* Homepage: subtle guard so links stay legible over the busy wallpaper. */
-body:has(#root [data-home-route]) [data-site-header].global-overlay-header,
 [data-site-header].global-overlay-header {
-  background-image: linear-gradient(to bottom, color-mix(in oklab, var(--homepage-header-paper) 55%, transparent), color-mix(in oklab, var(--homepage-header-paper) 30%, transparent));
+  background-image: none;
   box-shadow: 0 1px 0 var(--homepage-header-divider);
 }
-[data-site-header].global-overlay-header[data-dark-backdrop="true"] {
-  background-image: linear-gradient(to bottom, color-mix(in oklab, var(--homepage-header-ink) 45%, transparent), transparent);
+[data-site-header].global-overlay-header[data-homepage="true"] {
+  background-color: var(--homepage-header-glass);
+  backdrop-filter: blur(12px);
+  background-image: linear-gradient(to bottom, color-mix(in oklab, var(--homepage-header-paper) 55%, transparent), color-mix(in oklab, var(--homepage-header-paper) 30%, transparent));
 }
 [data-site-header].global-overlay-header:focus-within,
 [data-site-header].global-overlay-header[data-menu-active="true"] { background-image: none; }
