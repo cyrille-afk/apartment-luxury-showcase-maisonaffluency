@@ -226,6 +226,8 @@ function mergeWithDbPicks(hardcoded: ProductItem[], dbPicks: ProductItem[]): Pro
   return Array.from(merged.values());
 }
 
+const CATALOGUE_PAGE_SIZE = 60; // 3 columns x 20 rows
+
 const ProductGrid = ({ sectionScope, roomSlug, roomCategory, roomSubcategory, compactTop, showAll, searchQuery }: { sectionScope?: "designers" | "collectibles" | "ateliers"; roomSlug?: RoomSlug; roomCategory?: string | null; roomSubcategory?: string | null; compactTop?: boolean; showAll?: boolean; searchQuery?: string }) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { data: dbPicks, isLoading: dbPicksLoading } = useDbCuratorPicks();
@@ -413,7 +415,18 @@ function singularizeSub(s: string): string {
     [facetFiltered, itemTones, Object.keys(itemTones).length],
   );
   const batchKey = JSON.stringify([roomSlug, roomCategory, roomSubcategory, category, subcategory, textQuery, filterSource, roomFacets, filtered.map((item) => item.pick.id || `${item.designerId}:${item.pick.title}`)]);
-  const { renderedItems, hasMore, sentinelRef } = useCatalogBatches(filtered, batchKey);
+  const batched = useCatalogBatches(filtered, batchKey);
+  const [catalogPage, setCatalogPage] = useState(1);
+  useEffect(() => { setCatalogPage(1); }, [batchKey]);
+  const pageCount = Math.max(1, Math.ceil(filtered.length / CATALOGUE_PAGE_SIZE));
+  const currentPage = Math.min(catalogPage, pageCount);
+  const renderedItems = showAll ? filtered.slice((currentPage - 1) * CATALOGUE_PAGE_SIZE, currentPage * CATALOGUE_PAGE_SIZE) : batched.renderedItems;
+  const hasMore = showAll ? false : batched.hasMore;
+  const sentinelRef = batched.sentinelRef;
+  const goToPage = (page: number) => {
+    setCatalogPage(page);
+    gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
   const { data: publicRrpMap = {} } = usePublicRrpMap(renderedItems.map((item) => item.pick.id));
   const isActive = Boolean(category || subcategory || textQuery || roomSlug);
 
@@ -564,7 +577,7 @@ function singularizeSub(s: string): string {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className={`grid min-w-0 flex-1 grid-cols-2 ${gridCols === 4 ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4 md:gap-6`}
+          className={`grid min-w-0 flex-1 ${showAll ? 'grid-cols-3' : `grid-cols-2 ${gridCols === 4 ? 'md:grid-cols-4' : 'md:grid-cols-3'}`} gap-4 md:gap-6`}
         >
           {renderedItems.map((item) => (
             <motion.div
@@ -670,6 +683,15 @@ function singularizeSub(s: string): string {
           ))}
         </motion.div>
         </div>
+        {showAll && pageCount > 1 && (
+          <nav aria-label="Catalogue pages" style={{ fontFamily: "var(--font-body)" }} className="mt-16 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 font-body text-sm font-light tracking-[0.12em] text-foreground">
+            <button style={{ fontFamily: "Inter, sans-serif" }} type="button" disabled={currentPage === 1} onClick={() => goToPage(currentPage - 1)} className="px-2 py-1 transition-opacity hover:opacity-60 disabled:pointer-events-none disabled:opacity-30">Previous</button>
+            {Array.from({ length: pageCount }, (_, i) => i + 1).map((n) => (
+              <button style={{ fontFamily: "Inter, sans-serif" }} key={n} type="button" aria-current={n === currentPage ? "page" : undefined} onClick={() => goToPage(n)} className={cn("min-w-6 border-b px-1 py-1 transition-opacity hover:opacity-60", n === currentPage ? "border-foreground font-normal" : "border-transparent text-muted-foreground")}>{n}</button>
+            ))}
+            <button style={{ fontFamily: "Inter, sans-serif" }} type="button" disabled={currentPage === pageCount} onClick={() => goToPage(currentPage + 1)} className="px-2 py-1 transition-opacity hover:opacity-60 disabled:pointer-events-none disabled:opacity-30">Next</button>
+          </nav>
+        )}
         {hasMore && <div ref={sentinelRef} data-catalog-sentinel aria-hidden="true" className="h-1 w-full" />}
         {!dbPicksLoading && filtered.length === 0 && (
           <p className="py-20 text-center font-body text-sm text-muted-foreground">
