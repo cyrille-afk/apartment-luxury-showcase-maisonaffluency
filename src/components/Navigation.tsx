@@ -1493,7 +1493,7 @@ const Navigation = (_props: NavigationProps) => {
                         key={link.label}
                         type="button"
                         onMouseEnter={openNewInMenu}
-                        onClick={() => { setNewInOpen(false); navigate(categoryUrl(link.category)); }}
+                        onClick={() => { setNewInOpen(false); navigate(categoryUrl(link.category, null)); }}
                         className="group flex w-full items-center justify-between gap-2 whitespace-nowrap px-5 py-2 text-left font-body text-xs font-normal text-muted-foreground transition-colors duration-200 hover:bg-[hsl(var(--accent))]/30 hover:text-foreground"
                       >
                         <span>{link.label}</span>
