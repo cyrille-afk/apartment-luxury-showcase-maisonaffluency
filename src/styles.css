@@ -54,6 +54,7 @@ body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-he
 .global-overlay-header [data-utility-trade] :is(span, em) {
   font-weight: 300 !important;
   font-style: italic !important;
+  text-transform: none !important;
 }
 
 .header-editorial-row, .header-collection-row {
