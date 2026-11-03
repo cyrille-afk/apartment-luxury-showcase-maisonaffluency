@@ -156,7 +156,7 @@ const Hero = () => {
                 trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" });
                 navigate("/designers");
               }}
-              className="ma-home-hero-primary group flex translate-x-4 items-center gap-4 border border-white/20 bg-white/5 px-6 py-3.5 font-body text-[11px] font-medium uppercase tracking-[0.25em] text-white backdrop-blur-sm transition-all duration-500 ease-out hover:translate-x-12 hover:border-white hover:bg-white hover:text-black mt-16 md:mt-20 md:translate-x-8"
+              className="ma-home-hero-primary group flex translate-x-4 items-center gap-4 border border-white/20 bg-white/5 px-6 py-3.5 font-body text-[11px] font-medium uppercase tracking-[0.25em] text-white backdrop-blur-sm transition-all duration-500 ease-out hover:translate-x-12 hover:border-white hover:bg-white hover:text-black mt-16 md:mt-[7.5rem] md:translate-x-8"
             >
               <span>Explore the Collection</span>
               <span aria-hidden="true" className="inline-block transition-transform duration-500 ease-out group-hover:translate-x-1.5">→</span>
