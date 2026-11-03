@@ -50,6 +50,13 @@ body:has(.global-overlay-header[data-dark-backdrop="true"]) #designers-hover-her
   font-style: normal;
 }
 .global-overlay-header [data-header-top-row] :is(button, a):not(:has(.font-brand)) { letter-spacing: 0.14em !important; font-weight: 400; text-transform: uppercase; font-size: 11px; }
+/* Top-left trade entry: light italic, quiet against the utility links. */
+.global-overlay-header [data-utility-trade],
+.global-overlay-header [data-utility-trade] :is(span, em) {
+  font-weight: 300 !important;
+  font-style: italic;
+}
+
 .header-editorial-row, .header-collection-row {
   position: relative;
   flex: none;
