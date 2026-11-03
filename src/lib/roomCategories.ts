@@ -4,7 +4,7 @@ export const ROOM_MAP = {
   "dining-room": ["dining-tables", "chairs", "bar-stools", "credenzas", "rugs", "ceiling-lights"],
   bedroom: ["beds", "nightstands", "dressers", "daybeds", "benches", "armchairs", "wardrobes", "table-lights", "rugs"],
   bath: ["mirrors", "stools", "wall-lights", "bathroom-lights", "decorative-objects"],
-  office: ["desks", "office-chairs", "bookcases", "credenzas", "table-lights", "floor-lights"],
+  office: ["desks", "office-chairs", "armchairs", "bookcases", "credenzas", "table-lights", "floor-lights", "rugs"],
   lighting: ["ceiling-lights", "wall-lights", "table-lights", "floor-lights", "bathroom-lights", "outdoor-lights"],
   outdoor: ["outdoor-seating", "outdoor-tables", "outdoor-lights", "decorative-objects"],
   modern: ["sofas", "armchairs", "chairs", "coffee-tables", "side-tables", "credenzas", "floor-lights"],
