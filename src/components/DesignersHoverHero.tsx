@@ -1993,9 +1993,9 @@ const DesignersHoverHero = () => {
       {/* Luxury scroll indicator — desktop only */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-6 left-1/2 z-40 hidden -translate-x-1/2 md:block lg:fixed lg:bottom-0 lg:top-auto"
+        className="pointer-events-none absolute bottom-2 left-1/2 z-40 hidden -translate-x-1/2 md:block"
       >
-        <div className="relative h-14 w-px overflow-hidden bg-white/20 lg:h-8">
+        <div className="relative h-8 w-px overflow-hidden bg-white/20">
           <span className="absolute left-0 top-0 block h-6 w-px bg-white/80 animate-scroll-cue" />
         </div>
       </div>
@@ -2364,7 +2364,7 @@ const DesignersHoverHero = () => {
       })()}
 
       {/* Desktop directory launcher — compact width grouped above the white page floor. */}
-      <div className="absolute bottom-[56px] left-1/2 z-[73] hidden w-[min(34rem,calc(100vw-6rem))] -translate-x-1/2 flex-col items-center lg:flex [body[data-nav-dropdown-open]_&]:!hidden">
+      <div className="directory-search-dock absolute bottom-[56px] left-1/2 z-[73] hidden w-[min(34rem,calc(100vw-6rem))] -translate-x-1/2 flex-col items-center p-3 lg:flex [body[data-nav-dropdown-open]_&]:!hidden">
         <div
           className={cn(
             "flex h-10 w-full shrink-0 items-center rounded-md border px-4 backdrop-blur-[12px]",

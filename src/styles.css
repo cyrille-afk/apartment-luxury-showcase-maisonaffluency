@@ -9,6 +9,8 @@
   --homepage-header-ink: #111111;
   --header-dark-glass: rgba(20, 20, 20, 0.4);
   --header-dark-ink: #ffffff;
+  --directory-search-shield: #141414;
+  --directory-bottom-preview: 1cm;
   --font-header-trade: "Times New Roman", Times, serif;
   --homepage-header-glass: color-mix(in oklab, var(--homepage-header-paper) 25%, transparent);
   --homepage-header-divider: color-mix(in oklab, var(--homepage-header-ink) 5%, transparent);
@@ -36,6 +38,16 @@
 .global-overlay-header :is([data-header-top-row], [data-header-editorial-row], .header-collection-row, .header-mobile-collections) :is(button, a, span, svg):not([data-header-panel] *) { color: var(--header-current-ink); }
 .global-overlay-header .font-brand { color: var(--header-current-ink); }
 body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-hero { height: var(--designers-landing-vh, 100svh); }
+@media (min-width: 768px) and (display-mode: browser) {
+  body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-hero {
+    height: calc(100svh - var(--directory-bottom-preview));
+  }
+}
+.directory-search-dock {
+  isolation: isolate;
+  background-color: var(--directory-search-shield);
+  backdrop-filter: blur(12px);
+}
 body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-hero > .absolute.inset-x-0 { height: 100%; }
 body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-hero > .absolute.pointer-events-none > .relative { padding-top: calc(var(--header-h) + 24px); }
 .header-trade-entry { position: relative; }

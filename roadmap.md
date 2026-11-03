@@ -1,5 +1,8 @@
 # Roadmap
 
+## Directory viewport and search shield
+- [ ] Restore the desktop bottom preview and shield the search/caption from the animated line; verify viewport geometry and live search without changing mobile/standalone sizing.
+
 ## Helios Coffee Table finishes
 - [x] Uploaded all five supplied originals to Cloudinary and updated Helios’s existing samples without changing prices; isolated shared stone links so other products remain unchanged. Public sample readback and signed-in product chooser verified all five images loaded and opened; build OK.
 
