@@ -1,5 +1,9 @@
 # Roadmap
 
+## Expired activation links
+- [ ] Show expired/used/missing activation links with the confirmed 24-hour validity and a fresh password-setup request.
+- [ ] Reuse secure email delivery without changing approval; test eligibility and verify the request screen.
+
 ## Homepage overlay header
 - [x] Apply the homepage-only two-row frosted overlay; retain shared menu handlers and Trade PRO, move Gallery left and add Search right.
 - [x] Desktop glass/solid hover, Living menu and Search verified; fresh phone visit opens menu without overflow. Two navigation tests pass; build OK. GitHub sync and publication required for live visual update.
