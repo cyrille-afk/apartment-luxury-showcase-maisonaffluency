@@ -1257,6 +1257,9 @@ const Navigation = (_props: NavigationProps) => {
             <div className="relative z-20 flex shrink-0 items-center gap-5">
 
 
+
+              <Button asChild variant="ghost" className="flex h-auto items-center gap-2 rounded-none p-1 font-body text-xs text-foreground hover:bg-transparent"><Link to="/search" aria-label="Search" title="Search" onClick={closeAllDropdowns}><span className="header-utility-label">Search</span><Search className="size-4" strokeWidth={1.25} /></Link></Button>
+              <CartNavButton label="Cart" />
               <div ref={setAccountMenuAnchor} className="header-account-entry">
               <DropdownMenu modal={false} open={accountMenuOpen} onOpenChange={(open) => { cancelAccountMenuClose(); setAccountMenuOpen(open); if (open) setTradeMenuOpen(false); }}>
                 <DropdownMenuTrigger asChild>
@@ -1289,7 +1292,7 @@ const Navigation = (_props: NavigationProps) => {
                         className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
                       >
                         <Heart className="h-4 w-4 text-primary" />
-                        <span className="font-body text-sm">My Favorites &amp; Folders</span>
+                        <span className="font-body text-sm">My Favorites & Folders</span>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
@@ -1323,7 +1326,7 @@ const Navigation = (_props: NavigationProps) => {
                         className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
                       >
                         <Heart className="h-4 w-4 text-primary" />
-                        <span className="font-body text-sm">My Favorites &amp; Folders</span>
+                        <span className="font-body text-sm">My Favorites & Folders</span>
                       </DropdownMenuItem>
                     </>
                   )}
@@ -1332,8 +1335,6 @@ const Navigation = (_props: NavigationProps) => {
               </DropdownMenu>
               </div>
 
-              <Button asChild variant="ghost" className="flex h-auto items-center gap-2 rounded-none p-1 font-body text-xs text-foreground hover:bg-transparent"><Link to="/search" aria-label="Search" title="Search" onClick={closeAllDropdowns}><span className="header-utility-label">Search</span><Search className="size-4" strokeWidth={1.25} /></Link></Button>
-              <CartNavButton label="Cart" />
             </div>
           </div>
 
