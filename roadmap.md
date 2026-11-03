@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Helios Coffee Table finishes
-- [ ] Add the five supplied finish images to the product, upload them to Cloudinary and verify saved samples on the product page.
+- [x] Uploaded all five supplied originals to Cloudinary and updated Helios’s existing samples without changing prices; isolated shared stone links so other products remain unchanged. Public sample readback and signed-in product chooser verified all five images loaded and opened; build OK.
 
 ## Global header navigation
 - [x] Browser verified full-strength white dark-header rows, logo and icons at rest/hover, exact 14px italic sentence-case Trade prompt without PRO, readable Trade menu and unchanged light Gallery header; build OK. GitHub sync required.
