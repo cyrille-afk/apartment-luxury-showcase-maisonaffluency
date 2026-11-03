@@ -40,13 +40,25 @@ body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-he
 body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-hero > .absolute.pointer-events-none > .relative { padding-top: calc(var(--header-h) + 24px); }
 .header-trade-entry { position: relative; }
 .header-trade-menu { position: absolute; top: 100%; margin-top: 8px; padding-top: 0; }
-/* Account dropdown: anchored by the Radix popper right under the ACCOUNT
-   trigger (sideOffset 8); no manual padding offsets. Items share the same
-   clean sans as ACCOUNT/SEARCH/CART — the menu is portaled to <body>, so the
-   header-row font rules never reach it and must be declared here. */
-.header-account-menu :is(span, p, [data-radix-collection-item]) {
-  font-family: 'Inter', sans-serif !important;
+/* Keep Radix keyboard/dismissal behavior, but anchor only to Account's box. */
+.header-account-entry { position: relative; }
+.header-account-entry > [data-radix-popper-content-wrapper] {
+  position: absolute !important;
+  inset: auto !important;
+  right: 0 !important;
+  top: 100% !important;
+  margin-top: 4px !important;
+  transform: none !important;
+  z-index: 60 !important;
+}
+.header-account-menu {
+  animation: none !important;
+  --header-current-ink: hsl(var(--foreground));
+}
+.global-overlay-header .header-account-menu :is(span, p, [data-radix-collection-item]) {
+  font-family: var(--font-body) !important;
   font-weight: 400 !important;
+  font-size: 14px !important;
   letter-spacing: normal !important;
   text-transform: none !important;
 }
@@ -61,7 +73,7 @@ body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-he
   font-family: var(--font-body) !important;
   font-style: normal;
 }
-.global-overlay-header [data-header-top-row] :is(button, a):not(:has(.font-brand)):not(.header-trade-menu :is(button, a)) { letter-spacing: 0.14em !important; font-weight: 400; text-transform: uppercase; font-size: 11px; }
+.global-overlay-header [data-header-top-row] :is(button, a):not(:has(.font-brand)):not(.header-trade-menu :is(button, a)):not(.header-account-menu *) { letter-spacing: 0.14em !important; font-weight: 400; text-transform: uppercase; font-size: 11px; }
 /* Top-left trade entry: fixed legible sentence-case italic in every theme.
    The 14px lock lives on the element itself (inline style) as well — the CSS
    rule is a safety net; menu items are excluded from the 11px row rule above. */
