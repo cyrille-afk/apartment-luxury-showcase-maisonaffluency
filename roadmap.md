@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Homepage overlay header
-- [ ] Apply the requested homepage-only two-row frosted header and preserve existing navigation.
-- [ ] Verify hover, menus, centered branding and phone layout.
+- [x] Apply the homepage-only two-row frosted overlay; retain shared menu handlers and Trade PRO, move Gallery left and add Search right.
+- [x] Desktop glass/solid hover, Living menu and Search verified; fresh phone visit opens menu without overflow. Two navigation tests pass; build OK. GitHub sync and publication required for live visual update.
 
 ## SEO failing findings review
 - [x] Fresh foundations scan: all eight checks pass, including sitemap; verified published www host, 44 category pages, sign-in entry and page-specific lastmod sources. Four sitemap tests pass; no code correction needed.
