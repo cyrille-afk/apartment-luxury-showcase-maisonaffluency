@@ -11,6 +11,7 @@
 - Password-setup resends reuse the review drawer and retain attempt keys on retry; never change approval. Verified activation links the account; the queue reads user_id for setup status.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Expired Trade activation requests use the public requestTradePasswordSetup server function with same-host Turnstile validation and private approved/unlinked eligibility; delegate issuance and idempotent sending to the existing approval email pipeline without role/status writes — avoids enumeration and duplicate token implementations.
 - Setup-link revocation uses Auth's single recovery token via prepareTradeActivation, also rotating the original signup address after corrections; email-attempt idempotency precedes issuance — rejects old tokens without browser-only security or custom credentials.
 - Client quote presentation and loading/unavailable states share the route-local QuoteShell; display only the existing secure retail snapshot with recorded maker, product and configuration fields — keeps branding consistent without new catalogue or pricing reads.
 - Shared quote links use quoteSharePresentation and token-validated quoteShareHead server reads for named addresses and crawler metadata; src/lib/AGENTS.md owns the privacy/compatibility rules — one identity source preserves old links.
