@@ -530,8 +530,13 @@ function singularizeSub(s: string): string {
               </Tooltip>
               </TooltipProvider>
             </div>}
-            {roomSlug || showAll ? (
+            {roomSlug ? (
               <GridDensityToggle value={gridCols} onChange={setGridCols} />
+            ) : showAll ? (
+              <>
+                <CollectionFilterTrigger open={roomFiltersOpen} onClick={() => setRoomFiltersOpen(!roomFiltersOpen)} />
+                <GridDensityToggle value={gridCols} onChange={setGridCols} />
+              </>
             ) : showAll && !isActive ? null : (
             <button
               onClick={handleClearFilter}
