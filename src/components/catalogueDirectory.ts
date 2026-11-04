@@ -1,4 +1,4 @@
-import taxonomy from "@/data/productTaxonomy.json";
+import { NAVIGATION_DATA, type NavigationCategory } from "./productNavigation";
 import type { ProductMenuLink } from "./productMenuImages";
 
 export interface CatalogueDirectoryGroup {
@@ -6,19 +6,23 @@ export interface CatalogueDirectoryGroup {
   links: ProductMenuLink[];
 }
 
-/** Use the complete catalogue taxonomy, not the shorter featured-menu lists. */
-export const CATALOGUE_DIRECTORY_COLUMNS: CatalogueDirectoryGroup[][] = [
+/** Column placement only; every group's links belong to the shared master. */
+export function buildCatalogueDirectory(data: NavigationCategory[]): CatalogueDirectoryGroup[][] {
+  return [
   ["Tables", "Bedroom"],
   ["Seating", "Storage"],
   ["Lighting", "Rugs"],
   ["Décor"],
-].map((categories) => categories.map((category) => ({
-  category,
-  links: (taxonomy.subcategories[category as keyof typeof taxonomy.subcategories] ?? [])
-    .map((subcategory) => ({ label: subcategory, category, subcategory }))
-    .sort((a, b) => a.label.localeCompare(b.label, "en", { sensitivity: "base" })),
-})));
+  ].map((categories) => categories.flatMap((category) => {
+    const group = data.find((entry) => entry.category === category);
+    return group ? [{ category: group.category, links: group.links }] : [];
+  }));
+}
+
+export const CATALOGUE_DIRECTORY_COLUMNS = buildCatalogueDirectory(NAVIGATION_DATA);
+
+export const catalogueDirectoryCountKey = (link: ProductMenuLink) => `${link.category}:${link.subcategory ?? ""}`;
 
 export const CATALOGUE_DIRECTORY_COUNT_ENTRIES = CATALOGUE_DIRECTORY_COLUMNS.flatMap((column) =>
-  column.flatMap((group) => group.links.map((link) => ({ ...link, key: `${link.category}:${link.subcategory}` }))),
+  column.flatMap((group) => group.links.map((link) => ({ ...link, key: catalogueDirectoryCountKey(link) }))),
 );

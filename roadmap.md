@@ -1,5 +1,9 @@
 # Roadmap
 
+## Shared category source
+- [x] Individual menus and All Categories share the exact sorted NAVIGATION_DATA arrays, including Bar Stools in Seating and Bedside Tables in Tables; complete seven-department coverage retained.
+- [x] Eighteen regressions pass; browser confirms all six product lists match the directory, aligned image frames, Bedside Tables count 10 and loaded destination, preserved Bar Stools routing, image-free directory at 1946px/1024px with no overflow or page errors. Build OK.
+
 ## All Categories directory
 - [x] Replace the room-preview state with a full-width white, four-column taxonomy directory, sorted subcategories and shared live counts; retain other menus.
 - [x] Twelve focused tests pass; 1946px and 1024px browser checks confirm all seven departments, 37 sorted subcategory links/counts, no images or overflow, white/sans-serif contrast on Home and Designers, Bedside Tables navigation and unchanged By Rooms/Seating; final run has no page errors and build OK.

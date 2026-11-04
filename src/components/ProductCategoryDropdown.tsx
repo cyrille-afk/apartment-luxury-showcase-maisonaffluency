@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { useCategoryMenuCounts } from "@/hooks/useRoomMenuCounts";
 import { selectProductMenuImages, productMenuImageSizes, type ProductMenuCard, type ProductMenuLink, type ProductMenuRotationState } from "./productMenuImages";
 import { seatingCardImage, seatingCardSrcSet } from "./seatingMenuImages";
-import { sortProductMenuLinks } from "./productNavigation";
 
 interface Props {
   menu: { key: string; title: string; links: ProductMenuLink[] };
@@ -15,7 +14,7 @@ interface Props {
 
 export default function ProductCategoryDropdown({ menu, visit, rotationState, cards: pools, onCategoryLink }: Props) {
   const isSeating = menu.key === "seating";
-  const links = useMemo(() => menu.key === "tables" ? sortProductMenuLinks(menu.links) : menu.links, [menu.key, menu.links]);
+  const links = menu.links;
   const { data: counts } = useCategoryMenuCounts(links.map((link) => ({ ...link, key: link.label })));
   const cards = useMemo(() => selectProductMenuImages(pools, visit, rotationState), [pools, visit, rotationState]);
   const trackImage = (label: string, interaction: "hover" | "click", index: number) => {
