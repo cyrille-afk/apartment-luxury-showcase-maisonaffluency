@@ -1,5 +1,9 @@
 # Roadmap
 
+## Shared category source
+- [ ] Unify individual menus and All Categories under one master navigation structure, including Bar Stools in Seating and Bedside Tables in Tables; preserve complete department coverage and alphabetical order.
+- [ ] Run synchronization/count identity regressions and verify both menu views and destination links in the browser.
+
 ## All Categories directory
 - [x] Replace the room-preview state with a full-width white, four-column taxonomy directory, sorted subcategories and shared live counts; retain other menus.
 - [x] Twelve focused tests pass; 1946px and 1024px browser checks confirm all seven departments, 37 sorted subcategory links/counts, no images or overflow, white/sans-serif contrast on Home and Designers, Bedside Tables navigation and unchanged By Rooms/Seating; final run has no page errors and build OK.
