@@ -309,7 +309,7 @@ const SeatingDropdownGrid = ({ onCategoryLink }: { onCategoryLink: (category: st
         key={card.label}
         type="button"
         onClick={() => onCategoryLink(card.category, card.subcategory)}
-        className="group flex w-36 shrink-0 flex-col items-center focus-visible:outline-hidden"
+        className="group flex w-32 shrink-0 flex-col items-center focus-visible:outline-hidden"
       >
         <span className="block w-full overflow-hidden bg-[hsl(var(--accent))]/30">
           <img
