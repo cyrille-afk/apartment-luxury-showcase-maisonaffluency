@@ -2,6 +2,9 @@
 export type ProductNavKey = "rooms" | "furniture" | "seating" | "tables" | "lighting" | "rugs" | "storage" | "decor";
 import type { ProductMenuLink } from "./productMenuImages";
 type ProductNavLink = ProductMenuLink;
+export function sortProductMenuLinks(links: ProductMenuLink[]): ProductMenuLink[] {
+  return [...links].sort((a, b) => a.label.localeCompare(b.label, "en", { sensitivity: "base" }));
+}
 export const PRODUCT_NAV: { key: ProductNavKey; label: string; title: string; category: string; subcategory?: string; defaultRoom: string; links: ProductNavLink[] }[] = [
   { key: "rooms", label: "By Rooms", title: "By Rooms", category: "Seating", defaultRoom: "living-room", links: [] },
   { key: "furniture", label: "All Categories", title: "All Categories", category: "Seating", defaultRoom: "living-room", links: [
@@ -21,6 +24,7 @@ export const PRODUCT_NAV: { key: ProductNavKey; label: string; title: string; ca
     { label: "Sofas", category: "Seating", subcategory: "Sofas" },
   ] },
   { key: "tables", label: "Tables", title: "Tables", category: "Tables", defaultRoom: "dining-room", links: [
+    { label: "Bedside Tables", category: "Tables", subcategory: "Bedside Tables" },
     { label: "Dining Tables", category: "Tables", subcategory: "Dining Tables" },
     { label: "Coffee Tables", category: "Tables", subcategory: "Coffee Tables" },
     { label: "Side Tables", category: "Tables", subcategory: "Side Tables" },
