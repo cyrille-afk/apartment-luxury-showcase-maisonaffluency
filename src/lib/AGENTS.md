@@ -1,4 +1,5 @@
 # src/lib rules
+- Stylesheet recovery runs the same self-contained guard before hydration and on shell entry, loading an independent CSS entry sourced from styles.css only after failure or a bounded stall; deduplicate requests and never reload pages — preserves forms, theme tokens and normal first-paint performance.
 - Client quote snapshots allowlist recorded materials and available_finishes alongside selected dimensions; optional fields preserve older shares, and missing specifications remain unknown rather than inferred — public quote pages never fetch trade catalogue data.
 - New quote shares use persisted maker/product locators with saved-recipient OTP and HttpOnly cookie sessions; locked challenges and parent expiry/revocation govern access. Legacy token URLs retain their original RPC/preview path; names-only pages expose no snapshot before verification — locators are never credentials.
 - Enquiry submission and inbox display share inquiryMessage's exact structured-finish deduplication; preserve distinct choices and free notes — historical duplicate lines need no record rewrites.
