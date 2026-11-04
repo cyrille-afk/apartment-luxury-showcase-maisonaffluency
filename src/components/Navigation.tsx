@@ -1,6 +1,7 @@
 import { ROOM_PREVIEW_SCENES } from "@/lib/roomPreviewScenes";
 import ProductCategoryDropdown from "@/components/ProductCategoryDropdown";
 import AllCategoriesDropdown from "@/components/AllCategoriesDropdown";
+import NavigationBackdrop from "@/components/NavigationBackdrop";
 import { CATALOGUE_DIRECTORY_COUNT_ENTRIES } from "@/components/catalogueDirectory";
 import { resolveProductMenuCards, selectProductMenuImages, type ProductMenuCard, type ProductMenuRotationState } from "@/components/productMenuImages";
 import { nextProductMenuImages, warmProductMenuImages } from "@/components/productMenuPreload";
@@ -933,13 +934,16 @@ const Navigation = (_props: NavigationProps) => {
   const closeAllDropdowns = () => {
     if (roomMenuCloseTimer.current !== null) window.clearTimeout(roomMenuCloseTimer.current);
     if (tradeMenuCloseTimer.current !== null) window.clearTimeout(tradeMenuCloseTimer.current);
+    if (newInCloseTimer.current !== null) window.clearTimeout(newInCloseTimer.current);
+    cancelAccountMenuClose();
     setMegaMenuOpen(false);
     setActiveRoomMenu(null);
+    setNewInOpen(false);
     setTradeMenuOpen(false);
     setAccountMenuOpen(false);
   };
 
-  const anyDropdownOpen = megaMenuOpen || tradeMenuOpen || accountMenuOpen;
+  const anyDropdownOpen = megaMenuOpen || newInOpen || tradeMenuOpen || accountMenuOpen;
   // Floating page overlays (e.g. the trade CTA) hide while a header menu is open.
   useEffect(() => {
     document.body.toggleAttribute("data-nav-dropdown-open", anyDropdownOpen);
@@ -948,11 +952,7 @@ const Navigation = (_props: NavigationProps) => {
 
   return <>
     {anyDropdownOpen && (
-      <div
-        aria-hidden="true"
-        onClick={closeAllDropdowns}
-        className="fixed inset-0 z-40 bg-background/25 backdrop-blur-[6px] animate-fade-in"
-      />
+      <NavigationBackdrop onDismiss={closeAllDropdowns} />
     )}
     <nav data-site-header data-global-overlay="true" data-header-surface={_props.surface} data-homepage={location.pathname === "/" ? "true" : "false"} data-designers-page={location.pathname === "/designers" ? "true" : undefined} data-menu-active={anyDropdownOpen ? "true" : undefined} className="global-overlay-header absolute inset-x-0 top-0 z-50 pt-[env(safe-area-inset-top)]">
 
