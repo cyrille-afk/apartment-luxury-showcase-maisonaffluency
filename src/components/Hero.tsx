@@ -130,7 +130,7 @@ const Hero = () => {
 
       {/* Legibility scrim: bottom-45% fade on mobile/PWA, subtler 35% fade on desktop */}
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 md:left-1/2 md:right-auto md:w-[min(100%,calc((100vh-176px)*1.5))] md:-translate-x-1/2 h-[45%] bg-gradient-to-t from-black/60 via-black/15 to-transparent md:h-[35%] md:from-black/40 md:via-transparent md:to-transparent"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[45%] bg-gradient-to-t from-black/60 via-black/15 to-transparent md:h-[35%] md:from-black/40 md:via-transparent md:to-transparent"
         aria-hidden="true"
       />
 
