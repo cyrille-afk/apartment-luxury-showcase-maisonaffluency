@@ -19,7 +19,10 @@ describe("full catalogue directory", () => {
       expect(group.links.map((link) => link.label)).toEqual([...group.links.map((link) => link.label)].sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" })));
       for (const link of group.links) {
         const key = catalogueDirectoryCountKey(link);
-        expect(CATALOGUE_DIRECTORY_COUNT_ENTRIES.find((entry) => entry.key === key)).toEqual(expect.objectContaining({ category: link.category, subcategory: link.subcategory, key }));
+        const entry = CATALOGUE_DIRECTORY_COUNT_ENTRIES.find((entry) => entry.key === key);
+        expect(entry?.category).toBe(link.category);
+        expect(entry?.subcategory).toBe(link.subcategory);
+        expect(entry?.key).toBe(key);
       }
     }
   });
