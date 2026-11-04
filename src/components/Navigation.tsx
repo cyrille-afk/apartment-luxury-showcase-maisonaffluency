@@ -1,7 +1,7 @@
 import { ROOM_PREVIEW_SCENES } from "@/lib/roomPreviewScenes";
 import ProductCategoryDropdown from "@/components/ProductCategoryDropdown";
 import { resolveProductMenuCards, selectProductMenuImages, type ProductMenuCard, type ProductMenuRotationState } from "@/components/productMenuImages";
-import { warmProductMenuImages } from "@/components/productMenuPreload";
+import { nextProductMenuImages, warmProductMenuImages } from "@/components/productMenuPreload";
 import { PRODUCT_NAV, sortProductMenuLinks, type ProductNavKey } from "@/components/productNavigation";
 import React, { useState, useEffect, useLayoutEffect, useRef, useMemo } from "react";
 import { Link, useNavigate, useLocation } from "@/lib/router-compat";
@@ -541,10 +541,10 @@ const Navigation = (_props: NavigationProps) => {
     for (const menu of PRODUCT_NAV) {
       if (menu.key === "rooms" || menu.key === "furniture") continue;
       const pools = menuPools[menu.key] ?? [];
-      // Reserve the next visit's shuffled cards now so the preloaded files are
-      // exactly those shown on opening; the live bag still exhausts every asset.
-      const selected = selectProductMenuImages(pools, (menuVisits[menu.key] ?? 0) + 1, productImageRotations.current);
-      warmProductMenuImages(selected.map((card) => ({ ...card, images: card.image ? [card.image] : [] })));
+      const visit = menuVisits[menu.key] ?? 0;
+      selectProductMenuImages(pools, visit, productImageRotations.current);
+      const next = nextProductMenuImages(pools, visit + 1, productImageRotations.current);
+      warmProductMenuImages(next.map((card) => ({ ...card, images: card.image ? [card.image] : [] })));
     }
   }, [menuPools, menuVisits]);
   const [contactExpanded, setContactExpanded] = useState(false);
