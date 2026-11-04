@@ -42,7 +42,8 @@ import livingRoomAmbient from "@/assets/living-room-hero.jpg";
 import diningRoomAmbient from "@/assets/dining-room.jpg";
 import intimateDiningAmbient from "@/assets/intimate-dining.jpg";
 import calmingBedroomAmbient from "@/assets/master-suite.jpg";
-import { useRoomPreviewScene } from "@/hooks/useRoomPreviewScene";
+import { useRoomPreviewScene, useWarmRoomPreviewScenes } from "@/hooks/useRoomPreviewScene";
+import type { RoomPreviewScene } from "@/lib/roomPreviewScenes";
 import { useDbCuratorPicks, useMasterCatalogRawCount } from "@/hooks/useDbCuratorPicks";
 import { useRoomMenuCounts, useCategoryMenuCounts } from "@/hooks/useRoomMenuCounts";
 import type { RoomSlug } from "@/lib/roomCategories";
@@ -155,11 +156,11 @@ const preloadRoomMenuPhotos = () => {
 // Coordinates are percentages of the displayed, centre-cropped preview frame.
 // Scene data is shared with the Room Experience landing page via
 // src/lib/roomPreviewScenes.ts so menu and page never drift apart.
-const RoomVisualPreview = ({ room, selectedRoomSlug, onPieceNavigate, onRoomNavigate }: { room: RoomNavKey; selectedRoomSlug?: string; onPieceNavigate: (href: string) => void; onRoomNavigate: (slug: string) => void }) => {
+const RoomVisualPreview = ({ room, selectedRoomSlug, preparedScene, onPieceNavigate, onRoomNavigate }: { room: RoomNavKey; selectedRoomSlug?: string; preparedScene?: RoomPreviewScene; onPieceNavigate: (href: string) => void; onRoomNavigate: (slug: string) => void }) => {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(false);
   const [photoReady, setPhotoReady] = useState(false);
-  const scene = useRoomPreviewScene(selectedRoomSlug);
+  const scene = useRoomPreviewScene(selectedRoomSlug, preparedScene);
   const pieceSources = scene.pieces.map((piece) => piece.src).join("|");
   const [readyPieceSources, setReadyPieceSources] = useState("");
   useEffect(() => {
@@ -241,11 +242,12 @@ const SHOP_BY_ROOM_LINKS = [
   { label: "Office", slug: "office", nav: "office" as RoomNavKey },
 ];
 
-const ProductDropdownPanel = ({ menuKey, menuVisit, rotationState, cards, onCategoryLink, onRoomNavigate, onFullCatalogue, onPieceNavigate }: {
+const ProductDropdownPanel = ({ menuKey, menuVisit, rotationState, cards, roomScenes, onCategoryLink, onRoomNavigate, onFullCatalogue, onPieceNavigate }: {
   menuKey: ProductNavKey;
   menuVisit: number;
   rotationState: ProductMenuRotationState;
   cards: ProductMenuCard[];
+  roomScenes: Record<string, RoomPreviewScene>;
   onCategoryLink: (category: string, subcategory?: string) => void;
   onRoomNavigate: (slug: string) => void;
   onFullCatalogue: () => void;
@@ -301,7 +303,7 @@ const ProductDropdownPanel = ({ menuKey, menuVisit, rotationState, cards, onCate
         </div>
         </>)}
       </div>
-      <RoomVisualPreview key={previewRoom} room={previewNav} selectedRoomSlug={previewRoom} onPieceNavigate={onPieceNavigate} onRoomNavigate={onRoomNavigate} />
+      <RoomVisualPreview key={previewRoom} room={previewNav} selectedRoomSlug={previewRoom} preparedScene={roomScenes[previewRoom]} onPieceNavigate={onPieceNavigate} onRoomNavigate={onRoomNavigate} />
     </div>
   );
 };
@@ -536,6 +538,7 @@ const Navigation = (_props: NavigationProps) => {
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [menuVisits, setMenuVisits] = useState<Partial<Record<ProductNavKey, number>>>({});
+  const roomScenes = useWarmRoomPreviewScenes(menuCatalogue, `${menuVisits.rooms ?? 0}:${menuVisits.furniture ?? 0}`);
   const productImageRotations = useRef<ProductMenuRotationState>(new Map());
   useEffect(() => {
     for (const menu of PRODUCT_NAV) {
@@ -1525,6 +1528,7 @@ const Navigation = (_props: NavigationProps) => {
                         menuVisit={menuVisits[menu.key] ?? 0}
                         rotationState={productImageRotations.current}
                         cards={menuPools[menu.key] ?? []}
+                        roomScenes={roomScenes}
                         onCategoryLink={(category, subcategory) => navigateFromMegaMenu(category, subcategory ?? null)}
                         onRoomNavigate={navigateToRoom}
                         onFullCatalogue={() => { setMegaMenuOpen(false); setActiveRoomMenu(null); navigate("/search?view=grid"); }}

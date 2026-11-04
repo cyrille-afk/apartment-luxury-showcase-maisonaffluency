@@ -1,6 +1,7 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useDbCuratorPicks, type DbProductItem } from "@/hooks/useDbCuratorPicks";
 import { getRoomPreviewScene, type RoomPreviewScene } from "@/lib/roomPreviewScenes";
+import { preloadImage } from "@/lib/curatorPickPreload";
 
 type RotatingRoom = "bedroom" | "living-room" | "dining-room" | "office";
 
@@ -15,9 +16,7 @@ const productHref = ({ pick, designerId }: DbProductItem) =>
   `/designers/${designerId}/${pick.slug || pick.id}`;
 
 /** A fresh, distinct public-catalog trio for each room mount, stable while it is open. */
-export function useRoomPreviewScene(slug?: string | null): RoomPreviewScene {
-  const { data: catalog, isLoading } = useDbCuratorPicks();
-  return useMemo(() => {
+export function resolveRoomPreviewScene(catalog: DbProductItem[] | undefined, slug?: string | null, isLoading = false): RoomPreviewScene {
     const base = getRoomPreviewScene(slug);
     if (!slug || !(slug in ROOM_SUBCATEGORIES)) return base;
     if (!catalog) return isLoading ? { ...base, pending: true } : base;
@@ -63,5 +62,28 @@ export function useRoomPreviewScene(slug?: string | null): RoomPreviewScene {
     });
 
     return { ...base, pieces, highlightIndex: 0 };
-  }, [catalog, isLoading, slug]);
+}
+
+export function useRoomPreviewScene(slug?: string | null, prepared?: RoomPreviewScene): RoomPreviewScene {
+  const { data: catalog, isLoading } = useDbCuratorPicks();
+  return useMemo(() => prepared ?? resolveRoomPreviewScene(catalog, slug, isLoading), [catalog, isLoading, slug, prepared]);
+}
+
+/** Prepare the next room trio before it mounts, keeping per-opening variation. */
+export function useWarmRoomPreviewScenes(catalog: DbProductItem[] | undefined, visit: string) {
+  const next = useRef<{ catalog: DbProductItem[]; scenes: Record<string, RoomPreviewScene> } | null>(null);
+  const scenes = useMemo(() => {
+    if (catalog && next.current?.catalog === catalog) return next.current.scenes;
+    return Object.fromEntries(Object.keys(ROOM_SUBCATEGORIES).map((slug) => [slug, resolveRoomPreviewScene(catalog, slug, !catalog)]));
+  }, [catalog, visit]);
+  useEffect(() => {
+    if (!catalog) return;
+    const prepared = Object.fromEntries(Object.keys(ROOM_SUBCATEGORIES).map((slug) => [slug, resolveRoomPreviewScene(catalog, slug)]));
+    next.current = { catalog, scenes: prepared };
+    for (const scene of [...Object.values(scenes), ...Object.values(prepared)]) {
+      void preloadImage(scene.previewImage.src, "low");
+      scene.pieces.forEach((piece) => { void preloadImage(piece.src, "low"); });
+    }
+  }, [catalog, scenes]);
+  return scenes;
 }
