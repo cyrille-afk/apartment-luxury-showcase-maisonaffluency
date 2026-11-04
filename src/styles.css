@@ -17,6 +17,14 @@
 }
 
 /* One route-independent editorial header; menus inherit the same surface. */
+.global-overlay-header [data-catalogue-directory] {
+  background-color: var(--homepage-header-paper);
+  color: var(--homepage-header-ink);
+  --header-current-ink: var(--homepage-header-ink);
+}
+.global-overlay-header [data-catalogue-directory] :is(button, span) {
+  color: inherit;
+}
 [data-site-header].global-overlay-header {
   position: absolute;
   background-color: var(--homepage-header-paper);

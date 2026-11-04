@@ -1,5 +1,9 @@
 # Roadmap
 
+## All Categories directory
+- [x] Replace the room-preview state with a full-width white, four-column taxonomy directory, sorted subcategories and shared live counts; retain other menus.
+- [ ] Verify directory links, count alignment, light/dark contrast and menu separation in the browser; run focused tests.
+
 ## Navigation warm-up
 - [x] Menu catalogue/counts start on header mount; count menus share one cached pool, all product pools are memoized, and prepared room scenes warm their photos and alternatives before mounting.
 - [x] Featured responsive assets preload before hover; selected cards render synchronously in 220px-aligned frames. Desktop and 1024px browser checks show all featured images already loaded and zero menu-time data requests; rotation, eleven unit tests and Seating analytics pass without page errors. Build OK.
