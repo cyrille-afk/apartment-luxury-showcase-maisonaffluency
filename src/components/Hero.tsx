@@ -190,6 +190,18 @@ const Hero = () => {
             <span>Book Private Appointment</span>
             <span className="text-[9px] font-bold normal-case italic tracking-widest text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)]">(trade only)</span>
           </button>
+          <span className="h-px w-20 bg-white/30" aria-hidden="true" />
+          <button
+            type="button"
+            onClick={() => {
+              trackEvent("click_hero_full_view", { event_category: "CTA", event_label: "HeroFullView" });
+              setViewerOpen(true);
+            }}
+            className="flex min-h-[44px] items-center justify-center gap-2 font-body text-[11px] font-semibold uppercase tracking-[0.25em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70"
+          >
+            <span aria-hidden="true" className="text-[13px] leading-none">⤢</span>
+            View Full Room
+          </button>
         </nav>
 
 
@@ -224,11 +236,26 @@ const Hero = () => {
         </div>
       </nav>
 
+      {/* Desktop — expand control, bottom-right, mirrors the ghost secondary-nav styling */}
+      <button
+        type="button"
+        onClick={() => {
+          trackEvent("click_hero_full_view", { event_category: "CTA", event_label: "HeroFullView" });
+          setViewerOpen(true);
+        }}
+        aria-label="View the full room photograph"
+        className="hero-fade-in-delayed-5 pointer-events-auto absolute bottom-8 right-8 z-20 hidden items-center gap-3 font-body text-[10px] font-light uppercase tracking-[0.34em] text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.6)] transition-opacity duration-300 hover:opacity-70 md:flex before:absolute before:-inset-x-4 before:-inset-y-2.5 before:-z-10 before:rounded-sm before:bg-black/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)]"
+      >
+        <span aria-hidden="true" className="text-sm leading-none">⤢</span>
+        View Full Room
+      </button>
+
       {tourMounted && (
         <Suspense fallback={null}>
           <PrivateTourDialog open={tourOpen} onOpenChange={setTourOpen} />
         </Suspense>
       )}
+      <HeroLightbox open={viewerOpen} onClose={() => setViewerOpen(false)} />
     </section>
   );
 };
