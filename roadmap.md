@@ -2,7 +2,7 @@
 
 ## Navigation backdrop
 - [x] Share a full-viewport darkened blur beneath every active main dropdown, including New In, above floating page panels; clicking it dismisses all dropdown states and pending timers.
-- [ ] Verify all menu openings, background dismissal and gallery panel coverage in the browser.
+- [x] Verified all nine dropdowns on Home, Gallery and Designers at 1946/1024/1280px: exact full-viewport 12px blur/20% darkening, sharp clickable panels above the backdrop, outside-click dismissal, no page errors; ten navigation tests pass and build OK.
 
 ## Shared category source
 - [x] Individual menus and All Categories share the exact sorted NAVIGATION_DATA arrays, including Bar Stools in Seating and Bedside Tables in Tables; complete seven-department coverage retained.
