@@ -336,10 +336,33 @@ const ProductDropdownPanel = ({ menuKey, onCategoryLink, onRoomNavigate, onFullC
 }) => {
   const menu = PRODUCT_NAV.find((m) => m.key === menuKey)!;
   const showShopByRoom = menuKey === "rooms";
+  const isSeating = menuKey === "seating";
   const [previewRoom, setPreviewRoom] = useState(menu.defaultRoom);
   const { data: rawCatalogCount } = useMasterCatalogRawCount();
   const { data: counts } = useCategoryMenuCounts(menu.links.map((l) => ({ key: l.label, category: l.category, subcategory: l.subcategory ?? null })));
   const previewNav = SHOP_BY_ROOM_LINKS.find((r) => r.slug === previewRoom)?.nav ?? "living";
+  if (isSeating) {
+    return (
+      <div data-header-panel className="relative flex min-h-[470px] items-stretch overflow-visible border-t border-border/50 bg-[hsl(var(--collection-card-canvas))] shadow-[0_18px_40px_-24px_hsl(var(--foreground)/0.25)]">
+        <div className="w-44 shrink-0 self-stretch border-r border-border/60 py-7 pl-8 pr-4">
+          <div className="mb-5 font-body text-xs font-semibold uppercase tracking-widest text-foreground">Seating</div>
+          <div className="flex flex-col gap-0.5">
+            {menu.links.map((link) => (
+              <button
+                key={link.label}
+                type="button"
+                onClick={() => onCategoryLink(link.category, link.subcategory)}
+                className="py-1 text-left font-body text-xs font-normal tracking-wide text-muted-foreground transition-colors duration-200 hover:text-foreground focus-visible:outline-hidden"
+              >
+                {link.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <SeatingDropdownGrid onCategoryLink={onCategoryLink} />
+      </div>
+    );
+  }
   return (
     <div data-header-panel className="relative flex min-h-[470px] items-start overflow-visible bg-[hsl(var(--collection-card-canvas))]">
       <div className="w-56 shrink-0 self-stretch border-r border-border/60 py-6 pl-6 pr-4">
