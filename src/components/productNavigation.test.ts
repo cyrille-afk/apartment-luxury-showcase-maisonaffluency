@@ -32,3 +32,11 @@ describe("Tables menu subcategories", () => {
     expect(links.map((link) => link.label)).toEqual(["Side Tables", "Bedside Tables", "Accent Tables"]);
   });
 });
+
+describe("shared alphabetical menu order", () => {
+  it("sorts every individual product category before links and image pools consume it", () => {
+    for (const menu of PRODUCT_NAV.filter((entry) => entry.key !== "rooms" && entry.key !== "furniture")) {
+      expect(menu.links.map((link) => link.label)).toEqual(sortProductMenuLinks(menu.links).map((link) => link.label));
+    }
+  });
+});
