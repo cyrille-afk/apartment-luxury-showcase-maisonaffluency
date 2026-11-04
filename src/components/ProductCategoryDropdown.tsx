@@ -4,6 +4,7 @@ import { useDbCuratorPicks } from "@/hooks/useDbCuratorPicks";
 import { useCategoryMenuCounts } from "@/hooks/useRoomMenuCounts";
 import { selectProductMenuImages, productMenuImageSizes, resolveProductMenuCards, type ProductMenuLink, type ProductMenuRotationState } from "./productMenuImages";
 import { seatingCardImage, seatingCardSrcSet } from "./seatingMenuImages";
+import { sortProductMenuLinks } from "./productNavigation";
 
 interface Props {
   menu: { key: string; title: string; links: ProductMenuLink[] };
@@ -14,9 +15,10 @@ interface Props {
 
 export default function ProductCategoryDropdown({ menu, visit, rotationState, onCategoryLink }: Props) {
   const isSeating = menu.key === "seating";
+  const links = useMemo(() => menu.key === "tables" ? sortProductMenuLinks(menu.links) : menu.links, [menu.key, menu.links]);
   const { data: catalogue = [] } = useDbCuratorPicks();
-  const { data: counts } = useCategoryMenuCounts(menu.links.map((link) => ({ ...link, key: link.label })));
-  const pools = useMemo(() => resolveProductMenuCards(menu.links, catalogue.map((item) => item.pick)).filter((card) => card.images.length > 0), [menu.links, catalogue]);
+  const { data: counts } = useCategoryMenuCounts(links.map((link) => ({ ...link, key: link.label })));
+  const pools = useMemo(() => resolveProductMenuCards(links, catalogue.map((item) => item.pick)).filter((card) => card.images.length > 0), [links, catalogue]);
   const [cards, setCards] = useState<ReturnType<typeof selectProductMenuImages>>([]);
   useEffect(() => {
     setCards(selectProductMenuImages(pools, visit, rotationState));
@@ -29,7 +31,7 @@ export default function ProductCategoryDropdown({ menu, visit, rotationState, on
       <div data-product-menu-sidebar data-seating-sidebar={isSeating ? "" : undefined} className="min-h-[190px] border-r border-border/60 pr-4">
         <div className="mb-5 font-body text-xs font-semibold uppercase tracking-widest text-foreground">{menu.title}</div>
         <div className="flex flex-col gap-0.5">
-          {menu.links.map((link) => (
+          {links.map((link) => (
             <Button key={link.label} type="button" variant="ghost"
               onClick={() => {
                 if (isSeating) window.__lovableEvents?.track?.("project.seating_subcategory_clicked", { subcategory: link.label });
