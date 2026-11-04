@@ -1310,9 +1310,9 @@ const Navigation = (_props: NavigationProps) => {
         </div>
 
         <div data-header-editorial-row className="header-editorial-row md:hidden">
-          <Button variant="ghost" onClick={() => handleNavClick("/designers")}>Designers</Button>
-          <Button variant="ghost" onClick={() => handleNavClick("/gallery")}>Our Gallery</Button>
-          <Button variant="ghost" onClick={() => handleNavClick("/journal")}>Journal</Button>
+          <Button variant="ghost" className="group cursor-pointer" onClick={() => handleNavClick("/designers")}><span className="link-underline-grow">Designers</span></Button>
+          <Button variant="ghost" className="group cursor-pointer" onClick={() => handleNavClick("/gallery")}><span className="link-underline-grow">Our Gallery</span></Button>
+          <Button variant="ghost" className="group cursor-pointer" onClick={() => handleNavClick("/journal")}><span className="link-underline-grow">Journal</span></Button>
         </div>
         <div className="header-mobile-collections md:hidden" aria-label="Product collections">
           {(["living", "dining", "bedroom", "office", "lighting", "decor"] as RoomNavKey[]).map((room) => (
@@ -1470,9 +1470,9 @@ const Navigation = (_props: NavigationProps) => {
           </div>
 
           <div data-header-editorial-row className="header-editorial-row">
-            <Button variant="ghost" onClick={() => { closeAllDropdowns(); handleNavClick("/designers"); }}>Designers</Button>
-            <Button variant="ghost" onClick={() => { closeAllDropdowns(); handleNavClick("/gallery"); }}>Our Gallery</Button>
-            <Button variant="ghost" data-nav-journal onClick={() => { closeAllDropdowns(); handleNavClick("/journal"); }}>Journal</Button>
+            <Button variant="ghost" className="group cursor-pointer" onClick={() => { closeAllDropdowns(); handleNavClick("/designers"); }}><span className="link-underline-grow">Designers</span></Button>
+            <Button variant="ghost" className="group cursor-pointer" onClick={() => { closeAllDropdowns(); handleNavClick("/gallery"); }}><span className="link-underline-grow">Our Gallery</span></Button>
+            <Button variant="ghost" className="group cursor-pointer" data-nav-journal onClick={() => { closeAllDropdowns(); handleNavClick("/journal"); }}><span className="link-underline-grow">Journal</span></Button>
           </div>
           <nav ref={desktopRoomNavRef} data-header-primary-row aria-label="Product collections" className="header-collection-row relative">
               {/* New In — first item in Row 3, minimalist vertical drop-down */}
