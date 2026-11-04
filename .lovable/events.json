@@ -487,6 +487,89 @@
         "additionalProperties": false,
         "properties": {}
       }
+    },
+    "project.seating_dropdown_opened": {
+      "event_schema_version": 1,
+      "description": "The Seating navigation dropdown opens, excluding repeated trigger interactions while already open.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      }
+    },
+    "project.seating_featured_image_interacted": {
+      "event_schema_version": 1,
+      "description": "A featured Seating image card is hovered or clicked, including its caption.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "subcategory",
+          "interaction",
+          "image_index"
+        ],
+        "properties": {
+          "subcategory": {
+            "type": "string",
+            "enum": [
+              "Armchairs",
+              "Bar Stools",
+              "Chairs",
+              "Daybeds & Benches",
+              "Ottomans & Stools",
+              "Sofas"
+            ]
+          },
+          "interaction": {
+            "type": "string",
+            "enum": [
+              "hover",
+              "click"
+            ]
+          },
+          "image_index": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2
+          }
+        }
+      }
+    },
+    "project.seating_subcategory_clicked": {
+      "event_schema_version": 1,
+      "description": "A Seating dropdown text-sidebar subcategory is selected.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "subcategory"
+        ],
+        "properties": {
+          "subcategory": {
+            "type": "string",
+            "enum": [
+              "Armchairs",
+              "Bar Stools",
+              "Chairs",
+              "Daybeds & Benches",
+              "Ottomans & Stools",
+              "Sofas"
+            ]
+          }
+        }
+      }
     }
   }
 }

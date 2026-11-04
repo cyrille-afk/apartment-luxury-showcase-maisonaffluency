@@ -1,5 +1,8 @@
 # Roadmap
 
+## Seating analytics
+- [x] Three registered events track actual opens (no already-open duplicates), sidebar clicks and featured-card hovers/clicks with subcategory/image index only. Browser regression confirms exact payloads, navigation and safe missing-runtime behavior; two rotation tests pass, 17 schemas validate and build OK. Published receipt awaits publication and real visitor interaction.
+
 ## Seating dropdown refinement
 - [x] Sidebar and image grid both measure 190px; oversized panel reduced to 248px, verified at 1946px and 1280px without overflow.
 - [x] All six curated images change across three openings, photographs load, Sofas opens its collection; two rotation tests pass, no browser errors and build OK.
