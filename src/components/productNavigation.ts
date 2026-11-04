@@ -24,7 +24,7 @@ export const PRODUCT_NAV: { key: ProductNavKey; label: string; title: string; ca
     { label: "Sofas", category: "Seating", subcategory: "Sofas" },
   ] },
   { key: "tables", label: "Tables", title: "Tables", category: "Tables", defaultRoom: "dining-room", links: [
-    { label: "Bedside Tables", category: "Tables", subcategory: "Bedside Tables" },
+    { label: "Bedside Tables", category: "Bedroom", subcategory: "Bedside Tables" },
     { label: "Dining Tables", category: "Tables", subcategory: "Dining Tables" },
     { label: "Coffee Tables", category: "Tables", subcategory: "Coffee Tables" },
     { label: "Side Tables", category: "Tables", subcategory: "Side Tables" },

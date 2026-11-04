@@ -10,7 +10,7 @@ describe("Tables menu subcategories", () => {
     expect(links.map((link) => link.label)).toEqual([
       "Bedside Tables", "Coffee Tables", "Consoles", "Desks", "Dining Tables", "Side Tables",
     ]);
-    expect(links[0]).toEqual({ label: "Bedside Tables", category: "Tables", subcategory: "Bedside Tables" });
+    expect(links[0]).toEqual({ label: "Bedside Tables", category: "Bedroom", subcategory: "Bedside Tables" });
     const cards = resolveProductMenuCards(links, links.map((link) => ({ ...link, image: link.label })));
     expect(cards.map((card) => card.label)).toEqual(links.map((link) => link.label));
   });
