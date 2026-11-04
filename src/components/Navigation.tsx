@@ -1,8 +1,9 @@
 import { ROOM_PREVIEW_SCENES } from "@/lib/roomPreviewScenes";
 import ProductCategoryDropdown from "@/components/ProductCategoryDropdown";
-import type { ProductMenuRotationState } from "@/components/productMenuImages";
-import { PRODUCT_NAV, type ProductNavKey } from "@/components/productNavigation";
-import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
+import { resolveProductMenuCards, selectProductMenuImages, type ProductMenuCard, type ProductMenuRotationState } from "@/components/productMenuImages";
+import { nextProductMenuImages, warmProductMenuImages } from "@/components/productMenuPreload";
+import { PRODUCT_NAV, sortProductMenuLinks, type ProductNavKey } from "@/components/productNavigation";
+import React, { useState, useEffect, useLayoutEffect, useRef, useMemo } from "react";
 import { Link, useNavigate, useLocation } from "@/lib/router-compat";
 import { Menu, X, Crown, Search, ChevronDown, ChevronRight, ChevronLeft, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Briefcase, BookOpen, Heart, Pin, User, LogIn, UserPlus, LogOut } from "lucide-react";
 import TradeServicesRequestModal from "@/components/trade/TradeServicesRequestModal";
@@ -41,7 +42,8 @@ import livingRoomAmbient from "@/assets/living-room-hero.jpg";
 import diningRoomAmbient from "@/assets/dining-room.jpg";
 import intimateDiningAmbient from "@/assets/intimate-dining.jpg";
 import calmingBedroomAmbient from "@/assets/master-suite.jpg";
-import { useRoomPreviewScene } from "@/hooks/useRoomPreviewScene";
+import { useRoomPreviewScene, useWarmRoomPreviewScenes } from "@/hooks/useRoomPreviewScene";
+import type { RoomPreviewScene } from "@/lib/roomPreviewScenes";
 import { useDbCuratorPicks, useMasterCatalogRawCount } from "@/hooks/useDbCuratorPicks";
 import { useRoomMenuCounts, useCategoryMenuCounts } from "@/hooks/useRoomMenuCounts";
 import type { RoomSlug } from "@/lib/roomCategories";
@@ -154,11 +156,11 @@ const preloadRoomMenuPhotos = () => {
 // Coordinates are percentages of the displayed, centre-cropped preview frame.
 // Scene data is shared with the Room Experience landing page via
 // src/lib/roomPreviewScenes.ts so menu and page never drift apart.
-const RoomVisualPreview = ({ room, selectedRoomSlug, onPieceNavigate, onRoomNavigate }: { room: RoomNavKey; selectedRoomSlug?: string; onPieceNavigate: (href: string) => void; onRoomNavigate: (slug: string) => void }) => {
+const RoomVisualPreview = ({ room, selectedRoomSlug, preparedScene, onPieceNavigate, onRoomNavigate }: { room: RoomNavKey; selectedRoomSlug?: string; preparedScene?: RoomPreviewScene; onPieceNavigate: (href: string) => void; onRoomNavigate: (slug: string) => void }) => {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(false);
   const [photoReady, setPhotoReady] = useState(false);
-  const scene = useRoomPreviewScene(selectedRoomSlug);
+  const scene = useRoomPreviewScene(selectedRoomSlug, preparedScene);
   const pieceSources = scene.pieces.map((piece) => piece.src).join("|");
   const [readyPieceSources, setReadyPieceSources] = useState("");
   useEffect(() => {
@@ -240,10 +242,12 @@ const SHOP_BY_ROOM_LINKS = [
   { label: "Office", slug: "office", nav: "office" as RoomNavKey },
 ];
 
-const ProductDropdownPanel = ({ menuKey, menuVisit, rotationState, onCategoryLink, onRoomNavigate, onFullCatalogue, onPieceNavigate }: {
+const ProductDropdownPanel = ({ menuKey, menuVisit, rotationState, cards, roomScenes, onCategoryLink, onRoomNavigate, onFullCatalogue, onPieceNavigate }: {
   menuKey: ProductNavKey;
   menuVisit: number;
   rotationState: ProductMenuRotationState;
+  cards: ProductMenuCard[];
+  roomScenes: Record<string, RoomPreviewScene>;
   onCategoryLink: (category: string, subcategory?: string) => void;
   onRoomNavigate: (slug: string) => void;
   onFullCatalogue: () => void;
@@ -257,7 +261,7 @@ const ProductDropdownPanel = ({ menuKey, menuVisit, rotationState, onCategoryLin
   const { data: counts } = useCategoryMenuCounts(menu.links.map((l) => ({ key: l.label, category: l.category, subcategory: l.subcategory ?? null })));
   const previewNav = SHOP_BY_ROOM_LINKS.find((r) => r.slug === previewRoom)?.nav ?? "living";
   if (isProductGrid) {
-    return <ProductCategoryDropdown menu={menu} visit={menuVisit} rotationState={rotationState} onCategoryLink={onCategoryLink} />;
+    return <ProductCategoryDropdown menu={menu} visit={menuVisit} rotationState={rotationState} cards={cards} onCategoryLink={onCategoryLink} />;
   }
   return (
     <div data-header-panel className="relative flex min-h-[470px] items-start overflow-visible bg-[hsl(var(--collection-card-canvas))]">
@@ -299,7 +303,7 @@ const ProductDropdownPanel = ({ menuKey, menuVisit, rotationState, onCategoryLin
         </div>
         </>)}
       </div>
-      <RoomVisualPreview key={previewRoom} room={previewNav} selectedRoomSlug={previewRoom} onPieceNavigate={onPieceNavigate} onRoomNavigate={onRoomNavigate} />
+      <RoomVisualPreview key={previewRoom} room={previewNav} selectedRoomSlug={previewRoom} preparedScene={roomScenes[previewRoom]} onPieceNavigate={onPieceNavigate} onRoomNavigate={onRoomNavigate} />
     </div>
   );
 };
@@ -458,23 +462,17 @@ interface NavigationProps {
 
 const Navigation = (_props: NavigationProps) => {
   useEffect(() => {
-    if (!window.matchMedia("(min-width: 768px)").matches) return;
-    // Leave first paint to the page, then warm all three menu photos in parallel.
-    // Hover starts them immediately if the visitor reaches the nav first.
-    if (window.requestIdleCallback) {
-      const id = window.requestIdleCallback(preloadRoomMenuPhotos, { timeout: 1800 });
-      return () => window.cancelIdleCallback(id);
-    }
-    const id = window.setTimeout(preloadRoomMenuPhotos, 400);
-    return () => window.clearTimeout(id);
+    preloadRoomMenuPhotos();
   }, []);
-  const [catalogWarm, setCatalogWarm] = useState(false);
-  useEffect(() => {
-    if (!window.matchMedia("(min-width: 768px)").matches) return;
-    const id = window.setTimeout(() => setCatalogWarm(true), 1500);
-    return () => window.clearTimeout(id);
-  }, []);
-  useDbCuratorPicks({ enabled: catalogWarm });
+  const { data: menuCatalogue } = useDbCuratorPicks();
+  useMasterCatalogRawCount();
+  useCategoryMenuCounts(PRODUCT_NAV.flatMap((menu) => menu.links.map((link) => ({ ...link, key: `${menu.key}:${link.label}` }))));
+  const menuPools = useMemo(() => {
+    const picks = (menuCatalogue ?? []).map((item) => item.pick);
+    return Object.fromEntries(PRODUCT_NAV.map((menu) => [menu.key,
+      resolveProductMenuCards(menu.key === "tables" ? sortProductMenuLinks(menu.links) : menu.links, picks).filter((card) => card.images.length > 0),
+    ]));
+  }, [menuCatalogue]);
   const { user, isTradeUser, rolesLoaded, signOut } = useAuth();
   const tradePartner = Boolean(user && rolesLoaded && isTradeUser);
   const queryClient = useQueryClient();
@@ -540,7 +538,18 @@ const Navigation = (_props: NavigationProps) => {
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [menuVisits, setMenuVisits] = useState<Partial<Record<ProductNavKey, number>>>({});
+  const roomScenes = useWarmRoomPreviewScenes(menuCatalogue, `${menuVisits.rooms ?? 0}:${menuVisits.furniture ?? 0}`);
   const productImageRotations = useRef<ProductMenuRotationState>(new Map());
+  useEffect(() => {
+    for (const menu of PRODUCT_NAV) {
+      if (menu.key === "rooms" || menu.key === "furniture") continue;
+      const pools = menuPools[menu.key] ?? [];
+      const visit = menuVisits[menu.key] ?? 0;
+      const current = selectProductMenuImages(pools, Math.max(1, visit), productImageRotations.current);
+      const next = visit === 0 ? current : nextProductMenuImages(pools, visit + 1, productImageRotations.current);
+      warmProductMenuImages(next.map((card) => ({ ...card, images: card.image ? [card.image] : [] })));
+    }
+  }, [menuPools, menuVisits]);
   const [contactExpanded, setContactExpanded] = useState(false);
   const [tradeMenuOpen, setTradeMenuOpen] = useState(false);
   // Delayed close so a stray cursor movement doesn't instantly kill the TRADE dropdown
@@ -1518,6 +1527,8 @@ const Navigation = (_props: NavigationProps) => {
                         menuKey={menu.key}
                         menuVisit={menuVisits[menu.key] ?? 0}
                         rotationState={productImageRotations.current}
+                        cards={menuPools[menu.key] ?? []}
+                        roomScenes={roomScenes}
                         onCategoryLink={(category, subcategory) => navigateFromMegaMenu(category, subcategory ?? null)}
                         onRoomNavigate={navigateToRoom}
                         onFullCatalogue={() => { setMegaMenuOpen(false); setActiveRoomMenu(null); navigate("/search?view=grid"); }}
