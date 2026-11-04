@@ -237,11 +237,12 @@ const PRODUCT_NAV: { key: ProductNavKey; label: string; title: string; category:
     { label: "Decor", category: "Décor" },
   ] },
   { key: "seating", label: "Seating", title: "Seating", category: "Seating", defaultRoom: "living-room", links: [
-    { label: "Sofas", category: "Seating", subcategory: "Sofas" },
     { label: "Armchairs", category: "Seating", subcategory: "Armchairs" },
+    { label: "Bar Stools", category: "Seating", subcategory: "Ottomans & Stools" },
     { label: "Chairs", category: "Seating", subcategory: "Chairs" },
     { label: "Daybeds & Benches", category: "Seating", subcategory: "Daybeds & Benches" },
     { label: "Ottomans & Stools", category: "Seating", subcategory: "Ottomans & Stools" },
+    { label: "Sofas", category: "Seating", subcategory: "Sofas" },
   ] },
   { key: "tables", label: "Tables", title: "Tables", category: "Tables", defaultRoom: "dining-room", links: [
     { label: "Dining Tables", category: "Tables", subcategory: "Dining Tables" },
@@ -290,6 +291,42 @@ const SHOP_BY_ROOM_LINKS = [
   { label: "Office", slug: "office", nav: "office" as RoomNavKey },
 ];
 
+// Seating mega-dropdown: editorial card grid (single piece on a neutral studio ground).
+const seatingCardImage = (url: string) => url.replace("/image/upload/", "/image/upload/c_fill,ar_4:5,w_480,q_auto,f_auto/");
+const SEATING_CARDS: { label: string; category: string; subcategory?: string; image: string }[] = [
+  { label: "Armchairs", category: "Seating", subcategory: "Armchairs", image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1781803450/cover_w5pk16.jpg" },
+  { label: "Bar Stools", category: "Seating", subcategory: "Ottomans & Stools", image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1775836417/Ari_Barstool-1_lsexyf.jpg" },
+  { label: "Chairs", category: "Seating", subcategory: "Chairs", image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1780638970/Solid_Oak_Wood_-_Neve_Fabric-2_w2umoh.jpg" },
+  { label: "Daybeds & Benches", category: "Seating", subcategory: "Daybeds & Benches", image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1791126840/Beauregard_Daybed-1_npqxtc.webp" },
+  { label: "Ottomans & Stools", category: "Seating", subcategory: "Ottomans & Stools", image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1776136286/Barth_Stool-4_jkc3my.jpg" },
+  { label: "Sofas", category: "Seating", subcategory: "Sofas", image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1777527856/PC_Corbeille_Sofa_01_A4_BD_1_ziscqe.jpg" },
+];
+
+const SeatingDropdownGrid = ({ onCategoryLink }: { onCategoryLink: (category: string, subcategory?: string) => void }) => (
+  <div className="flex flex-1 items-center justify-center gap-6 self-stretch px-8 py-8">
+    {SEATING_CARDS.map((card) => (
+      <button
+        key={card.label}
+        type="button"
+        onClick={() => onCategoryLink(card.category, card.subcategory)}
+        className="group flex w-32 shrink-0 flex-col items-center focus-visible:outline-hidden"
+      >
+        <span className="block w-full overflow-hidden bg-[hsl(var(--accent))]/30">
+          <img
+            src={seatingCardImage(card.image)}
+            alt={card.label}
+            loading="lazy"
+            className="aspect-[4/5] w-full object-cover transition-all duration-500 ease-out group-hover:scale-[1.04] group-hover:opacity-95"
+          />
+        </span>
+        <span className="mt-3 font-body text-xs font-normal tracking-wide text-muted-foreground transition-colors duration-300 group-hover:text-foreground">
+          {card.label}
+        </span>
+      </button>
+    ))}
+  </div>
+);
+
 const ProductDropdownPanel = ({ menuKey, onCategoryLink, onRoomNavigate, onFullCatalogue, onPieceNavigate }: {
   menuKey: ProductNavKey;
   onCategoryLink: (category: string, subcategory?: string) => void;
@@ -299,10 +336,33 @@ const ProductDropdownPanel = ({ menuKey, onCategoryLink, onRoomNavigate, onFullC
 }) => {
   const menu = PRODUCT_NAV.find((m) => m.key === menuKey)!;
   const showShopByRoom = menuKey === "rooms";
+  const isSeating = menuKey === "seating";
   const [previewRoom, setPreviewRoom] = useState(menu.defaultRoom);
   const { data: rawCatalogCount } = useMasterCatalogRawCount();
   const { data: counts } = useCategoryMenuCounts(menu.links.map((l) => ({ key: l.label, category: l.category, subcategory: l.subcategory ?? null })));
   const previewNav = SHOP_BY_ROOM_LINKS.find((r) => r.slug === previewRoom)?.nav ?? "living";
+  if (isSeating) {
+    return (
+      <div data-header-panel className="relative flex min-h-[470px] items-stretch overflow-visible border-t border-border/50 bg-[hsl(var(--collection-card-canvas))] shadow-[0_18px_40px_-24px_hsl(var(--foreground)/0.25)]">
+        <div className="w-44 shrink-0 self-stretch border-r border-border/60 py-7 pl-8 pr-4">
+          <div className="mb-5 font-body text-xs font-semibold uppercase tracking-widest text-foreground">Seating</div>
+          <div className="flex flex-col gap-0.5">
+            {menu.links.map((link) => (
+              <button
+                key={link.label}
+                type="button"
+                onClick={() => onCategoryLink(link.category, link.subcategory)}
+                className="py-1 text-left font-body text-xs font-normal tracking-wide text-muted-foreground transition-colors duration-200 hover:text-foreground focus-visible:outline-hidden"
+              >
+                {link.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <SeatingDropdownGrid onCategoryLink={onCategoryLink} />
+      </div>
+    );
+  }
   return (
     <div data-header-panel className="relative flex min-h-[470px] items-start overflow-visible bg-[hsl(var(--collection-card-canvas))]">
       <div className="w-56 shrink-0 self-stretch border-r border-border/60 py-6 pl-6 pr-4">
@@ -1549,7 +1609,7 @@ const Navigation = (_props: NavigationProps) => {
                   </Button>
 
                   {megaMenuOpen && activeRoomMenu === menu.key && (
-                    <div ref={megaMenuRef} data-room-menu={menu.key} className="absolute left-1/2 top-full z-50 mt-1 w-[min(56rem,calc(100vw-48px))] bg-background shadow-xl" style={{ translate: "-50% 0" }}>
+                    <div ref={megaMenuRef} data-room-menu={menu.key} className={cn("absolute left-1/2 top-full z-50 mt-1 bg-background shadow-xl", menu.key === "seating" ? "w-[min(74rem,calc(100vw-48px))]" : "w-[min(56rem,calc(100vw-48px))]")} style={{ translate: "-50% 0" }}>
                       <ProductDropdownPanel
                         menuKey={menu.key}
                         onCategoryLink={(category, subcategory) => navigateFromMegaMenu(category, subcategory ?? null)}
