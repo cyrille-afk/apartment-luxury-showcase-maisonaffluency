@@ -47,7 +47,13 @@ export function installAppStylesheetRecovery(doc: Document, backupHref: string):
   primary.addEventListener("load", primaryLoaded);
   primary.addEventListener("error", recover);
   // Errors may have happened before this script was reached; bound that wait too.
-  if (primary.sheet) primaryLoaded();
+  let alreadyLoaded = false;
+  try {
+    // Chromium can expose a sheet after a failed request; inaccessible rules
+    // are not proof that our same-origin stylesheet actually arrived.
+    alreadyLoaded = !!primary.sheet && primary.sheet.cssRules.length > 0;
+  } catch { /* The load/error event or bounded timeout decides instead. */ }
+  if (alreadyLoaded) primaryLoaded();
   else timer = setTimeout(recover, 8000);
 }
 

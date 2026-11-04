@@ -13,7 +13,7 @@ function primary(loaded = false) {
   const link = document.createElement("link");
   link.id = "app-css";
   link.media = "print";
-  Object.defineProperty(link, "sheet", { value: loaded ? {} : null });
+  Object.defineProperty(link, "sheet", { value: loaded ? { cssRules: [{}] } : null });
   document.head.append(link);
   document.documentElement.classList.add("home-fouc");
   vi.useFakeTimers();
