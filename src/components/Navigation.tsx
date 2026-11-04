@@ -1,4 +1,5 @@
 import { ROOM_PREVIEW_SCENES } from "@/lib/roomPreviewScenes";
+import { SEATING_CARDS, seatingCardImage, seatingImagesForVisit } from "@/components/seatingMenuImages";
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "@/lib/router-compat";
 import { Menu, X, Crown, Search, ChevronDown, ChevronRight, ChevronLeft, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Briefcase, BookOpen, Heart, Pin, User, LogIn, UserPlus, LogOut } from "lucide-react";
@@ -291,50 +292,42 @@ const SHOP_BY_ROOM_LINKS = [
   { label: "Office", slug: "office", nav: "office" as RoomNavKey },
 ];
 
-// Seating mega-dropdown: editorial card grid (single piece on a neutral studio ground).
-const seatingCardImage = (url: string) => url.replace("/image/upload/", "/image/upload/c_fill,ar_4:5,w_480,q_auto,f_auto/");
-const SEATING_CARDS: { label: string; category: string; subcategory?: string; image: string }[] = [
-  { label: "Armchairs", category: "Seating", subcategory: "Armchairs", image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1781803450/cover_w5pk16.jpg" },
-  { label: "Bar Stools", category: "Seating", subcategory: "Ottomans & Stools", image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1775836417/Ari_Barstool-1_lsexyf.jpg" },
-  { label: "Chairs", category: "Seating", subcategory: "Chairs", image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1780638970/Solid_Oak_Wood_-_Neve_Fabric-2_w2umoh.jpg" },
-  { label: "Daybeds & Benches", category: "Seating", subcategory: "Daybeds & Benches", image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1791126840/Beauregard_Daybed-1_npqxtc.webp" },
-  { label: "Ottomans & Stools", category: "Seating", subcategory: "Ottomans & Stools", image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1776136286/Barth_Stool-4_jkc3my.jpg" },
-  { label: "Sofas", category: "Seating", subcategory: "Sofas", image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1777527856/PC_Corbeille_Sofa_01_A4_BD_1_ziscqe.jpg" },
-];
-
-const SeatingDropdownGrid = ({ onCategoryLink }: { onCategoryLink: (category: string, subcategory?: string) => void }) => (
-  <div className="flex flex-1 items-center justify-center gap-6 self-stretch px-8 py-8">
-    {SEATING_CARDS.map((card) => (
-      <button
+const SeatingDropdownGrid = ({ onCategoryLink, visit }: { onCategoryLink: (category: string, subcategory?: string) => void; visit: number }) => (
+  <div data-seating-grid className="relative min-h-0 min-w-0">
+    <div className="absolute inset-0 grid grid-cols-6 gap-4">
+    {SEATING_CARDS.map((card, index) => (
+      <Button
         key={card.label}
         type="button"
+        variant="ghost"
         onClick={() => onCategoryLink(card.category, card.subcategory)}
-        className="group flex w-32 shrink-0 flex-col items-center focus-visible:outline-hidden"
+        className="group flex h-full min-h-0 min-w-0 flex-col items-stretch justify-start gap-0 rounded-none p-0 hover:bg-transparent focus-visible:outline-hidden"
       >
-        <span className="block w-full overflow-hidden bg-[hsl(var(--accent))]/30">
+        <span className="block min-h-0 w-full flex-1 overflow-hidden bg-accent/30">
           <img
-            src={seatingCardImage(card.image)}
+            src={seatingCardImage(seatingImagesForVisit(visit)[index] ?? "")}
             alt={card.label}
-            loading="lazy"
-            className="aspect-[4/5] w-full object-cover transition-all duration-500 ease-out group-hover:scale-[1.04] group-hover:opacity-95"
+            className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
           />
         </span>
-        <span className="mt-3 font-body text-xs font-normal tracking-wide text-muted-foreground transition-colors duration-300 group-hover:text-foreground">
+        <span className="flex h-10 shrink-0 items-center justify-center whitespace-normal text-center font-body text-xs font-normal tracking-normal text-muted-foreground transition-colors duration-300 group-hover:text-foreground">
           {card.label}
         </span>
-      </button>
+      </Button>
     ))}
+    </div>
   </div>
 );
 
-const ProductDropdownPanel = ({ menuKey, onCategoryLink, onRoomNavigate, onFullCatalogue, onPieceNavigate }: {
+const ProductDropdownPanel = ({ menuKey, seatingVisit, onCategoryLink, onRoomNavigate, onFullCatalogue, onPieceNavigate }: {
   menuKey: ProductNavKey;
+  seatingVisit: number;
   onCategoryLink: (category: string, subcategory?: string) => void;
   onRoomNavigate: (slug: string) => void;
   onFullCatalogue: () => void;
   onPieceNavigate: (href: string) => void;
 }) => {
-  const menu = PRODUCT_NAV.find((m) => m.key === menuKey)!;
+  const menu = PRODUCT_NAV.find((m) => m.key === menuKey) ?? PRODUCT_NAV[0];
   const showShopByRoom = menuKey === "rooms";
   const isSeating = menuKey === "seating";
   const [previewRoom, setPreviewRoom] = useState(menu.defaultRoom);
@@ -343,23 +336,24 @@ const ProductDropdownPanel = ({ menuKey, onCategoryLink, onRoomNavigate, onFullC
   const previewNav = SHOP_BY_ROOM_LINKS.find((r) => r.slug === previewRoom)?.nav ?? "living";
   if (isSeating) {
     return (
-      <div data-header-panel className="relative flex min-h-[470px] items-stretch overflow-visible border-t border-border/50 bg-[hsl(var(--collection-card-canvas))] shadow-[0_18px_40px_-24px_hsl(var(--foreground)/0.25)]">
-        <div className="w-44 shrink-0 self-stretch border-r border-border/60 py-7 pl-8 pr-4">
+      <div data-header-panel className="relative grid grid-cols-[11rem_minmax(0,1fr)] gap-6 overflow-visible border-t border-border/50 bg-background p-7 shadow-xl">
+        <div data-seating-sidebar className="border-r border-border/60 pr-4">
           <div className="mb-5 font-body text-xs font-semibold uppercase tracking-widest text-foreground">Seating</div>
           <div className="flex flex-col gap-0.5">
             {menu.links.map((link) => (
-              <button
+              <Button
                 key={link.label}
                 type="button"
+                variant="ghost"
                 onClick={() => onCategoryLink(link.category, link.subcategory)}
-                className="py-1 text-left font-body text-xs font-normal tracking-wide text-muted-foreground transition-colors duration-200 hover:text-foreground focus-visible:outline-hidden"
+                className="h-auto justify-start whitespace-normal rounded-none px-0 py-1 text-left font-body text-xs font-normal tracking-normal text-muted-foreground transition-colors duration-200 hover:bg-transparent hover:text-foreground focus-visible:outline-hidden"
               >
                 {link.label}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
-        <SeatingDropdownGrid onCategoryLink={onCategoryLink} />
+        <SeatingDropdownGrid onCategoryLink={onCategoryLink} visit={seatingVisit} />
       </div>
     );
   }
@@ -643,6 +637,7 @@ const Navigation = (_props: NavigationProps) => {
   }, []);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
+  const [seatingVisit, setSeatingVisit] = useState(0);
   const [contactExpanded, setContactExpanded] = useState(false);
   const [tradeMenuOpen, setTradeMenuOpen] = useState(false);
   // Delayed close so a stray cursor movement doesn't instantly kill the TRADE dropdown
@@ -953,6 +948,7 @@ const Navigation = (_props: NavigationProps) => {
   };
 
   const openRoomMenu = (room: RoomNavKey | ProductNavKey) => {
+    if (room === "seating") setSeatingVisit((visit) => visit + 1);
     if (roomMenuCloseTimer.current !== null) window.clearTimeout(roomMenuCloseTimer.current);
     if (activeRoomMenu !== room || !megaMenuOpen) setActiveRoomCategory(null);
     setActiveRoomMenu(room);
@@ -1612,6 +1608,7 @@ const Navigation = (_props: NavigationProps) => {
                     <div ref={megaMenuRef} data-room-menu={menu.key} className={cn("absolute left-1/2 top-full z-50 mt-1 bg-background shadow-xl", menu.key === "seating" ? "w-[min(74rem,calc(100vw-48px))]" : "w-[min(56rem,calc(100vw-48px))]")} style={{ translate: "-50% 0" }}>
                       <ProductDropdownPanel
                         menuKey={menu.key}
+                        seatingVisit={seatingVisit}
                         onCategoryLink={(category, subcategory) => navigateFromMegaMenu(category, subcategory ?? null)}
                         onRoomNavigate={navigateToRoom}
                         onFullCatalogue={() => { setMegaMenuOpen(false); setActiveRoomMenu(null); navigate("/search?view=grid"); }}

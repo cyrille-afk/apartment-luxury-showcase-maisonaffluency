@@ -1,5 +1,9 @@
 # Roadmap
 
+## Seating dropdown refinement
+- [x] Sidebar and image grid both measure 190px; oversized panel reduced to 248px, verified at 1946px and 1280px without overflow.
+- [x] All six curated images change across three openings, photographs load, Sofas opens its collection; two rotation tests pass, no browser errors and build OK.
+
 ## Directory viewport and search shield
 - [x] Restored a 37.8px desktop bottom preview at 1946×1181 and 1280×1800; search/caption share a dark shield and the cue stays below it. Live Amelie search returns one result and Escape dismisses; mobile remains full-height, 20 directory tests pass and build OK.
 
