@@ -7,9 +7,10 @@
   --collection-control-foreground: #ffffff;
   --homepage-header-paper: oklch(1 0 0);
   --homepage-header-ink: #111111;
-  --header-dark-glass: rgba(20, 20, 20, 0.4);
+  --header-dark-glass: rgba(60, 60, 60, 0.55);
+  --header-dark-glass-gradient: linear-gradient(to bottom, rgba(38, 38, 38, 0.72), rgba(92, 92, 92, 0.62));
   --header-dark-ink: #ffffff;
-  --directory-search-shield: #141414;
+  --directory-search-shield: rgba(255, 255, 255, 0.04);
   --directory-bottom-preview: 1cm;
   --font-header-trade: "Times New Roman", Times, serif;
   --homepage-header-glass: color-mix(in oklab, var(--homepage-header-paper) 25%, transparent);
@@ -190,7 +191,7 @@ body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-he
   --header-current-ink: var(--header-dark-ink);
   color: var(--header-dark-ink);
   background-color: var(--header-dark-glass) !important;
-  background-image: none !important;
+  background-image: var(--header-dark-glass-gradient) !important;
   backdrop-filter: blur(12px) !important;
 }
 /* Dark row ink stays full-strength, including the wordmark's hover state.
