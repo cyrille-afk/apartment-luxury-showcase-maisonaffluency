@@ -1,8 +1,9 @@
 import { ROOM_PREVIEW_SCENES } from "@/lib/roomPreviewScenes";
 import ProductCategoryDropdown from "@/components/ProductCategoryDropdown";
-import type { ProductMenuRotationState } from "@/components/productMenuImages";
-import { PRODUCT_NAV, type ProductNavKey } from "@/components/productNavigation";
-import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
+import { resolveProductMenuCards, selectProductMenuImages, type ProductMenuCard, type ProductMenuRotationState } from "@/components/productMenuImages";
+import { warmProductMenuImages } from "@/components/productMenuPreload";
+import { PRODUCT_NAV, sortProductMenuLinks, type ProductNavKey } from "@/components/productNavigation";
+import React, { useState, useEffect, useLayoutEffect, useRef, useMemo } from "react";
 import { Link, useNavigate, useLocation } from "@/lib/router-compat";
 import { Menu, X, Crown, Search, ChevronDown, ChevronRight, ChevronLeft, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Briefcase, BookOpen, Heart, Pin, User, LogIn, UserPlus, LogOut } from "lucide-react";
 import TradeServicesRequestModal from "@/components/trade/TradeServicesRequestModal";
@@ -240,10 +241,11 @@ const SHOP_BY_ROOM_LINKS = [
   { label: "Office", slug: "office", nav: "office" as RoomNavKey },
 ];
 
-const ProductDropdownPanel = ({ menuKey, menuVisit, rotationState, onCategoryLink, onRoomNavigate, onFullCatalogue, onPieceNavigate }: {
+const ProductDropdownPanel = ({ menuKey, menuVisit, rotationState, cards, onCategoryLink, onRoomNavigate, onFullCatalogue, onPieceNavigate }: {
   menuKey: ProductNavKey;
   menuVisit: number;
   rotationState: ProductMenuRotationState;
+  cards: ProductMenuCard[];
   onCategoryLink: (category: string, subcategory?: string) => void;
   onRoomNavigate: (slug: string) => void;
   onFullCatalogue: () => void;
@@ -257,7 +259,7 @@ const ProductDropdownPanel = ({ menuKey, menuVisit, rotationState, onCategoryLin
   const { data: counts } = useCategoryMenuCounts(menu.links.map((l) => ({ key: l.label, category: l.category, subcategory: l.subcategory ?? null })));
   const previewNav = SHOP_BY_ROOM_LINKS.find((r) => r.slug === previewRoom)?.nav ?? "living";
   if (isProductGrid) {
-    return <ProductCategoryDropdown menu={menu} visit={menuVisit} rotationState={rotationState} onCategoryLink={onCategoryLink} />;
+    return <ProductCategoryDropdown menu={menu} visit={menuVisit} rotationState={rotationState} cards={cards} onCategoryLink={onCategoryLink} />;
   }
   return (
     <div data-header-panel className="relative flex min-h-[470px] items-start overflow-visible bg-[hsl(var(--collection-card-canvas))]">
@@ -458,23 +460,17 @@ interface NavigationProps {
 
 const Navigation = (_props: NavigationProps) => {
   useEffect(() => {
-    if (!window.matchMedia("(min-width: 768px)").matches) return;
-    // Leave first paint to the page, then warm all three menu photos in parallel.
-    // Hover starts them immediately if the visitor reaches the nav first.
-    if (window.requestIdleCallback) {
-      const id = window.requestIdleCallback(preloadRoomMenuPhotos, { timeout: 1800 });
-      return () => window.cancelIdleCallback(id);
-    }
-    const id = window.setTimeout(preloadRoomMenuPhotos, 400);
-    return () => window.clearTimeout(id);
+    preloadRoomMenuPhotos();
   }, []);
-  const [catalogWarm, setCatalogWarm] = useState(false);
-  useEffect(() => {
-    if (!window.matchMedia("(min-width: 768px)").matches) return;
-    const id = window.setTimeout(() => setCatalogWarm(true), 1500);
-    return () => window.clearTimeout(id);
-  }, []);
-  useDbCuratorPicks({ enabled: catalogWarm });
+  const { data: menuCatalogue } = useDbCuratorPicks();
+  useMasterCatalogRawCount();
+  useCategoryMenuCounts(PRODUCT_NAV.flatMap((menu) => menu.links.map((link) => ({ ...link, key: `${menu.key}:${link.label}` }))));
+  const menuPools = useMemo(() => {
+    const picks = (menuCatalogue ?? []).map((item) => item.pick);
+    return Object.fromEntries(PRODUCT_NAV.map((menu) => [menu.key,
+      resolveProductMenuCards(menu.key === "tables" ? sortProductMenuLinks(menu.links) : menu.links, picks).filter((card) => card.images.length > 0),
+    ]));
+  }, [menuCatalogue]);
   const { user, isTradeUser, rolesLoaded, signOut } = useAuth();
   const tradePartner = Boolean(user && rolesLoaded && isTradeUser);
   const queryClient = useQueryClient();
@@ -541,6 +537,16 @@ const Navigation = (_props: NavigationProps) => {
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [menuVisits, setMenuVisits] = useState<Partial<Record<ProductNavKey, number>>>({});
   const productImageRotations = useRef<ProductMenuRotationState>(new Map());
+  useEffect(() => {
+    for (const menu of PRODUCT_NAV) {
+      if (menu.key === "rooms" || menu.key === "furniture") continue;
+      const pools = menuPools[menu.key] ?? [];
+      // Reserve the next visit's shuffled cards now so the preloaded files are
+      // exactly those shown on opening; the live bag still exhausts every asset.
+      const selected = selectProductMenuImages(pools, (menuVisits[menu.key] ?? 0) + 1, productImageRotations.current);
+      warmProductMenuImages(selected.map((card) => ({ ...card, images: card.image ? [card.image] : [] })));
+    }
+  }, [menuPools, menuVisits]);
   const [contactExpanded, setContactExpanded] = useState(false);
   const [tradeMenuOpen, setTradeMenuOpen] = useState(false);
   // Delayed close so a stray cursor movement doesn't instantly kill the TRADE dropdown
@@ -1518,6 +1524,7 @@ const Navigation = (_props: NavigationProps) => {
                         menuKey={menu.key}
                         menuVisit={menuVisits[menu.key] ?? 0}
                         rotationState={productImageRotations.current}
+                        cards={menuPools[menu.key] ?? []}
                         onCategoryLink={(category, subcategory) => navigateFromMegaMenu(category, subcategory ?? null)}
                         onRoomNavigate={navigateToRoom}
                         onFullCatalogue={() => { setMegaMenuOpen(false); setActiveRoomMenu(null); navigate("/search?view=grid"); }}
