@@ -11,6 +11,8 @@ interface BreadcrumbsProps {
   className?: string;
   /** "default" = chevron separators, wrapping. "compact" = "/" separators, single-line, small. */
   variant?: "default" | "compact";
+  /** Link the final crumb too (used when the product title is omitted, e.g. mobile). */
+  linkLast?: boolean;
 }
 
 /**
@@ -18,7 +20,7 @@ interface BreadcrumbsProps {
  * Last item is always plain text (current page). All others link.
  * Renders as a semantic <nav> with an ordered list for SEO.
  */
-export default function Breadcrumbs({ items, className = "", variant = "default" }: BreadcrumbsProps) {
+export default function Breadcrumbs({ items, className = "", variant = "default", linkLast = false }: BreadcrumbsProps) {
   if (!items.length) return null;
 
   const compact = variant === "compact";
@@ -31,10 +33,11 @@ export default function Breadcrumbs({ items, className = "", variant = "default"
       <ol className={`flex items-center ${compact ? "flex-nowrap gap-1 overflow-hidden whitespace-nowrap" : "flex-wrap gap-1.5"}`}>
         {items.map((item, i) => {
           const isLast = i === items.length - 1;
+          const linked = !!item.to && (!isLast || linkLast);
           return (
             <li key={`${item.label}-${i}`} className={`flex items-center ${compact ? "gap-1" : "gap-1.5"} min-w-0`}>
-              {item.to && !isLast ? (
-                <Link to={item.to} className="hover:text-foreground transition-colors truncate">
+              {linked ? (
+                <Link to={item.to!} aria-current={isLast ? "page" : undefined} className={`${isLast ? "text-foreground" : ""} hover:text-foreground transition-colors truncate py-2 -my-2`}>
                   {item.label}
                 </Link>
               ) : (
