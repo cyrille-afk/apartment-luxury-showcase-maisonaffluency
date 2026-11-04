@@ -300,7 +300,21 @@ const SeatingDropdownGrid = ({ onCategoryLink, visit }: { onCategoryLink: (categ
         key={card.label}
         type="button"
         variant="ghost"
-        onClick={() => onCategoryLink(card.category, card.subcategory)}
+        onMouseEnter={() => {
+          window.__lovableEvents?.track?.("project.seating_featured_image_interacted", {
+            subcategory: card.label,
+            interaction: "hover",
+            image_index: Math.max(0, visit) % card.images.length,
+          });
+        }}
+        onClick={() => {
+          window.__lovableEvents?.track?.("project.seating_featured_image_interacted", {
+            subcategory: card.label,
+            interaction: "click",
+            image_index: Math.max(0, visit) % card.images.length,
+          });
+          onCategoryLink(card.category, card.subcategory);
+        }}
         className="group flex h-full min-h-0 min-w-0 flex-col items-stretch justify-start gap-0 rounded-none p-0 hover:bg-transparent focus-visible:outline-hidden"
       >
         <span className="block min-h-0 w-full flex-1 overflow-hidden bg-accent/30">
@@ -345,7 +359,10 @@ const ProductDropdownPanel = ({ menuKey, seatingVisit, onCategoryLink, onRoomNav
                 key={link.label}
                 type="button"
                 variant="ghost"
-                onClick={() => onCategoryLink(link.category, link.subcategory)}
+                onClick={() => {
+                  window.__lovableEvents?.track?.("project.seating_subcategory_clicked", { subcategory: link.label });
+                  onCategoryLink(link.category, link.subcategory);
+                }}
                 className="h-auto justify-start whitespace-normal rounded-none px-0 py-1 text-left font-body text-xs font-normal tracking-normal text-muted-foreground transition-colors duration-200 hover:bg-transparent hover:text-foreground focus-visible:outline-hidden"
               >
                 {link.label}
@@ -948,6 +965,9 @@ const Navigation = (_props: NavigationProps) => {
   };
 
   const openRoomMenu = (room: RoomNavKey | ProductNavKey) => {
+    if (room === "seating" && (activeRoomMenu !== room || !megaMenuOpen)) {
+      window.__lovableEvents?.track?.("project.seating_dropdown_opened", {});
+    }
     if (room === "seating") setSeatingVisit((visit) => visit + 1);
     if (roomMenuCloseTimer.current !== null) window.clearTimeout(roomMenuCloseTimer.current);
     if (activeRoomMenu !== room || !megaMenuOpen) setActiveRoomCategory(null);
