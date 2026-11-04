@@ -38,6 +38,7 @@ export const PRODUCT_NAV: { key: ProductNavKey; label: string; title: string; ca
     { label: "Floor Lights", category: "Lighting", subcategory: "Floor Lights" },
   ] },
   { key: "rugs", label: "Rugs", title: "Rugs", category: "Rugs", defaultRoom: "living-room", links: [
+    { label: "All Rugs", category: "Rugs" },
     { label: "Hand-Knotted Rugs", category: "Rugs", subcategory: "Hand-Knotted Rugs" },
     { label: "Hand-Tufted Rugs", category: "Rugs", subcategory: "Hand-Tufted Rugs" },
     { label: "Hand-Woven Rugs", category: "Rugs", subcategory: "Hand-Woven Rugs" },

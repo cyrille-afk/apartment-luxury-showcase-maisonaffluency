@@ -2,6 +2,18 @@ import { describe, expect, it } from "vitest";
 import { PRODUCT_NAV, sortProductMenuLinks } from "./productNavigation";
 import { resolveProductMenuCards } from "./productMenuImages";
 
+describe("Rugs menu coverage", () => {
+  it("starts with the complete Rugs collection rather than a restricted subcategory", () => {
+    const menu = PRODUCT_NAV.find((item) => item.key === "rugs");
+    expect(menu?.links[0]).toEqual({ label: "All Rugs", category: "Rugs" });
+    const cards = resolveProductMenuCards(menu?.links.slice(0, 1) ?? [], [
+      { category: "Rugs", subcategory: "Hand-Knotted Rugs", image: "knotted.jpg" },
+      { category: "Rugs", subcategory: "Hand-Tufted Rugs", image: "tufted.jpg" },
+    ]);
+    expect(cards[0]?.images).toEqual(["knotted.jpg", "tufted.jpg"]);
+  });
+});
+
 describe("Tables menu subcategories", () => {
   it("includes Bedside Tables and sorts the full menu alphabetically", () => {
     const menu = PRODUCT_NAV.find((item) => item.key === "tables");

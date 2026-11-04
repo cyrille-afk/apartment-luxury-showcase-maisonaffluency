@@ -28,7 +28,7 @@ export default function ProductCategoryDropdown({ menu, visit, rotationState, on
   };
   return (
     <div data-header-panel data-product-grid-panel={menu.key} className="relative grid grid-cols-[11rem_minmax(0,1fr)] gap-6 overflow-visible border-t border-border/50 bg-background p-7 shadow-xl">
-      <div data-product-menu-sidebar data-seating-sidebar={isSeating ? "" : undefined} className="min-h-[190px] border-r border-border/60 pr-4">
+      <div data-product-menu-sidebar data-seating-sidebar={isSeating ? "" : undefined} className="min-h-[220px] border-r border-border/60 pr-4">
         <div className="mb-5 font-body text-xs font-semibold uppercase tracking-widest text-foreground">{menu.title}</div>
         <div className="flex flex-col gap-0.5">
           {links.map((link) => (
@@ -54,7 +54,7 @@ export default function ProductCategoryDropdown({ menu, visit, rotationState, on
                 onClick={() => { trackImage(card.label, "click", index); onCategoryLink(card.category, card.subcategory); }}
                 className="group flex h-full min-h-0 min-w-0 flex-col items-stretch justify-start gap-0 rounded-none p-0 hover:bg-transparent focus-visible:outline-hidden">
                 <span className="block min-h-0 w-full flex-1 overflow-hidden bg-accent/30">
-                  {image && <img src={seatingCardImage(image)} srcSet={seatingCardSrcSet(image)} sizes={productMenuImageSizes(cards.length)} loading="lazy" decoding="async" width={320} height={400} alt={card.label} className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100" />}
+                  {image && <img src={seatingCardImage(image)} srcSet={seatingCardSrcSet(image)} sizes={productMenuImageSizes(cards.length)} loading="lazy" decoding="async" width={320} height={400} alt={card.label} className="h-full w-full object-contain transition-opacity duration-500 ease-out group-hover:opacity-90 motion-reduce:transition-none" />}
                 </span>
                 <span className="flex h-10 shrink-0 items-center justify-center whitespace-normal text-center font-body text-xs font-normal tracking-normal text-muted-foreground transition-colors duration-300 group-hover:text-foreground">{card.label}</span>
               </Button>
