@@ -1,5 +1,6 @@
 import { ROOM_PREVIEW_SCENES } from "@/lib/roomPreviewScenes";
 import ProductCategoryDropdown from "@/components/ProductCategoryDropdown";
+import type { ProductMenuRotationState } from "@/components/productMenuImages";
 import { PRODUCT_NAV, type ProductNavKey } from "@/components/productNavigation";
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "@/lib/router-compat";
@@ -239,9 +240,10 @@ const SHOP_BY_ROOM_LINKS = [
   { label: "Office", slug: "office", nav: "office" as RoomNavKey },
 ];
 
-const ProductDropdownPanel = ({ menuKey, menuVisit, onCategoryLink, onRoomNavigate, onFullCatalogue, onPieceNavigate }: {
+const ProductDropdownPanel = ({ menuKey, menuVisit, rotationState, onCategoryLink, onRoomNavigate, onFullCatalogue, onPieceNavigate }: {
   menuKey: ProductNavKey;
   menuVisit: number;
+  rotationState: ProductMenuRotationState;
   onCategoryLink: (category: string, subcategory?: string) => void;
   onRoomNavigate: (slug: string) => void;
   onFullCatalogue: () => void;
@@ -255,7 +257,7 @@ const ProductDropdownPanel = ({ menuKey, menuVisit, onCategoryLink, onRoomNaviga
   const { data: counts } = useCategoryMenuCounts(menu.links.map((l) => ({ key: l.label, category: l.category, subcategory: l.subcategory ?? null })));
   const previewNav = SHOP_BY_ROOM_LINKS.find((r) => r.slug === previewRoom)?.nav ?? "living";
   if (isProductGrid) {
-    return <ProductCategoryDropdown menu={menu} visit={menuVisit} onCategoryLink={onCategoryLink} />;
+    return <ProductCategoryDropdown menu={menu} visit={menuVisit} rotationState={rotationState} onCategoryLink={onCategoryLink} />;
   }
   return (
     <div data-header-panel className="relative flex min-h-[470px] items-start overflow-visible bg-[hsl(var(--collection-card-canvas))]">
@@ -538,6 +540,7 @@ const Navigation = (_props: NavigationProps) => {
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [menuVisits, setMenuVisits] = useState<Partial<Record<ProductNavKey, number>>>({});
+  const productImageRotations = useRef<ProductMenuRotationState>(new Map());
   const [contactExpanded, setContactExpanded] = useState(false);
   const [tradeMenuOpen, setTradeMenuOpen] = useState(false);
   // Delayed close so a stray cursor movement doesn't instantly kill the TRADE dropdown
@@ -1514,6 +1517,7 @@ const Navigation = (_props: NavigationProps) => {
                       <ProductDropdownPanel
                         menuKey={menu.key}
                         menuVisit={menuVisits[menu.key] ?? 0}
+                        rotationState={productImageRotations.current}
                         onCategoryLink={(category, subcategory) => navigateFromMegaMenu(category, subcategory ?? null)}
                         onRoomNavigate={navigateToRoom}
                         onFullCatalogue={() => { setMegaMenuOpen(false); setActiveRoomMenu(null); navigate("/search?view=grid"); }}

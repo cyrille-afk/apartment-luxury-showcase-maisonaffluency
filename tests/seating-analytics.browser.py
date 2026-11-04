@@ -20,7 +20,7 @@ async def main():
   captured=await page.evaluate('captured');print(json.dumps(captured))
   opens=[e for e in captured if e['name']=='project.seating_dropdown_opened'];assert len(opens)==2
   subs=[e for e in captured if e['name']=='project.seating_subcategory_clicked'];assert subs==[{'name':'project.seating_subcategory_clicked','properties':{'subcategory':'Armchairs'}}]
-  interactions=[e['properties'] for e in captured if e['name']=='project.seating_featured_image_interacted'];assert [e['interaction'] for e in interactions]==['hover','click'];assert all(e['subcategory']=='Sofas' and e['image_index'] in [0,1] for e in interactions)
+  interactions=[e['properties'] for e in captured if e['name']=='project.seating_featured_image_interacted'];assert [e['interaction'] for e in interactions]==['hover','click'];assert all(e['subcategory']=='Sofas' and isinstance(e['image_index'],int) and e['image_index']>=0 for e in interactions);assert interactions[0]['image_index']==interactions[1]['image_index']
   await page.screenshot(path='/tmp/browser/seating-analytics/destination.png')
   await page.evaluate('delete window.__lovableEvents');await trigger.hover();await page.locator('[data-seating-sidebar]').get_by_role('button',name='Chairs',exact=True).click();await page.wait_for_url('**/products-category/seating/chairs')
   assert not errors,errors;print('All analytics assertions passed; no-runtime fallback works; errors:',errors)
