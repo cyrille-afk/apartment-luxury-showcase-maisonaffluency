@@ -1,5 +1,7 @@
 import { ROOM_PREVIEW_SCENES } from "@/lib/roomPreviewScenes";
 import ProductCategoryDropdown from "@/components/ProductCategoryDropdown";
+import AllCategoriesDropdown from "@/components/AllCategoriesDropdown";
+import { CATALOGUE_DIRECTORY_COUNT_ENTRIES } from "@/components/catalogueDirectory";
 import { resolveProductMenuCards, selectProductMenuImages, type ProductMenuCard, type ProductMenuRotationState } from "@/components/productMenuImages";
 import { nextProductMenuImages, warmProductMenuImages } from "@/components/productMenuPreload";
 import { PRODUCT_NAV, sortProductMenuLinks, type ProductNavKey } from "@/components/productNavigation";
@@ -260,6 +262,9 @@ const ProductDropdownPanel = ({ menuKey, menuVisit, rotationState, cards, roomSc
   const { data: rawCatalogCount } = useMasterCatalogRawCount();
   const { data: counts } = useCategoryMenuCounts(menu.links.map((l) => ({ key: l.label, category: l.category, subcategory: l.subcategory ?? null })));
   const previewNav = SHOP_BY_ROOM_LINKS.find((r) => r.slug === previewRoom)?.nav ?? "living";
+  if (menuKey === "furniture") {
+    return <AllCategoriesDropdown onCategoryLink={onCategoryLink} onFullCatalogue={onFullCatalogue} />;
+  }
   if (isProductGrid) {
     return <ProductCategoryDropdown menu={menu} visit={menuVisit} rotationState={rotationState} cards={cards} onCategoryLink={onCategoryLink} />;
   }
@@ -466,7 +471,7 @@ const Navigation = (_props: NavigationProps) => {
   }, []);
   const { data: menuCatalogue } = useDbCuratorPicks();
   useMasterCatalogRawCount();
-  useCategoryMenuCounts(PRODUCT_NAV.flatMap((menu) => menu.links.map((link) => ({ ...link, key: `${menu.key}:${link.label}` }))));
+  useCategoryMenuCounts([...CATALOGUE_DIRECTORY_COUNT_ENTRIES, ...PRODUCT_NAV.flatMap((menu) => menu.links.map((link) => ({ ...link, key: `${menu.key}:${link.label}` })))]);
   const menuPools = useMemo(() => {
     const picks = (menuCatalogue ?? []).map((item) => item.pick);
     return Object.fromEntries(PRODUCT_NAV.map((menu) => [menu.key,
@@ -1522,7 +1527,7 @@ const Navigation = (_props: NavigationProps) => {
                   </Button>
 
                   {megaMenuOpen && activeRoomMenu === menu.key && (
-                    <div ref={megaMenuRef} data-room-menu={menu.key} className={cn("absolute left-1/2 top-full z-50 mt-1 bg-background shadow-xl", menu.key !== "rooms" && menu.key !== "furniture" ? "w-[min(74rem,calc(100vw-48px))]" : "w-[min(56rem,calc(100vw-48px))]")} style={{ translate: "-50% 0" }}>
+                    <div ref={megaMenuRef} data-room-menu={menu.key} className={cn("absolute left-1/2 top-full z-50 bg-background shadow-xl", menu.key === "furniture" ? "w-screen" : menu.key !== "rooms" ? "mt-1 w-[min(74rem,calc(100vw-48px))]" : "mt-1 w-[min(56rem,calc(100vw-48px))]")} style={{ translate: "-50% 0" }}>
                       <ProductDropdownPanel
                         menuKey={menu.key}
                         menuVisit={menuVisits[menu.key] ?? 0}

@@ -1,5 +1,9 @@
 # Roadmap
 
+## All Categories directory
+- [x] Replace the room-preview state with a full-width white, four-column taxonomy directory, sorted subcategories and shared live counts; retain other menus.
+- [x] Twelve focused tests pass; 1946px and 1024px browser checks confirm all seven departments, 37 sorted subcategory links/counts, no images or overflow, white/sans-serif contrast on Home and Designers, Bedside Tables navigation and unchanged By Rooms/Seating; final run has no page errors and build OK.
+
 ## Navigation warm-up
 - [x] Menu catalogue/counts start on header mount; count menus share one cached pool, all product pools are memoized, and prepared room scenes warm their photos and alternatives before mounting.
 - [x] Featured responsive assets preload before hover; selected cards render synchronously in 220px-aligned frames. Desktop and 1024px browser checks show all featured images already loaded and zero menu-time data requests; rotation, eleven unit tests and Seating analytics pass without page errors. Build OK.
