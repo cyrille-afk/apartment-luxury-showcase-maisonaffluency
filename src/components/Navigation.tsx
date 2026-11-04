@@ -291,6 +291,42 @@ const SHOP_BY_ROOM_LINKS = [
   { label: "Office", slug: "office", nav: "office" as RoomNavKey },
 ];
 
+// Seating mega-dropdown: editorial card grid (single piece on a neutral studio ground).
+const seatingCardImage = (url: string) => url.replace("/image/upload/", "/image/upload/c_fill,ar_4:5,w_480,q_auto,f_auto/");
+const SEATING_CARDS: { label: string; category: string; subcategory?: string; image: string }[] = [
+  { label: "Armchairs", category: "Seating", subcategory: "Armchairs", image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1781803450/cover_w5pk16.jpg" },
+  { label: "Bar Stools", category: "Seating", subcategory: "Ottomans & Stools", image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1775836417/Ari_Barstool-1_lsexyf.jpg" },
+  { label: "Chairs", category: "Seating", subcategory: "Chairs", image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1780638970/Solid_Oak_Wood_-_Neve_Fabric-2_w2umoh.jpg" },
+  { label: "Daybeds & Benches", category: "Seating", subcategory: "Daybeds & Benches", image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1791126840/Beauregard_Daybed-1_npqxtc.webp" },
+  { label: "Ottomans & Stools", category: "Seating", subcategory: "Ottomans & Stools", image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1776136286/Barth_Stool-4_jkc3my.jpg" },
+  { label: "Sofas", category: "Seating", subcategory: "Sofas", image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1777527856/PC_Corbeille_Sofa_01_A4_BD_1_ziscqe.jpg" },
+];
+
+const SeatingDropdownGrid = ({ onCategoryLink }: { onCategoryLink: (category: string, subcategory?: string) => void }) => (
+  <div className="flex flex-1 items-center gap-7 self-stretch px-10 py-8">
+    {SEATING_CARDS.map((card) => (
+      <button
+        key={card.label}
+        type="button"
+        onClick={() => onCategoryLink(card.category, card.subcategory)}
+        className="group flex w-36 shrink-0 flex-col items-center focus-visible:outline-hidden"
+      >
+        <span className="block w-full overflow-hidden bg-[hsl(var(--accent))]/30">
+          <img
+            src={seatingCardImage(card.image)}
+            alt={card.label}
+            loading="lazy"
+            className="aspect-[4/5] w-full object-cover transition-all duration-500 ease-out group-hover:scale-[1.04] group-hover:opacity-95"
+          />
+        </span>
+        <span className="mt-3 font-body text-xs font-normal tracking-wide text-muted-foreground transition-colors duration-300 group-hover:text-foreground">
+          {card.label}
+        </span>
+      </button>
+    ))}
+  </div>
+);
+
 const ProductDropdownPanel = ({ menuKey, onCategoryLink, onRoomNavigate, onFullCatalogue, onPieceNavigate }: {
   menuKey: ProductNavKey;
   onCategoryLink: (category: string, subcategory?: string) => void;
