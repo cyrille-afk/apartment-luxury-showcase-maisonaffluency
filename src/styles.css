@@ -26,6 +26,11 @@
 [data-site-header].global-overlay-header[data-menu-active="true"] {
   z-index: var(--navigation-active-layer);
 }
+/* Browser canvas helpers may give #root an inline stacking level. Release it
+   only while a menu is open so the header can sit above its body portal. */
+body[data-nav-dropdown-open] #root {
+  z-index: auto !important;
+}
 
 /* One route-independent editorial header; menus inherit the same surface. */
 .global-overlay-header [data-catalogue-directory] {
