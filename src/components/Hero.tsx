@@ -105,7 +105,7 @@ const Hero = () => {
 
   return (
     <section
-      className="ma-home-hero relative flex w-full flex-col justify-between h-[100svh] min-h-[100svh] overflow-hidden md:h-[calc(176px+100vw/1.5)] md:min-h-0 md:overflow-hidden"
+      className="ma-home-hero relative flex w-full flex-col justify-between h-[100svh] min-h-[100svh] overflow-hidden md:h-screen md:overflow-hidden"
     >
       {/* Hero image is rendered by the static <picture id="static-hero"> in
           index.html (fixed, z-index:0, painted from the preloaded bytes
@@ -118,7 +118,7 @@ const Hero = () => {
           <img
             src={HERO_SAFARI_FALLBACK}
             alt="Luxury living room with Asian-inspired murals and designer furniture"
-            className="absolute inset-0 h-full w-full object-cover object-[50%_40%] md:top-[176px] md:h-[calc(100vw/1.5)] md:object-[50%_0%]"
+            className="absolute inset-0 h-full w-full object-cover object-[50%_40%] md:top-[176px] md:h-[calc(100%-176px)] md:object-[50%_45%]"
             loading="eager"
             decoding="async"
             fetchPriority="high"
