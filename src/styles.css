@@ -10,7 +10,7 @@
   --header-dark-glass: rgba(60, 60, 60, 0.55);
   --header-dark-glass-gradient: linear-gradient(to bottom, rgba(38, 38, 38, 0.72), rgba(92, 92, 92, 0.62));
   --header-dark-ink: #ffffff;
-  --directory-search-shield: rgba(255, 255, 255, 0.14);
+  --directory-search-shield: rgba(255, 255, 255, 0.04);
   --directory-bottom-preview: 1cm;
   --font-header-trade: "Times New Roman", Times, serif;
   --homepage-header-glass: color-mix(in oklab, var(--homepage-header-paper) 25%, transparent);
@@ -72,9 +72,7 @@ body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-he
 .directory-search-dock {
   isolation: isolate;
   background-color: var(--directory-search-shield);
-  /* 40px dissolves the 1px animated scroll cue passing behind the dock;
-     lighter blurs leave the line visible through the frost. */
-  backdrop-filter: blur(40px) saturate(120%);
+  backdrop-filter: blur(12px);
 }
 body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-hero > .absolute.inset-x-0 { height: 100%; }
 body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-hero > .absolute.pointer-events-none > .relative { padding-top: calc(var(--header-h) + 24px); }

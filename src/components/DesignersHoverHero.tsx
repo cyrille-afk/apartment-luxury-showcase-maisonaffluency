@@ -1990,10 +1990,11 @@ const DesignersHoverHero = () => {
         <div className="hidden md:block absolute inset-y-0 left-0 z-10 w-[38%] bg-gradient-to-r from-black via-black/90 to-transparent pointer-events-none" />
       </div>
 
-      {/* Luxury scroll indicator — desktop only */}
+      {/* Luxury scroll indicator — tablet only. On lg+ it sits entirely behind
+          the Search Directory dock and would bleed through its frost. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-2 left-1/2 z-40 hidden -translate-x-1/2 md:block"
+        className="pointer-events-none absolute bottom-2 left-1/2 z-40 hidden -translate-x-1/2 md:block lg:hidden"
       >
         <div className="relative h-8 w-px overflow-hidden bg-white/20">
           <span className="absolute left-0 top-0 block h-6 w-px bg-white/80 animate-scroll-cue" />
