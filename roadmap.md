@@ -1,5 +1,9 @@
 # Roadmap
 
+## Deployment pairing
+- [x] Isolate generated assets by release, enforce non-cacheable HTML at the server, remove immutable caching for gallery page addresses, and stop mismatched client hydration with manual recovery.
+- [x] Fifteen regressions pass; browser simulations verify matching startup, blocked mismatched hydration at 1946/390px, missing startup-file recovery, and successful manual reopening. HTML response no-store/CDN no-store headers verified; build OK. Published release paths await publishing.
+
 ## Stylesheet recovery
 - [x] Add a pre-hydration failure/stall guard and an independent revisioned backup stylesheet sourced from the existing design tokens, without reload loops or normal-load backup requests.
 - [x] Blocked primary CSS recovers on Home and Dining Room at 1946px and mobile at 390px; recovered Home→Search stays visible, normal loads request no backup asset. Ten regressions pass and build OK. Mobile has the same overlapping header in normal and recovery states (pre-existing, outside this styling-delivery task).
