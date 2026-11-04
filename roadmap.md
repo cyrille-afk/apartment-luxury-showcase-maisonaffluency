@@ -2,8 +2,9 @@
 
 ## Current GitHub mobile check failures
 - [x] Read actual GitHub logs: six quote tests have a missing mock export, one dimensions test uses a retired comment, and phone navigation renders the desktop stack with undersized controls.
-- [ ] Correct and rerun the unit and navigation checks without weakening assertions or performance budgets.
-- [ ] Investigate the production Lighthouse trace before changing homepage loading; latest run reports LCP 5926ms, TBT 5602ms and performance 43/100.
+- [x] Complete unit suite: 2,278 passed, nine existing skips. All 20 PWA/accessibility checks pass locally; phone screenshot confirms only the mobile header renders. Visibility checks exclude hidden/offscreen controls; minimum target size and performance budgets remain unchanged. Build OK.
+- [x] Inspect the saved production Lighthouse report: startup scripting dominates CPU; its largest task is 2,569ms attributed to removable, with 4,250ms script evaluation attributed to client. No unsupported image-preload diagnosis or speculative homepage rewrite.
+- [ ] Confirm GitHub's next production run after these corrections; Lighthouse performance remains unresolved (latest prior run LCP 5926ms, TBT 5602ms, score 43/100). Production audit verification awaits the next GitHub build.
 
 ## Deployment pairing
 - [x] Isolate generated assets by release, enforce non-cacheable HTML at the server, remove immutable caching for gallery page addresses, and stop mismatched client hydration with manual recovery.
