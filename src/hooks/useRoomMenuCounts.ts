@@ -2,6 +2,7 @@
 // matching helpers as the room grid (src/lib/roomMatching.ts) so the numbers
 // shown in the menu can never drift from what the room pages display.
 import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getCachedCatalog } from "@/lib/catalogSource";
 import { filterPublicPicks } from "@/lib/publicCatalogVisibility";
@@ -43,22 +44,23 @@ async function loadCatalogPool(): Promise<CuratorPick[]> {
  */
 export function useRoomMenuCounts(room: RoomSlug | null, categories: { category: string }[]) {
   const categoryKey = categories.map((c) => c.category).join("|");
-  return useQuery({
-    queryKey: ["room-menu-counts", room, categoryKey] as const,
+  const query = useQuery({
+    queryKey: ["navigation-catalog-pool"] as const,
     staleTime: 30 * 60_000,
     gcTime: 60 * 60_000,
-    enabled: Boolean(room) && categories.length > 0,
-    queryFn: async (): Promise<Record<string, number>> => {
-      if (!room) return {};
-      const pool = await loadCatalogPool();
+    queryFn: loadCatalogPool,
+  });
+  const data = useMemo(() => {
+      if (!room || !query.data) return undefined;
+      const pool = query.data;
       const inRoom = pool.filter((pick) => pickMatchesRoom(pick, room));
       const out: Record<string, number> = {};
       for (const { category } of categories) {
         out[category] = inRoom.filter((pick) => pickMatchesFilter(pick, category, null)).length;
       }
       return out;
-    },
-  });
+  }, [query.data, room, categoryKey]);
+  return { ...query, data };
 }
 
 /**
@@ -67,18 +69,20 @@ export function useRoomMenuCounts(room: RoomSlug | null, categories: { category:
  */
 export function useCategoryMenuCounts(entries: { key: string; category: string; subcategory?: string | null }[]) {
   const signature = entries.map((e) => `${e.key}:${e.category}:${e.subcategory ?? ""}`).join("|");
-  return useQuery({
-    queryKey: ["category-menu-counts", signature] as const,
+  const query = useQuery({
+    queryKey: ["navigation-catalog-pool"] as const,
     staleTime: 30 * 60_000,
     gcTime: 60 * 60_000,
-    enabled: entries.length > 0,
-    queryFn: async (): Promise<Record<string, number>> => {
-      const pool = await loadCatalogPool();
+    queryFn: loadCatalogPool,
+  });
+  const data = useMemo(() => {
+      if (!query.data) return undefined;
+      const pool = query.data;
       const out: Record<string, number> = {};
       for (const e of entries) {
         out[e.key] = pool.filter((pick) => pickMatchesFilter(pick, e.category, e.subcategory ?? null)).length;
       }
       return out;
-    },
-  });
+  }, [query.data, signature]);
+  return { ...query, data };
 }
