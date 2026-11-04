@@ -1,5 +1,9 @@
 # Roadmap
 
+## Shared product navigation grids
+- [x] Extracted productNavigation schema and ProductCategoryDropdown for Seating, Tables, Lighting, Rugs, Storage and Decor; By Rooms and All Categories retain their existing layouts.
+- [x] Public subcategory image pools rotate per opening with responsive lazy loading; all six grids match the sidebar at 190px at 1946px/1024px. Images load, Coffee Tables navigation and Seating analytics pass; five unit tests pass and build OK. Hand-Woven Rugs, Bars, Cushions & Throws and Candle Holders retain their links/counts but have no matching public image cards; no substitutes invented.
+
 ## Seating analytics
 - [x] Three registered events track actual opens (no already-open duplicates), sidebar clicks and featured-card hovers/clicks with subcategory/image index only. Browser regression confirms exact payloads, navigation and safe missing-runtime behavior; two rotation tests pass, 17 schemas validate and build OK. Published receipt awaits publication and real visitor interaction.
 
