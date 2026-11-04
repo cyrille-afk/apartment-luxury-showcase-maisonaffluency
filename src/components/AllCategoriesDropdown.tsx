@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useCategoryMenuCounts } from "@/hooks/useRoomMenuCounts";
-import { CATALOGUE_DIRECTORY_COLUMNS, CATALOGUE_DIRECTORY_COUNT_ENTRIES } from "./catalogueDirectory";
+import { CATALOGUE_DIRECTORY_COLUMNS, CATALOGUE_DIRECTORY_COUNT_ENTRIES, catalogueDirectoryCountKey } from "./catalogueDirectory";
 
 interface Props {
   onCategoryLink: (category: string, subcategory?: string) => void;
@@ -25,9 +25,9 @@ export default function AllCategoriesDropdown({ onCategoryLink, onFullCatalogue 
                   </Button>
                   <ul className="space-y-1">
                     {group.links.map((link) => {
-                      const count = counts?.[`${link.category}:${link.subcategory}`];
+                      const count = counts?.[catalogueDirectoryCountKey(link)];
                       return (
-                        <li key={link.subcategory} className="min-w-0">
+                        <li key={link.label} className="min-w-0">
                           <Button variant="ghost" onClick={() => onCategoryLink(link.category, link.subcategory)} className="grid h-auto w-full grid-cols-[minmax(0,1fr)_auto] items-baseline gap-2 whitespace-normal rounded-none px-0 py-1 text-left font-body text-xs font-light leading-relaxed tracking-normal transition-opacity hover:bg-transparent hover:opacity-60 motion-reduce:transition-none">
                             <span className="min-w-0 text-balance">{link.label}</span>
                             {typeof count === "number" && <span className="shrink-0 text-[10px] tabular-nums opacity-60">{count}</span>}

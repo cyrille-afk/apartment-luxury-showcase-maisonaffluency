@@ -13,7 +13,7 @@
 
 # Gallery (Gallery.tsx / InteractiveGalleryLookbook.tsx)
 
-- All Categories renders the image-free AllCategoriesDropdown directory from the complete shared catalogue taxonomy with shared public counts; room imagery belongs only to room menus, so featured product lists cannot truncate the site index.
+- All Categories and individual product menus consume the same sorted NAVIGATION_DATA links, including navigation aliases/cross-department placements, with shared public counts keyed by each link's catalogue identity; directory columns control placement only and room imagery stays in room menus.
 
 - Mobile homepage and /gallery use `Gallery`; desktop uses `InteractiveGalleryLookbook`.
 - Derive desktop side picks from photo hotspot coordinates against the public catalog, with image fallback; never expose trade-only picks.

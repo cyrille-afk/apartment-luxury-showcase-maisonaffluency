@@ -4,7 +4,7 @@ import AllCategoriesDropdown from "@/components/AllCategoriesDropdown";
 import { CATALOGUE_DIRECTORY_COUNT_ENTRIES } from "@/components/catalogueDirectory";
 import { resolveProductMenuCards, selectProductMenuImages, type ProductMenuCard, type ProductMenuRotationState } from "@/components/productMenuImages";
 import { nextProductMenuImages, warmProductMenuImages } from "@/components/productMenuPreload";
-import { PRODUCT_NAV, sortProductMenuLinks, type ProductNavKey } from "@/components/productNavigation";
+import { PRODUCT_NAV, type ProductNavKey } from "@/components/productNavigation";
 import React, { useState, useEffect, useLayoutEffect, useRef, useMemo } from "react";
 import { Link, useNavigate, useLocation } from "@/lib/router-compat";
 import { Menu, X, Crown, Search, ChevronDown, ChevronRight, ChevronLeft, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Briefcase, BookOpen, Heart, Pin, User, LogIn, UserPlus, LogOut } from "lucide-react";
@@ -475,7 +475,7 @@ const Navigation = (_props: NavigationProps) => {
   const menuPools = useMemo(() => {
     const picks = (menuCatalogue ?? []).map((item) => item.pick);
     return Object.fromEntries(PRODUCT_NAV.map((menu) => [menu.key,
-      resolveProductMenuCards(menu.key === "tables" ? sortProductMenuLinks(menu.links) : menu.links, picks).filter((card) => card.images.length > 0),
+      resolveProductMenuCards(menu.links, picks).filter((card) => card.images.length > 0),
     ]));
   }, [menuCatalogue]);
   const { user, isTradeUser, rolesLoaded, signOut } = useAuth();
