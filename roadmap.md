@@ -1,5 +1,9 @@
 # Roadmap
 
+## Shared product navigation grids
+- [ ] Extract a reusable menu schema and compact sidebar-aligned image grid for Seating, Tables, Lighting, Rugs, Storage and Decor; preserve By Rooms and All Categories.
+- [ ] Resolve public catalogue image pools by subcategory, rotate per menu visit, retain lazy responsive loading and Seating analytics, and verify category navigation and sizing.
+
 ## Seating analytics
 - [x] Three registered events track actual opens (no already-open duplicates), sidebar clicks and featured-card hovers/clicks with subcategory/image index only. Browser regression confirms exact payloads, navigation and safe missing-runtime behavior; two rotation tests pass, 17 schemas validate and build OK. Published receipt awaits publication and real visitor interaction.
 
