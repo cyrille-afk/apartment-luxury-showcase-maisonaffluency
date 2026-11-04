@@ -144,7 +144,7 @@ body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-he
 @media (min-width: 768px) {
   .global-overlay-header > div > div.md\:flex { display: flex; }
 }
-.global-overlay-header [data-header-top-row] { position: relative; flex: none; padding-block: 20px 16px; }
+.global-overlay-header [data-header-top-row] { position: relative; flex: none; padding-block: 20px 6px; }
 .global-overlay-header [data-header-top-row] :is(button, a, span):not(.font-brand),
 .global-overlay-header .header-editorial-row :is(button, a, span),
 .global-overlay-header .header-collection-row > div > button,
@@ -178,7 +178,7 @@ body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-he
   gap: 48px;
   min-height: 0;
 }
-.header-editorial-row { padding-block: 7px 3px; }
+.header-editorial-row { padding-block: 3px 3px; }
 .header-collection-row { gap: 52px; padding-block: 3px 13px; }
 .global-overlay-header .header-editorial-row > button,
 .global-overlay-header .header-collection-row > div > button {
