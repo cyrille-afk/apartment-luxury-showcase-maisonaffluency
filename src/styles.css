@@ -203,7 +203,7 @@ body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-he
   box-shadow: 0 1px 0 var(--homepage-header-divider);
 }
 [data-site-header].global-overlay-header[data-homepage="true"] {
-  background-color: var(--homepage-header-glass);
+  background-color: transparent;
   backdrop-filter: blur(2px) saturate(105%);
   background-image: linear-gradient(to bottom, color-mix(in oklab, var(--homepage-header-paper) 42%, transparent), color-mix(in oklab, var(--homepage-header-paper) 20%, transparent) 55%, color-mix(in oklab, var(--homepage-header-paper) 0%, transparent));
 }
