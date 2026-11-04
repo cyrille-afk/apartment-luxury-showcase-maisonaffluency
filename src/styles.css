@@ -51,11 +51,11 @@ body[data-nav-dropdown-open] #root {
   color: var(--homepage-header-ink);
   backdrop-filter: none;
   transition: background-color 300ms ease, backdrop-filter 300ms ease;
-  --site-header-height: 204px;
+  --site-header-height: 190px;
   --header-current-ink: var(--homepage-header-ink);
 }
 .global-overlay-header [data-header-top-row] {
-  min-height: 88px;
+  min-height: 74px;
   border: 0;
 }
 .global-overlay-header [data-header-top-row] > div:last-child { gap: 22px; }
