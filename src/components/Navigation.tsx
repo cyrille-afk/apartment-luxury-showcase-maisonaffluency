@@ -564,6 +564,12 @@ const Navigation = (_props: NavigationProps) => {
       window.clearTimeout(tradeMenuCloseTimer.current);
       tradeMenuCloseTimer.current = null;
     }
+    // Isolate the trade dropdown from every other navigation list state so
+    // its card never stacks on top of an open mega menu or account menu.
+    setMegaMenuOpen(false);
+    setActiveRoomMenu(null);
+    setNewInOpen(false);
+    setAccountMenuOpen(false);
     setTradeMenuOpen(true);
   };
   const scheduleTradeMenuClose = () => {
@@ -876,6 +882,7 @@ const Navigation = (_props: NavigationProps) => {
     setActiveRoomMenu(room);
     setMegaMenuOpen(true);
     setNewInOpen(false);
+    setTradeMenuOpen(false);
   };
   const [newInOpen, setNewInOpen] = useState(false);
   const newInCloseTimer = useRef<number | null>(null);
@@ -883,6 +890,7 @@ const Navigation = (_props: NavigationProps) => {
     if (newInCloseTimer.current !== null) { window.clearTimeout(newInCloseTimer.current); newInCloseTimer.current = null; }
     setMegaMenuOpen(false);
     setActiveRoomMenu(null);
+    setTradeMenuOpen(false);
     setNewInOpen(true);
   };
   const scheduleNewInMenuClose = () => {
