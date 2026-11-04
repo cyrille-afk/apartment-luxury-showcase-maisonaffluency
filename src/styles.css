@@ -1263,7 +1263,7 @@ body[data-tour-step="procurement"] [data-tour-target="procurement"] {
 
 /* Extend scroll anchor offset to include safe-area inset on mobile. */
 @media (max-width: 767px) {
-  :root { --header-h: calc(10.5rem + env(safe-area-inset-top)); }
+  :root { --header-h: calc(6.5rem + env(safe-area-inset-top)); }
 }
 
 /* ─────────────────────────────────────────────
