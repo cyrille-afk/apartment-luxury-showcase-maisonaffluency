@@ -1060,7 +1060,8 @@ html.public-product-canvas,
 html.public-product-canvas body,
 html.public-product-canvas #root,
 html.public-product-canvas .product-configurator-canvas {
-  background-color: hsl(var(--product-canvas-dark));
+  /* Light canvas: a dark canvas showed as a black block behind the iOS toolbar. */
+  background-color: hsl(var(--background));
 }
 
 html.public-product-canvas .product-page-root,

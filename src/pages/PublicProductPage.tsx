@@ -2533,6 +2533,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                 // omit title on mobile
               })}
               variant="compact"
+              linkLast
             />
           </div>
 
