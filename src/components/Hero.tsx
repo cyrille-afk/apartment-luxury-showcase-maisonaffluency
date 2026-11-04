@@ -118,7 +118,7 @@ const Hero = () => {
           <img
             src={HERO_SAFARI_FALLBACK}
             alt="Luxury living room with Asian-inspired murals and designer furniture"
-            className="absolute inset-0 h-full w-full object-cover object-[50%_40%] md:object-[50%_0%]"
+            className="absolute inset-0 h-full w-full object-cover object-[50%_40%] md:top-[176px] md:h-[calc(100%-176px)]"
             loading="eager"
             decoding="async"
             fetchPriority="high"
