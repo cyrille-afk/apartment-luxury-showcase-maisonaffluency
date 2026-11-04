@@ -49,6 +49,19 @@ describe("stylesheet recovery", () => {
     vi.advanceTimersByTime(1);
     expect(document.getElementById("app-css-recovery")).not.toBeNull();
   });
+  it("does not mistake an inaccessible failed sheet for a successful download", () => {
+    const link = primary();
+    // A new element avoids overriding the non-configurable test sheet above.
+    link.remove();
+    const failed = document.createElement("link");
+    failed.id = "app-css";
+    Object.defineProperty(failed, "sheet", { value: { get cssRules() { throw new DOMException("Failed sheet", "SecurityError"); } } });
+    document.head.append(failed);
+    installAppStylesheetRecovery(document, "/backup.css");
+    vi.advanceTimersByTime(8000);
+    expect(document.getElementById("app-css-recovery")).not.toBeNull();
+    expect(document.documentElement.classList.contains("app-css")).toBe(false);
+  });
   it("does not loop or falsely reveal when the backup also fails", () => {
     const link = primary();
     installAppStylesheetRecovery(document, "/backup.css");

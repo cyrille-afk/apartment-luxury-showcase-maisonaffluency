@@ -2,7 +2,7 @@
 
 ## Stylesheet recovery
 - [x] Add a pre-hydration failure/stall guard and an independent revisioned backup stylesheet sourced from the existing design tokens, without reload loops or normal-load backup requests.
-- [x] Blocked primary CSS recovers on Home and Dining Room at 1946px and mobile at 390px; recovered Home→Search stays visible, normal loads request no backup asset, nine regressions pass and build OK.
+- [x] Blocked primary CSS recovers on Home and Dining Room at 1946px and mobile at 390px; recovered Home→Search stays visible, normal loads request no backup asset. Ten regressions pass and build OK. Mobile has the same overlapping header in normal and recovery states (pre-existing, outside this styling-delivery task).
 
 ## Navigation backdrop
 - [x] Share a full-viewport darkened blur beneath every active main dropdown, including New In, above floating page panels; clicking it dismisses all dropdown states and pending timers.
