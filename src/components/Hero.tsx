@@ -3,9 +3,10 @@ import { useNavigate } from "@/lib/router-compat";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { trackEvent, trackCTA } from "@/lib/analytics";
 import { setDarkIosChrome, clearDarkIosChrome } from "@/lib/iosChrome";
-// Appointment dialog (plus its Turnstile widget) is click-only: keep it out of
-// the homepage critical path.
 const PrivateTourDialog = lazy(() => import("@/components/PrivateTourDialog"));
+// Fullscreen room viewer — tiny, but only its markup ships in the hero chunk;
+// the full-resolution photo is fetched when the visitor opens it.
+import { HeroLightbox } from "@/components/HeroLightbox";
 
 const HERO_BASE = "https://res.cloudinary.com/dif1oamtj/image/upload";
 const HERO_ID = "v1781920000/AffluencySG_194-22.jpg_macpwj";
@@ -49,6 +50,7 @@ const heroPrimaryCtaClass =
 const Hero = () => {
   const navigate = useNavigate();
   const [tourOpen, setTourOpen] = useState(false);
+  const [viewerOpen, setViewerOpen] = useState(false);
   const [tourMounted, setTourMounted] = useState(false);
   useEffect(() => {
     if (tourOpen) setTourMounted(true);
