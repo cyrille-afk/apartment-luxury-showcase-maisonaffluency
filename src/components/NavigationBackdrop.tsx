@@ -11,7 +11,7 @@ export default function NavigationBackdrop({ onDismiss }: { onDismiss: () => voi
       data-navigation-backdrop
       aria-hidden="true"
       onClick={onDismiss}
-      className="navigation-backdrop fixed inset-0 pointer-events-auto backdrop-blur-md motion-safe:animate-fade-in"
+      className="navigation-backdrop fixed inset-0 pointer-events-auto backdrop-blur-md"
     />,
     document.body,
   );
