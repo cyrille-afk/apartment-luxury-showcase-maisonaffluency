@@ -18,9 +18,13 @@ export function DirectoryScrollCue({ hidden }: { hidden: boolean }) {
       if (!line || !dock || !hero) return;
       const dockRect = dock.getBoundingClientRect();
       const heroRect = hero.getBoundingClientRect();
-      const top = Math.max(dockRect.bottom + 12, window.innerHeight - 84);
+      const top = Math.max(dockRect.bottom + 12, window.innerHeight - 96);
+      // Length bridges the hero into the next section: from below the dock to
+      // 28px past the section boundary, clamped so short/tall heroes stay balanced.
+      const length = Math.min(Math.max(heroRect.bottom + 28 - top, 48), 140);
       line.style.top = `${top}px`;
       line.style.left = `${dockRect.left + dockRect.width / 2}px`;
+      line.style.height = `${length}px`;
       line.style.setProperty("--directory-line-boundary", `${heroRect.bottom - top}px`);
       line.dataset.visible = String(window.innerWidth >= 1024 && dockRect.width > 0 && heroRect.bottom > 0);
     };

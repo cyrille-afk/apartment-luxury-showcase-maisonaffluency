@@ -100,7 +100,7 @@ body[data-nav-dropdown-open] .directory-scroll-cue { visibility: hidden; }
   opacity: 0.9;
   mask-image: linear-gradient(to bottom, transparent 0%, transparent 35%, black 40%, black 55%, transparent 60%, transparent 100%);
   mask-size: 100% 240%;
-  animation: directory-line-travel 3.2s ease-in-out infinite;
+  animation: directory-line-travel 3.8s cubic-bezier(0.45, 0, 0.15, 1) infinite;
 }
 @keyframes directory-line-travel {
   from { mask-position: 0 100%; }
