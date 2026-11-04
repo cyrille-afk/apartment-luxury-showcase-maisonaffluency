@@ -1,5 +1,9 @@
 # Roadmap
 
+## Directory scroll line
+- [x] Restore the desktop line below the live search/caption dock with light frost unchanged and section-aware white-to-black ink.
+- [ ] Verify placement, scrolling colour transition, search/menu dismissal and reduced motion on desktop; check tablet/mobile remain unchanged.
+
 ## Current GitHub mobile check failures
 - [x] Read actual GitHub logs: six quote tests have a missing mock export, one dimensions test uses a retired comment, and phone navigation renders the desktop stack with undersized controls.
 - [x] Complete unit suite: 2,278 passed, nine existing skips. All 20 PWA/accessibility checks pass locally; phone screenshot confirms only the mobile header renders. Visibility checks exclude hidden/offscreen controls; minimum target size and performance budgets remain unchanged. Build OK.

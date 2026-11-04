@@ -1,4 +1,5 @@
 import { usePublishedMakerCount } from "@/hooks/usePublishedMakerCount";
+import { DirectoryScrollCue } from "@/components/DirectoryScrollCue";
 /**
  * Editorial hover hero for the public /designers directory.
  *
@@ -1990,8 +1991,8 @@ const DesignersHoverHero = () => {
         <div className="hidden md:block absolute inset-y-0 left-0 z-10 w-[38%] bg-gradient-to-r from-black via-black/90 to-transparent pointer-events-none" />
       </div>
 
-      {/* Luxury scroll indicator — tablet only. On lg+ it sits entirely behind
-          the Search Directory dock and would bleed through its frost. */}
+      <DirectoryScrollCue hidden={searchOpen} />
+      {/* Tablet cue remains hero-local; desktop follows the Search Directory dock. */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute bottom-2 left-1/2 z-40 hidden -translate-x-1/2 md:block lg:hidden"

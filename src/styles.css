@@ -11,6 +11,8 @@
   --header-dark-glass-gradient: linear-gradient(to bottom, rgba(38, 38, 38, 0.72), rgba(92, 92, 92, 0.62));
   --header-dark-ink: #ffffff;
   --directory-search-shield: rgba(255, 255, 255, 0.04);
+  --directory-line-light: #ffffff;
+  --directory-line-dark: #000000;
   --directory-bottom-preview: 1cm;
   --font-header-trade: "Times New Roman", Times, serif;
   --homepage-header-glass: color-mix(in oklab, var(--homepage-header-paper) 25%, transparent);
@@ -73,6 +75,39 @@ body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-he
   isolation: isolate;
   background-color: var(--directory-search-shield);
   backdrop-filter: blur(12px);
+}
+.directory-scroll-cue {
+  position: fixed;
+  width: 1px;
+  height: 80px;
+  z-index: 74;
+  pointer-events: none;
+  visibility: hidden;
+  --directory-line-boundary: 80px;
+}
+.directory-scroll-cue[data-visible="true"] { visibility: visible; }
+body[data-nav-dropdown-open] .directory-scroll-cue { visibility: hidden; }
+.directory-scroll-cue-track,
+.directory-scroll-cue-pulse {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom,
+    var(--directory-line-light) calc(var(--directory-line-boundary) - 6px),
+    var(--directory-line-dark) calc(var(--directory-line-boundary) + 6px));
+}
+.directory-scroll-cue-track { opacity: 0.25; }
+.directory-scroll-cue-pulse {
+  opacity: 0.9;
+  mask-image: linear-gradient(to bottom, transparent 0%, transparent 35%, black 40%, black 55%, transparent 60%, transparent 100%);
+  mask-size: 100% 240%;
+  animation: directory-line-travel 3.2s ease-in-out infinite;
+}
+@keyframes directory-line-travel {
+  from { mask-position: 0 100%; }
+  to { mask-position: 0 0%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .directory-scroll-cue-pulse { animation: none; mask-image: none; }
 }
 body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-hero > .absolute.inset-x-0 { height: 100%; }
 body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-hero > .absolute.pointer-events-none > .relative { padding-top: calc(var(--header-h) + 24px); }
