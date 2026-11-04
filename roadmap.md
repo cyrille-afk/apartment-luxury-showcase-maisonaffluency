@@ -1,5 +1,9 @@
 # Roadmap
 
+## Navigation warm-up
+- [ ] Load menu catalogue/counts and room scenes on header mount; memoize pools and render selected cards synchronously.
+- [ ] Preload featured responsive assets and verify menu switching, image rotation and stable heights.
+
 ## Complete catalogue menu rotation
 - [x] Removed curated overrides and the 12-photo cap; full public subcategory pools use header-owned shuffle bags, exhausted before reshuffling without immediate repeats. Direct public reads paginate instead of truncating.
 - [x] Nine tests pass, including 45-product coverage, deduplication, pool expansion and empty pools. Live 16 Sofa openings showed 16 unique photos; all six menus changed images at 1946px/1024px, kept 190px alignment and loaded photos. Collection navigation and Seating analytics (index 33) pass without runtime errors; build OK.
