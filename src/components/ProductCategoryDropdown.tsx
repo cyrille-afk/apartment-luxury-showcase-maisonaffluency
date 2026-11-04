@@ -15,7 +15,7 @@ export default function ProductCategoryDropdown({ menu, visit, onCategoryLink }:
   const isSeating = menu.key === "seating";
   const { data: catalogue = [] } = useDbCuratorPicks();
   const { data: counts } = useCategoryMenuCounts(menu.links.map((link) => ({ ...link, key: link.label })));
-  const cards = useMemo(() => resolveProductMenuCards(menu.links, catalogue.map((item) => item.pick), isSeating), [menu.links, catalogue, isSeating]);
+  const cards = useMemo(() => resolveProductMenuCards(menu.links, catalogue.map((item) => item.pick), isSeating).filter((card) => card.images.length > 0), [menu.links, catalogue, isSeating]);
   const trackImage = (label: string, interaction: "hover" | "click", index: number) => {
     if (isSeating) window.__lovableEvents?.track?.("project.seating_featured_image_interacted", { subcategory: label, interaction, image_index: index });
   };
