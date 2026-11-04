@@ -15,7 +15,7 @@
   --directory-line-dark: #000000;
   --directory-bottom-preview: 1cm;
   --font-header-trade: "Times New Roman", Times, serif;
-  --homepage-header-glass: color-mix(in oklab, var(--homepage-header-paper) 25%, transparent);
+  --homepage-header-glass: color-mix(in oklab, var(--homepage-header-paper) 12%, transparent);
   --homepage-header-divider: color-mix(in oklab, var(--homepage-header-ink) 5%, transparent);
   --navigation-backdrop-dim: rgb(0 0 0 / 20%);
   --navigation-backdrop-layer: 10020;
@@ -204,22 +204,30 @@ body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-he
 }
 [data-site-header].global-overlay-header[data-homepage="true"] {
   background-color: var(--homepage-header-glass);
-  backdrop-filter: blur(12px);
-  background-image: linear-gradient(to bottom, color-mix(in oklab, var(--homepage-header-paper) 55%, transparent), color-mix(in oklab, var(--homepage-header-paper) 30%, transparent));
+  backdrop-filter: blur(2px) saturate(105%);
+  background-image: linear-gradient(to bottom, color-mix(in oklab, var(--homepage-header-paper) 42%, transparent), color-mix(in oklab, var(--homepage-header-paper) 20%, transparent) 55%, color-mix(in oklab, var(--homepage-header-paper) 0%, transparent));
+}
+[data-site-header].global-overlay-header[data-homepage="true"]:focus-within,
+[data-site-header].global-overlay-header[data-homepage="true"][data-menu-active="true"] {
+  background-image: linear-gradient(to bottom, color-mix(in oklab, var(--homepage-header-paper) 62%, transparent), color-mix(in oklab, var(--homepage-header-paper) 34%, transparent) 70%, color-mix(in oklab, var(--homepage-header-paper) 0%, transparent));
+  backdrop-filter: blur(6px) saturate(110%);
+}
+@media (hover: hover) {
+  [data-site-header].global-overlay-header[data-homepage="true"]:hover {
+    background-image: linear-gradient(to bottom, color-mix(in oklab, var(--homepage-header-paper) 48%, transparent), color-mix(in oklab, var(--homepage-header-paper) 22%, transparent) 55%, color-mix(in oklab, var(--homepage-header-paper) 0%, transparent));
+    backdrop-filter: blur(3px) saturate(105%);
+  }
 }
 [data-site-header].global-overlay-header:focus-within,
 [data-site-header].global-overlay-header[data-menu-active="true"] { background-image: none; }
-@media (hover: hover) {
-  [data-site-header].global-overlay-header:hover { background-image: none; }
-}
-[data-site-header].global-overlay-header:focus-within,
-[data-site-header].global-overlay-header[data-menu-active="true"] {
+[data-site-header].global-overlay-header:focus-within:not([data-homepage="true"]),
+[data-site-header].global-overlay-header[data-menu-active="true"]:not([data-homepage="true"]) {
   --header-current-ink: var(--homepage-header-ink);
   background-color: var(--homepage-header-paper);
   backdrop-filter: none;
 }
 @media (hover: hover) {
-  [data-site-header].global-overlay-header:hover {
+  [data-site-header].global-overlay-header:hover:not([data-homepage="true"]) {
     --header-current-ink: var(--homepage-header-ink);
     background-color: var(--homepage-header-paper);
     backdrop-filter: none;
