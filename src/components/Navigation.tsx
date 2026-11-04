@@ -303,7 +303,7 @@ const SEATING_CARDS: { label: string; category: string; subcategory?: string; im
 ];
 
 const SeatingDropdownGrid = ({ onCategoryLink }: { onCategoryLink: (category: string, subcategory?: string) => void }) => (
-  <div className="flex flex-1 items-center gap-7 self-stretch px-10 py-8">
+  <div className="flex flex-1 items-center justify-center gap-6 self-stretch px-8 py-8">
     {SEATING_CARDS.map((card) => (
       <button
         key={card.label}
@@ -1609,7 +1609,7 @@ const Navigation = (_props: NavigationProps) => {
                   </Button>
 
                   {megaMenuOpen && activeRoomMenu === menu.key && (
-                    <div ref={megaMenuRef} data-room-menu={menu.key} className="absolute left-1/2 top-full z-50 mt-1 w-[min(56rem,calc(100vw-48px))] bg-background shadow-xl" style={{ translate: "-50% 0" }}>
+                    <div ref={megaMenuRef} data-room-menu={menu.key} className={cn("absolute left-1/2 top-full z-50 mt-1 bg-background shadow-xl", menu.key === "seating" ? "w-[min(74rem,calc(100vw-48px))]" : "w-[min(56rem,calc(100vw-48px))]")} style={{ translate: "-50% 0" }}>
                       <ProductDropdownPanel
                         menuKey={menu.key}
                         onCategoryLink={(category, subcategory) => navigateFromMegaMenu(category, subcategory ?? null)}
