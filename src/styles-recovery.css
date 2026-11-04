@@ -1,0 +1,5 @@
+/* Independent, revisioned recovery asset; the primary stylesheet owns all tokens. */
+@import "./styles.css";
+
+/* Keep this entry distinct from the primary asset without changing its theme. */
+html[data-stylesheet-recovery="loaded"] { --ma-stylesheet-recovered: 1; }

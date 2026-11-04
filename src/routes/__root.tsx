@@ -13,6 +13,7 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import recoveryCss from "../styles-recovery.css?url";
 import { reportLovableError } from "@/lib/lovable-error-reporting";
 import { bootClient } from "@/lib/clientBoot";
 import HmrStatusBanner from "@/components/dev/HmrStatusBanner";
@@ -21,6 +22,7 @@ import AppRecoveryBoundary from "@/components/AppRecoveryBoundary";
 import { PwaPendingAuthConsumer } from "@/components/PwaPendingAuthConsumer";
 import { mobileManifestHref } from "@/lib/pwaLaunchManifest";
 import { watchAppStylesheetReady } from "@/lib/appStylesheetReady";
+import { appStylesheetRecoveryScript, installAppStylesheetRecovery } from "@/lib/appStylesheetRecovery";
 import {
   AuthProvider,
   CheckoutFormProvider,
@@ -153,8 +155,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 // On the homepage the first screen is painted by the inline static hero, so
 // the site-wide stylesheet loads without blocking that paint; #root stays
 // hidden until it arrives. Every other page keeps a normal blocking stylesheet.
-const HOME_CSS_SWAP =
-  "(function(){var l=document.getElementById('app-css');if(!l)return;function d(){l.media='all';document.documentElement.classList.add('app-css')}if(l.sheet)d();else l.addEventListener('load',d)})();";
+const CSS_RECOVERY_SCRIPT = appStylesheetRecoveryScript(recoveryCss);
 
 function RootShell({ children }: { children: ReactNode }) {
   const isHome = useRouterState({ select: (s) => s.location.pathname === "/" });
@@ -174,7 +175,10 @@ function RootShell({ children }: { children: ReactNode }) {
     // Ends the "still loading" bar: from here every tap is handled.
     document.documentElement.classList.add("app-ready");
   }, []);
-  useEffect(() => watchAppStylesheetReady(document), [isHome, hydrated]);
+  useEffect(() => {
+    installAppStylesheetRecovery(document, recoveryCss);
+    return watchAppStylesheetReady(document);
+  }, [isHome, hydrated]);
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -189,6 +193,7 @@ function RootShell({ children }: { children: ReactNode }) {
           precedence="default"
           suppressHydrationWarning
         />
+        <script dangerouslySetInnerHTML={{ __html: CSS_RECOVERY_SCRIPT }} />
         {/* Slow connections can show the page long before taps work; a thin
             moving bar tells visitors it is still loading instead of frozen. */}
         <style>{"@keyframes ma-boot-bar{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}html:not(.app-ready) body::before{content:'';position:fixed;top:0;left:0;z-index:2147483647;width:40%;height:3px;background:var(--color-primary,currentColor);animation:ma-boot-bar 1.2s ease-in-out infinite;pointer-events:none}"}</style>
@@ -196,7 +201,6 @@ function RootShell({ children }: { children: ReactNode }) {
           <>
             {/* Once the page's own headline is visible, the quick-paint copy must go — never two headlines. */}
             <style>{"html.home-fouc:not(.app-css) #root{visibility:hidden}html.app-css #static-hero-copy{display:none!important}"}</style>
-            <script dangerouslySetInnerHTML={{ __html: HOME_CSS_SWAP }} />
             <noscript>
               <link rel="stylesheet" href={appCss} />
             </noscript>

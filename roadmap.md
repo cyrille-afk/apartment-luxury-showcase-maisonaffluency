@@ -1,5 +1,9 @@
 # Roadmap
 
+## Stylesheet recovery
+- [x] Add a pre-hydration failure/stall guard and an independent revisioned backup stylesheet sourced from the existing design tokens, without reload loops or normal-load backup requests.
+- [ ] Verify blocked stylesheet recovery on the homepage and Dining Room, including mobile and route transitions; run recovery regressions.
+
 ## Navigation backdrop
 - [x] Share a full-viewport darkened blur beneath every active main dropdown, including New In, above floating page panels; clicking it dismisses all dropdown states and pending timers.
 - [x] Verified all nine dropdowns on Home, Gallery and Designers at 1946/1024/1280px: exact full-viewport 12px blur/20% darkening, sharp clickable panels above the backdrop, outside-click dismissal, no page errors; ten navigation tests pass and build OK.
