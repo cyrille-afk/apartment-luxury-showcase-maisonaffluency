@@ -1,5 +1,9 @@
 # Roadmap
 
+## Navigation backdrop
+- [x] Share a full-viewport darkened blur beneath every active main dropdown, including New In, above floating page panels; clicking it dismisses all dropdown states and pending timers.
+- [ ] Verify all menu openings, background dismissal and gallery panel coverage in the browser.
+
 ## Shared category source
 - [x] Individual menus and All Categories share the exact sorted NAVIGATION_DATA arrays, including Bar Stools in Seating and Bedside Tables in Tables; complete seven-department coverage retained.
 - [x] Eighteen regressions pass; browser confirms all six product lists match the directory, aligned image frames, Bedside Tables count 10 and loaded destination, preserved Bar Stools routing, image-free directory at 1946px/1024px with no overflow or page errors. Build OK.

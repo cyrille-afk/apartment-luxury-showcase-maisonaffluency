@@ -14,6 +14,17 @@
   --font-header-trade: "Times New Roman", Times, serif;
   --homepage-header-glass: color-mix(in oklab, var(--homepage-header-paper) 25%, transparent);
   --homepage-header-divider: color-mix(in oklab, var(--homepage-header-ink) 5%, transparent);
+  --navigation-backdrop-dim: rgb(0 0 0 / 20%);
+  --navigation-backdrop-layer: 10020;
+  --navigation-active-layer: 10021;
+}
+
+.navigation-backdrop {
+  background-color: var(--navigation-backdrop-dim);
+  z-index: var(--navigation-backdrop-layer);
+}
+[data-site-header].global-overlay-header[data-menu-active="true"] {
+  z-index: var(--navigation-active-layer);
 }
 
 /* One route-independent editorial header; menus inherit the same surface. */
