@@ -237,11 +237,12 @@ const PRODUCT_NAV: { key: ProductNavKey; label: string; title: string; category:
     { label: "Decor", category: "Décor" },
   ] },
   { key: "seating", label: "Seating", title: "Seating", category: "Seating", defaultRoom: "living-room", links: [
-    { label: "Sofas", category: "Seating", subcategory: "Sofas" },
     { label: "Armchairs", category: "Seating", subcategory: "Armchairs" },
+    { label: "Bar Stools", category: "Seating", subcategory: "Ottomans & Stools" },
     { label: "Chairs", category: "Seating", subcategory: "Chairs" },
     { label: "Daybeds & Benches", category: "Seating", subcategory: "Daybeds & Benches" },
     { label: "Ottomans & Stools", category: "Seating", subcategory: "Ottomans & Stools" },
+    { label: "Sofas", category: "Seating", subcategory: "Sofas" },
   ] },
   { key: "tables", label: "Tables", title: "Tables", category: "Tables", defaultRoom: "dining-room", links: [
     { label: "Dining Tables", category: "Tables", subcategory: "Dining Tables" },
