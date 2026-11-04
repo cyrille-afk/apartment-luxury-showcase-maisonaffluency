@@ -605,6 +605,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
   );
   const suppressTopAsFinish = !topAxisIsDim && (
     topAxisHasSwatches
+    || (hasWoodSwatches && topOptions.length > 0 && topOptions.every((option) => /^(metal|stone|wood|glass) finish$/i.test(option.trim())))
     || isUpholsteryAxisLabel(topAxisLabelRaw)
     || (isProductUpholstered(product) && isFinishAxis(topAxisLabelRaw))
     || (hasWoodSwatches && isFinishAxis(topAxisLabelRaw))
