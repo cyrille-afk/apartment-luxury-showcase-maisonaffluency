@@ -1,5 +1,6 @@
 import { ROOM_PREVIEW_SCENES } from "@/lib/roomPreviewScenes";
-import { SEATING_CARDS, SEATING_IMAGE_SIZES, seatingCardImage, seatingCardSrcSet, seatingImagesForVisit } from "@/components/seatingMenuImages";
+import ProductCategoryDropdown from "@/components/ProductCategoryDropdown";
+import { PRODUCT_NAV, type ProductNavKey } from "@/components/productNavigation";
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "@/lib/router-compat";
 import { Menu, X, Crown, Search, ChevronDown, ChevronRight, ChevronLeft, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Briefcase, BookOpen, Heart, Pin, User, LogIn, UserPlus, LogOut } from "lucide-react";
@@ -223,60 +224,6 @@ const RoomVisualPreview = ({ room, selectedRoomSlug, onPieceNavigate, onRoomNavi
   );
 };
 
-// Row 3 product-type menus (The Future Perfect structure). Each opens the same
-// hybrid mega-panel: category links with counts + Shop By Room + room preview.
-type ProductNavKey = "rooms" | "furniture" | "seating" | "tables" | "lighting" | "rugs" | "storage" | "decor";
-interface ProductNavLink { label: string; category: string; subcategory?: string }
-const PRODUCT_NAV: { key: ProductNavKey; label: string; title: string; category: string; subcategory?: string; defaultRoom: string; links: ProductNavLink[] }[] = [
-  { key: "rooms", label: "By Rooms", title: "By Rooms", category: "Seating", defaultRoom: "living-room", links: [] },
-  { key: "furniture", label: "All Categories", title: "All Categories", category: "Seating", defaultRoom: "living-room", links: [
-    { label: "Seating", category: "Seating" },
-    { label: "Tables", category: "Tables" },
-    { label: "Lighting", category: "Lighting" },
-    { label: "Rugs", category: "Rugs" },
-    { label: "Storage", category: "Storage" },
-    { label: "Decor", category: "Décor" },
-  ] },
-  { key: "seating", label: "Seating", title: "Seating", category: "Seating", defaultRoom: "living-room", links: [
-    { label: "Armchairs", category: "Seating", subcategory: "Armchairs" },
-    { label: "Bar Stools", category: "Seating", subcategory: "Ottomans & Stools" },
-    { label: "Chairs", category: "Seating", subcategory: "Chairs" },
-    { label: "Daybeds & Benches", category: "Seating", subcategory: "Daybeds & Benches" },
-    { label: "Ottomans & Stools", category: "Seating", subcategory: "Ottomans & Stools" },
-    { label: "Sofas", category: "Seating", subcategory: "Sofas" },
-  ] },
-  { key: "tables", label: "Tables", title: "Tables", category: "Tables", defaultRoom: "dining-room", links: [
-    { label: "Dining Tables", category: "Tables", subcategory: "Dining Tables" },
-    { label: "Coffee Tables", category: "Tables", subcategory: "Coffee Tables" },
-    { label: "Side Tables", category: "Tables", subcategory: "Side Tables" },
-    { label: "Consoles", category: "Tables", subcategory: "Consoles" },
-    { label: "Desks", category: "Tables", subcategory: "Desks" },
-  ] },
-  { key: "lighting", label: "Lighting", title: "Lighting", category: "Lighting", defaultRoom: "dining-room", links: [
-    { label: "Ceiling Lights", category: "Lighting", subcategory: "Ceiling Lights" },
-    { label: "Wall Lights", category: "Lighting", subcategory: "Wall Lights" },
-    { label: "Table Lights", category: "Lighting", subcategory: "Table Lights" },
-    { label: "Floor Lights", category: "Lighting", subcategory: "Floor Lights" },
-  ] },
-  { key: "rugs", label: "Rugs", title: "Rugs", category: "Rugs", defaultRoom: "living-room", links: [
-    { label: "Hand-Knotted Rugs", category: "Rugs", subcategory: "Hand-Knotted Rugs" },
-    { label: "Hand-Tufted Rugs", category: "Rugs", subcategory: "Hand-Tufted Rugs" },
-    { label: "Hand-Woven Rugs", category: "Rugs", subcategory: "Hand-Woven Rugs" },
-  ] },
-  { key: "storage", label: "Storage", title: "Storage", category: "Storage", defaultRoom: "dining-room", links: [
-    { label: "Bookcases", category: "Storage", subcategory: "Bookcases" },
-    { label: "Bars", category: "Storage", subcategory: "Bars" },
-    { label: "Cabinets & Sideboards", category: "Storage", subcategory: "Buffets, Cabinets And Sideboards" },
-  ] },
-  { key: "decor", label: "Decor", title: "Decor", category: "Décor", defaultRoom: "living-room", links: [
-    { label: "Mirrors", category: "Décor", subcategory: "Mirrors" },
-    { label: "Decorative Objects", category: "Décor", subcategory: "Decorative Objects" },
-    { label: "Vases & Vessels", category: "Décor", subcategory: "Vases & Vessels" },
-    { label: "Wall Décor", category: "Décor", subcategory: "Wall Décor" },
-    { label: "Cushions & Throws", category: "Décor", subcategory: "Cushions & Throws" },
-    { label: "Candle Holders", category: "Décor", subcategory: "Candle Holders" },
-  ] },
-];
 const NEW_IN_LINKS = [
   { label: "Seating", category: "Seating" },
   { label: "Tables", category: "Tables" },
@@ -292,56 +239,9 @@ const SHOP_BY_ROOM_LINKS = [
   { label: "Office", slug: "office", nav: "office" as RoomNavKey },
 ];
 
-const SeatingDropdownGrid = ({ onCategoryLink, visit }: { onCategoryLink: (category: string, subcategory?: string) => void; visit: number }) => (
-  <div data-seating-grid className="relative min-h-0 min-w-0">
-    <div className="absolute inset-0 grid grid-cols-6 gap-4">
-    {SEATING_CARDS.map((card, index) => (
-      <Button
-        key={card.label}
-        type="button"
-        variant="ghost"
-        onMouseEnter={() => {
-          window.__lovableEvents?.track?.("project.seating_featured_image_interacted", {
-            subcategory: card.label,
-            interaction: "hover",
-            image_index: Math.max(0, visit) % card.images.length,
-          });
-        }}
-        onClick={() => {
-          window.__lovableEvents?.track?.("project.seating_featured_image_interacted", {
-            subcategory: card.label,
-            interaction: "click",
-            image_index: Math.max(0, visit) % card.images.length,
-          });
-          onCategoryLink(card.category, card.subcategory);
-        }}
-        className="group flex h-full min-h-0 min-w-0 flex-col items-stretch justify-start gap-0 rounded-none p-0 hover:bg-transparent focus-visible:outline-hidden"
-      >
-        <span className="block min-h-0 w-full flex-1 overflow-hidden bg-accent/30">
-          <img
-            src={seatingCardImage(seatingImagesForVisit(visit)[index] ?? "")}
-            srcSet={seatingCardSrcSet(seatingImagesForVisit(visit)[index] ?? "")}
-            sizes={SEATING_IMAGE_SIZES}
-            loading="lazy"
-            decoding="async"
-            width={320}
-            height={400}
-            alt={card.label}
-            className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
-          />
-        </span>
-        <span className="flex h-10 shrink-0 items-center justify-center whitespace-normal text-center font-body text-xs font-normal tracking-normal text-muted-foreground transition-colors duration-300 group-hover:text-foreground">
-          {card.label}
-        </span>
-      </Button>
-    ))}
-    </div>
-  </div>
-);
-
-const ProductDropdownPanel = ({ menuKey, seatingVisit, onCategoryLink, onRoomNavigate, onFullCatalogue, onPieceNavigate }: {
+const ProductDropdownPanel = ({ menuKey, menuVisit, onCategoryLink, onRoomNavigate, onFullCatalogue, onPieceNavigate }: {
   menuKey: ProductNavKey;
-  seatingVisit: number;
+  menuVisit: number;
   onCategoryLink: (category: string, subcategory?: string) => void;
   onRoomNavigate: (slug: string) => void;
   onFullCatalogue: () => void;
@@ -349,36 +249,13 @@ const ProductDropdownPanel = ({ menuKey, seatingVisit, onCategoryLink, onRoomNav
 }) => {
   const menu = PRODUCT_NAV.find((m) => m.key === menuKey) ?? PRODUCT_NAV[0];
   const showShopByRoom = menuKey === "rooms";
-  const isSeating = menuKey === "seating";
+  const isProductGrid = menuKey !== "rooms" && menuKey !== "furniture";
   const [previewRoom, setPreviewRoom] = useState(menu.defaultRoom);
   const { data: rawCatalogCount } = useMasterCatalogRawCount();
   const { data: counts } = useCategoryMenuCounts(menu.links.map((l) => ({ key: l.label, category: l.category, subcategory: l.subcategory ?? null })));
   const previewNav = SHOP_BY_ROOM_LINKS.find((r) => r.slug === previewRoom)?.nav ?? "living";
-  if (isSeating) {
-    return (
-      <div data-header-panel className="relative grid grid-cols-[11rem_minmax(0,1fr)] gap-6 overflow-visible border-t border-border/50 bg-background p-7 shadow-xl">
-        <div data-seating-sidebar className="border-r border-border/60 pr-4">
-          <div className="mb-5 font-body text-xs font-semibold uppercase tracking-widest text-foreground">Seating</div>
-          <div className="flex flex-col gap-0.5">
-            {menu.links.map((link) => (
-              <Button
-                key={link.label}
-                type="button"
-                variant="ghost"
-                onClick={() => {
-                  window.__lovableEvents?.track?.("project.seating_subcategory_clicked", { subcategory: link.label });
-                  onCategoryLink(link.category, link.subcategory);
-                }}
-                className="h-auto justify-start whitespace-normal rounded-none px-0 py-1 text-left font-body text-xs font-normal tracking-normal text-muted-foreground transition-colors duration-200 hover:bg-transparent hover:text-foreground focus-visible:outline-hidden"
-              >
-                {link.label}
-              </Button>
-            ))}
-          </div>
-        </div>
-        <SeatingDropdownGrid onCategoryLink={onCategoryLink} visit={seatingVisit} />
-      </div>
-    );
+  if (isProductGrid) {
+    return <ProductCategoryDropdown menu={menu} visit={menuVisit} onCategoryLink={onCategoryLink} />;
   }
   return (
     <div data-header-panel className="relative flex min-h-[470px] items-start overflow-visible bg-[hsl(var(--collection-card-canvas))]">
@@ -660,7 +537,7 @@ const Navigation = (_props: NavigationProps) => {
   }, []);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
-  const [seatingVisit, setSeatingVisit] = useState(0);
+  const [menuVisits, setMenuVisits] = useState<Partial<Record<ProductNavKey, number>>>({});
   const [contactExpanded, setContactExpanded] = useState(false);
   const [tradeMenuOpen, setTradeMenuOpen] = useState(false);
   // Delayed close so a stray cursor movement doesn't instantly kill the TRADE dropdown
@@ -974,7 +851,9 @@ const Navigation = (_props: NavigationProps) => {
     if (room === "seating" && (activeRoomMenu !== room || !megaMenuOpen)) {
       window.__lovableEvents?.track?.("project.seating_dropdown_opened", {});
     }
-    if (room === "seating") setSeatingVisit((visit) => visit + 1);
+    if (PRODUCT_NAV.some((menu) => menu.key === room) && (activeRoomMenu !== room || !megaMenuOpen)) {
+      setMenuVisits((visits) => ({ ...visits, [room]: (visits[room as ProductNavKey] ?? 0) + 1 }));
+    }
     if (roomMenuCloseTimer.current !== null) window.clearTimeout(roomMenuCloseTimer.current);
     if (activeRoomMenu !== room || !megaMenuOpen) setActiveRoomCategory(null);
     setActiveRoomMenu(room);
@@ -1631,10 +1510,10 @@ const Navigation = (_props: NavigationProps) => {
                   </Button>
 
                   {megaMenuOpen && activeRoomMenu === menu.key && (
-                    <div ref={megaMenuRef} data-room-menu={menu.key} className={cn("absolute left-1/2 top-full z-50 mt-1 bg-background shadow-xl", menu.key === "seating" ? "w-[min(74rem,calc(100vw-48px))]" : "w-[min(56rem,calc(100vw-48px))]")} style={{ translate: "-50% 0" }}>
+                    <div ref={megaMenuRef} data-room-menu={menu.key} className={cn("absolute left-1/2 top-full z-50 mt-1 bg-background shadow-xl", menu.key !== "rooms" && menu.key !== "furniture" ? "w-[min(74rem,calc(100vw-48px))]" : "w-[min(56rem,calc(100vw-48px))]")} style={{ translate: "-50% 0" }}>
                       <ProductDropdownPanel
                         menuKey={menu.key}
-                        seatingVisit={seatingVisit}
+                        menuVisit={menuVisits[menu.key] ?? 0}
                         onCategoryLink={(category, subcategory) => navigateFromMegaMenu(category, subcategory ?? null)}
                         onRoomNavigate={navigateToRoom}
                         onFullCatalogue={() => { setMegaMenuOpen(false); setActiveRoomMenu(null); navigate("/search?view=grid"); }}
