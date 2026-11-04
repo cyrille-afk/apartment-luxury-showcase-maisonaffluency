@@ -37,6 +37,16 @@ export default defineConfig({
     optimizeDeps: {
       include: ["@tanstack/router-core", "@tanstack/router-core/isServer", "@tanstack/router-core/ssr/client", "seroval"],
     },
-    build: { chunkSizeWarningLimit: 1500 },
+    build: {
+      chunkSizeWarningLimit: 1500,
+      // Old and new page versions can never reference the same asset address.
+      rollupOptions: {
+        output: {
+          entryFileNames: `assets/releases/${buildId}/[name]-[hash].js`,
+          chunkFileNames: `assets/releases/${buildId}/[name]-[hash].js`,
+          assetFileNames: `assets/releases/${buildId}/[name]-[hash][extname]`,
+        },
+      },
+    },
   },
 });

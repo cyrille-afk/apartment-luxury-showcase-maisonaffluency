@@ -3,6 +3,7 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import { legacyRedirectTarget } from "./lib/legacyRedirects";
+import { pairHtmlResponse } from "./lib/deploymentPairing";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -55,13 +56,13 @@ export default {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      return pairHtmlResponse(await normalizeCatastrophicSsrResponse(response), String(import.meta.env["VITE_APP_BUILD_ID"] ?? "dev"));
     } catch (error) {
       console.error(error);
-      return new Response(renderErrorPage(), {
+      return pairHtmlResponse(new Response(renderErrorPage(), {
         status: 500,
         headers: { "content-type": "text/html; charset=utf-8" },
-      });
+      }), String(import.meta.env["VITE_APP_BUILD_ID"] ?? "dev"));
     }
   },
 };
