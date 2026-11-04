@@ -256,11 +256,11 @@ body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-he
   .header-utility-label { display: none; }
 }
 @media (max-width: 767px) {
-  .global-overlay-header { --site-header-height: 184px; }
+  .global-overlay-header { --site-header-height: 6.5rem; }
   .global-overlay-header [aria-label="Toggle menu"] { color: var(--header-current-ink); background: transparent; }
   .global-overlay-header .md\:hidden button, .global-overlay-header .md\:hidden svg { color: var(--header-current-ink); }
   .global-overlay-header .brand-lockup { display: none; }
-  .global-overlay-header > div > .header-editorial-row { display: flex; }
+  .global-overlay-header > div > .header-editorial-row, .global-overlay-header .header-mobile-collections { display: none !important; }
   .global-overlay-header [data-header-editorial-row] { gap: 28px; min-height: 40px; }
   .header-mobile-collections {
     display: flex;
@@ -1226,7 +1226,7 @@ body[data-tour-step="procurement"] [data-tour-target="procurement"] {
    clears the fixed header during scroll.
    ───────────────────────────────────────────── */
 :root {
-  --header-h: 10.5rem; /* mobile three-row header */
+  --header-h: 6.5rem; /* mobile: single brand row (desktop rows never apply) */
   --mobile-nav-height: calc(5rem + env(safe-area-inset-top, 0px));
 }
 @media (min-width: 390px) and (max-width: 767px) {
