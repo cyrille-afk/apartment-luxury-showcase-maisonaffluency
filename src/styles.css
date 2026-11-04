@@ -23,7 +23,8 @@
   --header-current-ink: var(--homepage-header-ink);
 }
 .global-overlay-header [data-catalogue-directory] :is(button, span) {
-  color: inherit;
+  color: var(--homepage-header-ink);
+  font-family: var(--font-body) !important;
 }
 [data-site-header].global-overlay-header {
   position: absolute;
