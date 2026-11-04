@@ -1,21 +1,26 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useDbCuratorPicks } from "@/hooks/useDbCuratorPicks";
 import { useCategoryMenuCounts } from "@/hooks/useRoomMenuCounts";
-import { productMenuImageIndex, productMenuImageSizes, resolveProductMenuCards, type ProductMenuLink } from "./productMenuImages";
+import { selectProductMenuImages, productMenuImageSizes, resolveProductMenuCards, type ProductMenuLink, type ProductMenuRotationState } from "./productMenuImages";
 import { seatingCardImage, seatingCardSrcSet } from "./seatingMenuImages";
 
 interface Props {
   menu: { key: string; title: string; links: ProductMenuLink[] };
   visit: number;
+  rotationState: ProductMenuRotationState;
   onCategoryLink: (category: string, subcategory?: string) => void;
 }
 
-export default function ProductCategoryDropdown({ menu, visit, onCategoryLink }: Props) {
+export default function ProductCategoryDropdown({ menu, visit, rotationState, onCategoryLink }: Props) {
   const isSeating = menu.key === "seating";
   const { data: catalogue = [] } = useDbCuratorPicks();
   const { data: counts } = useCategoryMenuCounts(menu.links.map((link) => ({ ...link, key: link.label })));
-  const cards = useMemo(() => resolveProductMenuCards(menu.links, catalogue.map((item) => item.pick), isSeating).filter((card) => card.images.length > 0), [menu.links, catalogue, isSeating]);
+  const pools = useMemo(() => resolveProductMenuCards(menu.links, catalogue.map((item) => item.pick)).filter((card) => card.images.length > 0), [menu.links, catalogue]);
+  const [cards, setCards] = useState<ReturnType<typeof selectProductMenuImages>>([]);
+  useEffect(() => {
+    setCards(selectProductMenuImages(pools, visit, rotationState));
+  }, [pools, visit, rotationState]);
   const trackImage = (label: string, interaction: "hover" | "click", index: number) => {
     if (isSeating) window.__lovableEvents?.track?.("project.seating_featured_image_interacted", { subcategory: label, interaction, image_index: index });
   };
@@ -40,8 +45,7 @@ export default function ProductCategoryDropdown({ menu, visit, onCategoryLink }:
       <div data-product-menu-grid data-seating-grid={isSeating ? "" : undefined} className="relative min-h-0 min-w-0">
         <div className="absolute inset-0 grid auto-cols-fr grid-flow-col gap-4">
           {cards.map((card) => {
-            const index = productMenuImageIndex(visit, card.images);
-            const image = card.images[index];
+            const { index, image } = card;
             return (
               <Button key={card.label} type="button" variant="ghost"
                 onMouseEnter={() => trackImage(card.label, "hover", index)}

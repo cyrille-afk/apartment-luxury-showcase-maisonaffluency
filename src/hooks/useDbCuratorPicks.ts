@@ -46,15 +46,21 @@ export function useDbCuratorPicks(options: { enabled?: boolean } = {}) {
           .eq("trade_only", false);
         designers = (designerRows || []) as any[];
 
-        // Fetch all picks via public view
-        const { data } = await applyCuratorPickOrder(
-          supabase
-            .from("designer_curator_picks_public" as any)
-            // Slim listing fetch: no description / gallery_images / size_variants /
-            // variant_* — those are lazily fetched on card open (lightbox / product page).
-            .select("id, slug, title, subtitle, image_url, hover_image_url, materials, dimensions, lead_time, origin, category, subcategory, tags, photo_credit, edition, pdf_url, pdf_filename, pdf_urls, designer_id, sort_order, created_at")
-        );
-        picksRaw = data as any[] | null;
+        // Page through the public view so its response-size limit never truncates
+        // category pools. Keep the existing price-free listing projection/order.
+        picksRaw = [];
+        const pageSize = 500;
+        for (let offset = 0; ; offset += pageSize) {
+          const { data, error } = await applyCuratorPickOrder(
+            supabase
+              .from("designer_curator_picks_public" as any)
+              .select("id, slug, title, subtitle, image_url, hover_image_url, materials, dimensions, lead_time, origin, category, subcategory, tags, photo_credit, edition, pdf_url, pdf_filename, pdf_urls, designer_id, sort_order, created_at")
+          ).range(offset, offset + pageSize - 1);
+          if (error) throw error;
+          const page = (data ?? []) as any[];
+          picksRaw.push(...page);
+          if (page.length < pageSize) break;
+        }
       }
 
       if (!designers?.length) return [];
