@@ -1,5 +1,9 @@
 # Roadmap
 
+## Seating dropdown refinement
+- [ ] Match the image grid to the subcategory list height and remove oversized vertical space.
+- [ ] Rotate verified curated furniture alternatives each time Seating opens or its trigger is hovered; verify imagery and collection navigation.
+
 ## Directory viewport and search shield
 - [x] Restored a 37.8px desktop bottom preview at 1946×1181 and 1280×1800; search/caption share a dark shield and the cue stays below it. Live Amelie search returns one result and Escape dismisses; mobile remains full-height, 20 directory tests pass and build OK.
 
