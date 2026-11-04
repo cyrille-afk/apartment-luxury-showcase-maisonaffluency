@@ -47,7 +47,7 @@ const Journal = () => {
         })}</script>
       </Helmet>
 
-      <div className="min-h-screen overflow-y-auto bg-background pt-[calc(96px+env(safe-area-inset-top))] md:pt-[calc(120px+env(safe-area-inset-top))]">
+      <div className="min-h-screen overflow-y-auto bg-background pt-[var(--header-h)]">
         <Navigation />
         <FeaturedReadBanner />
 
