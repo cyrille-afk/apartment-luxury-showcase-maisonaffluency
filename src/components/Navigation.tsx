@@ -6,7 +6,7 @@ import { CATALOGUE_DIRECTORY_COUNT_ENTRIES } from "@/components/catalogueDirecto
 import { resolveProductMenuCards, selectProductMenuImages, type ProductMenuCard, type ProductMenuRotationState } from "@/components/productMenuImages";
 import { nextProductMenuImages, warmProductMenuImages } from "@/components/productMenuPreload";
 import { PRODUCT_NAV, type ProductNavKey } from "@/components/productNavigation";
-import React, { useState, useEffect, useLayoutEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback } from "react";
 import { Link, useNavigate, useLocation } from "@/lib/router-compat";
 import { Menu, X, Crown, Search, ChevronDown, ChevronRight, ChevronLeft, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Briefcase, BookOpen, Heart, Pin, User, LogIn, UserPlus, LogOut } from "lucide-react";
 import TradeServicesRequestModal from "@/components/trade/TradeServicesRequestModal";
@@ -467,14 +467,41 @@ interface NavigationProps {
 }
 
 const Navigation = (_props: NavigationProps) => {
+  // Menu catalogue warm-up is deferred: it starts on the first header
+  // interaction, or once the browser is idle after load on desktop widths.
+  // Running it during startup blocked the homepage main thread (mobile TBT).
+  const [menuWarm, setMenuWarm] = useState(false);
+  const warmMenus = useCallback(() => setMenuWarm(true), []);
   useEffect(() => {
-    preloadRoomMenuPhotos();
-  }, []);
-  const { data: menuCatalogue } = useDbCuratorPicks();
-  useMasterCatalogRawCount();
-  useCategoryMenuCounts([...CATALOGUE_DIRECTORY_COUNT_ENTRIES, ...PRODUCT_NAV.flatMap((menu) => menu.links.map((link) => ({ ...link, key: `${menu.key}:${link.label}` })))]);
+    if (menuWarm) return;
+    if (!window.matchMedia("(min-width: 768px)").matches) return;
+    let idleId: number | null = null;
+    let timerId: number | null = null;
+    const schedule = () => {
+      const ric = (window as any).requestIdleCallback as ((cb: () => void, opts?: { timeout: number }) => number) | undefined;
+      timerId = window.setTimeout(() => {
+        if (ric) idleId = ric(() => setMenuWarm(true), { timeout: 4000 });
+        else setMenuWarm(true);
+      }, 2500);
+    };
+    if (document.readyState === "complete") schedule();
+    else window.addEventListener("load", schedule, { once: true });
+    return () => {
+      window.removeEventListener("load", schedule);
+      if (timerId !== null) window.clearTimeout(timerId);
+      if (idleId !== null) (window as any).cancelIdleCallback?.(idleId);
+    };
+  }, [menuWarm]);
+  useEffect(() => {
+    if (menuWarm) preloadRoomMenuPhotos();
+  }, [menuWarm]);
+  const { data: menuCatalogueData } = useDbCuratorPicks({ enabled: menuWarm });
+  const menuCatalogue = menuWarm ? menuCatalogueData : undefined;
+  useMasterCatalogRawCount({ enabled: menuWarm });
+  useCategoryMenuCounts([...CATALOGUE_DIRECTORY_COUNT_ENTRIES, ...PRODUCT_NAV.flatMap((menu) => menu.links.map((link) => ({ ...link, key: `${menu.key}:${link.label}` })))], { enabled: menuWarm });
   const menuPools = useMemo(() => {
-    const picks = (menuCatalogue ?? []).map((item) => item.pick);
+    if (!menuCatalogue) return {} as Record<string, ReturnType<typeof resolveProductMenuCards>>;
+    const picks = menuCatalogue.map((item) => item.pick);
     return Object.fromEntries(PRODUCT_NAV.map((menu) => [menu.key,
       resolveProductMenuCards(menu.links, picks).filter((card) => card.images.length > 0),
     ]));
@@ -954,7 +981,7 @@ const Navigation = (_props: NavigationProps) => {
     {anyDropdownOpen && (
       <NavigationBackdrop onDismiss={closeAllDropdowns} />
     )}
-    <nav data-site-header data-global-overlay="true" data-header-surface={_props.surface} data-homepage={location.pathname === "/" ? "true" : "false"} data-designers-page={location.pathname === "/designers" ? "true" : undefined} data-menu-active={anyDropdownOpen ? "true" : undefined} className="global-overlay-header absolute inset-x-0 top-0 z-50 pt-[env(safe-area-inset-top)]">
+    <nav data-site-header data-global-overlay="true" data-header-surface={_props.surface} data-homepage={location.pathname === "/" ? "true" : "false"} data-designers-page={location.pathname === "/designers" ? "true" : undefined} data-menu-active={anyDropdownOpen ? "true" : undefined} onPointerEnter={warmMenus} onFocusCapture={warmMenus} onTouchStartCapture={warmMenus} className="global-overlay-header absolute inset-x-0 top-0 z-50 pt-[env(safe-area-inset-top)]">
 
       <div className="mx-auto w-full max-w-[1500px] px-6">
         {/* Mobile: single row */}

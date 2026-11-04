@@ -160,6 +160,10 @@
     "name": "Noé Duchaufour-Lawrance"
   },
   {
+    "slug": "haddou-dufourcq",
+    "name": "Haddou & Dufourcq"
+  },
+  {
     "slug": "overgaard-dyrman",
     "name": "Overgaard & Dyrman"
   },
@@ -226,10 +230,6 @@
   {
     "slug": "didier-gomez",
     "name": "Didier Gomez"
-  },
-  {
-    "slug": "eileen-gray",
-    "name": "Eileen Gray"
   },
   {
     "slug": "anthony-guerree",
