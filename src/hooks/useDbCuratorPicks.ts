@@ -218,8 +218,9 @@ export function useMasterCatalogCount() {
  * security-definer RPC because RLS limits the client head-count to published
  * rows — see useMasterCatalogCount for the browseable figure.
  */
-export function useMasterCatalogRawCount() {
+export function useMasterCatalogRawCount(options: { enabled?: boolean } = {}) {
   return useQuery({
+    enabled: options.enabled ?? true,
     queryKey: ["master-catalog-raw-count"] as const,
     staleTime: 30 * 60_000,
     gcTime: 60 * 60_000,

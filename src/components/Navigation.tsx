@@ -467,14 +467,41 @@ interface NavigationProps {
 }
 
 const Navigation = (_props: NavigationProps) => {
+  // Menu catalogue warm-up is deferred: it starts on the first header
+  // interaction, or once the browser is idle after load on desktop widths.
+  // Running it during startup blocked the homepage main thread (mobile TBT).
+  const [menuWarm, setMenuWarm] = useState(false);
+  const warmMenus = useCallback(() => setMenuWarm(true), []);
   useEffect(() => {
-    preloadRoomMenuPhotos();
-  }, []);
-  const { data: menuCatalogue } = useDbCuratorPicks();
-  useMasterCatalogRawCount();
-  useCategoryMenuCounts([...CATALOGUE_DIRECTORY_COUNT_ENTRIES, ...PRODUCT_NAV.flatMap((menu) => menu.links.map((link) => ({ ...link, key: `${menu.key}:${link.label}` })))]);
+    if (menuWarm) return;
+    if (!window.matchMedia("(min-width: 768px)").matches) return;
+    let idleId: number | null = null;
+    let timerId: number | null = null;
+    const schedule = () => {
+      const ric = (window as any).requestIdleCallback as ((cb: () => void, opts?: { timeout: number }) => number) | undefined;
+      timerId = window.setTimeout(() => {
+        if (ric) idleId = ric(() => setMenuWarm(true), { timeout: 4000 });
+        else setMenuWarm(true);
+      }, 2500);
+    };
+    if (document.readyState === "complete") schedule();
+    else window.addEventListener("load", schedule, { once: true });
+    return () => {
+      window.removeEventListener("load", schedule);
+      if (timerId !== null) window.clearTimeout(timerId);
+      if (idleId !== null) (window as any).cancelIdleCallback?.(idleId);
+    };
+  }, [menuWarm]);
+  useEffect(() => {
+    if (menuWarm) preloadRoomMenuPhotos();
+  }, [menuWarm]);
+  const { data: menuCatalogueData } = useDbCuratorPicks({ enabled: menuWarm });
+  const menuCatalogue = menuWarm ? menuCatalogueData : undefined;
+  useMasterCatalogRawCount({ enabled: menuWarm });
+  useCategoryMenuCounts([...CATALOGUE_DIRECTORY_COUNT_ENTRIES, ...PRODUCT_NAV.flatMap((menu) => menu.links.map((link) => ({ ...link, key: `${menu.key}:${link.label}` })))], { enabled: menuWarm });
   const menuPools = useMemo(() => {
-    const picks = (menuCatalogue ?? []).map((item) => item.pick);
+    if (!menuCatalogue) return {} as Record<string, ReturnType<typeof resolveProductMenuCards>>;
+    const picks = menuCatalogue.map((item) => item.pick);
     return Object.fromEntries(PRODUCT_NAV.map((menu) => [menu.key,
       resolveProductMenuCards(menu.links, picks).filter((card) => card.images.length > 0),
     ]));

@@ -67,22 +67,24 @@ export function useRoomMenuCounts(room: RoomSlug | null, categories: { category:
  * Catalogue-wide counts for the product-type mega-menu (Furniture, Lighting,
  * Mirrors…). Each entry matches via the same grid helper as category pages.
  */
-export function useCategoryMenuCounts(entries: { key: string; category: string; subcategory?: string | null }[]) {
+export function useCategoryMenuCounts(entries: { key: string; category: string; subcategory?: string | null }[], options: { enabled?: boolean } = {}) {
   const signature = entries.map((e) => `${e.key}:${e.category}:${e.subcategory ?? ""}`).join("|");
+  const enabled = options.enabled ?? true;
   const query = useQuery({
     queryKey: ["navigation-catalog-pool"] as const,
     staleTime: 30 * 60_000,
     gcTime: 60 * 60_000,
     queryFn: loadCatalogPool,
+    enabled,
   });
   const data = useMemo(() => {
-      if (!query.data) return undefined;
+      if (!enabled || !query.data) return undefined;
       const pool = query.data;
       const out: Record<string, number> = {};
       for (const e of entries) {
         out[e.key] = pool.filter((pick) => pickMatchesFilter(pick, e.category, e.subcategory ?? null)).length;
       }
       return out;
-  }, [query.data, signature]);
+  }, [query.data, signature, enabled]);
   return { ...query, data };
 }
