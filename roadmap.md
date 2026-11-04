@@ -2,7 +2,7 @@
 
 ## Directory scroll line
 - [x] Restore the desktop line below the live search/caption dock with light frost unchanged and section-aware white-to-black ink.
-- [ ] Verify placement, scrolling colour transition, search/menu dismissal and reduced motion on desktop; check tablet/mobile remain unchanged.
+- [x] Live desktop checks confirm a 12px dock clearance, white-to-black transition at the section edge during scrolling, search/menu suppression and reduced-motion handling; 1024/768/390px visibility checked, twelve directory regressions pass, no page errors and build OK.
 
 ## Current GitHub mobile check failures
 - [x] Read actual GitHub logs: six quote tests have a missing mock export, one dimensions test uses a retired comment, and phone navigation renders the desktop stack with undersized controls.
