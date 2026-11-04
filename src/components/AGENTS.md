@@ -6,6 +6,7 @@
 - OOL 77 Mini bar sharing uses a readable public product address with frame/drawer finish-name slugs; the selector restores those names and legacy `?c=` links so existing shares survive catalogue reordering.
 
 - Finish accordions: when every linked swatch maps to a Base/Top matrix value (name, "Family - colour" prefix, generic "Wood" = wood species, accent-insensitive), `FinishSelector` renders one accordion per axis and emits the matrix value — prevents duplicate/mislabelled finish dropdowns without per-product IDs.
+- Linked price-tier labels may identify matrix finish groups: render their individual swatches on separate Base/Top selectors, emit the group value for matrix compatibility, and preserve unmatched linked groups separately — prevents generic group labels replacing actual finish options.
 - When Base and Top explicitly name distinct materials, `FinishSelector` groups linked swatches by library category before falling back to variant-name matching — prevents a differently named metal patina from appearing under a glass diffuser.
 - Single-axis products whose linked finishes span exactly two stored categories render one FinishSelector dropdown per category unless the admin set a wood picker label or each category holds only one finish (then one dropdown) (labelled like the Pictured Finishes strip), and a slide counts as non-specific only when more than two finishes map to every photo — keeps dropdowns and strip in agreement.
 

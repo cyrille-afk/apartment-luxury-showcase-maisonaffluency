@@ -308,11 +308,12 @@ const OOL77_PRESETS: { id: string; name: string; finishes: { frame: string; shel
 const foldAxisText = (s: string) =>
   s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase().replace(/\s+/g, " ");
 const GENERIC_WOOD_OPTION = /^(wood|woods|timber|solid wood|natural wood|wood veneer|veneer)$/;
-const swatchMatchesAxisOption = (f: { name: string; category?: string | null }, option: string) => {
+const swatchMatchesAxisOption = (f: { name: string; category?: string | null; price_tier_label?: string | null }, option: string) => {
   const o = foldAxisText(option);
   const n = foldAxisText(f.name);
   if (!o) return false;
   if (n === o) return true;
+  if (f.price_tier_label && foldAxisText(f.price_tier_label) === o) return true;
   if (n.startsWith(o) && /^[\s\-—–:,(/]/.test(n.slice(o.length))) return true;
   if (GENERIC_WOOD_OPTION.test(o)) return normalizeFabricCategory(f.category) === "Wood";
   return false;
@@ -1323,9 +1324,15 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   const axisBaseOpts = (baseAxisOptions || []).filter((o) => o && o.trim());
   const axisTopOpts = (topAxisOptions || []).filter((o) => o && o.trim());
   const axisMatches = (f: Fabric, opts: string[]) => opts.filter((o) => swatchMatchesAxisOption(f, o));
-  const axisCandidates = isRugProduct
+  const allAxisCandidates = isRugProduct
     ? []
     : [...fabricTiles.filter((f) => f.id !== "__com__" && f.id !== "__col__"), ...allNonFabricTiles];
+  const tierAxisMode = axisBaseOpts.length > 0 && axisTopOpts.length > 0
+    && allAxisCandidates.some((f) => f.price_tier_label && axisBaseOpts.some((o) => foldAxisText(o) === foldAxisText(f.price_tier_label ?? "")))
+    && allAxisCandidates.some((f) => f.price_tier_label && axisTopOpts.some((o) => foldAxisText(o) === foldAxisText(f.price_tier_label ?? "")));
+  const axisCandidates = tierAxisMode
+    ? allAxisCandidates.filter((f) => axisMatches(f, axisBaseOpts).length > 0 || axisMatches(f, axisTopOpts).length > 0)
+    : allAxisCandidates;
   const axisBaseTiles = axisCandidates.filter((f) => axisMatches(f, axisBaseOpts).length > 0);
   const axisTopTiles = axisCandidates.filter((f) => axisMatches(f, axisTopOpts).length > 0);
   const axisModeActive = !isOolMinibar && !isRugProduct && !hideBaseAccordion
@@ -1377,7 +1384,12 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   // instead of rendering as a third accordion.
   const visibleWoodTiles   = isOolMinibar ? [] : axisModeActive ? axisBaseTiles : categoryGroups ? categoryGroups[0].tiles : woodTiles;
   const visibleTopTiles    = isOolMinibar ? drawerTiles : axisModeActive ? axisTopTiles : categoryGroups ? (categoryGroups[1]?.tiles ?? []) : topTiles;
-  const extraCategoryGroups = categoryGroups ? categoryGroups.slice(2) : [];
+  const extraCategoryGroups = categoryGroups ? categoryGroups.slice(2) : axisModeActive && tierAxisMode
+    ? [...new Set(allNonFabricTiles.filter((f) => !axisCandidates.includes(f)).map((f) => f.price_tier_label || f.category || "Finish"))].map((key) => ({
+        key, label: `Select Your ${key.includes("Finish") ? key : `${key} Finish`}`,
+        tiles: allNonFabricTiles.filter((f) => !axisCandidates.includes(f) && (f.price_tier_label || f.category || "Finish") === key),
+      }))
+    : [];
   const visibleCoverTiles  = coverTiles;
 
   // Display-only highlight for wood/stone/top/cover swatches: frame the swatch
@@ -1558,6 +1570,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     .join(" / ");
 
   const baseAxisLabel = (() => {
+    if (axisModeActive && tierAxisMode && axisBaseOpts.length === 1) return `Select Your ${axisBaseOpts[0]}`;
     if (categoryGroups) return categoryGroups[0].label;
     if ((axisModeActive || baseAxisIsWood) && axisBaseLabel && axisBaseLabel.trim()) return axisBaseLabel.trim();
     if (woodLabel && woodLabel.trim()) return woodLabel.trim();
@@ -1570,6 +1583,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     return "Select Your Finish";
   })();
   const topAxisLabel = (() => {
+    if (axisModeActive && tierAxisMode && axisTopOpts.length === 1) return `Select Your ${axisTopOpts[0]}`;
     if (categoryGroups) return categoryGroups[1]?.label ?? "Select Your Top Finish";
     if (topLabel && topLabel.trim()) return topLabel.trim();
     const title = (productTitle || "").toLowerCase();
