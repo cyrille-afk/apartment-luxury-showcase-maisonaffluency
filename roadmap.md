@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Complete catalogue menu rotation
-- [ ] Remove curated overrides and image-pool caps; shuffle unique matching catalogue photos on every menu opening without immediate repeats.
-- [ ] Test dozens-of-products coverage, deduplication and empty pools; verify live image changes, layout, links and analytics.
+- [x] Removed curated overrides and the 12-photo cap; full public subcategory pools use header-owned shuffle bags, exhausted before reshuffling without immediate repeats. Direct public reads paginate instead of truncating.
+- [x] Nine tests pass, including 45-product coverage, deduplication, pool expansion and empty pools. Live 16 Sofa openings showed 16 unique photos; all six menus changed images at 1946px/1024px, kept 190px alignment and loaded photos. Collection navigation and Seating analytics (index 33) pass without runtime errors; build OK.
 
 ## Shared product navigation grids
 - [x] Extracted productNavigation schema and ProductCategoryDropdown for Seating, Tables, Lighting, Rugs, Storage and Decor; By Rooms and All Categories retain their existing layouts.
