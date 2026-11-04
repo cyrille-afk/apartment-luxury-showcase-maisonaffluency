@@ -58,7 +58,7 @@ describe("dimensions render consistency", () => {
     const src = read("src/pages/TradeProductPage.tsx");
     const finishesIdx = src.indexOf("<AlsoContainsFinishes pickId={product.id}");
     const dimsIdx = src.indexOf("{/* Dimensions & size pickers");
-    const actionsIdx = src.indexOf("{/* ===== Primary action block");
+    const actionsIdx = src.indexOf("<div data-product-transaction");
     expect(finishesIdx).toBeGreaterThan(-1);
     expect(dimsIdx).toBeGreaterThan(-1);
     expect(actionsIdx).toBeGreaterThan(-1);

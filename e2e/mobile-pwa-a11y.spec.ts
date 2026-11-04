@@ -171,7 +171,8 @@ test.describe("Mobile PWA & accessibility", () => {
         for (const el of els) {
           const r = el.getBoundingClientRect();
           if (r.width === 0 || r.height === 0) continue; // hidden
-          if (r.top > window.innerHeight) continue; // below fold
+          if (!el.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })) continue;
+          if (r.top >= window.innerHeight || r.bottom <= 0 || r.left >= window.innerWidth || r.right <= 0) continue;
           if (r.width < MIN || r.height < MIN) {
             bad.push({
               tag: el.tagName.toLowerCase(),

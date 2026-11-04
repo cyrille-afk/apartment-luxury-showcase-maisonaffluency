@@ -1,5 +1,10 @@
 # Roadmap
 
+## Current GitHub mobile check failures
+- [x] Read actual GitHub logs: six quote tests have a missing mock export, one dimensions test uses a retired comment, and phone navigation renders the desktop stack with undersized controls.
+- [ ] Correct and rerun the unit and navigation checks without weakening assertions or performance budgets.
+- [ ] Investigate the production Lighthouse trace before changing homepage loading; latest run reports LCP 5926ms, TBT 5602ms and performance 43/100.
+
 ## Deployment pairing
 - [x] Isolate generated assets by release, enforce non-cacheable HTML at the server, remove immutable caching for gallery page addresses, and stop mismatched client hydration with manual recovery.
 - [x] Fifteen regressions pass; browser simulations verify matching startup, blocked mismatched hydration at 1946/390px, missing startup-file recovery, and successful manual reopening. HTML response no-store/CDN no-store headers verified; build OK. Published release paths await publishing.
