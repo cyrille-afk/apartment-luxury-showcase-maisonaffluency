@@ -132,7 +132,7 @@
 - Resources maker tiles use stored cover images, never eager catalogue PDF previews; visible document previews use the bundled worker with bounded lifetime and cleanup — prevents preview traffic starving downloads.
 - Designer Editor lifecycle exits clear the restore guard and flush buffered edits; crash recovery collapses heavy content but retains filters — normal refreshes must not reset the editor to All designers.
 - Admin price history combines the admin-only content audit log with durable admin_price_save_attempts; admin-checked begin/commit RPCs record attempts before writing and atomically commit product changes with Saved status, rejecting concurrent field changes. Local feedback tracks revisions and retains failed edits; interrupted attempts remain unconfirmed, never block beforeunload.
-- Seating navigation keeps curated image pools in seatingMenuImages and header-owned visit state across dropdown remounts; sidebar intrinsic height sizes the image grid — avoids repeated placeholders and oversized panels.
+- Seating navigation keeps curated image pools and responsive Cloudinary srcsets in seatingMenuImages and header-owned visit state across dropdown remounts; sidebar intrinsic height sizes the image grid, with native lazy loading only when mounted — avoids repeated placeholders, oversized panels and hidden-menu image downloads.
 <!-- LOVABLE:END -->
 - Felix sourcing matching/ranking runs only in the `felix-sourcing` edge function; the client receives final results only — keeps matching rules out of the browser bundle.
 - No standalone Collectibles page: collectibles live only in the unified designers directory and shared product templates; /collectibles redirects to /designers.

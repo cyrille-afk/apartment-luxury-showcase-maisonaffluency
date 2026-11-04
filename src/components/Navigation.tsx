@@ -1,5 +1,5 @@
 import { ROOM_PREVIEW_SCENES } from "@/lib/roomPreviewScenes";
-import { SEATING_CARDS, seatingCardImage, seatingImagesForVisit } from "@/components/seatingMenuImages";
+import { SEATING_CARDS, SEATING_IMAGE_SIZES, seatingCardImage, seatingCardSrcSet, seatingImagesForVisit } from "@/components/seatingMenuImages";
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "@/lib/router-compat";
 import { Menu, X, Crown, Search, ChevronDown, ChevronRight, ChevronLeft, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Briefcase, BookOpen, Heart, Pin, User, LogIn, UserPlus, LogOut } from "lucide-react";
@@ -320,6 +320,12 @@ const SeatingDropdownGrid = ({ onCategoryLink, visit }: { onCategoryLink: (categ
         <span className="block min-h-0 w-full flex-1 overflow-hidden bg-accent/30">
           <img
             src={seatingCardImage(seatingImagesForVisit(visit)[index] ?? "")}
+            srcSet={seatingCardSrcSet(seatingImagesForVisit(visit)[index] ?? "")}
+            sizes={SEATING_IMAGE_SIZES}
+            loading="lazy"
+            decoding="async"
+            width={320}
+            height={400}
             alt={card.label}
             className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
           />

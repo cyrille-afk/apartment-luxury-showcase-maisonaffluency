@@ -32,4 +32,12 @@ export function seatingImagesForVisit(visit: number): string[] {
   return SEATING_CARDS.map((card) => card.images[Math.max(0, visit) % card.images.length] ?? card.images[0] ?? "");
 }
 
-export const seatingCardImage = (url: string) => url.replace("/image/upload/", "/image/upload/c_fill,ar_4:5,w_480,q_auto,f_auto/");
+// Six cards share the panel after its padding, sidebar, column gap and grid gaps.
+export const SEATING_IMAGE_SIZES = "(min-width: 1232px) 142px, calc((100vw - 384px) / 6)";
+const SEATING_IMAGE_WIDTHS = [160, 240, 320, 480];
+
+export const seatingCardImage = (url: string, width = 320) =>
+  url.replace("/image/upload/", `/image/upload/c_fill,ar_4:5,w_${width},q_auto,f_auto/`);
+
+export const seatingCardSrcSet = (url: string) =>
+  SEATING_IMAGE_WIDTHS.map((width) => `${seatingCardImage(url, width)} ${width}w`).join(", ");
