@@ -545,8 +545,8 @@ const Navigation = (_props: NavigationProps) => {
       if (menu.key === "rooms" || menu.key === "furniture") continue;
       const pools = menuPools[menu.key] ?? [];
       const visit = menuVisits[menu.key] ?? 0;
-      selectProductMenuImages(pools, visit, productImageRotations.current);
-      const next = nextProductMenuImages(pools, visit + 1, productImageRotations.current);
+      const current = selectProductMenuImages(pools, Math.max(1, visit), productImageRotations.current);
+      const next = visit === 0 ? current : nextProductMenuImages(pools, visit + 1, productImageRotations.current);
       warmProductMenuImages(next.map((card) => ({ ...card, images: card.image ? [card.image] : [] })));
     }
   }, [menuPools, menuVisits]);

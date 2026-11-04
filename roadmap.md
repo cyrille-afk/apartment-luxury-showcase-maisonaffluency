@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Navigation warm-up
-- [ ] Load menu catalogue/counts and room scenes on header mount; memoize pools and render selected cards synchronously.
-- [ ] Preload featured responsive assets and verify menu switching, image rotation and stable heights.
+- [x] Menu catalogue/counts start on header mount; count menus share one cached pool, all product pools are memoized, and prepared room scenes warm their photos and alternatives before mounting.
+- [x] Featured responsive assets preload before hover; selected cards render synchronously in 220px-aligned frames. Desktop and 1024px browser checks show all featured images already loaded and zero menu-time data requests; rotation, eleven unit tests and Seating analytics pass without page errors. Build OK.
 
 ## Complete catalogue menu rotation
 - [x] Removed curated overrides and the 12-photo cap; full public subcategory pools use header-owned shuffle bags, exhausted before reshuffling without immediate repeats. Direct public reads paginate instead of truncating.

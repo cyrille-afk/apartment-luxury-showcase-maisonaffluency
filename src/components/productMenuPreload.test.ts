@@ -11,6 +11,7 @@ describe("menu warm-up rotation", () => {
     const preview = nextProductMenuImages(cards, 1, state);
     expect(JSON.stringify([...state])).toBe(before);
     expect(selectProductMenuImages(cards, 1, state)).toEqual(preview);
-    expect(new Set([0, 1, 2, 3].map((visit) => selectProductMenuImages(cards, visit, new Map(state), () => 0.5)[0]?.image)).size).toBeGreaterThan(1);
+    const displayed = [preview[0]?.image, ...[2, 3].map((visit) => selectProductMenuImages(cards, visit, state)[0]?.image)];
+    expect(new Set(displayed).size).toBe(3);
   });
 });
