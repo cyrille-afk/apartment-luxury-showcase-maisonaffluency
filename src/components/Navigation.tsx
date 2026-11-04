@@ -151,7 +151,7 @@ const preloadRoomMenuPhotos = () => {
 // Coordinates are percentages of the displayed, centre-cropped preview frame.
 // Scene data is shared with the Room Experience landing page via
 // src/lib/roomPreviewScenes.ts so menu and page never drift apart.
-const RoomVisualPreview = ({ room, selectedRoomSlug, onPieceNavigate }: { room: RoomNavKey; selectedRoomSlug?: string; onPieceNavigate: (href: string) => void }) => {
+const RoomVisualPreview = ({ room, selectedRoomSlug, onPieceNavigate, onRoomNavigate }: { room: RoomNavKey; selectedRoomSlug?: string; onPieceNavigate: (href: string) => void; onRoomNavigate: (slug: string) => void }) => {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(false);
   const [photoReady, setPhotoReady] = useState(false);
@@ -166,18 +166,24 @@ const RoomVisualPreview = ({ room, selectedRoomSlug, onPieceNavigate }: { room: 
     return () => { active = false; };
   }, [pieceSources]);
   const previewImage = selectedRoomSlug === "office" || selectedRoomSlug === "living-room" || selectedRoomSlug === "dining-room" || selectedRoomSlug === "bedroom" ? scene.previewImage : roomAmbientImages[room];
+  const roomSlug = selectedRoomSlug ?? (room === "living" ? "living-room" : room === "dining" ? "dining-room" : room);
+  const roomHref = `/search?room=${roomSlug}&view=grid`;
   return (
   <div data-room-preview className="sticky top-6 flex min-w-0 flex-1 flex-col items-center self-start bg-[hsl(var(--collection-card-canvas))] px-6 py-6 transition-all duration-300">
     <div className="w-full">
       <div className="relative mb-5 aspect-[16/9.5] w-full overflow-hidden rounded-sm bg-[hsl(var(--alternative-frame))]">
-          <img src={previewImage.src} alt={previewImage.alt} onLoad={() => setPhotoReady(true)} className={cn("h-full w-full object-cover object-center transition-opacity duration-300", photoReady ? "opacity-100" : "opacity-0")} />
+          <a href={roomHref} aria-label={`Explore the ${roomSlug.replace(/-/g, " ")} curation`}
+            onClick={(event) => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return; event.preventDefault(); onRoomNavigate(roomSlug); }}
+            className="block h-full w-full cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring">
+            <img src={previewImage.src} alt={previewImage.alt} onLoad={() => setPhotoReady(true)} className={cn("h-full w-full object-cover object-center transition-opacity duration-300", photoReady ? "opacity-100" : "opacity-0")} />
+          </a>
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
-             <Button type="button" variant="ghost" size="icon" aria-label={`Shop this look: ${scene.hotspot.label}; highlight curated alternatives`} aria-expanded={open}
+             <Button type="button" variant="ghost" size="icon" aria-label={`Discover the curation: ${scene.hotspot.label}; highlight curated alternatives`} aria-expanded={open}
               onPointerEnter={(event) => { if (event.pointerType === "mouse") setOpen(true); }}
               onPointerLeave={(event) => { if (event.pointerType === "mouse") setOpen(false); }}
               onClick={() => { setSelected(true); setOpen(true); }}
-               style={{ left: `${scene.hotspot.left}%`, top: `${scene.hotspot.top}%` }}
+                style={{ left: `${scene.hotspot.left}%`, top: `${scene.hotspot.top}%` }}
                className="group absolute z-10 size-6 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-ring">
                <span className="relative block size-3.5 rounded-full border border-background/90 bg-foreground shadow-lg transition-transform group-hover:scale-110">
                  <span className="absolute left-1/2 top-1/2 h-px w-1.5 -translate-x-1/2 -translate-y-1/2 bg-background" />
@@ -185,9 +191,9 @@ const RoomVisualPreview = ({ room, selectedRoomSlug, onPieceNavigate }: { room: 
               </span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent side="top" align="center" sideOffset={2} onOpenAutoFocus={(event) => event.preventDefault()} className="pointer-events-none w-auto rounded-none border-border bg-background/95 px-3 py-1.5 font-body text-xs text-foreground shadow-sm">Shop this Look</PopoverContent>
+          <PopoverContent side="top" align="center" sideOffset={2} onOpenAutoFocus={(event) => event.preventDefault()} className="pointer-events-none w-auto rounded-none border-border bg-background/95 px-3 py-1.5 font-body text-xs font-light tracking-tight text-foreground shadow-sm">Discover Curation</PopoverContent>
         </Popover>
-      </div>
+       </div>
       <div className="w-full border-t border-border/40 pt-4">
         <div className="mb-4 text-center font-body text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">Curated alternatives</div>
             <div className={cn("grid w-full grid-cols-3 gap-x-4 gap-y-6 bg-background transition-all duration-300", readyPieceSources === pieceSources && !scene.pending ? "opacity-100" : "opacity-0")}>
@@ -337,7 +343,7 @@ const ProductDropdownPanel = ({ menuKey, onCategoryLink, onRoomNavigate, onFullC
         </div>
         </>)}
       </div>
-      <RoomVisualPreview key={previewRoom} room={previewNav} selectedRoomSlug={previewRoom} onPieceNavigate={onPieceNavigate} />
+      <RoomVisualPreview key={previewRoom} room={previewNav} selectedRoomSlug={previewRoom} onPieceNavigate={onPieceNavigate} onRoomNavigate={onRoomNavigate} />
     </div>
   );
 };
@@ -434,7 +440,7 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
         </div>
       </div>
     </div>
-     <RoomVisualPreview key={roomFlyouts[room]?.[selectedRoom]?.slug ?? room} room={room} selectedRoomSlug={roomFlyouts[room]?.[selectedRoom]?.slug} onPieceNavigate={onPieceNavigate} />
+     <RoomVisualPreview key={roomFlyouts[room]?.[selectedRoom]?.slug ?? room} room={room} selectedRoomSlug={roomFlyouts[room]?.[selectedRoom]?.slug} onPieceNavigate={onPieceNavigate} onRoomNavigate={onRoomNavigate} />
   </div>
   );
 };

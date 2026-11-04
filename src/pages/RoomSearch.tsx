@@ -109,7 +109,7 @@ function RoomExperience({ room, roomLabel }: { room: RoomSlug; roomLabel: string
                 type="button"
                 variant="ghost"
                 size="icon"
-                aria-label={`Shop this look: ${scene.hotspot.label}; highlight curated alternatives`}
+                aria-label={`Discover the curation: ${scene.hotspot.label}; highlight curated alternatives`}
                 aria-expanded={open}
                 onPointerEnter={(event) => { if (event.pointerType === "mouse") setOpen(true); }}
                 onPointerLeave={(event) => { if (event.pointerType === "mouse") setOpen(false); }}
@@ -123,8 +123,8 @@ function RoomExperience({ room, roomLabel }: { room: RoomSlug; roomLabel: string
                 </span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent side="top" align="center" sideOffset={2} onOpenAutoFocus={(event) => event.preventDefault()} className="pointer-events-none w-auto rounded-none border-border bg-background/95 px-3 py-1.5 font-body text-xs text-foreground shadow-sm">
-              Shop this Look
+            <PopoverContent side="top" align="center" sideOffset={2} onOpenAutoFocus={(event) => event.preventDefault()} className="pointer-events-none w-auto rounded-none border-border bg-background/95 px-3 py-1.5 font-body text-xs font-light tracking-tight text-foreground shadow-sm">
+              Discover Curation
             </PopoverContent>
           </Popover>
         </div>
