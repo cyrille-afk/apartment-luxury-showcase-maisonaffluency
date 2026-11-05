@@ -389,6 +389,7 @@ export function GlbBulkUpload({ onChange }: Props) {
             ))}
           </div>
         )}
+        {!letter && (
         <select
           value={brand}
           onChange={(e) => {
@@ -404,6 +405,7 @@ export function GlbBulkUpload({ onChange }: Props) {
             <option key={b} value={b}>{b}</option>
           ))}
         </select>
+        )}
       </div>
 
       {/* 2. Products */}
