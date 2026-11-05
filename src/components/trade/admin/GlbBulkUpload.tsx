@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Upload, Loader2, X, CheckCircle2, AlertCircle, FileBox, Paperclip } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { prepareGlbFile, uploadGlbForProduct, GLB_MAX_MB } from "@/lib/glbUpload";
+import { prepareGlbFile, uploadGlbForProduct, measureGlbDimensions, formatDimensionLabel, GLB_MAX_MB } from "@/lib/glbUpload";
 
 interface ProductRow {
   id: string;
@@ -20,6 +20,8 @@ interface BulkFile {
   productId: string | null;
   /** Variant label — distinct labels save as separate selectable 3D models. */
   label: string;
+  /** True once the admin edits the label — auto-measurement must not overwrite it. */
+  labelTouched?: boolean;
   status: FileStatus;
   progress: number;
   message?: string;
@@ -61,6 +63,12 @@ export function guessVariantLabel(fileName: string): string {
   const stem = fileName.replace(/\.[^.]+$/, "");
   const m = stem.match(/(\d{2,4})\s*[x×*]\s*(\d{2,4})(?:\s*[x×*]\s*(\d{2,4}))?/i);
   if (m) return m[3] ? `W ${m[1]} × D ${m[2]} × H ${m[3]}` : `W ${m[1]} × D ${m[2]}`;
+  // Millimetre size + shape word, e.g. "CTS_1080_ROUND" → Ø 108 cm.
+  const shape = stem.match(/(\d{3,4})\s*[_-]?\s*(round|oval|square|rect(?:angle)?)\b/i);
+  if (shape) {
+    const n = Math.round(parseInt(shape[1], 10) / 10);
+    return /round|square/i.test(shape[2]) ? `W ${n} × D ${n}` : `W ${n}`;
+  }
   return "Default";
 }
 
