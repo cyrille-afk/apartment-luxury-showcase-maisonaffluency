@@ -384,6 +384,29 @@ export function GlbBulkUpload({ onChange }: Props) {
             );
           })}
         </div>
+        <div className="relative mb-2">
+          <input
+            type="search"
+            value={brandQuery}
+            onChange={(e) => setBrandQuery(e.target.value)}
+            placeholder={letter ? `Search designers in ${letter}…` : "Search all designers…"}
+            disabled={running}
+            aria-label="Search designers"
+            className="w-full h-8 pl-8 pr-7 border border-border rounded-md bg-background font-body text-sm focus:outline-hidden focus:border-foreground/40"
+          />
+          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none text-[12px]">⌕</span>
+          {brandQuery && (
+            <button
+              type="button"
+              onClick={() => setBrandQuery("")}
+              aria-label="Clear designer search"
+              disabled={running}
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground"
+            >
+              <X size={12} />
+            </button>
+          )}
+        </div>
         {letter && (
           <div className="border border-border rounded-md divide-y divide-border max-h-[24vh] overflow-y-auto mb-2">
             {visibleBrands.map((b) => (
