@@ -350,7 +350,10 @@ export function GlbBulkUpload({ onChange }: Props) {
         <div className="flex flex-wrap gap-1 mb-2" role="group" aria-label="Filter designers A–Z">
           <button
             type="button"
-            onClick={() => setLetter(null)}
+            onClick={() => {
+              setLetter(null);
+              setBrandQuery("");
+            }}
             disabled={running}
             aria-pressed={letter === null}
             className={`h-7 px-2 rounded font-body text-[11px] uppercase tracking-[0.08em] border ${letter === null ? "bg-foreground text-background border-foreground" : "border-border hover:bg-muted/50"}`}
@@ -366,6 +369,7 @@ export function GlbBulkUpload({ onChange }: Props) {
                 type="button"
                 onClick={() => {
                   setLetter(l);
+                  setBrandQuery("");
                   if (brand && brandLetter(brand) !== l) {
                     setBrand("");
                     setFiles([]);
