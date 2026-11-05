@@ -1,7 +1,52 @@
 import { supabase } from "@/integrations/supabase/client";
+import { Box3, Vector3 } from "three";
+import { GLTFLoader } from "three-stdlib";
 import { classifyObjBundle, convertObjBundleToGlb, convert3dsToGlb } from "@/lib/objToGlb";
 
 export const GLB_MAX_MB = 50;
+
+export interface GlbDimensions {
+  wCm: number;
+  dCm: number;
+  hCm: number;
+}
+
+/**
+ * Normalize a raw bounding-box size to whole centimetres. glTF is specified
+ * in metres, but many studio exports are authored in cm or mm — pick the
+ * unit from the magnitude so a 1.08 m table and a 1080 mm table both read
+ * as 108 cm.
+ */
+export function normalizeSizeToCm(size: { x: number; y: number; z: number }): GlbDimensions | null {
+  const max = Math.max(size.x, size.y, size.z);
+  if (!Number.isFinite(max) || max <= 0) return null;
+  const factor = max < 20 ? 100 : max > 2000 ? 0.1 : 1;
+  const round = (v: number) => Math.max(1, Math.round(v * factor));
+  return { wCm: round(size.x), dCm: round(size.z), hCm: round(size.y) };
+}
+
+/** Variant label matching the admin convention ("W 108 × D 108"). */
+export function formatDimensionLabel(d: GlbDimensions): string {
+  return `W ${d.wCm} × D ${d.dCm}`;
+}
+
+/**
+ * Measure a .glb/.gltf model's real bounding box in the browser. Returns
+ * null when the file cannot be parsed — callers keep their manual label.
+ */
+export async function measureGlbDimensions(file: File): Promise<GlbDimensions | null> {
+  try {
+    const loader = new GLTFLoader();
+    const data: ArrayBuffer | string = /\.gltf$/i.test(file.name)
+      ? await file.text()
+      : await file.arrayBuffer();
+    const gltf = await loader.parseAsync(data, "");
+    const size = new Box3().setFromObject(gltf.scene).getSize(new Vector3());
+    return normalizeSizeToCm(size);
+  } catch {
+    return null;
+  }
+}
 
 export interface PreparedGlb {
   file: File;
