@@ -55,7 +55,7 @@ body[data-nav-dropdown-open] #root {
   --header-current-ink: var(--homepage-header-ink);
 }
 .global-overlay-header [data-header-top-row] {
-  min-height: 74px;
+  min-height: 68px;
   border: 0;
 }
 .global-overlay-header [data-header-top-row] > div:last-child { gap: 22px; }
