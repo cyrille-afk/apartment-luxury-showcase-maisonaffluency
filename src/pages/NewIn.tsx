@@ -3,7 +3,6 @@ import { useSearchParams } from "@/lib/router-compat";
 import ShareMenu from "@/components/ShareMenu";
 import { Helmet } from "react-helmet-async";
 import useEmblaCarousel from "embla-carousel-react";
-import { useScrollDirection } from "@/hooks/useScrollDirection";
 import Navigation from "@/components/Navigation";
 import NewInSpotlight from "@/components/NewInSpotlight";
 import SliderDots from "@/components/ui/SliderDots";
@@ -104,8 +103,6 @@ function MobileDesignerCarousel({ designers, initialIndex = 0 }: { designers: Re
 /* ── Desktop sticky jump nav ── */
 function DesktopJumpNav({ designers }: { designers: ReturnType<typeof useNewInDesigners>["data"] }) {
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
-  const { direction: scrollDir, scrollY: navScrollY } = useScrollDirection();
-  const navHidden = scrollDir === "down" && navScrollY > 240;
   const isScrollingRef = useRef(false);
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -151,12 +148,8 @@ function DesktopJumpNav({ designers }: { designers: ReturnType<typeof useNewInDe
 
     const el = document.getElementById(`new-in-${slug}`);
     if (el) {
-      const probe = document.createElement("div");
-      probe.style.cssText = "position:absolute;visibility:hidden;height:var(--header-h)";
-      document.body.appendChild(probe);
-      const headerH = probe.getBoundingClientRect().height || 150;
-      probe.remove();
-      const y = el.getBoundingClientRect().top + window.scrollY - (headerH + 56);
+      // Only the sticky jump nav (~56px) overlays content; the page header scrolls away.
+      const y = el.getBoundingClientRect().top + window.scrollY - 56;
       window.scrollTo({ top: y, behavior: "smooth" });
     }
 
@@ -168,8 +161,7 @@ function DesktopJumpNav({ designers }: { designers: ReturnType<typeof useNewInDe
 
   return (
     <div
-      className="sticky z-30 bg-background/95 backdrop-blur-sm border-b border-border/20 transition-[top] duration-300"
-      style={{ top: navHidden ? 0 : "var(--header-h)" }}
+      className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border/20"
     >
 
       <div className="max-w-7xl mx-auto px-12 lg:px-20 flex items-center gap-8 py-3">
