@@ -10,7 +10,7 @@ vi.mock("@/lib/objToGlb", () => ({
   convertObjBundleToGlb: mocks.convertObj,
   convert3dsToGlb: mocks.convert3ds,
 }));
-import { prepareGlbFile, uploadGlbForProduct } from "@/lib/glbUpload";
+import { prepareGlbFile, uploadGlbForProduct, normalizeSizeToCm, formatDimensionLabel } from "@/lib/glbUpload";
 
 beforeEach(() => {
   vi.clearAllMocks();
