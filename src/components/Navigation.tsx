@@ -179,7 +179,7 @@ const RoomVisualPreview = ({ room, selectedRoomSlug, preparedScene, onPieceNavig
   return (
   <div data-room-preview className="sticky top-6 flex min-w-0 flex-1 flex-col items-center self-start bg-[hsl(var(--collection-card-canvas))] px-6 py-6 transition-all duration-300">
     <div className="w-full">
-      <div className="relative mb-5 aspect-[16/9.5] w-full overflow-hidden rounded-sm bg-[hsl(var(--alternative-frame))]">
+      <div className="relative mb-5 h-[clamp(200px,38vh,520px)] w-full overflow-hidden rounded-sm bg-[hsl(var(--alternative-frame))]">
           <a href={roomHref} aria-label={`Explore the ${roomSlug.replace(/-/g, " ")} curation`}
             onClick={(event) => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return; event.preventDefault(); onRoomNavigate(roomSlug); }}
             className="block h-full w-full cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring">
@@ -1562,7 +1562,7 @@ const Navigation = (_props: NavigationProps) => {
                   </Button>
 
                   {megaMenuOpen && activeRoomMenu === menu.key && (
-                    <div ref={megaMenuRef} data-room-menu={menu.key} className={cn("absolute left-1/2 top-full z-50 bg-background shadow-xl", "mt-1 w-[min(74rem,calc(100vw-48px))]")} style={{ translate: "-50% 0" }}>
+                    <div ref={megaMenuRef} data-room-menu={menu.key} className={cn("absolute left-1/2 top-full z-50 bg-background shadow-xl", "mt-1 w-[min(74rem,calc(100vw-48px))] max-h-[calc(100dvh-var(--header-h)-1rem)] overflow-y-auto overscroll-contain")} style={{ translate: "-50% 0" }}>
                       <ProductDropdownPanel
                         menuKey={menu.key}
                         menuVisit={menuVisits[menu.key] ?? 0}
