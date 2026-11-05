@@ -139,6 +139,14 @@ export function GlbBulkUpload({ onChange }: Props) {
     return /[A-Z]/.test(c) ? c : "#";
   };
   const lettersWithBrands = useMemo(() => new Set(brands.map(brandLetter)), [brands]);
+  const brandsPerLetter = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const b of brands) {
+      const l = brandLetter(b);
+      counts.set(l, (counts.get(l) ?? 0) + 1);
+    }
+    return counts;
+  }, [brands]);
   const visibleBrands = useMemo(
     () => (letter ? brands.filter((b) => brandLetter(b) === letter) : brands),
     [brands, letter],
