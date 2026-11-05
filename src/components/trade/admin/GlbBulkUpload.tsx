@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Upload, Loader2, X, CheckCircle2, AlertCircle, FileBox, Paperclip } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { prepareGlbFile, uploadGlbForProduct, GLB_MAX_MB } from "@/lib/glbUpload";
+import { prepareGlbFile, uploadGlbForProduct, measureGlbDimensions, formatDimensionLabel, GLB_MAX_MB } from "@/lib/glbUpload";
 
 interface ProductRow {
   id: string;
@@ -20,6 +20,8 @@ interface BulkFile {
   productId: string | null;
   /** Variant label — distinct labels save as separate selectable 3D models. */
   label: string;
+  /** True once the admin edits the label — auto-measurement must not overwrite it. */
+  labelTouched?: boolean;
   status: FileStatus;
   progress: number;
   message?: string;
@@ -61,6 +63,12 @@ export function guessVariantLabel(fileName: string): string {
   const stem = fileName.replace(/\.[^.]+$/, "");
   const m = stem.match(/(\d{2,4})\s*[x×*]\s*(\d{2,4})(?:\s*[x×*]\s*(\d{2,4}))?/i);
   if (m) return m[3] ? `W ${m[1]} × D ${m[2]} × H ${m[3]}` : `W ${m[1]} × D ${m[2]}`;
+  // Millimetre size + shape word, e.g. "CTS_1080_ROUND" → Ø 108 cm.
+  const shape = stem.match(/(\d{3,4})\s*[_-]?\s*(round|oval|square|rect(?:angle)?)\b/i);
+  if (shape) {
+    const n = Math.round(parseInt(shape[1], 10) / 10);
+    return /round|square/i.test(shape[2]) ? `W ${n} × D ${n}` : `W ${n}`;
+  }
   return "Default";
 }
 
@@ -251,6 +259,20 @@ export function GlbBulkUpload({ onChange }: Props) {
         `${newOrphans.length} companion file${newOrphans.length === 1 ? "" : "s"} need${newOrphans.length === 1 ? "s" : ""} an .obj to attach to — use the dropdown below.`,
       );
     }
+
+    // Measure each .glb/.gltf's real bounding box and pre-fill the dimension
+    // label — never overwrites a label the admin already edited.
+    for (const e of newEntries) {
+      if (!/\.(glb|gltf)$/i.test(e.file.name)) continue;
+      void measureGlbDimensions(e.file).then((dims) => {
+        if (!dims) return;
+        setFiles((prev) =>
+          prev.map((f) =>
+            f.key === e.key && !f.labelTouched ? { ...f, label: formatDimensionLabel(dims) } : f,
+          ),
+        );
+      });
+    }
   };
 
   const setFile = (key: string, patch: Partial<BulkFile>) =>
@@ -305,6 +327,16 @@ export function GlbBulkUpload({ onChange }: Props) {
           .filter((o) => o.attachTo === item.key)
           .map((o) => o.file);
         const prepared = await prepareGlbFile([item.file, ...item.companions, ...attached]);
+        // Converted sources (obj/3ds) couldn't be measured at drop time —
+        // measure the converted GLB now when the label still lacks dimensions.
+        let label = item.label;
+        if (!item.labelTouched && !/W\s*\d/i.test(label)) {
+          const dims = await measureGlbDimensions(prepared.file);
+          if (dims) {
+            label = formatDimensionLabel(dims);
+            setFile(item.key, { label });
+          }
+        }
         setFile(item.key, { status: "uploading", progress: 0 });
         // Fresh variant list per product for replace/default logic.
         const { data: vrows } = await supabase
@@ -313,7 +345,7 @@ export function GlbBulkUpload({ onChange }: Props) {
           .eq("product_id", item.productId!);
         await uploadGlbForProduct({
           productId: item.productId!,
-          label: item.label.trim() || "Default",
+          label: label.trim() || "Default",
           prepared,
           existingVariants: (vrows as any[]) || [],
           onProgress: (pct) => setFile(item.key, { progress: pct }),
@@ -338,7 +370,7 @@ export function GlbBulkUpload({ onChange }: Props) {
       <div>
         <div className="font-display text-xl">Bulk upload — one designer</div>
         <div className="font-body text-[11px] text-muted-foreground">
-          Pick a brand, select the products, then drop all the model files at once — including each product's .obj with its .mtl and texture files. Files are matched to products by filename — adjust any match before starting. Give each dimension its own variant label (sizes like 95x77 in the filename are detected) — distinct labels save as separate selectable 3D models; a repeated label replaces that model.
+          Pick a brand, select the products, then drop all the model files at once — including each product's .obj with its .mtl and texture files. Files are matched to products by filename — adjust any match before starting. Give each dimension its own variant label — sizes are measured from the model itself (and detected in filenames like 95x77 or 1080_ROUND), so labels pre-fill and stay editable — distinct labels save as separate selectable 3D models; a repeated label replaces that model.
         </div>
       </div>
 
@@ -550,7 +582,7 @@ export function GlbBulkUpload({ onChange }: Props) {
                     </select>
                     <input
                       value={f.label}
-                      onChange={(e) => setFile(f.key, { label: e.target.value })}
+                      onChange={(e) => setFile(f.key, { label: e.target.value, labelTouched: true })}
                       disabled={running || f.status === "done"}
                       placeholder="Variant label"
                       className="w-[130px] px-2 py-1.5 border border-border rounded bg-background font-body text-xs focus:outline-hidden focus:border-foreground/40"
