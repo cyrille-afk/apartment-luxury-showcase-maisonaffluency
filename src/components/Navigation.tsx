@@ -996,7 +996,7 @@ const Navigation = (_props: NavigationProps) => {
               </SheetTrigger>
 
               {/* Currency / shipping-destination flag — between burger and the centered logo */}
-              
+              <ShippingDestinationSwitcher compact flagClassName="text-lg" className="min-w-0 px-0" />
             </div>
 
             {/* Brand — absolutely centered in the viewport; side groups reserve equal space */}
@@ -1404,7 +1404,13 @@ const Navigation = (_props: NavigationProps) => {
             </div>
 
             <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap">
-              <button onClick={scrollToTop} className="group relative cursor-pointer">
+              {/* Currency flag — mirrored left of the wordmark, balancing the Est. 2017 badge on the right */}
+              <div className="relative">
+                <div className="absolute right-full top-1/2 mr-5 flex -translate-y-1/2 items-center gap-2">
+                  <ShippingDestinationSwitcher compact showIso flagClassName="text-base lg:text-lg" />
+                  <span className="h-3 w-px bg-foreground/40" aria-hidden="true" />
+                </div>
+                <button onClick={scrollToTop} className="group relative cursor-pointer">
                 <span className="font-brand text-xl lg:text-3xl font-normal tracking-[0.18em] text-foreground transition-opacity duration-300 group-hover:opacity-70">
                   MAISON AFFLUENCY
                 </span>
