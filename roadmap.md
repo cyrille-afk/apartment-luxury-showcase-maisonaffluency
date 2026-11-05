@@ -1,5 +1,9 @@
 # Roadmap
 
+## Admin option scrolling
+- [x] Audit admin pages and shared editors: remaining glide comes from the shared PUSH/REPLACE navigation reset; admin option/filter changes already retain position.
+- [x] Admin destinations and departures now land instantly; public navigation/history unchanged. Signed-in live checks clicked all 50 dashboard cards and six additional Admin Tools links: no smooth calls or intermediate glide frames. Designer/product/inquiry/finish filters and two view-tab switches stayed stationary; no records changed. Eighteen scroll regressions pass; build OK.
+
 ## Directory scroll line
 - [x] Restore the desktop line below the live search/caption dock with light frost unchanged and section-aware white-to-black ink.
 - [x] Live desktop checks confirm a 12px dock clearance, white-to-black transition at the section edge during scrolling, search/menu suppression and reduced-motion handling; 1024/768/390px visibility checked, twelve directory regressions pass, no page errors and build OK.

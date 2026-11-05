@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isCollectionLanding, isProductDetailPath, shouldResetRouteScroll } from "./collectionScrollPolicy";
+import { isCollectionLanding, isProductDetailPath, routeScrollBehavior, shouldResetRouteScroll } from "./collectionScrollPolicy";
 
 describe("Collection scroll ownership", () => {
   it("lets both Trade product URLs and public product URLs own their content-ready reset", () => {
@@ -13,6 +13,26 @@ describe("Collection scroll ownership", () => {
   });
   it("does not reset unrelated same-page filters", () => {
     expect(shouldResetRouteScroll("/designers", "/designers")).toBe(false);
+  });
+  it.each([
+    "/trade/admin", "/trade/admin/glb-models", "/trade/admin/studios/example",
+    "/trade/admin-dashboard", "/trade/designers/admin", "/trade/collectibles/admin",
+    "/trade/quotes-admin", "/trade/documents-admin", "/admin/trade-review",
+  ])("never animates admin navigation to %s", (path) => {
+    expect(routeScrollBehavior(path, true)).toBe("instant");
+  });
+  it.each(["/trade/admin/inquiries", "/trade/admin/glb-models", "/trade/designers/admin"])(
+    "keeps same-page admin options at their current position on %s", (path) => {
+      expect(shouldResetRouteScroll(path, path)).toBe(false);
+    },
+  );
+  it("preserves public navigation and reduced-motion behavior", () => {
+    expect(routeScrollBehavior("/journal", true)).toBe("smooth");
+    expect(routeScrollBehavior("/journal", false)).toBe("instant");
+  });
+  it("lands dashboard options instantly even when their destination has no admin suffix", () => {
+    expect(routeScrollBehavior("/trade/journal", true, "/trade/admin-dashboard")).toBe("instant");
+    expect(routeScrollBehavior("/trade/clients", true, "/trade/admin/tools")).toBe("instant");
   });
   it("excludes Collection from resize anchor restoration", () => {
     expect(isCollectionLanding("/trade/the-collection")).toBe(true);

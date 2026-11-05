@@ -1,6 +1,6 @@
 /* Shared route helpers and lazy page components ported from the pre-TanStack App.tsx. */
 import AdminOnly from "@/components/trade/AdminOnly";
-import { isCollectionLanding, isProductDetailPath, shouldResetRouteScroll } from "@/lib/collectionScrollPolicy";
+import { isCollectionLanding, isProductDetailPath, routeScrollBehavior, shouldResetRouteScroll } from "@/lib/collectionScrollPolicy";
 import { isTradeGalleryListing, readTradeGalleryState } from "@/lib/tradeGalleryState";
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import LegacyRouteRedirect from "@/components/LegacyRouteRedirect";
@@ -360,7 +360,8 @@ export function HomeRouteSync() {
   return null;
 }
 
-// Scroll to top on PUSH/REPLACE navigations. Smooth is now the default so it
+// Scroll to top on PUSH/REPLACE navigations. Admin destinations land instantly;
+// public navigation retains its default smooth behavior so it
 // triggers for every Link/navigate() call regardless of source (menu, logo,
 // footer, deep link, programmatic, fast/duplicate clicks). Skips when:
 //   - navigation is POP (back/forward) — browser restores prior scroll
@@ -396,7 +397,7 @@ export function ScrollToTopOnNavigate() {
     const requiresStableTop = isCollectionLanding(location.pathname) || isProductDetailPath(location.pathname);
     const prefersReduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     const smooth = !isLockedDesignersLanding && !requiresStableTop && state?.smoothScroll !== false && !prefersReduced;
-    const behavior: ScrollBehavior = smooth ? "smooth" : "instant";
+    const behavior = routeScrollBehavior(location.pathname, smooth, prevPath);
     // Defer one frame so the new route mounts before we animate — prevents the
     // browser from snapping mid-transition when React commits the new tree.
     const raf = window.requestAnimationFrame(() => {
