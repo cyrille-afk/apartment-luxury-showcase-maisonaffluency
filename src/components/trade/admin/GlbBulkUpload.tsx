@@ -106,6 +106,32 @@ export function GlbBulkUpload({ onChange }: Props) {
   const [orphans, setOrphans] = useState<OrphanFile[]>([]);
   const [running, setRunning] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  // Detected-dimension unit: centimetres (default), millimetres or inches.
+  const [dimUnit, setDimUnit] = useState<DimensionUnit>(() => {
+    try {
+      const saved = localStorage.getItem("ma-glb-dim-unit");
+      return saved === "mm" || saved === "in" ? saved : "cm";
+    } catch {
+      return "cm";
+    }
+  });
+  const dimUnitRef = useRef(dimUnit);
+
+  const changeDimUnit = (unit: DimensionUnit) => {
+    dimUnitRef.current = unit;
+    setDimUnit(unit);
+    try {
+      localStorage.setItem("ma-glb-dim-unit", unit);
+    } catch {
+      /* storage unavailable — session-only */
+    }
+    // Reformat measured labels the admin has not edited; edited labels keep their text.
+    setFiles((prev) =>
+      prev.map((f) =>
+        !f.labelTouched && f.measured ? { ...f, label: formatDimensionLabel(f.measured, unit) } : f,
+      ),
+    );
+  };
 
   // Brand list: distinct brand_name across active products.
   useEffect(() => {
