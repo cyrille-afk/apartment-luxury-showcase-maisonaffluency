@@ -1,5 +1,9 @@
 # Roadmap
 
+## Admin option scrolling
+- [ ] Audit remaining admin pages and shared editors for animated option-click scrolling.
+- [ ] Remove unwanted scrolling and verify affected pages signed in with real records and non-destructive actions.
+
 ## Directory scroll line
 - [x] Restore the desktop line below the live search/caption dock with light frost unchanged and section-aware white-to-black ink.
 - [x] Live desktop checks confirm a 12px dock clearance, white-to-black transition at the section edge during scrolling, search/menu suppression and reduced-motion handling; 1024/768/390px visibility checked, twelve directory regressions pass, no page errors and build OK.
