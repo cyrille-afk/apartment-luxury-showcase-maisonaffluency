@@ -554,9 +554,26 @@ export function GlbBulkUpload({ onChange }: Props) {
       {/* 3. Files */}
       {brand && selectedIds.size > 0 && (
         <div>
-          <label className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground block mb-1.5">
-            3 · Model files (.glb, .gltf, .3ds, .obj + .mtl + textures — max {GLB_MAX_MB} MB each)
-          </label>
+          <div className="flex items-center gap-3 mb-1.5">
+            <label className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground block">
+              3 · Model files (.glb, .gltf, .3ds, .obj + .mtl + textures — max {GLB_MAX_MB} MB each)
+            </label>
+            <div className="ml-auto flex items-center gap-1 shrink-0" role="group" aria-label="Detected dimension unit">
+              <span className="font-body text-[11px] text-muted-foreground">Measured sizes in</span>
+              {(["cm", "mm", "in"] as const).map((u) => (
+                <button
+                  key={u}
+                  type="button"
+                  onClick={() => changeDimUnit(u)}
+                  disabled={running}
+                  aria-pressed={dimUnit === u}
+                  className={`h-7 px-2 rounded font-body text-[11px] uppercase border ${dimUnit === u ? "bg-foreground text-background border-foreground" : "border-border hover:bg-muted/50"} disabled:opacity-50`}
+                >
+                  {u}
+                </button>
+              ))}
+            </div>
+          </div>
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
