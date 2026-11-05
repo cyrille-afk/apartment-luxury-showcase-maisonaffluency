@@ -88,6 +88,7 @@ export function GlbBulkUpload({ onChange }: Props) {
   const [brands, setBrands] = useState<string[]>([]);
   const [brand, setBrand] = useState("");
   const [letter, setLetter] = useState<string | null>(null);
+  const [brandQuery, setBrandQuery] = useState("");
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -147,10 +148,12 @@ export function GlbBulkUpload({ onChange }: Props) {
     }
     return counts;
   }, [brands]);
-  const visibleBrands = useMemo(
-    () => (letter ? brands.filter((b) => brandLetter(b) === letter) : brands),
-    [brands, letter],
-  );
+  const visibleBrands = useMemo(() => {
+    const base = letter ? brands.filter((b) => brandLetter(b) === letter) : brands;
+    const q = brandQuery.trim().toLowerCase();
+    if (!q) return base;
+    return base.filter((b) => b.toLowerCase().includes(q));
+  }, [brands, letter, brandQuery]);
 
   const selectedProducts = useMemo(
     () => products.filter((p) => selectedIds.has(p.id)),
