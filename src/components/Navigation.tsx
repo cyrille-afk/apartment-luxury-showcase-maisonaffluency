@@ -1419,6 +1419,7 @@ const Navigation = (_props: NavigationProps) => {
                   <span className="font-body text-[9px] font-bold uppercase tracking-[0.3em] text-foreground/70 lg:text-[10px]">Est. 2017</span>
                 </span>
               </button>
+              </div>
 
             </div>
 
