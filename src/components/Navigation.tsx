@@ -1404,9 +1404,13 @@ const Navigation = (_props: NavigationProps) => {
             </div>
 
             <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap">
-              <button onClick={scrollToTop} className="group cursor-pointer">
+              <button onClick={scrollToTop} className="group relative cursor-pointer">
                 <span className="font-brand text-xl lg:text-3xl font-normal tracking-[0.18em] text-foreground transition-opacity duration-300 group-hover:opacity-70">
                   MAISON AFFLUENCY
+                </span>
+                <span className="pointer-events-none absolute left-full top-1/2 ml-5 hidden -translate-y-1/2 items-center gap-2 whitespace-nowrap md:inline-flex" aria-hidden="true">
+                  <span className="h-3 w-px bg-foreground/40" />
+                  <span className="font-body text-[9px] font-bold uppercase tracking-[0.3em] text-foreground/70 lg:text-[10px]">Est. 2017</span>
                 </span>
               </button>
 
