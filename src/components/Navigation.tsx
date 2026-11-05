@@ -1562,7 +1562,7 @@ const Navigation = (_props: NavigationProps) => {
                   </Button>
 
                   {megaMenuOpen && activeRoomMenu === menu.key && (
-                    <div ref={megaMenuRef} data-room-menu={menu.key} className={cn("absolute left-1/2 top-full z-50 bg-background shadow-xl", menu.key === "furniture" ? "w-screen" : menu.key !== "rooms" ? "mt-1 w-[min(74rem,calc(100vw-48px))]" : "mt-1 w-[min(56rem,calc(100vw-48px))]")} style={{ translate: "-50% 0" }}>
+                    <div ref={megaMenuRef} data-room-menu={menu.key} className={cn("absolute left-1/2 top-full z-50 bg-background shadow-xl", "mt-1 w-[min(74rem,calc(100vw-48px))]")} style={{ translate: "-50% 0" }}>
                       <ProductDropdownPanel
                         menuKey={menu.key}
                         menuVisit={menuVisits[menu.key] ?? 0}
