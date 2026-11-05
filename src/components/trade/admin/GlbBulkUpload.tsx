@@ -327,6 +327,16 @@ export function GlbBulkUpload({ onChange }: Props) {
           .filter((o) => o.attachTo === item.key)
           .map((o) => o.file);
         const prepared = await prepareGlbFile([item.file, ...item.companions, ...attached]);
+        // Converted sources (obj/3ds) couldn't be measured at drop time —
+        // measure the converted GLB now when the label still lacks dimensions.
+        let label = item.label;
+        if (!item.labelTouched && !/W\s*\d/i.test(label)) {
+          const dims = await measureGlbDimensions(prepared.file);
+          if (dims) {
+            label = formatDimensionLabel(dims);
+            setFile(item.key, { label });
+          }
+        }
         setFile(item.key, { status: "uploading", progress: 0 });
         // Fresh variant list per product for replace/default logic.
         const { data: vrows } = await supabase
