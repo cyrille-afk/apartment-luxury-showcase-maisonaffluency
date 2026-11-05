@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Upload, Loader2, X, CheckCircle2, AlertCircle, FileBox, Paperclip } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { prepareGlbFile, uploadGlbForProduct, measureGlbDimensions, formatDimensionLabel, GLB_MAX_MB } from "@/lib/glbUpload";
+import { prepareGlbFile, uploadGlbForProduct, measureGlbDimensions, formatDimensionLabel, GLB_MAX_MB, type DimensionUnit, type GlbDimensions } from "@/lib/glbUpload";
 
 interface ProductRow {
   id: string;
@@ -22,6 +22,8 @@ interface BulkFile {
   label: string;
   /** True once the admin edits the label — auto-measurement must not overwrite it. */
   labelTouched?: boolean;
+  /** Bounding box measured from the model, kept so unit switches can reformat untouched labels. */
+  measured?: GlbDimensions;
   status: FileStatus;
   progress: number;
   message?: string;
@@ -104,6 +106,32 @@ export function GlbBulkUpload({ onChange }: Props) {
   const [orphans, setOrphans] = useState<OrphanFile[]>([]);
   const [running, setRunning] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  // Detected-dimension unit: centimetres (default), millimetres or inches.
+  const [dimUnit, setDimUnit] = useState<DimensionUnit>(() => {
+    try {
+      const saved = localStorage.getItem("ma-glb-dim-unit");
+      return saved === "mm" || saved === "in" ? saved : "cm";
+    } catch {
+      return "cm";
+    }
+  });
+  const dimUnitRef = useRef(dimUnit);
+
+  const changeDimUnit = (unit: DimensionUnit) => {
+    dimUnitRef.current = unit;
+    setDimUnit(unit);
+    try {
+      localStorage.setItem("ma-glb-dim-unit", unit);
+    } catch {
+      /* storage unavailable — session-only */
+    }
+    // Reformat measured labels the admin has not edited; edited labels keep their text.
+    setFiles((prev) =>
+      prev.map((f) =>
+        !f.labelTouched && f.measured ? { ...f, label: formatDimensionLabel(f.measured, unit) } : f,
+      ),
+    );
+  };
 
   // Brand list: distinct brand_name across active products.
   useEffect(() => {
@@ -268,7 +296,9 @@ export function GlbBulkUpload({ onChange }: Props) {
         if (!dims) return;
         setFiles((prev) =>
           prev.map((f) =>
-            f.key === e.key && !f.labelTouched ? { ...f, label: formatDimensionLabel(dims) } : f,
+            f.key === e.key && !f.labelTouched
+              ? { ...f, measured: dims, label: formatDimensionLabel(dims, dimUnitRef.current) }
+              : f,
           ),
         );
       });
@@ -333,8 +363,8 @@ export function GlbBulkUpload({ onChange }: Props) {
         if (!item.labelTouched && !/W\s*\d/i.test(label)) {
           const dims = await measureGlbDimensions(prepared.file);
           if (dims) {
-            label = formatDimensionLabel(dims);
-            setFile(item.key, { label });
+            label = formatDimensionLabel(dims, dimUnitRef.current);
+            setFile(item.key, { label, measured: dims });
           }
         }
         setFile(item.key, { status: "uploading", progress: 0 });
@@ -524,9 +554,26 @@ export function GlbBulkUpload({ onChange }: Props) {
       {/* 3. Files */}
       {brand && selectedIds.size > 0 && (
         <div>
-          <label className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground block mb-1.5">
-            3 · Model files (.glb, .gltf, .3ds, .obj + .mtl + textures — max {GLB_MAX_MB} MB each)
-          </label>
+          <div className="flex items-center gap-3 mb-1.5">
+            <label className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground block">
+              3 · Model files (.glb, .gltf, .3ds, .obj + .mtl + textures — max {GLB_MAX_MB} MB each)
+            </label>
+            <div className="ml-auto flex items-center gap-1 shrink-0" role="group" aria-label="Detected dimension unit">
+              <span className="font-body text-[11px] text-muted-foreground">Measured sizes in</span>
+              {(["cm", "mm", "in"] as const).map((u) => (
+                <button
+                  key={u}
+                  type="button"
+                  onClick={() => changeDimUnit(u)}
+                  disabled={running}
+                  aria-pressed={dimUnit === u}
+                  className={`h-7 px-2 rounded font-body text-[11px] uppercase border ${dimUnit === u ? "bg-foreground text-background border-foreground" : "border-border hover:bg-muted/50"} disabled:opacity-50`}
+                >
+                  {u}
+                </button>
+              ))}
+            </div>
+          </div>
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
