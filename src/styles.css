@@ -248,6 +248,25 @@ body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-he
   }
 }
 
+/* Homepage, desktop: the exact designers-landing glass (same tint + 3px blur)
+   with crisp white ink instead of the solid white header. The hero photo runs
+   behind the header; mobile/PWA keep the solid white header. */
+@media (min-width: 768px) {
+  [data-site-header].global-overlay-header[data-homepage="true"],
+  [data-site-header].global-overlay-header[data-homepage="true"]:is(:hover, :focus-within, [data-menu-active="true"]) {
+    --header-current-ink: var(--header-dark-ink) !important;
+    color: var(--header-dark-ink) !important;
+    background-color: rgba(60, 60, 60, 0.2) !important;
+    background-image: linear-gradient(to bottom, rgba(38, 38, 38, 0.32), rgba(92, 92, 92, 0.26)) !important;
+    backdrop-filter: blur(3px) !important;
+  }
+  /* The trade prompt is locked black on light surfaces; on this glass it flips white. */
+  [data-site-header].global-overlay-header[data-homepage="true"] [data-utility-trade],
+  [data-site-header].global-overlay-header[data-homepage="true"] [data-utility-trade] :is(span, em) {
+    color: #ffffff !important;
+  }
+}
+
 /* Dark row ink stays full-strength, including the wordmark's hover state.
    Dropdown panels keep their own surface/ink rather than inheriting white. */
 :is([data-site-header].global-overlay-header[data-header-surface="dark"],
