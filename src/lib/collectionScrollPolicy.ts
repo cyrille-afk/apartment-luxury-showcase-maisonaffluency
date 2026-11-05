@@ -7,8 +7,9 @@ export function shouldResetRouteScroll(previousPath: string | null, pathname: st
 }
 
 /** Admin destinations land immediately; same-page options keep their position. */
-export function routeScrollBehavior(pathname: string, allowSmooth: boolean): ScrollBehavior {
-  const adminPath = /(^|\/)admin(?:\/|$|-)|(^|\/)[^/]+-admin(?:\/|$)/.test(pathname);
+export function routeScrollBehavior(pathname: string, allowSmooth: boolean, previousPath?: string | null): ScrollBehavior {
+  const adminPattern = /(^|\/)admin(?:\/|$|-)|(^|\/)[^/]+-admin(?:\/|$)/;
+  const adminPath = adminPattern.test(pathname) || adminPattern.test(previousPath ?? "");
   return allowSmooth && !adminPath ? "smooth" : "instant";
 }
 /** Product detail pages must land instantly — a smooth scroll-to-top from a deep

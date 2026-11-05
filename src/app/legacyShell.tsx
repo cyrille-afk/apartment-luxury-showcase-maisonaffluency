@@ -397,7 +397,7 @@ export function ScrollToTopOnNavigate() {
     const requiresStableTop = isCollectionLanding(location.pathname) || isProductDetailPath(location.pathname);
     const prefersReduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     const smooth = !isLockedDesignersLanding && !requiresStableTop && state?.smoothScroll !== false && !prefersReduced;
-    const behavior = routeScrollBehavior(location.pathname, smooth);
+    const behavior = routeScrollBehavior(location.pathname, smooth, prevPath);
     // Defer one frame so the new route mounts before we animate — prevents the
     // browser from snapping mid-transition when React commits the new tree.
     const raf = window.requestAnimationFrame(() => {

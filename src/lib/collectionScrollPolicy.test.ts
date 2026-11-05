@@ -30,6 +30,10 @@ describe("Collection scroll ownership", () => {
     expect(routeScrollBehavior("/journal", true)).toBe("smooth");
     expect(routeScrollBehavior("/journal", false)).toBe("instant");
   });
+  it("lands dashboard options instantly even when their destination has no admin suffix", () => {
+    expect(routeScrollBehavior("/trade/journal", true, "/trade/admin-dashboard")).toBe("instant");
+    expect(routeScrollBehavior("/trade/clients", true, "/trade/admin/tools")).toBe("instant");
+  });
   it("excludes Collection from resize anchor restoration", () => {
     expect(isCollectionLanding("/trade/the-collection")).toBe(true);
     expect(isCollectionLanding("/trade/the-collection/")).toBe(true);
