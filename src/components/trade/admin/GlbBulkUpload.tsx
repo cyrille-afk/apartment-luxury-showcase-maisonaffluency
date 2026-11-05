@@ -345,7 +345,7 @@ export function GlbBulkUpload({ onChange }: Props) {
           .eq("product_id", item.productId!);
         await uploadGlbForProduct({
           productId: item.productId!,
-          label: item.label.trim() || "Default",
+          label: label.trim() || "Default",
           prepared,
           existingVariants: (vrows as any[]) || [],
           onProgress: (pct) => setFile(item.key, { progress: pct }),
@@ -370,7 +370,7 @@ export function GlbBulkUpload({ onChange }: Props) {
       <div>
         <div className="font-display text-xl">Bulk upload — one designer</div>
         <div className="font-body text-[11px] text-muted-foreground">
-          Pick a brand, select the products, then drop all the model files at once — including each product's .obj with its .mtl and texture files. Files are matched to products by filename — adjust any match before starting. Give each dimension its own variant label (sizes like 95x77 in the filename are detected) — distinct labels save as separate selectable 3D models; a repeated label replaces that model.
+          Pick a brand, select the products, then drop all the model files at once — including each product's .obj with its .mtl and texture files. Files are matched to products by filename — adjust any match before starting. Give each dimension its own variant label — sizes are measured from the model itself (and detected in filenames like 95x77 or 1080_ROUND), so labels pre-fill and stay editable — distinct labels save as separate selectable 3D models; a repeated label replaces that model.
         </div>
       </div>
 
@@ -582,7 +582,7 @@ export function GlbBulkUpload({ onChange }: Props) {
                     </select>
                     <input
                       value={f.label}
-                      onChange={(e) => setFile(f.key, { label: e.target.value })}
+                      onChange={(e) => setFile(f.key, { label: e.target.value, labelTouched: true })}
                       disabled={running || f.status === "done"}
                       placeholder="Variant label"
                       className="w-[130px] px-2 py-1.5 border border-border rounded bg-background font-body text-xs focus:outline-hidden focus:border-foreground/40"
