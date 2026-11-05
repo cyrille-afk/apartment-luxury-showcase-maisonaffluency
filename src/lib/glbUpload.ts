@@ -25,8 +25,16 @@ export function normalizeSizeToCm(size: { x: number; y: number; z: number }): Gl
   return { wCm: round(size.x), dCm: round(size.z), hCm: round(size.y) };
 }
 
+/** Unit the admin wants detected dimensions pre-filled in. */
+export type DimensionUnit = "cm" | "mm" | "in";
+
 /** Variant label matching the admin convention ("W 108 × D 108"). */
-export function formatDimensionLabel(d: GlbDimensions): string {
+export function formatDimensionLabel(d: GlbDimensions, unit: DimensionUnit = "cm"): string {
+  if (unit === "mm") return `W ${d.wCm * 10} × D ${d.dCm * 10} mm`;
+  if (unit === "in") {
+    const toIn = (v: number) => `${Math.round((v / 2.54) * 10) / 10}`;
+    return `W ${toIn(d.wCm)} × D ${toIn(d.dCm)} in`;
+  }
   return `W ${d.wCm} × D ${d.dCm}`;
 }
 
