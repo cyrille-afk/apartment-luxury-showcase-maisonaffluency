@@ -33,7 +33,7 @@ const TradeAdminGlbModels: React.FC = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const startUpload = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "auto" });
     setSearch("");
     setSelected(null);
     setBulkMode(false);
@@ -41,7 +41,7 @@ const TradeAdminGlbModels: React.FC = () => {
   };
 
   const startBulkUpload = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "auto" });
     setSelected(null);
     setBulkMode(true);
   };
@@ -400,7 +400,7 @@ const TradeAdminGlbModels: React.FC = () => {
                           onClick={() => {
                             setSelected(row);
                             setBulkMode(false);
-                            window.scrollTo({ top: 0, behavior: "smooth" });
+                            window.scrollTo({ top: 0, behavior: "auto" });
                           }}
                           className="block w-full text-left"
                         >
