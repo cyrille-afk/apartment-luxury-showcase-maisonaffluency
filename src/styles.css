@@ -242,9 +242,9 @@ body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-he
 @media (min-width: 768px) {
   [data-site-header].global-overlay-header[data-header-surface="dark"][data-designers-page="true"],
   [data-site-header].global-overlay-header[data-header-surface="dark"][data-designers-page="true"]:is(:hover, :focus-within, [data-menu-active="true"]) {
-    background-color: rgba(60, 60, 60, 0.4) !important;
-    background-image: linear-gradient(to bottom, rgba(38, 38, 38, 0.55), rgba(92, 92, 92, 0.48)) !important;
-    backdrop-filter: blur(6px) !important;
+    background-color: rgba(60, 60, 60, 0.2) !important;
+    background-image: linear-gradient(to bottom, rgba(38, 38, 38, 0.32), rgba(92, 92, 92, 0.26)) !important;
+    backdrop-filter: blur(3px) !important;
   }
 }
 
