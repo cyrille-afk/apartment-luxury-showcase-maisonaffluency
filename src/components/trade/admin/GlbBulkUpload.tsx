@@ -424,6 +424,11 @@ export function GlbBulkUpload({ onChange }: Props) {
                 {b}
               </button>
             ))}
+            {visibleBrands.length === 0 && (
+              <div className="px-3 py-3 text-muted-foreground text-sm text-center">
+                {brandQuery ? `No designers in ${letter} match "${brandQuery}".` : `No designers in ${letter}.`}
+              </div>
+            )}
           </div>
         )}
         {!letter && (
