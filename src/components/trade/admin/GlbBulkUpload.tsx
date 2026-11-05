@@ -371,9 +371,12 @@ export function GlbBulkUpload({ onChange }: Props) {
                 }}
                 disabled={!has || running}
                 aria-pressed={active}
-                className={`h-7 w-7 rounded font-body text-[11px] border ${active ? "bg-foreground text-background border-foreground" : "border-border hover:bg-muted/50"} disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed`}
+                className={`h-7 min-w-7 px-1 rounded font-body text-[11px] border ${active ? "bg-foreground text-background border-foreground" : "border-border hover:bg-muted/50"} disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed`}
               >
                 {l}
+                {has && (
+                  <span className="ml-0.5 text-[9px] opacity-60">{brandsPerLetter.get(l)}</span>
+                )}
               </button>
             );
           })}
