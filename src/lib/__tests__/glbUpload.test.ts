@@ -43,3 +43,17 @@ describe("original 3D upload provenance", () => {
     expect(mocks.insert).not.toHaveBeenCalled();
   });
 });
+describe("normalizeSizeToCm", () => {
+  it("treats small sizes as metres", () =>
+    expect(normalizeSizeToCm({ x: 1.08, y: 0.75, z: 1.08 })).toEqual({ wCm: 108, dCm: 108, hCm: 75 }));
+  it("treats large sizes as millimetres", () =>
+    expect(normalizeSizeToCm({ x: 1680, y: 740, z: 1080 })).toEqual({ wCm: 168, dCm: 108, hCm: 74 }));
+  it("keeps mid-range sizes as centimetres", () =>
+    expect(normalizeSizeToCm({ x: 128, y: 75, z: 108 })).toEqual({ wCm: 128, dCm: 108, hCm: 75 }));
+  it("rejects empty boxes", () => expect(normalizeSizeToCm({ x: 0, y: 0, z: 0 })).toBeNull());
+});
+
+describe("formatDimensionLabel", () => {
+  it("matches the admin W × D convention", () =>
+    expect(formatDimensionLabel({ wCm: 108, dCm: 108, hCm: 75 })).toBe("W 108 × D 108"));
+});
