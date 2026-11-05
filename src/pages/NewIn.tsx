@@ -166,8 +166,7 @@ function DesktopJumpNav({ designers }: { designers: ReturnType<typeof useNewInDe
 
   return (
     <div
-      className="sticky z-30 bg-background/95 backdrop-blur-sm border-b border-border/20 transition-[top] duration-300"
-      style={{ top: navHidden ? 0 : "var(--header-h)" }}
+      className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border/20"
     >
 
       <div className="max-w-7xl mx-auto px-12 lg:px-20 flex items-center gap-8 py-3">
