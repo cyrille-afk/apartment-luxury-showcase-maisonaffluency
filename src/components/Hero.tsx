@@ -105,7 +105,7 @@ const Hero = () => {
 
   return (
     <section
-      className="ma-home-hero relative flex w-full flex-col justify-between h-[100svh] min-h-[100svh] overflow-hidden md:h-screen md:overflow-hidden"
+      className="ma-home-hero relative flex w-full flex-col justify-between h-[100svh] min-h-[100svh] overflow-hidden md:h-[max(100vh,66.666667vw)] md:overflow-hidden"
     >
       {/* Hero image is rendered by the static <picture id="static-hero"> in
           index.html (fixed, z-index:0, painted from the preloaded bytes
