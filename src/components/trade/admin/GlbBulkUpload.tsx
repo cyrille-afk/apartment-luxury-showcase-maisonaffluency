@@ -87,6 +87,7 @@ function matchScore(fileStem: string, productName: string): number {
 export function GlbBulkUpload({ onChange }: Props) {
   const [brands, setBrands] = useState<string[]>([]);
   const [brand, setBrand] = useState("");
+  const [letter, setLetter] = useState<string | null>(null);
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -132,6 +133,16 @@ export function GlbBulkUpload({ onChange }: Props) {
       setLoadingProducts(false);
     })();
   }, [brand]);
+
+  const brandLetter = (b: string) => {
+    const c = b.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().charAt(0).toUpperCase();
+    return /[A-Z]/.test(c) ? c : "#";
+  };
+  const lettersWithBrands = useMemo(() => new Set(brands.map(brandLetter)), [brands]);
+  const visibleBrands = useMemo(
+    () => (letter ? brands.filter((b) => brandLetter(b) === letter) : brands),
+    [brands, letter],
+  );
 
   const selectedProducts = useMemo(
     () => products.filter((p) => selectedIds.has(p.id)),
@@ -325,6 +336,60 @@ export function GlbBulkUpload({ onChange }: Props) {
         <label className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground block mb-1.5">
           1 · Designer / brand
         </label>
+        <div className="flex flex-wrap gap-1 mb-2" role="group" aria-label="Filter designers A–Z">
+          <button
+            type="button"
+            onClick={() => setLetter(null)}
+            disabled={running}
+            aria-pressed={letter === null}
+            className={`h-7 px-2 rounded font-body text-[11px] uppercase tracking-[0.08em] border ${letter === null ? "bg-foreground text-background border-foreground" : "border-border hover:bg-muted/50"}`}
+          >
+            All
+          </button>
+          {[..."ABCDEFGHIJKLMNOPQRSTUVWXYZ", "#"].map((l) => {
+            const has = lettersWithBrands.has(l);
+            const active = letter === l;
+            return (
+              <button
+                key={l}
+                type="button"
+                onClick={() => {
+                  setLetter(l);
+                  if (brand && brandLetter(brand) !== l) {
+                    setBrand("");
+                    setFiles([]);
+                    setOrphans([]);
+                  }
+                }}
+                disabled={!has || running}
+                aria-pressed={active}
+                className={`h-7 w-7 rounded font-body text-[11px] border ${active ? "bg-foreground text-background border-foreground" : "border-border hover:bg-muted/50"} disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed`}
+              >
+                {l}
+              </button>
+            );
+          })}
+        </div>
+        {letter && (
+          <div className="border border-border rounded-md divide-y divide-border max-h-[24vh] overflow-y-auto mb-2">
+            {visibleBrands.map((b) => (
+              <button
+                key={b}
+                type="button"
+                disabled={running}
+                onClick={() => {
+                  setBrand(b);
+                  setFiles([]);
+                  setOrphans([]);
+                }}
+                className={`w-full text-left px-3 py-2 font-body text-sm ${brand === b ? "bg-muted" : "hover:bg-muted/40"}`}
+              >
+                {b}
+              </button>
+            ))}
+          </div>
+        )}
+        {!letter && (
         <select
           value={brand}
           onChange={(e) => {
@@ -336,10 +401,11 @@ export function GlbBulkUpload({ onChange }: Props) {
           className="w-full px-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:outline-hidden focus:border-foreground/40 appearance-none"
         >
           <option value="">Choose a brand…</option>
-          {brands.map((b) => (
+          {visibleBrands.map((b) => (
             <option key={b} value={b}>{b}</option>
           ))}
         </select>
+        )}
       </div>
 
       {/* 2. Products */}
