@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Upload, Loader2, X, CheckCircle2, AlertCircle, FileBox, Paperclip } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { prepareGlbFile, uploadGlbForProduct, measureGlbDimensions, formatDimensionLabel, GLB_MAX_MB } from "@/lib/glbUpload";
+import { prepareGlbFile, uploadGlbForProduct, measureGlbDimensions, formatDimensionLabel, GLB_MAX_MB, type DimensionUnit, type GlbDimensions } from "@/lib/glbUpload";
 
 interface ProductRow {
   id: string;
@@ -22,6 +22,8 @@ interface BulkFile {
   label: string;
   /** True once the admin edits the label — auto-measurement must not overwrite it. */
   labelTouched?: boolean;
+  /** Bounding box measured from the model, kept so unit switches can reformat untouched labels. */
+  measured?: GlbDimensions;
   status: FileStatus;
   progress: number;
   message?: string;
