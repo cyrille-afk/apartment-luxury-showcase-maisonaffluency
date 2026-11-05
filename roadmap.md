@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Admin option scrolling
-- [ ] Audit remaining admin pages and shared editors for animated option-click scrolling.
-- [ ] Remove unwanted scrolling and verify affected pages signed in with real records and non-destructive actions.
+- [x] Audit admin pages and shared editors: remaining glide comes from the shared PUSH/REPLACE navigation reset; admin option/filter changes already retain position.
+- [x] Admin destinations and departures now land instantly; public navigation/history unchanged. Signed-in live checks clicked all 50 dashboard cards and six additional Admin Tools links: no smooth calls or intermediate glide frames. Designer/product/inquiry/finish filters and two view-tab switches stayed stationary; no records changed. Eighteen scroll regressions pass; build OK.
 
 ## Directory scroll line
 - [x] Restore the desktop line below the live search/caption dock with light frost unchanged and section-aware white-to-black ink.
