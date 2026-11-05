@@ -259,6 +259,20 @@ export function GlbBulkUpload({ onChange }: Props) {
         `${newOrphans.length} companion file${newOrphans.length === 1 ? "" : "s"} need${newOrphans.length === 1 ? "s" : ""} an .obj to attach to — use the dropdown below.`,
       );
     }
+
+    // Measure each .glb/.gltf's real bounding box and pre-fill the dimension
+    // label — never overwrites a label the admin already edited.
+    for (const e of newEntries) {
+      if (!/\.(glb|gltf)$/i.test(e.file.name)) continue;
+      void measureGlbDimensions(e.file).then((dims) => {
+        if (!dims) return;
+        setFiles((prev) =>
+          prev.map((f) =>
+            f.key === e.key && !f.labelTouched ? { ...f, label: formatDimensionLabel(dims) } : f,
+          ),
+        );
+      });
+    }
   };
 
   const setFile = (key: string, patch: Partial<BulkFile>) =>
