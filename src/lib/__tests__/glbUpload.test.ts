@@ -56,4 +56,10 @@ describe("normalizeSizeToCm", () => {
 describe("formatDimensionLabel", () => {
   it("matches the admin W × D convention", () =>
     expect(formatDimensionLabel({ wCm: 108, dCm: 108, hCm: 75 })).toBe("W 108 × D 108"));
+  it("defaults to centimetres", () =>
+    expect(formatDimensionLabel({ wCm: 108, dCm: 108, hCm: 75 }, "cm")).toBe("W 108 × D 108"));
+  it("reads out millimetres when the admin picks mm", () =>
+    expect(formatDimensionLabel({ wCm: 108, dCm: 108, hCm: 75 }, "mm")).toBe("W 1080 × D 1080 mm"));
+  it("converts to inches at one decimal when the admin picks in", () =>
+    expect(formatDimensionLabel({ wCm: 108, dCm: 77, hCm: 75 }, "in")).toBe("W 42.5 × D 30.3 in"));
 });
