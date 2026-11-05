@@ -20,7 +20,7 @@ export interface GlbDimensions {
 export function normalizeSizeToCm(size: { x: number; y: number; z: number }): GlbDimensions | null {
   const max = Math.max(size.x, size.y, size.z);
   if (!Number.isFinite(max) || max <= 0) return null;
-  const factor = max < 20 ? 100 : max > 2000 ? 0.1 : 1;
+  const factor = max < 20 ? 100 : max > 400 ? 0.1 : 1;
   const round = (v: number) => Math.max(1, Math.round(v * factor));
   return { wCm: round(size.x), dCm: round(size.z), hCm: round(size.y) };
 }
