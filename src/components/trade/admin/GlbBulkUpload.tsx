@@ -139,6 +139,14 @@ export function GlbBulkUpload({ onChange }: Props) {
     return /[A-Z]/.test(c) ? c : "#";
   };
   const lettersWithBrands = useMemo(() => new Set(brands.map(brandLetter)), [brands]);
+  const brandsPerLetter = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const b of brands) {
+      const l = brandLetter(b);
+      counts.set(l, (counts.get(l) ?? 0) + 1);
+    }
+    return counts;
+  }, [brands]);
   const visibleBrands = useMemo(
     () => (letter ? brands.filter((b) => brandLetter(b) === letter) : brands),
     [brands, letter],
@@ -363,9 +371,12 @@ export function GlbBulkUpload({ onChange }: Props) {
                 }}
                 disabled={!has || running}
                 aria-pressed={active}
-                className={`h-7 w-7 rounded font-body text-[11px] border ${active ? "bg-foreground text-background border-foreground" : "border-border hover:bg-muted/50"} disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed`}
+                className={`h-7 min-w-7 px-1 rounded font-body text-[11px] border ${active ? "bg-foreground text-background border-foreground" : "border-border hover:bg-muted/50"} disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed`}
               >
                 {l}
+                {has && (
+                  <span className="ml-0.5 text-[9px] opacity-60">{brandsPerLetter.get(l)}</span>
+                )}
               </button>
             );
           })}
