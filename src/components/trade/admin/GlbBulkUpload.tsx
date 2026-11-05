@@ -296,7 +296,9 @@ export function GlbBulkUpload({ onChange }: Props) {
         if (!dims) return;
         setFiles((prev) =>
           prev.map((f) =>
-            f.key === e.key && !f.labelTouched ? { ...f, label: formatDimensionLabel(dims) } : f,
+            f.key === e.key && !f.labelTouched
+              ? { ...f, measured: dims, label: formatDimensionLabel(dims, dimUnitRef.current) }
+              : f,
           ),
         );
       });
@@ -361,8 +363,8 @@ export function GlbBulkUpload({ onChange }: Props) {
         if (!item.labelTouched && !/W\s*\d/i.test(label)) {
           const dims = await measureGlbDimensions(prepared.file);
           if (dims) {
-            label = formatDimensionLabel(dims);
-            setFile(item.key, { label });
+            label = formatDimensionLabel(dims, dimUnitRef.current);
+            setFile(item.key, { label, measured: dims });
           }
         }
         setFile(item.key, { status: "uploading", progress: 0 });
