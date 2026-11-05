@@ -237,6 +237,17 @@ body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-he
   background-image: var(--header-dark-glass-gradient) !important;
   backdrop-filter: blur(12px) !important;
 }
+/* Designers landing only, desktop: slightly clearer glass — more transparent,
+   less blur — while the rest of the dark-glass pages keep the full treatment. */
+@media (min-width: 768px) {
+  [data-site-header].global-overlay-header[data-header-surface="dark"][data-designers-page="true"],
+  [data-site-header].global-overlay-header[data-header-surface="dark"][data-designers-page="true"]:is(:hover, :focus-within, [data-menu-active="true"]) {
+    background-color: rgba(60, 60, 60, 0.4) !important;
+    background-image: linear-gradient(to bottom, rgba(38, 38, 38, 0.55), rgba(92, 92, 92, 0.48)) !important;
+    backdrop-filter: blur(6px) !important;
+  }
+}
+
 /* Dark row ink stays full-strength, including the wordmark's hover state.
    Dropdown panels keep their own surface/ink rather than inheriting white. */
 :is([data-site-header].global-overlay-header[data-header-surface="dark"],
