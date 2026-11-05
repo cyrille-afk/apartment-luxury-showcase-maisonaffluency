@@ -573,10 +573,10 @@ const TradeLanding = () => {
         {/* Full official site header (fixed) */}
         <Navigation />
         {/* Spacer reserving the fixed header's footprint */}
-        <div aria-hidden className="h-24 md:h-[120px] pt-[env(safe-area-inset-top)]" />
+        <div aria-hidden className="h-24 md:h-[var(--header-h)] pt-[env(safe-area-inset-top)]" />
 
         {/* ─── Split-screen Hero ─── */}
-        <div className="relative flex min-h-[calc(100svh-6rem)] w-full flex-col md:grid md:grid-cols-12 md:h-[calc(100vh-256px)] md:min-h-0">
+        <div className="relative flex min-h-[calc(100svh-6rem)] w-full flex-col md:grid md:grid-cols-12 md:h-[calc(100vh-var(--header-h)-136px)] md:min-h-0">
           {/* Debug 12-column overlay (desktop only) — add ?debug-grid to the URL to show */}
           {typeof window !== "undefined" && new URLSearchParams(window.location.search).has("debug-grid") && (
             <div aria-hidden className="pointer-events-none absolute inset-0 z-[80] hidden md:grid md:grid-cols-12">
