@@ -11,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
 import { getCachedCatalog } from "@/lib/catalogSource";
 import { filterPublicPicks } from "@/lib/publicCatalogVisibility";
+import { fetchPublicDesignerCredits } from "@/lib/publicDesignerCredits";
 import { useAllDesigners, type Designer } from "@/hooks/useDesigner";
 import { useAuth } from "@/hooks/useAuth";
 import { shouldShowCatalogueFootnote } from "@/lib/catalogueFootnote";

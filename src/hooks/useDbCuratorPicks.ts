@@ -4,6 +4,7 @@ import type { CuratorPick } from "@/components/FeaturedDesigners";
 import { applyCuratorPickOrder, sortCuratorPicks } from "@/lib/curatorPickSort";
 import { queryKeys } from "@/lib/queryKeys";
 import { getCachedCatalog } from "@/lib/catalogSource";
+import { fetchPublicDesignerCredits, type PublicDesignerCredit } from "@/lib/publicDesignerCredits";
 
 export interface DbProductItem {
   pick: CuratorPick;

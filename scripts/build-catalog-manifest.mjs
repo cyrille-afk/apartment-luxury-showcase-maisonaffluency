@@ -80,10 +80,7 @@ async function main() {
       .from("designer_curator_picks_public")
       .select(PICK_COLUMNS)
       .not("image_url", "is", null),
-    supabase
-      .from("designers")
-      .select("id, name, slug, display_name, source, founder, era, country, is_published, trade_only")
-      .eq("is_published", true),
+    supabase.rpc("public_catalog_designer_credits"),
   ]);
 
   if (picksRes.error || designersRes.error) {

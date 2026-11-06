@@ -87,10 +87,7 @@ Deno.serve(async (req) => {
         .not("image_url", "is", null)
         .range(0, 1999),
       supabase
-        .from("designers")
-        .select("id, name, slug, display_name, source, founder, era, country, is_published, trade_only")
-        .eq("is_published", true)
-        .range(0, 499),
+        .rpc("public_catalog_designer_credits"),
     ]);
 
     if (picksRes.error) throw picksRes.error;

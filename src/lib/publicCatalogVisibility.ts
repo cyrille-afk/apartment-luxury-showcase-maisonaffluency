@@ -8,16 +8,16 @@ export interface DesignerVisibilityRow {
   trade_only?: boolean | null;
 }
 
-/** Ids of designers that may appear on public pages. */
+/** Ids of published designers whose safe credit may accompany a public pick. */
 export function publicDesignerIds(designers: readonly DesignerVisibilityRow[] | null | undefined): Set<string> {
   const ids = new Set<string>();
   for (const d of designers ?? []) {
-    if (d?.id && d.is_published === true && d.trade_only !== true) ids.add(d.id);
+    if (d?.id && d.is_published === true) ids.add(d.id);
   }
   return ids;
 }
 
-/** Drops picks whose designer is Trade Only, unpublished or unknown. */
+/** Drops picks whose maker is unpublished or has no safe public credit. */
 export function filterPublicPicks<T extends { designer_id?: string | null }>(
   picks: readonly T[],
   designers: readonly DesignerVisibilityRow[] | null | undefined,
