@@ -3,6 +3,7 @@ import { applyTradeDiscount } from "@/lib/productPricing";
 import type { TradeProduct } from "@/lib/tradeProducts";
 import { withImperialPerLine } from "./formatDimensions";
 import { formatEditionLabel } from "./editionLabel";
+import { fetchPublicDesignerCredits } from "./publicDesignerCredits";
 
 const fold = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 

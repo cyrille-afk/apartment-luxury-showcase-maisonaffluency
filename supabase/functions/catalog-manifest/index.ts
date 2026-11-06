@@ -64,7 +64,8 @@ Deno.serve(async (req) => {
 
   try {
     // Anon key + RLS: the public policy on designer_curator_picks_public
-    // already scopes to visible / published / non-trade-only rows.
+    // scopes to individually published products. Safe maker credits come from
+    // the narrow RPC, never from private Trade Only profile fields.
     // A signed-in trade user is served with their own JWT (and never cached).
     const authHeader = req.headers.get("Authorization");
     const authenticated = isAuthenticatedRequest(req);

@@ -6,6 +6,7 @@ import { formatEditionLabel } from "@/lib/editionLabel";
 import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
 import { queryKeys } from "@/lib/queryKeys";
 import { attributedDesignerFilter, creditsDesigner } from "@/lib/designerCollaboration";
+import { fetchPublicDesignerCredits } from "@/lib/publicDesignerCredits";
 
 const HIDDEN_DESIGNER_SLUGS = new Set(["gabriel-hendifar"]);
 

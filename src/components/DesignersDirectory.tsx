@@ -356,23 +356,21 @@ function useFullCuratorPicks(enabled: boolean) {
         picks = cached.picks as any[];
         designers = cached.designers as any[];
       } else {
-        const [picksRes, designersRes] = await Promise.all([
+        const [picksRes, designerCredits] = await Promise.all([
           applyCuratorPickOrder(
             supabase
               .from("designer_curator_picks_public")
               .select("id, designer_id, sort_order, created_at, image_url, hover_image_url, title, subtitle, category, subcategory, tags, materials, dimensions, pdf_url, origin, edition, edition_number, edition_signing")
           ),
-          supabase
-            .from("designers")
-            .select("id, name, slug, founder, is_published, trade_only"),
+          fetchPublicDesignerCredits(),
         ]);
         picks = picksRes.data as any[] | null;
-        designers = designersRes.data as any[] | null;
+        designers = designerCredits;
       }
       if (!picks) return [];
       const designerMap = new Map((designers || []).map((d: any) => [d.id, { name: d.name, slug: d.slug, founder: d.founder }]));
-      // Public grids never surface pieces from Trade Only or unpublished
-      // designers — not even as a placeholder card.
+      // Public grids use each product's own publication state. Trade Only
+      // maker profiles and unpublished/uncredited makers stay excluded.
       // Finish-specific duplicates (e.g. Clam Chair "Oiled Walnut") are tagged
       // "profile-only": they belong on the designer profile, never in category grids.
       const visiblePicks = filterPublicPicks(picks as any[], designers).filter(

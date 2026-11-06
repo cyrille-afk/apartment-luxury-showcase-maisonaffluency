@@ -9,8 +9,8 @@
  * database dependency. The edge function is kept as a runtime fallback so
  * newly-added picks show up within the 5-min SWR window without a redeploy.
  *
- * Mirrors the query in supabase/functions/catalog-manifest/index.ts — keep
- * the two column lists in sync.
+ * Mirrors the queries in supabase/functions/catalog-manifest/index.ts — keep
+ * the product columns and safe maker-credit RPC in sync.
  */
 import { writeFile, mkdir, readFile } from "node:fs/promises";
 import path from "node:path";
