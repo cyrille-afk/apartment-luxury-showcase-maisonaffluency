@@ -44,12 +44,18 @@ var search_curator_picks_default = defineTool({
       }, () => {
       });
     };
+    const { data: creditRows, error: creditError } = await supabase.rpc("public_catalog_designer_credits");
+    if (creditError) {
+      logCall(0, true);
+      return { content: [{ type: "text", text: `Search failed: ${creditError.message}` }], isError: true };
+    }
+    const credits = creditRows ?? [];
     const MIN_LIMIT = 10;
     const limit = Math.max(MIN_LIMIT, input.limit ?? 20);
     let designerId = null;
     let designerName = null;
     if (input.designer_slug) {
-      const { data: d } = await supabase.from("designers").select("id, name").eq("slug", input.designer_slug).eq("is_published", true).eq("trade_only", false).maybeSingle();
+      const d = credits.find((credit) => credit.slug === input.designer_slug && credit.is_published);
       if (!d) {
         logCall(0);
         return {
@@ -116,9 +122,9 @@ var search_curator_picks_default = defineTool({
       );
       let brandFilter = "";
       if (!designerId && tokens.length) {
-        const orClauses = tokens.flatMap((t) => [`name.ilike.%${t}%`, `founder.ilike.%${t}%`]).join(",");
-        const { data: brandMatches } = await supabase.from("designers").select("id").eq("is_published", true).eq("trade_only", false).or(orClauses).limit(200);
-        const brandIds = (brandMatches ?? []).map((r) => r.id).filter(Boolean);
+        const brandIds = credits.filter((credit) => credit.is_published && tokens.some(
+          (token) => [credit.name, credit.founder].some((value) => value?.toLowerCase().includes(token.toLowerCase()))
+        )).map((credit) => credit.id).slice(0, 200);
         if (brandIds.length) {
           brandFilter = `,designer_id.in.(${brandIds.join(",")})`;
         }
@@ -136,8 +142,9 @@ var search_curator_picks_default = defineTool({
     const ids = Array.from(new Set((data ?? []).map((r) => r.designer_id).filter(Boolean)));
     let designersById = /* @__PURE__ */ new Map();
     if (ids.length) {
-      const { data: ds } = await supabase.from("designers").select("id, name, slug").in("id", ids).eq("is_published", true).eq("trade_only", false);
-      for (const row of ds ?? []) designersById.set(row.id, { name: row.name, slug: row.slug });
+      for (const row of credits) {
+        if (ids.includes(row.id) && row.is_published) designersById.set(row.id, { name: row.name, slug: row.slug });
+      }
     }
     const results = (data ?? []).map((r) => {
       const designer = r.designer_id ? designersById.get(r.designer_id) : null;
@@ -223,8 +230,9 @@ var get_product_default = defineTool2({
         isError: true
       };
     }
-    const { data: designer } = await supabase.from("designers").select("id, name, slug, is_published, trade_only").eq("id", data.designer_id).maybeSingle();
-    if (!designer || !designer.is_published || designer.trade_only) {
+    const { data: credits } = await supabase.rpc("public_catalog_designer_credits");
+    const designer = (credits ?? []).find((credit) => credit.id === data.designer_id);
+    if (!designer || !designer.is_published) {
       logCall(0, true);
       return {
         content: [{ type: "text", text: "Product not found or not publicly available." }],
