@@ -213,7 +213,10 @@ export async function fetchPublicProductPage(
       .select(publicPickFields)
       .eq("id", (product as any).id)
       .maybeSingle();
-    if (fullRow) product = { ...(product as any), ...(fullRow as any) };
+    // A cached listing row is not permission to render a product that has just
+    // been made Trade Only or hidden. The live safe projection is authoritative.
+    if (!fullRow) return null;
+    product = { ...(product as any), ...(fullRow as any) };
   }
 
   // If the route designer was unresolvable (trade-only or unknown parent slug),
