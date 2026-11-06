@@ -121,7 +121,7 @@ export function designerSeoTitle(
 export function designerSeoDescription(args: { name: string; founder?: string | null; specialty?: string | null; biography?: string | null; isChildDesigner?: boolean; slug?: string | null }) {
   const cleanName = displayName(args.name);
   const cleanFounder = args.founder?.trim();
-  const rawBio = args.biography ? args.biography.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() : "";
+  const rawBio = args.biography ? args.biography.replace(/^[ \t]*https?:\/\/[^\n]*$/gim, " ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() : "";
   const genericAffiliation = /^designer\s+for\s+.+\.?$/i.test(rawBio);
   const usableBio = rawBio && !genericAffiliation ? rawBio : "";
 
