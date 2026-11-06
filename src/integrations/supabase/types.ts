@@ -14047,6 +14047,22 @@ export type Database = {
         }
         Returns: boolean
       }
+      public_catalog_designer_credits: {
+        Args: never
+        Returns: {
+          country: string
+          display_name: string
+          era: string
+          founder: string
+          id: string
+          is_independent: boolean
+          is_published: boolean
+          name: string
+          slug: string
+          source: string
+          trade_only: boolean
+        }[]
+      }
       public_collaboration_owner_metadata: {
         Args: { _ids: string[] }
         Returns: {

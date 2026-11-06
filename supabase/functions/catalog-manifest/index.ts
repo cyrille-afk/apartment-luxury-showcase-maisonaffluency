@@ -6,7 +6,8 @@
 // lazily via useCuratorPickDetail when a card is opened.
 //
 // Cached by the browser AND any intermediate CDN via a plain GET + Cache-Control:
-//   public, s-maxage=3600, stale-while-revalidate=86400
+//   public, s-maxage=60, stale-while-revalidate=300
+// Short freshness keeps per-product Public / Trade Only changes responsive.
 //
 // -> 1 h fresh at the edge, 24 h stale-while-revalidate window. This is the
 // single high-traffic listing that was showing up as the top slow query
@@ -17,7 +18,7 @@
 
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { isAuthenticatedRequest, publicCacheHeaders } from "../_shared/publicCache.ts";
+import { isAuthenticatedRequest, PRIVATE_CACHE_CONTROL, publicCacheHeaders } from "../_shared/publicCache.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
@@ -64,7 +65,8 @@ Deno.serve(async (req) => {
 
   try {
     // Anon key + RLS: the public policy on designer_curator_picks_public
-    // already scopes to visible / published / non-trade-only rows.
+    // scopes to individually published products. Safe maker credits come from
+    // the narrow RPC, never from private Trade Only profile fields.
     // A signed-in trade user is served with their own JWT (and never cached).
     const authHeader = req.headers.get("Authorization");
     const authenticated = isAuthenticatedRequest(req);
@@ -87,10 +89,7 @@ Deno.serve(async (req) => {
         .not("image_url", "is", null)
         .range(0, 1999),
       supabase
-        .from("designers")
-        .select("id, name, slug, display_name, source, founder, era, country, is_published, trade_only")
-        .eq("is_published", true)
-        .range(0, 499),
+        .rpc("public_catalog_designer_credits"),
     ]);
 
     if (picksRes.error) throw picksRes.error;
@@ -107,6 +106,9 @@ Deno.serve(async (req) => {
       headers: {
         ...corsHeaders,
         ...publicCacheHeaders(req),
+        "Cache-Control": authenticated
+          ? PRIVATE_CACHE_CONTROL
+          : "public, max-age=30, s-maxage=60, stale-while-revalidate=300",
         "Content-Type": "application/json; charset=utf-8",
       },
     });

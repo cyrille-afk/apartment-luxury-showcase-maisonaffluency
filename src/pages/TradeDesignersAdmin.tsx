@@ -251,7 +251,7 @@ function HeritageSlideManager({ designerId }: { designerId: string }) {
 }
 
 /** Inline Curator Picks manager for each designer */
-const IMMEDIATE_PICK_AUTOSAVE_FIELDS = new Set<string>(["title"]);
+const IMMEDIATE_PICK_AUTOSAVE_FIELDS = new Set<string>(["title", "trade_only"]);
 
 // Pickup details are shared across a designer's whole catalogue: saving one
 // pick's pickup address/country/postcode applies it to every pick of that
@@ -443,7 +443,7 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
       : {};
     const { data, error } = await supabase
       .from("designer_curator_picks")
-      .insert({ designer_id: designerId, title: "Untitled Piece", image_url: "", sort_order: order, ...inherited } as any)
+      .insert({ designer_id: designerId, title: "Untitled Piece", image_url: "", sort_order: order, trade_only: true, ...inherited } as any)
       .select()
       .single();
     if (error) {
@@ -864,14 +864,17 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
                 {(pick as any).is_hidden ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
               </button>
               <button
+                type="button"
                 onClick={() => {
                   updateField(pick.id, "trade_only", !pick.trade_only);
                   queryClient.invalidateQueries({ queryKey: ["admin-public-picks-counts"] });
                 }}
-                title={pick.trade_only ? "Trade-only — hidden from public (click to make public)" : "Public + Trade (click to make trade-only)"}
-                className={`transition-colors p-1 ${pick.trade_only ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                aria-label={`${pick.title || "Piece"}: ${pick.trade_only ? "Trade Only; publish publicly" : "Public; make Trade Only"}`}
+                title={pick.trade_only ? "Trade Only — hidden from visitors. Click to publish this product only." : "Public — visible to visitors and Trade. Click to make this product Trade Only."}
+                className={`inline-flex h-7 shrink-0 items-center gap-1 rounded border border-border/60 px-2 text-[9px] uppercase tracking-wider transition-colors ${pick.trade_only ? "text-primary hover:text-foreground" : "text-foreground hover:text-primary"}`}
               >
                 {pick.trade_only ? <Lock className="w-3.5 h-3.5" /> : <LockOpen className="w-3 h-3" />}
+                <span>{pick.trade_only ? "Trade Only" : "Public"}</span>
               </button>
               <button
                 onClick={() => updateField(pick.id, "hidden_in_studio", !(pick as any).hidden_in_studio)}
@@ -3337,7 +3340,7 @@ const TradeDesignersAdmin = () => {
 
                         <div
                           className="flex items-center gap-2 pl-3 border-l border-border/60"
-                          title="When ON, this designer appears only inside the Trade Program and is hidden from every public page."
+                          title="When ON, this maker's profile and directory entry stay inside the Trade Program. Each product's own PUBLIC / TRADE ONLY control decides its public visibility independently."
                         >
                           <Switch
                             checked={getField(d.id, "trade_only") as unknown as boolean}

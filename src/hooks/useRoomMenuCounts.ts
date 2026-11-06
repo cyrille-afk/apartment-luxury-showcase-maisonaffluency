@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getCachedCatalog } from "@/lib/catalogSource";
 import { filterPublicPicks } from "@/lib/publicCatalogVisibility";
+import { fetchPublicDesignerCredits } from "@/lib/publicDesignerCredits";
 import type { RoomSlug } from "@/lib/roomCategories";
 import { pickMatchesRoom, pickMatchesFilter } from "@/lib/roomMatching";
 import type { CuratorPick } from "@/components/FeaturedDesigners";
@@ -17,16 +18,15 @@ async function loadCatalogPool(): Promise<CuratorPick[]> {
   if (cached?.picks?.length) {
     return filterPublicPicks(cached.picks, cached.designers) as unknown as CuratorPick[];
   }
-  const [{ data, error }, designersRes] = await Promise.all([
+  const [{ data, error }, designers] = await Promise.all([
     supabase
       .from("designer_curator_picks_public")
       .select("id, designer_id, title, subtitle, category, subcategory, tags, image_url")
       .not("image_url", "is", null),
-    supabase.from("designers").select("id, is_published, trade_only"),
+    fetchPublicDesignerCredits(),
   ]);
   if (error) throw error;
-  if (designersRes.error) throw designersRes.error;
-  return filterPublicPicks((data ?? []) as any[], designersRes.data as any[]).map((row: any) => ({
+  return filterPublicPicks((data ?? []) as any[], designers).map((row: any) => ({
     id: row.id,
     title: row.title,
     subtitle: row.subtitle,

@@ -3,6 +3,7 @@ import { applyTradeDiscount } from "@/lib/productPricing";
 import type { TradeProduct } from "@/lib/tradeProducts";
 import { withImperialPerLine } from "./formatDimensions";
 import { formatEditionLabel } from "./editionLabel";
+import { fetchPublicDesignerCredits } from "./publicDesignerCredits";
 
 const fold = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
@@ -75,10 +76,8 @@ export async function resolvePublicUrlsByPickIds(pickIds: string[]): Promise<Map
     .in("id", ids);
   if (error || !picks) return new Map();
   const designerIds = [...new Set(picks.map((p) => p.designer_id).filter((id): id is string => Boolean(id)))];
-  const { data: designers } = designerIds.length
-    ? await supabase.from("designers").select("id, slug").in("id", designerIds)
-    : { data: [] as { id: string; slug: string }[] };
-  const designerSlugs = new Map((designers ?? []).map((d) => [d.id, d.slug]));
+  const credits = designerIds.length ? await fetchPublicDesignerCredits() : [];
+  const designerSlugs = new Map(credits.filter((d) => designerIds.includes(d.id)).map((d) => [d.id, d.slug]));
   const urls = new Map<string, string>();
   for (const p of picks) {
     const designerSlug = p.designer_id ? designerSlugs.get(p.designer_id) : null;

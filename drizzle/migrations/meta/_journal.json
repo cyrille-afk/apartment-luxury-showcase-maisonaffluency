@@ -1828,6 +1828,20 @@
       "when": 1793710820880,
       "tag": "0260_jules_lamp_finish_images",
       "breakpoints": true
+    },
+    {
+      "idx": 261,
+      "version": "7",
+      "when": 1793954007929,
+      "tag": "0261_independent_product_publication",
+      "breakpoints": true
+    },
+    {
+      "idx": 262,
+      "version": "7",
+      "when": 1793954038448,
+      "tag": "0262_preserve_existing_trade_only_product_visibility",
+      "breakpoints": true
     }
   ]
 }

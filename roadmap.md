@@ -1,5 +1,9 @@
 # Roadmap
 
+## Independent product publishing
+- [x] Each curator pick's Public / Trade Only control is authoritative even when its maker profile remains Trade Only; safe maker credits expose no private profile, and previously hidden products under Trade Only makers remain hidden.
+- [x] New products default to Trade Only and the editor shows an explicit status. Nine visibility/cache regressions pass; signed-in Cloud Filigrane toggled Trade Only → public 404 → Public → restored product (HTTP 200 saves), with public category, safe metadata, live one-minute catalogue refresh and build verified.
+
 ## Bulk-upload dimension integrity
 - [x] Confirm the live overwrite and remove source-unit inference; protect filename/manual labels and retain measured height.
 - [x] Signed-in bulk-upload checks preserve filename W/D/H, retain unknown-unit Default, convert a 300 mm box to 30 cm with height, and protect manual labels through source/display changes. Thirty regressions pass, including the actual upload-handler label boundary without writing customer models.

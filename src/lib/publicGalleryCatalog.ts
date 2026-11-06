@@ -8,8 +8,10 @@ export function publicGalleryDesigners(manifest: CatalogManifest | undefined): C
 }
 
 export function publicGalleryPicks(manifest: CatalogManifest | undefined) {
-  const publicIds = new Set(publicGalleryDesigners(manifest).map((designer) => designer.id));
-  return (manifest?.picks ?? []).filter((pick) => publicIds.has(pick.designer_id));
+  // Manifest picks are already individually published through the safe public
+  // product projection, so a Trade Only maker profile must not hide them again.
+  const creditedIds = new Set((manifest?.designers ?? []).filter((designer) => designer.is_published).map((designer) => designer.id));
+  return (manifest?.picks ?? []).filter((pick) => creditedIds.has(pick.designer_id));
 }
 
 export function isPublicGalleryMaker(name: string, manifest: CatalogManifest | undefined): boolean {

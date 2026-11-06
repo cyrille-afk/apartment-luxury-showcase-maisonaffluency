@@ -60,14 +60,21 @@ export interface CatalogManifest {
 // and served from the site origin at /catalog-manifest.json. First paint hits
 // this same-origin static asset — zero database dependency, warm CDN cache.
 const STATIC_MANIFEST_URL = "/catalog-manifest.json";
+const STATIC_MANIFEST_MAX_AGE_MS = 5 * 60_000;
+
+export function isStaticManifestFresh(generatedAt: string, now = Date.now()): boolean {
+  const generated = Date.parse(generatedAt);
+  return Number.isFinite(generated) && now >= generated && now - generated < STATIC_MANIFEST_MAX_AGE_MS;
+}
 
 async function fetchStaticManifest(): Promise<CatalogManifest | null> {
   try {
     const res = await fetch(STATIC_MANIFEST_URL, { credentials: "omit" });
     if (!res.ok) return null;
     const json = (await res.json()) as CatalogManifest;
-    // Empty manifests from a failed build shouldn't mask real data.
-    if (!json?.picks?.length || !json?.designers?.length) return null;
+    // Empty or stale build-time manifests must not freeze admin visibility
+    // changes until the next deployment; use the short-cached live manifest.
+    if (!json?.picks?.length || !json?.designers?.length || !isStaticManifestFresh(json.generated_at)) return null;
     return json;
   } catch {
     return null;

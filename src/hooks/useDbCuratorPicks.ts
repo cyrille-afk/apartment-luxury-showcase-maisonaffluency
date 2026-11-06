@@ -4,6 +4,7 @@ import type { CuratorPick } from "@/components/FeaturedDesigners";
 import { applyCuratorPickOrder, sortCuratorPicks } from "@/lib/curatorPickSort";
 import { queryKeys } from "@/lib/queryKeys";
 import { getCachedCatalog } from "@/lib/catalogSource";
+import { fetchPublicDesignerCredits, type PublicDesignerCredit } from "@/lib/publicDesignerCredits";
 
 export interface DbProductItem {
   pick: CuratorPick;
@@ -29,22 +30,18 @@ export function useDbCuratorPicks(options: { enabled?: boolean } = {}) {
       // trade users fall through to the live, permission-scoped queries.
       const cachedCatalog = await getCachedCatalog();
 
-      let designers: Array<{ id: string; name: string; slug: string; display_name: string | null; source: string | null; founder: string | null }>;
+      let designers: PublicDesignerCredit[];
       let picksRaw: any[] | null;
 
       if (cachedCatalog) {
         designers = cachedCatalog.designers.filter(
-          (designer) => designer.is_published && !designer.trade_only,
+          (designer) => designer.is_published,
         ) as any[];
         picksRaw = cachedCatalog.picks as any[];
       } else {
-        // Public browsing grids must contain only published, non-trade-only designers.
-        const { data: designerRows } = await supabase
-          .from("designers")
-          .select("id, name, slug, display_name, source, founder")
-          .eq("is_published", true)
-          .eq("trade_only", false);
-        designers = (designerRows || []) as any[];
+        // The safe credit lookup keeps individually public products visible
+        // without exposing a Trade Only maker's private profile.
+        designers = await fetchPublicDesignerCredits();
 
         // Page through the public view so its response-size limit never truncates
         // category pools. Keep the existing price-free listing projection/order.

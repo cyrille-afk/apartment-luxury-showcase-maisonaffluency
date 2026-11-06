@@ -9,8 +9,8 @@
  * database dependency. The edge function is kept as a runtime fallback so
  * newly-added picks show up within the 5-min SWR window without a redeploy.
  *
- * Mirrors the query in supabase/functions/catalog-manifest/index.ts — keep
- * the two column lists in sync.
+ * Mirrors the queries in supabase/functions/catalog-manifest/index.ts — keep
+ * the product columns and safe maker-credit RPC in sync.
  */
 import { writeFile, mkdir, readFile } from "node:fs/promises";
 import path from "node:path";
@@ -80,10 +80,7 @@ async function main() {
       .from("designer_curator_picks_public")
       .select(PICK_COLUMNS)
       .not("image_url", "is", null),
-    supabase
-      .from("designers")
-      .select("id, name, slug, display_name, source, founder, era, country, is_published, trade_only")
-      .eq("is_published", true),
+    supabase.rpc("public_catalog_designer_credits"),
   ]);
 
   if (picksRes.error || designersRes.error) {
