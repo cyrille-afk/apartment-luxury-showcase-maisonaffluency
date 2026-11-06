@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Upload, Loader2, X, CheckCircle2, AlertCircle, FileBox, Paperclip } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { prepareGlbFile, uploadGlbForProduct, measureGlbDimensions, formatDimensionLabel, GLB_MAX_MB, type DimensionUnit, type GlbDimensions } from "@/lib/glbUpload";
+import { prepareGlbFile, uploadGlbForProduct, measureGlbDimensions, formatDimensionLabel, canApplyMeasuredDimensions, GLB_MAX_MB, type DimensionUnit, type GlbDimensions, type ModelSourceUnit } from "@/lib/glbUpload";
 
 interface ProductRow {
   id: string;
@@ -24,6 +24,7 @@ interface BulkFile {
   labelTouched?: boolean;
   /** Bounding box measured from the model, kept so unit switches can reformat untouched labels. */
   measured?: GlbDimensions;
+  sourceUnit?: ModelSourceUnit;
   status: FileStatus;
   progress: number;
   message?: string;
@@ -288,21 +289,19 @@ export function GlbBulkUpload({ onChange }: Props) {
       );
     }
 
-    // Measure each .glb/.gltf's real bounding box and pre-fill the dimension
-    // label — never overwrites a label the admin already edited.
-    for (const e of newEntries) {
-      if (!/\.(glb|gltf)$/i.test(e.file.name)) continue;
-      void measureGlbDimensions(e.file).then((dims) => {
-        if (!dims) return;
-        setFiles((prev) =>
-          prev.map((f) =>
-            f.key === e.key && !f.labelTouched
-              ? { ...f, measured: dims, label: formatDimensionLabel(dims, dimUnitRef.current) }
-              : f,
-          ),
-        );
-      });
-    }
+  };
+
+  const changeSourceUnit = (entry: BulkFile, sourceUnit?: ModelSourceUnit) => {
+    setFiles(prev => prev.map(f => f.key === entry.key
+      ? { ...f, sourceUnit, measured: undefined, label: f.measured && !f.labelTouched ? "Default" : f.label }
+      : f));
+    if (!sourceUnit || !canApplyMeasuredDimensions(entry) || !/\.(glb|gltf)$/i.test(entry.file.name)) return;
+    void measureGlbDimensions(entry.file, sourceUnit).then(dims => {
+      if (!dims) return;
+      setFiles(prev => prev.map(f => f.key === entry.key && f.sourceUnit === sourceUnit && f.status === "pending" && canApplyMeasuredDimensions(f)
+        ? { ...f, measured: dims, label: formatDimensionLabel(dims, dimUnitRef.current) }
+        : f));
+    });
   };
 
   const setFile = (key: string, patch: Partial<BulkFile>) =>
@@ -360,8 +359,8 @@ export function GlbBulkUpload({ onChange }: Props) {
         // Converted sources (obj/3ds) couldn't be measured at drop time —
         // measure the converted GLB now when the label still lacks dimensions.
         let label = item.label;
-        if (!item.labelTouched && !/W\s*\d/i.test(label)) {
-          const dims = await measureGlbDimensions(prepared.file);
+        if (item.sourceUnit && canApplyMeasuredDimensions(item)) {
+          const dims = await measureGlbDimensions(prepared.file, item.sourceUnit);
           if (dims) {
             label = formatDimensionLabel(dims, dimUnitRef.current);
             setFile(item.key, { label, measured: dims });
@@ -400,7 +399,7 @@ export function GlbBulkUpload({ onChange }: Props) {
       <div>
         <div className="font-display text-xl">Bulk upload — one designer</div>
         <div className="font-body text-[11px] text-muted-foreground">
-          Pick a brand, select the products, then drop all the model files at once — including each product's .obj with its .mtl and texture files. Files are matched to products by filename — adjust any match before starting. Give each dimension its own variant label — sizes are measured from the model itself (and detected in filenames like 95x77 or 1080_ROUND), so labels pre-fill and stay editable — distinct labels save as separate selectable 3D models; a repeated label replaces that model.
+          Pick a brand, select the products, then drop all the model files at once — including each product's .obj with its .mtl and texture files. Filename dimensions are preserved. Model measurements require confirmed source units; manual labels are never replaced. Distinct labels save as separate selectable 3D models; a repeated label replaces that model.
         </div>
       </div>
 
@@ -635,6 +634,22 @@ export function GlbBulkUpload({ onChange }: Props) {
                       className="w-[130px] px-2 py-1.5 border border-border rounded bg-background font-body text-xs focus:outline-hidden focus:border-foreground/40"
                       aria-label="Variant label"
                     />
+                    <select
+                      value={f.sourceUnit || ""}
+                      onChange={e => {
+                        const unit = e.target.value;
+                        changeSourceUnit(f, unit === "m" || unit === "cm" || unit === "mm" || unit === "in" ? unit : undefined);
+                      }}
+                      disabled={running || f.status === "done"}
+                      aria-label="Model source unit"
+                      className="max-w-[150px] px-2 py-1.5 border border-border rounded bg-background font-body text-xs"
+                    >
+                      <option value="">Model units: unknown</option>
+                      <option value="m">Model units: metres</option>
+                      <option value="cm">Model units: cm</option>
+                      <option value="mm">Model units: mm</option>
+                      <option value="in">Model units: inches</option>
+                    </select>
                     {f.status === "done" ? (
                       <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
                     ) : f.status === "error" ? (
