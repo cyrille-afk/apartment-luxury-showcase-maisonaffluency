@@ -65,7 +65,7 @@ function parseMediaLine(text: string): MediaItem | null {
   const value = text.trim();
   const pipes = value.split(/\s*\|\s*/);
   const url = (pipes[0] || "").trim();
-  if (!/^https?:\/\//i.test(url) || /\s/.test(url)) return null;
+  if (!/^https?:\/\//i.test(url)) return null;
 
   let caption: string | null = null;
   let poster: string | null = null;

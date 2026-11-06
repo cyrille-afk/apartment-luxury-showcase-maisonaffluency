@@ -23,7 +23,7 @@ const MEDIA_HOST_RE =
 
 const MARKDOWN_LINK_RE = /\[([^\]]+)\]\(https?:\/\/[^)]+\)/g;
 const SOURCE_BRACKET_RE = /\s*\[Sources?:[^\]]*\]/gi;
-const BARE_URL_LINE_RE = /^[ \t]*(https?:\/\/[^\s|]+)(\s*\|[^\n]*)?[ \t]*$/;
+const BARE_URL_LINE_RE = /^[ \t]*(https?:\/\/[^|\n]*[^\s|])(\s*\|[^\n]*)?[ \t]*$/;
 
 const isMediaUrl = (url: string): boolean => {
   try {
