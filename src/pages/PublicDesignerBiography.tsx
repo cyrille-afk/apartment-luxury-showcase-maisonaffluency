@@ -63,14 +63,14 @@ export default function PublicDesignerBiography() {
       <button
         type="button"
         onClick={() => navigate(profileHref)}
-        className="fixed top-[86px] right-4 md:top-[90px] md:right-6 z-50 inline-flex items-center gap-2 font-body text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-foreground/55 hover:text-foreground transition-colors duration-300"
+        className="fixed top-[86px] right-4 md:top-[calc(var(--header-h)+24px)] md:right-6 z-50 inline-flex items-center gap-2 font-body text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-foreground/55 hover:text-foreground transition-colors duration-300"
         aria-label="Close portrait"
       >
         <X className="h-3 w-3 md:h-3.5 md:w-3.5" strokeWidth={1.25} />
         <span className="hidden md:inline">Close</span>
       </button>
 
-      <main className="pt-[70px] mb-16 md:mb-24">
+      <main className="pt-[70px] md:pt-[var(--header-h)] mb-16 md:mb-24">
         {/* Editorial masthead */}
         <header className="mx-auto w-full max-w-6xl px-6 pt-5 pb-2 md:pt-6 md:pb-3">
           <Link
