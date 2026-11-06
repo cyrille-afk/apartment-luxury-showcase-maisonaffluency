@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Independent product publishing
-- [ ] Make each curator pick's Public / Trade Only control authoritative even when its maker profile remains Trade Only; keep safe maker credits without exposing private profiles.
-- [ ] Default newly created products to Trade Only, make the admin status explicit, and verify public grids, counts, direct product pages and metadata while existing product settings remain unchanged.
+- [x] Each curator pick's Public / Trade Only control is authoritative even when its maker profile remains Trade Only; safe maker credits expose no private profile, and previously hidden products under Trade Only makers remain hidden.
+- [x] New products default to Trade Only and the editor shows an explicit status. Nine visibility/cache regressions pass; signed-in Cloud Filigrane toggled Trade Only → public 404 → Public → restored product (HTTP 200 saves), with public category, safe metadata, live one-minute catalogue refresh and build verified.
 
 ## Bulk-upload dimension integrity
 - [x] Confirm the live overwrite and remove source-unit inference; protect filename/manual labels and retain measured height.
