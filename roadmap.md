@@ -1,5 +1,9 @@
 # Roadmap
 
+## Bulk-upload dimension integrity
+- [x] Confirm the live overwrite and remove source-unit inference; protect filename/manual labels and retain measured height.
+- [x] Signed-in bulk-upload checks preserve filename W/D/H, retain unknown-unit Default, convert a 300 mm box to 30 cm with height, and protect manual labels through source/display changes. Thirty regressions pass, including the actual upload-handler label boundary without writing customer models.
+
 ## Admin option scrolling
 - [x] Audit admin pages and shared editors: remaining glide comes from the shared PUSH/REPLACE navigation reset; admin option/filter changes already retain position.
 - [x] Admin destinations and departures now land instantly; public navigation/history unchanged. Signed-in live checks clicked all 50 dashboard cards and six additional Admin Tools links: no smooth calls or intermediate glide frames. Designer/product/inquiry/finish filters and two view-tab switches stayed stationary; no records changed. Eighteen scroll regressions pass; build OK.

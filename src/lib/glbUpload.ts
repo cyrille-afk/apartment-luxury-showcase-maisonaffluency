@@ -12,37 +12,42 @@ export interface GlbDimensions {
 }
 
 /**
- * Normalize a raw bounding-box size to whole centimetres. glTF is specified
- * in metres, but many studio exports are authored in cm or mm — pick the
- * unit from the magnitude so a 1.08 m table and a 1080 mm table both read
- * as 108 cm.
+ * Normalize bounds only with an explicitly confirmed source unit. Magnitude
+ * cannot distinguish a small millimetre export from a centimetre export.
  */
-export function normalizeSizeToCm(size: { x: number; y: number; z: number }): GlbDimensions | null {
+export type ModelSourceUnit = "m" | "cm" | "mm" | "in";
+
+export function normalizeSizeToCm(size: { x: number; y: number; z: number }, sourceUnit?: ModelSourceUnit): GlbDimensions | null {
+  if (!sourceUnit || ![size.x, size.y, size.z].every(v => Number.isFinite(v) && v >= 0)) return null;
   const max = Math.max(size.x, size.y, size.z);
   if (!Number.isFinite(max) || max <= 0) return null;
-  const factor = max < 20 ? 100 : max > 400 ? 0.1 : 1;
-  const round = (v: number) => Math.max(1, Math.round(v * factor));
+  const factor = { m: 100, cm: 1, mm: 0.1, in: 2.54 }[sourceUnit];
+  const round = (v: number) => Math.round(v * factor * 100) / 100;
   return { wCm: round(size.x), dCm: round(size.z), hCm: round(size.y) };
 }
 
 /** Unit the admin wants detected dimensions pre-filled in. */
 export type DimensionUnit = "cm" | "mm" | "in";
 
-/** Variant label matching the admin convention ("W 108 × D 108"). */
+/** Preserve all three measured axes in every display unit. */
 export function formatDimensionLabel(d: GlbDimensions, unit: DimensionUnit = "cm"): string {
-  if (unit === "mm") return `W ${d.wCm * 10} × D ${d.dCm * 10} mm`;
-  if (unit === "in") {
-    const toIn = (v: number) => `${Math.round((v / 2.54) * 10) / 10}`;
-    return `W ${toIn(d.wCm)} × D ${toIn(d.dCm)} in`;
-  }
-  return `W ${d.wCm} × D ${d.dCm}`;
+  const factor = unit === "mm" ? 10 : unit === "in" ? 1 / 2.54 : 1;
+  const precision = unit === "in" ? 10 : 100;
+  const value = (v: number) => Math.round(v * factor * precision) / precision;
+  return `W ${value(d.wCm)} × D ${value(d.dCm)} × H ${value(d.hCm)}${unit === "cm" ? "" : ` ${unit}`}`;
+}
+
+/** Filename and manual labels take precedence; only placeholders/measurements can change. */
+export function canApplyMeasuredDimensions(entry: { label: string; labelTouched?: boolean; measured?: GlbDimensions }): boolean {
+  return !entry.labelTouched && (entry.label === "Default" || !!entry.measured);
 }
 
 /**
  * Measure a .glb/.gltf model's real bounding box in the browser. Returns
  * null when the file cannot be parsed — callers keep their manual label.
  */
-export async function measureGlbDimensions(file: File): Promise<GlbDimensions | null> {
+export async function measureGlbDimensions(file: File, sourceUnit?: ModelSourceUnit): Promise<GlbDimensions | null> {
+  if (!sourceUnit) return null;
   try {
     const loader = new GLTFLoader();
     const data: ArrayBuffer | string = /\.gltf$/i.test(file.name)
@@ -50,7 +55,7 @@ export async function measureGlbDimensions(file: File): Promise<GlbDimensions | 
       : await file.arrayBuffer();
     const gltf = await loader.parseAsync(data, "");
     const size = new Box3().setFromObject(gltf.scene).getSize(new Vector3());
-    return normalizeSizeToCm(size);
+    return normalizeSizeToCm(size, sourceUnit);
   } catch {
     return null;
   }
