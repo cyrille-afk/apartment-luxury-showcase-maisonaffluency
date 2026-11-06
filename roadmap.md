@@ -1,5 +1,9 @@
 # Roadmap
 
+## Independent product publishing
+- [ ] Make each curator pick's Public / Trade Only control authoritative even when its maker profile remains Trade Only; keep safe maker credits without exposing private profiles.
+- [ ] Default newly created products to Trade Only, make the admin status explicit, and verify public grids, counts, direct product pages and metadata while existing product settings remain unchanged.
+
 ## Bulk-upload dimension integrity
 - [x] Confirm the live overwrite and remove source-unit inference; protect filename/manual labels and retain measured height.
 - [x] Signed-in bulk-upload checks preserve filename W/D/H, retain unknown-unit Default, convert a 300 mm box to 30 cm with height, and protect manual labels through source/display changes. Thirty regressions pass, including the actual upload-handler label boundary without writing customer models.
