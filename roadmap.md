@@ -2,7 +2,7 @@
 
 ## Bulk-upload dimension integrity
 - [x] Confirm the live overwrite and remove source-unit inference; protect filename/manual labels and retain measured height.
-- [ ] Verify source-unit and display-unit changes, upload-label integrity and regressions before resolving the monitoring finding.
+- [x] Signed-in bulk-upload checks preserve filename W/D/H, retain unknown-unit Default, convert a 300 mm box to 30 cm with height, and protect manual labels through source/display changes. Thirty regressions pass, including the actual upload-handler label boundary without writing customer models.
 
 ## Admin option scrolling
 - [x] Audit admin pages and shared editors: remaining glide comes from the shared PUSH/REPLACE navigation reset; admin option/filter changes already retain position.

@@ -35,8 +35,8 @@ describe("bulk upload dimension integrity", () => {
     if (!input) throw new Error("Missing file input");
     fireEvent.change(input, { target: { files: [file] } });
     fireEvent.change(screen.getByRole("combobox", { name: "Model source unit" }), { target: { value: "mm" } });
-    fireEvent.click(screen.getByRole("button", { name: "in", exact: true }));
-    fireEvent.click(screen.getByRole("button", { name: "Upload 1 model", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: /^in$/ }));
+    fireEvent.click(screen.getByRole("button", { name: /^Upload 1 model$/ }));
     await waitFor(() => expect(mocks.upload).toHaveBeenCalledWith(expect.objectContaining({ productId: "lamp", label: "W 95 × D 77 × H 75" })));
     expect(mocks.measure).not.toHaveBeenCalled();
   });
