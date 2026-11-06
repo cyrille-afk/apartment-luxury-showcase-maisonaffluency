@@ -553,7 +553,7 @@ export function GlbBulkUpload({ onChange }: Props) {
       {/* 3. Files */}
       {brand && selectedIds.size > 0 && (
         <div>
-          <div className="flex items-center gap-3 mb-1.5">
+          <div className="flex flex-wrap items-center gap-3 mb-1.5">
             <label className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground block">
               3 · Model files (.glb, .gltf, .3ds, .obj + .mtl + textures — max {GLB_MAX_MB} MB each)
             </label>
@@ -599,7 +599,7 @@ export function GlbBulkUpload({ onChange }: Props) {
             <div className="mt-3 border border-border rounded-md divide-y divide-border">
               {files.map((f) => (
                 <div key={f.key} className="px-3 py-2.5">
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-3">
                     <FileBox size={14} className="text-muted-foreground shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="font-body text-sm truncate">{f.file.name}</div>
@@ -631,7 +631,7 @@ export function GlbBulkUpload({ onChange }: Props) {
                       onChange={(e) => setFile(f.key, { label: e.target.value, labelTouched: true })}
                       disabled={running || f.status === "done"}
                       placeholder="Variant label"
-                      className="w-[130px] px-2 py-1.5 border border-border rounded bg-background font-body text-xs focus:outline-hidden focus:border-foreground/40"
+                      className="w-[190px] px-2 py-1.5 border border-border rounded bg-background font-body text-xs focus:outline-hidden focus:border-foreground/40"
                       aria-label="Variant label"
                     />
                     <select
