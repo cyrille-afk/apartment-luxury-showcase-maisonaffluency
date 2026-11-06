@@ -244,10 +244,9 @@ export function parseMediaLine(text: string): { url: string; caption: string | n
   const value = text.trim();
   // Try pipe separator: "https://...jpg | My Caption | poster:https://..." | left/right | small|28%
   const pipes = value.split(/\s*\|\s*/);
-  const url = normalizeMediaInput(pipes[0] || "");
+  const url = normalizeMediaInput(pipes[0] || "").replace(/\s/g, "%20");
 
   if (!/^https?:\/\//i.test(url)) return null;
-  if (/\s/.test(url)) return null;
 
   let caption: string | null = null;
   let poster: string | null = null;

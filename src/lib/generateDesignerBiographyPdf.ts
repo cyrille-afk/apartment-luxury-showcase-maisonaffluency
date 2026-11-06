@@ -64,8 +64,8 @@ function isImageUrl(url: string): boolean {
 function parseMediaLine(text: string): MediaItem | null {
   const value = text.trim();
   const pipes = value.split(/\s*\|\s*/);
-  const url = (pipes[0] || "").trim();
-  if (!/^https?:\/\//i.test(url) || /\s/.test(url)) return null;
+  const url = (pipes[0] || "").trim().replace(/\s/g, "%20");
+  if (!/^https?:\/\//i.test(url)) return null;
 
   let caption: string | null = null;
   let poster: string | null = null;

@@ -541,7 +541,7 @@ const PublicDesignerProfile = ({ presentation = false }: { presentation?: boolea
   const bioHasInlineMedia = bioBlocks.some((b: string) => {
     const pipes = b.split(/\s*\|\s*/);
     const url = pipes[0]?.trim() || "";
-    if (!/^https?:\/\//i.test(url) || /\s/.test(url)) return false;
+    if (!/^https?:\/\//i.test(url)) return false;
     return (
       /\.(avif|gif|jpe?g|png|webp|mp4|webm|mov)(\?|$)/i.test(url) ||
       /res\.cloudinary\.com\/.+\/(image|video)\/upload/i.test(url) ||
@@ -565,7 +565,6 @@ const PublicDesignerProfile = ({ presentation = false }: { presentation?: boolea
     const pipes = trimmed.split(/\s*\|\s*/);
     const url = pipes[0]?.trim() || "";
     if (!/^https?:\/\//i.test(url)) return false;
-    if (/\s/.test(url)) return false;
     return (
       /\.(avif|gif|jpe?g|png|webp|mp4|webm|mov)(\?|$)/i.test(url) ||
       /res\.cloudinary\.com\/.+\/(image|video)\/upload/i.test(url) ||
@@ -581,7 +580,7 @@ const PublicDesignerProfile = ({ presentation = false }: { presentation?: boolea
     if (/^<iframe[\s\S]*(youtube\.com|youtu\.be|vimeo\.com|facebook\.com\/plugins\/video)/i.test(trimmed)) return true;
 
     const url = trimmed.split(/\s*\|\s*/)[0]?.trim() || "";
-    if (!/^https?:\/\//i.test(url) || /\s/.test(url)) return false;
+    if (!/^https?:\/\//i.test(url)) return false;
 
     return (
       /\.(mp4|webm|mov)(\?|$)/i.test(url) ||
