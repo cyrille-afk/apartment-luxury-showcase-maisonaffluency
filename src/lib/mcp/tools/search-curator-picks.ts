@@ -127,10 +127,6 @@ export default defineTool({
       );
       let brandFilter = "";
       if (!designerId && tokens.length) {
-        const orClauses = tokens
-          .flatMap((t) => [`name.ilike.%${t}%`, `founder.ilike.%${t}%`])
-          .join(",");
-        void orClauses;
         const brandIds = credits
           .filter((credit) => credit.is_published && tokens.some((token) =>
             [credit.name, credit.founder].some((value) => value?.toLowerCase().includes(token.toLowerCase())),

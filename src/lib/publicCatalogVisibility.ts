@@ -18,10 +18,10 @@ export function publicDesignerIds(designers: readonly DesignerVisibilityRow[] | 
 }
 
 /** Drops picks whose maker is unpublished or has no safe public credit. */
-export function filterPublicPicks<T extends { designer_id?: string | null }>(
+export function filterPublicPicks<T extends { designer_id?: string | null; trade_only?: boolean | null }>(
   picks: readonly T[],
   designers: readonly DesignerVisibilityRow[] | null | undefined,
 ): T[] {
   const allowed = publicDesignerIds(designers);
-  return picks.filter((p) => !!p.designer_id && allowed.has(p.designer_id));
+  return picks.filter((p) => p.trade_only !== true && !!p.designer_id && allowed.has(p.designer_id));
 }

@@ -13,6 +13,11 @@ describe("filterPublicPicks", () => {
     expect(out.map((p) => p.id)).toEqual(["a", "b"]);
   });
 
+  it("removes products explicitly marked Trade Only even under a public maker", () => {
+    const out = filterPublicPicks([{ id: "a", designer_id: "public", trade_only: true }], designers);
+    expect(out).toEqual([]);
+  });
+
   it("removes pieces from unpublished or unknown designers", () => {
     const out = filterPublicPicks(
       [{ id: "a", designer_id: "draft" }, { id: "b", designer_id: "missing" }, { id: "c", designer_id: null }],
