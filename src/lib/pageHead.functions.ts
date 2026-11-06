@@ -79,9 +79,8 @@ export const getLegacyProductHead = createServerFn({ method: "GET" })
       .eq("id", twin?.source_pick_id || data.id).maybeSingle();
     const pick = row as unknown as Pick | null;
     if (!pick) return null;
-    const { data: designer } = pick.designer_id
-      ? await client.from("designers").select("name, display_name").eq("id", pick.designer_id).maybeSingle()
-      : { data: null };
+    const { data: credits } = await client.rpc("public_catalog_designer_credits");
+    const designer = (credits ?? []).find((credit) => credit.id === pick.designer_id);
     const text = productSeoText({ name: pick.title, maker: designer?.display_name || designer?.name, description: pick.description, materials: pick.materials });
     return { ...text, path: `/product/${data.id}`, image: shareImage(pick.image_url), type: "product" };
   });
@@ -96,10 +95,11 @@ export const getProductHead = createServerFn({ method: "GET" })
     if (!supabase) return null;
     const fields = "slug, title, subtitle, image_url, description, materials, designer_id";
     const view = "designer_curator_picks_public" as never;
+    const { data: credits } = await supabase.rpc("public_catalog_designer_credits");
+    const designerCredits = credits ?? [];
     let designer: { id: string; name: string; display_name: string | null } | null = null;
     if (data.designerSlug) {
-      const { data: d } = await supabase.from("designers").select("id, name, display_name").eq("slug", data.designerSlug).maybeSingle();
-      designer = d;
+      designer = designerCredits.find((credit) => credit.slug === data.designerSlug) ?? null;
     }
     let pick: Pick | null = null;
     if (designer) {
@@ -118,8 +118,7 @@ export const getProductHead = createServerFn({ method: "GET" })
     }
     if (!pick) return null;
     if (!designer && pick.designer_id) {
-      const { data: d } = await supabase.from("designers").select("id, name, display_name").eq("id", pick.designer_id).maybeSingle();
-      designer = d;
+      designer = designerCredits.find((credit) => credit.id === pick.designer_id) ?? null;
     }
     const maker = formatDesignerDisplayName(designer?.name || designer?.display_name);
     const name = pick.title.replace(/\s+/g, " ").trim();

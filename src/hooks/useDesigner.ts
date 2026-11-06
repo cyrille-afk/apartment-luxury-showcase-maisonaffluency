@@ -295,19 +295,19 @@ export function attributedDesignerPicksQueryOptions(
       if (rows.length === 0) return [];
 
       const ownerIds = [...new Set(rows.map((row) => row.designer_id).filter(Boolean))];
-      const { data: owners, error: ownersError } = await supabase
-        .from("designers")
-        .select("id, name, slug, trade_only")
-        .in("id", ownerIds);
-      if (ownersError) throw ownersError;
+      const owners = publicOnly
+        ? (await fetchPublicDesignerCredits()).filter((owner) => ownerIds.includes(owner.id))
+        : await (async () => {
+            const { data, error } = await supabase
+              .from("designers")
+              .select("id, name, slug, trade_only")
+              .in("id", ownerIds);
+            if (error) throw error;
+            return data || [];
+          })();
       const ownerMap = Object.fromEntries((owners || []).map((owner) => [owner.id, owner]));
       if (publicOnly) {
-        // Collaborations owned by a Trade-only house (e.g. Michel Amar × Emma
-        // Donnersberg) stay on the Trade side only — never on public pages.
-        rows = rows.filter((row) => {
-          const owner = ownerMap[row.designer_id as string];
-          return !!owner && !(owner as any).trade_only;
-        });
+        rows = rows.filter((row) => !!ownerMap[row.designer_id as string]);
         if (rows.length === 0) return [];
       }
 
@@ -337,12 +337,19 @@ export function useGroupedDesignerPicks(designer: Designer | null | undefined, {
       // Find sub-designers whose founder matches this parent designer's name or display_name
       const founderNames = [designer.name, designer.display_name].filter((n): n is string => !!n);
       const uniqueFounderNames = [...new Set(founderNames)];
-      const { data: subDesigners, error: subDesignersError } = await supabase
-        .from("designers")
-        .select("id, name, slug, is_independent")
-        .in("founder", uniqueFounderNames)
-        .neq("id", designer.id);
-      if (subDesignersError) throw subDesignersError;
+      const subDesigners = publicOnly
+        ? (await fetchPublicDesignerCredits()).filter(
+            (d) => d.id !== designer.id && !!d.founder && uniqueFounderNames.includes(d.founder),
+          )
+        : await (async () => {
+            const { data, error } = await supabase
+              .from("designers")
+              .select("id, name, slug, is_independent")
+              .in("founder", uniqueFounderNames)
+              .neq("id", designer.id);
+            if (error) throw error;
+            return data || [];
+          })();
 
       const subOnly = (subDesigners || []).filter(
         (d) => d.id !== designer.id && d.is_independent !== true && !HIDDEN_DESIGNER_SLUGS.has(d.slug),

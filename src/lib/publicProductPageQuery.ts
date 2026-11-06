@@ -38,9 +38,8 @@ export async function fetchPublicProductPage(
   // being linked from public lightboxes — keep resolving their product URLs.
   let designer = designerRow as any;
   if (!designer && designerSlug) {
-    // Trade-only designers are unreadable to the public, but a single approved
-    // public piece (e.g. Wintrebert's Cloud Filigrane) must still credit them —
-    // scoped RPC returns name/id only; the bio stays gated.
+    // Trade Only maker profiles are unreadable to the public, but individually
+    // published products still receive their safe name/id credit; bio stays gated.
     const { data: credit } = await supabase.rpc("public_trade_only_designer_credit" as any, { _slug: designerSlug });
     const d = (credit as any[] | null)?.[0];
     if (d) designer = { id: d.id, name: d.name, slug: d.slug, display_name: d.display_name ?? null, biography: "", founder: null };

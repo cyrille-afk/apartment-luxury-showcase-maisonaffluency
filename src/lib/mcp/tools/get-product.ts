@@ -62,13 +62,10 @@ export default defineTool({
       };
     }
 
-    const { data: designer } = await supabase
-      .from("designers")
-      .select("id, name, slug, is_published, trade_only")
-      .eq("id", data.designer_id!)
-      .maybeSingle();
+    const { data: credits } = await supabase.rpc("public_catalog_designer_credits");
+    const designer = (credits ?? []).find((credit: { id: string }) => credit.id === data.designer_id);
 
-    if (!designer || !designer.is_published || designer.trade_only) {
+    if (!designer || !designer.is_published) {
       logCall(0, true);
       return {
         content: [{ type: "text", text: "Product not found or not publicly available." }],
