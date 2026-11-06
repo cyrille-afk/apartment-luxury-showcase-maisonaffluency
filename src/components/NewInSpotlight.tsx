@@ -209,7 +209,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
     for (const block of blocks) {
       const firstToken = block.split(/\s*\|\s*/)[0]?.trim() || "";
       // Skip blocks that start with a URL (media / video references)
-      if (/^https?:\/\//i.test(firstToken) && !/\s/.test(firstToken)) continue;
+      if (/^https?:\/\//i.test(firstToken)) continue;
       text = block;
       break;
     }
