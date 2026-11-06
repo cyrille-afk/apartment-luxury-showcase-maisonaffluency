@@ -15,9 +15,9 @@ describe("public gallery ownership", () => {
     const manifest: CatalogManifest = { generated_at: "", designers: [maker("frank", "Jean-Michel Frank")], picks: [...pieces, pick("stool", "X Stool", "frank")] };
     expect(publicGalleryPicks(manifest).map((p) => p.id)).toEqual(["stool"]);
   });
-  it("excludes trade-only owners even when present in the catalogue", () => {
+  it("keeps individually public picks from a Trade Only maker without exposing static maker products", () => {
     const manifest: CatalogManifest = { generated_at: "", designers: [maker("amar", "Michel Amar Studio", true)], picks: pieces };
-    expect(publicGalleryPicks(manifest)).toEqual([]);
+    expect(publicGalleryPicks(manifest)).toEqual(pieces);
     expect(isPublicGalleryMaker("Michel Amar Studio", manifest)).toBe(false);
   });
   it("allows static gallery candidates only for a verified published public maker", () => {

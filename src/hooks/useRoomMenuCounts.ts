@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getCachedCatalog } from "@/lib/catalogSource";
 import { filterPublicPicks } from "@/lib/publicCatalogVisibility";
+import { fetchPublicDesignerCredits } from "@/lib/publicDesignerCredits";
 import type { RoomSlug } from "@/lib/roomCategories";
 import { pickMatchesRoom, pickMatchesFilter } from "@/lib/roomMatching";
 import type { CuratorPick } from "@/components/FeaturedDesigners";

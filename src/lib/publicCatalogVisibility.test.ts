@@ -8,9 +8,9 @@ const designers = [
 ];
 
 describe("filterPublicPicks", () => {
-  it("removes pieces from Trade Only designers", () => {
+  it("keeps individually public pieces when their maker profile is Trade Only", () => {
     const out = filterPublicPicks([{ id: "a", designer_id: "trade" }, { id: "b", designer_id: "public" }], designers);
-    expect(out.map((p) => p.id)).toEqual(["b"]);
+    expect(out.map((p) => p.id)).toEqual(["a", "b"]);
   });
 
   it("removes pieces from unpublished or unknown designers", () => {

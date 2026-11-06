@@ -251,7 +251,7 @@ function HeritageSlideManager({ designerId }: { designerId: string }) {
 }
 
 /** Inline Curator Picks manager for each designer */
-const IMMEDIATE_PICK_AUTOSAVE_FIELDS = new Set<string>(["title"]);
+const IMMEDIATE_PICK_AUTOSAVE_FIELDS = new Set<string>(["title", "trade_only"]);
 
 // Pickup details are shared across a designer's whole catalogue: saving one
 // pick's pickup address/country/postcode applies it to every pick of that
@@ -443,7 +443,7 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
       : {};
     const { data, error } = await supabase
       .from("designer_curator_picks")
-      .insert({ designer_id: designerId, title: "Untitled Piece", image_url: "", sort_order: order, ...inherited } as any)
+      .insert({ designer_id: designerId, title: "Untitled Piece", image_url: "", sort_order: order, trade_only: true, ...inherited } as any)
       .select()
       .single();
     if (error) {

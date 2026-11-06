@@ -1,5 +1,6 @@
-// Public catalogue surfaces must never show pieces belonging to Trade Only or
-// unpublished designers — not even as an anonymous placeholder card.
+// Public catalogue surfaces consume only the safe product projection. Each
+// product's own Trade Only setting controls its visibility; a maker's Trade
+// Only setting protects their profile without overriding a published product.
 
 export interface DesignerVisibilityRow {
   id: string;
