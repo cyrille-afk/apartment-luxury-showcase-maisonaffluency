@@ -1,5 +1,9 @@
 # Roadmap
 
+## Bulk-upload automatic dimensions
+- [x] Restore automatic drop measurements with one remembered, explicit batch source unit, retain per-file overrides and filename/manual labels.
+- [x] Signed-in real glTF fixtures verify existing/future multi-file sizing, remembered selection, per-file overrides and protected filename/manual labels on desktop/mobile; 29 regressions pass including converted OBJ upload-label checks. Build OK, no page errors; no customer model records changed.
+
 ## Independent product publishing
 - [x] Each curator pick's Public / Trade Only control is authoritative even when its maker profile remains Trade Only; safe maker credits expose no private profile, and previously hidden products under Trade Only makers remain hidden.
 - [x] New products default to Trade Only and the editor shows an explicit status. Nine visibility/cache regressions pass; signed-in Cloud Filigrane toggled Trade Only → public 404 → Public → restored product (HTTP 200 saves), with public category, safe metadata, live one-minute catalogue refresh and build verified.

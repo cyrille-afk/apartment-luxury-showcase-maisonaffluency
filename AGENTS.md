@@ -11,6 +11,7 @@
 - Password-setup resends reuse the review drawer and retain attempt keys on retry; never change approval. Verified activation links the account; the queue reads user_id for setup status.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Bulk 3D sizing uses the explicitly confirmed, device-remembered batch source unit with per-file overrides; drop/upload measurements share existing label precedence and conversion helpers — restores batch automation without magnitude guessing or overwriting filename/manual sizes.
 - Admin destinations use collectionScrollPolicy's instant navigation reset, while same-page option/query changes retain position; public navigation and history restoration stay unchanged — prevents shared smooth scrolling from gliding every admin page.
 - Desktop homepage photo and its recovery image fill exactly one viewport (full width, cover) behind the glass header with a shared 35% vertical crop — keeps TV/birds and the coffee table in the first view without scrolling.
 - Expired Trade activation requests use the public requestTradePasswordSetup server function with same-host Turnstile validation and private approved/unlinked eligibility; delegate issuance and idempotent sending to the existing approval email pipeline without role/status writes — avoids enumeration and duplicate token implementations.

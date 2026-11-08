@@ -117,6 +117,13 @@ export function GlbBulkUpload({ onChange }: Props) {
     }
   });
   const dimUnitRef = useRef(dimUnit);
+  const [batchSourceUnit, setBatchSourceUnit] = useState<ModelSourceUnit>();
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("ma-glb-source-unit");
+      if (saved === "m" || saved === "cm" || saved === "mm" || saved === "in") setBatchSourceUnit(saved);
+    } catch { /* storage unavailable */ }
+  }, []);
 
   const changeDimUnit = (unit: DimensionUnit) => {
     dimUnitRef.current = unit;
@@ -243,6 +250,7 @@ export function GlbBulkUpload({ onChange }: Props) {
       companions: [],
       productId: bestProductMatch(f.name),
       label: guessVariantLabel(f.name),
+      sourceUnit: batchSourceUnit,
       status: "pending" as FileStatus,
       progress: 0,
     }));
@@ -289,19 +297,38 @@ export function GlbBulkUpload({ onChange }: Props) {
       );
     }
 
+    for (const entry of newEntries) measureEntry(entry, entry.sourceUnit);
+  };
+
+  const measurementVersions = useRef(new Map<string, number>());
+  const measureEntry = (entry: BulkFile, sourceUnit?: ModelSourceUnit) => {
+    const version = (measurementVersions.current.get(entry.key) ?? 0) + 1;
+    measurementVersions.current.set(entry.key, version);
+    if (!sourceUnit || !canApplyMeasuredDimensions(entry) || !/\.(glb|gltf)$/i.test(entry.file.name)) return;
+    void measureGlbDimensions(entry.file, sourceUnit).then(dims => {
+      if (!dims) return;
+      setFiles(prev => prev.map(f => f.key === entry.key && measurementVersions.current.get(entry.key) === version && f.sourceUnit === sourceUnit && f.status === "pending" && canApplyMeasuredDimensions(f)
+        ? { ...f, measured: dims, label: formatDimensionLabel(dims, dimUnitRef.current) }
+        : f));
+    });
   };
 
   const changeSourceUnit = (entry: BulkFile, sourceUnit?: ModelSourceUnit) => {
     setFiles(prev => prev.map(f => f.key === entry.key
       ? { ...f, sourceUnit, measured: undefined, label: f.measured && !f.labelTouched ? "Default" : f.label }
       : f));
-    if (!sourceUnit || !canApplyMeasuredDimensions(entry) || !/\.(glb|gltf)$/i.test(entry.file.name)) return;
-    void measureGlbDimensions(entry.file, sourceUnit).then(dims => {
-      if (!dims) return;
-      setFiles(prev => prev.map(f => f.key === entry.key && f.sourceUnit === sourceUnit && f.status === "pending" && canApplyMeasuredDimensions(f)
-        ? { ...f, measured: dims, label: formatDimensionLabel(dims, dimUnitRef.current) }
-        : f));
-    });
+    measureEntry(entry, sourceUnit);
+  };
+
+  const changeBatchSourceUnit = (sourceUnit?: ModelSourceUnit) => {
+    setBatchSourceUnit(sourceUnit);
+    try {
+      if (sourceUnit) localStorage.setItem("ma-glb-source-unit", sourceUnit);
+      else localStorage.removeItem("ma-glb-source-unit");
+    } catch { /* storage unavailable */ }
+    for (const entry of files) {
+      if (entry.status === "pending") changeSourceUnit(entry, sourceUnit);
+    }
   };
 
   const setFile = (key: string, patch: Partial<BulkFile>) =>
@@ -573,6 +600,22 @@ export function GlbBulkUpload({ onChange }: Props) {
               ))}
             </div>
           </div>
+          <select
+            value={batchSourceUnit || ""}
+            onChange={e => {
+              const unit = e.target.value;
+              changeBatchSourceUnit(unit === "m" || unit === "cm" || unit === "mm" || unit === "in" ? unit : undefined);
+            }}
+            disabled={running}
+            aria-label="Model source units for batch"
+            className="mb-3 px-2 py-1.5 border border-border rounded bg-background font-body text-xs"
+          >
+            <option value="">Batch model units: choose…</option>
+            <option value="m">Batch model units: metres</option>
+            <option value="cm">Batch model units: cm</option>
+            <option value="mm">Batch model units: mm</option>
+            <option value="in">Batch model units: inches</option>
+          </select>
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
