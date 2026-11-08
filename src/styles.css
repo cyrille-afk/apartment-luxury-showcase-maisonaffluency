@@ -279,6 +279,22 @@ body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-he
 .global-overlay-header :is([role="menu"], .header-account-menu, .bg-background, [data-header-panel]) {
   --header-current-ink: hsl(var(--foreground));
 }
+/* Desktop landing-page glass becomes white only while hovered/open.
+   Leaving restores the original tint and blur; keyboard focus alone does not latch it. */
+@media (min-width: 768px) and (hover: hover) {
+  [data-site-header][data-global-overlay="true"].global-overlay-header:is([data-homepage="true"], [data-designers-page="true"]):is(:hover, [data-menu-active="true"]) {
+    --header-current-ink: var(--homepage-header-ink) !important;
+    color: var(--homepage-header-ink) !important;
+    background-color: var(--homepage-header-paper) !important;
+    background-image: none !important;
+    backdrop-filter: none !important;
+  }
+  [data-site-header][data-global-overlay="true"].global-overlay-header:is([data-homepage="true"], [data-designers-page="true"]):is(:hover, [data-menu-active="true"])
+    :is([data-header-top-row], [data-header-editorial-row], .header-collection-row)
+    :is(button, a, span, em, svg):not([role="menu"] *):not(.header-account-menu *):not([data-header-panel] *) {
+    color: var(--homepage-header-ink) !important;
+  }
+}
 .header-mobile-collections, .global-overlay-header > div > .header-editorial-row { display: none; }
 @media (min-width: 768px) and (max-width: 1100px) {
   .header-trade-trigger { max-width: 200px; white-space: normal; text-align: left; }
