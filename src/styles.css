@@ -282,14 +282,14 @@ body:has(.global-overlay-header[data-designers-page="true"]) #designers-hover-he
 /* Desktop landing-page glass becomes white only while hovered/open.
    Leaving restores the original tint and blur; keyboard focus alone does not latch it. */
 @media (min-width: 768px) and (hover: hover) {
-  [data-site-header].global-overlay-header:is([data-homepage="true"], [data-designers-page="true"]):is(:hover, [data-menu-active="true"]) {
+  [data-site-header][data-global-overlay="true"].global-overlay-header:is([data-homepage="true"], [data-designers-page="true"]):is(:hover, [data-menu-active="true"]) {
     --header-current-ink: var(--homepage-header-ink) !important;
     color: var(--homepage-header-ink) !important;
     background-color: var(--homepage-header-paper) !important;
     background-image: none !important;
     backdrop-filter: none !important;
   }
-  [data-site-header].global-overlay-header:is([data-homepage="true"], [data-designers-page="true"]):is(:hover, [data-menu-active="true"])
+  [data-site-header][data-global-overlay="true"].global-overlay-header:is([data-homepage="true"], [data-designers-page="true"]):is(:hover, [data-menu-active="true"])
     :is([data-header-top-row], [data-header-editorial-row], .header-collection-row)
     :is(button, a, span, em, svg):not([role="menu"] *):not(.header-account-menu *):not([data-header-panel] *) {
     color: var(--homepage-header-ink) !important;
