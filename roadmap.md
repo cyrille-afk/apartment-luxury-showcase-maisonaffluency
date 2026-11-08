@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Bulk-upload automatic dimensions
-- [ ] Restore automatic drop measurements with one remembered, explicit batch source unit, retain per-file overrides and filename/manual labels.
-- [ ] Verify signed-in multi-file sizing and run dimension regressions before resolving the finding.
+- [x] Restore automatic drop measurements with one remembered, explicit batch source unit, retain per-file overrides and filename/manual labels.
+- [x] Signed-in real glTF fixtures verify existing/future multi-file sizing, remembered selection, per-file overrides and protected filename/manual labels on desktop/mobile; 29 regressions pass including converted OBJ upload-label checks. Build OK, no page errors; no customer model records changed.
 
 ## Independent product publishing
 - [x] Each curator pick's Public / Trade Only control is authoritative even when its maker profile remains Trade Only; safe maker credits expose no private profile, and previously hidden products under Trade Only makers remain hidden.
