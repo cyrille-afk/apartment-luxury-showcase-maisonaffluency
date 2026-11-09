@@ -244,6 +244,16 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
     try {
       const realId = await resolveRealId();
       if (!realId) { toast.error("Could not add to project folder"); return; }
+      if (quickMoodboard) {
+        const { data: existing, error: lookupError } = await supabase.from("client_board_items").select("id").eq("board_id", boardId).eq("product_id", realId).limit(1).maybeSingle();
+        if (lookupError) { toast.error("Could not save to project moodboard"); return; }
+        if (existing) {
+          setInBoards((prev) => new Set(prev).add(boardId));
+          toast.success("Saved to project moodboard");
+          setOpen(false);
+          return;
+        }
+      }
       const { data: last } = await supabase.from("client_board_items").select("sort_order").eq("board_id", boardId).order("sort_order", { ascending: false }).limit(1);
       const next = last && last.length ? ((last[0] as any).sort_order ?? 0) + 1 : 0;
       const { error } = await supabase.from("client_board_items").insert({ board_id: boardId, product_id: realId, sort_order: next });
@@ -266,7 +276,7 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
     try {
       const { data, error } = await supabase
         .from("client_boards")
-        .insert({ user_id: user.id, studio_id: currentStudio?.id ?? null, title, client_name: "" } as any)
+        .insert({ user_id: user.id, studio_id: currentStudio?.id ?? null, title, client_name: "", ...(quickMoodboard ? { project_id: getActiveProjectId() } : {}) } as any)
         .select("id, title")
         .single();
       if (error || !data) { toast.error("Could not create project folder"); return; }
