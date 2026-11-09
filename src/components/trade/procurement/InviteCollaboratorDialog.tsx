@@ -25,7 +25,7 @@ function maskLink(url: string) {
 }
 
 
-export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, onInvited, readOnly = false, projectId, projectName, boardOptions, boardsLoading = false, workspaceInvite = false, clientWorkspace = false }: {
+export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, onInvited, readOnly = false, projectId, projectName, boardOptions, boardsLoading = false, workspaceInvite = false, clientWorkspace = false, projectOptions, selectedProjectId = "", projectsLoading = false, onProjectChange }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   boardId: string;
@@ -37,6 +37,10 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
   boardsLoading?: boolean;
   workspaceInvite?: boolean;
   clientWorkspace?: boolean;
+  projectOptions?: { id: string; name: string }[];
+  selectedProjectId?: string;
+  projectsLoading?: boolean;
+  onProjectChange?: (id: string | null) => void;
 }) {
   const workspace = useProjectWorkspace();
   const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null);
@@ -45,6 +49,7 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
     if (open && !wasOpen.current) setSelectedBoardId(null);
     wasOpen.current = open;
   }, [open]);
+  useEffect(() => { setSelectedBoardId(null); }, [selectedProjectId]);
   const activeFolderId = workspace?.activeFolder?.projectId === projectId ? workspace?.activeFolder?.folderId : undefined;
   const defaultBoardId = clientWorkspace ? activeFolderId || boardId : boardId;
   const targetBoardId = boardOptions ? boardOptions.find(board => board.id === (selectedBoardId ?? defaultBoardId))?.id || "" : boardId;
@@ -105,7 +110,7 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
         {!link ? (
           <div className="space-y-5 pt-2">
             {clientWorkspace && <>
-              <div className="space-y-1.5"><Label htmlFor="invite-project-name" className="font-body text-[10px] uppercase">Project workspace</Label><Input id="invite-project-name" readOnly value={projectName || (boardsLoading ? "Loading project…" : "No active project")} className="rounded-none" /></div>
+              <div className="space-y-1.5"><Label htmlFor="invite-project-name" className="font-body text-[10px] uppercase">Project workspace</Label>{projectOptions ? <select id="invite-project-name" value={selectedProjectId} disabled={sending || projectsLoading} onChange={event => onProjectChange?.(event.target.value || null)} className="h-10 w-full rounded-none border border-input bg-background px-3 font-body text-sm"><option value="">{projectsLoading ? "Loading projects…" : "Select project"}</option>{projectOptions.map(option => <option key={option.id} value={option.id}>{option.name}</option>)}</select> : <Input id="invite-project-name" readOnly value={projectName || (boardsLoading ? "Loading project…" : "No active project")} className="rounded-none" />}</div>
               <div className="space-y-1.5"><Label htmlFor="invite-client-access" className="font-body text-[10px] uppercase">Access</Label><Input id="invite-client-access" readOnly value="Client (Read-Only - Comment/Approve)" className="rounded-none text-xs" /></div>
             </>}
             {boardOptions && <div className="space-y-1.5">
@@ -114,7 +119,7 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
                 <option value="">{boardsLoading ? "Loading project boards…" : "Select project board"}</option>
                 {boardOptions.map(board => <option key={board.id} value={board.id}>{board.title}</option>)}
               </select>
-              {!boardsLoading && !projectId && <p role="status" className="font-body text-xs text-muted-foreground">Assign this quote to a project in the Quote Builder first.</p>}
+              {!boardsLoading && !projectId && <p role="status" className="font-body text-xs text-muted-foreground">{projectOptions ? "Select a project workspace to load its folders." : "Assign this quote to a project in the Quote Builder first."}</p>}
               {!boardsLoading && projectId && !boardOptions.length && <p role="status" className="font-body text-xs text-muted-foreground">Add a board to this project before inviting your client.</p>}
             </div>}
             <div className="space-y-1.5">

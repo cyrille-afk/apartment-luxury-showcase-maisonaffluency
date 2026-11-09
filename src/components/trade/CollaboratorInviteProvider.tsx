@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
 import { useLocation } from "@/lib/router-compat";
-import { useProject } from "@/hooks/useProjects";
+import { useProject, useProjects } from "@/hooks/useProjects";
 import { useUserBoards } from "@/hooks/useUserBoards";
 import InviteCollaboratorDialog from "./procurement/InviteCollaboratorDialog";
 import { ProjectWorkspaceProvider, useProjectWorkspace } from "@/contexts/ProjectWorkspaceContext";
@@ -31,12 +31,16 @@ function CollaboratorInviteState({ children }: { children: ReactNode }) {
 }
 
 function ProjectClientInvitation({ projectId, onClose }: { projectId: string | null; onClose: () => void }) {
-  const { project, loading: projectLoading } = useProject(projectId || undefined);
-  const { boards, loading, error } = useUserBoards(Boolean(projectId), projectId);
-  const projectBoards = boards.filter(board => board.project_id === projectId);
-  const ready = Boolean(projectId && project?.id === projectId && !projectLoading && !error);
+  const [selectedProjectId, setSelectedProjectId] = useState(projectId);
+  const { projects, loading: projectsLoading } = useProjects({ activeOnly: false });
+  const { project, loading: projectLoading } = useProject(selectedProjectId || undefined);
+  const { boards, loading, error } = useUserBoards(Boolean(selectedProjectId), selectedProjectId, true);
+  const projectBoards = boards.filter(board => board.project_id === selectedProjectId);
+  const ready = Boolean(selectedProjectId && project?.id === selectedProjectId && !projectLoading && !error);
+  const projectOptions = project?.id === selectedProjectId && !projects.some(option => option.id === project.id) ? [project, ...projects] : projects;
   return <InviteCollaboratorDialog open onOpenChange={open => { if (!open) onClose(); }} boardId=""
-    projectId={ready ? projectId || undefined : undefined} projectName={project?.id === projectId ? project.name : undefined}
+    projectId={ready ? selectedProjectId || undefined : undefined} projectName={project?.id === selectedProjectId ? project.name : undefined}
+    projectOptions={projectOptions} selectedProjectId={selectedProjectId || ""} projectsLoading={projectsLoading} onProjectChange={setSelectedProjectId}
     boardOptions={ready ? projectBoards : []} boardsLoading={loading || projectLoading} workspaceInvite clientWorkspace
     readOnly onInvited={() => {}} />;
 }
