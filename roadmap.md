@@ -1,5 +1,9 @@
 # Roadmap
 
+## Contextual client workspace invitation
+- [ ] Connect the quote drawer to shared collaborator invitation state with the saved active project folder and Client read-only/comment/approve access.
+- [ ] Verify project scope and permissions through tests and the signed-in drawer without sending customer invitations.
+
 ## Active quote workspace invitation
 - [x] Replaced drawer-only recipient/share/revoke controls with a bordered Add Client to Project button and reused the collaborator dialog with saved project context and explicit project-board selection; full quote-editor sharing remains unchanged.
 - [x] Signed-in real drawer opens Invite Collaborator; selecting an existing project board enables Send Invite. Unassigned quotes show a project-assignment blocker; no invitations sent or records changed. Six regressions pass; build OK.
