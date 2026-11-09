@@ -15,10 +15,13 @@ describe("persisted quote selections", () => {
     expect(findQuoteFinishSwatches(label, library).map((finish) => finish.name)).toEqual(finishes.map((finish) => finish.name));
   });
   it("saves the chair's selected upholstery and frame, not its fabric price category", () => {
-    expect(quoteSelectionLabel([
+    const label = quoteSelectionLabel([
       { label: "Upholstery", name: "Safire-2 0007" },
       { label: "Frame Finish", name: "Black Pepper Oak" },
-    ], "Fabric Cat. Opera")).toBe("Upholstery: Safire-2 0007 · Frame Finish: Black Pepper Oak");
+    ], "Fabric Cat. Opera");
+    expect(label).toBe("Upholstery: Safire-2 0007 · Frame Finish: Black Pepper Oak");
+    const library = ["Safire-2 0007", "Safire-2 0008", "Safire-2 0009", "Black Pepper Oak"].map((name, i) => ({ name, image_url: `https://images.test/${i}.jpg` }));
+    expect(findQuoteFinishSwatches(label, library).map((swatch) => swatch.name)).toEqual(["Safire-2 0007", "Black Pepper Oak"]);
   });
   it("retains explicit size and keeps the existing variant when no finishes are provided", () => {
     expect(quoteSelectionLabel([{ label: "Wood", name: "Oak" }], "old", "W 82 × D 77 × H 73 cm")).toBe("Wood: Oak · W 82 × D 77 × H 73 cm");
