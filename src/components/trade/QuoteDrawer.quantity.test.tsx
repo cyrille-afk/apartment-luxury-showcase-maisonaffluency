@@ -11,7 +11,7 @@ vi.mock("@/integrations/supabase/client", () => ({ supabase: { from: (table: str
   select: () => ({ eq: () => table === "trade_quotes" ? { maybeSingle: async () => ({ data: { status: "draft" } }) } : { order: async () => ({ data: [
     { id: "chair", quantity: state.quantity, unit_price_cents: 501600, unit_price_currency: "EUR", product: { product_name: "Frenchmen Street Lounge Chair", brand_name: "Herkner", currency: "EUR" } },
     { id: "yoma", quantity: 1, unit_price_cents: 10056330, unit_price_currency: "EUR", product: { product_name: "Yoma CLW Console", brand_name: "Kerstens", currency: "EUR" } },
-  ] }) }, ilike: () => ({ limit: async () => ({ data: [] }) }) }),
+  ] }) }, ilike: () => ({ limit: async () => ({ data: [] }) }), or: async () => ({ data: [] }) }),
   update: (patch: { quantity: number }) => {
     state.update(patch);
     const query = { eq: () => query, select: () => ({ single: async () => {
