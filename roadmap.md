@@ -1,5 +1,8 @@
 # Roadmap
 
+## Product card button cursors
+- [x] Added cursor-pointer only to both card actions; signed-in browser verified pointer on each, with layout, styling and borders unchanged. Build OK.
+
 ## Product card split actions
 - [ ] Replace gallery hover quote action with Configure & Quote and Add to Moodboard; reuse product configuration and existing project-board saves.
 - [ ] Verify finish selection, saved-board readback, toast and desktop/mobile fit.
