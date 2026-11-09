@@ -6,13 +6,13 @@ export function shouldResetRouteScroll(previousPath: string | null, pathname: st
   return previousPath !== pathname || isCollectionLanding(pathname);
 }
 
-/** Admin destinations land immediately; same-page options keep their position. */
+/** Trade arrivals/departures land immediately; same-page options keep their position. */
 export function routeScrollBehavior(pathname: string, allowSmooth: boolean, previousPath?: string | null): ScrollBehavior {
   const adminPattern = /(^|\/)admin(?:\/|$|-)|(^|\/)[^/]+-admin(?:\/|$)/;
   const adminPath = adminPattern.test(pathname) || adminPattern.test(previousPath ?? "");
-  // Leaving the Collection (e.g. a Designers & Ateliers card) must land instantly.
-  const fromCollection = isCollectionLanding(previousPath ?? "");
-  return allowSmooth && !adminPath && !fromCollection ? "smooth" : "instant";
+  const tradePattern = /^\/trade(?:\/|$)/;
+  const tradeNavigation = tradePattern.test(pathname) || tradePattern.test(previousPath ?? "");
+  return allowSmooth && !adminPath && !tradeNavigation ? "smooth" : "instant";
 }
 /** Product detail pages must land instantly — a smooth scroll-to-top from a deep
  *  listing position reads as an "elevator" before the product appears. */
