@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Trade-wide navigation scrolling
-- [ ] Replace the remaining shared smooth reset on all Trade arrivals/departures; retain same-page position and Back restoration.
-- [ ] Verify signed-in Trade navigation and same-page controls, and run scroll regressions.
+- [x] Replace the remaining shared smooth reset on all Trade arrivals/departures; retain same-page position and Back restoration.
+- [x] Signed-in Comparator → Tools → Quotes → Settings → Projects → Favorites → Tools checks show no animated resets; quote filter stays at its position. Forty-two scroll/history regressions pass; build OK. No customer records changed.
 
 ## Bulk-upload automatic dimensions
 - [x] Restore automatic drop measurements with one remembered, explicit batch source unit, retain per-file overrides and filename/manual labels.
