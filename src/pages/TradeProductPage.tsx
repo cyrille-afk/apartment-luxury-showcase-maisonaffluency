@@ -916,6 +916,12 @@ const TradeProductPage: React.FC = () => {
     })();
   }, [user]);
 
+  // Land at the top as soon as a new product URL mounts — waiting for data
+  // left the loading state at the old listing depth, then jumped (staggered move).
+  useLayoutEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+  }, [tradeProductIdParam, designerSlug, productSlug]);
+
   useLayoutEffect(() => {
     if (isLoading || !data?.product) return;
     window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
