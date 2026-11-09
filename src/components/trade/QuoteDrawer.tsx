@@ -155,10 +155,12 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
           .map((m) => m.product.product_name.trim())));
         if (unlinkedNames.length > 0) {
           const titleKey = (value: string | null | undefined) => (value || "").trim().toLowerCase();
-          const { data: titleRows } = await supabase
+          const titleResults = await Promise.all(unlinkedNames.map((name) => supabase
             .from("designer_curator_picks")
             .select("id, title")
-            .or(unlinkedNames.map((name) => `title.ilike.${name.replace(/[%_,()*\\"]/g, "")}*`).join(","));
+            .ilike("title", `${name.replace(/[\\%_]/g, (ch) => `\\${ch}`)}%`)
+            .limit(10)));
+          const titleRows = titleResults.flatMap((result) => result.data || []);
           for (const item of mapped) {
             if (!item.product || item.product.source_pick_id) continue;
             const key = titleKey(item.product.product_name);
