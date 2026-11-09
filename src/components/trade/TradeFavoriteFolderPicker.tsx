@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { recentProjectBoards } from "./recentProjectBoards";
+import { getActiveProjectId } from "@/lib/activeProjectId";
 
 export const TRADE_FAVORITE_FOLDERS_EVENT = "trade_favorite_folders_changed";
 
@@ -30,13 +31,14 @@ interface Props {
   side?: "top" | "right" | "bottom" | "left";
   /** Product name used in project-folder confirmations. */
   productName?: string;
+  quickMoodboard?: boolean;
 }
 
 /**
  * Artemest-style folder picker for trade users.
  * Persists folders + assignments in `favorite_folders` / `favorite_folder_items`.
  */
-const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", side = "bottom", productName }: Props) => {
+const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", side = "bottom", productName, quickMoodboard = false }: Props) => {
   const { user } = useAuth();
   const { currentStudio } = useStudio();
   const [boards, setBoards] = useState<{ id: string; title: string }[]>([]);
@@ -233,7 +235,11 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
   };
 
   const addToBoard = async (boardId: string, title: string) => {
-    if (!user || inBoards.has(boardId)) return;
+    if (!user || busy) return;
+    if (inBoards.has(boardId)) {
+      if (quickMoodboard) toast.success("Saved to project moodboard");
+      return;
+    }
     setBusy(true);
     try {
       const realId = await resolveRealId();
@@ -244,7 +250,8 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
       if (error) { toast.error("Could not add to project folder", { description: error.message }); return; }
       setInBoards((prev) => new Set(prev).add(boardId));
       await ensureFavoriteRow();
-      toast.success("Added to project folder", { description: `${productName || meta?.product_name || "Piece"} → ${title}` });
+      toast.success(quickMoodboard ? "Saved to project moodboard" : "Added to project folder", { description: quickMoodboard ? undefined : `${productName || meta?.product_name || "Piece"} → ${title}` });
+      if (quickMoodboard) setOpen(false);
     } finally {
       setBusy(false);
     }
@@ -293,9 +300,21 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
 
   const favorited = !!favoriteId;
 
+  const openOrSaveMoodboard = async () => {
+    if (!quickMoodboard) { setOpen(true); return; }
+    if (busy) return;
+    const projectId = getActiveProjectId();
+    if (!projectId) { setOpen(true); return; }
+    const { data, error } = await supabase.from("client_boards").select("id, title")
+      .eq("project_id", projectId).order("created_at", { ascending: false }).limit(2);
+    if (error) { toast.error("Could not load project moodboards"); return; }
+    if (data?.length === 1) { await addToBoard(data[0].id, data[0].title); return; }
+    setOpen(true);
+  };
+
   return (
     <>
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={(next) => { if (next) void openOrSaveMoodboard(); else setOpen(false); }}>
       <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
         {children}
       </PopoverTrigger>

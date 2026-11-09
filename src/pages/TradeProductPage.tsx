@@ -2612,7 +2612,7 @@ const TradeProductPage: React.FC<{ embeddedProduct?: { id?: string; designerSlug
             },
           })}
           className="mb-6"
-        />
+        />}
 
         <div ref={masterRef} className="grid grid-cols-1 lg:grid-cols-[minmax(0,55fr)_minmax(0,45fr)] lg:items-start gap-8 lg:gap-6 xl:gap-10 2xl:gap-14">
           {isLg ? (
@@ -3694,8 +3694,8 @@ const TradeProductPage: React.FC<{ embeddedProduct?: { id?: string; designerSlug
         })()}
       </div>
 
-      <div className="h-28 md:hidden" aria-hidden="true" />
-      <ProductCommerceCta
+      {!embeddedProduct && <div className="h-28 md:hidden" aria-hidden="true" />}
+      {!embeddedProduct && <ProductCommerceCta
         productId={product.id}
         dockOnly
         fixedDock
@@ -3713,7 +3713,7 @@ const TradeProductPage: React.FC<{ embeddedProduct?: { id?: string; designerSlug
         selectedFinishSwatches={felixSelectionRef.current?.finishes?.filter((finish) => !!finish.imageUrl).map((finish) => ({ name: finish.name, image_url: finish.imageUrl || "" }))}
         onAddToCart={(orderQuantity) => handleProceedToOrder(orderQuantity, true)}
         onPlaceOrder={() => currentRrpCents() ? handleProceedToOrder() : setCustomRequestOpen(true)}
-      />
+      />}
 
       <QuoteDrawer
         open={drawerOpen}
@@ -3736,7 +3736,7 @@ const TradeProductPage: React.FC<{ embeddedProduct?: { id?: string; designerSlug
           brand_name: designerDisplay || null,
         }}
       />
-      <GalleryDetailsFloatingNav
+      {!embeddedProduct && <GalleryDetailsFloatingNav
         showImmediately
         azHref="/designers"
         allCategoriesHref={
@@ -3744,7 +3744,7 @@ const TradeProductPage: React.FC<{ embeddedProduct?: { id?: string; designerSlug
             ? categoryUrl(product.category, product.subcategory ?? null)
             : undefined
         }
-      />
+      />}
 
       <AlertDialog open={!!quoteConfirm} onOpenChange={(open) => { if (!open) setQuoteConfirm(null); }}>
         <AlertDialogContent>
