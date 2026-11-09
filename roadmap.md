@@ -1,5 +1,9 @@
 # Roadmap
 
+## Quote quantities and configured totals
+- [ ] Add saved drawer quantity controls; keep totals in sync and report failed saves.
+- [ ] Persist the same numeric configured price and priced variant shown on the product page; verify Yoma remains included after another item and reload.
+
 ## Preserve configured quote finishes
 - [x] Save each product's selector-derived finish configuration on its own quote line, rather than only the active drawer preview.
 - [x] Signed-in disposable real quote: Yoma's three finish names and crops survive adding Frenchmen Street Lounge Chair and a full reload; exact chair colourways no longer expand to sibling fabrics. Eleven regressions pass, build OK. Temporary quotes removed; the customer's previously blank Yoma line remains unchanged because its original selection was never saved.
