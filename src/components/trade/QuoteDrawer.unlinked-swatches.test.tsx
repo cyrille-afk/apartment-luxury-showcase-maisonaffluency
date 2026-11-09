@@ -11,6 +11,7 @@ const product = { id: "orphan", source_pick_id: null, product_name: "Frenchmen S
 const swatches = [
   { pick_id: "lounge-pick", fabric_id: "f1", name: "Opera Calla", image_url: "https://img/calla.jpg", sort_order: 1, is_active: true },
   { pick_id: "lounge-pick", fabric_id: "f2", name: "Opera Delft", image_url: "https://img/delft.jpg", sort_order: 2, is_active: true },
+  { pick_id: "lounge-pick", fabric_id: "f3", name: "Zero 001", image_url: "https://img/zero.jpg", sort_order: 3, is_active: true },
 ];
 vi.mock("@/integrations/supabase/client", () => ({ supabase: { from: (table: string) => ({ select: () => ({
   ilike: () => ({ limit: async () => ({ data: table === "designer_curator_picks" ? pickTitles.rows : [] }) }),
@@ -25,14 +26,14 @@ afterEach(() => { cleanup(); pickTitles.rows = []; });
 it("shows finish crops for a line saved against an unlinked catalogue copy when its title matches one piece", async () => {
   pickTitles.rows = [{ id: "lounge-pick", title: "Frenchmen Street Lounge Chair " }];
   render(<QuoteDrawer open onOpenChange={vi.fn()} quoteId="quote" />);
-  await new Promise((r) => setTimeout(r, 300)); console.log("DOM", document.body.textContent);
   await waitFor(() => expect(screen.getByAltText("Opera Calla")).toBeTruthy());
   expect(screen.getByAltText("Opera Delft")).toBeTruthy();
+  expect(screen.queryByAltText("Zero 001")).toBeNull();
 });
 
 it("does not guess finish crops when two pieces share the title", async () => {
   pickTitles.rows = [{ id: "lounge-pick", title: "Frenchmen Street Lounge Chair" }, { id: "other", title: "frenchmen street lounge chair " }];
   render(<QuoteDrawer open onOpenChange={vi.fn()} quoteId="quote" />);
-  await waitFor(() => expect(screen.getByText("Finish: Fabric Cat. Opera")).toBeTruthy());
+  await waitFor(() => expect(screen.getByText("Frenchmen Street Lounge Chair")).toBeTruthy());
   expect(screen.queryByAltText("Opera Calla")).toBeNull();
 });
