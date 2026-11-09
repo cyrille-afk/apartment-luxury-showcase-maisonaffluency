@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { copyTextToClipboard } from "@/lib/clipboard";
+import { useProjectWorkspace } from "@/contexts/ProjectWorkspaceContext";
 
 const emailSchema = z.string().trim().email("Enter a valid email").max(255);
 
@@ -37,6 +38,7 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
   workspaceInvite?: boolean;
   clientWorkspace?: boolean;
 }) {
+  const workspace = useProjectWorkspace();
   const [selectedBoardId, setSelectedBoardId] = useState("");
   const targetBoardId = boardOptions ? boardOptions.find(board => board.id === (selectedBoardId || boardId))?.id || (boardOptions.length === 1 ? boardOptions[0]?.id : "") : boardId;
   const [email, setEmail] = useState("");
@@ -53,14 +55,21 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
     if (!parsed.success) { setError(parsed.error.issues[0].message); return; }
     setSending(true);
     setError(null);
+    const rollback = projectId && clientWorkspace
+      ? workspace?.submitClientInvitation(projectId, targetBoardId, parsed.data)
+      : undefined;
+    let invitationCreated = false;
+    try {
     const { data, error: err } = projectId
       ? await supabase.rpc(clientWorkspace ? "create_project_board_client_invite" : "create_project_board_view_invite", { _project_id: projectId, _board_id: targetBoardId, _email: parsed.data })
       : await supabase.rpc("create_board_invite" as any, { _board_id: targetBoardId, _email: parsed.data, _role: readOnly ? "client" : role });
     if (err || !data) {
+      rollback?.();
       setSending(false);
       setError("Could not create the invite.");
       return;
     }
+    invitationCreated = true;
     const { id, token } = data as { id: string; token: string };
     const { data: slug } = await supabase.rpc("board_share_slug" as any, { _board_id: targetBoardId });
     const url = `${shareOrigin()}/shared/board/${(slug as string) || token}`;
@@ -71,6 +80,12 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
     setSending(false);
     onInvited();
     toast({ title: mailErr ? "Invite created — email could not be sent, copy the link instead" : `Invite sent to ${parsed.data}` });
+    } catch {
+      if (!invitationCreated) rollback?.();
+      setError(invitationCreated ? "Invite created, but delivery could not be confirmed. Check the invitation before retrying." : "Could not create the invite. Please try again.");
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
