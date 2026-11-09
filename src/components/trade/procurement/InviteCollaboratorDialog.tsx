@@ -77,7 +77,7 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
       <DialogContent className="rounded-none sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="font-display text-xl font-normal">{workspaceInvite ? "Invite Collaborator" : projectId ? "Invite architect or designer" : readOnly ? "Invite Client" : "Invite Collaborator"}</DialogTitle>
-          <DialogDescription className="font-body text-xs">{projectId ? "View-only access to this project board, verified by email. No editing, comments or approvals. Invitation expires after 30 days." : "They receive a private link to this board, valid for 30 days."}</DialogDescription>
+          <DialogDescription className="font-body text-xs">{projectId || workspaceInvite ? "View-only access to this project board, verified by email. No editing, comments or approvals. Invitation expires after 30 days." : "They receive a private link to this board, valid for 30 days."}</DialogDescription>
         </DialogHeader>
         {!link ? (
           <div className="space-y-5 pt-2">
