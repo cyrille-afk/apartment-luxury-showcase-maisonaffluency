@@ -606,8 +606,11 @@ export function tradeProductPageQueryOptions(
   };
 }
 
-const TradeProductPage: React.FC = () => {
-  const { id: tradeProductIdParam, slug: designerSlug, productSlug } = useParams<{ id: string; slug: string; productSlug: string }>();
+const TradeProductPage: React.FC<{ embeddedProduct?: { id?: string; designerSlug: string; productSlug: string } }> = ({ embeddedProduct }) => {
+  const routeParams = useParams<{ id: string; slug: string; productSlug: string }>();
+  const tradeProductIdParam = embeddedProduct ? embeddedProduct.id : routeParams.id;
+  const designerSlug = embeddedProduct ? embeddedProduct.designerSlug : routeParams.slug;
+  const productSlug = embeddedProduct ? embeddedProduct.productSlug : routeParams.productSlug;
   const navigate = useNavigate();
   const location = useLocation();
   const { user, profile: authProfile } = useAuth();
@@ -706,6 +709,7 @@ const TradeProductPage: React.FC = () => {
   // selection updates the gallery — otherwise the image is off-screen above
   // the dropdown and the user can't see the change.
   useEffect(() => {
+    if (embeddedProduct) return;
     if (galleryJumpNonce === 0) return;
     if (typeof window === "undefined") return;
     if (window.matchMedia("(min-width: 1024px)").matches) return;
@@ -714,7 +718,7 @@ const TradeProductPage: React.FC = () => {
     const headerOffset = 80;
     const y = el.getBoundingClientRect().top + window.scrollY - headerOffset;
     window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
-  }, [galleryJumpNonce]);
+  }, [galleryJumpNonce, embeddedProduct]);
 
   // Desktop dashboard: one viewport-height workspace (single asset window + fixed panel).
   const [isLg, setIsLg] = useState(() => typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches);
@@ -919,13 +923,15 @@ const TradeProductPage: React.FC = () => {
   // Land at the top as soon as a new product URL mounts — waiting for data
   // left the loading state at the old listing depth, then jumped (staggered move).
   useLayoutEffect(() => {
+    if (embeddedProduct) return;
     window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
-  }, [tradeProductIdParam, designerSlug, productSlug]);
+  }, [tradeProductIdParam, designerSlug, productSlug, embeddedProduct]);
 
   useLayoutEffect(() => {
+    if (embeddedProduct) return;
     if (isLoading || !data?.product) return;
     window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
-  }, [isLoading, data?.product?.id]);
+  }, [isLoading, data?.product?.id, embeddedProduct]);
 
   useEffect(() => {
     // Reset gallery to first image when navigating between products — the page
@@ -1427,7 +1433,7 @@ const TradeProductPage: React.FC = () => {
           ].filter(Boolean).map((s) => String(s)),
         });
         setDrawerRefreshKey((k) => k + 1);
-        setDrawerOpen(true);
+        if (!embeddedProduct) setDrawerOpen(true);
         try { window.sessionStorage.setItem(`ma-copilot-open-v1:${product.id}`, quoteId); } catch { /* noop */ }
         if (felixSelection) {
           window.dispatchEvent(new CustomEvent("concierge:propose_tearsheet_proactive", { detail: { ...structuredClone(felixSelection), lockedAt: Date.now() } }));
@@ -1444,7 +1450,7 @@ const TradeProductPage: React.FC = () => {
     } finally {
       setAdding(false);
     }
-  }, [user, data, activeQuoteId, toast, addToInventory, selectedBase, selectedTop, selectedBaseDisplay, selectedTopDisplay, selectedSwatchGalleryIndices, selectedSwatchGalleryName, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx, rugSelection, selectedFabric, selectedWoodPrice, fxRates, displayCurrency, finishesMissingImages, activeVariantCents]);
+  }, [user, data, activeQuoteId, toast, addToInventory, selectedBase, selectedTop, selectedBaseDisplay, selectedTopDisplay, selectedSwatchGalleryIndices, selectedSwatchGalleryName, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx, rugSelection, selectedFabric, selectedWoodPrice, fxRates, displayCurrency, finishesMissingImages, activeVariantCents, embeddedProduct]);
 
   // Preselect Base/Top/Size (dual-axis) or Material/Size (single-axis) from
   // URL query params — used when the concierge 3D drawer deep-links here so
@@ -2576,24 +2582,24 @@ const TradeProductPage: React.FC = () => {
           />
         ) : null}
       />
-      <Helmet>
+      {!embeddedProduct && <Helmet>
         <title>{pageTitle} — Trade — Maison Affluency</title>
-      </Helmet>
+      </Helmet>}
 
       <div className="w-full max-w-[1760px] pb-12 lg:pb-0">
-        <button
+        {!embeddedProduct && <button
           type="button"
           onClick={() => navigate(fromPath || fallbackPath)}
           className="mb-4 inline-flex items-center gap-1.5 font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" />{" "}
           {fromPath && !fromPath.startsWith("/trade") ? "Back to product" : "Back"}
-        </button>
+        </button>}
 
         {/* Breadcrumbs route back to the Trade Gallery grid pre-filtered
             to the same category/subcategory, so users stay inside the
             trade portal instead of being sent to the public catalogue. */}
-        <Breadcrumbs
+        {!embeddedProduct && <Breadcrumbs
           items={buildProductBreadcrumbs({
             root: { label: "Trade Gallery", to: "/trade/gallery" },
             category: product.category,
@@ -2606,7 +2612,7 @@ const TradeProductPage: React.FC = () => {
             },
           })}
           className="mb-6"
-        />
+        />}
 
         <div ref={masterRef} className="grid grid-cols-1 lg:grid-cols-[minmax(0,55fr)_minmax(0,45fr)] lg:items-start gap-8 lg:gap-6 xl:gap-10 2xl:gap-14">
           {isLg ? (
@@ -3433,13 +3439,13 @@ const TradeProductPage: React.FC = () => {
                   </Button>
                 </div>
               </div>
-              <Button data-commerce-primary onClick={() => window.dispatchEvent(new Event("ma:open-workspace-order"))} className="w-full gap-2 rounded-none bg-foreground text-background hover:bg-foreground/90 font-body text-xs uppercase">
+              {!embeddedProduct && <Button data-commerce-primary onClick={() => window.dispatchEvent(new Event("ma:open-workspace-order"))} className="w-full gap-2 rounded-none bg-foreground text-background hover:bg-foreground/90 font-body text-xs uppercase">
                 <ShoppingCart size={14} />
                 Proceed to Order
-              </Button>
-              <Button variant="outline" onClick={() => void handleAddToQuote()} disabled={adding} className={cn("w-full rounded-none font-body text-xs uppercase", added && "border-primary text-primary")}>
+              </Button>}
+              <Button variant={embeddedProduct ? "default" : "outline"} onClick={() => void handleAddToQuote()} disabled={adding} className={cn("w-full rounded-none font-body text-xs uppercase", embeddedProduct && "bg-foreground text-background hover:bg-foreground/90", added && "border-primary text-primary")}>
                 {adding ? <DotCircleLoader size="sm" /> : added ? <Check size={14} /> : null}
-                {added ? "Added to Co-Pilot Workspace" : "Add to Co-Pilot Workspace"}
+                {embeddedProduct ? (added ? "Added to Quote" : "Add to Quote") : (added ? "Added to Co-Pilot Workspace" : "Add to Co-Pilot Workspace")}
               </Button>
               <div aria-live="polite" className="text-center font-body text-[11px] empty:hidden">
                 {copilotSave.state === "saving" && <span className="text-muted-foreground">Saving to quote…</span>}
@@ -3688,8 +3694,8 @@ const TradeProductPage: React.FC = () => {
         })()}
       </div>
 
-      <div className="h-28 md:hidden" aria-hidden="true" />
-      <ProductCommerceCta
+      {!embeddedProduct && <div className="h-28 md:hidden" aria-hidden="true" />}
+      {!embeddedProduct && <ProductCommerceCta
         productId={product.id}
         dockOnly
         fixedDock
@@ -3707,7 +3713,7 @@ const TradeProductPage: React.FC = () => {
         selectedFinishSwatches={felixSelectionRef.current?.finishes?.filter((finish) => !!finish.imageUrl).map((finish) => ({ name: finish.name, image_url: finish.imageUrl || "" }))}
         onAddToCart={(orderQuantity) => handleProceedToOrder(orderQuantity, true)}
         onPlaceOrder={() => currentRrpCents() ? handleProceedToOrder() : setCustomRequestOpen(true)}
-      />
+      />}
 
       <QuoteDrawer
         open={drawerOpen}
@@ -3730,7 +3736,7 @@ const TradeProductPage: React.FC = () => {
           brand_name: designerDisplay || null,
         }}
       />
-      <GalleryDetailsFloatingNav
+      {!embeddedProduct && <GalleryDetailsFloatingNav
         showImmediately
         azHref="/designers"
         allCategoriesHref={
@@ -3738,7 +3744,7 @@ const TradeProductPage: React.FC = () => {
             ? categoryUrl(product.category, product.subcategory ?? null)
             : undefined
         }
-      />
+      />}
 
       <AlertDialog open={!!quoteConfirm} onOpenChange={(open) => { if (!open) setQuoteConfirm(null); }}>
         <AlertDialogContent>

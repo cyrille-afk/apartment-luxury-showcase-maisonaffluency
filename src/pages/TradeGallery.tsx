@@ -55,6 +55,7 @@ import GridDensityToggle from "@/components/GridDensityToggle";
 import NewInSpotlight from "@/components/NewInSpotlight";
 import { readTradeGalleryState } from "@/lib/tradeGalleryState";
 import { useTradeGalleryScroll } from "@/hooks/useTradeGalleryScroll";
+import ProductCardActions from "@/components/trade/ProductCardActions";
 
 
 const slugifyForUrl = (s: string) =>
@@ -900,7 +901,7 @@ const StudioGallery = () => {
             const metadata = tradeCardMetadata(product);
             return (
               <div key={product.id} data-trade-card={product.product_name} className="group relative min-w-0" onPointerEnter={() => warmTradeProductPage(product)} onFocusCapture={() => warmTradeProductPage(product)}>
-                <div className="relative aspect-square w-full overflow-hidden bg-[hsl(var(--product-canvas))] cursor-pointer" onClick={() => openProductSheet(product)}>
+                <div className="@container relative aspect-square w-full overflow-hidden bg-[hsl(var(--product-canvas))] cursor-pointer" onClick={() => openProductSheet(product)}>
                   {product.image_url ? (
                     <>
                       <img
@@ -980,39 +981,12 @@ const StudioGallery = () => {
                      <Scale className="h-3.5 w-3.5" />
                    </button>
                   {/* Overlay actions */}
-                  <div className="absolute inset-x-0 bottom-0 p-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                    <Button variant="outline" size="sm"
-                      onClick={() => handleAddToQuote(product)}
-                      disabled={isAdding || product.hidden_in_trade}
-                      className={`flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md font-body text-[10px] uppercase tracking-wider transition-colors ${
-                        isAdded
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-foreground text-background hover:bg-foreground/90"
-                      } disabled:opacity-60`}
-                    >
-                      {isAdding ? (
-                        <DotCircleLoader size="sm" />
-                      ) : isAdded ? (
-                        <Check className="h-3 w-3" />
-                      ) : (
-                        <ShoppingCart className="h-3 w-3" />
-                      )}
-                      {product.hidden_in_trade ? "Hidden in Trade" : isAdded ? "Added" : "Add to Quote"}
-                    </Button>
-                    {product.pdf_url && (
-                      <a
-                        href={buildSpecSheetUrl(product.pdf_url, product.brand_name, product.product_name)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2 bg-[hsl(var(--pdf-red))]/80 rounded-md text-white hover:bg-[hsl(var(--pdf-red))] transition-colors"
-                        title="Download spec sheet"
-                      >
-                        <FileDown className="h-3.5 w-3.5" />
-                      </a>
-                    )}
-                  </div>
+                  <ProductCardActions productId={product.trade_product_id ?? undefined}
+                    designerSlug={designerSlugMap.get(product.brand_name.toLowerCase()) || slugifyForUrl(product.brand_name)}
+                    productSlug={slugifyForUrl(product.product_name)} disabled={product.hidden_in_trade}
+                    meta={{ product_name: product.product_name, brand_name: product.brand_name, category: product.category, image_url: product.image_url, dimensions: product.dimensions, materials: product.materials }} />
                   {(metadata.leadTime || metadata.dimensions) && (
-                    <div data-card-specifications className="pointer-events-none absolute inset-x-0 bottom-14 z-30 flex flex-col gap-0.5 bg-background/95 py-1 text-left font-mono text-[9px] uppercase tracking-normal text-muted-foreground opacity-0 transition-opacity duration-300 motion-reduce:transition-none group-hover:opacity-100 group-focus-within:opacity-100">
+                    <div data-card-specifications className="pointer-events-none absolute inset-x-0 bottom-[104px] @[340px]:bottom-14 z-30 flex flex-col gap-0.5 bg-background/95 py-1 text-left font-mono text-[9px] uppercase tracking-normal text-muted-foreground opacity-0 transition-opacity duration-300 motion-reduce:transition-none group-hover:opacity-100 group-focus-within:opacity-100">
                       {metadata.leadTime && <span>Lead Time: {metadata.leadTime}</span>}
                       {metadata.dimensions && <span className="truncate" title={metadata.dimensions}>Dimensions: {metadata.dimensions}</span>}
                     </div>

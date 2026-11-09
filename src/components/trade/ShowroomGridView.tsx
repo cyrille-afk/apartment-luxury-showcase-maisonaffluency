@@ -29,6 +29,7 @@ import { motion } from "framer-motion";
 import { useFavorites } from "@/hooks/useFavorites";
 import TradeFavoriteFolderPicker from "@/components/trade/TradeFavoriteFolderPicker";
 import { createActiveDraftQuote } from "@/lib/activeProjectId";
+import ProductCardActions from "./ProductCardActions";
 
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
 import { ECART_REEDITION_LABEL, isEcartReedition, getHouseEditionLabel } from "@/lib/editionLabel";
@@ -774,7 +775,7 @@ const ShowroomGridView = ({
                     : "border-border hover:border-foreground/20"
                 )}
               >
-                <div className="aspect-[4/5] bg-muted/30 relative overflow-hidden cursor-pointer" onClick={() => openProductSheet(product)}>
+                <div className="@container aspect-[4/5] bg-muted/30 relative overflow-hidden cursor-pointer" onClick={() => openProductSheet(product)}>
                   {product.product_image_url ? (
                     <>
                       <img src={product.product_image_url} alt={product.product_name} width={800} height={1000} decoding="async" className={cn("w-full h-full object-cover object-center transition-opacity duration-500", product.hover_image_url ? "group-hover:opacity-0" : "")} loading="lazy" />
@@ -821,36 +822,10 @@ const ShowroomGridView = ({
                     </div>
                   )}
 
-                  <div className="absolute inset-x-0 bottom-0 p-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleAddToQuote(product); }}
-                      disabled={isAdding}
-                      className={`flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md font-body text-[10px] uppercase tracking-wider transition-colors ${
-                        isAdded ? "bg-emerald-600 text-white" : "bg-foreground text-background hover:bg-foreground/90"
-                      } disabled:opacity-60`}
-                    >
-                      {isAdding ? (
-                        <DotCircleLoader size="sm" />
-                      ) : isAdded ? (
-                        <Check className="h-3 w-3" />
-                      ) : (
-                        <ShoppingCart className="h-3 w-3" />
-                      )}
-                      {isAdded ? "Added" : "Add to Quote"}
-                    </button>
-                    {product.pdf_url && (
-                      <a
-                        href={buildSpecSheetUrl(product.pdf_url, product.designer_name || product.product_name, product.product_name)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2 bg-[hsl(var(--pdf-red))]/80 rounded-md text-white hover:bg-[hsl(var(--pdf-red))] transition-colors"
-                        title="Download spec sheet"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <FileDown className="h-3.5 w-3.5" />
-                      </a>
-                    )}
-                  </div>
+                  <ProductCardActions productId={product.trade_product_id}
+                    designerSlug={slugifyForUrl(product.designer_name || "")}
+                    productSlug={slugifyForUrl(product.product_name)}
+                    meta={{ product_name: product.product_name, brand_name: product.designer_name || "", category: product.category ?? undefined, image_url: product.product_image_url, dimensions: product.dimensions, materials: product.materials }} />
                 </div>
                 {/* Description in portal tooltip */}
                 <div className="flex flex-col items-center p-3 min-h-[4rem]">
