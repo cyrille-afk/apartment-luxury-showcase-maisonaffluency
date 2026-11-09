@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import ClientPicker from "@/components/trade/ClientPicker";
 import CopyTearsheetLink from "@/components/trade/CopyTearsheetLink";
 import ProjectComparisonShortlists from "@/components/trade/ProjectComparisonShortlists";
+import ProjectWorkspaceContact from "@/components/trade/ProjectWorkspaceContact";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import {
@@ -360,6 +361,7 @@ export default function TradeProjectDetail() {
           <div className="flex items-start justify-between gap-4">
             <div>
               <h1 className="font-display text-2xl md:text-3xl text-foreground mb-2">{project.name}</h1>
+              <ProjectWorkspaceContact projectId={project.id} />
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-body text-muted-foreground">
                 {project.client_name && <span>{project.client_name}</span>}
                 {project.location && <span>· {project.location}</span>}

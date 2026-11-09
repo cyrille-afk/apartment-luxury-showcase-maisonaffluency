@@ -1,5 +1,9 @@
 # Roadmap
 
+## Immediate invited-client folder state
+- [x] Selected-folder and project primaryContact/collaborators update immediately on validated client submission; failed creation rolls back its own attempt, email delivery failures retain created invitations, and headers consume shared session state without reload. CRM contacts and authorization remain unchanged.
+- [x] Twelve regressions pass; signed-in Singapore folder header visibly updates after shared-modal submission with simulated invitation/email responses (no records or emails created). Shared modal opened directly through its provider for this check; drawer click path remains covered by existing tests. Build OK.
+
 ## Contextual client workspace invitation
 - [x] Drawer opens the Trade-owned shared collaborator modal, resolves the saved quote project (active workspace fallback), and preselects an unambiguous project folder with fixed Client read-only/comment/approve access; view-only tearsheet sharing is unchanged.
 - [x] Signed-in Singapore GCB workflow drawer verified; 14 regressions pass and build OK. Temporary live invitation confirms client role with comments/approvals enabled, wrong-project rejection and no contractor editing; temporary folder/invite removed, no emails sent.

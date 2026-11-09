@@ -3,6 +3,7 @@ import { useLocation } from "@/lib/router-compat";
 import { useProject } from "@/hooks/useProjects";
 import { useUserBoards } from "@/hooks/useUserBoards";
 import InviteCollaboratorDialog from "./procurement/InviteCollaboratorDialog";
+import { ProjectWorkspaceProvider } from "@/contexts/ProjectWorkspaceContext";
 
 const InviteContext = createContext<((projectId: string | null) => void) | null>(null);
 export const useCollaboratorInvite = () => useContext(InviteContext);
@@ -18,10 +19,10 @@ export function CollaboratorInviteProvider({ children }: { children: ReactNode }
     // A saved quote's association wins over an unrelated browsing filter.
     setRequest({ projectId: quoteProjectId || activeProjectId, key: Date.now() });
   }, [location.search]);
-  return <InviteContext.Provider value={openInvite}>
+  return <ProjectWorkspaceProvider><InviteContext.Provider value={openInvite}>
     {children}
     {request && <ProjectClientInvitation key={request.key} projectId={request.projectId} onClose={() => setRequest(null)} />}
-  </InviteContext.Provider>;
+  </InviteContext.Provider></ProjectWorkspaceProvider>;
 }
 
 function ProjectClientInvitation({ projectId, onClose }: { projectId: string | null; onClose: () => void }) {

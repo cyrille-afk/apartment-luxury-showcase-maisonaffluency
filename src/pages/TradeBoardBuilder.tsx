@@ -44,6 +44,7 @@ import { copyTextToClipboard } from "@/lib/clipboard";
 import ProcurementBoardPanel, { FinishChips } from "@/components/trade/procurement/ProcurementBoardPanel";
 import FinishesDrawer, { type FinishSelection, resolveSavedFinishes } from "@/components/trade/procurement/FinishesDrawer";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
+import ProjectWorkspaceContact from "@/components/trade/ProjectWorkspaceContact";
 
 interface Board {
   id: string;
@@ -661,6 +662,7 @@ const TradeBoardBuilder = () => {
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-8">
           <div>
             <h1 className="font-display text-2xl text-foreground">{board.title}</h1>
+            {board.project_id && <ProjectWorkspaceContact projectId={board.project_id} folderId={board.id} />}
             {board.client_name && <p className="font-body text-sm text-muted-foreground mt-1">For {board.client_name}</p>}
             <div className="flex items-center gap-2 mt-2 flex-wrap">
               <Badge variant="secondary">{board.status}</Badge>
