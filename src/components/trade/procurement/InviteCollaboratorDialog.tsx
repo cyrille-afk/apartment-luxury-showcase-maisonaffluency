@@ -24,19 +24,21 @@ function maskLink(url: string) {
 }
 
 
-export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, onInvited, readOnly = false, projectId, boardOptions, boardsLoading = false, workspaceInvite = false }: {
+export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, onInvited, readOnly = false, projectId, projectName, boardOptions, boardsLoading = false, workspaceInvite = false, clientWorkspace = false }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   boardId: string;
   onInvited: () => void;
   readOnly?: boolean;
   projectId?: string;
+  projectName?: string;
   boardOptions?: { id: string; title: string }[];
   boardsLoading?: boolean;
   workspaceInvite?: boolean;
+  clientWorkspace?: boolean;
 }) {
   const [selectedBoardId, setSelectedBoardId] = useState("");
-  const targetBoardId = boardOptions ? boardOptions.find(board => board.id === selectedBoardId)?.id || (boardOptions.length === 1 ? boardOptions[0]?.id : "") : boardId;
+  const targetBoardId = boardOptions ? boardOptions.find(board => board.id === (selectedBoardId || boardId))?.id || (boardOptions.length === 1 ? boardOptions[0]?.id : "") : boardId;
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"client" | "contractor">("client");
   const [sending, setSending] = useState(false);
@@ -46,14 +48,13 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
   const reset = () => { setEmail(""); setRole("client"); setLink(null); setError(null); setSelectedBoardId(""); };
 
   const send = async () => {
-    if (!targetBoardId || (workspaceInvite && !projectId)) return;
+    if (sending || boardsLoading || !targetBoardId || ((workspaceInvite || clientWorkspace) && !projectId)) return;
     const parsed = emailSchema.safeParse(email);
     if (!parsed.success) { setError(parsed.error.issues[0].message); return; }
     setSending(true);
     setError(null);
-    if (sending) return;
     const { data, error: err } = projectId
-      ? await supabase.rpc("create_project_board_view_invite", { _project_id: projectId, _board_id: targetBoardId, _email: parsed.data })
+      ? await supabase.rpc(clientWorkspace ? "create_project_board_client_invite" : "create_project_board_view_invite", { _project_id: projectId, _board_id: targetBoardId, _email: parsed.data })
       : await supabase.rpc("create_board_invite" as any, { _board_id: targetBoardId, _email: parsed.data, _role: readOnly ? "client" : role });
     if (err || !data) {
       setSending(false);
@@ -77,12 +78,16 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
       <DialogContent className="rounded-none sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="font-display text-xl font-normal">{workspaceInvite ? "Invite Collaborator" : projectId ? "Invite architect or designer" : readOnly ? "Invite Client" : "Invite Collaborator"}</DialogTitle>
-          <DialogDescription className="font-body text-xs">{projectId || workspaceInvite ? "View-only access to this project board, verified by email. No editing, comments or approvals. Invitation expires after 30 days." : "They receive a private link to this board, valid for 30 days."}</DialogDescription>
+          <DialogDescription className="font-body text-xs">{clientWorkspace ? "Client access to the selected project folder, verified by email. Comments and approvals allowed; no editing or adding items. Invitation expires after 30 days." : projectId || workspaceInvite ? "View-only access to this project board, verified by email. No editing, comments or approvals. Invitation expires after 30 days." : "They receive a private link to this board, valid for 30 days."}</DialogDescription>
         </DialogHeader>
         {!link ? (
           <div className="space-y-5 pt-2">
+            {clientWorkspace && <>
+              <div className="space-y-1.5"><Label htmlFor="invite-project-name" className="font-body text-[10px] uppercase">Project workspace</Label><Input id="invite-project-name" readOnly value={projectName || (boardsLoading ? "Loading project…" : "No active project")} className="rounded-none" /></div>
+              <div className="space-y-1.5"><Label htmlFor="invite-client-access" className="font-body text-[10px] uppercase">Access</Label><Input id="invite-client-access" readOnly value="Client (Read-Only - Comment/Approve)" className="rounded-none text-xs" /></div>
+            </>}
             {boardOptions && <div className="space-y-1.5">
-              <Label htmlFor="invite-project-board" className="font-body text-[10px] uppercase tracking-[0.18em]">Project board</Label>
+              <Label htmlFor="invite-project-board" className="font-body text-[10px] uppercase tracking-[0.18em]">{clientWorkspace ? "Project folder" : "Project board"}</Label>
               <select id="invite-project-board" value={targetBoardId} disabled={sending || boardsLoading} onChange={event => setSelectedBoardId(event.target.value)} className="h-10 w-full rounded-none border border-input bg-background px-3 font-body text-sm">
                 <option value="">{boardsLoading ? "Loading project boards…" : "Select project board"}</option>
                 {boardOptions.map(board => <option key={board.id} value={board.id}>{board.title}</option>)}
@@ -102,7 +107,7 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
               </select>
             </div>}
             {error && <p className="font-body text-xs text-destructive">{error}</p>}
-            <Button onClick={send} disabled={sending || !targetBoardId || (workspaceInvite && !projectId)} className="w-full rounded-none">{sending ? "Sending…" : "Send Invite"}</Button>
+            <Button onClick={send} disabled={sending || boardsLoading || !targetBoardId || ((workspaceInvite || clientWorkspace) && !projectId)} className="w-full rounded-none">{sending ? "Sending…" : "Send Invite"}</Button>
           </div>
         ) : (
           <div className="space-y-4 pt-2">

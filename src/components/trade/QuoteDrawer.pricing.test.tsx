@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { afterEach, expect, it, vi } from "vitest";
 import { setClientSafeMode } from "@/lib/clientSafeMode";
 import QuoteDrawer from "./QuoteDrawer";
+vi.mock("./CollaboratorInviteProvider", () => ({ useCollaboratorInvite: () => vi.fn() }));
 
 const product = { id: "sofa", source_pick_id: null, product_name: "Saint Honoré Sofa", brand_name: "Pierre Augustin Rose", rrp_price_cents: 1460000, trade_price_cents: 1460000, currency: "EUR", image_url: null,
   size_variants: [

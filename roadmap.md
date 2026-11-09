@@ -1,5 +1,9 @@
 # Roadmap
 
+## Contextual client workspace invitation
+- [x] Drawer opens the Trade-owned shared collaborator modal, resolves the saved quote project (active workspace fallback), and preselects an unambiguous project folder with fixed Client read-only/comment/approve access; view-only tearsheet sharing is unchanged.
+- [x] Signed-in Singapore GCB workflow drawer verified; 14 regressions pass and build OK. Temporary live invitation confirms client role with comments/approvals enabled, wrong-project rejection and no contractor editing; temporary folder/invite removed, no emails sent.
+
 ## Active quote workspace invitation
 - [x] Replaced drawer-only recipient/share/revoke controls with a bordered Add Client to Project button and reused the collaborator dialog with saved project context and explicit project-board selection; full quote-editor sharing remains unchanged.
 - [x] Signed-in real drawer opens Invite Collaborator; selecting an existing project board enables Send Invite. Unassigned quotes show a project-assignment blocker; no invitations sent or records changed. Six regressions pass; build OK.

@@ -1,4 +1,5 @@
 import Navigation from "@/components/Navigation";
+import { CollaboratorInviteProvider } from "@/components/trade/CollaboratorInviteProvider";
 import { heldTradePageHeight, setHeldTradePageHeight } from "@/lib/tradePageHeightHold";
 import { lazy, Suspense, useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
@@ -553,7 +554,7 @@ const TradeLayout = () => {
   const fullBleed = ["/trade/visualiser", "/trade/axonometric"].includes(location.pathname.replace(/\/$/, ""));
 
   return (
-    <SidebarProvider>
+    <CollaboratorInviteProvider><SidebarProvider>
        <div
          className={`trade-portal-shell flex w-full bg-background ${fullBleed ? "h-screen overflow-hidden" : "min-h-screen"}`}
         data-price-view={showTradePrice ? "trade" : "client"}
@@ -683,7 +684,7 @@ const TradeLayout = () => {
          <div data-trade-sensitive><CompareFab /><CompareDrawer /><AIConcierge /><ActivationWelcome /><QuickTour /><BriefWizard /><TradeCopilotOnboarding /></div>
         <BackToTopButton />
       </Suspense>
-    </SidebarProvider>
+    </SidebarProvider></CollaboratorInviteProvider>
   );
 };
 
