@@ -981,7 +981,7 @@ const StudioGallery = () => {
                      <Scale className="h-3.5 w-3.5" />
                    </button>
                   {/* Overlay actions */}
-                  <ProductCardActions productId={product.trade_product_id}
+                  <ProductCardActions productId={product.trade_product_id ?? undefined}
                     designerSlug={designerSlugMap.get(product.brand_name.toLowerCase()) || slugifyForUrl(product.brand_name)}
                     productSlug={slugifyForUrl(product.product_name)} disabled={product.hidden_in_trade}
                     meta={{ product_name: product.product_name, brand_name: product.brand_name, category: product.category, image_url: product.image_url, dimensions: product.dimensions, materials: product.materials }} />
