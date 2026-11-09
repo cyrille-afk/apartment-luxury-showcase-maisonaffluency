@@ -1,5 +1,9 @@
 # Roadmap
 
+## Quote invitation project choices
+- [ ] Resolve the same active project as the Trade project selector and offer accessible project choices when none is assigned; retain scoped folder defaults.
+- [ ] Verify the real drawer and active Singapore folder, with regressions and no invitation sends.
+
 ## Active-folder invitation default
 - [x] Default the collaborator folder selection from the current workspace context; keep the placeholder without an active folder and preserve manual selection.
 - [x] Seventeen invitation/workspace regressions pass, including delayed folder loading, no-context fallback, cross-project isolation and reopening. Live signed-in verification is blocked: the requesting account redirects to studio setup and cannot open the existing Singapore folder. No invitations sent or account data changed.
