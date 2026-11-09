@@ -17,11 +17,11 @@ export default function ProductCardActions({ productId, designerSlug, productSlu
   const [configuring, setConfiguring] = useState(false);
   return (
     <div onClick={(event) => event.stopPropagation()} className="absolute inset-x-0 bottom-0 z-20 grid grid-cols-1 gap-2 bg-background/95 p-2 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100 @[340px]:grid-cols-2">
-      <Button disabled={disabled} onClick={() => setConfiguring(true)} className="h-10 min-w-0 rounded-sm bg-foreground px-2 font-body text-xs font-medium tracking-normal text-background hover:bg-foreground/90">
+      <Button disabled={disabled} onClick={() => setConfiguring(true)} className="h-10 min-w-0 cursor-pointer rounded-sm bg-foreground px-2 font-body text-xs font-medium tracking-normal text-background hover:bg-foreground/90">
         Configure &amp; Quote
       </Button>
       <TradeFavoriteFolderPicker productId={productId || productSlug} meta={meta} productName={meta.product_name} quickMoodboard side="top">
-        <Button disabled={disabled} variant="outline" className="h-10 min-w-0 rounded-sm border-foreground/30 bg-transparent px-2 font-body text-xs font-medium tracking-normal text-foreground hover:bg-muted">
+        <Button disabled={disabled} variant="outline" className="h-10 min-w-0 cursor-pointer rounded-sm border-foreground/30 bg-transparent px-2 font-body text-xs font-medium tracking-normal text-foreground hover:bg-muted">
           Add to Moodboard
         </Button>
       </TradeFavoriteFolderPicker>
