@@ -1,11 +1,58 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import InviteCollaboratorDialog from "./InviteCollaboratorDialog";
+import { ProjectWorkspaceProvider, useProjectWorkspace } from "@/contexts/ProjectWorkspaceContext";
+import { useEffect } from "react";
 const mocks = vi.hoisted(() => ({ rpc: vi.fn(), invoke: vi.fn() }));
 vi.mock("@/integrations/supabase/client", () => ({ supabase: { rpc: mocks.rpc, functions: { invoke: mocks.invoke } } }));
 vi.mock("@/hooks/use-toast", () => ({ toast: vi.fn() }));
 beforeEach(() => { vi.clearAllMocks(); mocks.rpc.mockResolvedValue({ data: { id: "invite", token: "token" }, error: null }); mocks.invoke.mockResolvedValue({ error: null }); });
 afterEach(cleanup);
+function ActiveFolder({ folderId = "board-two", projectId = "bangkok" }) {
+  const setActiveFolder = useProjectWorkspace()?.setActiveFolder;
+  useEffect(() => {
+    setActiveFolder?.({ projectId, folderId });
+    return () => setActiveFolder?.(null);
+  }, [folderId, projectId, setActiveFolder]);
+  return null;
+}
+const options = [{ id: "board-one", title: "First board" }, { id: "board-two", title: "Second board" }];
+const dialog = (open = true, boards = options) => <InviteCollaboratorDialog open={open} onOpenChange={() => {}} boardId="" projectId="bangkok" boardOptions={boards} workspaceInvite clientWorkspace readOnly onInvited={() => {}} />;
+it("submits to the active folder once asynchronously loaded choices arrive", async () => {
+  const view = render(<ProjectWorkspaceProvider><ActiveFolder />{dialog(true, [])}</ProjectWorkspaceProvider>);
+  view.rerender(<ProjectWorkspaceProvider><ActiveFolder />{dialog()}</ProjectWorkspaceProvider>);
+  fireEvent.change(screen.getByLabelText("Email"), { target: { value: "client@example.com" } });
+  fireEvent.click(screen.getByRole("button", { name: "Send Invite" }));
+  await waitFor(() => expect(mocks.rpc).toHaveBeenCalledWith("create_project_board_client_invite", { _project_id: "bangkok", _board_id: "board-two", _email: "client@example.com" }));
+});
+it("keeps the placeholder with no active context even for a single available folder", () => {
+  render(<ProjectWorkspaceProvider>{dialog(true, [options[0]])}</ProjectWorkspaceProvider>);
+  fireEvent.change(screen.getByLabelText("Email"), { target: { value: "client@example.com" } });
+  fireEvent.click(screen.getByRole("button", { name: "Send Invite" }));
+  expect(mocks.rpc).not.toHaveBeenCalled();
+});
+it("does not default to an active folder belonging to another project", () => {
+  render(<ProjectWorkspaceProvider><ActiveFolder projectId="singapore" />{dialog()}</ProjectWorkspaceProvider>);
+  fireEvent.change(screen.getByLabelText("Email"), { target: { value: "client@example.com" } });
+  fireEvent.click(screen.getByRole("button", { name: "Send Invite" }));
+  expect(mocks.rpc).not.toHaveBeenCalled();
+});
+it("preserves an explicit selection while open and returns to the active folder on reopen", () => {
+  const view = render(<ProjectWorkspaceProvider><ActiveFolder />{dialog()}</ProjectWorkspaceProvider>);
+  fireEvent.change(screen.getByLabelText("Project folder"), { target: { value: "board-one" } });
+  view.rerender(<ProjectWorkspaceProvider><ActiveFolder />{dialog()}</ProjectWorkspaceProvider>);
+  expect((screen.getByLabelText("Project folder") as HTMLSelectElement).value).toBe("board-one");
+  view.rerender(<ProjectWorkspaceProvider><ActiveFolder />{dialog(false)}</ProjectWorkspaceProvider>);
+  view.rerender(<ProjectWorkspaceProvider><ActiveFolder />{dialog()}</ProjectWorkspaceProvider>);
+  expect((screen.getByLabelText("Project folder") as HTMLSelectElement).value).toBe("board-two");
+});
+it("respects an explicit placeholder selection rather than reapplying the default", () => {
+  render(<ProjectWorkspaceProvider><ActiveFolder />{dialog()}</ProjectWorkspaceProvider>);
+  fireEvent.change(screen.getByLabelText("Project folder"), { target: { value: "" } });
+  fireEvent.change(screen.getByLabelText("Email"), { target: { value: "client@example.com" } });
+  fireEvent.click(screen.getByRole("button", { name: "Send Invite" }));
+  expect(mocks.rpc).not.toHaveBeenCalled();
+});
 it("creates view-only invitations through the selected project and board", async () => {
   render(<InviteCollaboratorDialog open onOpenChange={() => {}} boardId="board-bangkok" projectId="bangkok" readOnly onInvited={() => {}} />);
   fireEvent.change(screen.getByLabelText("Email"), { target: { value: "architect@example.com" } });
