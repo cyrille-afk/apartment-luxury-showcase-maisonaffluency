@@ -1640,6 +1640,7 @@ export type Database = {
           saved_via: string
           seen_on_desktop_at: string | null
           sort_order: number
+          source_quote_item_id: string | null
           subfolder: string | null
           variant_label: string | null
           wood_label: string | null
@@ -1657,6 +1658,7 @@ export type Database = {
           saved_via?: string
           seen_on_desktop_at?: string | null
           sort_order?: number
+          source_quote_item_id?: string | null
           subfolder?: string | null
           variant_label?: string | null
           wood_label?: string | null
@@ -1674,6 +1676,7 @@ export type Database = {
           saved_via?: string
           seen_on_desktop_at?: string | null
           sort_order?: number
+          source_quote_item_id?: string | null
           subfolder?: string | null
           variant_label?: string | null
           wood_label?: string | null
@@ -1698,6 +1701,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "trade_products_public_rrp"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_board_items_source_quote_item_id_fkey"
+            columns: ["source_quote_item_id"]
+            isOneToOne: false
+            referencedRelation: "trade_quote_items"
             referencedColumns: ["id"]
           },
         ]
@@ -11923,6 +11933,7 @@ export type Database = {
           notes: string | null
           payer_type: Database["public"]["Enums"]["payer_type"]
           pdf_locale: string | null
+          project_board_id: string | null
           project_id: string | null
           quote_kind: string
           resale_certificate_id: string | null
@@ -11986,6 +11997,7 @@ export type Database = {
           notes?: string | null
           payer_type?: Database["public"]["Enums"]["payer_type"]
           pdf_locale?: string | null
+          project_board_id?: string | null
           project_id?: string | null
           quote_kind?: string
           resale_certificate_id?: string | null
@@ -12049,6 +12061,7 @@ export type Database = {
           notes?: string | null
           payer_type?: Database["public"]["Enums"]["payer_type"]
           pdf_locale?: string | null
+          project_board_id?: string | null
           project_id?: string | null
           quote_kind?: string
           resale_certificate_id?: string | null
@@ -12093,6 +12106,13 @@ export type Database = {
             columns: ["managed_freight_quote_id"]
             isOneToOne: false
             referencedRelation: "shipping_quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_quotes_project_board_id_fkey"
+            columns: ["project_board_id"]
+            isOneToOne: false
+            referencedRelation: "client_boards"
             referencedColumns: ["id"]
           },
           {
@@ -13464,6 +13484,15 @@ export type Database = {
         Args: { _quote_id: string; _snapshot: Json }
         Returns: string
       }
+      create_quote_project_client_invite: {
+        Args: {
+          _board_id: string
+          _email: string
+          _project_id: string
+          _quote_id: string
+        }
+        Returns: Json
+      }
       create_visualiser_client_board: {
         Args: {
           _client_id: string
@@ -13822,6 +13851,10 @@ export type Database = {
       is_studio_owner: {
         Args: { _studio_id: string; _user_id: string }
         Returns: boolean
+      }
+      link_quote_project_folder: {
+        Args: { _board_id: string; _project_id: string; _quote_id: string }
+        Returns: undefined
       }
       list_curator_pick_versions: {
         Args: { _designer_id?: string; _pick_id?: string }
@@ -14255,6 +14288,10 @@ export type Database = {
       }
       sync_approved_trade_directory: {
         Args: { p_account_id: string }
+        Returns: undefined
+      }
+      sync_quote_project_folder: {
+        Args: { _quote_id: string }
         Returns: undefined
       }
       tier_discount_pct: {
