@@ -29,7 +29,24 @@ describe("Collection scroll ownership", () => {
   it("preserves public navigation and reduced-motion behavior", () => {
     expect(routeScrollBehavior("/journal", true)).toBe("smooth");
     expect(routeScrollBehavior("/journal", false)).toBe("instant");
+    expect(routeScrollBehavior("/trade-program", true, "/journal")).toBe("smooth");
   });
+  it.each([
+    "/trade", "/trade/", "/trade/comparator", "/trade/tools", "/trade/quotes",
+    "/trade/settings", "/trade/projects", "/trade/favorites", "/trade/client-management",
+    "/trade/gallery/michel-amar-studio", "/trade/products/michel-amar-studio/jules-lamp",
+    "/trade/the-collection", "/trade/boards/example", "/trade/concierge",
+  ])("lands every Trade destination instantly: %s", (path) => {
+    expect(routeScrollBehavior(path, true, "/journal")).toBe("instant");
+  });
+  it("does not animate departures from ordinary Trade pages either", () => {
+    expect(routeScrollBehavior("/designers/michel-amar-studio", true, "/trade/gallery/michel-amar-studio")).toBe("instant");
+  });
+  it.each(["/trade/comparator", "/trade/tools", "/trade/quotes", "/trade/settings"])(
+    "keeps same-page Trade functions stationary: %s", (path) => {
+      expect(shouldResetRouteScroll(path, path)).toBe(false);
+    },
+  );
   it("lands dashboard options instantly even when their destination has no admin suffix", () => {
     expect(routeScrollBehavior("/trade/journal", true, "/trade/admin-dashboard")).toBe("instant");
     expect(routeScrollBehavior("/trade/clients", true, "/trade/admin/tools")).toBe("instant");

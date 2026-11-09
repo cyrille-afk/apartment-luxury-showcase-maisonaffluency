@@ -360,7 +360,7 @@ export function HomeRouteSync() {
   return null;
 }
 
-// Scroll to top on PUSH/REPLACE navigations. Admin destinations land instantly;
+// Scroll to top on PUSH/REPLACE navigations. Trade arrivals/departures and Admin land instantly;
 // public navigation retains its default smooth behavior so it
 // triggers for every Link/navigate() call regardless of source (menu, logo,
 // footer, deep link, programmatic, fast/duplicate clicks). Skips when:
