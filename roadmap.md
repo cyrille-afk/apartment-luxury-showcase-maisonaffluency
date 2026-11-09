@@ -1,5 +1,9 @@
 # Roadmap
 
+## Active-folder invitation default
+- [ ] Default the collaborator folder selection from the current workspace context; keep the placeholder without an active folder and preserve manual selection.
+- [ ] Run invitation regressions and verify the signed-in folder default and no-folder fallback.
+
 ## Immediate invited-client folder state
 - [x] Selected-folder and project primaryContact/collaborators update immediately on validated client submission; failed creation rolls back its own attempt, email delivery failures retain created invitations, and headers consume shared session state without reload. CRM contacts and authorization remain unchanged.
 - [x] Twelve regressions pass; signed-in Singapore folder header visibly updates after shared-modal submission with simulated invitation/email responses (no records or emails created). Shared modal opened directly through its provider for this check; drawer click path remains covered by existing tests. Build OK.
