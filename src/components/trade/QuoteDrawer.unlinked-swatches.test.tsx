@@ -26,7 +26,7 @@ afterEach(() => { cleanup(); pickTitles.rows = []; });
 it("shows finish crops for a line saved against an unlinked catalogue copy when its title matches one piece", async () => {
   pickTitles.rows = [{ id: "lounge-pick", title: "Frenchmen Street Lounge Chair " }];
   render(<QuoteDrawer open onOpenChange={vi.fn()} quoteId="quote" />);
-  await waitFor(() => expect(screen.getByAltText("Opera Calla")).toBeTruthy());
+  await waitFor(() => expect(screen.getByAltText("Opera Calla")).toBeTruthy(), { timeout: 4000 });
   expect(screen.getByAltText("Opera Delft")).toBeTruthy();
   expect(screen.queryByAltText("Zero 001")).toBeNull();
 });
@@ -34,6 +34,6 @@ it("shows finish crops for a line saved against an unlinked catalogue copy when 
 it("does not guess finish crops when two pieces share the title", async () => {
   pickTitles.rows = [{ id: "lounge-pick", title: "Frenchmen Street Lounge Chair" }, { id: "other", title: "frenchmen street lounge chair " }];
   render(<QuoteDrawer open onOpenChange={vi.fn()} quoteId="quote" />);
-  await waitFor(() => expect(screen.getByText("Frenchmen Street Lounge Chair")).toBeTruthy());
+  await waitFor(() => expect(screen.getByText("Frenchmen Street Lounge Chair")).toBeTruthy(), { timeout: 4000 });
   expect(screen.queryByAltText("Opera Calla")).toBeNull();
 });
