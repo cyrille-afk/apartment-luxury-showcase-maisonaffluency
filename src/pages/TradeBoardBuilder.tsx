@@ -146,7 +146,7 @@ const TradeBoardBuilder = () => {
   const setActiveFolder = useProjectWorkspace()?.setActiveFolder;
   useEffect(() => {
     if (!setActiveFolder) return;
-    setActiveFolder(board?.id === id && board.project_id ? { projectId: board.project_id, folderId: board.id } : null);
+    setActiveFolder(board && board.id === id && board.project_id ? { projectId: board.project_id, folderId: board.id } : null);
     return () => setActiveFolder(null);
   }, [id, board?.id, board?.project_id, setActiveFolder]);
   const [items, setItems] = useState<BoardItem[]>([]);

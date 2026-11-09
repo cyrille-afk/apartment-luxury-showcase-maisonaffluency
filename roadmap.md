@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Active-folder invitation default
-- [ ] Default the collaborator folder selection from the current workspace context; keep the placeholder without an active folder and preserve manual selection.
-- [ ] Run invitation regressions and verify the signed-in folder default and no-folder fallback.
+- [x] Default the collaborator folder selection from the current workspace context; keep the placeholder without an active folder and preserve manual selection.
+- [x] Seventeen invitation/workspace regressions pass, including delayed folder loading, no-context fallback, cross-project isolation and reopening. Live signed-in verification is blocked: the requesting account redirects to studio setup and cannot open the existing Singapore folder. No invitations sent or account data changed.
 
 ## Immediate invited-client folder state
 - [x] Selected-folder and project primaryContact/collaborators update immediately on validated client submission; failed creation rolls back its own attempt, email delivery failures retain created invitations, and headers consume shared session state without reload. CRM contacts and authorization remain unchanged.
