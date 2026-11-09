@@ -265,6 +265,13 @@ const TradeBoardBuilder = () => {
   }, [id]);
 
   useEffect(() => { fetchBoard(); }, [fetchBoard]);
+  useEffect(() => {
+    const linked = (event: Event) => {
+      if ((event as CustomEvent<{ boardId?: string }>).detail?.boardId === id) void fetchBoard();
+    };
+    window.addEventListener("ma:quote-folder-linked", linked);
+    return () => window.removeEventListener("ma:quote-folder-linked", linked);
+  }, [id, fetchBoard]);
 
   // Derive sub-folder list from items
   const subfolders = useMemo(() => {

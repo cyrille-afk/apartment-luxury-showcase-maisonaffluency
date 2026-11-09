@@ -1,5 +1,9 @@
 # Roadmap
 
+## Quote-linked project folder
+- [x] Drawer client invitations transactionally link the saved quote to the selected project folder; exact configured products use unique source-line identities and later additions sync through database triggers, without copying quote prices or notes.
+- [x] Current QU-46C952 linked to Man of Parts — curated edit: seven items appear immediately and survive reload; both original quote prices preserved. Disposable signed-in regression verifies two selections, retry safety, later additions and wrong-project rejection; 22 unit regressions pass. No invitation emails sent.
+
 ## Quote quantities and configured totals
 - [x] Add saved drawer quantity controls; keep totals in sync and report failed saves. Signed-in disposable chair quantity 1→2→1 verified, with reload persistence; 34 regressions pass and build OK.
 - [x] Persist the renderer's numeric configured net price and priced variant. Real Yoma €100,563.30 remains included after adding a chair and reload; verified current quote's missing Yoma price restored, total €110,595 with its two chairs unchanged.

@@ -8,6 +8,14 @@ vi.mock("@/integrations/supabase/client", () => ({ supabase: { rpc: mocks.rpc, f
 vi.mock("@/hooks/use-toast", () => ({ toast: vi.fn() }));
 beforeEach(() => { vi.clearAllMocks(); mocks.rpc.mockResolvedValue({ data: { id: "invite", token: "token" }, error: null }); mocks.invoke.mockResolvedValue({ error: null }); });
 afterEach(cleanup);
+it("atomically links quote products to the explicitly selected folder when inviting its client", async () => {
+  render(<InviteCollaboratorDialog open onOpenChange={() => {}} boardId="" projectId="singapore" quoteId="quote-two-products" boardOptions={options} workspaceInvite clientWorkspace readOnly onInvited={() => {}} />);
+  fireEvent.change(screen.getByLabelText("Project folder"), { target: { value: "board-two" } });
+  fireEvent.change(screen.getByLabelText("Email"), { target: { value: "client@example.com" } });
+  fireEvent.click(screen.getByRole("button", { name: "Send Invite" }));
+  await waitFor(() => expect(mocks.rpc).toHaveBeenCalledWith("create_quote_project_client_invite", { _quote_id: "quote-two-products", _project_id: "singapore", _board_id: "board-two", _email: "client@example.com" }));
+  expect(mocks.rpc).not.toHaveBeenCalledWith("create_project_board_client_invite", expect.anything());
+});
 function ActiveFolder({ folderId = "board-two", projectId = "bangkok" }) {
   const setActiveFolder = useProjectWorkspace()?.setActiveFolder;
   useEffect(() => {

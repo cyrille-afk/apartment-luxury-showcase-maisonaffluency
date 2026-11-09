@@ -25,7 +25,7 @@ function maskLink(url: string) {
 }
 
 
-export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, onInvited, readOnly = false, projectId, projectName, boardOptions, boardsLoading = false, workspaceInvite = false, clientWorkspace = false, projectOptions, selectedProjectId = "", projectsLoading = false, onProjectChange }: {
+export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, onInvited, readOnly = false, projectId, projectName, boardOptions, boardsLoading = false, workspaceInvite = false, clientWorkspace = false, projectOptions, selectedProjectId = "", projectsLoading = false, onProjectChange, quoteId }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   boardId: string;
@@ -41,6 +41,7 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
   selectedProjectId?: string;
   projectsLoading?: boolean;
   onProjectChange?: (id: string | null) => void;
+  quoteId?: string;
 }) {
   const workspace = useProjectWorkspace();
   const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null);
@@ -72,7 +73,9 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
       : undefined;
     let invitationCreated = false;
     try {
-    const { data, error: err } = projectId
+    const { data, error: err } = projectId && clientWorkspace && quoteId
+      ? await supabase.rpc("create_quote_project_client_invite", { _quote_id: quoteId, _project_id: projectId, _board_id: targetBoardId, _email: parsed.data })
+      : projectId
       ? await supabase.rpc(clientWorkspace ? "create_project_board_client_invite" : "create_project_board_view_invite", { _project_id: projectId, _board_id: targetBoardId, _email: parsed.data })
       : await supabase.rpc("create_board_invite" as any, { _board_id: targetBoardId, _email: parsed.data, _role: readOnly ? "client" : role });
     if (err || !data) {
@@ -82,6 +85,7 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
       return;
     }
     invitationCreated = true;
+    window.dispatchEvent(new CustomEvent("ma:quote-folder-linked", { detail: { quoteId, projectId, boardId: targetBoardId } }));
     const { id, token } = data as { id: string; token: string };
     const { data: slug } = await supabase.rpc("board_share_slug" as any, { _board_id: targetBoardId });
     const url = `${shareOrigin()}/shared/board/${(slug as string) || token}`;

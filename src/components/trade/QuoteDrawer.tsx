@@ -75,6 +75,14 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
   const mutationVersion = useRef(0);
   const [itemError, setItemError] = useState<string | null>(null);
   useEffect(() => {
+    const linked = (event: Event) => {
+      const detail = (event as CustomEvent<{ quoteId?: string; projectId?: string }>).detail;
+      if (detail?.quoteId === quoteId && detail.projectId) setQuoteMeta(previous => previous ? { ...previous, project_id: detail.projectId ?? previous.project_id } : previous);
+    };
+    window.addEventListener("ma:quote-folder-linked", linked);
+    return () => window.removeEventListener("ma:quote-folder-linked", linked);
+  }, [quoteId]);
+  useEffect(() => {
     if (!open) return;
     window.dispatchEvent(new CustomEvent("ma:product-workspace-open", { detail: true }));
     return () => { window.dispatchEvent(new CustomEvent("ma:product-workspace-open", { detail: false })); };
@@ -330,7 +338,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-[380px] sm:w-[420px] flex flex-col">
         <SheetHeader>
-          <div className="flex min-w-0 flex-col items-start gap-3 pr-8"><PresentationModeToggle />{quoteId && <QuoteWorkspaceInvite projectId={quoteMeta?.project_id ?? null} />}</div>
+          <div className="flex min-w-0 flex-col items-start gap-3 pr-8"><PresentationModeToggle />{quoteId && <QuoteWorkspaceInvite quoteId={quoteId} projectId={quoteMeta?.project_id ?? null} />}</div>
           <SheetTitle className="font-display text-lg flex items-center gap-2">
             <ShoppingCart className="h-4 w-4" />
             Active Quote
