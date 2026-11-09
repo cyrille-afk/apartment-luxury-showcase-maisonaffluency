@@ -147,6 +147,26 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
         // saved on the row. Resolve every segment of `variant_label` against
         // this product's swatch library so the drawer shows one thumbnail per
         // selected finish instead of just the first fuzzy match.
+        // Some saved lines point at an unlinked catalogue copy (no source_pick_id).
+        // Recover the pick only from an unambiguous exact title match so their
+        // finish crops still resolve; never guess between same-named pieces.
+        const unlinkedNames = Array.from(new Set(mapped
+          .filter((m) => m.product && !m.product.source_pick_id && m.product.product_name?.trim())
+          .map((m) => m.product.product_name.trim())));
+        if (unlinkedNames.length > 0) {
+          const titleKey = (value: string | null | undefined) => (value || "").trim().toLowerCase();
+          const { data: titleRows } = await supabase
+            .from("designer_curator_picks")
+            .select("id, title")
+            .or(unlinkedNames.map((name) => `title.ilike.${name.replace(/[%_,()*\\"]/g, "")}*`).join(","));
+          for (const item of mapped) {
+            if (!item.product || item.product.source_pick_id) continue;
+            const key = titleKey(item.product.product_name);
+            const matches = (titleRows || []).filter((row: any) => titleKey(row.title) === key);
+            if (matches.length === 1) item.product = { ...item.product, source_pick_id: (matches[0] as any).id };
+          }
+        }
+
         const pickIds = Array.from(new Set(
           mapped.map((m) => m.product?.source_pick_id).filter(Boolean) as string[]
         ));
