@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Quote quantities and configured totals
-- [ ] Add saved drawer quantity controls; keep totals in sync and report failed saves.
-- [ ] Persist the same numeric configured price and priced variant shown on the product page; verify Yoma remains included after another item and reload.
+- [x] Add saved drawer quantity controls; keep totals in sync and report failed saves. Signed-in disposable chair quantity 1→2→1 verified, with reload persistence; 34 regressions pass and build OK.
+- [x] Persist the renderer's numeric configured net price and priced variant. Real Yoma €100,563.30 remains included after adding a chair and reload; verified current quote's missing Yoma price restored, total €110,595 with its two chairs unchanged.
 
 ## Preserve configured quote finishes
 - [x] Save each product's selector-derived finish configuration on its own quote line, rather than only the active drawer preview.
