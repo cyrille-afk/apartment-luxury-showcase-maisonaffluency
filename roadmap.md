@@ -1,5 +1,9 @@
 # Roadmap
 
+## Product card split actions
+- [ ] Replace gallery hover quote action with Configure & Quote and Add to Moodboard; reuse product configuration and existing project-board saves.
+- [ ] Verify finish selection, saved-board readback, toast and desktop/mobile fit.
+
 ## Trade-wide navigation scrolling
 - [x] Replace the remaining shared smooth reset on all Trade arrivals/departures; retain same-page position and Back restoration.
 - [x] Signed-in Comparator → Tools → Quotes → Settings → Projects → Favorites → Tools checks show no animated resets; quote filter stays at its position. Forty-two scroll/history regressions pass; build OK. No customer records changed.

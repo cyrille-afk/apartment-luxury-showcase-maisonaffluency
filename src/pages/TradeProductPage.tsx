@@ -606,8 +606,11 @@ export function tradeProductPageQueryOptions(
   };
 }
 
-const TradeProductPage: React.FC = () => {
-  const { id: tradeProductIdParam, slug: designerSlug, productSlug } = useParams<{ id: string; slug: string; productSlug: string }>();
+const TradeProductPage: React.FC<{ embeddedProduct?: { id?: string; designerSlug: string; productSlug: string } }> = ({ embeddedProduct }) => {
+  const routeParams = useParams<{ id: string; slug: string; productSlug: string }>();
+  const tradeProductIdParam = embeddedProduct ? embeddedProduct.id : routeParams.id;
+  const designerSlug = embeddedProduct ? embeddedProduct.designerSlug : routeParams.slug;
+  const productSlug = embeddedProduct ? embeddedProduct.productSlug : routeParams.productSlug;
   const navigate = useNavigate();
   const location = useLocation();
   const { user, profile: authProfile } = useAuth();
@@ -706,6 +709,7 @@ const TradeProductPage: React.FC = () => {
   // selection updates the gallery — otherwise the image is off-screen above
   // the dropdown and the user can't see the change.
   useEffect(() => {
+    if (embeddedProduct) return;
     if (galleryJumpNonce === 0) return;
     if (typeof window === "undefined") return;
     if (window.matchMedia("(min-width: 1024px)").matches) return;
@@ -714,7 +718,7 @@ const TradeProductPage: React.FC = () => {
     const headerOffset = 80;
     const y = el.getBoundingClientRect().top + window.scrollY - headerOffset;
     window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
-  }, [galleryJumpNonce]);
+  }, [galleryJumpNonce, embeddedProduct]);
 
   // Desktop dashboard: one viewport-height workspace (single asset window + fixed panel).
   const [isLg, setIsLg] = useState(() => typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches);
@@ -919,13 +923,15 @@ const TradeProductPage: React.FC = () => {
   // Land at the top as soon as a new product URL mounts — waiting for data
   // left the loading state at the old listing depth, then jumped (staggered move).
   useLayoutEffect(() => {
+    if (embeddedProduct) return;
     window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
-  }, [tradeProductIdParam, designerSlug, productSlug]);
+  }, [tradeProductIdParam, designerSlug, productSlug, embeddedProduct]);
 
   useLayoutEffect(() => {
+    if (embeddedProduct) return;
     if (isLoading || !data?.product) return;
     window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
-  }, [isLoading, data?.product?.id]);
+  }, [isLoading, data?.product?.id, embeddedProduct]);
 
   useEffect(() => {
     // Reset gallery to first image when navigating between products — the page
@@ -2576,24 +2582,24 @@ const TradeProductPage: React.FC = () => {
           />
         ) : null}
       />
-      <Helmet>
+      {!embeddedProduct && <Helmet>
         <title>{pageTitle} — Trade — Maison Affluency</title>
-      </Helmet>
+      </Helmet>}
 
       <div className="w-full max-w-[1760px] pb-12 lg:pb-0">
-        <button
+        {!embeddedProduct && <button
           type="button"
           onClick={() => navigate(fromPath || fallbackPath)}
           className="mb-4 inline-flex items-center gap-1.5 font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" />{" "}
           {fromPath && !fromPath.startsWith("/trade") ? "Back to product" : "Back"}
-        </button>
+        </button>}
 
         {/* Breadcrumbs route back to the Trade Gallery grid pre-filtered
             to the same category/subcategory, so users stay inside the
             trade portal instead of being sent to the public catalogue. */}
-        <Breadcrumbs
+        {!embeddedProduct && <Breadcrumbs
           items={buildProductBreadcrumbs({
             root: { label: "Trade Gallery", to: "/trade/gallery" },
             category: product.category,
