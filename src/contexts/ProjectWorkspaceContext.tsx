@@ -2,8 +2,11 @@ import { createContext, useCallback, useContext, useMemo, useRef, useState, type
 
 export type WorkspaceContactState = { primaryContact: string; collaborators: string[] };
 export type ProjectWorkspaceState = WorkspaceContactState & { folders: Record<string, WorkspaceContactState> };
+export type ActiveWorkspaceFolder = { projectId: string; folderId: string };
 type Invitation = { key: number; projectId: string; folderId: string; email: string };
 type WorkspaceContextValue = {
+  activeFolder: ActiveWorkspaceFolder | null;
+  setActiveFolder: (folder: ActiveWorkspaceFolder | null) => void;
   projects: Record<string, ProjectWorkspaceState>;
   submitClientInvitation: (projectId: string, folderId: string, email: string) => () => void;
 };
@@ -11,6 +14,7 @@ const Context = createContext<WorkspaceContextValue | null>(null);
 export const useProjectWorkspace = () => useContext(Context);
 
 export function ProjectWorkspaceProvider({ children }: { children: ReactNode }) {
+  const [activeFolder, setActiveFolder] = useState<ActiveWorkspaceFolder | null>(null);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const sequence = useRef(0);
   const submitClientInvitation = useCallback((projectId: string, folderId: string, email: string) => {
@@ -34,5 +38,5 @@ export function ProjectWorkspaceProvider({ children }: { children: ReactNode }) 
     }
     return result;
   }, [invitations]);
-  return <Context.Provider value={{ projects, submitClientInvitation }}>{children}</Context.Provider>;
+  return <Context.Provider value={{ projects, submitClientInvitation, activeFolder, setActiveFolder }}>{children}</Context.Provider>;
 }
