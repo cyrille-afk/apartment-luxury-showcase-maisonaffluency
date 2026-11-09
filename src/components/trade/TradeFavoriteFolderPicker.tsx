@@ -261,7 +261,7 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
       setInBoards((prev) => new Set(prev).add(boardId));
       await ensureFavoriteRow();
       toast.success(quickMoodboard ? "Saved to project moodboard" : "Added to project folder", { description: quickMoodboard ? undefined : `${productName || meta?.product_name || "Piece"} → ${title}` });
-      if (quickMoodboard) setOpen(false);
+      if (quickMoodboard) { setOpen(false); setDrawerOpen(false); }
     } finally {
       setBusy(false);
     }

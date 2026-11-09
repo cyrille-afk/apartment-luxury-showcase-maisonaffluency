@@ -1433,7 +1433,7 @@ const TradeProductPage: React.FC<{ embeddedProduct?: { id?: string; designerSlug
           ].filter(Boolean).map((s) => String(s)),
         });
         setDrawerRefreshKey((k) => k + 1);
-        setDrawerOpen(true);
+        if (!embeddedProduct) setDrawerOpen(true);
         try { window.sessionStorage.setItem(`ma-copilot-open-v1:${product.id}`, quoteId); } catch { /* noop */ }
         if (felixSelection) {
           window.dispatchEvent(new CustomEvent("concierge:propose_tearsheet_proactive", { detail: { ...structuredClone(felixSelection), lockedAt: Date.now() } }));
@@ -1450,7 +1450,7 @@ const TradeProductPage: React.FC<{ embeddedProduct?: { id?: string; designerSlug
     } finally {
       setAdding(false);
     }
-  }, [user, data, activeQuoteId, toast, addToInventory, selectedBase, selectedTop, selectedBaseDisplay, selectedTopDisplay, selectedSwatchGalleryIndices, selectedSwatchGalleryName, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx, rugSelection, selectedFabric, selectedWoodPrice, fxRates, displayCurrency, finishesMissingImages, activeVariantCents]);
+  }, [user, data, activeQuoteId, toast, addToInventory, selectedBase, selectedTop, selectedBaseDisplay, selectedTopDisplay, selectedSwatchGalleryIndices, selectedSwatchGalleryName, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx, rugSelection, selectedFabric, selectedWoodPrice, fxRates, displayCurrency, finishesMissingImages, activeVariantCents, embeddedProduct]);
 
   // Preselect Base/Top/Size (dual-axis) or Material/Size (single-axis) from
   // URL query params — used when the concierge 3D drawer deep-links here so
