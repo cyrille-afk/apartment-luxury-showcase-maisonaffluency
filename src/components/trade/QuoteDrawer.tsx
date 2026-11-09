@@ -9,7 +9,7 @@ import { findQuoteFinishSwatches } from "@/lib/quoteFinishSwatches";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { dimensionsFromVariantLabel } from "@/lib/drawerDimensions";
 import PresentationModeToggle from "./PresentationModeToggle";
-import ShareQuoteWithClient from "./ShareQuoteWithClient";
+import QuoteWorkspaceInvite from "./QuoteWorkspaceInvite";
 import DrawerPricing from "./DrawerPricing";
 import { quoteDrawerRetail } from "@/lib/quoteDrawerRetail";
 import { quoteLinePricing, summarizeQuoteLines } from "@/lib/quoteLineSummary";
@@ -67,7 +67,7 @@ const formatPrice = (cents: number, currency: string) => {
 const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceSnapshot, activeDimensionsLabel = null }: QuoteDrawerProps) => {
   const { clientSafe } = useClientSafeMode();
   const [items, setItems] = useState<QuoteItem[]>([]);
-  const [quoteMeta, setQuoteMeta] = useState<{ status: string; updated_at: string | null } | null>(null);
+  const [quoteMeta, setQuoteMeta] = useState<{ status: string; updated_at: string | null; project_id: string | null } | null>(null);
   const [loading, setLoading] = useState(false);
   useEffect(() => {
     if (!open) return;
@@ -87,12 +87,12 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
           .order("created_at", { ascending: false }),
         supabase
           .from("trade_quotes")
-          .select("status, updated_at")
+          .select("status, updated_at, project_id")
           .eq("id", quoteId)
           .maybeSingle(),
       ]);
       if (cancelled) return;
-      setQuoteMeta(quoteRow ? { status: (quoteRow as any).status || "draft", updated_at: (quoteRow as any).updated_at ?? null } : null);
+      setQuoteMeta(quoteRow ? { status: quoteRow.status || "draft", updated_at: quoteRow.updated_at ?? null, project_id: quoteRow.project_id ?? null } : null);
 
       if (data) {
         let mapped: QuoteItem[] = (data as any[]).map((d) => ({
@@ -271,7 +271,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-[380px] sm:w-[420px] flex flex-col">
         <SheetHeader>
-          <div className="flex min-w-0 flex-col items-start gap-3 pr-8"><PresentationModeToggle />{quoteId && <ShareQuoteWithClient quoteId={quoteId} />}</div>
+          <div className="flex min-w-0 flex-col items-start gap-3 pr-8"><PresentationModeToggle />{quoteId && <QuoteWorkspaceInvite projectId={quoteMeta?.project_id ?? null} />}</div>
           <SheetTitle className="font-display text-lg flex items-center gap-2">
             <ShoppingCart className="h-4 w-4" />
             Active Quote

@@ -1,5 +1,9 @@
 # Roadmap
 
+## Active quote workspace invitation
+- [ ] Replace drawer-only recipient/share/revoke controls with a bordered Add Client to Project button and reuse the collaborator dialog with explicit project-board selection.
+- [ ] Verify the actual drawer and invitation dialog signed in without sending a customer invitation.
+
 ## Trade Gallery direct product navigation
 - [x] Removed the configuration popup; signed-in image, card-title and Configure & Quote clicks all open the same full product route with real finish selectors and no dialog. Navigation regression passes; build OK.
 
