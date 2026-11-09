@@ -21,3 +21,17 @@ it("invites only to the explicitly selected board in the quote project", async (
   fireEvent.click(screen.getByRole("button", { name: "Send Invite" }));
   await waitFor(() => expect(mocks.rpc).toHaveBeenCalledWith("create_project_board_view_invite", { _project_id: "bangkok", _board_id: "board-two", _email: "client@example.com" }));
 });
+it("uses the scoped client permission path for a workspace invitation, not the view-only path", async () => {
+  render(<InviteCollaboratorDialog open onOpenChange={() => {}} boardId="singapore-folder" projectId="singapore" projectName="Singapore GCB workflow" boardOptions={[{ id: "singapore-folder", title: "Singapore GCB workflow" }]} workspaceInvite clientWorkspace readOnly onInvited={() => {}} />);
+  fireEvent.change(screen.getByLabelText("Email"), { target: { value: "client@example.com" } });
+  fireEvent.click(screen.getByRole("button", { name: "Send Invite" }));
+  await waitFor(() => expect(mocks.rpc).toHaveBeenCalledWith("create_project_board_client_invite", { _project_id: "singapore", _board_id: "singapore-folder", _email: "client@example.com" }));
+  expect(mocks.rpc).not.toHaveBeenCalledWith("create_project_board_view_invite", expect.anything());
+  expect(mocks.rpc).not.toHaveBeenCalledWith("create_board_invite", expect.anything());
+});
+it("does not submit stale folder selections while project folders are loading", () => {
+  render(<InviteCollaboratorDialog open onOpenChange={() => {}} boardId="singapore-folder" projectId="singapore" boardsLoading workspaceInvite clientWorkspace readOnly onInvited={() => {}} />);
+  fireEvent.change(screen.getByLabelText("Email"), { target: { value: "client@example.com" } });
+  fireEvent.click(screen.getByRole("button", { name: "Send Invite" }));
+  expect(mocks.rpc).not.toHaveBeenCalled();
+});
