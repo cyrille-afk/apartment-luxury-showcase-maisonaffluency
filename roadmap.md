@@ -1,5 +1,9 @@
 # Roadmap
 
+## Quote-linked project folder
+- [ ] Link drawer invitations to the saved quote and selected project folder; add exact configured products without duplicates and carry later additions into that folder.
+- [ ] Connect the current two-product quote to Man of Parts — curated edit; verify signed-in folder readback, permissions, retry safety and preserved prices.
+
 ## Quote quantities and configured totals
 - [x] Add saved drawer quantity controls; keep totals in sync and report failed saves. Signed-in disposable chair quantity 1→2→1 verified, with reload persistence; 34 regressions pass and build OK.
 - [x] Persist the renderer's numeric configured net price and priced variant. Real Yoma €100,563.30 remains included after adding a chair and reload; verified current quote's missing Yoma price restored, total €110,595 with its two chairs unchanged.
