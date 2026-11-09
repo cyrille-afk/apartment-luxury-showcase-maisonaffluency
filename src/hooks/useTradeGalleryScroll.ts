@@ -2,8 +2,30 @@ import { useEffect, useRef } from "react";
 import { readTradeGalleryState, saveTradeGalleryState, type TradeGalleryState } from "@/lib/tradeGalleryState";
 
 /** Wait for async catalogue height before restoring; user interaction cancels recovery. */
+let lastNavWasPop = false;
+if (typeof window !== "undefined") {
+  window.addEventListener("popstate", () => { lastNavWasPop = true; }, true);
+  const origPushState = history.pushState.bind(history);
+  history.pushState = (...args: Parameters<History["pushState"]>) => {
+    lastNavWasPop = false;
+    return origPushState(...args);
+  };
+}
+
+/** True only for back/forward navigation; fresh loads and link clicks always land at the top. */
+function isHistoryRestore(): boolean {
+  if (lastNavWasPop) return true;
+  try {
+    const nav = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+    return nav?.type === "back_forward";
+  } catch {
+    return false;
+  }
+}
+
 export function useTradeGalleryScroll(path: string, search: string, state: Omit<TradeGalleryState, "scrollY">, loading: boolean) {
-  const target = useRef(readTradeGalleryState(path).scrollY ?? 0);
+  const savedScroll = useRef(readTradeGalleryState(path).scrollY ?? 0);
+  const target = useRef(isHistoryRestore() ? savedScroll.current : 0);
   const restoring = useRef(target.current > 0);
   const latest = useRef(state);
   latest.current = state;
