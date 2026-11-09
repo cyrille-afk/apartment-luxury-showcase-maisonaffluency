@@ -27,7 +27,7 @@ it("updates primaryContact and collaborators in only the selected folder immedia
   mocks.rpc.mockReturnValue(new Promise(() => {}));
   mount(); submit();
   expect(state()).toEqual({ singapore: { primaryContact: "client@example.com", collaborators: ["client@example.com"], folders: { "folder-two": { primaryContact: "client@example.com", collaborators: ["client@example.com"] } } } });
-  expect(screen.getByText(/Client workspace owner/).textContent).toContain("client@example.com");
+  expect(screen.getByText(/Client workspace owner/).parentElement?.textContent).toContain("client@example.com");
 });
 it("rolls back a rejected invitation without retaining a false client contact", async () => {
   mocks.rpc.mockResolvedValue({ data: null, error: { message: "rejected" } });
