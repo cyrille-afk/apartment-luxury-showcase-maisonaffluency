@@ -45,6 +45,7 @@ import ProcurementBoardPanel, { FinishChips } from "@/components/trade/procureme
 import FinishesDrawer, { type FinishSelection, resolveSavedFinishes } from "@/components/trade/procurement/FinishesDrawer";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 import ProjectWorkspaceContact from "@/components/trade/ProjectWorkspaceContact";
+import { useProjectWorkspace } from "@/contexts/ProjectWorkspaceContext";
 
 interface Board {
   id: string;
@@ -142,6 +143,12 @@ const TradeBoardBuilder = () => {
   }, [navigate, location.pathname, location.search, id]);
 
   const [board, setBoard] = useState<Board | null>(null);
+  const setActiveFolder = useProjectWorkspace()?.setActiveFolder;
+  useEffect(() => {
+    if (!setActiveFolder) return;
+    setActiveFolder(board?.id === id && board.project_id ? { projectId: board.project_id, folderId: board.id } : null);
+    return () => setActiveFolder(null);
+  }, [id, board?.id, board?.project_id, setActiveFolder]);
   const [items, setItems] = useState<BoardItem[]>([]);
   const [finishes, setFinishes] = useState<Record<string, FinishSelection>>({});
   const [finishItem, setFinishItem] = useState<BoardItem | null>(null);

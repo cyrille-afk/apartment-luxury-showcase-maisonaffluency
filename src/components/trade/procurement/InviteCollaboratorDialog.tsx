@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link2 as LinkIcon } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,15 +39,22 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
   clientWorkspace?: boolean;
 }) {
   const workspace = useProjectWorkspace();
-  const [selectedBoardId, setSelectedBoardId] = useState("");
-  const targetBoardId = boardOptions ? boardOptions.find(board => board.id === (selectedBoardId || boardId))?.id || (boardOptions.length === 1 ? boardOptions[0]?.id : "") : boardId;
+  const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null);
+  const wasOpen = useRef(false);
+  useEffect(() => {
+    if (open && !wasOpen.current) setSelectedBoardId(null);
+    wasOpen.current = open;
+  }, [open]);
+  const activeFolderId = workspace?.activeFolder?.projectId === projectId ? workspace?.activeFolder?.folderId : undefined;
+  const defaultBoardId = clientWorkspace ? activeFolderId || boardId : boardId;
+  const targetBoardId = boardOptions ? boardOptions.find(board => board.id === (selectedBoardId ?? defaultBoardId))?.id || "" : boardId;
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"client" | "contractor">("client");
   const [sending, setSending] = useState(false);
   const [link, setLink] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const reset = () => { setEmail(""); setRole("client"); setLink(null); setError(null); setSelectedBoardId(""); };
+  const reset = () => { setEmail(""); setRole("client"); setLink(null); setError(null); setSelectedBoardId(null); };
 
   const send = async () => {
     if (sending || boardsLoading || !targetBoardId || ((workspaceInvite || clientWorkspace) && !projectId)) return;
