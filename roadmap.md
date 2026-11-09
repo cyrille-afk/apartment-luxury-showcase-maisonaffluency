@@ -1,14 +1,14 @@
 # Roadmap
 
 ## Trade Gallery direct product navigation
-- [ ] Remove the configuration popup from grid actions and open the dedicated product page from card, image and Configure & Quote clicks; verify signed in.
+- [x] Removed the configuration popup; signed-in image, card-title and Configure & Quote clicks all open the same full product route with real finish selectors and no dialog. Navigation regression passes; build OK.
 
 ## Product card button cursors
 - [x] Added cursor-pointer only to both card actions; signed-in browser verified pointer on each, with layout, styling and borders unchanged. Build OK.
 
 ## Product card split actions
-- [ ] Replace gallery hover quote action with Configure & Quote and Add to Moodboard; reuse product configuration and existing project-board saves.
-- [ ] Verify finish selection, saved-board readback, toast and desktop/mobile fit.
+- [x] Replaced gallery hover actions with Configure & Quote and Add to Moodboard; latest request replaces the embedded configuration modal with dedicated product-page navigation.
+- [x] Verified configuration and saved-board readback; desktop/mobile checks passed. Product-navigation verification recorded above.
 
 ## Trade-wide navigation scrolling
 - [x] Replace the remaining shared smooth reset on all Trade arrivals/departures; retain same-page position and Back restoration.

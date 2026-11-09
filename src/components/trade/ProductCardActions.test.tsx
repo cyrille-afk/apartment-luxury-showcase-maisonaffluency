@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import ProductCardActions from "./ProductCardActions";
 
-vi.mock("@tanstack/react-router", () => ({ Link: ({ to, params, children }: any) => <a href={to.replace("$id", params.id || "").replace("$slug", params.slug || "").replace("$productSlug", params.productSlug || "")}>{children}</a> }));
+vi.mock("@tanstack/react-router", () => ({ Link: ({ to, params, children }: any) => <a onClick={(event) => event.preventDefault()} href={to.replace("$id", params.id || "").replace("$slug", params.slug || "").replace("$productSlug", params.productSlug || "")}>{children}</a> }));
 vi.mock("./TradeFavoriteFolderPicker", () => ({ default: ({ children }: any) => children }));
 afterEach(() => { cleanup(); });
 it("links configuration to the dedicated product page without opening a modal", () => {
