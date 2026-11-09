@@ -11,7 +11,7 @@
 - Password-setup resends reuse the review drawer and retain attempt keys on retry; never change approval. Verified activation links the account; the queue reads user_id for setup status.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
-- Gallery hover actions reuse TradeProductPage in an embedded configuration dialog and TradeFavoriteFolderPicker for project-board persistence; embedded views suppress route scrolling and floating navigation — avoids duplicate pricing/configuration logic and false save confirmations.
+- Gallery card/image clicks and Configure & Quote open dedicated product routes, never embedded dialogs; moodboard actions reuse TradeFavoriteFolderPicker — preserves full-page configuration and real board persistence.
 - Bulk 3D sizing uses the explicitly confirmed, device-remembered batch source unit with per-file overrides; drop/upload measurements share existing label precedence and conversion helpers — restores batch automation without magnitude guessing or overwriting filename/manual sizes.
 - All Trade arrivals/departures and Admin destinations use collectionScrollPolicy's instant navigation reset, while same-page option/query changes retain position; public-only navigation and history restoration stay unchanged — prevents shared smooth scrolling from gliding between workspace functions.
 - Desktop homepage photo and its recovery image fill exactly one viewport (full width, cover) behind the glass header with a shared 35% vertical crop — keeps TV/birds and the coffee table in the first view without scrolling.

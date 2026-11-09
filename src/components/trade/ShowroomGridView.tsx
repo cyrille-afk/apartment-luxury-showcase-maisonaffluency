@@ -768,6 +768,7 @@ const ShowroomGridView = ({
               <div
                 key={product.id}
                 ref={isHighlighted ? highlightRef : undefined}
+                onClick={(event) => { if (!(event.target instanceof Element) || !event.target.closest('button, a, input, select, textarea, [role="button"], [role="dialog"]')) openProductSheet(product); }}
                 className={cn(
                   "group relative border rounded-lg transition-all",
                   isHighlighted
@@ -775,7 +776,7 @@ const ShowroomGridView = ({
                     : "border-border hover:border-foreground/20"
                 )}
               >
-                <div className="@container aspect-[4/5] bg-muted/30 relative overflow-hidden cursor-pointer" onClick={() => openProductSheet(product)}>
+                <div className="@container aspect-[4/5] bg-muted/30 relative overflow-hidden cursor-pointer">
                   {product.product_image_url ? (
                     <>
                       <img src={product.product_image_url} alt={product.product_name} width={800} height={1000} decoding="async" className={cn("w-full h-full object-cover object-center transition-opacity duration-500", product.hover_image_url ? "group-hover:opacity-0" : "")} loading="lazy" />

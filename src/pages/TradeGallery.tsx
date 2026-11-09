@@ -900,8 +900,8 @@ const StudioGallery = () => {
             const pinned = isPinned(product.product_name, product.id);
             const metadata = tradeCardMetadata(product);
             return (
-              <div key={product.id} data-trade-card={product.product_name} className="group relative min-w-0" onPointerEnter={() => warmTradeProductPage(product)} onFocusCapture={() => warmTradeProductPage(product)}>
-                <div className="@container relative aspect-square w-full overflow-hidden bg-[hsl(var(--product-canvas))] cursor-pointer" onClick={() => openProductSheet(product)}>
+              <div key={product.id} data-trade-card={product.product_name} className="group relative min-w-0 cursor-pointer" onClick={(event) => { if (!(event.target instanceof Element) || !event.target.closest('button, a, input, select, textarea, [role="button"], [role="dialog"]')) openProductSheet(product); }} onPointerEnter={() => warmTradeProductPage(product)} onFocusCapture={() => warmTradeProductPage(product)}>
+                <div className="@container relative aspect-square w-full overflow-hidden bg-[hsl(var(--product-canvas))] cursor-pointer">
                   {product.image_url ? (
                     <>
                       <img
