@@ -1,5 +1,8 @@
 # Roadmap
 
+## Trade Gallery direct product navigation
+- [ ] Remove the configuration popup from grid actions and open the dedicated product page from card, image and Configure & Quote clicks; verify signed in.
+
 ## Product card button cursors
 - [x] Added cursor-pointer only to both card actions; signed-in browser verified pointer on each, with layout, styling and borders unchanged. Build OK.
 
