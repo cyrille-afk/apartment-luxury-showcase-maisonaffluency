@@ -5,7 +5,7 @@ import { useUserBoards } from "@/hooks/useUserBoards";
 import InviteCollaboratorDialog from "./procurement/InviteCollaboratorDialog";
 import { ProjectWorkspaceProvider, useProjectWorkspace } from "@/contexts/ProjectWorkspaceContext";
 
-const InviteContext = createContext<((projectId: string | null) => void) | null>(null);
+const InviteContext = createContext<((projectId: string | null, quoteId?: string) => void) | null>(null);
 export const useCollaboratorInvite = () => useContext(InviteContext);
 const InviteDefaultContext = createContext<((quoteProjectId: string | null) => string | null) | null>(null);
 /** Resolves the project the invitation will open on, so callers can name it before opening. */
@@ -18,7 +18,7 @@ export function CollaboratorInviteProvider({ children }: { children: ReactNode }
 function CollaboratorInviteState({ children }: { children: ReactNode }) {
   const location = useLocation();
   const activeFolder = useProjectWorkspace()?.activeFolder;
-  const [request, setRequest] = useState<{ projectId: string | null; key: number } | null>(null);
+  const [request, setRequest] = useState<{ projectId: string | null; quoteId?: string; key: number } | null>(null);
   const resolveProjectId = useCallback((quoteProjectId: string | null) => {
     let activeProjectId = new URLSearchParams(location.search).get("project");
     if (!activeProjectId) {
@@ -27,16 +27,16 @@ function CollaboratorInviteState({ children }: { children: ReactNode }) {
     // A saved quote's association wins over an unrelated browsing filter.
     return quoteProjectId || activeFolder?.projectId || activeProjectId || null;
   }, [location.search, activeFolder?.projectId]);
-  const openInvite = useCallback((quoteProjectId: string | null) => {
-    setRequest({ projectId: resolveProjectId(quoteProjectId), key: Date.now() });
+  const openInvite = useCallback((quoteProjectId: string | null, quoteId?: string) => {
+    setRequest({ projectId: resolveProjectId(quoteProjectId), quoteId, key: Date.now() });
   }, [resolveProjectId]);
   return <InviteDefaultContext.Provider value={resolveProjectId}><InviteContext.Provider value={openInvite}>
     {children}
-    {request && <ProjectClientInvitation key={request.key} projectId={request.projectId} onClose={() => setRequest(null)} />}
+    {request && <ProjectClientInvitation key={request.key} projectId={request.projectId} quoteId={request.quoteId} onClose={() => setRequest(null)} />}
   </InviteContext.Provider></InviteDefaultContext.Provider>;
 }
 
-function ProjectClientInvitation({ projectId, onClose }: { projectId: string | null; onClose: () => void }) {
+function ProjectClientInvitation({ projectId, quoteId, onClose }: { projectId: string | null; quoteId?: string; onClose: () => void }) {
   const [selectedProjectId, setSelectedProjectId] = useState(projectId);
   const { projects, loading: projectsLoading } = useProjects({ activeOnly: false });
   const { project, loading: projectLoading } = useProject(selectedProjectId || undefined);
@@ -48,5 +48,5 @@ function ProjectClientInvitation({ projectId, onClose }: { projectId: string | n
     projectId={ready ? selectedProjectId || undefined : undefined} projectName={project?.id === selectedProjectId ? project.name : undefined}
     projectOptions={projectOptions} selectedProjectId={selectedProjectId || ""} projectsLoading={projectsLoading} onProjectChange={setSelectedProjectId}
     boardOptions={ready ? projectBoards : []} boardsLoading={loading || projectLoading} workspaceInvite clientWorkspace
-    readOnly onInvited={() => {}} />;
+    quoteId={quoteId} readOnly onInvited={() => {}} />;
 }

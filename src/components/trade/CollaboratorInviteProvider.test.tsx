@@ -6,9 +6,14 @@ const state = vi.hoisted(() => ({ search: "?project=other", project: { id: "sing
 vi.mock("@/lib/router-compat", () => ({ useLocation: () => ({ search: state.search }) }));
 vi.mock("@/hooks/useProjects", () => ({ useProject: () => ({ project: state.project, loading: false }), useProjects: () => ({ projects: [state.project], loading: false }) }));
 vi.mock("@/hooks/useUserBoards", () => ({ useUserBoards: () => ({ boards: state.boards, loading: false, error: null }) }));
-vi.mock("./procurement/InviteCollaboratorDialog", () => ({ default: (props: { projectId: string; boardId: string; clientWorkspace: boolean; onOpenChange: (open: boolean) => void }) => <div data-testid="invite" data-project={props.projectId} data-board={props.boardId} data-client={String(props.clientWorkspace)} onClick={() => props.onOpenChange(false)} /> }));
+vi.mock("./procurement/InviteCollaboratorDialog", () => ({ default: (props: { projectId: string; boardId: string; quoteId?: string; clientWorkspace: boolean; onOpenChange: (open: boolean) => void }) => <div data-testid="invite" data-quote={props.quoteId} data-project={props.projectId} data-board={props.boardId} data-client={String(props.clientWorkspace)} onClick={() => props.onOpenChange(false)} /> }));
 beforeEach(() => { state.search = "?project=other"; sessionStorage.clear(); });
 afterEach(cleanup);
+it("carries the saved two-product quote identity into the folder invitation", () => {
+  render(<CollaboratorInviteProvider><QuoteWorkspaceInvite projectId="singapore" quoteId="46c952f5-35a0-4cbd-a097-0ca4ce7fe75a" /></CollaboratorInviteProvider>);
+  fireEvent.click(screen.getByRole("button", { name: "Add Client to Project" }));
+  expect(screen.getByTestId("invite").getAttribute("data-quote")).toBe("46c952f5-35a0-4cbd-a097-0ca4ce7fe75a");
+});
 it("uses the quote project over an unrelated filter without inventing an active folder", () => {
   render(<CollaboratorInviteProvider><QuoteWorkspaceInvite projectId="singapore" /></CollaboratorInviteProvider>);
   fireEvent.click(screen.getByRole("button", { name: "Add Client to Project" }));
