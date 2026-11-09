@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ShoppingCart, Trash2, Package, ArrowRight } from "lucide-react";
+import { ShoppingCart, Trash2, Package, ArrowRight, Minus, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { DrawerItemSkeleton } from "@/components/trade/skeletons";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
@@ -69,6 +70,10 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
   const [items, setItems] = useState<QuoteItem[]>([]);
   const [quoteMeta, setQuoteMeta] = useState<{ status: string; updated_at: string | null; project_id: string | null } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [savingItem, setSavingItem] = useState<string | null>(null);
+  const mutationPending = useRef(false);
+  const mutationVersion = useRef(0);
+  const [itemError, setItemError] = useState<string | null>(null);
   useEffect(() => {
     if (!open) return;
     window.dispatchEvent(new CustomEvent("ma:product-workspace-open", { detail: true }));
@@ -78,6 +83,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
   useEffect(() => {
     if (!open || !quoteId) return;
     const fetchItems = async () => {
+      const version = mutationVersion.current;
       setLoading(true);
       const [{ data }, { data: quoteRow }] = await Promise.all([
         supabase
@@ -268,7 +274,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
             }
           }
         }
-        if (cancelled) return;
+        if (cancelled || version !== mutationVersion.current) return;
         setItems(mapped);
       }
       if (!cancelled) setLoading(false);
@@ -283,8 +289,39 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
   useEffect(() => { setItems([]); setQuoteMeta(null); }, [quoteId]);
 
   const removeItem = async (itemId: string) => {
-    await supabase.from("trade_quote_items").delete().eq("id", itemId);
-    setItems((prev) => prev.filter((i) => i.id !== itemId));
+    if (mutationPending.current || !quoteId) return;
+    mutationPending.current = true;
+    mutationVersion.current += 1;
+    setSavingItem(itemId);
+    setItemError(null);
+    try {
+      const { data, error } = await supabase.from("trade_quote_items").delete().eq("id", itemId).eq("quote_id", quoteId).select("id");
+      if (error || !data?.length) throw new Error("delete failed");
+      setItems((prev) => prev.filter((i) => i.id !== itemId));
+    } catch {
+      setItemError("The item couldn’t be removed. Please try again.");
+    } finally {
+      mutationPending.current = false;
+      setSavingItem(null);
+    }
+  };
+
+  const updateQuantity = async (itemId: string, quantity: number) => {
+    if (mutationPending.current || !quoteId || !Number.isInteger(quantity) || quantity < 1) return;
+    mutationPending.current = true;
+    mutationVersion.current += 1;
+    setSavingItem(itemId);
+    setItemError(null);
+    try {
+      const { data, error } = await supabase.from("trade_quote_items").update({ quantity }).eq("id", itemId).eq("quote_id", quoteId).select("id, quantity").single();
+      if (error || !data) throw new Error("save failed");
+      setItems((prev) => prev.map((item) => item.id === itemId ? { ...item, quantity: data.quantity } : item));
+    } catch {
+      setItemError("The quantity couldn’t be saved. Please try again.");
+    } finally {
+      mutationPending.current = false;
+      setSavingItem(null);
+    }
   };
 
   const totalQuantity = items.reduce((sum, i) => sum + i.quantity, 0);
@@ -322,6 +359,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
             })()}
           </SheetDescription>
         </SheetHeader>
+        {itemError && <p role="alert" className="font-body text-xs text-destructive mt-2">{itemError}</p>}
 
         <div className="flex-1 overflow-y-auto mt-4 -mx-6 px-6 space-y-3">
           {loading ? (
@@ -429,9 +467,11 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
                   )}
 
                   <div className="flex flex-col items-start mt-1">
-                    <span className="font-body text-[10px] text-muted-foreground">
-                      Qty: {item.quantity}
-                    </span>
+                    <div className="flex items-center gap-1 font-body text-[10px] text-muted-foreground" aria-busy={savingItem === item.id}>
+                      <Button variant="ghost" size="icon-sm" className="cursor-pointer" aria-label={`Decrease quantity for ${item.product?.product_name?.trim() || "item"}`} title="Decrease quantity" disabled={savingItem !== null || item.quantity <= 1} onClick={() => updateQuantity(item.id, item.quantity - 1)}><Minus /></Button>
+                      <span className="min-w-10 text-center tabular-nums">Qty: {item.quantity}</span>
+                      <Button variant="ghost" size="icon-sm" className="cursor-pointer" aria-label={`Increase quantity for ${item.product?.product_name?.trim() || "item"}`} title="Increase quantity" disabled={savingItem !== null} onClick={() => updateQuantity(item.id, item.quantity + 1)}><Plus /></Button>
+                    </div>
                     {(() => {
                       const snapshot = activePriceSnapshot?.itemId === item.id ? activePriceSnapshot : null;
                       const retail = quoteDrawerRetail(savedItem);
@@ -460,13 +500,14 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
                     })()}
                   </div>
                 </div>
-                <button
+                <Button variant="ghost" size="icon-sm"
                   onClick={() => removeItem(item.id)}
+                  disabled={savingItem !== null}
                   className="absolute right-1 top-2 p-1.5 text-muted-foreground hover:text-destructive transition-colors shrink-0"
                   title="Remove"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
-                </button>
+                </Button>
               </div>
             ); })
           )}

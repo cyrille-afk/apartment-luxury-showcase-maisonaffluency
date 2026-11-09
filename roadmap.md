@@ -1,5 +1,9 @@
 # Roadmap
 
+## Quote quantities and configured totals
+- [x] Add saved drawer quantity controls; keep totals in sync and report failed saves. Signed-in disposable chair quantity 1→2→1 verified, with reload persistence; 34 regressions pass and build OK.
+- [x] Persist the renderer's numeric configured net price and priced variant. Real Yoma €100,563.30 remains included after adding a chair and reload; verified current quote's missing Yoma price restored, total €110,595 with its two chairs unchanged.
+
 ## Preserve configured quote finishes
 - [x] Save each product's selector-derived finish configuration on its own quote line, rather than only the active drawer preview.
 - [x] Signed-in disposable real quote: Yoma's three finish names and crops survive adding Frenchmen Street Lounge Chair and a full reload; exact chair colourways no longer expand to sibling fabrics. Eleven regressions pass, build OK. Temporary quotes removed; the customer's previously blank Yoma line remains unchanged because its original selection was never saved.
