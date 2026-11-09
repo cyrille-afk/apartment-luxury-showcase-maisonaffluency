@@ -1,5 +1,9 @@
 # Roadmap
 
+## Quote drawer project label and unlinked finish crops
+- [x] Name the default invitation project under Add Client to Project (or say none is linked); recover finish crops for lines saved against unlinked catalogue copies via a single exact-title match, showing the saved fabric family only.
+- [x] Signed-in QU-B1F0A6 drawer shows "No project linked…" (and "Project: Singapore GCB workflow" when working in that project, with the modal preselected) plus the four Opera crops for Frenchmen Street Lounge Chair. 21 regressions pass. No invitations sent or records changed.
+
 ## Quote invitation project choices
 - [x] Offer the same studio-scoped project choices as the Trade selector, retaining saved-quote/active-workspace precedence; project-scoped invitation folder reads include accessible studio folders instead of only personally owned boards.
 - [x] Signed-in shared invitation verified with real Singapore/Hamptons choices, Singapore selected on the product page, Man of Parts selected inside its folder, and old folder cleared on project change. Twenty-one regressions pass; drawer click covered by provider tests, live shared modal opened through provider (saved drawer restoration could not be exercised). No invitations sent or records changed.

@@ -168,6 +168,15 @@ export const findQuoteFinishSwatches = (
         const allCovered = swTokens.every((t) => partSet.has(t));
         if (allCovered) pushMatch(swatch);
       }
+      // A fabric price-category label ("Fabric Cat. Opera") names a family whose
+      // colourways are stored as "Opera Calla", "Opera Delft"… — surface that
+      // family only, never unrelated fabrics.
+      if (/\bcat(?:egory|egorie)?\b\.?/i.test(part)) {
+        const family = partTokens.join(" ");
+        for (const swatch of ordered) {
+          if (normalizeFinishKey(swatch.name).startsWith(`${family} `)) pushMatch(swatch);
+        }
+      }
     }
 
     // Category fallback: only when NOTHING matched this part — otherwise a

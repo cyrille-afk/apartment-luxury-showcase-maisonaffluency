@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { afterEach, expect, it, vi } from "vitest";
 import { setClientSafeMode } from "@/lib/clientSafeMode";
 import QuoteDrawer from "./QuoteDrawer";
-vi.mock("./CollaboratorInviteProvider", () => ({ useCollaboratorInvite: () => vi.fn() }));
+vi.mock("./CollaboratorInviteProvider", () => ({ useCollaboratorInvite: () => vi.fn(), useCollaboratorInviteDefault: () => null }));
 
 const product = { id: "sofa", source_pick_id: null, product_name: "Saint Honoré Sofa", brand_name: "Pierre Augustin Rose", rrp_price_cents: 1460000, trade_price_cents: 1460000, currency: "EUR", image_url: null,
   size_variants: [
@@ -11,7 +11,7 @@ const product = { id: "sofa", source_pick_id: null, product_name: "Saint Honoré
     { base: "Solid Oak", top: "COM", label: "Saint Honoré 280", price_cents: 1670000 },
     { base: "Solid Oak", top: "Selected Pierre Frey fabric", label: "Saint Honoré 280", price_cents: 2260000 },
   ] };
-vi.mock("@/integrations/supabase/client", () => ({ supabase: { from: (table: string) => ({ select: () => ({ eq: () => table === "trade_quotes"
+vi.mock("@/integrations/supabase/client", () => ({ supabase: { from: (table: string) => ({ select: () => ({ ilike: () => ({ limit: async () => ({ data: [] }) }), eq: () => table === "trade_quotes"
   ? { maybeSingle: async () => ({ data: { status: "draft", updated_at: "2026-10-29T08:00:00Z" } }) }
   : { order: async () => ({ data: [
   { id: "240", product, quantity: 7, variant_label: "Selected Pierre Frey fabric · Saint Honoré 240", unit_price_cents: 1845000, unit_price_currency: "EUR", created_at: "2026-10-28T09:00:00Z" },
