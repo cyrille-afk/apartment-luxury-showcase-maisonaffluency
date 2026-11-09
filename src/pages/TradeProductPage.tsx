@@ -2472,7 +2472,7 @@ const TradeProductPage: React.FC<{ embeddedProduct?: { id?: string; designerSlug
       <div className="flex min-w-0 flex-col" ref={galleryScrollRef}>
         <div className="flex min-w-0 items-stretch gap-3 xl:gap-4">
           <div className="relative w-16 xl:w-[80px] 2xl:w-[88px] shrink-0">
-          <div className="absolute inset-0 flex flex-col gap-2 overflow-y-auto [scrollbar-width:none]" aria-label="Product views">
+          <div className="absolute inset-0 flex flex-col gap-2 overflow-y-auto [scrollbar-width:none]" aria-label="Product views" onMouseLeave={() => setHoverPreviewIdx(null)}>
             {r3d && (
               <button type="button" aria-label="Show 3D model" aria-pressed={asset === "3d"} onClick={() => { setWorkspaceAsset("3d"); setHoverPreviewIdx(null); }} className={thumbCls(asset === "3d")}>
                 <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-muted font-body text-[9px] uppercase tracking-[0.14em] text-foreground">
@@ -2488,7 +2488,6 @@ const TradeProductPage: React.FC<{ embeddedProduct?: { id?: string; designerSlug
                 aria-pressed={live3d ? (galleryActiveIndex ?? 0) === realIdx(i) : photoIdx === i}
                 title={live3d ? "Hover to preview in 3D · click to apply" : undefined}
                 onMouseEnter={() => setHoverPreviewIdx(i)}
-                onMouseLeave={() => setHoverPreviewIdx((h) => (h === i ? null : h))}
                 onFocus={() => setHoverPreviewIdx(i)}
                 onBlur={() => setHoverPreviewIdx((h) => (h === i ? null : h))}
                 onClick={() => { if (live3d) lockPhoto(i); else { setWorkspaceAsset(i); setGalleryActiveIndex(realIdx(i)); } }}
