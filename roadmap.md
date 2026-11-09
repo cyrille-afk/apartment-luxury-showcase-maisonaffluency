@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Preserve configured quote finishes
-- [ ] Save each product's selector-derived finish configuration on its own quote line, rather than only the active drawer preview.
-- [ ] Verify Yoma's finishes survive adding a chair and reopening the quote; run focused regressions.
+- [x] Save each product's selector-derived finish configuration on its own quote line, rather than only the active drawer preview.
+- [x] Signed-in disposable real quote: Yoma's three finish names and crops survive adding Frenchmen Street Lounge Chair and a full reload; nine regressions pass, build OK. Temporary quote removed; the customer's previously blank Yoma line remains unchanged because its original selection was never saved.
 
 ## Quote drawer project label and unlinked finish crops
 - [x] Name the default invitation project under Add Client to Project (or say none is linked); recover finish crops for lines saved against unlinked catalogue copies via a single exact-title match, showing the saved fabric family only.
