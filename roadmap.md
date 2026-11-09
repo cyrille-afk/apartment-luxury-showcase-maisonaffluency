@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Quote-linked project folder
-- [ ] Link drawer invitations to the saved quote and selected project folder; add exact configured products without duplicates and carry later additions into that folder.
-- [ ] Connect the current two-product quote to Man of Parts — curated edit; verify signed-in folder readback, permissions, retry safety and preserved prices.
+- [x] Drawer client invitations transactionally link the saved quote to the selected project folder; exact configured products use unique source-line identities and later additions sync through database triggers, without copying quote prices or notes.
+- [x] Current QU-46C952 linked to Man of Parts — curated edit: seven items appear immediately and survive reload; both original quote prices preserved. Disposable signed-in regression verifies two selections, retry safety, later additions and wrong-project rejection; 22 unit regressions pass. No invitation emails sent.
 
 ## Quote quantities and configured totals
 - [x] Add saved drawer quantity controls; keep totals in sync and report failed saves. Signed-in disposable chair quantity 1→2→1 verified, with reload persistence; 34 regressions pass and build OK.
