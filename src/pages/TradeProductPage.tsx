@@ -3439,13 +3439,13 @@ const TradeProductPage: React.FC<{ embeddedProduct?: { id?: string; designerSlug
                   </Button>
                 </div>
               </div>
-              <Button data-commerce-primary onClick={() => window.dispatchEvent(new Event("ma:open-workspace-order"))} className="w-full gap-2 rounded-none bg-foreground text-background hover:bg-foreground/90 font-body text-xs uppercase">
+              {!embeddedProduct && <Button data-commerce-primary onClick={() => window.dispatchEvent(new Event("ma:open-workspace-order"))} className="w-full gap-2 rounded-none bg-foreground text-background hover:bg-foreground/90 font-body text-xs uppercase">
                 <ShoppingCart size={14} />
                 Proceed to Order
-              </Button>
-              <Button variant="outline" onClick={() => void handleAddToQuote()} disabled={adding} className={cn("w-full rounded-none font-body text-xs uppercase", added && "border-primary text-primary")}>
+              </Button>}
+              <Button variant={embeddedProduct ? "default" : "outline"} onClick={() => void handleAddToQuote()} disabled={adding} className={cn("w-full rounded-none font-body text-xs uppercase", embeddedProduct && "bg-foreground text-background hover:bg-foreground/90", added && "border-primary text-primary")}>
                 {adding ? <DotCircleLoader size="sm" /> : added ? <Check size={14} /> : null}
-                {added ? "Added to Co-Pilot Workspace" : "Add to Co-Pilot Workspace"}
+                {embeddedProduct ? (added ? "Added to Quote" : "Add to Quote") : (added ? "Added to Co-Pilot Workspace" : "Add to Co-Pilot Workspace")}
               </Button>
               <div aria-live="polite" className="text-center font-body text-[11px] empty:hidden">
                 {copilotSave.state === "saving" && <span className="text-muted-foreground">Saving to quote…</span>}
