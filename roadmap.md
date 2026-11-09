@@ -1,5 +1,9 @@
 # Roadmap
 
+## Quote invitation project choices
+- [x] Offer the same studio-scoped project choices as the Trade selector, retaining saved-quote/active-workspace precedence; project-scoped invitation folder reads include accessible studio folders instead of only personally owned boards.
+- [x] Signed-in shared invitation verified with real Singapore/Hamptons choices, Singapore selected on the product page, Man of Parts selected inside its folder, and old folder cleared on project change. Twenty-one regressions pass; drawer click covered by provider tests, live shared modal opened through provider (saved drawer restoration could not be exercised). No invitations sent or records changed.
+
 ## Active-folder invitation default
 - [x] Default the collaborator folder selection from the current workspace context; keep the placeholder without an active folder and preserve manual selection.
 - [x] Seventeen invitation/workspace regressions pass, including delayed folder loading, no-context fallback, cross-project isolation and reopening. Live signed-in verification is blocked: the requesting account redirects to studio setup and cannot open the existing Singapore folder. No invitations sent or account data changed.

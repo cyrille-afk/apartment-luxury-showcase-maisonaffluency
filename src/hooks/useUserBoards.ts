@@ -15,7 +15,7 @@ export type UserBoardSummary = {
  * Lightweight fetch of the signed-in user's tearsheets, with item counts.
  * Used by the concierge proposal card to let the user pick which board to append to.
  */
-export function useUserBoards(enabled: boolean, projectId?: string | null) {
+export function useUserBoards(enabled: boolean, projectId?: string | null, projectWorkspace = false) {
   const [boards, setBoards] = useState<UserBoardSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,9 +41,11 @@ export function useUserBoards(enabled: boolean, projectId?: string | null) {
       let query = supabase
         .from("client_boards")
         .select("id, project_id, title, client_name, status, updated_at")
-        .eq("user_id", userId)
         .order("updated_at", { ascending: false })
         .limit(100);
+      // Workspace invitations include accessible studio folders; RLS still applies.
+      // Ordinary sourcing lists remain owner-scoped.
+      if (!projectWorkspace || !projectId) query = query.eq("user_id", userId);
       if (projectId) query = query.eq("project_id", projectId);
       const { data: rows, error: err } = await query;
 
@@ -83,7 +85,7 @@ export function useUserBoards(enabled: boolean, projectId?: string | null) {
     })();
 
     return () => { cancelled = true; };
-  }, [enabled, projectId]);
+  }, [enabled, projectId, projectWorkspace]);
 
   return { boards, loading, error };
 }

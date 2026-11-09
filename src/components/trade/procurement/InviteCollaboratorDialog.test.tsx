@@ -18,6 +18,15 @@ function ActiveFolder({ folderId = "board-two", projectId = "bangkok" }) {
 }
 const options = [{ id: "board-one", title: "First board" }, { id: "board-two", title: "Second board" }];
 const dialog = (open = true, boards = options) => <InviteCollaboratorDialog open={open} onOpenChange={() => {}} boardId="" projectId="bangkok" boardOptions={boards} workspaceInvite clientWorkspace readOnly onInvited={() => {}} />;
+it("clears a selected folder when the invitation project changes", () => {
+  const props = { open: true, onOpenChange: () => {}, boardId: "", onInvited: () => {}, workspaceInvite: true, clientWorkspace: true, projectOptions: [{ id: "bangkok", name: "Bangkok" }, { id: "singapore", name: "Singapore GCB workflow" }] };
+  const view = render(<InviteCollaboratorDialog {...props} projectId="bangkok" selectedProjectId="bangkok" boardOptions={options} />);
+  fireEvent.change(screen.getByLabelText("Project folder"), { target: { value: "board-two" } });
+  view.rerender(<InviteCollaboratorDialog {...props} projectId="singapore" selectedProjectId="singapore" boardOptions={options} />);
+  fireEvent.change(screen.getByLabelText("Email"), { target: { value: "client@example.com" } });
+  fireEvent.click(screen.getByRole("button", { name: "Send Invite" }));
+  expect(mocks.rpc).not.toHaveBeenCalled();
+});
 it("submits to the active folder once asynchronously loaded choices arrive", async () => {
   const view = render(<ProjectWorkspaceProvider><ActiveFolder />{dialog(true, [])}</ProjectWorkspaceProvider>);
   view.rerender(<ProjectWorkspaceProvider><ActiveFolder />{dialog()}</ProjectWorkspaceProvider>);

@@ -4,7 +4,7 @@ import { CollaboratorInviteProvider } from "./CollaboratorInviteProvider";
 import QuoteWorkspaceInvite from "./QuoteWorkspaceInvite";
 const state = vi.hoisted(() => ({ search: "?project=other", project: { id: "singapore", name: "Singapore GCB workflow" }, boards: [{ id: "folder", project_id: "singapore", title: "Singapore GCB workflow" }] }));
 vi.mock("@/lib/router-compat", () => ({ useLocation: () => ({ search: state.search }) }));
-vi.mock("@/hooks/useProjects", () => ({ useProject: () => ({ project: state.project, loading: false }) }));
+vi.mock("@/hooks/useProjects", () => ({ useProject: () => ({ project: state.project, loading: false }), useProjects: () => ({ projects: [state.project], loading: false }) }));
 vi.mock("@/hooks/useUserBoards", () => ({ useUserBoards: () => ({ boards: state.boards, loading: false, error: null }) }));
 vi.mock("./procurement/InviteCollaboratorDialog", () => ({ default: (props: { projectId: string; boardId: string; clientWorkspace: boolean; onOpenChange: (open: boolean) => void }) => <div data-testid="invite" data-project={props.projectId} data-board={props.boardId} data-client={String(props.clientWorkspace)} onClick={() => props.onOpenChange(false)} /> }));
 beforeEach(() => { state.search = "?project=other"; sessionStorage.clear(); });
