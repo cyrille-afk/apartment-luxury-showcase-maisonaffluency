@@ -13452,6 +13452,10 @@ export type Database = {
         Args: { _quote_id: string; _slug: string; _snapshot: Json }
         Returns: string
       }
+      create_project_board_client_invite: {
+        Args: { _board_id: string; _email: string; _project_id: string }
+        Returns: Json
+      }
       create_project_board_view_invite: {
         Args: { _board_id: string; _email: string; _project_id: string }
         Returns: Json

@@ -1842,6 +1842,13 @@
       "when": 1793954038448,
       "tag": "0262_preserve_existing_trade_only_product_visibility",
       "breakpoints": true
+    },
+    {
+      "idx": 263,
+      "version": "7",
+      "when": 1794191846807,
+      "tag": "0263_project_board_client_invitations",
+      "breakpoints": true
     }
   ]
 }
