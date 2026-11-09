@@ -25,6 +25,7 @@ afterEach(() => { cleanup(); pickTitles.rows = []; });
 it("shows finish crops for a line saved against an unlinked catalogue copy when its title matches one piece", async () => {
   pickTitles.rows = [{ id: "lounge-pick", title: "Frenchmen Street Lounge Chair " }];
   render(<QuoteDrawer open onOpenChange={vi.fn()} quoteId="quote" />);
+  await new Promise((r) => setTimeout(r, 300)); console.log("DOM", document.body.textContent);
   await waitFor(() => expect(screen.getByAltText("Opera Calla")).toBeTruthy());
   expect(screen.getByAltText("Opera Delft")).toBeTruthy();
 });
