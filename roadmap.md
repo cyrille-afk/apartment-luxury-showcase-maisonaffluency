@@ -1,5 +1,9 @@
 # Roadmap
 
+## Preserve configured quote finishes
+- [x] Save each product's selector-derived finish configuration on its own quote line, rather than only the active drawer preview.
+- [x] Signed-in disposable real quote: Yoma's three finish names and crops survive adding Frenchmen Street Lounge Chair and a full reload; exact chair colourways no longer expand to sibling fabrics. Eleven regressions pass, build OK. Temporary quotes removed; the customer's previously blank Yoma line remains unchanged because its original selection was never saved.
+
 ## Quote drawer project label and unlinked finish crops
 - [x] Name the default invitation project under Add Client to Project (or say none is linked); recover finish crops for lines saved against unlinked catalogue copies via a single exact-title match, showing the saved fabric family only.
 - [x] Signed-in QU-B1F0A6 drawer shows "No project linked…" (and "Project: Singapore GCB workflow" when working in that project, with the modal preselected) plus the four Opera crops for Frenchmen Street Lounge Chair. 21 regressions pass. No invitations sent or records changed.

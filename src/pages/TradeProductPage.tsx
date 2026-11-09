@@ -96,6 +96,7 @@ import { categoryUrl } from "@/lib/categorySlugs";
 import { priceRugVariantFromLabel, isRugCategory, looksLikeDimension } from "@/lib/rugPricing";
 import { resolveActiveVariant, resolvePartialDualMinCents } from "@/lib/resolveActiveVariant";
 import { findQuoteFinishSwatch } from "@/lib/quoteFinishSwatches";
+import { quoteSelectionLabel } from "@/lib/quoteSelectionLabel";
 import { configuredProductPrice } from "@/lib/configuredProductPrice";
 import { felixFinishLabel, type FelixQuoteFinish } from "@/lib/felixQuoteFinishes";
 import type { ProactiveTearsheetData } from "@/components/trade/concierge/ProactiveTearsheetCard";
@@ -1115,6 +1116,14 @@ const TradeProductPage: React.FC<{ embeddedProduct?: { id?: string; designerSlug
         }
       }
 
+      // Photo-linked selectors can display concrete choices without committing
+      // pricing axes. Save those same choices on the line, not just its preview.
+      variantLabel = quoteSelectionLabel(
+        felixSelection?.finishes,
+        variantLabel,
+        selectedDualSize || selectedSingleSize || rugSelection?.sizeLabel || null,
+      );
+
 
       // Resolve the finish-specific gallery photo so the quote thumbnail
       // reflects the finish the user actually picked (Walnut vs Oak, etc.)
@@ -1210,7 +1219,7 @@ const TradeProductPage: React.FC<{ embeddedProduct?: { id?: string; designerSlug
         // catalogue so the per-line shipping estimator is accurate from day one.
         if (itemId) {
           setDrawerPriceSnapshot({ itemId: String(itemId), ...selectedDrawerPrices,
-            configuration: felixSelection?.finishes?.map((finish) => `${finish.label}: ${finish.name}`).join(" · "),
+            configuration: variantLabel || undefined,
             imageUrl: images[galleryActiveIndex ?? 0] || resolvedImageUrl,
             finishes: felixSelection?.finishes?.filter((finish) => !!finish.imageUrl).map((finish) => ({ name: finish.name, image_url: finish.imageUrl || "" })),
           });

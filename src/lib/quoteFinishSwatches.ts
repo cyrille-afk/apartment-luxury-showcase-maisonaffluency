@@ -151,6 +151,14 @@ export const findQuoteFinishSwatches = (
     // "Selected Pierre Frey fabric" / "Client's own material" style placeholders
     // name no colourway — matching them would list the whole fabric library.
     if (/^\s*(selected|choice of|client'?s own|com\b|to be confirmed|tbc)\b/i.test(part)) continue;
+    // Selector-derived labels name a concrete colourway after the colon.
+    // An exact choice must not expand to siblings sharing its fabric name.
+    const selectedName = part.includes(":") ? part.slice(part.indexOf(":") + 1).trim() : part;
+    const exact = ordered.find((swatch) => normalizeFinishKey(swatch.name) === normalizeFinishKey(selectedName));
+    if (exact) {
+      pushMatch(exact);
+      continue;
+    }
     const sizeBefore = matches.length;
 
     // Try single best-match first (exact / fuzzy / token-overlap).
