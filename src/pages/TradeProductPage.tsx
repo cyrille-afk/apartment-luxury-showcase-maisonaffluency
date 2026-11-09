@@ -97,6 +97,7 @@ import { priceRugVariantFromLabel, isRugCategory, looksLikeDimension } from "@/l
 import { resolveActiveVariant, resolvePartialDualMinCents } from "@/lib/resolveActiveVariant";
 import { findQuoteFinishSwatch } from "@/lib/quoteFinishSwatches";
 import { quoteSelectionLabel } from "@/lib/quoteSelectionLabel";
+import { quoteConfiguredPricePatch, type QuoteConfiguredPrice } from "@/lib/quoteConfiguredPrice";
 import { configuredProductPrice } from "@/lib/configuredProductPrice";
 import { felixFinishLabel, type FelixQuoteFinish } from "@/lib/felixQuoteFinishes";
 import type { ProactiveTearsheetData } from "@/components/trade/concierge/ProactiveTearsheetCard";
@@ -777,7 +778,7 @@ const TradeProductPage: React.FC<{ embeddedProduct?: { id?: string; designerSlug
   const [activeQuoteId, setActiveQuoteId] = useState<string | null>(null);
   const [drawerRefreshKey, setDrawerRefreshKey] = useState(0);
   const [drawerPriceSnapshot, setDrawerPriceSnapshot] = useState<{ itemId: string; retailLabel: string | null; netLabel: string | null; configuration?: string; imageUrl?: string | null; finishes?: { name: string; image_url: string }[] } | null>(null);
-  const drawerPricesRef = useRef<{ retailLabel: string | null; netLabel: string | null }>({ retailLabel: null, netLabel: null });
+  const drawerPricesRef = useRef<QuoteConfiguredPrice & { retailLabel: string | null; netLabel: string | null }>({ retailLabel: null, netLabel: null, netCents: null, currency: null, variantLabel: null });
 
   const [adding, setAdding] = useState(false);
   // Confirmation gate: before reusing a remembered draft quote, show its
@@ -1123,6 +1124,11 @@ const TradeProductPage: React.FC<{ embeddedProduct?: { id?: string; designerSlug
         variantLabel,
         selectedDualSize || selectedSingleSize || rugSelection?.sizeLabel || null,
       );
+      // Keep the exact priced catalogue label alongside selected finish names;
+      // saved retail lookup must not lose a size/finish label shown by the renderer.
+      if (selectedDrawerPrices.variantLabel && !variantLabel?.includes(selectedDrawerPrices.variantLabel)) {
+        variantLabel = [variantLabel, selectedDrawerPrices.variantLabel].filter(Boolean).join(" · ");
+      }
 
 
       // Resolve the finish-specific gallery photo so the quote thumbnail
@@ -1323,7 +1329,13 @@ const TradeProductPage: React.FC<{ embeddedProduct?: { id?: string; designerSlug
 
 
           // Combined override unit price (wood + fabric upcharge), in quote currency.
-          if (overrideUnitPriceCents != null) {
+          const configuredPatch = quoteConfiguredPricePatch(selectedDrawerPrices);
+          if (configuredPatch) {
+            Object.assign(patch, configuredPatch);
+            // This numeric net snapshot already includes configured fabric cost.
+            // Retain fabric identity/metres without charging the surcharge twice.
+            patch.fabric_upcharge_cents = null;
+          } else if (overrideUnitPriceCents != null) {
             patch.unit_price_cents = overrideUnitPriceCents;
             patch.unit_price_currency = productCcy;
           } else if (selectedWoodPrice || selectedFabric || selectedVariantCents != null) {
@@ -2246,7 +2258,15 @@ const TradeProductPage: React.FC<{ embeddedProduct?: { id?: string; designerSlug
     baseAxisIsDimension: baseAxisIsDim, isUpholstered: isProductUpholstered(product as any),
     woodLabelOverride: product.wood_label_override,
   });
-  drawerPricesRef.current = { retailLabel: priceLabels?.retailLabel ?? null, netLabel: priceLabels?.netLabel ?? null };
+  const samePriceVariants = variantsList.filter((variant: any) => variant.price_cents === effectiveRrpCents);
+  const renderedPriceVariant = activeVariant || picturedVariant || (samePriceVariants.length === 1 ? samePriceVariants[0] : null);
+  drawerPricesRef.current = {
+    retailLabel: priceLabels?.retailLabel ?? null,
+    netLabel: priceLabels?.netLabel ?? null,
+    netCents: priceLabels?.netCents ?? null,
+    currency: priceLabels?.currency ?? null,
+    variantLabel: renderedPriceVariant?.label || null,
+  };
   const felixBaseSwatch = findQuoteFinishSwatch([selectedWoodPrice?.name, selectedBaseDisplay, displayedFinishes.base, selectedBase], felixLinkedSwatches);
   const felixPicturedSwatches = felixLinkedSwatches.filter((swatch) => swatch.image_indices?.includes((galleryActiveIndex ?? 0) + 1));
   const felixTopSwatch = findQuoteFinishSwatch([selectedFabric?.name, selectedTopSwatch?.name, selectedTopDisplay, displayedFinishes.top, selectedTop, selectedSwatchGalleryName], felixLinkedSwatches)
