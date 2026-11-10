@@ -494,7 +494,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [payingStripe, setPayingStripe] = useState(false);
   const [freightRevision, setFreightRevision] = useState(0);
   const [projectId, setProjectId] = useState<string | null>(null);
-  const quoteBranding = useQuoteBranding(quoteId, projectId, user?.id, currentStudio, !(isAdmin || isSuperAdmin));
+  const isQuoteAdmin = isAdmin || isSuperAdmin;
+  const [previewTradeHeader, setPreviewTradeHeader] = useState(false);
+  const quoteBranding = useQuoteBranding(quoteId, projectId, user?.id, currentStudio, !isQuoteAdmin || previewTradeHeader);
   const [projectName, setProjectName] = useState<string | null>(null);
   const [ceilingMode, setCeilingMode] = useState<"inherit" | "itemized" | "target_ceiling">("inherit");
   const [quoteCeilingCents, setQuoteCeilingCents] = useState<number | null>(null);
@@ -2929,7 +2931,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         </div>
       </div>
 
-      <QuoteBrandingControl branding={quoteBranding} />
+      <QuoteBrandingControl branding={quoteBranding} adminPreview={isQuoteAdmin ? { active: previewTradeHeader, onChange: setPreviewTradeHeader } : undefined} />
 
       {emailLogOpen && emailLog.length > 0 && (
         <div className="mb-4 md:mb-6 rounded-md border border-border bg-muted/30 px-4 py-3 print:hidden">
