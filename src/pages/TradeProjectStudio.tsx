@@ -295,15 +295,13 @@ export default function TradeProjectStudio() {
                     </div>
 
                     <figcaption
-                      className={`mt-4 space-y-1 text-center transition-opacity duration-500 ${
-                        isCuratorialActive ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus:opacity-100"
-                      }`}
+                      className="mt-4 space-y-1 text-center"
                     >
                       <span className="block font-body text-[10px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground">
                         {item.name}
                       </span>
                       <span className="block font-body text-[9px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground/60">
-                        {dims}
+                        {dims || "\u00a0"}
                       </span>
                     </figcaption>
                   </figure>
