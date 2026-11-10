@@ -221,7 +221,7 @@ export async function fetchPublicProductPage(
 
   // If the route designer was unresolvable (trade-only or unknown parent slug),
   // adopt the designer that actually owns the matched pick.
-  if (!designer.id && (product as any).designer_id) {
+  if ((product as any).designer_id && designer.id !== (product as any).designer_id) {
     const { data: owner } = await supabase
       .from("designers")
       .select("id, name, slug, display_name, biography, founder")

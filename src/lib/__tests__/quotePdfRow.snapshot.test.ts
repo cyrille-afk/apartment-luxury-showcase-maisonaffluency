@@ -188,14 +188,15 @@ describe("quotePdf row layout — regression guards", () => {
     items = await renderAndParse(BASE_ARGS);
   }, 30_000);
 
-  it("wraps the product title on ' by <Designer>' onto its own line", () => {
+  it("keeps the designer above the clean product title without a duplicate by-line", () => {
     const main = items.find((it) => /Frenchmen Street Lounge Chair/.test(it.str));
-    const byLine = items.find((it) => /^by Sebastian Herkner/.test(it.str.trim()));
+    const designer = items.find((it) => /^SEBASTIAN HERKNER$/.test(it.str.trim()));
     expect(main, "main title line missing").toBeDefined();
-    expect(byLine, "'by Sebastian Herkner' must render as its own line").toBeDefined();
-    // The "by" line must sit below the main title, on the same left column (±2pt).
-    expect(byLine!.y).toBeGreaterThan(main!.y);
-    expect(Math.abs(byLine!.x - main!.x)).toBeLessThan(2);
+    expect(designer, "designer credit missing").toBeDefined();
+    if (!main || !designer) throw new Error("Missing product attribution");
+    expect(designer.y).toBeLessThan(main.y);
+    expect(Math.abs(designer.x - main.x)).toBeLessThan(2);
+    expect(items.some((it) => /^by Sebastian Herkner/.test(it.str.trim()))).toBe(false);
   });
 
   it("renders a FINISHES caption plus each swatch name below the image", () => {

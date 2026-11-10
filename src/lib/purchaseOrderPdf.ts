@@ -140,7 +140,7 @@ export function buildPurchaseOrderPdf(args: PurchaseOrderPdfArgs): jsPDF {
   const credits = productAttribution({ title: args.productName, brandName: args.brandName });
   const titleLines = doc.splitTextToSize(credits.title, colQty - M - 20) as string[];
   titleLines.forEach((t, i) => doc.text(t, M, y + i * 13));
-  const detail = [args.brandName, args.sku ? `SKU ${args.sku}` : "", args.dimensions, args.materials]
+  const detail = [credits.designer, credits.edition, args.sku ? `SKU ${args.sku}` : "", args.dimensions, args.materials]
     .filter(Boolean)
     .join(" · ");
   let blockH = titleLines.length * 13;
