@@ -16,6 +16,7 @@ import LegacyRouteRedirect from "@/components/LegacyRouteRedirect";
 import NotFound from "@/pages/NotFound";
 import { productSeoText } from "@/lib/seoText";
 import { toOgImage } from "@/lib/ogImage";
+import { productAttribution } from "@/lib/productAttribution";
 
 const specIcon = (symbol: string, className = "") => (
   <SpecGlyph symbol={symbol} className={className} />
@@ -35,6 +36,12 @@ interface Product {
   lead_time: string | null;
   is_active: boolean;
   isInShowroom?: boolean;
+  source_pick_id?: string | null;
+  designer_name?: string | null;
+  house_name?: string | null;
+  edition?: string | null;
+  edition_number?: string | null;
+  edition_signing?: string | null;
 }
 
 import { BASE_URL, absoluteUrl } from "@/config/site";
@@ -53,7 +60,7 @@ const ProductPage = () => {
   useEffect(() => {
     if (!id) return;
     const fetchProduct = async () => {
-      const cols = "id, product_name, brand_name, category, subcategory, description, image_url, gallery_images, materials, dimensions, lead_time, is_active";
+      const cols = "id, product_name, brand_name, category, subcategory, description, image_url, gallery_images, materials, dimensions, lead_time, is_active, source_pick_id";
       let { data } = await supabase
         .from("trade_products")
         .select(cols)
@@ -84,7 +91,15 @@ const ProductPage = () => {
           .from("gallery_hotspots")
           .select("id", { count: "exact", head: true })
           .ilike("product_name", data.product_name);
-        setProduct({ ...(data as Product), isInShowroom: (count ?? 0) > 0 });
+        let creditFields = {};
+        if (data.source_pick_id) {
+          const { data: pick } = await supabase.from("designer_curator_picks_public").select("edition, edition_number, edition_signing, designer_id").eq("id", data.source_pick_id).maybeSingle();
+          if (pick) {
+            const { data: owner } = await supabase.from("designers").select("name, display_name, founder").eq("id", pick.designer_id).maybeSingle();
+            creditFields = { ...pick, designer_name: owner?.display_name || owner?.name, house_name: owner?.founder };
+          }
+        }
+        setProduct({ ...(data as Product), ...creditFields, isInShowroom: (count ?? 0) > 0 });
       }
       setLoading(false);
     };
@@ -118,6 +133,7 @@ const ProductPage = () => {
     ...(product.gallery_images?.filter(img => img !== product.image_url) || []),
   ];
   const hasMultipleImages = allImages.length > 1;
+  const credits = productAttribution({ ...product, title: product.product_name, designerName: product.designer_name, brandName: product.brand_name, houseName: product.house_name });
 
   const canonicalUrl = absoluteUrl(location.pathname);
   const { title: pageTitle, description: pageDescription } = productSeoText({
@@ -265,8 +281,9 @@ const ProductPage = () => {
 
             {/* Product details */}
             <div className="flex flex-col">
-              <p className="font-body text-xs text-muted-foreground uppercase tracking-[0.15em] mb-2">{product.brand_name}</p>
-              <h1 className="font-display text-2xl md:text-3xl text-foreground leading-tight">{product.product_name}</h1>
+              <p className="font-body text-xs text-muted-foreground uppercase tracking-[0.15em] mb-2">{credits.designer}</p>
+              <h1 className="font-display text-2xl md:text-3xl text-foreground leading-tight">{credits.title}</h1>
+              {credits.edition && <p className="mt-2 font-body text-[10px] uppercase text-muted-foreground">{credits.edition}</p>}
 
               {product.category && (
                 <p className="font-body text-xs text-muted-foreground mt-2 uppercase tracking-wider">
