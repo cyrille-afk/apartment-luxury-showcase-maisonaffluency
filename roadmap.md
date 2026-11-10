@@ -1,5 +1,9 @@
 # Roadmap
 
+## Consistent product attribution
+- [ ] Unify catalogue, product pages, secure shared links and PDF credits using separate product/designer/house/edition presentation; preserve identities, links and prices.
+- [ ] Verify Frenchmen and Madison plus attribution regressions without creating customer quotes or invitations.
+
 ## Matrix finish requests and approved draft
 - [x] Sync latest saved client finish requests into matrix descriptors and linked swatches, with a client-request marker; focus, saved-feedback events and visible-folder refresh keep history and rows together.
 - [x] Compile approved items with exact configuration, source-line quantity and verified tier pricing into a review-only invoice outline; exclude pending/rejected items, wait for authoritative price/status reads and never auto-order. Explicit draft saving retains separate configured lines.
