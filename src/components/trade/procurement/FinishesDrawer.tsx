@@ -49,6 +49,7 @@ export const matchTopVariant = <V extends { top?: string; base?: string }>(varia
  *  to the same price & image the drawer shows, so cards match on load. */
 export async function resolveSavedFinishes(
   items: { id: string; product_id: string; variant_label?: string | null; fabric_label?: string | null; wood_label?: string | null }[],
+  strict = false,
 ): Promise<Record<string, FinishSelection>> {
   const withSel = items.filter((i) => i.variant_label || i.fabric_label || i.wood_label);
   if (!withSel.length) return {};
@@ -66,7 +67,7 @@ export async function resolveSavedFinishes(
     const pid = pickOf.get(it.product_id);
     const p: any = pid && pickMap.get(pid);
     if (!p) continue;
-    out[it.id] = resolveFinishFrom(it, p, (sws || []).filter((x: any) => x.pick_id === pid));
+    out[it.id] = resolveFinishFrom(it, p, (sws || []).filter((x: any) => x.pick_id === pid), strict);
   }
   return out;
 }
@@ -76,6 +77,7 @@ export function resolveFinishFrom(
   it: { variant_label?: string | null; fabric_label?: string | null; wood_label?: string | null },
   p: { size_variants?: any; variants?: any; variant_image_map?: any; gallery_images?: any },
   sws: any[],
+  strict = false,
 ): FinishSelection {
   const raw = p.variants ?? p.size_variants;
   const variants: any[] = Array.isArray(raw) ? raw.filter((v: any) => v.top || v.base) : [];
@@ -109,10 +111,16 @@ export function resolveFinishFrom(
     variants.find((x) => normKey(x.base) === normKey(base)) ||
     null;
   const im = p.variant_image_map || {}, gal = p.gallery_images || [];
+  const exactPool = variants.filter((x) => {
+    const topMatches = normKey(x.top) === normKey(top) || (sw?.price_tier_label && categoryKey(x.top) === categoryKey(sw.price_tier_label));
+    return topMatches && normKey(x.base) === normKey(base);
+  });
+  const prices = new Set(exactPool.map((x) => x.price_cents));
+  const confirmedPrice = strict ? (prices.size === 1 ? exactPool[0]?.price_cents ?? null : null) : v?.price_cents ?? null;
   const img = variantImage(v ? { ...v, top: v.top, base: base || v.base } : { top, base }, im, gal) || variantImage(v, im, gal);
   return {
     label: [top, base].filter(Boolean).join(" / ") || lbl,
-    price_cents: v?.price_cents ?? null,
+    price_cents: confirmedPrice,
     image_url: img,
     top, base,
     top_image: sw?.image_url ?? null,
