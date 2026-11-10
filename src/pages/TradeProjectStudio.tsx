@@ -258,7 +258,7 @@ export default function TradeProjectStudio() {
               </p>
             </div>
           ) : (
-            <div className="columns-2 gap-8 px-4 pb-10 md:columns-3 md:gap-10 md:px-8 lg:px-12">
+            <div className={`grid items-start pb-10 transition-all duration-300 ease-in-out motion-reduce:transition-none ${isSpecPanelOpen ? "grid-cols-3 gap-6 px-4 md:px-8 lg:px-12" : "grid-cols-4 gap-4 px-4"}`}>
               {items.map((item, idx) => {
                 const dims = dimsLabel(item);
                 const isCuratorialActive = curatorialItemId === item.product_id;
@@ -272,7 +272,7 @@ export default function TradeProjectStudio() {
                   <figure
                     key={item.product_id}
                     data-curatorial-source={item.product_id}
-                    className="group relative mb-12 cursor-pointer break-inside-avoid md:mb-16"
+                    className="group relative min-w-0 cursor-pointer"
                     onClick={activate}
                     role="button"
                     tabIndex={0}
