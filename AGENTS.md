@@ -12,7 +12,7 @@
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
 - Recipient-facing links (board invitation email preview, copy-share, rotate-link, QR, quote/guest pay) build through absoluteUrl from src/config/site, never window.location.origin and never a sandbox host; src/components/trade/__tests__/qrProductionDomain.test.ts guards the list — clients must get an address they can open.
-- Board invitation email scope is counted from the saved invitation's folder at send time; omit unavailable counts and preserve role/view-only CTA distinctions — avoids invented scope or promises of unavailable approvals.
+- Board invite email counts the folder's pieces at send time (omit if unknown); CTA wording follows role/view-only.
 - Shared portfolio pictures and 3D View use one item-scoped panel action and the same availability gate; guest details remain preloaded through the invitation token without direct catalogue reads — preserves configuration parity and view-only restrictions.
 - Collaborator email status uses a folder-manager-checked RPC correlating each invitation's stable send key to the latest email log by message ID; membership and latest email attempt remain independent, with visible-folder refresh and no sent-to-delivered inference — prevents cross-folder diagnostics leaks and false delivery claims.
 - Drawer client invitations carry the saved quote ID into a transactional quote/project/board-checked RPC; database triggers project exact configured product/finish fields into the linked folder using unique source-line identities, never quote prices or notes. Existing folder items remain; retries cannot duplicate linked lines and later additions sync independently of the browser — prevents invite-only shares and private-price leaks.
@@ -194,3 +194,4 @@
 - Price-list content inspection uses an admin-checked public-storage inventory and revision-keyed private results; server-side byte detection precedes AI inspection, unchecked/failing assets remain unconfirmed — filenames and public covers must never imply safety.
 - Per-product `trade_only` controls visibility independently of maker profiles; new picks default Trade Only. Credits: `public_catalog_designer_credits`.
 - Trade loaders hold the last page height (tradePageHeightHold) — else the window snaps up before products load.
+- Auth emails send via src/routes/lovable/email/auth/webhook.ts, not the legacy hook.
