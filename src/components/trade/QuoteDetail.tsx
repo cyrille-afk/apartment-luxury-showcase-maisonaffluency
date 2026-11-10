@@ -2979,7 +2979,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         <div className="border-b border-border p-4 md:p-6 lg:p-8">
           <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-4 md:gap-10">
             {/* Left: Title + Project + Client Name */}
-            <div>
+            <div className="min-w-0">
               <h1 className="font-display text-2xl md:text-3xl lg:text-4xl text-foreground tracking-wide uppercase mb-2 md:mb-3">
                 Quote
               </h1>
@@ -3011,10 +3011,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   {shipTo.phone && <p>Tel: {shipTo.phone}</p>}
                 </div>
               )}
+            </div>
 
               {/* Ship-to & Incoterm */}
               {isDraft ? (
-                <div className="w-full max-w-[320px] mt-3 pt-3 border-t border-border/60">
+                <div className="min-w-0 w-full pt-3 border-t border-border/60 md:col-span-3 md:order-4">
                   <label className="flex items-center gap-2 cursor-pointer mb-2">
                     <input
                       type="checkbox"
@@ -3060,8 +3061,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   </label>
 
                   {(
-                    <div className="space-y-2">
-                      <div>
+                    <div className="grid grid-cols-3 gap-x-4 gap-y-3">
+                      <div className="min-w-0 col-span-3">
                         <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-1">Incoterm</span>
                         <select
                           value={incoterm}
@@ -3072,7 +3073,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                               .update({ incoterm: v || null } as any)
                               .eq("id", quoteId);
                           }}
-                          className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs font-body"
+                          className="min-w-0 w-full h-8 rounded-sm border border-input bg-background px-2 text-xs font-body"
                         >
                           <option value="">—</option>
                           {INCOTERMS.map((ic) => (
@@ -3097,8 +3098,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         };
                         const dbCol = `ship_to_${key}`;
                         return (
-                          <div key={key}>
-                            <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-0.5">{labelMap[key]}</span>
+                          <div key={key} className={cn("min-w-0", key === "notes" ? "col-span-3" : key === "name" || key === "address1" ? "col-span-2" : "col-span-1")}>
+                            <span className="text-[10px] text-muted-foreground uppercase tracking-normal block mb-0.5 break-words">{labelMap[key]}</span>
                             <input
                               type="text"
                               aria-label={labelMap[key]}
@@ -3129,7 +3130,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                                   toast({ title: "Delivery details not saved", description: error.message, variant: "destructive" });
                                 }
                               }}
-                              className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs font-body"
+                              className="min-w-0 w-full h-8 rounded-sm border border-input bg-background px-2 text-xs font-body"
                             />
                           </div>
                         );
@@ -3139,7 +3140,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 </div>
               ) : (
                 !shipToSameAsBill && (
-                  <div className="mt-3 pt-3 border-t border-border/60">
+                  <div className="min-w-0 pt-3 border-t border-border/60 md:col-span-3 md:order-4">
                     <span className="text-[10px] text-muted-foreground uppercase tracking-widest block">
                       Ship to {incoterm ? `· ${incoterm}` : ""}
                     </span>
@@ -3158,9 +3159,6 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   </div>
                 )
               )}
-            </div>
-
-
             {/* Middle: Date / Expiry / Number */}
             <div className="flex flex-wrap gap-x-6 gap-y-2 md:block md:space-y-2 text-sm font-body">
               <div>
