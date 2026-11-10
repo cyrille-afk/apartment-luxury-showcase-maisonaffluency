@@ -1,5 +1,8 @@
 # Roadmap
 
+## Client-board feedback retention
+- [ ] Restore submitted comments and approval display on the client board using saved invitation-scoped feedback; verify reopening without changing client selections.
+
 ## Shared board invitation email
 - [x] Add the saved folder's curated-piece count, client Review & Approve CTA, copyable full-link fallback and higher-contrast expiration notice; preserve view-only access wording.
 - [x] Desktop/mobile render verified without overflow, expiration contrast 6.66:1; three invitation resend regressions and all three sender/preview boot/live checks pass. Deployed without sending invitations.
