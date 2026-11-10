@@ -1863,6 +1863,13 @@
       "when": 1794272036920,
       "tag": "0265_board_invitation_email_status",
       "breakpoints": true
+    },
+    {
+      "idx": 266,
+      "version": "7",
+      "when": 1794284696509,
+      "tag": "0266_shared_board_saved_client_comments",
+      "breakpoints": true
     }
   ]
 }
