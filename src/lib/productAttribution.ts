@@ -24,7 +24,7 @@ export function productAttribution(input: ProductAttributionInput) {
   const house = cleanBrandLine(input.houseName) || (explicit.designer && key(brand) !== key(designer) ? brand : "") || null;
   const recordedEdition = formatCuratorialEditionLine(input);
   const ecart = isEcartReedition({ designerName: designer, founder: house });
-  const edition = ecart ? productEditionBadge(input, true) : recordedEdition;
+  const edition = ecart ? productEditionBadge(input, true) : recordedEdition || (house && key(house) !== key(designer) ? (/\b[ée]ditions?$/i.test(house) ? house : `${house} Edition`) : null);
   // An explicit edition stays separate; do not repeat its publishing house in a second line.
   const houseInEdition = house && edition && [house, `${house} Edition`, `${house} Editions`, `${house} REEDITION`].some((label) => key(label) === key(edition));
   const houseLine = house && key(house) !== key(designer) && !houseInEdition ? house : null;

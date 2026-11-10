@@ -8,8 +8,8 @@ describe("consistent product attribution", () => {
   it("keeps Frenchmen's designer independent of its trade brand", () => {
     expect(productAttribution({ title: "Frenchmen Street Lounge Chair ", designerName: "Sebastian Herkner", brandName: "Man of Parts", houseName: "Man of Parts", edition: "Man of Parts Edition" })).toMatchObject({ title: "Frenchmen Street Lounge Chair", designer: "Sebastian Herkner", house: "Man of Parts", edition: "Man of Parts Edition" });
   });
-  it("does not invent an edition for unrecorded products", () => {
-    expect(productAttribution({ title: "Table", designerName: "Maker", houseName: "Publisher" })).toMatchObject({ edition: null, houseLine: "Publisher" });
+  it("identifies a recorded publishing house without inventing a numbered edition", () => {
+    expect(productAttribution({ title: "Table", designerName: "Maker", houseName: "Publisher" })).toMatchObject({ edition: "Publisher Edition", houseLine: null });
   });
   it("does not promote a finish subtitle to designer", () => {
     expect(productAttribution({ title: "Table", subtitle: "Clear", brandName: "Atelier" })).toMatchObject({ designer: "Atelier", subtitle: "Clear" });
