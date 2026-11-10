@@ -4,14 +4,18 @@ import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { ProjectWorkspaceProvider, useProjectWorkspace } from "@/contexts/ProjectWorkspaceContext";
 import QuoteWorkspaceClient from "../QuoteWorkspaceClient";
 
-const mocks = vi.hoisted(() => ({ from: vi.fn(), savedFolder: "sheet", emails: ["cdelval@ace-capital.com"] }));
+const mocks = vi.hoisted(() => ({ from: vi.fn(), savedFolder: "sheet", emails: ["cdelval@ace-capital.com"], linkedClient: false }));
 vi.mock("@/integrations/supabase/client", () => ({ supabase: { from: mocks.from } }));
 beforeEach(() => {
   mocks.savedFolder = "sheet";
   mocks.emails = ["cdelval@ace-capital.com"];
+  mocks.linkedClient = false;
   mocks.from.mockImplementation((table: string) => {
     const result = { data: table === "trade_quotes" ? { project_id: "singapore", project_board_id: mocks.savedFolder }
-      : table === "client_boards" ? { project_id: "singapore" }
+      : table === "client_boards" ? { project_id: "singapore", client_id: mocks.linkedClient ? "client" : null }
+      : table === "projects" ? { client_id: null, client_name: "" }
+      : table === "clients" ? { type: "company", name: "Alternative Capital Enterprises Pte Ltd" }
+      : table === "client_contacts" ? [{ first_name: "Cyrille", last_name: "Delval", email: "cdelval@ace-capital.com", is_primary: true }]
       : table === "client_board_items" ? [] : mocks.emails.map(email => ({ email })), error: null };
     const chain: Record<string, unknown> = {};
     for (const method of ["select", "eq", "neq"]) chain[method] = vi.fn(() => chain);
@@ -21,10 +25,18 @@ beforeEach(() => {
     return chain;
   });
 });
+it("hydrates company, contact name and email together for the folder's linked client", async () => {
+  mocks.linkedClient = true;
+  mount();
+  await waitFor(() => expect(profile).toEqual({ companyName: "Alternative Capital Enterprises Pte Ltd", clientName: "Cyrille Delval", email: "cdelval@ace-capital.com" }));
+});
 afterEach(cleanup);
 let invite: ((projectId: string, folderId: string, email: string) => () => void) | undefined;
+let profile: unknown;
 function Actions() {
-  invite = useProjectWorkspace()?.submitClientInvitation;
+  const workspace = useProjectWorkspace();
+  invite = workspace?.submitClientInvitation;
+  profile = workspace?.projects.singapore?.folders.sheet?.clientProfile;
   return null;
 }
 function mount() {
