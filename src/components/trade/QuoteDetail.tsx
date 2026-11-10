@@ -494,6 +494,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [payingStripe, setPayingStripe] = useState(false);
   const [freightRevision, setFreightRevision] = useState(0);
   const [projectId, setProjectId] = useState<string | null>(null);
+  const quoteBranding = useQuoteBranding(quoteId, projectId, user?.id, currentStudio);
   const [projectName, setProjectName] = useState<string | null>(null);
   const [ceilingMode, setCeilingMode] = useState<"inherit" | "itemized" | "target_ceiling">("inherit");
   const [quoteCeilingCents, setQuoteCeilingCents] = useState<number | null>(null);
@@ -2928,6 +2929,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         </div>
       </div>
 
+      <QuoteBrandingControl branding={quoteBranding} />
+
       {emailLogOpen && emailLog.length > 0 && (
         <div className="mb-4 md:mb-6 rounded-md border border-border bg-muted/30 px-4 py-3 print:hidden">
           <p className="font-body text-xs uppercase tracking-[0.12em] text-foreground mb-2">Email send history</p>
@@ -3203,21 +3206,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             </div>
 
             {/* Right: Logo + Company details */}
-            <div className="flex items-start gap-3 md:gap-4">
-              <img src={affluencyLogo} alt="Affluency" className="h-14 w-14 md:h-16 md:w-16 lg:h-20 lg:w-20 object-contain shrink-0" />
-              <div className="text-left">
-                <p className="font-display text-xs text-foreground uppercase tracking-wider">
-                  Affluency Etc Pte. Ltd.
-                </p>
-                <p className="font-body text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
-                  1 Grange Garden<br />
-                  #16-05<br />
-                  The Grange<br />
-                  249631<br />
-                  Singapore
-                </p>
-              </div>
-            </div>
+            <QuoteBrandingHeader branding={quoteBranding} />
           </div>
         </div>
 
