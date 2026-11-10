@@ -3,12 +3,12 @@ import { invitationEmailState, latestInvitationEmail } from "./invitationEmailSt
 
 describe("collaborator email status", () => {
   it("does not claim delivery for an accepted send", () => {
-    expect(invitationEmailState("sent").label).toBe("Email sent");
-    expect(invitationEmailState("delivered").label).toBe("Email delivered");
+    expect(invitationEmailState("sent").status).toBe("sent");
+    expect(invitationEmailState("delivered").status).toBe("delivered");
   });
   it("retains pending and bounced as distinct email states", () => {
-    expect(invitationEmailState("pending").label).toBe("Email pending");
-    expect(invitationEmailState("bounced").label).toBe("Email bounced");
+    expect(invitationEmailState("pending").status).toBe("pending");
+    expect(invitationEmailState("bounced").status).toBe("bounced");
   });
   it("uses the newest invitation attempt even when an older invitation is joined", () => {
     expect(latestInvitationEmail(["joined", "new"], [
@@ -18,6 +18,6 @@ describe("collaborator email status", () => {
     ])?.email_status).toBe("pending");
   });
   it("keeps missing or failed lookup evidence unconfirmed instead of pending or delivered", () => {
-    expect(invitationEmailState(latestInvitationEmail(["missing"], [])?.email_status).label).toBe("Email unconfirmed");
+    expect(invitationEmailState(latestInvitationEmail(["missing"], [])?.email_status).status).toBe("unconfirmed");
   });
 });
