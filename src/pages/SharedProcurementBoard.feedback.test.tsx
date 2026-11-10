@@ -33,9 +33,9 @@ describe("saved client board feedback", () => {
   it("reads submitted comments back and preserves them when the client reopens the board", async () => {
     const view = render(<SharedProcurementBoard />);
     await screen.findByRole("heading", { name: "Madison Avenue Side Table" });
-    fireEvent.click(screen.getByRole("button", { name: "Comment", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: /^Comment$/ }));
     fireEvent.change(screen.getByRole("textbox"), { target: { value: "Keep my selected finishes" } });
-    fireEvent.click(screen.getByRole("button", { name: "Send", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: /^Send$/ }));
     await waitFor(() => expect(mocks.comments[0]?.comment).toBe("Keep my selected finishes"));
     await screen.findByText("Keep my selected finishes");
     view.unmount();
