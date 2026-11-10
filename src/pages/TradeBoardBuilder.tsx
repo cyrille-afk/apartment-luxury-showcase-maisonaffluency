@@ -613,6 +613,10 @@ const TradeBoardBuilder = () => {
   const rejectedCount = items.filter(i => i.approval_status === "rejected").length;
   const isEditable = board.status !== "converted";
   const procurementQuoteId = items.find((i) => i.procurement_quote_id)?.procurement_quote_id ?? null;
+  const procurementSearch = new URLSearchParams();
+  if (procurementQuoteId) procurementSearch.set("quote", procurementQuoteId);
+  if (board.project_id) procurementSearch.set("project", board.project_id);
+  const procurementWorkspaceUrl = `/trade/quotes${procurementSearch.size ? `?${procurementSearch}` : ""}`;
   const lockedItemIds = items.filter((i) => i.procurement_quote_id).map((i) => i.id);
 
   const renderItemCard = (item: BoardItem) => (
@@ -721,7 +725,9 @@ const TradeBoardBuilder = () => {
             {board.client_name && <p className="font-body text-sm text-muted-foreground mt-1">For {board.client_name}</p>}
             <div className="flex items-center gap-2 mt-2 flex-wrap">
               {board.status === "in_procurement_review"
-                ? <Badge variant="outline" className="gap-1.5 rounded-none border-foreground font-body text-[10px] uppercase tracking-[0.18em] text-foreground"><Lock className="h-3 w-3" />In Procurement Review</Badge>
+                ? <Button asChild variant="outline" size="sm" className="h-auto cursor-pointer gap-1.5 rounded-none border-foreground bg-transparent px-2.5 py-0.5 font-body text-[10px] font-semibold uppercase tracking-[0.18em] text-foreground shadow-none transition-colors hover:bg-muted/60">
+                    <Link to={procurementWorkspaceUrl} title="Open this project's procurement quote"><Lock className="h-3 w-3" />In Procurement Review</Link>
+                  </Button>
                 : <Badge variant="secondary">{board.status}</Badge>}
               {items.length > 0 && (
                 <span className="font-body text-xs text-muted-foreground">
