@@ -8,8 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Textarea } from "@/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import BoardFeedbackPanel from "./BoardFeedbackPanel";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { formatMoneyIn } from "@/lib/displayMoney";
 import { toast } from "@/hooks/use-toast";
@@ -75,7 +75,8 @@ export default function ProcurementBoardPanel({ boardId, boardTitle, projectId, 
   const [statusOverride, setStatusOverride] = useState<Record<string, string>>({});
   const [inviteOpen, setInviteOpen] = useState(false);
   const [notes, setNotes] = useState<Record<string, string>>({});
-  const [draft, setDraft] = useState("");
+  const [feedbackFor, setFeedbackFor] = useState<string | null>(null);
+  const [feedbackSenders, setFeedbackSenders] = useState<Record<string, string>>({});
 
   useEffect(() => {
     supabase.from("client_board_items").select("id, notes").eq("board_id", boardId)
@@ -84,9 +85,10 @@ export default function ProcurementBoardPanel({ boardId, boardTitle, projectId, 
 
   const saveNote = async (id: string, value: string) => {
     const v = value.trim().slice(0, 2000);
-    setNotes((n) => ({ ...n, [id]: v }));
     const { error } = await supabase.from("client_board_items").update({ notes: v || null }).eq("id", id);
-    if (error) toast({ title: "Could not save note", variant: "destructive" });
+    if (error) { toast({ title: "Could not save note", variant: "destructive" }); return false; }
+    setNotes((n) => ({ ...n, [id]: v }));
+    return true;
   };
 
   const productIds = useMemo(() => items.map((i) => i.product_id).join(","), [items]);
@@ -131,13 +133,15 @@ export default function ProcurementBoardPanel({ boardId, boardTitle, projectId, 
   }, [boardId, currentStudio?.default_project_markup_percentage]);
 
   const loadCollab = useCallback(async () => {
-    const [{ data: inv }, { data: fb }, delivery] = await Promise.all([
+    const [{ data: inv }, { data: fb }, delivery, { data: senders }] = await Promise.all([
       supabase.from("board_invites").select("id, email, role, status, last_seen_at, created_at").eq("board_id", boardId).neq("status", "revoked").order("created_at"),
       supabase.from("board_item_feedback").select("id, item_id, reaction, comment, created_at, invite_id").eq("board_id", boardId).order("created_at", { ascending: false }),
       supabase.rpc("board_invitation_email_status", { _board_id: boardId }),
+      supabase.from("board_invites").select("id, email").eq("board_id", boardId),
     ]);
     setInvites((inv as Invite[]) || []);
     setFeedback((fb as Feedback[]) || []);
+    setFeedbackSenders(Object.fromEntries((senders || []).map((sender) => [sender.id, sender.email])));
     setEmailStatuses(delivery.error ? [] : delivery.data || []);
   }, [boardId]);
 
@@ -200,7 +204,9 @@ export default function ProcurementBoardPanel({ boardId, boardTitle, projectId, 
   };
 
   const fbFor = (itemId: string) => feedback.filter((f) => f.item_id === itemId);
-  const inviteEmail = (id: string | null) => invites.find((i) => i.id === id)?.email ?? "Guest";
+  const inviteEmail = (id: string | null) => id ? feedbackSenders[id] || "Client" : "Client";
+  const feedbackRow = rows.find((row) => row.id === feedbackFor);
+  useEffect(() => { if (clientSafe) setFeedbackFor(null); }, [clientSafe]);
 
   return (
     <section className="mb-10 border border-border/60 bg-card">
@@ -235,13 +241,13 @@ export default function ProcurementBoardPanel({ boardId, boardTitle, projectId, 
            <motion.div key="matrix" data-trade-sensitive initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }} className="overflow-x-auto">
             <table className="w-full table-fixed font-body text-[11px] leading-tight">
               <colgroup>
-                <col className="w-11" /><col className="w-[16%]" /><col className="w-[9%]" /><col className="w-[7%]" /><col className="w-[5%]" /><col className="w-[7%]" /><col className="w-[9%]" /><col className="w-[6%]" /><col className="w-[10%]" /><col />
+                <col className="w-11" /><col /><col className="w-[13%]" /><col className="w-[10%]" /><col className="w-[6%]" /><col className="w-[10%]" /><col className="w-[10%]" /><col className="w-[7%]" /><col className="w-[11%]" /><col className="w-12" />
               </colgroup>
               <thead className="border-b border-border/60 text-left text-[9px] uppercase tracking-[0.12em] text-muted-foreground">
                 <tr>
                   <th className="px-2 py-1.5" /><th className="px-2">Product</th><th className="px-2">Manufacturer</th>
                   <th className="px-2 text-right">Trade Price</th><th className="px-2 text-right">Margin</th><th className="px-2 text-right">Client Price</th>
-                  <th className="px-2">Lead Time</th><th className="px-2">Shipping</th><th className="px-2">Status</th><th className="px-2">Feedback</th>
+                  <th className="px-2">Lead Time</th><th className="px-2">Shipping</th><th className="px-2">Status</th><th className="px-2"><span className="sr-only">Messages</span></th>
                 </tr>
               </thead>
               <tbody>
@@ -249,10 +255,6 @@ export default function ProcurementBoardPanel({ boardId, boardTitle, projectId, 
                   const trade = tradePriceCents(r.msrp_cents, discountPct);
                   const client = clientUnitCents(r.msrp_cents, discountPct, multiplier);
                   const fb = fbFor(r.id);
-                  const hearts = fb.filter((f) => f.reaction === "heart").length;
-                  const ups = fb.filter((f) => f.reaction === "up").length;
-                  const downs = fb.filter((f) => f.reaction === "down").length;
-                  const comments = fb.filter((f) => f.comment);
                   return (
                     <tr key={r.id} className="border-b border-border/40 align-middle">
                       <td className="px-2 py-1">{r.image_url ? (onOpenFinishes ? <button type="button" onClick={() => onOpenFinishes(r.id)} aria-label={`Open ${r.product_name}`} className="block cursor-pointer"><img src={r.image_url} alt="" className="h-8 w-8 bg-[hsl(var(--product-canvas))] object-contain" loading="lazy" /></button> : <img src={r.image_url} alt="" className="h-8 w-8 bg-[hsl(var(--product-canvas))] object-contain" loading="lazy" />) : <div className="h-8 w-8 bg-muted" />}</td>
@@ -268,40 +270,12 @@ export default function ProcurementBoardPanel({ boardId, boardTitle, projectId, 
                           {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
                         </select>
                       </td>
-                      <td className="px-2 text-muted-foreground">
-                        <Popover onOpenChange={(o) => o && setDraft(notes[r.id] || "")}>
-                          <PopoverTrigger asChild>
-                            <button type="button" aria-label={`Feedback and notes for ${r.product_name}`} className="group flex h-7 w-full items-center gap-2 border border-transparent px-1.5 text-left transition-colors hover:border-border/60 hover:bg-muted/30 focus:border-border focus:outline-hidden">
-                              {hearts > 0 && <span className="flex shrink-0 items-center gap-0.5"><Heart className="h-3 w-3 fill-current text-primary" />{hearts}</span>}
-                              {ups > 0 && <span className="flex shrink-0 items-center gap-0.5"><ThumbsUp className="h-3 w-3" />{ups}</span>}
-                              {downs > 0 && <span className="flex shrink-0 items-center gap-0.5"><ThumbsDown className="h-3 w-3" />{downs}</span>}
-                              <span className="min-w-0 flex-1 truncate">
-                                {comments[0] ? <span className="text-foreground">“{comments[0].comment}”</span> : notes[r.id] ? <span className="italic">{notes[r.id]}</span> : <span className="opacity-0 transition-opacity group-hover:opacity-60">Add note…</span>}
-                              </span>
-                              {comments.length > 1 && <span className="flex shrink-0 items-center gap-0.5"><MessageSquare className="h-3 w-3" />{comments.length}</span>}
-                            </button>
-                          </PopoverTrigger>
-                          <PopoverContent align="end" className="w-80 rounded-none p-0">
-                            {comments.length > 0 && (
-                              <div className="max-h-48 overflow-y-auto border-b border-border/60 px-4 py-3">
-                                <p className="mb-2 font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Client feedback</p>
-                                {comments.map((c) => (
-                                  <div key={c.id} className="mb-2 last:mb-0">
-                                    <p className="font-body text-xs text-foreground">{c.comment}</p>
-                                    <p className="font-body text-[10px] text-muted-foreground">{inviteEmail(c.invite_id)} · {new Date(c.created_at).toLocaleString()}</p>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                            <div className="px-4 py-3">
-                              <p className="mb-2 font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Internal note · studio only</p>
-                              <Textarea value={draft} onChange={(e) => setDraft(e.target.value)} maxLength={2000} rows={3} placeholder="Procurement notes, flags, client summary…" className="rounded-none font-body text-xs" />
-                              <div className="mt-2 flex justify-end">
-                                <Button size="sm" className="h-7 rounded-none text-[11px]" onClick={() => saveNote(r.id, draft)}>Save note</Button>
-                              </div>
-                            </div>
-                          </PopoverContent>
-                        </Popover>
+                      <td className="px-2 text-center">
+                        <TooltipProvider delayDuration={200}><Tooltip><TooltipTrigger asChild>
+                          <Button type="button" size="icon" variant="ghost" onClick={() => setFeedbackFor(r.id)} aria-label={`Feedback and notes for ${r.product_name}`} className={`h-8 w-8 cursor-pointer rounded-none ${fb.length ? "bg-primary/10 text-primary hover:bg-primary/15" : "text-muted-foreground hover:text-foreground"}`}>
+                            <MessageSquare className="h-4 w-4" strokeWidth={1.5} />
+                          </Button>
+                        </TooltipTrigger><TooltipContent>Client feedback &amp; private notes</TooltipContent></Tooltip></TooltipProvider>
                       </td>
                     </tr>
                   );
@@ -346,6 +320,9 @@ export default function ProcurementBoardPanel({ boardId, boardTitle, projectId, 
       </AnimatePresence>
        {!clientSafe && <div data-client-placeholder aria-hidden="true" className="grid grid-cols-1 gap-8 px-6 py-10 sm:grid-cols-2 lg:grid-cols-3"><div className="aspect-[4/5] animate-pulse bg-muted/60" /><div className="aspect-[4/5] animate-pulse bg-muted/60" /><div className="aspect-[4/5] animate-pulse bg-muted/60" /></div>}
 
+      {!clientSafe && feedbackRow && <BoardFeedbackPanel key={feedbackRow.id} productName={feedbackRow.product_name}
+        entries={fbFor(feedbackRow.id).map((entry) => ({ ...entry, sender: inviteEmail(entry.invite_id) }))}
+        note={notes[feedbackRow.id] || ""} onClose={() => setFeedbackFor(null)} onSave={(value) => saveNote(feedbackRow.id, value)} />}
       <InviteCollaboratorDialog open={inviteOpen} onOpenChange={setInviteOpen} boardId={boardId} onInvited={loadCollab} />
     </section>
   );
