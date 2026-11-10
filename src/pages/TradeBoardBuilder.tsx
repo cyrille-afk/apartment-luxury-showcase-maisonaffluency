@@ -562,7 +562,12 @@ const TradeBoardBuilder = () => {
       return;
     }
     setCreatingDraft(true);
-    const { data: quote, error } = await supabase
+    const appendTo = linkedQuoteId && procurementQuoteStatus === "draft" ? linkedQuoteId : null;
+    const pendingLines = compiledDraft.lines.filter((line) => !items.find((i) => i.id === line.id)?.procurement_quote_id);
+    if (!pendingLines.length) { setCreatingDraft(false); return; }
+    const { data: quote, error } = appendTo
+      ? { data: { id: appendTo }, error: null as any }
+      : await supabase
       .from("trade_quotes")
       .insert({ user_id: user.id, status: "draft", client_name: board.client_name, project_id: board.project_id })
       .select("id")
@@ -572,7 +577,7 @@ const TradeBoardBuilder = () => {
       toast({ title: "Error", description: error?.message, variant: "destructive" });
       return;
     }
-    const quoteItems = compiledDraft.lines.map((line) => ({
+    const quoteItems = pendingLines.map((line) => ({
       quote_id: quote.id,
       product_id: line.product_id,
       quantity: line.quantity ?? 1,
@@ -584,16 +589,16 @@ const TradeBoardBuilder = () => {
     const saved = await supabase.from("trade_quote_items").insert(quoteItems);
     setCreatingDraft(false);
     if (saved.error) {
-      await supabase.from("trade_quotes").delete().eq("id", quote.id);
+      if (!appendTo) await supabase.from("trade_quotes").delete().eq("id", quote.id);
       toast({ title: "Could not save draft", description: "Your folder is unchanged. Please try again.", variant: "destructive" });
       return;
     }
-    const lineIds = compiledDraft.lines.map((line) => line.id);
+    const lineIds = pendingLines.map((line) => line.id);
     const locked = await supabase.from("client_board_items").update({ procurement_quote_id: quote.id } as any).in("id", lineIds);
     const statusSaved = locked.error ? locked : await supabase.from("client_boards").update({ status: "in_procurement_review" }).eq("id", board.id);
     if (locked.error || statusSaved.error) {
-      await supabase.from("client_board_items").update({ procurement_quote_id: null } as any).eq("procurement_quote_id", quote.id);
-      await supabase.from("trade_quotes").delete().eq("id", quote.id);
+      await supabase.from("client_board_items").update({ procurement_quote_id: null } as any).in("id", lineIds);
+      if (!appendTo) await supabase.from("trade_quotes").delete().eq("id", quote.id);
       toast({ title: "Could not save draft", description: "Your folder is unchanged. Please try again.", variant: "destructive" });
       return;
     }
@@ -602,7 +607,7 @@ const TradeBoardBuilder = () => {
     setBoard({ ...board, status: "in_procurement_review" });
     setDraftReviewOpen(false);
     setProcurementQuoteStatus("draft");
-    toast({ title: "Draft quote created", description: "Opening the Quote Builder." });
+    toast({ title: appendTo ? "Added to draft quote" : "Draft quote created", description: "Opening the Quote Builder." });
     navigate(`/trade/quotes/${quote.id}`);
   };
 
@@ -1097,7 +1102,7 @@ const TradeBoardBuilder = () => {
             </div>
             {Object.entries(compiledDraft?.totals ?? {}).map(([currency, total]) => <p key={currency} className="font-body text-sm text-foreground">{compiledDraft?.ready ? "Subtotal" : "Verified lines subtotal"} · {formatMoneyIn(total.client, currency)}</p>)}
             {!compiledDraft?.ready && <p role="status" className="font-body text-xs text-destructive">Verify missing finish prices or quantities before saving this draft.</p>}
-            <Button className="cursor-pointer rounded-none" disabled={!compiledDraft?.ready || creatingDraft || compiledDraft.lines.some((l) => lockedItemIds.includes(l.id))} onClick={saveCompiledDraft}>{creatingDraft ? "Saving…" : compiledDraft?.lines.some((l) => lockedItemIds.includes(l.id)) ? "Already in procurement review" : "Save draft for procurement review"}</Button>
+            <Button className="cursor-pointer rounded-none" disabled={!compiledDraft?.ready || creatingDraft || compiledDraft.lines.every((l) => lockedItemIds.includes(l.id)) || (compiledDraft.lines.some((l) => lockedItemIds.includes(l.id)) && procurementQuoteStatus !== "draft")} onClick={saveCompiledDraft}>{creatingDraft ? "Saving…" : compiledDraft?.lines.every((l) => lockedItemIds.includes(l.id)) ? "Already in procurement review" : compiledDraft?.lines.some((l) => lockedItemIds.includes(l.id)) ? (procurementQuoteStatus === "draft" ? `Add ${compiledDraft.lines.filter((l) => !lockedItemIds.includes(l.id)).length} new to draft quote` : "Quote already sent — new approvals need a new draft") : "Save draft for procurement review"}</Button>
           </DialogContent>
         </Dialog>}
         {finishItem && (
