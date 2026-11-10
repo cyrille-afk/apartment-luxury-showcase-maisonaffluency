@@ -188,11 +188,14 @@ Deno.serve(async (req) => {
         projectName = p?.name ?? null
       }
       recipientEmail = inv.email
+      const { count: itemCount, error: itemCountError } = await svc.from('client_board_items')
+        .select('id', { count: 'exact', head: true }).eq('board_id', inv.board_id)
       templateData = {
         studioName: studioName || 'Your designer', studioLogoUrl,
         hideMaisonBranding: board.hide_maison_branding !== false,
         projectName: projectName || board.title || 'Project portfolio',
         boardTitle: board.title || 'Curated selection', role: inv.role, viewOnly: inv.view_only,
+        itemCount: itemCountError ? undefined : itemCount ?? undefined,
         link: `https://www.maisonaffluency.com/shared/board/${slug || token}`,
       }
     } else if (!privileged) {
