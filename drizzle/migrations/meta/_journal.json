@@ -1870,6 +1870,13 @@
       "when": 1794284696509,
       "tag": "0266_shared_board_saved_client_comments",
       "breakpoints": true
+    },
+    {
+      "idx": 267,
+      "version": "7",
+      "when": 1794300811853,
+      "tag": "0267_migration",
+      "breakpoints": true
     }
   ]
 }
