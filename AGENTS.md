@@ -11,6 +11,7 @@
 - Password-setup resends reuse the review drawer and retain attempt keys on retry; never change approval. Verified activation links the account; the queue reads user_id for setup status.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Shared board cards re-read saved comments after submission and render recipient/role/board-scoped comment history plus saved approval status; invitation renewal may recover the same recipient's comments but never restores revoked access or exposes other recipients — feedback must survive reopening without client storage becoming its source.
 - Recipient-facing links (board invitation email preview, copy-share, rotate-link, QR, quote/guest pay) build through absoluteUrl from src/config/site, never window.location.origin and never a sandbox host; src/components/trade/__tests__/qrProductionDomain.test.ts guards the list — clients must get an address they can open.
 - Board invite email counts the folder's pieces at send time (omit if unknown); CTA wording follows role/view-only.
 - Shared portfolio pictures and 3D View use one item-scoped panel action and the same availability gate; guest details remain preloaded through the invitation token without direct catalogue reads — preserves configuration parity and view-only restrictions.

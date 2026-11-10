@@ -23,6 +23,7 @@ type Item = {
   id: string; product_id: string; product_name: string; image_url: string | null; msrp_cents: number | null; currency: string;
   lead_time: string | null; finish: string | null; approval_status: string; my_reaction: string | null;
   variant_label: string | null; fabric_label: string | null; wood_label: string | null; my_finish: string | null;
+  my_comments?: { id: string; comment: string; created_at: string }[];
 };
 type Shared = {
   board_title: string; client_name: string | null; studio_name: string; studio_logo_url: string | null;
@@ -152,6 +153,7 @@ export default function SharedProcurementBoard() {
     setComment(""); setCommentFor(null);
     toast({ title: "Comment sent to your designer" });
     if (!user) setMicroPrompt(true);
+    await load();
   };
 
   // Catalogue finish data (variants, cropped swatches, 3D models) via the invite token.
@@ -287,6 +289,23 @@ export default function SharedProcurementBoard() {
               <FeedbackButton label="Dislike" active={item.my_reaction === "down"} onClick={() => react(item, "down")}><ThumbsDown className={`h-4 w-4 ${item.my_reaction === "down" ? "fill-current" : ""}`} /></FeedbackButton>
               <FeedbackButton label="Comment" active={commentFor === item.id} onClick={() => setCommentFor(commentFor === item.id ? null : item.id)}><MessageSquare className="h-4 w-4" /></FeedbackButton>
             </div>}
+            {item.approval_status !== "pending" && (
+              <p className="mt-3 font-body text-xs text-foreground" role="status">
+                {item.approval_status === "approved" ? "Approved" : item.approval_status === "rejected" ? "Rejected" : item.approval_status}
+              </p>
+            )}
+            {!!item.my_comments?.length && (
+              <div className="mt-3 space-y-3 border-t border-border pt-3" aria-label={`Your comments on ${item.product_name}`}>
+                {item.my_comments.map((entry) => (
+                  <div key={entry.id}>
+                    <p className="whitespace-pre-wrap break-words font-body text-xs text-foreground">{entry.comment}</p>
+                    <time dateTime={entry.created_at} className="mt-1 block font-body text-[10px] text-muted-foreground">
+                      {new Date(entry.created_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
+                    </time>
+                  </div>
+                ))}
+              </div>
+            )}
             <AnimatePresence>
               {commentFor === item.id && (
                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden" data-allow-guest="">
