@@ -8,11 +8,12 @@ type Props = {
   studioName?: string | null;
   projectName?: string | null;
   boardTitle?: string | null;
+  projectId?: string | null;
   itemCount: number;
 };
 
 /** Review-only render of the real shared-board invitation email; nothing is sent. */
-export default function BoardInviteEmailPreview({ studioName, projectName, boardTitle, itemCount }: Props) {
+export default function BoardInviteEmailPreview({ studioName, projectName, projectId, boardTitle, itemCount }: Props) {
   const [open, setOpen] = useState(false);
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
   const [result, setResult] = useState<{ html: string; subject: string } | null>(null);
@@ -23,29 +24,34 @@ export default function BoardInviteEmailPreview({ studioName, projectName, board
     let alive = true;
     setResult(null);
     setError(null);
-    supabase.functions
-      .invoke("render-email-preview", {
+    (async () => {
+      let resolvedProject = projectName;
+      if (!resolvedProject && projectId) {
+        const { data: proj } = await supabase.from("projects" as any).select("name").eq("id", projectId).maybeSingle();
+        resolvedProject = (proj as { name?: string } | null)?.name ?? null;
+      }
+      return supabase.functions.invoke("render-email-preview", {
         body: {
           templateName: "board-collaborator-invite",
           templateData: {
             studioName: studioName || "Your studio",
             hideMaisonBranding: true,
-            projectName: projectName || "Project portfolio",
+            projectName: resolvedProject || "Project portfolio",
             boardTitle: boardTitle || "Curated selection",
             role: "client",
             itemCount,
             link: `${window.location.origin}/shared/board/preview`,
           },
         },
-      })
-      .then(({ data, error: err }) => {
+      });
+    })().then(({ data, error: err }) => {
         if (!alive) return;
         const html = (data as { html?: string } | null)?.html;
         if (err || !html) setError("The preview couldn't be loaded. Only admins can open email previews.");
         else setResult(data as { html: string; subject: string });
       });
     return () => { alive = false; };
-  }, [open, studioName, projectName, boardTitle, itemCount]);
+  }, [open, studioName, projectName, projectId, boardTitle, itemCount]);
 
   return (
     <>

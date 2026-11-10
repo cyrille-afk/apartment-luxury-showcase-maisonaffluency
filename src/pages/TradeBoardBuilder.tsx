@@ -1041,7 +1041,7 @@ const TradeBoardBuilder = () => {
           </details>
         )}
 
-        <ProcurementBoardPanel boardId={board.id} boardTitle={board.title} items={items} finishOverrides={finishes} onOpenFinishes={(id) => { const it = items.find((i) => i.id === id); if (it) setFinishItem(it); }} />
+        <ProcurementBoardPanel boardId={board.id} boardTitle={board.title} projectId={board.project_id} items={items} finishOverrides={finishes} onOpenFinishes={(id) => { const it = items.find((i) => i.id === id); if (it) setFinishItem(it); }} />
         {finishItem && (
           <FinishesDrawer
             open={!!finishItem}
