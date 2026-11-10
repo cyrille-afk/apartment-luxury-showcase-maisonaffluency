@@ -13291,6 +13291,14 @@ export type Database = {
         Args: { _code: string; _email: string; _slug: string }
         Returns: string
       }
+      board_invitation_email_status: {
+        Args: { _board_id: string }
+        Returns: {
+          email_status: string
+          invite_id: string
+          updated_at: string
+        }[]
+      }
       board_share_slug: { Args: { _board_id: string }; Returns: string }
       board_slugify: { Args: { _t: string }; Returns: string }
       can_edit_project: {
