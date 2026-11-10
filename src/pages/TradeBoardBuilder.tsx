@@ -578,7 +578,7 @@ const TradeBoardBuilder = () => {
     <div key={item.id} className="border border-border rounded-lg overflow-hidden group">
       <button
         type="button"
-        onClick={() => openProductSheet(item)}
+        onClick={() => setFinishItem(item)}
         className="aspect-square bg-muted relative w-full block cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-ring"
         aria-label={`Open ${item.product?.product_name ?? "product"} sheet`}
       >

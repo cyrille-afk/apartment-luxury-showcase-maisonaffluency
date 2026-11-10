@@ -229,7 +229,7 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
                   const comments = fb.filter((f) => f.comment);
                   return (
                     <tr key={r.id} className="border-b border-border/40 align-middle">
-                      <td className="px-2 py-1">{r.image_url ? <img src={r.image_url} alt="" className="h-8 w-8 bg-[hsl(var(--product-canvas))] object-contain" loading="lazy" /> : <div className="h-8 w-8 bg-muted" />}</td>
+                      <td className="px-2 py-1">{r.image_url ? (onOpenFinishes ? <button type="button" onClick={() => onOpenFinishes(r.id)} aria-label={`Open ${r.product_name}`} className="block cursor-pointer"><img src={r.image_url} alt="" className="h-8 w-8 bg-[hsl(var(--product-canvas))] object-contain" loading="lazy" /></button> : <img src={r.image_url} alt="" className="h-8 w-8 bg-[hsl(var(--product-canvas))] object-contain" loading="lazy" />) : <div className="h-8 w-8 bg-muted" />}</td>
                       <td className="truncate px-2 text-foreground" title={r.product_name}>{r.product_name}{finishOverrides[r.id] && <span className="flex items-center gap-1.5"><FinishChips fo={finishOverrides[r.id]} size="h-5 w-5" /><span className="truncate text-[10px] text-muted-foreground">{finishOverrides[r.id].label}</span></span>}</td>
                       <td className="truncate px-2 text-muted-foreground" title={r.brand_name ?? ""}>{r.brand_name ?? "—"}</td>
                       <td className="px-2 text-right tabular-nums">{formatMoneyIn(trade, r.currency, "On request")}</td>
@@ -295,7 +295,7 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
                       <Box className="h-3.5 w-3.5" strokeWidth={1.5} /> 3D View
                     </button>
                   )}
-                  {(finishOverrides[r.id]?.image_url || r.image_url) && <img src={finishOverrides[r.id]?.image_url || r.image_url!} alt={r.product_name} className="h-full w-full object-contain" loading="lazy" />}
+                  {(finishOverrides[r.id]?.image_url || r.image_url) && <img src={finishOverrides[r.id]?.image_url || r.image_url!} alt={r.product_name} onClick={onOpenFinishes ? () => onOpenFinishes(r.id) : undefined} className={`h-full w-full object-contain${onOpenFinishes ? " cursor-pointer" : ""}`} loading="lazy" />}
                 </div>
                 <div className="mt-4 flex min-h-[96px] flex-1 flex-col justify-between">
                   <div>
