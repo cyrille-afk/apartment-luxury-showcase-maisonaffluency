@@ -28,7 +28,7 @@ const Email = ({ studioName = 'Your designer', studioLogoUrl = null, hideMaisonB
           {hideMaisonBranding ? (
             studioLogoUrl ? <Img src={studioLogoUrl} alt={studioName} width="220" style={{ margin: '0 auto', maxHeight: '72px', objectFit: 'contain' as const }} /> : <Text style={studioWordmark}>{studioName}</Text>
           ) : (
-            <Img src="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/affluency-email-wordmark.jpg" alt="Maison Affluency — Unique by Design" width="420" style={{ margin: '0 auto' }} />
+            <Img src="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/affluency-email-wordmark.jpg" alt="Maison Affluency — Unique by Design" width="420" style={{ margin: '0 auto', maxWidth: '100%', height: 'auto' }} />
           )}
         </Section>
         <Hr style={divider} />
@@ -62,7 +62,7 @@ export const template = {
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: 'Georgia, "Times New Roman", serif' }
-const container = { padding: '40px 20px', maxWidth: '600px', margin: '0 auto', backgroundColor: '#faf9f7' }
+const container = { padding: '40px 20px', width: '100%', maxWidth: '600px', boxSizing: 'border-box' as const, margin: '0 auto', backgroundColor: '#faf9f7' }
 const divider = { border: 'none', borderTop: '1px solid #e8e4de', margin: '0 0 24px' }
 const heading = { color: '#1a1a1a', fontSize: '24px', marginBottom: '24px', fontFamily: 'Georgia, "Times New Roman", serif' }
 const selection = { color: '#77716a', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase' as const, margin: '-14px 0 24px' }
