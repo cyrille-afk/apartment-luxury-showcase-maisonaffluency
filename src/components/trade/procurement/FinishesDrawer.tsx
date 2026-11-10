@@ -17,7 +17,7 @@ const roleOf = (cat: string | null) => {
   return null;
 };
 
-export type FinishSelection = { label: string; price_cents: number | null; image_url: string | null; top?: string | null; base?: string | null; top_image?: string | null; base_image?: string | null };
+export type FinishSelection = { label: string; price_cents: number | null; image_url: string | null; top?: string | null; base?: string | null; top_image?: string | null; base_image?: string | null; extra?: { name: string; img: string | null }[] };
 
 const normKey = (s?: string | null) => (s || "").toLowerCase().normalize("NFD").replace(/[^a-z0-9]/g, "");
 const variantImage = (v: any, imgMap: Record<string, number>, gallery: string[]) => {
