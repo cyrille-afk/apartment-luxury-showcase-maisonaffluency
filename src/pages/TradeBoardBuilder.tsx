@@ -883,40 +883,6 @@ const TradeBoardBuilder = () => {
           </div>
         </div>
 
-        {/* Concierge hand-off: Next stage CTA */}
-        {isEditable && items.length > 0 && (
-          <div className="mb-6 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
-                <FileText className="h-3.5 w-3.5" aria-hidden="true" />
-              </div>
-              <div>
-                <p className="font-body text-[11px] uppercase tracking-[0.18em] text-primary">
-                  Next: draft quote
-                </p>
-                <p className="font-body text-xs text-muted-foreground mt-0.5">
-                  Tearsheet committed. Hand off to the Quote stage to price these {items.length} item{items.length === 1 ? "" : "s"} for {board.client_name || "your client"}.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 sm:shrink-0">
-              {approvedCount > 0 ? (
-                <Button size="sm" className="gap-1.5" onClick={convertToQuote}>
-                  <FileText className="h-3.5 w-3.5" /> Draft quote ({approvedCount} approved)
-                </Button>
-              ) : (
-                <CreateQuoteFromBoard
-                  board={board}
-                  items={items.map((i) => ({ id: i.id, product_id: i.product_id, approval_status: i.approval_status, variant_label: i.variant_label ?? null, fabric_label: i.fabric_label ?? null, wood_label: i.wood_label ?? null }))}
-                  userId={user!.id}
-                />
-              )}
-            </div>
-          </div>
-        )}
-
-
-
         {/* Client Portal white-label settings */}
         {isEditable && (
           <details className="mb-6 rounded-md border border-border bg-card/40 group" data-felix-target="branding-panel">
@@ -1093,10 +1059,6 @@ const TradeBoardBuilder = () => {
           <Button className="cursor-pointer rounded-none font-body text-[11px] uppercase tracking-[0.2em]" onClick={() => navigate(`/trade/quotes?quote=${procurementQuoteId}`)}>Open in Quotes &amp; Proformas <ArrowRight className="ml-2 h-3.5 w-3.5" /></Button>
         </div>}
         <ProcurementBoardPanel lockedItemIds={lockedItemIds} boardId={board.id} boardTitle={board.title} projectId={board.project_id} items={items} finishOverrides={finishes} onDraftChange={setCompiledDraft} onRequestedFinishes={setRequestedFinishes} onOpenFinishes={(id) => { const it = items.find((i) => i.id === id); if (it) setFinishItem(it); }} />
-        {!clientSafe && <div data-trade-sensitive className="mb-6 flex items-center justify-between gap-4 border-b border-border pb-4">
-          <p className="font-body text-xs text-muted-foreground">Draft quote · {compiledDraft?.lines.length ?? 0} approved items · Awaiting procurement sign-off</p>
-          <Button variant="outline" size="sm" className="cursor-pointer rounded-none" onClick={() => setDraftReviewOpen(true)} disabled={!compiledDraft?.lines.length}><FileText className="mr-2 h-3.5 w-3.5" />Review draft quote</Button>
-        </div>}
         {!clientSafe && <Dialog open={draftReviewOpen} onOpenChange={setDraftReviewOpen}>
           <DialogContent data-trade-sensitive className="isolate max-h-[90dvh] max-w-3xl overflow-y-auto bg-background! opacity-100!">
             <DialogHeader><DialogTitle className="font-display text-2xl font-normal">Draft Quote · {board.title}</DialogTitle></DialogHeader>
