@@ -256,6 +256,8 @@ import { Route as TradeToolsFfeRouteImport } from './routes/trade.tools_.ffe'
 import { Route as TradeVisualiserSharedRoomsRouteImport } from './routes/trade.visualiser_.shared-rooms'
 import { Route as TradeConciergeSidebarRouteImport } from './routes/trade_.concierge_.sidebar'
 import { Route as ApiProcurementAcknowledgePoIdRouteImport } from './routes/api_.procurement_.acknowledge_.$poId'
+import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as SharedBoardProjectSlugBoardSlugRouteImport } from './routes/shared_.board_.$projectSlug_.$boardSlug'
 import { Route as TradeAdminAiUsagePrintCheckRouteImport } from './routes/trade.admin_.ai-usage_.print-check'
 import { Route as TradeAdminComplianceSubProcessorsRouteImport } from './routes/trade.admin_.compliance_.sub-processors'
@@ -1537,6 +1539,16 @@ const ApiProcurementAcknowledgePoIdRoute =
     path: '/api/procurement/acknowledge/$poId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
+  id: '/lovable/email/auth/preview',
+  path: '/lovable/email/auth/preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
+  id: '/lovable/email/auth/webhook',
+  path: '/lovable/email/auth/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SharedBoardProjectSlugBoardSlugRoute =
   SharedBoardProjectSlugBoardSlugRouteImport.update({
     id: '/shared_/board_/$projectSlug_/$boardSlug',
@@ -1854,6 +1866,8 @@ export interface FileRoutesByFullPath {
   '/trade/visualiser/shared-rooms': typeof TradeVisualiserSharedRoomsRoute
   '/trade/concierge/sidebar': typeof TradeConciergeSidebarRoute
   '/api/procurement/acknowledge/$poId': typeof ApiProcurementAcknowledgePoIdRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/shared/board/$projectSlug/$boardSlug': typeof SharedBoardProjectSlugBoardSlugRoute
   '/trade/admin/ai-usage/print-check': typeof TradeAdminAiUsagePrintCheckRoute
   '/trade/admin/compliance/sub-processors': typeof TradeAdminComplianceSubProcessorsRoute
@@ -2114,6 +2128,8 @@ export interface FileRoutesByTo {
   '/trade/visualiser/shared-rooms': typeof TradeVisualiserSharedRoomsRoute
   '/trade/concierge/sidebar': typeof TradeConciergeSidebarRoute
   '/api/procurement/acknowledge/$poId': typeof ApiProcurementAcknowledgePoIdRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/shared/board/$projectSlug/$boardSlug': typeof SharedBoardProjectSlugBoardSlugRoute
   '/trade/admin/ai-usage/print-check': typeof TradeAdminAiUsagePrintCheckRoute
   '/trade/admin/compliance/sub-processors': typeof TradeAdminComplianceSubProcessorsRoute
@@ -2376,6 +2392,8 @@ export interface FileRoutesById {
   '/trade/visualiser_/shared-rooms': typeof TradeVisualiserSharedRoomsRoute
   '/trade_/concierge_/sidebar': typeof TradeConciergeSidebarRoute
   '/api_/procurement_/acknowledge_/$poId': typeof ApiProcurementAcknowledgePoIdRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/shared_/board_/$projectSlug_/$boardSlug': typeof SharedBoardProjectSlugBoardSlugRoute
   '/trade/admin_/ai-usage_/print-check': typeof TradeAdminAiUsagePrintCheckRoute
   '/trade/admin_/compliance_/sub-processors': typeof TradeAdminComplianceSubProcessorsRoute
@@ -2639,6 +2657,8 @@ export interface FileRouteTypes {
     | '/trade/visualiser/shared-rooms'
     | '/trade/concierge/sidebar'
     | '/api/procurement/acknowledge/$poId'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
     | '/shared/board/$projectSlug/$boardSlug'
     | '/trade/admin/ai-usage/print-check'
     | '/trade/admin/compliance/sub-processors'
@@ -2899,6 +2919,8 @@ export interface FileRouteTypes {
     | '/trade/visualiser/shared-rooms'
     | '/trade/concierge/sidebar'
     | '/api/procurement/acknowledge/$poId'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
     | '/shared/board/$projectSlug/$boardSlug'
     | '/trade/admin/ai-usage/print-check'
     | '/trade/admin/compliance/sub-processors'
@@ -3160,6 +3182,8 @@ export interface FileRouteTypes {
     | '/trade/visualiser_/shared-rooms'
     | '/trade_/concierge_/sidebar'
     | '/api_/procurement_/acknowledge_/$poId'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
     | '/shared_/board_/$projectSlug_/$boardSlug'
     | '/trade/admin_/ai-usage_/print-check'
     | '/trade/admin_/compliance_/sub-processors'
@@ -3280,6 +3304,8 @@ export interface RootRouteChildren {
   StudiosSlugInsightsRoute: typeof StudiosSlugInsightsRoute
   TradeConciergeSidebarRoute: typeof TradeConciergeSidebarRoute
   ApiProcurementAcknowledgePoIdRoute: typeof ApiProcurementAcknowledgePoIdRoute
+  LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
+  LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   SharedBoardProjectSlugBoardSlugRoute: typeof SharedBoardProjectSlugBoardSlugRoute
   TradeApplyCompleteTokenRoute: typeof TradeApplyCompleteTokenRoute
 }
@@ -5015,6 +5041,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiProcurementAcknowledgePoIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/auth/preview': {
+      id: '/lovable/email/auth/preview'
+      path: '/lovable/email/auth/preview'
+      fullPath: '/lovable/email/auth/preview'
+      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/auth/webhook': {
+      id: '/lovable/email/auth/webhook'
+      path: '/lovable/email/auth/webhook'
+      fullPath: '/lovable/email/auth/webhook'
+      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/shared_/board_/$projectSlug_/$boardSlug': {
       id: '/shared_/board_/$projectSlug_/$boardSlug'
       path: '/shared/board/$projectSlug/$boardSlug'
@@ -5533,6 +5573,8 @@ const rootRouteChildren: RootRouteChildren = {
   StudiosSlugInsightsRoute: StudiosSlugInsightsRoute,
   TradeConciergeSidebarRoute: TradeConciergeSidebarRoute,
   ApiProcurementAcknowledgePoIdRoute: ApiProcurementAcknowledgePoIdRoute,
+  LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
+  LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   SharedBoardProjectSlugBoardSlugRoute: SharedBoardProjectSlugBoardSlugRoute,
   TradeApplyCompleteTokenRoute: TradeApplyCompleteTokenRoute,
 }
