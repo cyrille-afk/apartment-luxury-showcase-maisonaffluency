@@ -541,6 +541,17 @@ const TradeBoardBuilder = () => {
     });
   };
 
+  const linkedQuoteId = items.find((i) => i.procurement_quote_id)?.procurement_quote_id ?? null;
+  const [procurementQuoteStatus, setProcurementQuoteStatus] = useState<string | null>(null);
+  useEffect(() => {
+    if (!linkedQuoteId) { setProcurementQuoteStatus(null); return; }
+    let cancelled = false;
+    supabase.from("trade_quotes").select("status").eq("id", linkedQuoteId).maybeSingle().then(({ data }) => {
+      if (!cancelled) setProcurementQuoteStatus((data as any)?.status ?? null);
+    });
+    return () => { cancelled = true; };
+  }, [linkedQuoteId]);
+
   const convertToQuote = async () => {
     setDraftReviewOpen(true);
   };
@@ -590,7 +601,9 @@ const TradeBoardBuilder = () => {
     setItems((prev) => prev.map((i) => (lineIds.includes(i.id) ? { ...i, procurement_quote_id: quote.id } : i)));
     setBoard({ ...board, status: "in_procurement_review" });
     setDraftReviewOpen(false);
-    toast({ title: "Draft successfully pushed to procurement workspace." });
+    setProcurementQuoteStatus("draft");
+    toast({ title: "Draft quote created", description: "Opening the Quote Builder." });
+    navigate(`/trade/quotes/${quote.id}`);
   };
 
   const deleteBoard = async () => {
@@ -616,7 +629,9 @@ const TradeBoardBuilder = () => {
   const procurementSearch = new URLSearchParams();
   if (procurementQuoteId) procurementSearch.set("quote", procurementQuoteId);
   if (board.project_id) procurementSearch.set("project", board.project_id);
-  const procurementWorkspaceUrl = `/trade/quotes${procurementSearch.size ? `?${procurementSearch}` : ""}`;
+  const procurementWorkspaceUrl = `/trade/order-timeline${procurementSearch.size ? `?${procurementSearch}` : ""}`;
+  // Badge activates only once the linked quote has left draft (officially issued/finalised).
+  const quoteIssued = !!procurementQuoteStatus && procurementQuoteStatus !== "draft";
   const lockedItemIds = items.filter((i) => i.procurement_quote_id).map((i) => i.id);
 
   const renderItemCard = (item: BoardItem) => (
@@ -724,9 +739,13 @@ const TradeBoardBuilder = () => {
             {board.project_id && <ProjectWorkspaceContact projectId={board.project_id} folderId={board.id} />}
             {board.client_name && <p className="font-body text-sm text-muted-foreground mt-1">For {board.client_name}</p>}
             <div className="flex items-center gap-2 mt-2 flex-wrap">
-              {board.status === "in_procurement_review"
+              {board.status === "in_procurement_review" && !quoteIssued && procurementQuoteId
+                ? <Button asChild variant="outline" size="sm" className="h-auto cursor-pointer gap-1.5 rounded-none px-2.5 py-0.5 font-body text-[10px] uppercase tracking-[0.18em] shadow-none">
+                    <Link to={`/trade/quotes/${procurementQuoteId}`} title="Continue drafting this quote"><FileText className="h-3 w-3" />Quote in Draft</Link>
+                  </Button>
+                : board.status === "in_procurement_review"
                 ? <Button asChild variant="outline" size="sm" className="h-auto cursor-pointer gap-1.5 rounded-none border-foreground bg-transparent px-2.5 py-0.5 font-body text-[10px] font-semibold uppercase tracking-[0.18em] text-foreground shadow-none transition-colors hover:bg-muted/60">
-                    <Link to={procurementWorkspaceUrl} title="Open this project's procurement quote"><Lock className="h-3 w-3" />In Procurement Review</Link>
+                    <Link to={procurementWorkspaceUrl} title="Open this project's order timeline"><Lock className="h-3 w-3" />In Procurement Review</Link>
                   </Button>
                 : <Badge variant="secondary">{board.status}</Badge>}
               {items.length > 0 && (
