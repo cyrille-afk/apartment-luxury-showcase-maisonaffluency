@@ -8,13 +8,14 @@ import affluencyLogo from "@/assets/affluency-quote-logo.jpg";
 import { quoteBrandingStorageKey, resolveQuoteBranding, type QuoteFolderBranding } from "@/lib/quoteBranding";
 import type { Studio } from "@/hooks/useStudio";
 
-export function useQuoteBranding(quoteId: string, projectId: string | null, userId: string | undefined, studio: Studio | null) {
+export function useQuoteBranding(quoteId: string, projectId: string | null, userId: string | undefined, studio: Studio | null, enabled = true) {
   const workspace = useProjectWorkspace();
   const activeFolderId = projectId && workspace?.activeFolder?.projectId === projectId ? workspace.activeFolder.folderId : null;
   const queryClient = useQueryClient();
   const queryKey = ["quote-folder-branding", quoteId, projectId, activeFolderId];
   const { data: folder, refetch } = useQuery({
     queryKey,
+    enabled,
     queryFn: async (): Promise<QuoteFolderBranding | null> => {
       const { data: quote, error } = await supabase.from("trade_quotes").select("project_id, project_board_id").eq("id", quoteId).maybeSingle();
       if (error) throw error;
@@ -65,6 +66,7 @@ export function useQuoteBranding(quoteId: string, projectId: string | null, user
       window.removeEventListener("focus", refresh);
     };
   }, [refetch, folder, queryClient, quoteId, projectId, activeFolderId]);
+  if (!enabled) return { logoUrl: null, studioName: "", showPlatform: true, canHidePlatform: false, ...currentDraft, hidePlatform: false, updateDraft };
   return { ...resolveQuoteBranding(folder, studio, currentDraft.hidePlatform), ...currentDraft, updateDraft };
 }
 

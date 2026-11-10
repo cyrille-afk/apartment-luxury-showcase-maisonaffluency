@@ -436,7 +436,7 @@ const QuotePdfPreviewPages = ({ blobUrl }: { blobUrl: string | null }) => {
 };
 
 const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack, onStatusChange }: QuoteDetailProps) => {
-  const { user, isSuperAdmin } = useAuth();
+  const { user, isAdmin, isSuperAdmin } = useAuth();
   const { currentStudio } = useStudio();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -494,7 +494,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [payingStripe, setPayingStripe] = useState(false);
   const [freightRevision, setFreightRevision] = useState(0);
   const [projectId, setProjectId] = useState<string | null>(null);
-  const quoteBranding = useQuoteBranding(quoteId, projectId, user?.id, currentStudio);
+  const quoteBranding = useQuoteBranding(quoteId, projectId, user?.id, currentStudio, !(isAdmin || isSuperAdmin));
   const [projectName, setProjectName] = useState<string | null>(null);
   const [ceilingMode, setCeilingMode] = useState<"inherit" | "itemized" | "target_ceiling">("inherit");
   const [quoteCeilingCents, setQuoteCeilingCents] = useState<number | null>(null);
