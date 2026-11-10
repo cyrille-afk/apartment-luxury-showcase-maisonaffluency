@@ -28,6 +28,8 @@ import { assertTearsheetBoardProject, requireTearsheetProject } from "@/lib/tear
 import TearsheetBoardSharing from "@/components/trade/TearsheetBoardSharing";
 import TearsheetBoardInvitationStatus from "@/components/trade/TearsheetBoardInvitationStatus";
 import { useClientSafeMode, getClientSafeMode } from "@/lib/clientSafeMode";
+import { readLastVisitedFolder } from "@/lib/lastVisitedFolder";
+import { resolveTearsheetActiveFolder, type TearsheetFolder } from "@/lib/tearsheetActiveFolder";
 
 interface TearsheetProduct {
   id: string;
@@ -116,6 +118,54 @@ export default function TradeTearsheets() {
   const { projects, loading: projectsLoading } = useProjects({ activeOnly: false });
   const selectedProject = projects.find((project) => project.id === filterProjectId);
   const [projectPiecesOnly, setProjectPiecesOnly] = useState(false);
+  // Active sub-folder (e.g. "Man of Parts — curated edit") inside the selected project.
+  const urlFolderId = searchParams.get("folder");
+  const [lastVisitedId, setLastVisitedId] = useState<string | null>(null);
+  useEffect(() => { setLastVisitedId(readLastVisitedFolder()?.id ?? null); }, []);
+  const { data: projectFolders = [] } = useQuery({
+    queryKey: ["tearsheet-project-folders", filterProjectId, user?.id],
+    enabled: !!filterProjectId && !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("client_boards").select("id, title, project_id")
+        .eq("project_id", filterProjectId!).order("updated_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as TearsheetFolder[];
+    },
+  });
+  const activeFolder = resolveTearsheetActiveFolder(projectFolders, filterProjectId, urlFolderId, lastVisitedId);
+  const activeFolderId = activeFolder?.id ?? null;
+  const setActiveFolderId = (id: string | null) => {
+    const next = new URLSearchParams(searchParams);
+    if (id) next.set("folder", id); else next.set("folder", "all");
+    setSearchParams(next, { replace: true });
+    if (!id) setLastVisitedId(null);
+  };
+  useEffect(() => { if (activeFolderId) setProjectPiecesOnly(true); }, [activeFolderId]);
+  const { data: folderItems = [], isLoading: folderItemsLoading } = useQuery({
+    queryKey: ["tearsheet-folder-items", activeFolderId],
+    enabled: !!activeFolderId,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("client_board_items")
+        .select("id, product_id, variant_label, fabric_label, wood_label, approval_status, source_quote_item_id, sort_order, trade_products(product_name, brand_name, image_url)")
+        .eq("board_id", activeFolderId!).order("sort_order", { ascending: true });
+      if (error) throw error;
+      const quoteItemIds = (data ?? []).map((r: any) => r.source_quote_item_id).filter(Boolean);
+      const qty = new Map<string, number>();
+      if (quoteItemIds.length) {
+        const { data: q } = await supabase.from("trade_quote_items").select("id, quantity").in("id", quoteItemIds);
+        (q ?? []).forEach((r: any) => qty.set(r.id, r.quantity));
+      }
+      return (data ?? []).map((r: any) => ({
+        id: r.id as string,
+        name: r.trade_products?.product_name ?? "Untitled piece",
+        brand: r.trade_products?.brand_name ?? "",
+        image: r.trade_products?.image_url ?? null,
+        finishes: (() => { const parts = [r.variant_label, r.wood_label, r.fabric_label].map((x: any) => String(x ?? "").trim()).filter(Boolean); return parts.filter((x, i) => !parts.some((y, j) => j !== i && y.toLowerCase().includes(x.toLowerCase()) && (y.length > x.length || j < i))).join(" · "); })(),
+        quantity: (r.source_quote_item_id && qty.get(r.source_quote_item_id)) || 1,
+        status: r.approval_status as string | null,
+      }));
+    },
+  });
   // Finish handoff. Priority: URL params (from Draft-Tearsheet CTA) →
   // concierge session (persists across surfaces even when the URL is bare).
   const initialFinishes = useMemo(() => {
@@ -271,14 +321,18 @@ export default function TradeTearsheets() {
   // keeps the curator id, so without this expansion a board referencing the
   // trade id wouldn't match anything in the rendered list.
   const { data: projectProductIds } = useQuery({
-    queryKey: ["tearsheet-project-product-ids", filterProjectId, user?.id],
+    queryKey: ["tearsheet-project-product-ids", filterProjectId, activeFolderId, user?.id],
     enabled: !!filterProjectId && !!user,
     queryFn: async () => {
       const ids = new Set<string>();
       if (!filterProjectId) return ids;
       const [quotesRes, boardsRes] = await Promise.all([
-        supabase.from("trade_quotes").select("id").eq("project_id", filterProjectId),
-        supabase.from("client_boards").select("id").eq("project_id", filterProjectId),
+        activeFolderId
+          ? supabase.from("trade_quotes").select("id").eq("project_board_id", activeFolderId)
+          : supabase.from("trade_quotes").select("id").eq("project_id", filterProjectId),
+        activeFolderId
+          ? Promise.resolve({ data: [{ id: activeFolderId }] as any[] })
+          : supabase.from("client_boards").select("id").eq("project_id", filterProjectId),
       ]);
       const quoteIds = (quotesRes.data || []).map((q: any) => q.id);
       const boardIds = (boardsRes.data || []).map((b: any) => b.id);
@@ -777,9 +831,15 @@ export default function TradeTearsheets() {
         </div>
 
         <section className="flex flex-wrap items-center justify-between gap-3 border-y border-border py-4" aria-label="Tearsheet project">
-          <h2 className="font-display text-lg">{selectedProject ? selectedProject.name : "Choose a project"}</h2>
+          <h2 className="font-display text-lg">{selectedProject ? (activeFolder ? <>{activeFolder.title}<span className="block font-body text-[11px] uppercase tracking-widest text-muted-foreground">{selectedProject.name}</span></> : selectedProject.name) : "Choose a project"}</h2>
           <div className="flex flex-wrap items-center gap-3">
-            <ProjectPicker value={filterProjectId} onChange={setFilterProjectId} required />
+            <ProjectPicker value={filterProjectId} onChange={(id) => { const next = new URLSearchParams(searchParams); next.delete("folder"); if (id) next.set("project", id); else next.delete("project"); try { if (id) sessionStorage.setItem("trade:lastProjectFilter", id); } catch {} setSearchParams(next); }} required />
+            {selectedProject && projectFolders.length > 0 && (
+              <select aria-label="Project folder" value={activeFolderId ?? ""} onChange={(e) => setActiveFolderId(e.target.value || null)} className="h-9 rounded-md border border-input bg-background px-3 font-body text-sm text-foreground">
+                <option value="">Whole project</option>
+                {projectFolders.map((f) => <option key={f.id} value={f.id}>{f.title}</option>)}
+              </select>
+            )}
             {selectedProject && <TearsheetBoardPdfExport key={`pdf-${selectedProject.id}`} projectId={selectedProject.id} projectName={selectedProject.name} />}
             {selectedProject && <TearsheetBoardSharing key={selectedProject.id} projectId={selectedProject.id} projectName={selectedProject.name} />}
             {selectedProject && <Button variant="ghost" size="sm" onClick={() => navigate(`/trade/projects/${selectedProject.id}`)}>Open project →</Button>}
@@ -790,7 +850,28 @@ export default function TradeTearsheets() {
           <div className="py-12 font-body text-sm text-muted-foreground" role="status">{projectsLoading ? "Loading projects…" : filterProjectId ? "This project is unavailable. Choose another project." : "No project selected."}</div>
         ) : <>
 
-        <TearsheetBoardInvitationStatus key={`access-${selectedProject.id}`} projectId={selectedProject.id} refreshKey={boardAccessRefresh} />
+        <TearsheetBoardInvitationStatus key={`access-${selectedProject.id}`} projectId={selectedProject.id} boardId={activeFolderId} refreshKey={boardAccessRefresh} />
+
+        {activeFolder && (
+          <section aria-label="Folder pieces" className="space-y-3 border-b border-border pb-5">
+            <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">{activeFolder.title} · {folderItems.length} pieces</p>
+            {folderItemsLoading ? <p className="font-body text-sm text-muted-foreground">Loading folder pieces…</p> : folderItems.length === 0 ? <p className="font-body text-sm text-muted-foreground">No pieces in this folder yet.</p> : (
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                {folderItems.map((it) => (
+                  <div key={it.id} className="flex gap-3 rounded-md border border-border p-3">
+                    {it.image ? <img src={it.image} alt={it.name} className="h-16 w-16 shrink-0 rounded object-cover" /> : <div className="h-16 w-16 shrink-0 rounded bg-muted" />}
+                    <div className="min-w-0">
+                      <p className="font-display text-sm text-foreground">{it.name}</p>
+                      {it.brand && <p className="font-body text-[11px] text-muted-foreground">{it.brand}</p>}
+                      {it.finishes && <p className="font-body text-[11px] text-foreground mt-1">{it.finishes}</p>}
+                      <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground mt-1">Qty {it.quantity}{it.status ? ` · ${it.status}` : ""}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
         {conciergeSession && (conciergeSession.product || conciergeSession.briefText || conciergeSession.finishes.fabric || conciergeSession.finishes.wood) && (
           <div className="rounded-lg border border-accent/40 bg-accent/5 p-3 flex items-start justify-between gap-3">
@@ -989,7 +1070,7 @@ export default function TradeTearsheets() {
             </div>
             {projectPiecesOnly && (
               <p className="font-body text-[11px] text-muted-foreground -mt-1">
-                Showing only products from this project's quotes and boards.
+                {activeFolder ? `Showing only pieces from ${activeFolder.title}.` : "Showing only products from this project's quotes and boards."}
               </p>
             )}
             {isLoading ? (

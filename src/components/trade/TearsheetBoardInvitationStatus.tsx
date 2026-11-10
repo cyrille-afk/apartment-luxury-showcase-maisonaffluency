@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { boardInvitationPermission, boardInvitationStatus } from "./boardInvitationStatus";
 import ResendBoardInvitation from "./ResendBoardInvitation";
 
-export default function TearsheetBoardInvitationStatus({ projectId, refreshKey }: { projectId: string; refreshKey: number }) {
+export default function TearsheetBoardInvitationStatus({ projectId, refreshKey, boardId = null }: { projectId: string; refreshKey: number; boardId?: string | null }) {
   const { user } = useAuth();
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
@@ -15,12 +15,14 @@ export default function TearsheetBoardInvitationStatus({ projectId, refreshKey }
     return () => window.clearInterval(timer);
   }, []);
   const { data, isPending, isFetching, isError, refetch } = useQuery({
-    queryKey: ["tearsheet-board-access", projectId, user?.id, refreshKey],
+    queryKey: ["tearsheet-board-access", projectId, boardId, user?.id, refreshKey],
     enabled: !!user,
     queryFn: async () => {
       if (!user) throw new Error("Sign in required");
-      const { data: boards, error } = await supabase.from("client_boards")
-        .select("id, title").eq("project_id", projectId).eq("user_id", user.id).order("updated_at", { ascending: false });
+      let boardQuery = supabase.from("client_boards").select("id, title").eq("project_id", projectId);
+      // Active sub-folder: scope to it (RLS grants studio access); otherwise the user's own project folders.
+      boardQuery = boardId ? boardQuery.eq("id", boardId) : boardQuery.eq("user_id", user.id);
+      const { data: boards, error } = await boardQuery.order("updated_at", { ascending: false });
       if (error) throw error;
       if (!boards?.length) return { boards: [], invites: [] };
       const { data: invites, error: inviteError } = await supabase.from("board_invites")
