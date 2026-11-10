@@ -2812,20 +2812,20 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                         onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
                         className="font-display text-[14px] uppercase tracking-[0.1em] text-foreground hover:text-foreground/80 transition-colors"
                       >
-                        {designerDisplay}
+                        {credits.designer}
                       </Link>
                       <div className="mt-1 w-10 md:w-12 h-px bg-foreground/20 transition-all duration-500 ease-out group-hover:w-full md:group-hover:w-full motion-reduce:transition-none" aria-hidden="true" />
                     </div>
                     <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2 mt-3">
                       <h1 className="font-display font-normal text-[28px] leading-[1.15] tracking-[-0.01em]">
-                        {product.title}
+                        {credits.title}
                         {formatProductSubtitleLine(product.title, product.subtitle) && (
                           <span className="block mt-1 text-[0.8em] text-muted-foreground">
                             {formatProductSubtitleLine(product.title, product.subtitle)}
                           </span>
                         )}
                       </h1>
-                      {(() => { const badge = productEditionBadge(product as { edition?: string | null; edition_number?: string | null; edition_signing?: string | null }, isEcartProduct); return badge ? <span className="rounded-[1px] bg-muted px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{badge}</span> : null; })()}
+                      {credits.edition ? <span className="rounded-[1px] bg-muted px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{credits.edition}</span> : null}
                     </div>
 
                     {isTradeVerifiedView && (
