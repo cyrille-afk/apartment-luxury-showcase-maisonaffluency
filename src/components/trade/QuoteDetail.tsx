@@ -104,6 +104,8 @@ interface QuoteItemWithProduct {
   trade_products: {
     product_name: string;
     brand_name: string;
+    designer_name?: string | null;
+    house_name?: string | null;
     trade_price_cents: number | null;
     rrp_price_cents?: number | null;
     price_per_sqm_cents?: number | null;
@@ -881,7 +883,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           )
         );
         if (titles.length > 0 || sourcePickIds.length > 0) {
-          const pickSelect = "id, title, edition, image_url, gallery_images, variant_image_map, size_variants, dimensions";
+          const pickSelect = "id, title, edition, edition_number, edition_signing, image_url, gallery_images, variant_image_map, size_variants, dimensions, designers(name, display_name, founder)";
           const [byTitleRes, byIdRes] = await Promise.all([
             titles.length > 0
               ? supabase.from("designer_curator_picks").select(pickSelect).in("title", titles)
@@ -906,8 +908,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               const t = it.trade_products?.product_name;
               if (!t) return it;
               const key = norm(t);
-              const ed = editionByTitle.get(key);
               const pick = (it.trade_products?.source_pick_id && pickById.get(it.trade_products.source_pick_id)) || pickByTitle.get(key);
+              const owner = Array.isArray(pick?.designers) ? pick.designers[0] : pick?.designers;
+              const credits = productAttribution({ title: pick?.title || t, designerName: owner?.display_name || owner?.name, brandName: it.trade_products?.brand_name, houseName: owner?.founder, edition: pick?.edition, edition_number: pick?.edition_number, edition_signing: pick?.edition_signing });
+              const ed = credits.edition;
               const resolvedImage = resolveQuoteLineImageFromPick(it, pick);
 
               // Fallback dims: prefer the exact selected size from the saved
@@ -961,8 +965,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   }
                 }
               }
-              const patchedProduct = dimsFromPick && it.trade_products
-                ? { ...it.trade_products, dimensions: dimsFromPick }
+              const patchedProduct = it.trade_products
+                ? { ...it.trade_products, designer_name: credits.designer, house_name: credits.house, ...(dimsFromPick ? { dimensions: dimsFromPick } : {}) }
                 : it.trade_products;
 
               return {
@@ -1830,6 +1834,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       return {
         productName: product?.product_name || "—",
         brandName: product?.brand_name || "",
+        designerName: product?.designer_name,
+        houseName: product?.house_name,
         dimensions: product?.dimensions ?? null,
         materials: product?.materials ?? null,
         edition: item.edition ?? null,

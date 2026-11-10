@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { trimLogoUrl } from "@/lib/cloudinaryLogo";
+import { productAttribution } from "@/lib/productAttribution";
 import { useParams } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
 import { AnimatePresence, motion } from "framer-motion";
@@ -24,6 +25,8 @@ type Item = {
   lead_time: string | null; finish: string | null; approval_status: string; my_reaction: string | null;
   variant_label: string | null; fabric_label: string | null; wood_label: string | null; my_finish: string | null;
   my_comments?: { id: string; comment: string; created_at: string }[];
+  designer_name?: string | null; brand_name?: string | null; house_name?: string | null;
+  edition?: string | null; edition_number?: string | null; edition_signing?: string | null;
 };
 type Shared = {
   board_title: string; client_name: string | null; studio_name: string; studio_logo_url: string | null;
@@ -258,6 +261,7 @@ export default function SharedProcurementBoard() {
 
       <main className="mx-auto grid max-w-6xl grid-cols-1 gap-x-10 gap-y-16 px-6 pb-24 sm:grid-cols-2 lg:grid-cols-3">
         {data.items.map((item, i) => {
+          const credits = productAttribution({ ...item, title: item.product_name, designerName: item.designer_name, brandName: item.brand_name, houseName: item.house_name });
           const fo = resolved[item.id];
           const canOpenDetails = !data.view_only && !!catalog?.[item.product_id]?.variants?.length;
           const openDetails = () => setDrawerFor(item.id);
@@ -272,7 +276,9 @@ export default function SharedProcurementBoard() {
                 </button>
               )}
             </div>
-            <h2 className="mt-4 font-display text-lg text-foreground">{item.product_name}</h2>
+            {credits.designer && <p className="mt-4 font-body text-xs uppercase text-foreground">{credits.designer}</p>}
+            <h2 className="mt-1 font-display text-lg text-foreground">{credits.title}</h2>
+            {credits.edition && <p className="mt-1 font-body text-[10px] uppercase text-muted-foreground">{credits.edition}</p>}
             {fo ? (
               <div className="mt-1.5 flex items-center gap-2">
                 <FinishChips fo={fo} size="h-7 w-7" />
