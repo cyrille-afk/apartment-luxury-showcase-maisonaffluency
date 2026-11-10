@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { recentProjectBoards } from "./recentProjectBoards";
 import { getActiveProjectId } from "@/lib/activeProjectId";
+import { readLastVisitedFolderId } from "@/lib/lastVisitedFolder";
 
 export const TRADE_FAVORITE_FOLDERS_EVENT = "trade_favorite_folders_changed";
 
@@ -322,6 +323,9 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
     setOpen(true);
   };
 
+  const [lastVisitedId, setLastVisitedId] = useState<string | null>(null);
+  useEffect(() => { if (open) setLastVisitedId(readLastVisitedFolderId()); }, [open]);
+
   return (
     <>
     <Popover open={open} onOpenChange={(next) => { if (next) void openOrSaveMoodboard(); else setOpen(false); }}>
@@ -336,14 +340,16 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
         onClick={(e) => e.stopPropagation()}
       >
         <p className="px-4 pt-3 pb-2 font-body text-[10px] uppercase tracking-wider text-muted-foreground">Select project board</p>
-        {recentProjectBoards(boards).map((board) => {
+        {recentProjectBoards(boards, lastVisitedId).map((board) => {
           const done = inBoards.has(board.id);
+          const current = board.id === lastVisitedId;
           return (
             <Button key={board.id} variant="ghost" disabled={busy || done}
               onClick={() => addToBoard(board.id, board.title)}
-              className="w-full h-auto justify-start whitespace-normal rounded-none px-4 py-3 font-mono text-[11px] font-normal uppercase text-foreground text-left hover:bg-muted/40 disabled:opacity-70">
-              {done ? <Check className="shrink-0" /> : <FolderOpen className="shrink-0 text-muted-foreground" />}
-              <span className="min-w-0 break-words leading-relaxed">{board.title}</span>
+              className={cn("w-full h-auto justify-start whitespace-normal rounded-none px-4 py-3 font-mono text-[11px] font-normal uppercase text-foreground text-left hover:bg-muted/40 disabled:opacity-70", current && "bg-muted/60 font-semibold")}>
+              {done || current ? <Check className="shrink-0" /> : <FolderOpen className="shrink-0 text-muted-foreground" />}
+              <span className="min-w-0 flex-1 break-words leading-relaxed">{board.title}</span>
+              {current && <span className="shrink-0 font-body text-[9px] font-normal tracking-wider text-muted-foreground">Current</span>}
             </Button>
           );
         })}
