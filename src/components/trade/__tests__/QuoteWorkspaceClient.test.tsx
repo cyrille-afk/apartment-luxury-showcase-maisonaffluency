@@ -28,7 +28,7 @@ beforeEach(() => {
 it("hydrates company, contact name and email together for the folder's linked client", async () => {
   mocks.linkedClient = true;
   mount();
-  await waitFor(() => expect(profile).toEqual({ companyName: "Alternative Capital Enterprises Pte Ltd", clientName: "Cyrille Delval", email: "cdelval@ace-capital.com" }));
+  await waitFor(() => expect(profile).toEqual({ companyName: "Alternative Capital Enterprises Pte Ltd", clientName: "Cyrille Delval", email: "cdelval@ace-capital.com", corporateAddress: { line1: "", line2: "", city: "", region: "", postalCode: "", country: "" } }));
 });
 afterEach(cleanup);
 let invite: ((projectId: string, folderId: string, email: string) => () => void) | undefined;

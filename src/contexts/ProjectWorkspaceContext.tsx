@@ -1,6 +1,9 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from "react";
 
-export type WorkspaceClientProfile = { companyName?: string; clientName?: string; email?: string };
+export type WorkspaceClientProfile = {
+  companyName?: string; clientName?: string; email?: string; phone?: string;
+  corporateAddress?: { line1?: string; line2?: string; city?: string; region?: string; postalCode?: string; country?: string };
+};
 export type WorkspaceContactState = { primaryContact: string; collaborators: string[]; clientProfile?: WorkspaceClientProfile };
 export type ProjectWorkspaceState = WorkspaceContactState & { folders: Record<string, WorkspaceContactState> };
 export type ActiveWorkspaceFolder = { projectId: string; folderId: string };
