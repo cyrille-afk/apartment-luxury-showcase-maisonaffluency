@@ -54,6 +54,7 @@ export type SharedQuoteSnapshot = {
 
 export type ShareSourceLine = QuoteSummaryLine & {
   id?: string | null;
+  edition?: string | null;
   image_url?: string | null;
   fabric?: (QuoteSummaryLine["fabric"] & { name?: string | null; image_url?: string | null }) | null;
   wood_fabric?: { name?: string | null; image_url?: string | null } | null;
@@ -137,7 +138,7 @@ export function buildFinishChoices(item: ShareSourceLine, swatches: QuoteFinishS
  */
 export function buildSharedQuoteSnapshot(quoteId: string, clientName: string | null, items: ShareSourceLine[], swatchesByPick: Record<string, QuoteFinishSwatch[]> = {}): SharedQuoteSnapshot {
   const lines: SharedQuoteLine[] = items.map((item) => {
-    const credits = productAttribution({ title: item.product?.product_name || "Piece", designerName: item.product?.designer_name, brandName: item.product?.brand_name, houseName: item.product?.house_name, edition: (item as ShareSourceLine & { edition?: string | null }).edition });
+    const credits = productAttribution({ title: item.product?.product_name || "Piece", designerName: item.product?.designer_name, brandName: item.product?.brand_name, houseName: item.product?.house_name, edition: item.edition });
     const fc = buildFinishChoices(item, swatchesByPick[item.product?.source_pick_id || ""] ?? []);
     const pricing = quoteLinePricing(item, true);
     const dimensions = dimensionsFromVariantLabel(item.variant_label, item.product?.dimensions ?? null);
