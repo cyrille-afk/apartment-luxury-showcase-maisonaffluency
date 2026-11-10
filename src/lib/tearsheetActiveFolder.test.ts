@@ -16,4 +16,7 @@ describe("resolveTearsheetActiveFolder", () => {
   it("ignores folders from another project", () => {
     expect(resolveTearsheetActiveFolder(folders, P, "other", "other")).toBeNull();
   });
+  it("explicit whole-project choice overrides last visited", () => {
+    expect(resolveTearsheetActiveFolder(folders, P, "all", "mop")).toBeNull();
+  });
 });

@@ -26,6 +26,8 @@ import { useClientTierUpgrades } from "@/hooks/useClientTierUpgrades";
 import { TRADE_SANDBOX_ONLY } from "@/lib/tradeSandboxOnly";
 import { Scan } from "lucide-react";
 import { usePendingInquiryCount } from "@/hooks/usePendingInquiryCount";
+import { readLastVisitedFolder } from "@/lib/lastVisitedFolder";
+import { resolveTearsheetActiveFolder } from "@/lib/tearsheetActiveFolder";
 
 
 type NavItem = { title: string; url: string; icon: React.ElementType; end?: boolean };
@@ -138,6 +140,12 @@ export function TradeSidebar() {
   const [projectParams] = useSearchParams();
   const selectedProjectId = projectParams.get("project");
   const currentProject = activeProjects.find((project) => project.id === selectedProjectId || location.pathname.startsWith(`/trade/projects/${project.id}`) || boards.some((board) => board.id === currentBoard && board.project_id === project.id));
+  // Tearsheet Builder: highlight the same sub-folder the page resolves (URL folder → last visited).
+  const [lastVisitedFolderId, setLastVisitedFolderId] = useState<string | null>(null);
+  useEffect(() => { setLastVisitedFolderId(readLastVisitedFolder()?.id ?? null); }, [location.pathname, location.search]);
+  const activeFolderId = currentBoard ?? (location.pathname.startsWith("/trade/tearsheets")
+    ? resolveTearsheetActiveFolder(boards.map((b) => ({ id: b.id, title: b.title, project_id: b.project_id })), selectedProjectId, projectParams.get("folder"), lastVisitedFolderId)?.id ?? null
+    : null);
   useEffect(() => {
     if (currentProject) setExpandedProjects((ids) => ids.includes(currentProject.id) ? ids : [...ids, currentProject.id]);
   }, [currentProject?.id]);
@@ -361,7 +369,7 @@ export function TradeSidebar() {
                                {expanded && (
                                  <ul className="ml-4 border-l border-border/70 pl-3 font-body text-[10px] text-muted-foreground">
                                    <li><NavLink to={`/trade/projects/${project.id}?tab=boards`} className="flex items-center gap-2 py-1.5 hover:text-foreground"><FolderOpen className="h-3 w-3 shrink-0" /> Folders & Drafts</NavLink></li>
-                                   {projectBoards.map((board) => <li key={board.id} className="ml-2 border-l border-border/60 pl-3"><NavLink to={`/trade/boards/${board.id}?project=${project.id}`} className="block truncate py-1.5 hover:text-foreground" activeClassName="text-foreground font-medium" title={board.title}>{board.title}</NavLink></li>)}
+                                   {projectBoards.map((board) => <li key={board.id} className="ml-2 border-l border-border/60 pl-3"><NavLink to={`/trade/boards/${board.id}?project=${project.id}`} data-active-folder={board.id === activeFolderId ? "true" : undefined} className={`block truncate py-1.5 hover:text-foreground ${board.id === activeFolderId ? "text-foreground font-medium" : ""}`} activeClassName="text-foreground font-medium" title={board.title}>{board.title}</NavLink></li>)}
                                    <li><NavLink to={`/trade/projects/${project.id}?tab=tearsheets`} className="block py-1.5 hover:text-foreground">Tearsheets</NavLink></li>
                                    <li><NavLink to={`/trade/projects/${project.id}/studio`} className="block py-1.5 hover:text-foreground">Project Studio</NavLink></li>
                                  </ul>

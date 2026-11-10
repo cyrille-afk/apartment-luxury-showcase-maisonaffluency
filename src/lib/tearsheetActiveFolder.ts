@@ -9,7 +9,7 @@ export function resolveTearsheetActiveFolder(
   urlFolderId: string | null,
   lastVisitedId: string | null,
 ): TearsheetFolder | null {
-  if (!projectId) return null;
+  if (!projectId || urlFolderId === "all") return null; // "all" = whole project chosen explicitly
   const inProject = folders.filter((f) => f.project_id === projectId);
   for (const id of [urlFolderId, lastVisitedId]) {
     const hit = id ? inProject.find((f) => f.id === id) : undefined;
