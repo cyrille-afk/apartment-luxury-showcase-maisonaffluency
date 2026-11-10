@@ -17,7 +17,7 @@ const roleOf = (cat: string | null) => {
   return null;
 };
 
-export type FinishSelection = { label: string; price_cents: number | null; image_url: string | null; top?: string | null; base?: string | null; top_image?: string | null; base_image?: string | null };
+export type FinishSelection = { label: string; price_cents: number | null; image_url: string | null; top?: string | null; base?: string | null; top_image?: string | null; base_image?: string | null; extra?: { name: string; img: string | null }[] };
 
 const normKey = (s?: string | null) => (s || "").toLowerCase().normalize("NFD").replace(/[^a-z0-9]/g, "");
 const variantImage = (v: any, imgMap: Record<string, number>, gallery: string[]) => {
@@ -80,6 +80,21 @@ export function resolveFinishFrom(
   const raw = p.variants ?? p.size_variants;
   const variants: any[] = Array.isArray(raw) ? raw.filter((v: any) => v.top || v.base) : [];
   const lbl = it.variant_label || "";
+  // Quote-synced labels: "Wood Finish: X · Metal Finish: Y · Stone Finish: Z · size".
+  const axisValues = lbl.split(" · ").map((s) => s.match(/^[^:]{1,40}:\s*(.+)$/)?.[1]?.trim()).filter((v): v is string => Boolean(v));
+  if (axisValues.length >= 2) {
+    const find = (n: string) => sws.find((x: any) => normKey(x.name) === normKey(n)) ?? sws.find((x: any) => normKey(n).startsWith(normKey(x.name)) && normKey(x.name).length > 3);
+    const [top, base, ...rest] = axisValues;
+    return {
+      label: axisValues.join(" / "),
+      price_cents: null,
+      image_url: null,
+      top, base,
+      top_image: find(top)?.image_url ?? null,
+      base_image: find(base)?.image_url ?? null,
+      extra: rest.map((name) => ({ name, img: find(name)?.image_url ?? null })),
+    } as FinishSelection;
+  }
   const [pair] = lbl.split(" · ");
   const [lt, lb] = (pair || "").split(" / ");
   const top = it.fabric_label || lt || null;

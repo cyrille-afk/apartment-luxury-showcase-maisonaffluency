@@ -33,11 +33,12 @@ type Feedback = { id: string; item_id: string; reaction: string | null; comment:
 const STATUSES = ["pending", "approved", "rejected"] as const;
 
 /** Small cropped finish swatch chips (fabric + wood) with label tooltips. */
-export function FinishChips({ fo, size = "h-8 w-8" }: { fo?: { top?: string | null; base?: string | null; top_image?: string | null; base_image?: string | null } | null; size?: string }) {
+export function FinishChips({ fo, size = "h-8 w-8" }: { fo?: { top?: string | null; base?: string | null; top_image?: string | null; base_image?: string | null; extra?: { name: string; img: string | null }[] } | null; size?: string }) {
   if (!fo) return null;
   const chips = [
     { name: fo.top, img: fo.top_image },
     { name: fo.base, img: fo.base_image },
+    ...(fo.extra ?? []),
   ].filter((c) => c.name || c.img);
   if (!chips.length) return null;
   return (
@@ -55,7 +56,7 @@ export function FinishChips({ fo, size = "h-8 w-8" }: { fo?: { top?: string | nu
 export default function ProcurementBoardPanel({ boardId, items, finishOverrides = {}, onOpenFinishes }: {
   boardId: string;
   onOpenFinishes?: (itemId: string) => void;
-  finishOverrides?: Record<string, { label: string; price_cents: number | null; image_url: string | null; top?: string | null; base?: string | null; top_image?: string | null; base_image?: string | null }>;
+  finishOverrides?: Record<string, { label: string; price_cents: number | null; image_url: string | null; top?: string | null; base?: string | null; top_image?: string | null; base_image?: string | null; extra?: { name: string; img: string | null }[] }>;
   items: Array<{ id: string; product_id: string; approval_status: string; product?: { product_name: string; brand_name: string; image_url: string | null } }>;
 }) {
   const { clientSafe, setClientSafe } = useClientSafeMode();
