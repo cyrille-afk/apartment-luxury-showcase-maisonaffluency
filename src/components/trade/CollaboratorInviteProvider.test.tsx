@@ -14,6 +14,14 @@ it("carries the saved two-product quote identity into the folder invitation", ()
   fireEvent.click(screen.getByRole("button", { name: "Add Client to Project" }));
   expect(screen.getByTestId("invite").getAttribute("data-quote")).toBe("46c952f5-35a0-4cbd-a097-0ca4ce7fe75a");
 });
+it("opens invoice review with the saved project and quote context", () => {
+  render(<CollaboratorInviteProvider><QuoteWorkspaceInvite projectId="singapore" quoteId="46c952f5-35a0-4cbd-a097-0ca4ce7fe75a" label="Invite Collaborator to Review Invoice" /></CollaboratorInviteProvider>);
+  fireEvent.click(screen.getByRole("button", { name: "Invite Collaborator to Review Invoice" }));
+  const invite = screen.getByTestId("invite");
+  expect(invite.getAttribute("data-project")).toBe("singapore");
+  expect(invite.getAttribute("data-quote")).toBe("46c952f5-35a0-4cbd-a097-0ca4ce7fe75a");
+  expect(invite.getAttribute("data-client")).toBe("true");
+});
 it("uses the quote project over an unrelated filter without inventing an active folder", () => {
   render(<CollaboratorInviteProvider><QuoteWorkspaceInvite projectId="singapore" /></CollaboratorInviteProvider>);
   fireEvent.click(screen.getByRole("button", { name: "Add Client to Project" }));
