@@ -72,8 +72,12 @@ export function useQuoteBranding(quoteId: string, projectId: string | null, user
 
 type BrandingState = ReturnType<typeof useQuoteBranding>;
 
-export function QuoteBrandingControl({ branding }: { branding: BrandingState }) {
-  return <div className="mb-4 flex h-5 items-center justify-end print:hidden">
+export function QuoteBrandingControl({ branding, adminPreview }: { branding: BrandingState; adminPreview?: { active: boolean; onChange: (active: boolean) => void } }) {
+  return <div className="mb-4 flex h-5 items-center justify-end gap-6 print:hidden">
+    {adminPreview && <label className="flex cursor-pointer items-center gap-2 font-body text-[11px] text-muted-foreground">
+      <Checkbox checked={adminPreview.active} onCheckedChange={checked => adminPreview.onChange(checked === true)} />
+      Preview header as trade user
+    </label>}
     {branding.canHidePlatform && <label className="flex cursor-pointer items-center gap-2 font-body text-[11px] text-muted-foreground">
       <Checkbox checked={branding.hidePlatform} onCheckedChange={checked => branding.updateDraft({ hidePlatform: checked === true })} />
       Hide platform branding
