@@ -1066,12 +1066,17 @@ const TradeBoardBuilder = () => {
             <DialogHeader><DialogTitle className="font-display text-2xl font-normal">Draft Quote · {board.title}</DialogTitle></DialogHeader>
             <p className="font-body text-xs text-muted-foreground">Awaiting final procurement sign-off</p>
             <div className="divide-y divide-border">
-              {compiledDraft?.lines.map((line) => <div key={line.id} className="py-4">
-                <p className="font-body text-sm text-foreground">{line.product_name}</p>
-                {line.finish && <div className="mt-2 flex flex-wrap items-center gap-2"><FinishChips fo={line.finish} size="h-6 w-6" /><span className="font-body text-xs text-muted-foreground">{line.finish.label}</span>{line.requested && <span className="font-body text-[10px] text-primary">Client requested</span>}</div>}
-                <p className="mt-2 font-body text-xs text-muted-foreground">Quantity {line.quantity ?? "Unconfirmed"} · Trade/unit {formatMoneyIn(line.netUnitCents, line.currency, "Price verification needed")} · Client/unit {formatMoneyIn(line.clientUnitCents, line.currency, "Price verification needed")}</p>
-                <p className="mt-1 font-body text-xs text-foreground">Client line total {formatMoneyIn(line.clientTotalCents, line.currency, "Unconfirmed")}</p>
-              </div>)}
+              {compiledDraft?.lines.map((line) => { const imageUrl = items.find((item) => item.id === line.id)?.product?.image_url ?? null; return <div key={line.id} className="flex flex-row items-start gap-4 py-4">
+                <div className="h-16 w-16 shrink-0 overflow-hidden border border-border bg-muted">
+                  {imageUrl ? <img src={imageUrl} alt={line.product_name} className="h-full w-full object-cover" loading="lazy" /> : <div className="flex h-full w-full items-center justify-center font-body text-[10px] text-muted-foreground">No image</div>}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-body text-sm text-foreground">{line.product_name}</p>
+                  {line.finish && <div className="mt-2 flex flex-wrap items-center gap-2"><FinishChips fo={line.finish} size="h-6 w-6" /><span className="font-body text-xs text-muted-foreground">{line.finish.label}</span>{line.requested && <span className="font-body text-[10px] text-primary">Client requested</span>}</div>}
+                  <p className="mt-2 font-body text-xs text-muted-foreground">Quantity {line.quantity ?? "Unconfirmed"} · Trade/unit {formatMoneyIn(line.netUnitCents, line.currency, "Price verification needed")} · Client/unit {formatMoneyIn(line.clientUnitCents, line.currency, "Price verification needed")}</p>
+                  <p className="mt-1 font-body text-xs text-foreground">Client line total {formatMoneyIn(line.clientTotalCents, line.currency, "Unconfirmed")}</p>
+                </div>
+              </div>; })}
             </div>
             {Object.entries(compiledDraft?.totals ?? {}).map(([currency, total]) => <p key={currency} className="font-body text-sm text-foreground">{compiledDraft?.ready ? "Subtotal" : "Verified lines subtotal"} · {formatMoneyIn(total.client, currency)}</p>)}
             {!compiledDraft?.ready && <p role="status" className="font-body text-xs text-destructive">Verify missing finish prices or quantities before saving this draft.</p>}
