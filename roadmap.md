@@ -1,5 +1,10 @@
 # Roadmap
 
+## Matrix finish requests and approved draft
+- [x] Sync latest saved client finish requests into matrix descriptors and linked swatches, with a client-request marker; focus, saved-feedback events and visible-folder refresh keep history and rows together.
+- [x] Compile approved items with exact configuration, source-line quantity and verified tier pricing into a review-only invoice outline; exclude pending/rejected items, wait for authoritative price/status reads and never auto-order. Explicit draft saving retains separate configured lines.
+- [x] Eleven regressions pass and build OK. Signed-in Madison shows Onice Velluto Marble / Aged Brass with both real photos after reload; draft contains the two approved client-requested pieces, quantities 1 each and client subtotal €7,676 on desktop/390px. No client selections, notes, quotes or invoices created during verification; explicit draft-saving action was not exercised against customer data.
+
 ## Matrix feedback panel
 - [x] Replace wide feedback cells with a highlighted message icon and full-height right Sheet; chronological client history includes reaction events and historical invitation senders, with private notes in a shaded bottom zone. Client View unmounts the private panel.
 - [x] Signed-in real Madison history and sender verified; existing private note saved unchanged and read back on reopening, close/reopen and 390px full-height layout pass. Two submission regressions pass; build OK.

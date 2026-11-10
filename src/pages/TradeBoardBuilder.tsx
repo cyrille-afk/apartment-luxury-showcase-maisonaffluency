@@ -52,6 +52,8 @@ import FinishesDrawer, { type FinishSelection, resolveSavedFinishes } from "@/co
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 import ProjectWorkspaceContact from "@/components/trade/ProjectWorkspaceContact";
 import { useProjectWorkspace } from "@/contexts/ProjectWorkspaceContext";
+import { compileBoardDraftQuote } from "@/lib/boardDraftQuote";
+import { formatMoneyIn } from "@/lib/displayMoney";
 
 interface Board {
   id: string;
@@ -158,6 +160,10 @@ const TradeBoardBuilder = () => {
   const [items, setItems] = useState<BoardItem[]>([]);
   const [finishes, setFinishes] = useState<Record<string, FinishSelection>>({});
   const [finishItem, setFinishItem] = useState<BoardItem | null>(null);
+  const [requestedFinishes, setRequestedFinishes] = useState<Record<string, FinishSelection>>({});
+  const [compiledDraft, setCompiledDraft] = useState<ReturnType<typeof compileBoardDraftQuote> | null>(null);
+  const [draftReviewOpen, setDraftReviewOpen] = useState(false);
+  const [creatingDraft, setCreatingDraft] = useState(false);
   const [resolvedClient, setResolvedClient] = useState<PickedClient | null>(null);
   const { clientSafe: sharedClientSafe } = useClientSafeMode();
   const clientSafe = sharedClientSafe || new URLSearchParams(location.search).get("presentation") === "1";
@@ -528,35 +534,43 @@ const TradeBoardBuilder = () => {
   };
 
   const convertToQuote = async () => {
+    setDraftReviewOpen(true);
+  };
+  const saveCompiledDraft = async () => {
     if (!board || !user) return;
-    const approvedItems = items.filter(i => i.approval_status === "approved");
-    if (approvedItems.length === 0) {
-      toast({ title: "No approved items", description: "Your client must approve items before converting.", variant: "destructive" });
+    if (!compiledDraft?.ready || creatingDraft) {
+      toast({ title: "Draft needs review", description: "Confirm finish pricing and quantities before saving.", variant: "destructive" });
       return;
     }
+    setCreatingDraft(true);
     const { data: quote, error } = await supabase
       .from("trade_quotes")
       .insert({ user_id: user.id, status: "draft", client_name: board.client_name, project_id: board.project_id })
       .select("id")
       .single();
     if (error || !quote) {
+      setCreatingDraft(false);
       toast({ title: "Error", description: error?.message, variant: "destructive" });
       return;
     }
-    // Aggregate duplicate product_ids into a single quote line with quantity = count
-    const qtyByProduct = new Map<string, number>();
-    for (const item of approvedItems) {
-      qtyByProduct.set(item.product_id, (qtyByProduct.get(item.product_id) || 0) + 1);
-    }
-    const quoteItems = Array.from(qtyByProduct.entries()).map(([product_id, quantity]) => ({
+    const quoteItems = compiledDraft.lines.map((line) => ({
       quote_id: quote.id,
-      product_id,
-      quantity,
+      product_id: line.product_id,
+      quantity: line.quantity ?? 1,
+      variant_label: line.finish?.label ?? null,
+      unit_price_cents: line.netUnitCents,
+      unit_price_currency: line.currency,
+      image_url: items.find((item) => item.id === line.id)?.product?.image_url ?? null,
     }));
-    await supabase.from("trade_quote_items").insert(quoteItems);
-    await supabase.from("client_boards").update({ status: "converted" }).eq("id", board.id);
+    const saved = await supabase.from("trade_quote_items").insert(quoteItems);
+    setCreatingDraft(false);
+    if (saved.error) {
+      await supabase.from("trade_quotes").delete().eq("id", quote.id);
+      toast({ title: "Could not save draft", description: "Your folder is unchanged. Please try again.", variant: "destructive" });
+      return;
+    }
     rememberActiveQuoteId(quote.id, board.project_id);
-    toast({ title: "Quote created", description: `${quoteItems.length} item${quoteItems.length === 1 ? "" : "s"} pre-filled (${approvedItems.length} unit${approvedItems.length === 1 ? "" : "s"})` });
+    toast({ title: "Draft quote saved", description: `${quoteItems.length} configured lines ready for procurement review.` });
     navigate(`/trade/quotes?quote=${quote.id}`);
   };
 
@@ -1042,7 +1056,28 @@ const TradeBoardBuilder = () => {
           </details>
         )}
 
-        <ProcurementBoardPanel boardId={board.id} boardTitle={board.title} projectId={board.project_id} items={items} finishOverrides={finishes} onOpenFinishes={(id) => { const it = items.find((i) => i.id === id); if (it) setFinishItem(it); }} />
+        <ProcurementBoardPanel boardId={board.id} boardTitle={board.title} projectId={board.project_id} items={items} finishOverrides={finishes} onDraftChange={setCompiledDraft} onRequestedFinishes={setRequestedFinishes} onOpenFinishes={(id) => { const it = items.find((i) => i.id === id); if (it) setFinishItem(it); }} />
+        {!clientSafe && <div data-trade-sensitive className="mb-6 flex items-center justify-between gap-4 border-b border-border pb-4">
+          <p className="font-body text-xs text-muted-foreground">Draft quote · {compiledDraft?.lines.length ?? 0} approved items · Awaiting procurement sign-off</p>
+          <Button variant="outline" size="sm" className="cursor-pointer rounded-none" onClick={() => setDraftReviewOpen(true)} disabled={!compiledDraft?.lines.length}><FileText className="mr-2 h-3.5 w-3.5" />Review draft quote</Button>
+        </div>}
+        {!clientSafe && <Dialog open={draftReviewOpen} onOpenChange={setDraftReviewOpen}>
+          <DialogContent data-trade-sensitive className="isolate max-h-[90dvh] max-w-3xl overflow-y-auto bg-background! opacity-100!">
+            <DialogHeader><DialogTitle className="font-display text-2xl font-normal">Draft Quote · {board.title}</DialogTitle></DialogHeader>
+            <p className="font-body text-xs text-muted-foreground">Awaiting final procurement sign-off</p>
+            <div className="divide-y divide-border">
+              {compiledDraft?.lines.map((line) => <div key={line.id} className="py-4">
+                <p className="font-body text-sm text-foreground">{line.product_name}</p>
+                {line.finish && <div className="mt-2 flex flex-wrap items-center gap-2"><FinishChips fo={line.finish} size="h-6 w-6" /><span className="font-body text-xs text-muted-foreground">{line.finish.label}</span>{line.requested && <span className="font-body text-[10px] text-primary">Client requested</span>}</div>}
+                <p className="mt-2 font-body text-xs text-muted-foreground">Quantity {line.quantity ?? "Unconfirmed"} · Trade/unit {formatMoneyIn(line.netUnitCents, line.currency, "Price verification needed")} · Client/unit {formatMoneyIn(line.clientUnitCents, line.currency, "Price verification needed")}</p>
+                <p className="mt-1 font-body text-xs text-foreground">Client line total {formatMoneyIn(line.clientTotalCents, line.currency, "Unconfirmed")}</p>
+              </div>)}
+            </div>
+            {Object.entries(compiledDraft?.totals ?? {}).map(([currency, total]) => <p key={currency} className="font-body text-sm text-foreground">{compiledDraft?.ready ? "Subtotal" : "Verified lines subtotal"} · {formatMoneyIn(total.client, currency)}</p>)}
+            {!compiledDraft?.ready && <p role="status" className="font-body text-xs text-destructive">Verify missing finish prices or quantities before saving this draft.</p>}
+            <Button className="cursor-pointer rounded-none" disabled={!compiledDraft?.ready || creatingDraft} onClick={saveCompiledDraft}>{creatingDraft ? "Saving…" : "Save draft for procurement review"}</Button>
+          </DialogContent>
+        </Dialog>}
         {finishItem && (
           <FinishesDrawer
             open={!!finishItem}
@@ -1051,9 +1086,9 @@ const TradeBoardBuilder = () => {
             productName={finishItem.product?.product_name ?? "Selected piece"}
             baseImage={finishItem.product?.image_url ?? null}
             clientMode={clientSafe}
-            current={finishes[finishItem.id]?.label ?? finishItem.variant_label}
-            initialTop={finishes[finishItem.id]?.top ?? finishItem.fabric_label ?? null}
-            initialBase={finishes[finishItem.id]?.base ?? finishItem.wood_label ?? null}
+            current={requestedFinishes[finishItem.id]?.label ?? finishes[finishItem.id]?.label ?? finishItem.variant_label}
+            initialTop={requestedFinishes[finishItem.id]?.top ?? finishes[finishItem.id]?.top ?? finishItem.fabric_label ?? null}
+            initialBase={requestedFinishes[finishItem.id]?.base ?? finishes[finishItem.id]?.base ?? finishItem.wood_label ?? null}
             onSelect={(sel) => applyFinish(finishItem, sel)}
             footer={
               <Button className="h-11 w-full rounded-none font-body text-[11px] uppercase tracking-[0.2em]" onClick={async () => {
