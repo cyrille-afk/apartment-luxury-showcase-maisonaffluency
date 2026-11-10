@@ -1,5 +1,9 @@
 # Roadmap
 
+## Matrix feedback panel
+- [ ] Replace wide feedback cells with a message icon and full-height right panel; preserve chronological client history, sender identity and private saved notes.
+- [ ] Verify real signed-in panel, private-note readback, closing and mobile layout.
+
 ## Client-board feedback retention
 - [x] Display saved recipient/role/board-scoped comment history and approval status; reload comments after sending and fix finish-request prefix parsing. Renewed invitations recover the same recipient's comments without restoring revoked access.
 - [x] Real client board shows Madison's existing comment, finish proposal and Approved status, plus the earlier Frenchmen comment; reopening and 390px card verified. Three regressions pass, build OK; no selections changed and temporary verification session removed. Existing SSR document-is-not-defined warnings fall back to client rendering.
