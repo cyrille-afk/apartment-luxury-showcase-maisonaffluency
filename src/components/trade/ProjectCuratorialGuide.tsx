@@ -31,6 +31,7 @@ type Props = {
   activeItemId: string | null;
   isClientMode: boolean;
   docked?: boolean;
+  focused?: boolean;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   onActiveItemChange: (productId: string) => void;
@@ -89,6 +90,7 @@ export function ProjectCuratorialGuide({
   activeItemId,
   isClientMode,
   docked = false,
+  focused = false,
   open: controlledOpen,
   onOpenChange,
   onActiveItemChange,
@@ -302,7 +304,7 @@ export function ProjectCuratorialGuide({
   };
 
   const scroll = (direction: -1 | 1) => {
-    streamRef.current?.scrollBy({ left: direction * 360, behavior: "smooth" });
+    streamRef.current?.scrollBy(docked ? { top: direction * 360, behavior: "smooth" } : { left: direction * 360, behavior: "smooth" });
   };
 
   if (!open && !docked) {
@@ -428,10 +430,10 @@ export function ProjectCuratorialGuide({
           </p>
         </div>
 
-        <div className="min-w-0 flex-1 overflow-hidden px-4 py-4 md:px-6">
+        <div className={cn("min-w-0 flex-1 px-4 py-4 md:px-6", focused ? "overflow-visible" : "overflow-hidden")}>
           <div className="mb-3 flex items-center justify-between">
             <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Curation stream</p>
-            <div className="flex">
+            <div className={focused ? "hidden" : "flex"}>
               <Button type="button" variant="ghost" size="icon" onClick={() => scroll(-1)} aria-label="Previous recommendations" className="h-7 w-7 rounded-none text-muted-foreground"><ArrowLeft /></Button>
               <Button type="button" variant="ghost" size="icon" onClick={() => scroll(1)} aria-label="Next recommendations" className="h-7 w-7 rounded-none text-muted-foreground"><ArrowRight /></Button>
             </div>
@@ -453,7 +455,7 @@ export function ProjectCuratorialGuide({
                     ref={index === 0 ? firstRecommendationRef : undefined}
                     key={rec.product_id}
                     title={rationale}
-                    className={docked ? "group relative flex w-full shrink-0 flex-col border-b border-border pb-4" : "group relative flex h-full w-[140px] shrink-0 snap-start flex-col md:w-[170px]"}
+                    className={focused ? "group relative grid w-full shrink-0 grid-cols-[120px_minmax(0,1fr)] gap-5 border-b border-border pb-6 sm:grid-cols-[180px_minmax(0,1fr)]" : docked ? "group relative flex w-full shrink-0 flex-col border-b border-border pb-4" : "group relative flex h-full w-[140px] shrink-0 snap-start flex-col md:w-[170px]"}
                     onMouseEnter={() => onRecommendationHover(true)}
                     onMouseLeave={() => onRecommendationHover(false)}
                     onFocus={() => onRecommendationHover(true)}
@@ -466,7 +468,7 @@ export function ProjectCuratorialGuide({
                       variant="ghost"
                       onClick={() => void openRecommendation(rec)}
                       disabled={openingId === rec.product_id}
-                      className="relative block h-[110px] w-full rounded-none bg-transparent p-0 hover:bg-transparent md:h-[140px]"
+                      className={cn("relative block w-full rounded-none bg-transparent p-0 hover:bg-transparent", focused ? "row-span-3 h-[140px] sm:h-[180px]" : "h-[110px] md:h-[140px]")}
                       aria-label={`${Math.round(rec.score)}% match — view curation intent for ${rec.title}`}
                     >
                       {rec.image_url ? (
@@ -478,15 +480,16 @@ export function ProjectCuratorialGuide({
                         {Math.round(rec.score)}% Match // View Curation Intent
                       </span>
                     </Button>
-                    <p className="mt-2 truncate font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">
+                    <p className={cn("mt-2 font-body text-[10px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground", !focused && "truncate")}>
                       {rec.title}
                     </p>
+                    {focused && <div className="space-y-2 text-muted-foreground"><p className="font-body text-[10px] uppercase tracking-[0.15em]">{rec.brand} · {Math.round(rec.score)}% match</p><p className="font-body text-sm leading-relaxed">{rationale}</p></div>}
                     <Button
                       type="button"
                       variant="ghost"
                       onClick={() => void addToComposition(rec)}
                       disabled={addingId === rec.product_id || added}
-                      className="mt-1 h-auto justify-start rounded-none p-0 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground/70 opacity-0 transition-opacity hover:bg-transparent hover:text-foreground group-hover:opacity-100 group-focus-within:opacity-100 disabled:opacity-100"
+                      className={cn("mt-1 h-auto justify-start rounded-none p-0 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground/70 transition-opacity hover:bg-transparent hover:text-foreground group-hover:opacity-100 group-focus-within:opacity-100 disabled:opacity-100", focused ? "min-h-10 opacity-100" : "opacity-0")}
                     >
                       {addingId === rec.product_id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
                       {added ? "Added" : "Add"}

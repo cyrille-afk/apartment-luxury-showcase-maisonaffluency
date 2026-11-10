@@ -19,6 +19,7 @@ import { useStudio } from "@/hooks/useStudio";
 import { effectiveProjectMultiplier, tradePriceCents, clientPriceCents, clientUnitCents } from "@/lib/tradePricing";
 import { StudioBrand } from "@/components/trade/StudioBrand";
 import { StudioSidePanel } from "@/components/trade/StudioSidePanel";
+import { StudioFocusOverlay } from "@/components/trade/StudioFocusOverlay";
 
 type StudioItem = {
   id: string;
@@ -71,6 +72,12 @@ export default function TradeProjectStudio() {
   const [isSpecPanelOpen, setIsSpecPanelOpen] = useState(true);
   const [isProposalPreviewOpen, setIsProposalPreviewOpen] = useState(false);
   const specItem = items.find((i) => i.product_id === specItemId) || null;
+  const curatorialItem = items.find((i) => i.product_id === curatorialItemId) || items[0] || null;
+  const openVisualStudio = () => {
+    if (!curatorialItem) return;
+    setIsSpecPanelOpen(false);
+    setIsAiPanelOpen(true);
+  };
 
   const openProposalPreview = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -235,12 +242,12 @@ export default function TradeProjectStudio() {
       </div>
 
       <div className="flex shrink-0 flex-wrap justify-start gap-2 border-b border-border px-4 py-3 md:px-6">
-        <Button variant="outline" aria-controls="studio-ai-panel" aria-expanded={isAiPanelOpen} onClick={() => { setIsAiPanelOpen(!isAiPanelOpen); if (window.innerWidth < 1024) setIsSpecPanelOpen(false); }} className="cursor-pointer rounded-none font-body text-[10px] uppercase tracking-[0.15em]">AI Co-Designer</Button>
-        <Button variant="outline" aria-controls="studio-spec-panel" aria-expanded={isSpecPanelOpen} onClick={() => { setIsSpecPanelOpen(!isSpecPanelOpen); if (window.innerWidth < 1024) setIsAiPanelOpen(false); }} className="cursor-pointer rounded-none font-body text-[10px] uppercase tracking-[0.15em]">Specsheet</Button>
+        <Button variant="outline" aria-haspopup="dialog" disabled={!items.length} onClick={openVisualStudio} className="cursor-pointer rounded-none font-body text-[10px] uppercase tracking-[0.15em]">AI Co-Designer</Button>
+        <Button variant="outline" aria-controls="studio-spec-panel" aria-expanded={isSpecPanelOpen} onClick={() => setIsSpecPanelOpen(!isSpecPanelOpen)} className="cursor-pointer rounded-none font-body text-[10px] uppercase tracking-[0.15em]">Specsheet</Button>
       </div>
       <div className="relative min-h-[70dvh] overflow-hidden lg:min-h-0 lg:flex-1">
         {/* Canvas expands into the space released by either independent drawer. */}
-        <section aria-label="Visual canvas" className={`relative flex h-full flex-col bg-background transition-[margin] duration-500 ease-in-out motion-reduce:transition-none ${isSpecPanelOpen ? "lg:ml-[40%]" : "lg:ml-0"} ${isAiPanelOpen ? "lg:mr-80" : "lg:mr-0"}`}>
+        <section aria-label="Visual canvas" className={`relative flex h-full flex-col bg-background transition-[margin] duration-500 ease-in-out motion-reduce:transition-none ${isSpecPanelOpen ? "lg:ml-[40%]" : "lg:ml-0"}`}>
           {/* Upper zone — visual canvas */}
           <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
           <div className="px-4 py-6 md:px-8 lg:px-12 lg:py-5">
@@ -265,8 +272,7 @@ export default function TradeProjectStudio() {
                 const activate = () => {
                   setCuratorialItemId(item.product_id);
                   setIsAiPanelOpen(true);
-                  if (window.innerWidth < 1024) setIsSpecPanelOpen(false);
-                  window.dispatchEvent(new CustomEvent("project-curator:open"));
+                  setIsSpecPanelOpen(false);
                 };
                 return (
                   <figure
@@ -321,16 +327,16 @@ export default function TradeProjectStudio() {
 
         </section>
 
-        <StudioSidePanel id="studio-ai-panel" title="AI Co-Designer" side="right" size="narrow" open={isAiPanelOpen} onClose={() => setIsAiPanelOpen(false)}>
+        <StudioFocusOverlay open={isAiPanelOpen} onOpenChange={setIsAiPanelOpen} item={curatorialItem} dimensions={curatorialItem ? dimsLabel(curatorialItem) : ""}>
           <ProjectCuratorialGuide
-            docked open={isAiPanelOpen} onOpenChange={setIsAiPanelOpen}
+            docked focused open={isAiPanelOpen} onOpenChange={setIsAiPanelOpen}
             projectId={project.id} projectName={project.name} items={items}
             activeItemId={curatorialItemId} isClientMode={isClientMode}
             onActiveItemChange={setCuratorialItemId}
             onCompositionChanged={() => setItemsVersion((version) => version + 1)}
             onRecommendationHover={setIsRecommendationHovered}
           />
-        </StudioSidePanel>
+        </StudioFocusOverlay>
         <StudioSidePanel id="studio-spec-panel" title="Specsheet" side="left" size="wide" open={isSpecPanelOpen} onClose={() => setIsSpecPanelOpen(false)}>
         <div className="flex min-h-0 flex-1 flex-col px-6 py-6 md:px-8">
           {/* Header — fixed at the top of the left pane */}
