@@ -176,6 +176,10 @@
     "name": "Théorème Editions"
   },
   {
+    "slug": "parsa-editions",
+    "name": "Parsa Editions"
+  },
+  {
     "slug": "bruno-moinard-editions",
     "name": "Bruno Moinard Editions"
   },
@@ -304,10 +308,6 @@
     "name": "Kiko Lopez"
   },
   {
-    "slug": "lost-profile-studio",
-    "name": "Lost Profile Studio"
-  },
-  {
     "slug": "arnold-madsen",
     "name": "Arnold Madsen"
   },
@@ -414,6 +414,10 @@
   {
     "slug": "humbert-poyet",
     "name": "Humbert & Poyet"
+  },
+  {
+    "slug": "privatiselectionem",
+    "name": "Privatiselectionem"
   },
   {
     "slug": "alex-proba",
