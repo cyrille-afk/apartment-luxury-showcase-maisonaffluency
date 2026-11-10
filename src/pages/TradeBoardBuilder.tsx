@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { absoluteUrl } from "@/config/site";
 import { trimLogoUrl } from "@/lib/cloudinaryLogo";
 import {
   SUPPORTED_LOGO_FORMAT_COPY,
@@ -478,7 +479,7 @@ const TradeBoardBuilder = () => {
       toast({ title: "Cannot share", description: "Only the board owner can copy the share link.", variant: "destructive" });
       return;
     }
-    const url = `${window.location.origin}/board/${token}`;
+    const url = absoluteUrl(`/board/${token}`);
     const copied = await copyTextToClipboard(url);
 
     if (wasDraft) {
@@ -514,7 +515,7 @@ const TradeBoardBuilder = () => {
     }
     const newToken = data as string;
     setBoard({ ...board, share_token: newToken, token_expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), token_rotated_at: new Date().toISOString() });
-    const url = `${window.location.origin}/board/${newToken}`;
+    const url = absoluteUrl(`/board/${newToken}`);
     const copied = await copyTextToClipboard(url);
     setCopyButtonLabel("Copy New Link");
     window.setTimeout(() => setCopyButtonLabel("Copy Current Link"), 8000);
