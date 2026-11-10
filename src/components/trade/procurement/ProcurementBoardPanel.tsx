@@ -1,3 +1,4 @@
+import { uniqueCollaborators } from "@/lib/uniqueCollaborators";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toDiscountFraction, tradePriceCents, clientPriceCents, clientUnitCents, discountPercentLabel, effectiveProjectMultiplier } from "@/lib/tradePricing";
 import { AnimatePresence, motion } from "framer-motion";
@@ -172,8 +173,8 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
     if (error) toast({ title: "Could not update status", variant: "destructive" });
   };
 
-  const revoke = async (id: string) => {
-    await supabase.from("board_invites").update({ status: "revoked" }).eq("id", id);
+  const revoke = async (ids: string[]) => {
+    await supabase.from("board_invites").update({ status: "revoked" }).in("id", ids);
     loadCollab();
   };
 
@@ -190,11 +191,11 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
           <span className={`font-body text-[10px] uppercase tracking-[0.2em] ${clientSafe ? "text-foreground" : "text-muted-foreground"}`}>Client Editorial Presentation</span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {invites.map((inv) => (
+          {uniqueCollaborators(invites).map((inv) => (
             <Badge key={inv.id} variant="outline" className="gap-1.5 rounded-none font-body text-[10px] font-normal">
               <span className={`h-1.5 w-1.5 rounded-full ${inv.status === "accepted" || inv.last_seen_at ? "bg-primary" : "bg-muted-foreground/50"}`} />
               {inv.email} · {inv.role === "client" ? "Client" : "Contractor"} · {inv.status === "accepted" ? "joined" : inv.last_seen_at ? "viewed" : "pending"}
-              <button onClick={() => revoke(inv.id)} aria-label={`Revoke ${inv.email}`} className="ml-1 opacity-60 hover:opacity-100"><X className="h-3 w-3" /></button>
+              <button onClick={() => revoke(inv.ids)} aria-label={`Revoke ${inv.email}`} className="ml-1 opacity-60 hover:opacity-100"><X className="h-3 w-3" /></button>
             </Badge>
           ))}
           <Button size="sm" variant="outline" className="gap-1.5 rounded-none" data-felix-target="invite-collaborator" onClick={() => setInviteOpen(true)}>
