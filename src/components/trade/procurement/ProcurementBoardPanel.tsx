@@ -85,6 +85,12 @@ export default function ProcurementBoardPanel({ boardId, boardTitle, projectId, 
   const [requestedFinishes, setRequestedFinishes] = useState<Record<string, FinishSelection>>({});
   const [savedStatuses, setSavedStatuses] = useState<Record<string, string>>({});
   const [syncReady, setSyncReady] = useState(false);
+  const [collabReady, setCollabReady] = useState(false);
+  const [pricingReady, setPricingReady] = useState(false);
+  const [quoteReady, setQuoteReady] = useState(false);
+  const [markupReady, setMarkupReady] = useState(false);
+  const [savingStatus, setSavingStatus] = useState(false);
+  const [quoteRevision, setQuoteRevision] = useState(0);
   const requests = useMemo(() => latestBoardFinishRequests(feedback), [feedback]);
   const requestKey = JSON.stringify(requests);
   useEffect(() => {
@@ -118,22 +124,26 @@ export default function ProcurementBoardPanel({ boardId, boardTitle, projectId, 
   useEffect(() => {
     const ids = productIds ? productIds.split(",") : [];
     if (!ids.length) return;
+    setPricingReady(false);
     supabase
       .from("trade_products")
       .select("id, trade_price_cents, currency, lead_time, lead_time_weeks_min, lead_time_weeks_max, default_ship_mode")
       .in("id", ids)
       .then(({ data }) => setPricing(new Map((data || []).map((p: any) => [p.id, p]))));
-    supabase.rpc("current_trade_discount_pct" as any).then(({ data }) => setDiscountPct(toDiscountFraction(data)));
+    supabase.rpc("current_trade_discount_pct" as any).then(({ data, error }) => { if (!error) { setDiscountPct(toDiscountFraction(data)); setPricingReady(true); } });
   }, [productIds]);
 
   // Quote-synced pieces carry the configured net snapshot saved on the quote line.
   const [quoteNet, setQuoteNet] = useState<Map<string, { net: number; currency: string; quantity: number }>>(new Map());
   useEffect(() => {
+    setQuoteReady(false);
     (async () => {
-      const { data: links } = await supabase.from("client_board_items").select("id, source_quote_item_id").eq("board_id", boardId).not("source_quote_item_id", "is", null);
+      const { data: links, error: linkError } = await supabase.from("client_board_items").select("id, source_quote_item_id").eq("board_id", boardId).not("source_quote_item_id", "is", null);
+      if (linkError) return;
       const ids = (links || []).map((l: any) => l.source_quote_item_id);
-      if (!ids.length) return setQuoteNet(new Map());
-      const { data: qi } = await supabase.from("trade_quote_items").select("id, unit_price_cents, unit_price_currency, quantity").in("id", ids);
+      if (!ids.length) { setQuoteNet(new Map()); setQuoteReady(true); return; }
+      const { data: qi, error: quoteError } = await supabase.from("trade_quote_items").select("id, unit_price_cents, unit_price_currency, quantity").in("id", ids);
+      if (quoteError) return;
       const byQi = new Map((qi || []).map((q: any) => [q.id, q]));
       const m = new Map<string, { net: number; currency: string; quantity: number }>();
       for (const l of links as any[]) {
@@ -141,21 +151,26 @@ export default function ProcurementBoardPanel({ boardId, boardTitle, projectId, 
         if (q) m.set(l.id, { net: q.unit_price_cents == null ? NaN : Math.round(Number(q.unit_price_cents)), currency: q.unit_price_currency || "EUR", quantity: q.quantity });
       }
       setQuoteNet(m);
+      setQuoteReady((qi || []).length === ids.length);
     })();
-  }, [boardId, productIds]);
+  }, [boardId, productIds, quoteRevision]);
 
   useEffect(() => {
+    setMarkupReady(false);
     (async () => {
-      const { data: b } = await supabase.from("client_boards").select("project_id").eq("id", boardId).maybeSingle();
+      const { data: b, error: boardError } = await supabase.from("client_boards").select("project_id").eq("id", boardId).maybeSingle();
+      if (boardError) return;
       const pid = (b as any)?.project_id;
-      if (!pid) return setMultiplier(effectiveProjectMultiplier(null, currentStudio?.default_project_markup_percentage));
-      const { data: p } = await supabase.from("projects").select("trade_multiplier").eq("id", pid).maybeSingle();
+      if (!pid) { setMultiplier(effectiveProjectMultiplier(null, currentStudio?.default_project_markup_percentage)); setMarkupReady(true); return; }
+      const { data: p, error: projectError } = await supabase.from("projects").select("trade_multiplier").eq("id", pid).maybeSingle();
+      if (projectError) return;
       setMultiplier(effectiveProjectMultiplier((p as any)?.trade_multiplier, currentStudio?.default_project_markup_percentage));
+      setMarkupReady(true);
     })();
   }, [boardId, currentStudio?.default_project_markup_percentage]);
 
   const loadCollab = useCallback(async () => {
-    const [{ data: inv }, { data: fb }, delivery, { data: senders }, saved] = await Promise.all([
+    const [{ data: inv }, feedbackResult, delivery, { data: senders }, saved] = await Promise.all([
       supabase.from("board_invites").select("id, email, role, status, last_seen_at, created_at").eq("board_id", boardId).neq("status", "revoked").order("created_at"),
       supabase.from("board_item_feedback").select("id, item_id, reaction, comment, created_at, invite_id").eq("board_id", boardId).order("created_at", { ascending: false }),
       supabase.rpc("board_invitation_email_status", { _board_id: boardId }),
@@ -163,14 +178,15 @@ export default function ProcurementBoardPanel({ boardId, boardTitle, projectId, 
       supabase.from("client_board_items").select("id, approval_status").eq("board_id", boardId),
     ]);
     setInvites((inv as Invite[]) || []);
-    setFeedback((fb as Feedback[]) || []);
+    if (!feedbackResult.error) setFeedback((feedbackResult.data as Feedback[]) || []);
+    setCollabReady(!feedbackResult.error && !saved.error);
     setFeedbackSenders(Object.fromEntries((senders || []).map((sender) => [sender.id, sender.email])));
     setEmailStatuses(delivery.error ? [] : delivery.data || []);
     if (!saved.error) { setSavedStatuses(Object.fromEntries((saved.data || []).map((item) => [item.id, item.approval_status]))); setStatusOverride({}); }
   }, [boardId]);
 
   useEffect(() => {
-    const refresh = () => { if (document.visibilityState === "visible") void loadCollab(); };
+    const refresh = () => { if (document.visibilityState === "visible") { void loadCollab(); setQuoteRevision((value) => value + 1); } };
     const timer = window.setInterval(refresh, 15000);
     window.addEventListener("focus", refresh);
     window.addEventListener("ma:quote-folder-linked", refresh);
@@ -222,13 +238,16 @@ export default function ProcurementBoardPanel({ boardId, boardTitle, projectId, 
   const draftKey = JSON.stringify(draftSources);
   const stableSources = useMemo(() => draftSources, [draftKey]);
   const compiled = useDraftQuoteCompiler(stableSources, discountPct, multiplier);
-  useEffect(() => { onDraftChange?.({ ...compiled, ready: compiled.ready && syncReady }); }, [compiled, syncReady, onDraftChange]);
+  const ready = compiled.ready && syncReady && collabReady && pricingReady && quoteReady && markupReady && !savingStatus;
+  useEffect(() => { onDraftChange?.({ ...compiled, ready }); }, [compiled, ready, onDraftChange]);
 
   const setStatus = async (id: string, status: string) => {
+    setSavingStatus(true);
     setStatusOverride((s) => ({ ...s, [id]: status }));
     const { error } = await supabase.from("client_board_items").update({ approval_status: status }).eq("id", id);
     if (error) { setStatusOverride((s) => { const next = { ...s }; delete next[id]; return next; }); toast({ title: "Could not update status", variant: "destructive" }); }
     else void loadCollab();
+    setSavingStatus(false);
   };
 
   const revoke = async (ids: string[]) => {

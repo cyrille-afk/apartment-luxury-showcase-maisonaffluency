@@ -1062,7 +1062,7 @@ const TradeBoardBuilder = () => {
           <Button variant="outline" size="sm" className="cursor-pointer rounded-none" onClick={() => setDraftReviewOpen(true)} disabled={!compiledDraft?.lines.length}><FileText className="mr-2 h-3.5 w-3.5" />Review draft quote</Button>
         </div>}
         {!clientSafe && <Dialog open={draftReviewOpen} onOpenChange={setDraftReviewOpen}>
-          <DialogContent data-trade-sensitive className="max-h-[90dvh] max-w-3xl overflow-y-auto">
+          <DialogContent data-trade-sensitive className="isolate max-h-[90dvh] max-w-3xl overflow-y-auto bg-background! opacity-100!">
             <DialogHeader><DialogTitle className="font-display text-2xl font-normal">Draft Quote · {board.title}</DialogTitle></DialogHeader>
             <p className="font-body text-xs text-muted-foreground">Awaiting final procurement sign-off</p>
             <div className="divide-y divide-border">
