@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Mail, Monitor, Smartphone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { absoluteUrl } from "@/config/site";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -40,7 +41,9 @@ export default function BoardInviteEmailPreview({ studioName, projectName, proje
             boardTitle: boardTitle || "Curated selection",
             role: "client",
             itemCount,
-            link: `${window.location.origin}/shared/board/preview`,
+            // The real invitation is sent on the production domain, so the
+            // sample must show that address — never the sandbox preview host.
+            link: absoluteUrl("/shared/board/preview"),
           },
         },
       });

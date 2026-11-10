@@ -11,6 +11,7 @@
 - Password-setup resends reuse the review drawer and retain attempt keys on retry; never change approval. Verified activation links the account; the queue reads user_id for setup status.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Recipient-facing links (board invitation email preview, copy-share, rotate-link, QR, quote/guest pay) build through absoluteUrl from src/config/site, never window.location.origin and never a sandbox host; src/components/trade/__tests__/qrProductionDomain.test.ts guards the list — clients must get an address they can open.
 - Board invitation email scope is counted from the saved invitation's folder at send time; omit unavailable counts and preserve role/view-only CTA distinctions — avoids invented scope or promises of unavailable approvals.
 - Shared portfolio pictures and 3D View use one item-scoped panel action and the same availability gate; guest details remain preloaded through the invitation token without direct catalogue reads — preserves configuration parity and view-only restrictions.
 - Collaborator email status uses a folder-manager-checked RPC correlating each invitation's stable send key to the latest email log by message ID; membership and latest email attempt remain independent, with visible-folder refresh and no sent-to-delivered inference — prevents cross-folder diagnostics leaks and false delivery claims.

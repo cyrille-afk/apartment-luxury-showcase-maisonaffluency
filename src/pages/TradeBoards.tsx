@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { absoluteUrl } from "@/config/site";
 import { Helmet } from "react-helmet-async";
 import { Plus, Share2, FileText, Trash2, ExternalLink, FolderOpen, Sparkles } from "lucide-react";
 import { useNavigate } from "@/lib/router-compat";
@@ -181,7 +182,7 @@ const TradeBoards = ({ embedded = false }: { embedded?: boolean }) => {
       toast({ title: "Cannot copy link", description: "Only the board owner can copy the share link.", variant: "destructive" });
       return;
     }
-    const url = `${window.location.origin}/board/${data}`;
+    const url = absoluteUrl(`/board/${data}`);
     const copied = await copyTextToClipboard(url);
     toast({ title: copied ? "Link copied" : "Share link ready", description: copied ? "Share this link with your client" : url });
   };
