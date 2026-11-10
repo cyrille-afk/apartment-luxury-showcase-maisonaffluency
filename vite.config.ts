@@ -38,7 +38,6 @@ export default defineConfig({
         { find: /^entities\/lib\/encode\.js$/, replacement: path.resolve(__dirname, "node_modules/entities/lib/encode.js") },
       ],
     },
-    },
     server: {
       watch: { ignored: ["**/src/integrations/supabase/types.ts", "**/supabase/migrations/**"] },
     },
