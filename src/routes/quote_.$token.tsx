@@ -240,7 +240,7 @@ function SharedQuotePage() {
                 </div>
               </div>
             </li>
-          ))}
+          ); })}
         </ul>
 
         <section className="border-t border-border py-8 sm:py-10 flex flex-col sm:flex-row sm:justify-between gap-5">

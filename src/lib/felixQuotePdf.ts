@@ -1,4 +1,5 @@
 import { jsPDF } from "jspdf";
+import { productAttribution } from "./productAttribution";
 import type { ProactiveTearsheetData } from "@/components/trade/concierge/ProactiveTearsheetCard";
 import { felixLineCents, felixQuantity, felixQuoteTotals } from "@/lib/felixQuoteQuantity";
 import { formatPdfDate, formatPdfMoney } from "@/lib/pdfFormatting";
@@ -88,10 +89,11 @@ export async function buildFelixQuotePdf(cards: ProactiveTearsheetData[], studio
   const nextPage = () => { doc.addPage(); header(); };
   header(true);
   lines.forEach((line, index) => {
+    const credits = productAttribution({ title: line.productName, brandName: line.brandName });
     doc.setFont("Cormorant", "normal").setFontSize(17);
-    const name = doc.splitTextToSize(line.productName, W - M * 2 - 118);
+    const name = doc.splitTextToSize(credits.title, W - M * 2 - 118);
     doc.setFont("Inter", "normal").setFontSize(9);
-    const meta = [line.brandName, line.leadTimeLabel && `Lead time: ${line.leadTimeLabel}`].filter(Boolean).flatMap((value) => doc.splitTextToSize(String(value), W - M * 2 - 118));
+    const meta = [credits.designer, credits.edition, line.leadTimeLabel && `Lead time: ${line.leadTimeLabel}`].filter(Boolean).flatMap((value) => doc.splitTextToSize(String(value), W - M * 2 - 118));
     const finishes = felixQuoteFinishes(line).map((finish, finishIndex) => ({ ...finish, image: swatchPhotos[index]?.[finishIndex], text: doc.splitTextToSize(`${finish.label}: ${finish.name}`, W - M * 2 - 148) }));
     const finishHeight = finishes.reduce((height, finish) => height + Math.max(30, finish.text.length * 13 + 6), 0);
     const rowH = Math.max(155, name.length * 20 + meta.length * 13 + finishHeight + 67);
