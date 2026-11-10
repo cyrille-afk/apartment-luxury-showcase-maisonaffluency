@@ -1,8 +1,9 @@
 # Roadmap
 
 ## Collaborator invitation email status
-- [ ] Show invitation-scoped latest email status beside each unique collaborator; preserve joined/viewed independently and refresh while the folder is open.
-- [ ] Verify real invitation readback, deduplication and unauthorized access; confirmed delivery depends on provider delivery events, which the current email service does not expose.
+- [x] Show invitation-scoped latest email status beside each unique collaborator; preserve joined/viewed independently and refresh while the folder is open.
+- [x] Real signed-in folder shows one joined collaborator badge with the latest Email sent status after reopening; wrong-folder read returns 403 and anonymous read 401. Sixteen regressions pass; no emails or invitations created.
+- [ ] Confirmed delivered status awaits successful per-message delivery events, which the current email service does not expose; sent is never presented as delivered.
 
 ## Quote-linked project folder
 - [x] Drawer client invitations transactionally link the saved quote to the selected project folder; exact configured products use unique source-line identities and later additions sync through database triggers, without copying quote prices or notes.
