@@ -1,5 +1,9 @@
 # Roadmap
 
+## Collaborator invitation email status
+- [ ] Show invitation-scoped latest email status beside each unique collaborator; preserve joined/viewed independently and refresh while the folder is open.
+- [ ] Verify real invitation readback, deduplication and unauthorized access; confirmed delivery depends on provider delivery events, which the current email service does not expose.
+
 ## Quote-linked project folder
 - [x] Drawer client invitations transactionally link the saved quote to the selected project folder; exact configured products use unique source-line identities and later additions sync through database triggers, without copying quote prices or notes.
 - [x] Current QU-46C952 linked to Man of Parts — curated edit: seven items appear immediately and survive reload; both original quote prices preserved. Disposable signed-in regression verifies two selections, retry safety, later additions and wrong-project rejection; 22 unit regressions pass. No invitation emails sent.
