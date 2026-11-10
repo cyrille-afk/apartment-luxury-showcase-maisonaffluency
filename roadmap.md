@@ -1,5 +1,10 @@
 # Roadmap
 
+## Matrix finish requests and approved draft
+- [ ] Sync latest saved client finish requests into matrix descriptors and linked swatches, with a client-request marker.
+- [ ] Compile approved items with exact configuration, quantity and verified tier pricing into a review-only invoice outline; exclude pending/rejected items and never auto-order.
+- [ ] Run regression tests and verify the signed-in folder and draft review.
+
 ## Matrix feedback panel
 - [x] Replace wide feedback cells with a highlighted message icon and full-height right Sheet; chronological client history includes reaction events and historical invitation senders, with private notes in a shaded bottom zone. Client View unmounts the private panel.
 - [x] Signed-in real Madison history and sender verified; existing private note saved unchanged and read back on reopening, close/reopen and 390px full-height layout pass. Two submission regressions pass; build OK.
