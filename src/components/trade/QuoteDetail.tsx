@@ -31,6 +31,7 @@ import ReviewedQuotePdfDownload from "@/components/trade/ReviewedQuotePdfDownloa
 import { Link, useNavigate } from "@/lib/router-compat";
 import CopyTearsheetLink from "@/components/trade/CopyTearsheetLink";
 import QuoteWorkspaceInvite from "@/components/trade/QuoteWorkspaceInvite";
+import QuoteWorkspaceClient from "@/components/trade/QuoteWorkspaceClient";
 import { QuoteItemSkeleton } from "@/components/trade/skeletons";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import AlphabetProductPicker, { type PickerItem } from "@/components/trade/AlphabetProductPicker";
@@ -2981,6 +2982,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 <div className="mb-2">
                   <span className="text-[10px] text-muted-foreground uppercase tracking-widest block">Project</span>
                   <p className="font-display text-sm text-foreground uppercase tracking-wider">{projectName}</p>
+                  <QuoteWorkspaceClient quoteId={quoteId} projectId={projectId} />
                   {projectId && (
                     <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 print:hidden">
                       <a
@@ -3005,6 +3007,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 </div>
               )}
               <div className="my-3 max-w-sm print:hidden">
+                {!projectName && <QuoteWorkspaceClient quoteId={quoteId} projectId={projectId} />}
                 <QuoteWorkspaceInvite projectId={projectId} quoteId={quoteId} label="Invite Collaborator to Review Invoice" />
               </div>
               {!isDraft && (

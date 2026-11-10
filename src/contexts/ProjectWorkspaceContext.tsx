@@ -8,6 +8,7 @@ type WorkspaceContextValue = {
   activeFolder: ActiveWorkspaceFolder | null;
   setActiveFolder: (folder: ActiveWorkspaceFolder | null) => void;
   projects: Record<string, ProjectWorkspaceState>;
+  hydrateFolderContacts: (projectId: string, folderId: string, emails: string[]) => void;
   submitClientInvitation: (projectId: string, folderId: string, email: string) => () => void;
 };
 const Context = createContext<WorkspaceContextValue | null>(null);
@@ -16,6 +17,13 @@ export const useProjectWorkspace = () => useContext(Context);
 export function ProjectWorkspaceProvider({ children }: { children: ReactNode }) {
   const [activeFolder, setActiveFolder] = useState<ActiveWorkspaceFolder | null>(null);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
+  const [savedContacts, setSavedContacts] = useState<Record<string, Record<string, string[]>>>({});
+  const hydrateFolderContacts = useCallback((projectId: string, folderId: string, emails: string[]) => {
+    setSavedContacts(current => {
+      if (JSON.stringify(current[projectId]?.[folderId]) === JSON.stringify(emails)) return current;
+      return { ...current, [projectId]: { ...current[projectId], [folderId]: emails } };
+    });
+  }, []);
   const sequence = useRef(0);
   const submitClientInvitation = useCallback((projectId: string, folderId: string, email: string) => {
     const key = ++sequence.current;
@@ -27,6 +35,15 @@ export function ProjectWorkspaceProvider({ children }: { children: ReactNode }) 
   const projects = useMemo(() => {
     const result: Record<string, ProjectWorkspaceState> = {};
     const append = (emails: string[], email: string) => emails.some(value => value.toLowerCase() === email.toLowerCase()) ? emails : [...emails, email];
+    for (const [projectId, folders] of Object.entries(savedContacts)) {
+      const project: ProjectWorkspaceState = { primaryContact: "", collaborators: [], folders: {} };
+      for (const [folderId, emails] of Object.entries(folders)) {
+        project.folders[folderId] = { primaryContact: emails[0] || "", collaborators: emails };
+        project.primaryContact ||= emails[0] || "";
+        for (const email of emails) project.collaborators = append(project.collaborators, email);
+      }
+      result[projectId] = project;
+    }
     for (const { projectId, folderId, email } of invitations) {
       const project = result[projectId] || { primaryContact: "", collaborators: [], folders: {} };
       const folder = project.folders[folderId] || { primaryContact: "", collaborators: [] };
@@ -37,6 +54,6 @@ export function ProjectWorkspaceProvider({ children }: { children: ReactNode }) 
       };
     }
     return result;
-  }, [invitations]);
-  return <Context.Provider value={{ projects, submitClientInvitation, activeFolder, setActiveFolder }}>{children}</Context.Provider>;
+  }, [invitations, savedContacts]);
+  return <Context.Provider value={{ projects, submitClientInvitation, hydrateFolderContacts, activeFolder, setActiveFolder }}>{children}</Context.Provider>;
 }
