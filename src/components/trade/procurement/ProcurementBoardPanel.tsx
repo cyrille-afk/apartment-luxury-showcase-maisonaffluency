@@ -97,7 +97,7 @@ export default function ProcurementBoardPanel({ boardId, boardTitle, projectId, 
       setRequestedFinishes(resolved); onRequestedFinishes?.(resolved); setSyncReady(true);
     }).catch(() => { if (alive) setSyncReady(false); });
     return () => { alive = false; };
-  }, [boardId, productIdsKey(items), requestKey, onRequestedFinishes]);
+  }, [boardId, items.map((item) => `${item.id}:${item.product_id}`).join(","), requestKey, onRequestedFinishes]);
   const effectiveFinishes = { ...finishOverrides, ...requestedFinishes };
 
   useEffect(() => {
