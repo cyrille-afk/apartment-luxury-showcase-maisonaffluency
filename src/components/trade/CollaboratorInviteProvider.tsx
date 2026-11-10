@@ -1,4 +1,5 @@
-import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useLocation } from "@/lib/router-compat";
 import { useProject, useProjects } from "@/hooks/useProjects";
 import { useUserBoards } from "@/hooks/useUserBoards";
@@ -38,15 +39,27 @@ function CollaboratorInviteState({ children }: { children: ReactNode }) {
 
 function ProjectClientInvitation({ projectId, quoteId, onClose }: { projectId: string | null; quoteId?: string; onClose: () => void }) {
   const [selectedProjectId, setSelectedProjectId] = useState(projectId);
+  const [quoteFolder, setQuoteFolder] = useState<{ projectId: string; boardId: string } | null>(null);
+  const [quoteFolderLoading, setQuoteFolderLoading] = useState(Boolean(quoteId));
+  useEffect(() => {
+    if (!quoteId) return;
+    let cancelled = false;
+    void supabase.from("trade_quotes").select("project_id, project_board_id").eq("id", quoteId).maybeSingle().then(({ data }) => {
+      if (cancelled) return;
+      if (data?.project_id && data.project_board_id) setQuoteFolder({ projectId: data.project_id, boardId: data.project_board_id });
+      setQuoteFolderLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, [quoteId]);
   const { projects, loading: projectsLoading } = useProjects({ activeOnly: false });
   const { project, loading: projectLoading } = useProject(selectedProjectId || undefined);
   const { boards, loading, error } = useUserBoards(Boolean(selectedProjectId), selectedProjectId, true);
   const projectBoards = boards.filter(board => board.project_id === selectedProjectId);
   const ready = Boolean(selectedProjectId && project?.id === selectedProjectId && !projectLoading && !error);
   const projectOptions = project?.id === selectedProjectId && !projects.some(option => option.id === project.id) ? [project, ...projects] : projects;
-  return <InviteCollaboratorDialog open onOpenChange={open => { if (!open) onClose(); }} boardId=""
+  return <InviteCollaboratorDialog open onOpenChange={open => { if (!open) onClose(); }} boardId={quoteFolder?.projectId === selectedProjectId ? quoteFolder.boardId : ""}
     projectId={ready ? selectedProjectId || undefined : undefined} projectName={project?.id === selectedProjectId ? project.name : undefined}
     projectOptions={projectOptions} selectedProjectId={selectedProjectId || ""} projectsLoading={projectsLoading} onProjectChange={setSelectedProjectId}
-    boardOptions={ready ? projectBoards : []} boardsLoading={loading || projectLoading} workspaceInvite clientWorkspace
+    boardOptions={ready ? projectBoards : []} boardsLoading={loading || projectLoading || quoteFolderLoading} workspaceInvite clientWorkspace
     quoteId={quoteId} readOnly onInvited={() => {}} />;
 }

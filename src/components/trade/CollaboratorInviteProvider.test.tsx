@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { CollaboratorInviteProvider } from "./CollaboratorInviteProvider";
 import QuoteWorkspaceInvite from "./QuoteWorkspaceInvite";
@@ -6,6 +6,7 @@ const state = vi.hoisted(() => ({ search: "?project=other", project: { id: "sing
 vi.mock("@/lib/router-compat", () => ({ useLocation: () => ({ search: state.search }) }));
 vi.mock("@/hooks/useProjects", () => ({ useProject: () => ({ project: state.project, loading: false }), useProjects: () => ({ projects: [state.project], loading: false }) }));
 vi.mock("@/hooks/useUserBoards", () => ({ useUserBoards: () => ({ boards: state.boards, loading: false, error: null }) }));
+vi.mock("@/integrations/supabase/client", () => ({ supabase: { from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { project_id: "singapore", project_board_id: "folder" } }) }) }) }) } }));
 vi.mock("./procurement/InviteCollaboratorDialog", () => ({ default: (props: { projectId: string; boardId: string; quoteId?: string; clientWorkspace: boolean; onOpenChange: (open: boolean) => void }) => <div data-testid="invite" data-quote={props.quoteId} data-project={props.projectId} data-board={props.boardId} data-client={String(props.clientWorkspace)} onClick={() => props.onOpenChange(false)} /> }));
 beforeEach(() => { state.search = "?project=other"; sessionStorage.clear(); });
 afterEach(cleanup);
@@ -14,13 +15,14 @@ it("carries the saved two-product quote identity into the folder invitation", ()
   fireEvent.click(screen.getByRole("button", { name: "Add Client to Project" }));
   expect(screen.getByTestId("invite").getAttribute("data-quote")).toBe("46c952f5-35a0-4cbd-a097-0ca4ce7fe75a");
 });
-it("opens invoice review with the saved project and quote context", () => {
+it("opens invoice review with the saved project and quote context", async () => {
   render(<CollaboratorInviteProvider><QuoteWorkspaceInvite projectId="singapore" quoteId="46c952f5-35a0-4cbd-a097-0ca4ce7fe75a" label="Invite Collaborator to Review Invoice" /></CollaboratorInviteProvider>);
   fireEvent.click(screen.getByRole("button", { name: "Invite Collaborator to Review Invoice" }));
   const invite = screen.getByTestId("invite");
   expect(invite.getAttribute("data-project")).toBe("singapore");
   expect(invite.getAttribute("data-quote")).toBe("46c952f5-35a0-4cbd-a097-0ca4ce7fe75a");
   expect(invite.getAttribute("data-client")).toBe("true");
+  await waitFor(() => expect(invite.getAttribute("data-board")).toBe("folder"));
 });
 it("uses the quote project over an unrelated filter without inventing an active folder", () => {
   render(<CollaboratorInviteProvider><QuoteWorkspaceInvite projectId="singapore" /></CollaboratorInviteProvider>);
