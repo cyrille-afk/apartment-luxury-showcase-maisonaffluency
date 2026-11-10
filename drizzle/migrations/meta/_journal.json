@@ -1884,6 +1884,13 @@
       "when": 1794301570792,
       "tag": "0268_board_procurement_review_lock",
       "breakpoints": true
+    },
+    {
+      "idx": 269,
+      "version": "7",
+      "when": 1794303157397,
+      "tag": "0269_shared_board_product_credits",
+      "breakpoints": true
     }
   ]
 }
