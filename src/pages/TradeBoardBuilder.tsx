@@ -1,4 +1,4 @@
-import { writeLastVisitedFolderId } from "@/lib/lastVisitedFolder";
+import { writeLastVisitedFolder } from "@/lib/lastVisitedFolder";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useProcurementStatus } from "@/hooks/useProcurementStatus";
 import { ProcurementStatusBadge } from "@/components/trade/ProcurementStatusBadge";
@@ -161,9 +161,11 @@ const TradeBoardBuilder = () => {
       id: board.id, studio_name: board.studio_name, studio_logo_url: board.studio_logo_url,
     } }));
   }, [board?.id, board?.studio_name, board?.studio_logo_url]);
+  useEffect(() => {
+    if (board && board.id === id) writeLastVisitedFolder({ id: board.id, name: board.title ?? "" });
+  }, [id, board?.id, board?.title]);
   const setActiveFolder = useProjectWorkspace()?.setActiveFolder;
   useEffect(() => {
-    if (board && board.id === id) writeLastVisitedFolderId(board.id);
     if (!setActiveFolder) return;
     setActiveFolder(board && board.id === id && board.project_id ? { projectId: board.project_id, folderId: board.id } : null);
     return () => setActiveFolder(null);

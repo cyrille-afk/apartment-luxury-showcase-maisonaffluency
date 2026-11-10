@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { recentProjectBoards } from "./recentProjectBoards";
 import { getActiveProjectId } from "@/lib/activeProjectId";
-import { readLastVisitedFolderId } from "@/lib/lastVisitedFolder";
+import { readLastVisitedFolder } from "@/lib/lastVisitedFolder";
 
 export const TRADE_FAVORITE_FOLDERS_EVENT = "trade_favorite_folders_changed";
 
@@ -324,7 +324,7 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
   };
 
   const [lastVisitedId, setLastVisitedId] = useState<string | null>(null);
-  useEffect(() => { if (open) setLastVisitedId(readLastVisitedFolderId()); }, [open]);
+  useEffect(() => { if (open) setLastVisitedId(readLastVisitedFolder()?.id ?? null); }, [open]);
 
   return (
     <>
