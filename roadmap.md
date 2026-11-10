@@ -1,5 +1,9 @@
 # Roadmap
 
+## Quote sheet studio identity
+- [x] Connect the exact quote folder's Client Portal Branding to the upper-right document identity, with studio-profile fallback and immediate branding-change events.
+- [x] Add the no-logo Hide platform branding checkbox and editable company header with user+quote-scoped device persistence and fixed header tracks. Ten regressions pass; signed-in real quote verified with read-only simulated no-logo/custom SVG branding, instant toggle, unchanged dimensions, reload readback and 390px identity rendering; build OK. No customer records changed; generated PDFs/exports remain unchanged.
+
 ## Consistent product attribution
 - [x] Unify catalogue, product pages, secure shared links and PDF credits using separate product/designer/house/edition presentation; preserve identities, links and prices.
 - [x] Frenchmen and Madison public headings and edition badges verified visually; 34 attribution, retail-only sharing, feedback and PDF checks pass; build OK. No customer quotes or invitations created.

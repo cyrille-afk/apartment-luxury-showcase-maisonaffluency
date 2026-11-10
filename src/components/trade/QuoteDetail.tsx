@@ -37,7 +37,7 @@ import { quoteShipToFromClient } from "@/lib/quoteShipTo";
 import { QuoteItemSkeleton } from "@/components/trade/skeletons";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import AlphabetProductPicker, { type PickerItem } from "@/components/trade/AlphabetProductPicker";
-import affluencyLogo from "@/assets/affluency-quote-logo.jpg";
+import { QuoteBrandingControl, QuoteBrandingHeader, useQuoteBranding } from "./QuoteBranding";
 import { downloadProcurementWorkbook, autoPoNumber, type ProcurementLine } from "@/lib/procurementExcel";
 import { downloadQuotePdf, previewQuotePdfUrl, type QuotePdfLine, type QuotePdfArgs } from "@/lib/quotePdf";
 import { publishQuotePdf } from "@/lib/publishQuotePdf";
@@ -494,6 +494,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [payingStripe, setPayingStripe] = useState(false);
   const [freightRevision, setFreightRevision] = useState(0);
   const [projectId, setProjectId] = useState<string | null>(null);
+  const quoteBranding = useQuoteBranding(quoteId, projectId, user?.id, currentStudio);
   const [projectName, setProjectName] = useState<string | null>(null);
   const [ceilingMode, setCeilingMode] = useState<"inherit" | "itemized" | "target_ceiling">("inherit");
   const [quoteCeilingCents, setQuoteCeilingCents] = useState<number | null>(null);
@@ -2928,6 +2929,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         </div>
       </div>
 
+      <QuoteBrandingControl branding={quoteBranding} />
+
       {emailLogOpen && emailLog.length > 0 && (
         <div className="mb-4 md:mb-6 rounded-md border border-border bg-muted/30 px-4 py-3 print:hidden">
           <p className="font-body text-xs uppercase tracking-[0.12em] text-foreground mb-2">Email send history</p>
@@ -2977,7 +2980,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       <div className="border border-border rounded-lg bg-background">
         {/* ===== HEADER — matches reference layout ===== */}
         <div className="border-b border-border p-4 md:p-6 lg:p-8">
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-4 md:gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto_247px] gap-4 md:gap-10">
             {/* Left: Title + Project + Client Name */}
             <div className="min-w-0">
               <h1 className="font-display text-2xl md:text-3xl lg:text-4xl text-foreground tracking-wide uppercase mb-2 md:mb-3">
@@ -3203,21 +3206,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             </div>
 
             {/* Right: Logo + Company details */}
-            <div className="flex items-start gap-3 md:gap-4">
-              <img src={affluencyLogo} alt="Affluency" className="h-14 w-14 md:h-16 md:w-16 lg:h-20 lg:w-20 object-contain shrink-0" />
-              <div className="text-left">
-                <p className="font-display text-xs text-foreground uppercase tracking-wider">
-                  Affluency Etc Pte. Ltd.
-                </p>
-                <p className="font-body text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
-                  1 Grange Garden<br />
-                  #16-05<br />
-                  The Grange<br />
-                  249631<br />
-                  Singapore
-                </p>
-              </div>
-            </div>
+            <QuoteBrandingHeader branding={quoteBranding} />
           </div>
         </div>
 

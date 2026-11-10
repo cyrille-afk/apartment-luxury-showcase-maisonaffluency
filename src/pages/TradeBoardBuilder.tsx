@@ -152,6 +152,12 @@ const TradeBoardBuilder = () => {
   }, [navigate, location.pathname, location.search, id]);
 
   const [board, setBoard] = useState<Board | null>(null);
+  useEffect(() => {
+    if (!board) return;
+    window.dispatchEvent(new CustomEvent("ma:studio-branding-changed", { detail: {
+      id: board.id, studio_name: board.studio_name, studio_logo_url: board.studio_logo_url,
+    } }));
+  }, [board?.id, board?.studio_name, board?.studio_logo_url]);
   const setActiveFolder = useProjectWorkspace()?.setActiveFolder;
   useEffect(() => {
     if (!setActiveFolder) return;
