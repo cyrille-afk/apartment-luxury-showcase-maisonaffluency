@@ -95,7 +95,7 @@ const ProductPage = () => {
         if (data.source_pick_id) {
           const { data: pick } = await supabase.from("designer_curator_picks_public").select("edition, edition_number, edition_signing, designer_id").eq("id", data.source_pick_id).maybeSingle();
           if (pick) {
-            const { data: owner } = await supabase.from("designers").select("name, display_name, founder").eq("id", pick.designer_id).maybeSingle();
+            const { data: owner } = pick.designer_id ? await supabase.from("designers").select("name, display_name, founder").eq("id", pick.designer_id).maybeSingle() : { data: null };
             creditFields = { ...pick, designer_name: owner?.display_name || owner?.name, house_name: owner?.founder };
           }
         }
