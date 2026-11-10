@@ -59,13 +59,14 @@ export function FinishChips({ fo, size = "h-8 w-8" }: { fo?: { top?: string | nu
   );
 }
 
-export default function ProcurementBoardPanel({ boardId, boardTitle, projectId, items, finishOverrides = {}, onOpenFinishes, onDraftChange, onRequestedFinishes }: {
+export default function ProcurementBoardPanel({ lockedItemIds = [], boardId, boardTitle, projectId, items, finishOverrides = {}, onOpenFinishes, onDraftChange, onRequestedFinishes }: {
   boardId: string;
   boardTitle?: string;
   projectId?: string | null;
   onDraftChange?: (draft: ReturnType<typeof useDraftQuoteCompiler>) => void;
   onRequestedFinishes?: (finishes: Record<string, FinishSelection>) => void;
   onOpenFinishes?: (itemId: string) => void;
+  lockedItemIds?: string[];
   finishOverrides?: Record<string, { label: string; price_cents: number | null; image_url: string | null; top?: string | null; base?: string | null; top_image?: string | null; base_image?: string | null; extra?: { name: string; img: string | null }[] }>;
   items: Array<{ id: string; product_id: string; approval_status: string; product?: { product_name: string; brand_name: string; image_url: string | null } }>;
 }) {
@@ -318,7 +319,7 @@ export default function ProcurementBoardPanel({ boardId, boardTitle, projectId, 
                       <td className="truncate px-2">{r.lead_time ?? "—"}</td>
                       <td className="truncate px-2 capitalize">{r.ship_mode ?? "—"}</td>
                       <td className="px-2">
-                        <select value={r.approval_status} onChange={(e) => setStatus(r.id, e.target.value)} className={`h-6 w-full border px-1 text-[10px] capitalize ${r.approval_status === "approved" ? "border-emerald-700 bg-emerald-600 font-semibold text-white" : r.approval_status === "rejected" ? "border-destructive bg-destructive font-semibold text-destructive-foreground" : "border-border/60 bg-background"}`} aria-label={`Status for ${r.product_name}`}>
+                        <select value={r.approval_status} disabled={lockedItemIds.includes(r.id)} title={lockedItemIds.includes(r.id) ? "Locked in procurement review" : undefined} onChange={(e) => setStatus(r.id, e.target.value)} className={`h-6 w-full border px-1 text-[10px] capitalize ${r.approval_status === "approved" ? "border-emerald-700 bg-emerald-600 font-semibold text-white" : r.approval_status === "rejected" ? "border-destructive bg-destructive font-semibold text-destructive-foreground" : "border-border/60 bg-background"}`} aria-label={`Status for ${r.product_name}`}>
                           {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
                         </select>
                       </td>

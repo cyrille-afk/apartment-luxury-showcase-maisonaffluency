@@ -10,7 +10,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
 import { useParams, useNavigate, useLocation, Link } from "@/lib/router-compat";
 import type { ReactNode } from "react";
-import { ArrowLeft, Plus, Share2, FileText, Trash2, Check, X, FolderPlus, Folder, ChevronDown, ChevronRight, MoreHorizontal, Pencil, RefreshCw, Palette, Box, Mail, Phone, ExternalLink } from "lucide-react";
+import { ArrowLeft, Plus, Share2, FileText, Trash2, Check, X, FolderPlus, Folder, ChevronDown, ChevronRight, MoreHorizontal, Pencil, RefreshCw, Palette, Box, Mail, Phone, ExternalLink, Lock, ArrowRight } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
@@ -1104,7 +1104,7 @@ const TradeBoardBuilder = () => {
             </div>
             {Object.entries(compiledDraft?.totals ?? {}).map(([currency, total]) => <p key={currency} className="font-body text-sm text-foreground">{compiledDraft?.ready ? "Subtotal" : "Verified lines subtotal"} · {formatMoneyIn(total.client, currency)}</p>)}
             {!compiledDraft?.ready && <p role="status" className="font-body text-xs text-destructive">Verify missing finish prices or quantities before saving this draft.</p>}
-            <Button className="cursor-pointer rounded-none" disabled={!compiledDraft?.ready || creatingDraft} onClick={saveCompiledDraft}>{creatingDraft ? "Saving…" : "Save draft for procurement review"}</Button>
+            <Button className="cursor-pointer rounded-none" disabled={!compiledDraft?.ready || creatingDraft || compiledDraft.lines.some((l) => lockedItemIds.includes(l.id))} onClick={saveCompiledDraft}>{creatingDraft ? "Saving…" : compiledDraft?.lines.some((l) => lockedItemIds.includes(l.id)) ? "Already in procurement review" : "Save draft for procurement review"}</Button>
           </DialogContent>
         </Dialog>}
         {finishItem && (
