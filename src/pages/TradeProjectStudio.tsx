@@ -69,7 +69,7 @@ export default function TradeProjectStudio() {
   const [curatorialItemId, setCuratorialItemId] = useState<string | null>(null);
   const [isRecommendationHovered, setIsRecommendationHovered] = useState(false);
   const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
-  const [isSpecPanelOpen, setIsSpecPanelOpen] = useState(true);
+  const [isSpecPanelOpen, setIsSpecPanelOpen] = useState(false);
   const [isProposalPreviewOpen, setIsProposalPreviewOpen] = useState(false);
   const specItem = items.find((i) => i.product_id === specItemId) || null;
   const curatorialItem = items.find((i) => i.product_id === curatorialItemId) || items[0] || null;
@@ -242,8 +242,8 @@ export default function TradeProjectStudio() {
       </div>
 
       <div className="flex shrink-0 flex-wrap justify-start gap-2 border-b border-border px-4 py-3 md:px-6">
-        <Button variant="outline" aria-haspopup="dialog" disabled={!items.length} onClick={openVisualStudio} className="cursor-pointer rounded-none font-body text-[10px] uppercase tracking-[0.15em]">AI Co-Designer</Button>
-        <Button variant="outline" aria-controls="studio-spec-panel" aria-expanded={isSpecPanelOpen} onClick={() => setIsSpecPanelOpen(!isSpecPanelOpen)} className="cursor-pointer rounded-none font-body text-[10px] uppercase tracking-[0.15em]">Specsheet</Button>
+        <Button variant="secondary" aria-haspopup="dialog" disabled={!items.length} onClick={openVisualStudio} className="cursor-pointer rounded-none bg-muted font-body text-[10px] uppercase tracking-[0.15em] text-foreground hover:bg-muted/80">AI Co-Designer</Button>
+        <Button variant="outline" aria-controls="studio-spec-panel" aria-expanded={isSpecPanelOpen} onClick={() => setIsSpecPanelOpen(!isSpecPanelOpen)} className="cursor-pointer rounded-none border-foreground/30 bg-transparent font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground hover:bg-muted/40 hover:text-foreground">Specsheet</Button>
       </div>
       <div className="relative min-h-[70dvh] overflow-hidden lg:min-h-0 lg:flex-1">
         {/* Canvas expands into the space released by either independent drawer. */}
