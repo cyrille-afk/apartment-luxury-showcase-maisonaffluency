@@ -1856,6 +1856,13 @@
       "when": 1794202279146,
       "tag": "0264_quote_project_folder_sync",
       "breakpoints": true
+    },
+    {
+      "idx": 265,
+      "version": "7",
+      "when": 1794272036920,
+      "tag": "0265_board_invitation_email_status",
+      "breakpoints": true
     }
   ]
 }

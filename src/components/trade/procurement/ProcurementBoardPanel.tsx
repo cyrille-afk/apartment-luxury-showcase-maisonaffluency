@@ -1,4 +1,5 @@
 import { uniqueCollaborators } from "@/lib/uniqueCollaborators";
+import { invitationEmailState, latestInvitationEmail, type InvitationEmailStatus } from "@/lib/invitationEmailStatus";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toDiscountFraction, tradePriceCents, clientPriceCents, clientUnitCents, discountPercentLabel, effectiveProjectMultiplier } from "@/lib/tradePricing";
 import { AnimatePresence, motion } from "framer-motion";
@@ -28,7 +29,7 @@ type Row = {
   ship_mode: string | null;
 };
 
-type Invite = { id: string; email: string; role: string; status: string; last_seen_at: string | null };
+type Invite = { id: string; email: string; role: string; status: string; last_seen_at: string | null; created_at: string };
 type Feedback = { id: string; item_id: string; reaction: string | null; comment: string | null; created_at: string; invite_id: string | null };
 
 const STATUSES = ["pending", "approved", "rejected"] as const;
@@ -66,6 +67,7 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
   const [discountPct, setDiscountPct] = useState(0); // fraction (0.10 = 10%)
   const [multiplier, setMultiplier] = useState(1);
   const [invites, setInvites] = useState<Invite[]>([]);
+  const [emailStatuses, setEmailStatuses] = useState<InvitationEmailStatus[]>([]);
   const [feedback, setFeedback] = useState<Feedback[]>([]);
   const [statusOverride, setStatusOverride] = useState<Record<string, string>>({});
   const [inviteOpen, setInviteOpen] = useState(false);
@@ -126,13 +128,29 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
   }, [boardId, currentStudio?.default_project_markup_percentage]);
 
   const loadCollab = useCallback(async () => {
-    const [{ data: inv }, { data: fb }] = await Promise.all([
-      supabase.from("board_invites").select("id, email, role, status, last_seen_at").eq("board_id", boardId).neq("status", "revoked").order("created_at"),
+    const [{ data: inv }, { data: fb }, delivery] = await Promise.all([
+      supabase.from("board_invites").select("id, email, role, status, last_seen_at, created_at").eq("board_id", boardId).neq("status", "revoked").order("created_at"),
       supabase.from("board_item_feedback").select("id, item_id, reaction, comment, created_at, invite_id").eq("board_id", boardId).order("created_at", { ascending: false }),
+      supabase.rpc("board_invitation_email_status", { _board_id: boardId }),
     ]);
     setInvites((inv as Invite[]) || []);
     setFeedback((fb as Feedback[]) || []);
+    setEmailStatuses(delivery.error ? [] : delivery.data || []);
   }, [boardId]);
+
+  useEffect(() => {
+    const refresh = () => { if (document.visibilityState === "visible") void loadCollab(); };
+    const timer = window.setInterval(refresh, 15000);
+    window.addEventListener("focus", refresh);
+    window.addEventListener("ma:quote-folder-linked", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("focus", refresh);
+      window.removeEventListener("ma:quote-folder-linked", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, [loadCollab]);
 
   useEffect(() => {
     loadCollab();
@@ -191,13 +209,17 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
           <span className={`font-body text-[10px] uppercase tracking-[0.2em] ${clientSafe ? "text-foreground" : "text-muted-foreground"}`}>Client Editorial Presentation</span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {uniqueCollaborators(invites).map((inv) => (
+          {uniqueCollaborators(invites).map((inv) => {
+            const delivery = latestInvitationEmail(inv.ids, emailStatuses);
+            const emailState = invitationEmailState(delivery?.email_status);
+            return (
             <Badge key={inv.id} variant="outline" className="gap-1.5 rounded-none font-body text-[10px] font-normal">
               <span className={`h-1.5 w-1.5 rounded-full ${inv.status === "accepted" || inv.last_seen_at ? "bg-primary" : "bg-muted-foreground/50"}`} />
               {inv.email} · {inv.role === "client" ? "Client" : "Contractor"} · {inv.status === "accepted" ? "joined" : inv.last_seen_at ? "viewed" : "pending"}
-              <button onClick={() => revoke(inv.ids)} aria-label={`Revoke ${inv.email}`} className="ml-1 opacity-60 hover:opacity-100"><X className="h-3 w-3" /></button>
+              <span className={emailState.tone} title={`${emailState.detail}${delivery?.updated_at ? ` Last update: ${new Date(delivery.updated_at).toLocaleString()}` : ""}`} aria-live="polite">· {emailState.label}</span>
+              <Button type="button" variant="ghost" size="icon" onClick={() => revoke(inv.ids)} aria-label={`Revoke ${inv.email}`} className="ml-1 h-5 w-5 shrink-0 cursor-pointer opacity-60 hover:opacity-100"><X className="h-3 w-3" /></Button>
             </Badge>
-          ))}
+          ); })}
           <Button size="sm" variant="outline" className="gap-1.5 rounded-none" data-felix-target="invite-collaborator" onClick={() => setInviteOpen(true)}>
             <UserPlus className="h-3.5 w-3.5" /> Invite Collaborator
           </Button>
