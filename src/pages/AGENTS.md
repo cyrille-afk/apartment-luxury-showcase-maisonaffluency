@@ -13,3 +13,5 @@
 
 - Admin inquiry inbox search (`src/pages/TradeAdminInquiries.tsx`) applies each typed term as a server-side or-group built by `src/lib/inquirySearch.ts`, so a match older than the newest fetched page stays findable; the same predicate filters client-side as a final guard so the list and the match count can't disagree.
 - Saving a board draft quote reserves its board items via client_board_items.procurement_quote_id and opens the Quote Builder; procurement_issued_at is the shared authority for the builder/folder/dashboard badge, set atomically on finalization, while the quote remains open as a read-only archive — draft preparation cannot masquerade as issuance.
+- Trade loaders hold the last page height (tradePageHeightHold) — else the window snaps up before products load.
+- Trade login return URLs use tradeLoginReturn helpers and normalize old recursive links at entry; the outgoing TradeLayout never redirects an incoming login location, and router-compat search has exactly one question mark — pending navigation must not wrap its own destination.
