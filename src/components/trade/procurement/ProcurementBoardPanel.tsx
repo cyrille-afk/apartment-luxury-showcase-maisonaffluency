@@ -66,6 +66,7 @@ export default function ProcurementBoardPanel({ lockedItemIds = [], boardId, boa
   onDraftChange?: (draft: ReturnType<typeof useDraftQuoteCompiler>) => void;
   onRequestedFinishes?: (finishes: Record<string, FinishSelection>) => void;
   onOpenFinishes?: (itemId: string) => void;
+  onStatusChange?: (itemId: string, status: string) => void;
   lockedItemIds?: string[];
   finishOverrides?: Record<string, { label: string; price_cents: number | null; image_url: string | null; top?: string | null; base?: string | null; top_image?: string | null; base_image?: string | null; extra?: { name: string; img: string | null }[] }>;
   items: Array<{ id: string; product_id: string; approval_status: string; product?: { product_name: string; brand_name: string; image_url: string | null } }>;
@@ -247,7 +248,7 @@ export default function ProcurementBoardPanel({ lockedItemIds = [], boardId, boa
     setStatusOverride((s) => ({ ...s, [id]: status }));
     const { error } = await supabase.from("client_board_items").update({ approval_status: status }).eq("id", id);
     if (error) { setStatusOverride((s) => { const next = { ...s }; delete next[id]; return next; }); toast({ title: "Could not update status", variant: "destructive" }); }
-    else void loadCollab();
+    else { onStatusChange?.(id, status); void loadCollab(); toast({ title: status === "approved" ? "Selection approved" : `Status set to ${status}` }); }
     setSavingStatus(false);
   };
 
