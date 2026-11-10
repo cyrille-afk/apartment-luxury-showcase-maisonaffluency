@@ -2,7 +2,7 @@
 
 ## Shared board invitation email
 - [x] Add the saved folder's curated-piece count, client Review & Approve CTA, copyable full-link fallback and higher-contrast expiration notice; preserve view-only access wording.
-- [ ] Verify rendered desktop/mobile email and deploy the existing sender and previews without sending invitations.
+- [x] Desktop/mobile render verified without overflow, expiration contrast 6.66:1; three invitation resend regressions and all three sender/preview boot/live checks pass. Deployed without sending invitations.
 
 ## Shared portfolio picture interaction
 - [x] Shared-grid product pictures use the same selected-item panel action as 3D View, preserving token-scoped configuration and existing view-only restrictions.
