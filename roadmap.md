@@ -1,5 +1,9 @@
 # Roadmap
 
+## Matrix feedback panel
+- [x] Replace wide feedback cells with a highlighted message icon and full-height right Sheet; chronological client history includes reaction events and historical invitation senders, with private notes in a shaded bottom zone. Client View unmounts the private panel.
+- [x] Signed-in real Madison history and sender verified; existing private note saved unchanged and read back on reopening, close/reopen and 390px full-height layout pass. Two submission regressions pass; build OK.
+
 ## Client-board feedback retention
 - [x] Display saved recipient/role/board-scoped comment history and approval status; reload comments after sending and fix finish-request prefix parsing. Renewed invitations recover the same recipient's comments without restoring revoked access.
 - [x] Real client board shows Madison's existing comment, finish proposal and Approved status, plus the earlier Frenchmen comment; reopening and 390px card verified. Three regressions pass, build OK; no selections changed and temporary verification session removed. Existing SSR document-is-not-defined warnings fall back to client rendering.
