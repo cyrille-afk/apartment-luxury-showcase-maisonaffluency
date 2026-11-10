@@ -1,5 +1,9 @@
 # Roadmap
 
+## Project Studio sliding panels
+- [x] Separate AI Co-Designer and Specsheet into independent sliding drawers with black close controls and persistent reopen actions; released space expands the canvas.
+- [x] Signed-in real project verified: both drawers open independently, close/reopen preserves Frenchmen context, closing Specsheet expands canvas from 1019px to 1699px, and 390px controls fit with one drawer at a time; no browser errors and build OK.
+
 ## Shared procurement status and quote archive
 - [x] Share persisted issuance state across Quote Builder, folder header and folder dashboard badges; keep the builder open after finalization.
 - [x] Finalize atomically into procurement review and freeze line items, client identity and addresses, including administrator edits. Corrected pre-existing trigger ordering that blocked non-admin finalization without weakening caller-price checks.

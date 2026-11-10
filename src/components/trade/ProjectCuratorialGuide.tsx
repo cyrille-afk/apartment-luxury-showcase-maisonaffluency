@@ -324,27 +324,7 @@ export function ProjectCuratorialGuide({
 
   return (
     <>
-    {false && docked && !open && (
-      <>
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="flex h-11 w-full items-center justify-center gap-2 bg-background font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:text-foreground lg:hidden"
-        >
-          <ArrowUp className="h-3 w-3" aria-hidden="true" />
-          [ Activate AI Curatorial Concierge ]
-        </button>
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="hidden lg:absolute lg:bottom-8 lg:left-1/2 lg:z-50 lg:flex lg:-translate-x-1/2 lg:items-center lg:gap-3 lg:rounded-full lg:border lg:border-[#E5E5E5] lg:bg-white lg:px-6 lg:py-3.5 lg:font-mono lg:text-[10px] lg:uppercase lg:tracking-[0.2em] lg:text-foreground/80 lg:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.08)] lg:backdrop-blur-sm lg:transition-all lg:duration-300 lg:ease-out lg:hover:-translate-y-1 lg:hover:text-foreground lg:hover:border-foreground/40 lg:hover:shadow-[0_8px_24px_-6px_rgba(0,0,0,0.12)]"
-        >
-          <span className="inline-block h-1.5 w-1.5 rounded-full bg-current ring-1 ring-current/30" aria-hidden="true" />
-          Activate AI Concierge Workspace
-        </button>
-      </>
-    )}
-    {connector && open && (
+    {connector && open && !docked && (
       <svg className="pointer-events-none fixed inset-0 z-[51] h-full w-full" aria-hidden="true">
         <line
           x1={connector.x1}
@@ -377,27 +357,16 @@ export function ProjectCuratorialGuide({
           <p data-curating-for className="mt-2 inline-block border border-foreground/80 px-2 py-0.5 font-body text-[9px] uppercase tracking-[0.15em] text-foreground">
             Curating pairings for: {activeItem?.name || "the project composition"}
           </p>
-          <h2 className="mt-1 truncate font-display text-xl text-foreground md:text-2xl">
+          <h2 className="mt-1 font-display text-xl leading-tight text-foreground md:text-2xl">
             AI Curatorial Assistant <span className="font-body text-[10px] uppercase tracking-[0.15em]">// Co-Designer</span>
           </h2>
-          <p className="mt-1 truncate font-body text-[10px] uppercase tracking-[0.15em] text-foreground">
+          <p className="mt-1 font-body text-[10px] uppercase leading-relaxed tracking-[0.15em] text-foreground">
             {isClientMode
               ? "AI Curation: Aesthetic pairings selected to balance the textural composition."
               : `AI Curation: Sourcing active wood variants and high-margin pairs matching ${activeItem?.name || "the active composition"}.`}
           </p>
         </div>
         <div className="flex shrink-0 items-center">
-          {docked && (
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => setOpen(false)}
-              className="h-auto rounded-none px-2 py-1 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground hover:bg-transparent hover:text-foreground"
-            >
-              <X className="h-3 w-3" aria-hidden="true" />
-              [ Dismiss AI Concierge ]
-            </Button>
-          )}
           {!docked && (
             <>
               <Button
@@ -473,7 +442,7 @@ export function ProjectCuratorialGuide({
               <Loader2 className="h-4 w-4 animate-spin" /> Analysing the composition
             </div>
           ) : recommendations.length ? (
-            <div ref={streamRef} className="flex h-full snap-x gap-5 overflow-x-auto pb-3 [scrollbar-width:thin]">
+            <div ref={streamRef} className={docked ? "flex flex-col gap-6 pb-3" : "flex h-full snap-x gap-5 overflow-x-auto pb-3 [scrollbar-width:thin]"}>
               {recommendations.map((rec, index) => {
                 const context = recommendationContext(rec, activeItem?.name || "active piece");
                 const briefReason = isClientMode ? clientReason(rec, activeItem?.name || "composition") : rec.reason;
@@ -484,7 +453,7 @@ export function ProjectCuratorialGuide({
                     ref={index === 0 ? firstRecommendationRef : undefined}
                     key={rec.product_id}
                     title={rationale}
-                    className="group relative flex h-full w-[140px] shrink-0 snap-start flex-col md:w-[170px]"
+                    className={docked ? "group relative flex w-full shrink-0 flex-col border-b border-border pb-4" : "group relative flex h-full w-[140px] shrink-0 snap-start flex-col md:w-[170px]"}
                     onMouseEnter={() => onRecommendationHover(true)}
                     onMouseLeave={() => onRecommendationHover(false)}
                     onFocus={() => onRecommendationHover(true)}

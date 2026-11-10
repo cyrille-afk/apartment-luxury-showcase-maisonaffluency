@@ -18,6 +18,7 @@ import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useStudio } from "@/hooks/useStudio";
 import { effectiveProjectMultiplier, tradePriceCents, clientPriceCents, clientUnitCents } from "@/lib/tradePricing";
 import { StudioBrand } from "@/components/trade/StudioBrand";
+import { StudioSidePanel } from "@/components/trade/StudioSidePanel";
 
 type StudioItem = {
   id: string;
@@ -67,6 +68,7 @@ export default function TradeProjectStudio() {
   const [curatorialItemId, setCuratorialItemId] = useState<string | null>(null);
   const [isRecommendationHovered, setIsRecommendationHovered] = useState(false);
   const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
+  const [isSpecPanelOpen, setIsSpecPanelOpen] = useState(true);
   const [isProposalPreviewOpen, setIsProposalPreviewOpen] = useState(false);
   const specItem = items.find((i) => i.product_id === specItemId) || null;
 
@@ -232,9 +234,13 @@ export default function TradeProjectStudio() {
         </h1>
       </div>
 
-      <div className="grid grid-cols-1 lg:min-h-0 lg:flex-1 lg:grid-cols-[60%_40%]">
-        {/* LEFT — central workspace: canvas (upper) + AI pane (lower) */}
-        <section className="relative flex flex-col border-b border-border bg-background lg:min-h-0 lg:border-b-0 lg:border-r lg:border-border">
+      <div className="flex shrink-0 flex-wrap justify-end gap-2 border-b border-border px-4 py-3 md:px-8 lg:px-12">
+        <Button variant="outline" aria-controls="studio-ai-panel" aria-expanded={isAiPanelOpen} onClick={() => { setIsAiPanelOpen(!isAiPanelOpen); if (window.innerWidth < 1024) setIsSpecPanelOpen(false); }} className="cursor-pointer rounded-none font-body text-[10px] uppercase tracking-[0.15em]">AI Co-Designer</Button>
+        <Button variant="outline" aria-controls="studio-spec-panel" aria-expanded={isSpecPanelOpen} onClick={() => { setIsSpecPanelOpen(!isSpecPanelOpen); if (window.innerWidth < 1024) setIsAiPanelOpen(false); }} className="cursor-pointer rounded-none font-body text-[10px] uppercase tracking-[0.15em]">Specsheet</Button>
+      </div>
+      <div className="relative min-h-[70dvh] overflow-hidden lg:min-h-0 lg:flex-1">
+        {/* Canvas expands into the space released by either independent drawer. */}
+        <section aria-label="Visual canvas" className={`relative flex h-full flex-col bg-background transition-[margin] duration-500 ease-in-out motion-reduce:transition-none ${isAiPanelOpen ? "lg:ml-80" : "lg:ml-0"} ${isSpecPanelOpen ? "lg:mr-[40%]" : "lg:mr-0"}`}>
           {/* Upper zone — visual canvas */}
           <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
           <div className="px-4 py-6 md:px-8 lg:px-12 lg:py-5">
@@ -259,6 +265,7 @@ export default function TradeProjectStudio() {
                 const activate = () => {
                   setCuratorialItemId(item.product_id);
                   setIsAiPanelOpen(true);
+                  if (window.innerWidth < 1024) setIsSpecPanelOpen(false);
                   window.dispatchEvent(new CustomEvent("project-curator:open"));
                 };
                 return (
@@ -314,8 +321,18 @@ export default function TradeProjectStudio() {
 
         </section>
 
-        {/* RIGHT — procurement ledger */}
-        <aside className="flex flex-col px-6 py-6 md:px-10 lg:min-h-0 lg:overflow-hidden lg:px-14">
+        <StudioSidePanel id="studio-ai-panel" title="AI Co-Designer" side="left" open={isAiPanelOpen} onClose={() => setIsAiPanelOpen(false)}>
+          <ProjectCuratorialGuide
+            docked open={isAiPanelOpen} onOpenChange={setIsAiPanelOpen}
+            projectId={project.id} projectName={project.name} items={items}
+            activeItemId={curatorialItemId} isClientMode={isClientMode}
+            onActiveItemChange={setCuratorialItemId}
+            onCompositionChanged={() => setItemsVersion((version) => version + 1)}
+            onRecommendationHover={setIsRecommendationHovered}
+          />
+        </StudioSidePanel>
+        <StudioSidePanel id="studio-spec-panel" title="Specsheet" side="right" open={isSpecPanelOpen} onClose={() => setIsSpecPanelOpen(false)}>
+        <div className="flex min-h-0 flex-1 flex-col px-6 py-6 md:px-8">
           {/* Header — fixed at the top of the right pane */}
           <div className="shrink-0 border-b border-border pb-6">
             <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -385,39 +402,8 @@ export default function TradeProjectStudio() {
              {!isClientMode && <div data-client-placeholder aria-hidden="true" className="mt-6 h-3 w-40 animate-pulse bg-muted/60" />}
           </div>
 
-          {/* Column view switch — Specifications / AI Curator */}
-          <div role="tablist" aria-label="Right column view" className="mt-4 flex shrink-0 gap-6 border-b border-border">
-            {([["spec", "Specifications"], ["ai", "AI Curator"]] as const).map(([key, label]) => {
-              const selected = (key === "ai") === isAiPanelOpen;
-              return (
-                <button key={key} type="button" role="tab" aria-selected={selected} onClick={() => setIsAiPanelOpen(key === "ai")}
-                  className={`-mb-px border-b py-2 font-body text-[10px] uppercase tracking-[0.15em] transition-colors ${selected ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-
-          {isAiPanelOpen && (
-            <div className="-mx-6 flex min-h-0 flex-1 flex-col md:-mx-10 lg:-mx-14">
-              <ProjectCuratorialGuide
-                docked
-                open={isAiPanelOpen}
-                onOpenChange={setIsAiPanelOpen}
-                projectId={project.id}
-                projectName={project.name}
-                items={items}
-                activeItemId={curatorialItemId}
-                isClientMode={isClientMode}
-                onActiveItemChange={setCuratorialItemId}
-                onCompositionChanged={() => setItemsVersion((version) => version + 1)}
-                onRecommendationHover={setIsRecommendationHovered}
-              />
-            </div>
-          )}
-
           {/* Scrollable ledger body */}
-          <div className={`flex-1 overflow-y-auto ${isAiPanelOpen ? "hidden" : ""}`}>
+          <div className="min-h-0 flex-1 overflow-y-auto">
             <div className="mt-8 px-1 md:px-2">
               <div className="grid grid-cols-[44px_minmax(0,1fr)_auto] gap-3 border-b border-border pb-4 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
                 <span>Spec</span>
@@ -544,7 +530,8 @@ export default function TradeProjectStudio() {
                {!isClientMode && items.length > 0 && <div data-client-placeholder aria-hidden="true" className="h-4 w-32 my-9 bg-muted/60 animate-pulse" />}
             </div>
           </div>
-        </aside>
+        </div>
+        </StudioSidePanel>
 
       </div>
 
