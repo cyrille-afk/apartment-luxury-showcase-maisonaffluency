@@ -26,13 +26,17 @@ beforeEach(() => {
   });
 });
 it("hydrates company, contact name and email together for the folder's linked client", async () => {
+  mocks.linkedClient = true;
   mount();
-  await screen.findByText("cdelval@ace-capital.com");
+  await waitFor(() => expect(profile).toEqual({ companyName: "Alternative Capital Enterprises Pte Ltd", clientName: "Cyrille Delval", email: "cdelval@ace-capital.com" }));
 });
 afterEach(cleanup);
 let invite: ((projectId: string, folderId: string, email: string) => () => void) | undefined;
+let profile: unknown;
 function Actions() {
-  invite = useProjectWorkspace()?.submitClientInvitation;
+  const workspace = useProjectWorkspace();
+  invite = workspace?.submitClientInvitation;
+  profile = workspace?.projects.singapore?.folders.sheet?.clientProfile;
   return null;
 }
 function mount() {
