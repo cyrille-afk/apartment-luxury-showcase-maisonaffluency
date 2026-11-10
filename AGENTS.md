@@ -194,4 +194,4 @@
 - Price-list content inspection uses an admin-checked public-storage inventory and revision-keyed private results; server-side byte detection precedes AI inspection, unchecked/failing assets remain unconfirmed — filenames and public covers must never imply safety.
 - Per-product `trade_only` controls visibility independently of maker profiles; new picks default Trade Only. Credits: `public_catalog_designer_credits`.
 - Trade loaders hold the last page height (tradePageHeightHold) — else the window snaps up before products load.
-- Sign-in emails (signup/reset/magic link) are sent by the app's /lovable/email/auth/webhook route using src/lib/email-templates (ported from the legacy hook's branded designs) — the legacy auth-email-hook function is no longer the delivery path.
+- Auth emails send via src/routes/lovable/email/auth/webhook.ts, not the legacy hook.
