@@ -5,11 +5,11 @@ import monogram from "@/assets/studio-monogram-a.png.asset.json";
  * DotCircleLoader — app-wide loading indicator. Renders the studio "A"
  * monogram with a slow, continuous spin (name kept so every caller updates).
  *
- * Sizes: sm (24px), md (40px — default), lg (64px), xl (96px)
+ * Sizes: sm (48px), md (96px — default), lg (144px), xl (192px)
  */
 type Size = "sm" | "md" | "lg" | "xl";
 
-const SIZE_PX: Record<Size, number> = { sm: 24, md: 40, lg: 64, xl: 96 };
+const SIZE_PX: Record<Size, number> = { sm: 48, md: 96, lg: 144, xl: 192 };
 
 interface DotCircleLoaderProps {
   size?: Size;
