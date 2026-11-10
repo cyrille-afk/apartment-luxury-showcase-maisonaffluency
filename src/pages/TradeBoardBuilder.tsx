@@ -1077,7 +1077,7 @@ const TradeBoardBuilder = () => {
           </div>
           <Button className="cursor-pointer rounded-none font-body text-[11px] uppercase tracking-[0.2em]" onClick={() => navigate(`/trade/quotes?quote=${procurementQuoteId}`)}>Open in Quotes &amp; Proformas <ArrowRight className="ml-2 h-3.5 w-3.5" /></Button>
         </div>}
-        <ProcurementBoardPanel lockedItemIds={lockedItemIds} boardId={board.id} boardTitle={board.title} projectId={board.project_id} items={items} finishOverrides={finishes} onDraftChange={setCompiledDraft} onRequestedFinishes={setRequestedFinishes} onOpenFinishes={(id) => { const it = items.find((i) => i.id === id); if (it) setFinishItem(it); }} />
+        <ProcurementBoardPanel lockedItemIds={lockedItemIds} boardId={board.id} boardTitle={board.title} projectId={board.project_id} items={items} finishOverrides={finishes} onDraftChange={setCompiledDraft} onStatusChange={(id, status) => setItems((prev) => prev.map((i) => (i.id === id ? { ...i, approval_status: status } : i)))} onRequestedFinishes={setRequestedFinishes} onOpenFinishes={(id) => { const it = items.find((i) => i.id === id); if (it) setFinishItem(it); }} />
         {!clientSafe && <Dialog open={draftReviewOpen} onOpenChange={setDraftReviewOpen}>
           <DialogContent data-trade-sensitive className="isolate max-h-[90dvh] max-w-3xl overflow-y-auto bg-background! opacity-100!">
             <DialogHeader><DialogTitle className="font-display text-2xl font-normal">Draft Quote · {board.title}</DialogTitle></DialogHeader>
