@@ -15,6 +15,7 @@ import { formatMoneyIn } from "@/lib/displayMoney";
 import { toast } from "@/hooks/use-toast";
 import { useStudio } from "@/hooks/useStudio";
 import InviteCollaboratorDialog from "./InviteCollaboratorDialog";
+import BoardInviteEmailPreview from "./BoardInviteEmailPreview";
 
 type Row = {
   id: string;
@@ -55,8 +56,9 @@ export function FinishChips({ fo, size = "h-8 w-8" }: { fo?: { top?: string | nu
   );
 }
 
-export default function ProcurementBoardPanel({ boardId, items, finishOverrides = {}, onOpenFinishes }: {
+export default function ProcurementBoardPanel({ boardId, boardTitle, items, finishOverrides = {}, onOpenFinishes }: {
   boardId: string;
+  boardTitle?: string;
   onOpenFinishes?: (itemId: string) => void;
   finishOverrides?: Record<string, { label: string; price_cents: number | null; image_url: string | null; top?: string | null; base?: string | null; top_image?: string | null; base_image?: string | null; extra?: { name: string; img: string | null }[] }>;
   items: Array<{ id: string; product_id: string; approval_status: string; product?: { product_name: string; brand_name: string; image_url: string | null } }>;
@@ -220,6 +222,7 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
               <Button type="button" variant="ghost" size="icon" onClick={() => revoke(inv.ids)} aria-label={`Revoke ${inv.email}`} className="ml-1 h-5 w-5 shrink-0 cursor-pointer opacity-60 hover:opacity-100"><X className="h-3 w-3" /></Button>
             </Badge>
           ); })}
+          <BoardInviteEmailPreview boardTitle={boardTitle} studioName={currentStudio?.name} itemCount={items.length} />
           <Button size="sm" variant="outline" className="gap-1.5 rounded-none" data-felix-target="invite-collaborator" onClick={() => setInviteOpen(true)}>
             <UserPlus className="h-3.5 w-3.5" /> Invite Collaborator
           </Button>
