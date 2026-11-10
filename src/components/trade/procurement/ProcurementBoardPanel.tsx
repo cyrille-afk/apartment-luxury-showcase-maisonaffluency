@@ -95,6 +95,24 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
     supabase.rpc("current_trade_discount_pct" as any).then(({ data }) => setDiscountPct(toDiscountFraction(data)));
   }, [productIds]);
 
+  // Quote-synced pieces carry the configured net snapshot saved on the quote line.
+  const [quoteNet, setQuoteNet] = useState<Map<string, { net: number; currency: string }>>(new Map());
+  useEffect(() => {
+    (async () => {
+      const { data: links } = await supabase.from("client_board_items").select("id, source_quote_item_id").eq("board_id", boardId).not("source_quote_item_id", "is", null);
+      const ids = (links || []).map((l: any) => l.source_quote_item_id);
+      if (!ids.length) return setQuoteNet(new Map());
+      const { data: qi } = await supabase.from("trade_quote_items").select("id, unit_price_cents, unit_price_currency").in("id", ids);
+      const byQi = new Map((qi || []).map((q: any) => [q.id, q]));
+      const m = new Map<string, { net: number; currency: string }>();
+      for (const l of links as any[]) {
+        const q: any = byQi.get(l.source_quote_item_id);
+        if (q?.unit_price_cents) m.set(l.id, { net: Math.round(Number(q.unit_price_cents)), currency: q.unit_price_currency || "EUR" });
+      }
+      setQuoteNet(m);
+    })();
+  }, [boardId, productIds]);
+
   useEffect(() => {
     (async () => {
       const { data: b } = await supabase.from("client_boards").select("project_id").eq("id", boardId).maybeSingle();
@@ -138,8 +156,10 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
       product_name: i.product?.product_name || "Selected piece",
       brand_name: i.product?.brand_name || null,
       image_url: fo?.image_url || i.product?.image_url || null,
-      msrp_cents: fo?.price_cents ?? (p.trade_price_cents || null),
-      currency: p.currency || "EUR",
+      msrp_cents: quoteNet.has(i.id)
+        ? Math.round(quoteNet.get(i.id)!.net / Math.max(0.01, 1 - discountPct))
+        : fo?.price_cents ?? (p.trade_price_cents || null),
+      currency: quoteNet.get(i.id)?.currency || p.currency || "EUR",
       lead_time: lead,
       ship_mode: p.default_ship_mode || null,
     };
