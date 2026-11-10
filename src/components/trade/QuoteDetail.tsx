@@ -37,7 +37,7 @@ import { quoteShipToFromClient } from "@/lib/quoteShipTo";
 import { QuoteItemSkeleton } from "@/components/trade/skeletons";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import AlphabetProductPicker, { type PickerItem } from "@/components/trade/AlphabetProductPicker";
-import affluencyLogo from "@/assets/affluency-quote-logo.jpg";
+import { QuoteBrandingControl, QuoteBrandingHeader, useQuoteBranding } from "./QuoteBranding";
 import { downloadProcurementWorkbook, autoPoNumber, type ProcurementLine } from "@/lib/procurementExcel";
 import { downloadQuotePdf, previewQuotePdfUrl, type QuotePdfLine, type QuotePdfArgs } from "@/lib/quotePdf";
 import { publishQuotePdf } from "@/lib/publishQuotePdf";
