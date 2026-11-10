@@ -1891,6 +1891,27 @@
       "when": 1794303157397,
       "tag": "0269_shared_board_product_credits",
       "breakpoints": true
+    },
+    {
+      "idx": 270,
+      "version": "7",
+      "when": 1794316805188,
+      "tag": "0270_shared_procurement_issue_archive",
+      "breakpoints": true
+    },
+    {
+      "idx": 271,
+      "version": "7",
+      "when": 1794316970626,
+      "tag": "0271_serialize_procurement_archive_line_writes",
+      "breakpoints": true
+    },
+    {
+      "idx": 272,
+      "version": "7",
+      "when": 1794317151222,
+      "tag": "0272_validate_quote_inputs_before_canonical_pricing",
+      "breakpoints": true
     }
   ]
 }

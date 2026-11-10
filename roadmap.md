@@ -1,5 +1,11 @@
 # Roadmap
 
+## Shared procurement status and quote archive
+- [x] Share persisted issuance state across Quote Builder, folder header and folder dashboard badges; keep the builder open after finalization.
+- [x] Finalize atomically into procurement review and freeze line items, client identity and addresses, including administrator edits. Corrected pre-existing trigger ordering that blocked non-admin finalization without weakening caller-price checks.
+- [x] Sixteen regressions pass; authenticated disposable finalization confirms identical saved quote/folder issuance and rejects client-name/address edits, quantity changes, line insertion and deletion. Temporary records removed, no customer document issued; build OK.
+- [ ] Full live builder → parent dashboard interaction blocked: the requesting account renders “No studio yet”; shared-hook remount and saved backend readback verified instead.
+
 ## Quote sheet studio identity
 - [x] Connect the exact quote folder's Client Portal Branding to the upper-right document identity, with studio-profile fallback and immediate branding-change events.
 - [x] Add the no-logo Hide platform branding checkbox and editable company header with user+quote-scoped device persistence and fixed header tracks. Ten regressions pass; signed-in real quote verified with read-only simulated no-logo/custom SVG branding, instant toggle, unchanged dimensions, reload readback and 390px identity rendering; build OK. No customer records changed; generated PDFs/exports remain unchanged.

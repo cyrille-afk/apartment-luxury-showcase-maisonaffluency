@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { ProcurementStatusBadge } from "@/components/trade/ProcurementStatusBadge";
+import { procurementState } from "@/lib/procurementStatus";
 import { absoluteUrl } from "@/config/site";
 import { Helmet } from "react-helmet-async";
 import { Plus, Share2, FileText, Trash2, ExternalLink, FolderOpen, Sparkles } from "lucide-react";
@@ -33,6 +35,7 @@ interface Board {
   client_email: string | null;
   share_token?: string;
   status: string;
+  procurement_issued_at?: string | null;
   source?: "manual" | "concierge" | null;
   created_at: string;
   updated_at: string;
@@ -77,7 +80,7 @@ const TradeBoards = ({ embedded = false }: { embedded?: boolean }) => {
     if (!user) return;
     let q = supabase
       .from("client_boards")
-      .select("id, user_id, studio_id, project_id, title, client_name, status, source, token_expires_at, token_rotated_at, studio_name, studio_logo_url, hide_maison_branding, created_at, updated_at")
+      .select("id, user_id, studio_id, project_id, title, client_name, status, procurement_issued_at, source, token_expires_at, token_rotated_at, studio_name, studio_logo_url, hide_maison_branding, created_at, updated_at")
       .order("updated_at", { ascending: false });
     // Scope to current studio so teammates see each other's boards.
     // Also include legacy boards created before a studio existed (studio_id NULL)
@@ -125,6 +128,15 @@ const TradeBoards = ({ embedded = false }: { embedded?: boolean }) => {
   };
 
   useEffect(() => { fetchBoards(); }, [user, projectFilter, currentStudio?.id]);
+  useEffect(() => {
+    const refresh = () => { void fetchBoards(); };
+    window.addEventListener("ma:procurement-issued", refresh);
+    window.addEventListener("focus", refresh);
+    return () => {
+      window.removeEventListener("ma:procurement-issued", refresh);
+      window.removeEventListener("focus", refresh);
+    };
+  }, [user, projectFilter, currentStudio?.id]);
 
   useEffect(() => {
     if (!projectFilter) { setProjectFilterName(null); return; }
@@ -337,7 +349,9 @@ const TradeBoards = ({ embedded = false }: { embedded?: boolean }) => {
                     {board.client_name && <p className="font-body text-xs text-muted-foreground mt-0.5">{board.client_name}</p>}
                   </div>
                   <div className="flex flex-col items-end gap-1 shrink-0">
-                    <Badge variant="secondary" className={statusColors[board.status] || ""}>{board.status}</Badge>
+                    {board.status === "in_procurement_review" || board.procurement_issued_at
+                      ? <ProcurementStatusBadge state={procurementState(board.procurement_issued_at)} />
+                      : <Badge variant="secondary" className={statusColors[board.status] || ""}>{board.status}</Badge>}
                     {board.source === "concierge" && (
                       <span className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 border border-dashed border-foreground/30 font-body text-[9px] uppercase tracking-[0.1em] text-muted-foreground" title="Auto-saved from an AI Concierge session">
                         <Sparkles className="h-2.5 w-2.5" />

@@ -405,6 +405,11 @@ const TradeQuotes = () => {
           fetchQuotes();
         }}
         onStatusChange={() => {
+          // Issuance stays on the document so its shared status and archive are visible.
+          if (selectedQuoteId) {
+            void fetchQuotes();
+            return;
+          }
           setSelectedQuoteId(null);
           if (quoteId) {
             navigate("/trade/quotes", { replace: true });

@@ -1730,6 +1730,7 @@ export type Database = {
           created_at: string
           hide_maison_branding: boolean
           id: string
+          procurement_issued_at: string | null
           project_id: string | null
           share_token: string
           source: string
@@ -1750,6 +1751,7 @@ export type Database = {
           created_at?: string
           hide_maison_branding?: boolean
           id?: string
+          procurement_issued_at?: string | null
           project_id?: string | null
           share_token?: string
           source?: string
@@ -1770,6 +1772,7 @@ export type Database = {
           created_at?: string
           hide_maison_branding?: boolean
           id?: string
+          procurement_issued_at?: string | null
           project_id?: string | null
           share_token?: string
           source?: string
@@ -11943,6 +11946,7 @@ export type Database = {
           notes: string | null
           payer_type: Database["public"]["Enums"]["payer_type"]
           pdf_locale: string | null
+          procurement_issued_at: string | null
           project_board_id: string | null
           project_id: string | null
           quote_kind: string
@@ -12007,6 +12011,7 @@ export type Database = {
           notes?: string | null
           payer_type?: Database["public"]["Enums"]["payer_type"]
           pdf_locale?: string | null
+          procurement_issued_at?: string | null
           project_board_id?: string | null
           project_id?: string | null
           quote_kind?: string
@@ -12071,6 +12076,7 @@ export type Database = {
           notes?: string | null
           payer_type?: Database["public"]["Enums"]["payer_type"]
           pdf_locale?: string | null
+          procurement_issued_at?: string | null
           project_board_id?: string | null
           project_id?: string | null
           quote_kind?: string

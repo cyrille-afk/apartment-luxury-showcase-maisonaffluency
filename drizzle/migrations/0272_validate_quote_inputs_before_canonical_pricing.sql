@@ -1,0 +1,3 @@
+ALTER TRIGGER trg_prevent_quote_pricing_self_insert ON public.trade_quotes RENAME TO aaa_prevent_quote_pricing_self_insert;
+ALTER TRIGGER trg_prevent_quote_pricing_self_update ON public.trade_quotes RENAME TO aaa_prevent_quote_pricing_self_update;
+COMMENT ON TRIGGER aaa_prevent_quote_pricing_self_update ON public.trade_quotes IS 'Reject caller pricing edits before the canonical tier guard normalizes values; system normalization must not block draft finalization.';

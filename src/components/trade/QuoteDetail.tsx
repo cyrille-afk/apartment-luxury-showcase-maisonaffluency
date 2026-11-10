@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { useProcurementStatus } from "@/hooks/useProcurementStatus";
+import { quoteDocumentEditable } from "@/lib/procurementStatus";
+import { ProcurementStatusBadge } from "./ProcurementStatusBadge";
 import { productAttribution } from "@/lib/productAttribution";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
@@ -435,7 +438,9 @@ const QuotePdfPreviewPages = ({ blobUrl }: { blobUrl: string | null }) => {
   );
 };
 
-const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack, onStatusChange }: QuoteDetailProps) => {
+const QuoteDetail = ({ quoteId, quoteStatus: initialQuoteStatus, quoteCreatedAt, quoteNotes, onBack, onStatusChange }: QuoteDetailProps) => {
+  const procurement = useProcurementStatus(quoteId);
+  const quoteStatus = procurement.data?.status ?? initialQuoteStatus;
   const { user, isAdmin, isSuperAdmin } = useAuth();
   const { currentStudio } = useStudio();
   const { toast } = useToast();
@@ -633,9 +638,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const isConfirmed = quoteStatus === "confirmed" || quoteStatus === "deposit_paid" || quoteStatus === "paid";
   const isDepositPaid = quoteStatus === "deposit_paid";
   const isFullyPaid = quoteStatus === "paid";
-  const isReadOnly = !isDraft && !isSuperAdmin;
-  // Admins can edit line items at any status (remove, change qty) without first reopening as draft.
-  const canEditLines = isDraft || isSuperAdmin;
+  const isArchive = procurement.state === "PROCUREMENT_REVIEW";
+  const isReadOnly = !procurement.data || !quoteDocumentEditable(procurement.data.procurement_issued_at, quoteStatus, isSuperAdmin);
+  const canEditLines = !isReadOnly;
 
   const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
     draft:        { label: "Draft",        cls: "bg-muted text-muted-foreground" },
@@ -1401,6 +1406,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   };
 
   const commitEditPrice = async (itemId: string) => {
+    if (isReadOnly) return;
     const raw = editingPriceValue.trim().replace(/[^\d.,-]/g, "").replace(/,/g, "");
     setEditingPriceId(null);
     const cents = raw === "" ? null : Math.round(parseFloat(raw) * 100);
@@ -1462,6 +1468,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   };
 
   const handleCurrencyChange = async (c: Currency) => {
+    if (isReadOnly) return;
     setCurrency(c);
     setCurrencyOpen(false);
     await supabase.from("trade_quotes").update({ currency: c }).eq("id", quoteId);
@@ -1471,6 +1478,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   };
 
   const handleUpdateQuantity = async (itemId: string, newQty: number) => {
+    if (isReadOnly) return;
     if (newQty < 1) return;
     const { error } = await supabase.from("trade_quote_items").update({ quantity: newQty }).eq("id", itemId);
     if (error) {
@@ -1481,6 +1489,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   };
 
   const handleRemoveItem = async (itemId: string) => {
+    if (isReadOnly) return;
     const { error } = await supabase.from("trade_quote_items").delete().eq("id", itemId);
     if (error) {
       toast({ title: "Could not remove item", description: error.message, variant: "destructive" });
@@ -1491,7 +1500,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   };
 
   const handleSubmit = async () => {
-    if (submittingQuote) return;
+    if (submittingQuote || isReadOnly) return;
     setSubmittingQuote(true);
     try {
       // Submission can be blocked by billing validation. Check it first so the
@@ -1537,7 +1546,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           landed_cost_mode: landedCostSettings.mode,
         } as any)
         .eq("id", quoteId)
-        .select("id, status, submitted_at");
+        .select("id, status, procurement_issued_at, project_board_id");
 
       if (updateError) {
         console.error("Quote submit update failed:", updateError);
@@ -1550,7 +1559,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         }
         return;
       }
-      if (!updated || updated.length === 0) {
+      if (!updated || updated.length === 0 || updated[0].status !== "submitted" || !updated[0].procurement_issued_at) {
         console.error("Quote submit update matched 0 rows — likely RLS or missing quote id", { quoteId });
         toast({
           title: "Quote not submitted",
@@ -1559,6 +1568,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         });
         return;
       }
+
+      procurement.acceptIssued(updated[0]);
 
       // Auto-apply any available credit (e.g. FF&E unlock)
       try {
@@ -1573,7 +1584,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         body: { quoteId },
       }).catch((err) => console.error("Quote notification email failed:", err));
 
-      toast({ title: "Quote submitted", description: "Our team will review and respond within 1 business day." });
+      toast({ title: "In procurement review", description: "The issued quote is now a read-only document." });
       onStatusChange();
     } finally {
       setSubmittingQuote(false);
@@ -1730,6 +1741,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
 
   const handleSaveNotes = async () => {
+    if (isReadOnly) return;
     await supabase.from("trade_quotes").update({ notes: notes || null }).eq("id", quoteId);
     toast({ title: "Notes saved" });
   };
@@ -2685,6 +2697,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   });
 
   const handleLandedCostSettingsChange = useCallback((settings: { cbm: number; kg: number; mode: "road" | "courier" }) => {
+    if (isReadOnly) return;
     setLandedCostSettings((prev) => (
       prev.cbm === settings.cbm && prev.kg === settings.kg && prev.mode === settings.mode ? prev : settings
     ));
@@ -2693,7 +2706,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       landed_cost_kg: settings.kg,
       landed_cost_mode: settings.mode,
     } as any).eq("id", quoteId);
-  }, [quoteId]);
+  }, [quoteId, isReadOnly]);
 
   /** HKD DAP landed-cost amounts for the PDF (Paris → Hong Kong). */
   const hkd = useHkdLandedCost({
@@ -2800,7 +2813,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           <span className="sm:hidden">Back</span>
         </button>
         <div data-felix-target="quote-document-actions" className="flex items-center gap-2 flex-wrap justify-end">
-          {(isDraft || isSuperAdmin) && (
+          {canEditLines && (
             <ProjectPicker
               value={projectId}
               onChange={async (id) => {
@@ -2931,7 +2944,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         </div>
       </div>
 
-      <QuoteBrandingControl branding={quoteBranding} adminPreview={isQuoteAdmin ? { active: previewTradeHeader, onChange: setPreviewTradeHeader } : undefined} />
+      {!isReadOnly && <QuoteBrandingControl branding={quoteBranding} adminPreview={isQuoteAdmin ? { active: previewTradeHeader, onChange: setPreviewTradeHeader } : undefined} />}
 
       {emailLogOpen && emailLog.length > 0 && (
         <div className="mb-4 md:mb-6 rounded-md border border-border bg-muted/30 px-4 py-3 print:hidden">
@@ -2979,7 +2992,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       )}
 
       {/* Quote document */}
-      <div className="border border-border rounded-lg bg-background">
+      <fieldset disabled={isReadOnly || submittingQuote} className="min-w-0 w-full border border-border rounded-lg bg-background">
         {/* ===== HEADER — matches reference layout ===== */}
         <div className="border-b border-border p-4 md:p-6 lg:p-8">
           <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto_247px] gap-4 md:gap-10">
@@ -2988,6 +3001,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               <h1 className="font-display text-2xl md:text-3xl lg:text-4xl text-foreground tracking-wide uppercase mb-2 md:mb-3">
                 Quote
               </h1>
+              <ProcurementStatusBadge state={procurement.state} />
               {projectName && (
                 <div className="mb-2">
                   <span className="text-[10px] text-muted-foreground uppercase tracking-widest block">Project</span>
@@ -2997,7 +3011,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               )}
               <div className="my-3 max-w-sm print:hidden">
                 {!projectName && <QuoteWorkspaceClient quoteId={quoteId} projectId={projectId} onClientProfileChange={setWorkspaceClientProfile} />}
-                <QuoteWorkspaceInvite projectId={projectId} quoteId={quoteId} label="Invite Collaborator to Review Invoice" showProjectLabel={false} />
+                {!isReadOnly && <QuoteWorkspaceInvite projectId={projectId} quoteId={quoteId} label="Invite Collaborator to Review Invoice" showProjectLabel={false} />}
               </div>
               {!isDraft && (
                 clientName && (
@@ -4940,7 +4954,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         )}
 
         {/* Request changes / Cancel — shown for submitted or priced quotes */}
-        {(quoteStatus === "submitted" || quoteStatus === "priced") && (
+        {!isArchive && (quoteStatus === "submitted" || quoteStatus === "priced") && (
           <div className="border-t border-border p-4 md:p-6 lg:p-8 flex flex-wrap items-center justify-between gap-3 print:hidden">
             <p className="font-body text-[10px] text-muted-foreground max-w-xs">
               {isSuperAdmin
@@ -4994,7 +5008,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               shipToCountry={shipTo.country}
               subtotalCents={subtotalCents}
               currency={currency}
-              isEditable={isDraft || isPriced}
+              isEditable={!isReadOnly && (isDraft || isPriced)}
               onBillingModeChange={(next) => {
                 setBillingMeta((prev) => ({
                   billing_mode: next.billing_mode,
@@ -5015,10 +5029,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             <button onClick={handleDelete} className="inline-flex items-center gap-1.5 font-body text-[10px] text-destructive hover:text-destructive/80 uppercase tracking-wider transition-colors">
               <Trash2 className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Delete Quote</span><span className="sm:hidden">Delete</span>
             </button>
-            <button onClick={handleSubmit} disabled={items.length === 0 || submittingQuote} className="inline-flex items-center gap-2 px-4 py-2 md:px-5 md:py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-foreground/90 transition-colors disabled:opacity-40">
+            <Button onClick={handleSubmit} disabled={items.length === 0 || submittingQuote || isReadOnly} className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 md:px-5 md:py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-foreground/90 transition-colors disabled:opacity-40">
               {submittingQuote ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-              {submittingQuote ? "Submitting…" : "Submit"}
-            </button>
+              {submittingQuote ? "Finalizing…" : "Finalize & Issue Proforma"}
+            </Button>
           </div>
         )}
 
@@ -5264,7 +5278,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             </button>
           </div>
         )}
-      </div>
+      </fieldset>
 
       {/* Request changes dialog */}
       <Dialog open={reviseOpen} onOpenChange={setReviseOpen}>
