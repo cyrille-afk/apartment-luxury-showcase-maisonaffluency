@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Shared portfolio picture interaction
-- [ ] Shared-grid product pictures use the same selected-item panel action as 3D View, preserving token-scoped configuration and existing view-only restrictions.
-- [ ] Compare both actions on a real guest portfolio and verify reopening another product selects its own details.
+- [x] Shared-grid product pictures use the same selected-item panel action as 3D View, preserving token-scoped configuration and existing view-only restrictions.
+- [x] Real guest portfolio: Frenchmen image and 3D View produce identical populated panels (Opera Delft / Nude Oak, €5,016, 10–16 weeks); Madison image opens its own details (€2,600). Finish regression passes and build OK; temporary invitation removed, no emails sent.
 
 ## Collaborator invitation email status
 - [x] Show invitation-scoped latest email status beside each unique collaborator; preserve joined/viewed independently and refresh while the folder is open.
