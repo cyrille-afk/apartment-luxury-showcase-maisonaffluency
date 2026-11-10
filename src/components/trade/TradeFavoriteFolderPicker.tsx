@@ -335,6 +335,7 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
         className="w-[26rem] max-w-[calc(100vw-2rem)] rounded-sm p-1 bg-background border border-border shadow-xl z-[120]"
         onClick={(e) => e.stopPropagation()}
       >
+        <p className="px-4 pt-3 pb-2 font-body text-[10px] uppercase tracking-wider text-muted-foreground">Select project board</p>
         {recentProjectBoards(boards).map((board) => {
           const done = inBoards.has(board.id);
           return (

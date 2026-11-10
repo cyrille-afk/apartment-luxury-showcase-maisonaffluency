@@ -21,7 +21,7 @@ export default function ProductCardActions({ productId, designerSlug, productSlu
       </Button>
       <TradeFavoriteFolderPicker productId={productId || productSlug} meta={meta} productName={meta.product_name} quickMoodboard side="top">
         <Button disabled={disabled} variant="outline" className="h-10 min-w-0 cursor-pointer rounded-sm border-foreground/30 bg-transparent px-2 font-body text-xs font-medium tracking-normal text-foreground hover:bg-muted">
-          Add to Moodboard
+          ADD TO PROJECT
         </Button>
       </TradeFavoriteFolderPicker>
     </div>
