@@ -1877,6 +1877,13 @@
       "when": 1794300811853,
       "tag": "0267_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 268,
+      "version": "7",
+      "when": 1794301570792,
+      "tag": "0268_board_procurement_review_lock",
+      "breakpoints": true
     }
   ]
 }

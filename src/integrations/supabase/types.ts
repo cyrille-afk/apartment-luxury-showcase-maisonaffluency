@@ -1636,6 +1636,7 @@ export type Database = {
           fabric_label: string | null
           id: string
           notes: string | null
+          procurement_quote_id: string | null
           product_id: string
           saved_via: string
           seen_on_desktop_at: string | null
@@ -1654,6 +1655,7 @@ export type Database = {
           fabric_label?: string | null
           id?: string
           notes?: string | null
+          procurement_quote_id?: string | null
           product_id: string
           saved_via?: string
           seen_on_desktop_at?: string | null
@@ -1672,6 +1674,7 @@ export type Database = {
           fabric_label?: string | null
           id?: string
           notes?: string | null
+          procurement_quote_id?: string | null
           product_id?: string
           saved_via?: string
           seen_on_desktop_at?: string | null
@@ -1687,6 +1690,13 @@ export type Database = {
             columns: ["board_id"]
             isOneToOne: false
             referencedRelation: "client_boards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_board_items_procurement_quote_id_fkey"
+            columns: ["procurement_quote_id"]
+            isOneToOne: false
+            referencedRelation: "trade_quotes"
             referencedColumns: ["id"]
           },
           {

@@ -12,3 +12,4 @@
 - Sales Funnel delete controls pass the explicit source and UUID to the admin-authorized deletion RPC only after confirmation; real payment-linked records are protected and failed deletes remain open for retry — prevents deleting the wrong source or financial history.
 
 - Admin inquiry inbox search (`src/pages/TradeAdminInquiries.tsx`) applies each typed term as a server-side or-group built by `src/lib/inquirySearch.ts`, so a match older than the newest fetched page stays findable; the same predicate filters client-side as a final guard so the list and the match count can't disagree.
+- Saving a board draft quote locks its board items via client_board_items.procurement_quote_id (DB trigger blocks finish/status/product edits) and sets board status in_procurement_review; the banner deep-links to that quote — prevents mid-workflow changes.
