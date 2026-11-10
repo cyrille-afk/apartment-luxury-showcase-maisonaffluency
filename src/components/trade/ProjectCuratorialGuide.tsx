@@ -489,7 +489,7 @@ export function ProjectCuratorialGuide({
                       variant="ghost"
                       onClick={() => void addToComposition(rec)}
                       disabled={addingId === rec.product_id || added}
-                      className={cn("mt-1 h-auto justify-start rounded-none p-0 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground/70 transition-opacity hover:bg-transparent hover:text-foreground group-hover:opacity-100 group-focus-within:opacity-100 disabled:opacity-100", focused ? "min-h-10 opacity-100" : "opacity-0")}
+                      className={cn("mt-1 h-auto justify-start rounded-none p-0 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground/70 transition-opacity hover:bg-transparent hover:text-foreground group-hover:opacity-100 group-focus-within:opacity-100 disabled:opacity-100", focused ? "col-start-2 min-h-10 justify-self-start text-left opacity-100" : "opacity-0")}
                     >
                       {addingId === rec.product_id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
                       {added ? "Added" : "Add"}
