@@ -32,11 +32,11 @@ export default defineConfig({
     plugins: [mcpPlugin(), emitVersionPlugin(buildId), emitOgManifestPlugin(), environmentRobotsPlugin()],
     // React Email's parser needs entities v4.5.0; nested v5+ copies removed lib/decode.js.
     resolve: {
-      alias: {
-        "entities/lib/decode.js": path.resolve(__dirname, "node_modules/entities/lib/decode.js"),
-        "entities/lib/encode.js": path.resolve(__dirname, "node_modules/entities/lib/encode.js"),
-        entities: path.resolve(__dirname, "node_modules/entities"),
-      },
+      // Exact-match only: a bare "entities" prefix alias hijacks parse5's newer nested entities/* imports.
+      alias: [
+        { find: /^entities\/lib\/decode\.js$/, replacement: path.resolve(__dirname, "node_modules/entities/lib/decode.js") },
+        { find: /^entities\/lib\/encode\.js$/, replacement: path.resolve(__dirname, "node_modules/entities/lib/encode.js") },
+      ],
     },
     server: {
       watch: { ignored: ["**/src/integrations/supabase/types.ts", "**/supabase/migrations/**"] },
