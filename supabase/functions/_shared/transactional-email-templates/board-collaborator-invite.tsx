@@ -14,10 +14,11 @@ interface Props {
   boardTitle?: string
   role?: 'client' | 'contractor'
   viewOnly?: boolean
+  itemCount?: number
   link?: string
 }
 
-const Email = ({ studioName = 'Your designer', studioLogoUrl = null, hideMaisonBranding = true, projectName = 'Project portfolio', boardTitle = 'Curated selection', role = 'client', viewOnly = false, link = '#' }: Props) => (
+const Email = ({ studioName = 'Your designer', studioLogoUrl = null, hideMaisonBranding = true, projectName = 'Project portfolio', boardTitle = 'Curated selection', role = 'client', viewOnly = false, itemCount, link = '#' }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>{studioName} has shared {boardTitle} with you</Preview>
@@ -27,7 +28,7 @@ const Email = ({ studioName = 'Your designer', studioLogoUrl = null, hideMaisonB
           {hideMaisonBranding ? (
             studioLogoUrl ? <Img src={studioLogoUrl} alt={studioName} width="220" style={{ margin: '0 auto', maxHeight: '72px', objectFit: 'contain' as const }} /> : <Text style={studioWordmark}>{studioName}</Text>
           ) : (
-            <Img src="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/affluency-email-wordmark.jpg" alt="Maison Affluency — Unique by Design" width="420" style={{ margin: '0 auto' }} />
+            <Img src="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/affluency-email-wordmark.jpg" alt="Maison Affluency — Unique by Design" width="420" style={{ margin: '0 auto', maxWidth: '100%', height: 'auto' }} />
           )}
         </Section>
         <Hr style={divider} />
@@ -38,10 +39,14 @@ const Email = ({ studioName = 'Your designer', studioLogoUrl = null, hideMaisonB
             ? 'collaborate on this project board as an external contractor.'
             : 'review this curated selection. You can approve pieces and leave comments directly on the board.'}
         </Text>
+        {typeof itemCount === 'number' && Number.isInteger(itemCount) && itemCount >= 0 && (
+          <Text style={scope}>{itemCount} Curated {itemCount === 1 ? 'Piece' : 'Pieces'}</Text>
+        )}
         <Section style={{ textAlign: 'center' as const, margin: '32px 0' }}>
-          <Button href={link} style={button}>Open the board</Button>
+          <Button href={link} style={button}>{viewOnly ? 'View the board' : role === 'contractor' ? 'Review the board' : 'Review & Approve Board'}</Button>
         </Section>
-        <Text style={small}>This private link expires in 30 days. Please do not forward it.</Text>
+        <Text style={fallback}>If the button does not open, copy and paste this link into your browser:<br />{link}</Text>
+        <Text style={expiration}>This private link expires in 30 days. Please do not forward it.</Text>
         <Hr style={divider} />
         <Text style={small}>{hideMaisonBranding ? studioName : <>Maison Affluency Singapore · <em>Unique by Design</em></>}</Text>
       </Container>
@@ -53,15 +58,18 @@ export const template = {
   component: Email,
   subject: (d: Record<string, any>) => `${d.studioName || 'Your designer'} has shared ${d.projectName || d.boardTitle || 'a project'} with you`,
   displayName: 'Board collaborator invite',
-  previewData: { studioName: 'Studio Example', hideMaisonBranding: true, projectName: 'Villa Serena', boardTitle: 'Living Room — Curated Edit', role: 'client', link: 'https://www.maisonaffluency.com/shared/board/example' },
+  previewData: { studioName: 'Studio Example', hideMaisonBranding: true, projectName: 'Villa Serena', boardTitle: 'Living Room — Curated Edit', role: 'client', itemCount: 14, link: 'https://www.maisonaffluency.com/shared/board/example' },
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: 'Georgia, "Times New Roman", serif' }
-const container = { padding: '40px 20px', maxWidth: '600px', margin: '0 auto', backgroundColor: '#faf9f7' }
+const container = { padding: '40px 20px', width: '100%', maxWidth: '600px', boxSizing: 'border-box' as const, margin: '0 auto', backgroundColor: '#faf9f7' }
 const divider = { border: 'none', borderTop: '1px solid #e8e4de', margin: '0 0 24px' }
 const heading = { color: '#1a1a1a', fontSize: '24px', marginBottom: '24px', fontFamily: 'Georgia, "Times New Roman", serif' }
 const selection = { color: '#77716a', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase' as const, margin: '-14px 0 24px' }
 const studioWordmark = { color: '#1a1a1a', fontSize: '25px', letterSpacing: '0.08em', margin: '12px 0', fontFamily: 'Georgia, "Times New Roman", serif' }
 const paragraph = { color: '#333333', lineHeight: '1.8', marginBottom: '20px', fontSize: '15px' }
 const small = { color: '#888888', fontSize: '12px', lineHeight: '1.6' }
+const scope = { color: '#595959', fontSize: '13px', lineHeight: '1.6', margin: '0 0 20px' }
+const expiration = { color: '#595959', fontSize: '12px', lineHeight: '1.6' }
+const fallback = { color: '#595959', fontSize: '12px', lineHeight: '1.6', margin: '0 0 24px', overflowWrap: 'anywhere' as const, wordBreak: 'break-all' as const }
 const button = { backgroundColor: '#1a1a1a', color: '#faf9f7', padding: '14px 28px', fontSize: '12px', letterSpacing: '0.18em', textTransform: 'uppercase' as const, textDecoration: 'none' }
