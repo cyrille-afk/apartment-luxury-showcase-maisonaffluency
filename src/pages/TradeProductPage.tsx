@@ -2795,14 +2795,14 @@ const TradeProductPage: React.FC<{ embeddedProduct?: { id?: string; designerSlug
                   }}
                   className="font-body text-[12px] uppercase tracking-[0.18em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors"
                 >
-                   {credits.designer}
+                   {showTradePrice ? credits.designer : "Curated Collection"}
                 </Link>
                 <ProductTitleBlock
                   title={credits.title}
                   subtitleLine={formatProductSubtitleLine(product.title, product.subtitle)}
                   product={{ ...product, edition: credits.edition }}
                   isEcartProduct={isEcartProduct}
-                  showBadge
+                  showBadge={showTradePrice}
                 />
               </div>
               <div className="shrink-0 mt-1 flex items-center gap-2">

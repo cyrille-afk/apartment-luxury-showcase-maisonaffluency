@@ -3695,6 +3695,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         {groupItems.map((item) => {
                   const product = item.trade_products;
                   const rawUnitPrice = item.unit_price_cents ?? catalogSourcePriceCents(item) ?? null;
+                  const credits = productAttribution({ title: product?.product_name || "Unknown Product", designerName: product?.designer_name, brandName: product?.brand_name, houseName: product?.house_name, edition: item.edition });
                   const unitPrice = convertCents(rawUnitPrice, itemPriceCurrency(item, currency), currency);
                   const lineTotal = unitPrice ? unitPrice * item.quantity : null;
                   // Brand margin cap actively suppressing this line's discount.
@@ -3790,10 +3791,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider truncate">
-                            {product?.brand_name?.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product?.brand_name}
+                            {credits.designer}
                           </p>
                           <h4 className="font-display text-xs md:text-sm text-foreground leading-tight break-words mt-0.5">
-                            {product?.product_name || "Unknown Product"}
+                            {credits.title}
                           </h4>
                           {(() => {
                             // Split the variant label into finish tokens and
