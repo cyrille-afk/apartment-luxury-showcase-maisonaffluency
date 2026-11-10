@@ -2980,7 +2980,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       <div className="border border-border rounded-lg bg-background">
         {/* ===== HEADER — matches reference layout ===== */}
         <div className="border-b border-border p-4 md:p-6 lg:p-8">
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-4 md:gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto_247px] gap-4 md:gap-10">
             {/* Left: Title + Project + Client Name */}
             <div className="min-w-0">
               <h1 className="font-display text-2xl md:text-3xl lg:text-4xl text-foreground tracking-wide uppercase mb-2 md:mb-3">
