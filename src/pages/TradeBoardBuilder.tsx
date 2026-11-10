@@ -1,5 +1,10 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { trimLogoUrl } from "@/lib/cloudinaryLogo";
+import {
+  SUPPORTED_LOGO_FORMAT_COPY,
+  isSupportedLogoUrl,
+  logoFormatLabel,
+} from "@/lib/studioLogoFormat";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
 import { useParams, useNavigate, useLocation, Link } from "@/lib/router-compat";
@@ -922,7 +927,7 @@ const TradeBoardBuilder = () => {
                   <Input
                     id="studio-logo"
                     value={board.studio_logo_url || ""}
-                    placeholder="https://yourstudio.com/logo.png"
+                    placeholder="https://yourstudio.com/logo.svg"
                     onFocus={() => { studioLogoFocusRef.current = board.studio_logo_url; }}
                     onBlur={async (e) => {
                       const v = e.target.value.trim() || null;
@@ -938,18 +943,40 @@ const TradeBoardBuilder = () => {
                     }}
                     onChange={(e) => setBoard({ ...board, studio_logo_url: e.target.value })}
                   />
+                  <p className="font-body text-[11px] text-muted-foreground">
+                    Accepted formats: {SUPPORTED_LOGO_FORMAT_COPY}.
+                  </p>
                 </div>
               </div>
               {board.studio_logo_url && (
-                <div className="flex items-center justify-center rounded border border-border/60 bg-background p-6">
-                  <img
-                    src={trimLogoUrl(board.studio_logo_url) ?? ""}
-                    alt="Logo preview"
-                    className="max-h-48 w-auto max-w-[480px] object-contain"
-                    onError={(e) => { e.currentTarget.style.display = "none"; }}
-                    onLoad={(e) => { e.currentTarget.style.display = ""; }}
-                  />
-                </div>
+                isSupportedLogoUrl(board.studio_logo_url) ? (
+                  <div className="space-y-2 rounded border border-border/60 bg-background p-6">
+                    {/*
+                      Fixed-height frame with a height-driven, auto-width image:
+                      SVGs (which can lack intrinsic pixel sizes) and raster
+                      logos both keep their own ratio instead of stretching.
+                    */}
+                    <div className="flex h-48 items-center justify-center">
+                      <img
+                        src={trimLogoUrl(board.studio_logo_url) ?? ""}
+                        alt="Logo preview"
+                        className="h-full w-auto max-w-full object-contain"
+                        style={{ aspectRatio: "auto" }}
+                        onError={(e) => { e.currentTarget.style.display = "none"; }}
+                        onLoad={(e) => { e.currentTarget.style.display = ""; }}
+                      />
+                    </div>
+                    {logoFormatLabel(board.studio_logo_url) && (
+                      <p className="text-center font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                        {logoFormatLabel(board.studio_logo_url)}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="font-body text-[11px] text-muted-foreground">
+                    That link isn't a {SUPPORTED_LOGO_FORMAT_COPY} image, so it can't be previewed.
+                  </p>
+                )
               )}
               <div className="overflow-hidden rounded-md border border-border/60">
                 <div className="flex items-center justify-between gap-2 border-b border-border/60 bg-muted/30 px-3 py-2">
@@ -967,16 +994,19 @@ const TradeBoardBuilder = () => {
                     </div>
                   )}
                   <div className="px-6 py-10 text-center">
-                    {board.studio_logo_url ? (
+                    {board.studio_logo_url && isSupportedLogoUrl(board.studio_logo_url) ? (
                       <img
                         src={trimLogoUrl(board.studio_logo_url) ?? ""}
                         alt=""
-                        className="mx-auto mb-4 h-20 object-contain"
+                        className="mx-auto mb-4 h-20 w-auto max-w-full object-contain"
+                        style={{ aspectRatio: "auto" }}
                         onError={(e) => { e.currentTarget.style.display = "none"; }}
                         onLoad={(e) => { e.currentTarget.style.display = ""; }}
                       />
                     ) : (
-                      <p className="mb-4 font-body text-xs text-muted-foreground">Add a logo URL above to see it here</p>
+                      <p className="mb-4 font-body text-xs text-muted-foreground">
+                        Add a {SUPPORTED_LOGO_FORMAT_COPY} logo URL above to see it here
+                      </p>
                     )}
                     <p className="font-body text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
                       {board.studio_name || "Your studio name"}
