@@ -81,6 +81,7 @@ interface BoardItem {
   variant_label: string | null;
   fabric_label: string | null;
   wood_label: string | null;
+  procurement_quote_id?: string | null;
   product?: {
     product_name: string;
     brand_name: string;
@@ -168,6 +169,7 @@ const TradeBoardBuilder = () => {
   const { clientSafe: sharedClientSafe } = useClientSafeMode();
   const clientSafe = sharedClientSafe || new URLSearchParams(location.search).get("presentation") === "1";
   const applyFinish = async (item: BoardItem, sel: FinishSelection) => {
+    if (item.procurement_quote_id) { toast({ title: "Locked for procurement review", description: "This piece's finishes can't change mid-workflow." }); return; }
     setFinishes((f) => ({ ...f, [item.id]: sel }));
     const patch = { variant_label: sel.label, fabric_label: sel.top ?? null, wood_label: sel.base ?? null };
     setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, ...patch } : i)));
@@ -569,9 +571,20 @@ const TradeBoardBuilder = () => {
       toast({ title: "Could not save draft", description: "Your folder is unchanged. Please try again.", variant: "destructive" });
       return;
     }
+    const lineIds = compiledDraft.lines.map((line) => line.id);
+    const locked = await supabase.from("client_board_items").update({ procurement_quote_id: quote.id } as any).in("id", lineIds);
+    const statusSaved = locked.error ? locked : await supabase.from("client_boards").update({ status: "in_procurement_review" }).eq("id", board.id);
+    if (locked.error || statusSaved.error) {
+      await supabase.from("client_board_items").update({ procurement_quote_id: null } as any).eq("procurement_quote_id", quote.id);
+      await supabase.from("trade_quotes").delete().eq("id", quote.id);
+      toast({ title: "Could not save draft", description: "Your folder is unchanged. Please try again.", variant: "destructive" });
+      return;
+    }
     rememberActiveQuoteId(quote.id, board.project_id);
-    toast({ title: "Draft quote saved", description: `${quoteItems.length} configured lines ready for procurement review.` });
-    navigate(`/trade/quotes?quote=${quote.id}`);
+    setItems((prev) => prev.map((i) => (lineIds.includes(i.id) ? { ...i, procurement_quote_id: quote.id } : i)));
+    setBoard({ ...board, status: "in_procurement_review" });
+    setDraftReviewOpen(false);
+    toast({ title: "Draft successfully pushed to procurement workspace." });
   };
 
   const deleteBoard = async () => {
@@ -593,6 +606,8 @@ const TradeBoardBuilder = () => {
   const approvedCount = items.filter(i => i.approval_status === "approved").length;
   const rejectedCount = items.filter(i => i.approval_status === "rejected").length;
   const isEditable = board.status !== "converted";
+  const procurementQuoteId = items.find((i) => i.procurement_quote_id)?.procurement_quote_id ?? null;
+  const lockedItemIds = items.filter((i) => i.procurement_quote_id).map((i) => i.id);
 
   const renderItemCard = (item: BoardItem) => (
     <div key={item.id} className="border border-border rounded-lg overflow-hidden group">
@@ -699,7 +714,9 @@ const TradeBoardBuilder = () => {
             {board.project_id && <ProjectWorkspaceContact projectId={board.project_id} folderId={board.id} />}
             {board.client_name && <p className="font-body text-sm text-muted-foreground mt-1">For {board.client_name}</p>}
             <div className="flex items-center gap-2 mt-2 flex-wrap">
-              <Badge variant="secondary">{board.status}</Badge>
+              {board.status === "in_procurement_review"
+                ? <Badge variant="outline" className="gap-1.5 rounded-none border-foreground font-body text-[10px] uppercase tracking-[0.18em] text-foreground"><Lock className="h-3 w-3" />In Procurement Review</Badge>
+                : <Badge variant="secondary">{board.status}</Badge>}
               {items.length > 0 && (
                 <span className="font-body text-xs text-muted-foreground">
                   {items.length} items · {approvedCount} approved · {rejectedCount} rejected
@@ -1056,7 +1073,14 @@ const TradeBoardBuilder = () => {
           </details>
         )}
 
-        <ProcurementBoardPanel boardId={board.id} boardTitle={board.title} projectId={board.project_id} items={items} finishOverrides={finishes} onDraftChange={setCompiledDraft} onRequestedFinishes={setRequestedFinishes} onOpenFinishes={(id) => { const it = items.find((i) => i.id === id); if (it) setFinishItem(it); }} />
+        {!clientSafe && procurementQuoteId && <div data-trade-sensitive className="mb-6 flex flex-col gap-3 border border-foreground bg-muted/40 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-display text-lg text-foreground">Proforma Invoice draft ready</p>
+            <p className="font-body text-xs text-muted-foreground">{lockedItemIds.length} locked {lockedItemIds.length === 1 ? "piece" : "pieces"} with their finishes, quantities and client totals are waiting in Quotes &amp; Proformas.</p>
+          </div>
+          <Button className="cursor-pointer rounded-none font-body text-[11px] uppercase tracking-[0.2em]" onClick={() => navigate(`/trade/quotes?quote=${procurementQuoteId}`)}>Open in Quotes &amp; Proformas <ArrowRight className="ml-2 h-3.5 w-3.5" /></Button>
+        </div>}
+        <ProcurementBoardPanel lockedItemIds={lockedItemIds} boardId={board.id} boardTitle={board.title} projectId={board.project_id} items={items} finishOverrides={finishes} onDraftChange={setCompiledDraft} onRequestedFinishes={setRequestedFinishes} onOpenFinishes={(id) => { const it = items.find((i) => i.id === id); if (it) setFinishItem(it); }} />
         {!clientSafe && <div data-trade-sensitive className="mb-6 flex items-center justify-between gap-4 border-b border-border pb-4">
           <p className="font-body text-xs text-muted-foreground">Draft quote · {compiledDraft?.lines.length ?? 0} approved items · Awaiting procurement sign-off</p>
           <Button variant="outline" size="sm" className="cursor-pointer rounded-none" onClick={() => setDraftReviewOpen(true)} disabled={!compiledDraft?.lines.length}><FileText className="mr-2 h-3.5 w-3.5" />Review draft quote</Button>
@@ -1095,7 +1119,7 @@ const TradeBoardBuilder = () => {
             initialTop={requestedFinishes[finishItem.id]?.top ?? finishes[finishItem.id]?.top ?? finishItem.fabric_label ?? null}
             initialBase={requestedFinishes[finishItem.id]?.base ?? finishes[finishItem.id]?.base ?? finishItem.wood_label ?? null}
             onSelect={(sel) => applyFinish(finishItem, sel)}
-            footer={
+            footer={finishItem.procurement_quote_id ? <p className="flex items-center justify-center gap-2 border border-border py-3 font-body text-[11px] uppercase tracking-[0.2em] text-muted-foreground"><Lock className="h-3.5 w-3.5" />Locked in procurement review</p> :
               <Button className="h-11 w-full rounded-none font-body text-[11px] uppercase tracking-[0.2em]" onClick={async () => {
                 const sel = finishes[finishItem.id];
                 if (sel) await applyFinish(finishItem, sel);
