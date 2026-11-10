@@ -11,6 +11,7 @@ export default function QuoteWorkspaceClient({ quoteId, projectId }: { quoteId: 
     queryKey: ["quote-workspace-client", quoteId, projectId, activeFolderId],
     enabled: Boolean(projectId),
     queryFn: async () => {
+      if (!projectId) return null;
       const { data: quote, error } = await supabase.from("trade_quotes").select("project_id, project_board_id").eq("id", quoteId).maybeSingle();
       if (error) throw error;
       if (!quote || quote.project_id !== projectId) return null;
@@ -42,11 +43,13 @@ export default function QuoteWorkspaceClient({ quoteId, projectId }: { quoteId: 
         if (clientError) throw clientError;
         if (contactsError) throw contactsError;
         const contact = profile.email ? contacts?.find(contact => contact.email?.trim().toLowerCase() === profile.email.toLowerCase()) : contacts?.find(contact => contact.is_primary);
-        if (client?.type === "company") profile.companyName = client.name.trim();
+        if (client?.type === "company" || client?.type === "studio") profile.companyName = client.name.trim();
         profile.clientName = contact ? [contact.first_name, contact.last_name].filter(Boolean).join(" ").trim() : "";
+        if (!profile.clientName && !profile.email && client?.type === "individual") profile.clientName = client.name.trim();
         if (!profile.email) profile.email = contact?.email?.trim() || "";
       }
       if (!profile.clientName && board.client_email?.trim().toLowerCase() === profile.email.toLowerCase()) profile.clientName = board.client_name?.trim() || "";
+      if (!profile.clientName && !profile.email) profile.clientName = board.client_name?.trim() || project?.client_name?.trim() || "";
       if (!emails.length && profile.email) emails.push(profile.email);
       return { folderId, emails, profile };
     },
