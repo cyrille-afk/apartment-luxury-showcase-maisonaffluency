@@ -1,5 +1,9 @@
 # Roadmap
 
+## Shared portfolio picture interaction
+- [ ] Shared-grid product pictures use the same selected-item panel action as 3D View, preserving token-scoped configuration and existing view-only restrictions.
+- [ ] Compare both actions on a real guest portfolio and verify reopening another product selects its own details.
+
 ## Collaborator invitation email status
 - [x] Show invitation-scoped latest email status beside each unique collaborator; preserve joined/viewed independently and refresh while the folder is open.
 - [x] Real signed-in folder shows one joined collaborator badge with the latest Email sent status after reopening; wrong-folder read returns 403 and anonymous read 401. Sixteen regressions pass; no emails or invitations created.
