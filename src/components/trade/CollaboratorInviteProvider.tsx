@@ -44,9 +44,18 @@ function ProjectClientInvitation({ projectId, quoteId, onClose }: { projectId: s
   useEffect(() => {
     if (!quoteId) return;
     let cancelled = false;
-    void supabase.from("trade_quotes").select("project_id, project_board_id").eq("id", quoteId).maybeSingle().then(({ data }) => {
+    void supabase.from("trade_quotes").select("project_id, project_board_id").eq("id", quoteId).maybeSingle().then(async ({ data }) => {
       if (cancelled) return;
-      if (data?.project_id && data.project_board_id) setQuoteFolder({ projectId: data.project_id, boardId: data.project_board_id });
+      if (data?.project_id) {
+        let boardId = data.project_board_id;
+        if (!boardId) {
+          const { data: sourceItems } = await supabase.from("client_board_items").select("board_id").eq("procurement_quote_id", quoteId);
+          const sourceBoards = [...new Set(sourceItems?.map(item => item.board_id) ?? [])];
+          if (sourceBoards.length === 1) boardId = sourceBoards[0];
+        }
+        if (cancelled) return;
+        if (boardId) setQuoteFolder({ projectId: data.project_id, boardId });
+      }
       setQuoteFolderLoading(false);
     });
     return () => { cancelled = true; };
