@@ -324,7 +324,7 @@ export function ProjectCuratorialGuide({
 
   return (
     <>
-    {docked && !open && (
+    {false && docked && !open && (
       <>
         <button
           type="button"
@@ -373,6 +373,9 @@ export function ProjectCuratorialGuide({
         <div className="min-w-0">
           <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">
             Status // {status}
+          </p>
+          <p data-curating-for className="mt-2 inline-block border border-foreground/80 px-2 py-0.5 font-body text-[9px] uppercase tracking-[0.15em] text-foreground">
+            Curating pairings for: {activeItem?.name || "the project composition"}
           </p>
           <h2 className="mt-1 truncate font-display text-xl text-foreground md:text-2xl">
             AI Curatorial Assistant <span className="font-body text-[10px] uppercase tracking-[0.15em]">// Co-Designer</span>
@@ -434,8 +437,8 @@ export function ProjectCuratorialGuide({
         </div>
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col md:flex-row">
-        <div className="border-b border-border px-4 py-4 md:w-56 md:shrink-0 md:border-b-0 md:border-r md:px-6">
+      <div className={`flex min-h-0 flex-1 flex-col ${docked ? "overflow-y-auto" : "md:flex-row"}`}>
+        <div className={docked ? "border-b border-border px-4 py-4 md:px-6" : "border-b border-border px-4 py-4 md:w-56 md:shrink-0 md:border-b-0 md:border-r md:px-6"}>
           <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Active reference</p>
           <p className="mt-2 font-display text-lg leading-tight text-foreground">{activeItem?.name || "Project composition"}</p>
           <p className="mt-1 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">{activeItem?.designer}</p>

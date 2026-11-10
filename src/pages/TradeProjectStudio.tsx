@@ -66,7 +66,7 @@ export default function TradeProjectStudio() {
 
   const [curatorialItemId, setCuratorialItemId] = useState<string | null>(null);
   const [isRecommendationHovered, setIsRecommendationHovered] = useState(false);
-  const [isAiPanelOpen, setIsAiPanelOpen] = useState(true);
+  const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
   const [isProposalPreviewOpen, setIsProposalPreviewOpen] = useState(false);
   const specItem = items.find((i) => i.product_id === specItemId) || null;
 
@@ -258,6 +258,7 @@ export default function TradeProjectStudio() {
                 const isCuratorialActive = curatorialItemId === item.product_id;
                 const activate = () => {
                   setCuratorialItemId(item.product_id);
+                  setIsAiPanelOpen(true);
                   window.dispatchEvent(new CustomEvent("project-curator:open"));
                 };
                 return (
@@ -276,7 +277,7 @@ export default function TradeProjectStudio() {
                     }}
                     aria-label={`Open AI curatorial guide for ${item.name}`}
                   >
-                    <div className="relative">
+                    <div data-curatorial-focus={isCuratorialActive && isAiPanelOpen ? "true" : undefined} className={`relative transition-shadow duration-300 ${isCuratorialActive && isAiPanelOpen ? "ring-1 ring-foreground ring-offset-4 ring-offset-background" : ""}`}>
                       {item.image_url ? (
                         <img
                           src={item.image_url}
@@ -311,26 +312,6 @@ export default function TradeProjectStudio() {
           )}
           </div>
 
-          {/* Lower zone — AI Curatorial Assistant, anchored to the base of the workspace */}
-          <div
-            className={`flex shrink-0 flex-col border-t border-border bg-background transition-all duration-500 ease-in-out lg:min-h-0 ${
-              isAiPanelOpen ? "lg:h-[35%]" : "lg:h-0 lg:border-0 lg:bg-transparent"
-            }`}
-          >
-            <ProjectCuratorialGuide
-              docked
-              open={isAiPanelOpen}
-              onOpenChange={setIsAiPanelOpen}
-              projectId={project.id}
-              projectName={project.name}
-              items={items}
-              activeItemId={curatorialItemId}
-              isClientMode={isClientMode}
-              onActiveItemChange={setCuratorialItemId}
-              onCompositionChanged={() => setItemsVersion((version) => version + 1)}
-              onRecommendationHover={setIsRecommendationHovered}
-            />
-          </div>
         </section>
 
         {/* RIGHT — procurement ledger */}
@@ -404,8 +385,39 @@ export default function TradeProjectStudio() {
              {!isClientMode && <div data-client-placeholder aria-hidden="true" className="mt-6 h-3 w-40 animate-pulse bg-muted/60" />}
           </div>
 
+          {/* Column view switch — Specifications / AI Curator */}
+          <div role="tablist" aria-label="Right column view" className="mt-4 flex shrink-0 gap-6 border-b border-border">
+            {([["spec", "Specifications"], ["ai", "AI Curator"]] as const).map(([key, label]) => {
+              const selected = (key === "ai") === isAiPanelOpen;
+              return (
+                <button key={key} type="button" role="tab" aria-selected={selected} onClick={() => setIsAiPanelOpen(key === "ai")}
+                  className={`-mb-px border-b py-2 font-body text-[10px] uppercase tracking-[0.15em] transition-colors ${selected ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+
+          {isAiPanelOpen && (
+            <div className="-mx-6 flex min-h-0 flex-1 flex-col md:-mx-10 lg:-mx-14">
+              <ProjectCuratorialGuide
+                docked
+                open={isAiPanelOpen}
+                onOpenChange={setIsAiPanelOpen}
+                projectId={project.id}
+                projectName={project.name}
+                items={items}
+                activeItemId={curatorialItemId}
+                isClientMode={isClientMode}
+                onActiveItemChange={setCuratorialItemId}
+                onCompositionChanged={() => setItemsVersion((version) => version + 1)}
+                onRecommendationHover={setIsRecommendationHovered}
+              />
+            </div>
+          )}
+
           {/* Scrollable ledger body */}
-          <div className="flex-1 overflow-y-auto">
+          <div className={`flex-1 overflow-y-auto ${isAiPanelOpen ? "hidden" : ""}`}>
             <div className="mt-8 px-1 md:px-2">
               <div className="grid grid-cols-[44px_minmax(0,1fr)_auto] gap-3 border-b border-border pb-4 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
                 <span>Spec</span>
