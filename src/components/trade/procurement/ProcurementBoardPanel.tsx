@@ -10,6 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import BoardFeedbackPanel from "./BoardFeedbackPanel";
+import { resolveSavedFinishes, type FinishSelection } from "./FinishesDrawer";
+import { latestBoardFinishRequests, type BoardDraftSource } from "@/lib/boardDraftQuote";
+import { useDraftQuoteCompiler } from "@/hooks/useDraftQuoteCompiler";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { formatMoneyIn } from "@/lib/displayMoney";
 import { toast } from "@/hooks/use-toast";
@@ -56,10 +59,12 @@ export function FinishChips({ fo, size = "h-8 w-8" }: { fo?: { top?: string | nu
   );
 }
 
-export default function ProcurementBoardPanel({ boardId, boardTitle, projectId, items, finishOverrides = {}, onOpenFinishes }: {
+export default function ProcurementBoardPanel({ boardId, boardTitle, projectId, items, finishOverrides = {}, onOpenFinishes, onDraftChange, onRequestedFinishes }: {
   boardId: string;
   boardTitle?: string;
   projectId?: string | null;
+  onDraftChange?: (draft: ReturnType<typeof useDraftQuoteCompiler>) => void;
+  onRequestedFinishes?: (finishes: Record<string, FinishSelection>) => void;
   onOpenFinishes?: (itemId: string) => void;
   finishOverrides?: Record<string, { label: string; price_cents: number | null; image_url: string | null; top?: string | null; base?: string | null; top_image?: string | null; base_image?: string | null; extra?: { name: string; img: string | null }[] }>;
   items: Array<{ id: string; product_id: string; approval_status: string; product?: { product_name: string; brand_name: string; image_url: string | null } }>;
@@ -77,6 +82,23 @@ export default function ProcurementBoardPanel({ boardId, boardTitle, projectId, 
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [feedbackFor, setFeedbackFor] = useState<string | null>(null);
   const [feedbackSenders, setFeedbackSenders] = useState<Record<string, string>>({});
+  const [requestedFinishes, setRequestedFinishes] = useState<Record<string, FinishSelection>>({});
+  const [savedStatuses, setSavedStatuses] = useState<Record<string, string>>({});
+  const [syncReady, setSyncReady] = useState(false);
+  const requests = useMemo(() => latestBoardFinishRequests(feedback), [feedback]);
+  const requestKey = JSON.stringify(requests);
+  useEffect(() => {
+    let alive = true;
+    setSyncReady(false);
+    const selected = items.filter((item) => requests[item.id]).map((item) => ({ id: item.id, product_id: item.product_id, variant_label: requests[item.id] }));
+    resolveSavedFinishes(selected, true).then((resolved) => {
+      if (!alive) return;
+      for (const item of selected) if (!resolved[item.id]) resolved[item.id] = { label: item.variant_label, price_cents: null, image_url: null };
+      setRequestedFinishes(resolved); onRequestedFinishes?.(resolved); setSyncReady(true);
+    }).catch(() => { if (alive) setSyncReady(false); });
+    return () => { alive = false; };
+  }, [boardId, productIdsKey(items), requestKey, onRequestedFinishes]);
+  const effectiveFinishes = { ...finishOverrides, ...requestedFinishes };
 
   useEffect(() => {
     supabase.from("client_board_items").select("id, notes").eq("board_id", boardId)
@@ -105,18 +127,18 @@ export default function ProcurementBoardPanel({ boardId, boardTitle, projectId, 
   }, [productIds]);
 
   // Quote-synced pieces carry the configured net snapshot saved on the quote line.
-  const [quoteNet, setQuoteNet] = useState<Map<string, { net: number; currency: string }>>(new Map());
+  const [quoteNet, setQuoteNet] = useState<Map<string, { net: number; currency: string; quantity: number }>>(new Map());
   useEffect(() => {
     (async () => {
       const { data: links } = await supabase.from("client_board_items").select("id, source_quote_item_id").eq("board_id", boardId).not("source_quote_item_id", "is", null);
       const ids = (links || []).map((l: any) => l.source_quote_item_id);
       if (!ids.length) return setQuoteNet(new Map());
-      const { data: qi } = await supabase.from("trade_quote_items").select("id, unit_price_cents, unit_price_currency").in("id", ids);
+      const { data: qi } = await supabase.from("trade_quote_items").select("id, unit_price_cents, unit_price_currency, quantity").in("id", ids);
       const byQi = new Map((qi || []).map((q: any) => [q.id, q]));
-      const m = new Map<string, { net: number; currency: string }>();
+      const m = new Map<string, { net: number; currency: string; quantity: number }>();
       for (const l of links as any[]) {
         const q: any = byQi.get(l.source_quote_item_id);
-        if (q?.unit_price_cents) m.set(l.id, { net: Math.round(Number(q.unit_price_cents)), currency: q.unit_price_currency || "EUR" });
+        if (q) m.set(l.id, { net: q.unit_price_cents == null ? NaN : Math.round(Number(q.unit_price_cents)), currency: q.unit_price_currency || "EUR", quantity: q.quantity });
       }
       setQuoteNet(m);
     })();
@@ -133,16 +155,18 @@ export default function ProcurementBoardPanel({ boardId, boardTitle, projectId, 
   }, [boardId, currentStudio?.default_project_markup_percentage]);
 
   const loadCollab = useCallback(async () => {
-    const [{ data: inv }, { data: fb }, delivery, { data: senders }] = await Promise.all([
+    const [{ data: inv }, { data: fb }, delivery, { data: senders }, saved] = await Promise.all([
       supabase.from("board_invites").select("id, email, role, status, last_seen_at, created_at").eq("board_id", boardId).neq("status", "revoked").order("created_at"),
       supabase.from("board_item_feedback").select("id, item_id, reaction, comment, created_at, invite_id").eq("board_id", boardId).order("created_at", { ascending: false }),
       supabase.rpc("board_invitation_email_status", { _board_id: boardId }),
       supabase.from("board_invites").select("id, email").eq("board_id", boardId),
+      supabase.from("client_board_items").select("id, approval_status").eq("board_id", boardId),
     ]);
     setInvites((inv as Invite[]) || []);
     setFeedback((fb as Feedback[]) || []);
     setFeedbackSenders(Object.fromEntries((senders || []).map((sender) => [sender.id, sender.email])));
     setEmailStatuses(delivery.error ? [] : delivery.data || []);
+    if (!saved.error) { setSavedStatuses(Object.fromEntries((saved.data || []).map((item) => [item.id, item.approval_status]))); setStatusOverride({}); }
   }, [boardId]);
 
   useEffect(() => {
@@ -174,28 +198,37 @@ export default function ProcurementBoardPanel({ boardId, boardTitle, projectId, 
 
   const rows: Row[] = items.map((i) => {
     const p = pricing.get(i.product_id) || {};
-    const fo = finishOverrides[i.id];
+    const fo = effectiveFinishes[i.id];
+    const savedNet = quoteNet.get(i.id);
     const lead = p.lead_time || (p.lead_time_weeks_min ? `${p.lead_time_weeks_min}–${p.lead_time_weeks_max ?? p.lead_time_weeks_min} wks` : null);
     return {
       id: i.id,
       product_id: i.product_id,
-      approval_status: statusOverride[i.id] ?? i.approval_status ?? "pending",
+      approval_status: statusOverride[i.id] ?? savedStatuses[i.id] ?? i.approval_status ?? "pending",
       product_name: i.product?.product_name || "Selected piece",
       brand_name: i.product?.brand_name || null,
       image_url: fo?.image_url || i.product?.image_url || null,
-      msrp_cents: quoteNet.has(i.id)
-        ? Math.round(quoteNet.get(i.id)!.net / Math.max(0.01, 1 - discountPct))
+      msrp_cents: requests[i.id] ? requestedFinishes[i.id]?.price_cents ?? null : savedNet && Number.isFinite(savedNet.net)
+        ? Math.round(savedNet.net / Math.max(0.01, 1 - discountPct))
         : fo?.price_cents ?? (p.trade_price_cents || null),
       currency: quoteNet.get(i.id)?.currency || p.currency || "EUR",
       lead_time: lead,
       ship_mode: p.default_ship_mode || null,
     };
   });
+  const draftSources: BoardDraftSource[] = rows.map((row) => ({ ...row, quantity: quoteNet.get(row.id)?.quantity ?? 1,
+    retailCents: row.msrp_cents, netCents: requests[row.id] ? null : Number.isFinite(quoteNet.get(row.id)?.net) ? quoteNet.get(row.id)?.net : null,
+    finish: effectiveFinishes[row.id] ?? null, requested: Boolean(requests[row.id]) }));
+  const draftKey = JSON.stringify(draftSources);
+  const stableSources = useMemo(() => draftSources, [draftKey]);
+  const compiled = useDraftQuoteCompiler(stableSources, discountPct, multiplier);
+  useEffect(() => { onDraftChange?.({ ...compiled, ready: compiled.ready && syncReady }); }, [compiled, syncReady, onDraftChange]);
 
   const setStatus = async (id: string, status: string) => {
     setStatusOverride((s) => ({ ...s, [id]: status }));
     const { error } = await supabase.from("client_board_items").update({ approval_status: status }).eq("id", id);
-    if (error) toast({ title: "Could not update status", variant: "destructive" });
+    if (error) { setStatusOverride((s) => { const next = { ...s }; delete next[id]; return next; }); toast({ title: "Could not update status", variant: "destructive" }); }
+    else void loadCollab();
   };
 
   const revoke = async (ids: string[]) => {
@@ -258,9 +291,9 @@ export default function ProcurementBoardPanel({ boardId, boardTitle, projectId, 
                   return (
                     <tr key={r.id} className="border-b border-border/40 align-middle">
                       <td className="px-2 py-1">{r.image_url ? (onOpenFinishes ? <button type="button" onClick={() => onOpenFinishes(r.id)} aria-label={`Open ${r.product_name}`} className="block cursor-pointer"><img src={r.image_url} alt="" className="h-8 w-8 bg-[hsl(var(--product-canvas))] object-contain" loading="lazy" /></button> : <img src={r.image_url} alt="" className="h-8 w-8 bg-[hsl(var(--product-canvas))] object-contain" loading="lazy" />) : <div className="h-8 w-8 bg-muted" />}</td>
-                      <td className="truncate px-2 text-foreground" title={r.product_name}>{r.product_name}{finishOverrides[r.id] && <span className="flex items-center gap-1.5"><FinishChips fo={finishOverrides[r.id]} size="h-5 w-5" /><span className="truncate text-[10px] text-muted-foreground">{finishOverrides[r.id].label}</span></span>}</td>
+                      <td className="px-2 py-1 text-foreground" title={r.product_name}><span className="block truncate">{r.product_name}</span>{effectiveFinishes[r.id] && <span className="flex flex-wrap items-center gap-1.5"><FinishChips fo={effectiveFinishes[r.id]} size="h-5 w-5" /><span className="min-w-0 text-[10px] text-muted-foreground">{effectiveFinishes[r.id].label}</span>{requests[r.id] && <span className="border-l border-primary/40 pl-1.5 text-[9px] text-primary">Client requested</span>}</span>}</td>
                       <td className="truncate px-2 text-muted-foreground" title={r.brand_name ?? ""}>{r.brand_name ?? "—"}</td>
-                      <td className="px-2 text-right tabular-nums">{formatMoneyIn(trade, r.currency, "On request")}</td>
+                      <td className="px-2 text-right tabular-nums">{formatMoneyIn(trade, r.currency, requests[r.id] ? "Price verification needed" : "On request")}</td>
                       <td className="px-2 text-right tabular-nums">{r.msrp_cents ? discountPercentLabel(discountPct) : "—"}</td>
                       <td className="px-2 text-right tabular-nums">{formatMoneyIn(client, r.currency, "On request")}</td>
                       <td className="truncate px-2">{r.lead_time ?? "—"}</td>
