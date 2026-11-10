@@ -234,13 +234,13 @@ export default function TradeProjectStudio() {
         </h1>
       </div>
 
-      <div className="flex shrink-0 flex-wrap justify-end gap-2 border-b border-border px-4 py-3 md:px-8 lg:px-12">
+      <div className="flex shrink-0 flex-wrap justify-start gap-2 border-b border-border px-4 py-3 md:px-6">
         <Button variant="outline" aria-controls="studio-ai-panel" aria-expanded={isAiPanelOpen} onClick={() => { setIsAiPanelOpen(!isAiPanelOpen); if (window.innerWidth < 1024) setIsSpecPanelOpen(false); }} className="cursor-pointer rounded-none font-body text-[10px] uppercase tracking-[0.15em]">AI Co-Designer</Button>
         <Button variant="outline" aria-controls="studio-spec-panel" aria-expanded={isSpecPanelOpen} onClick={() => { setIsSpecPanelOpen(!isSpecPanelOpen); if (window.innerWidth < 1024) setIsAiPanelOpen(false); }} className="cursor-pointer rounded-none font-body text-[10px] uppercase tracking-[0.15em]">Specsheet</Button>
       </div>
       <div className="relative min-h-[70dvh] overflow-hidden lg:min-h-0 lg:flex-1">
         {/* Canvas expands into the space released by either independent drawer. */}
-        <section aria-label="Visual canvas" className={`relative flex h-full flex-col bg-background transition-[margin] duration-500 ease-in-out motion-reduce:transition-none ${isAiPanelOpen ? "lg:ml-80" : "lg:ml-0"} ${isSpecPanelOpen ? "lg:mr-[40%]" : "lg:mr-0"}`}>
+        <section aria-label="Visual canvas" className={`relative flex h-full flex-col bg-background transition-[margin] duration-500 ease-in-out motion-reduce:transition-none ${isSpecPanelOpen ? "lg:ml-[40%]" : "lg:ml-0"} ${isAiPanelOpen ? "lg:mr-80" : "lg:mr-0"}`}>
           {/* Upper zone — visual canvas */}
           <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
           <div className="px-4 py-6 md:px-8 lg:px-12 lg:py-5">
@@ -321,7 +321,7 @@ export default function TradeProjectStudio() {
 
         </section>
 
-        <StudioSidePanel id="studio-ai-panel" title="AI Co-Designer" side="left" open={isAiPanelOpen} onClose={() => setIsAiPanelOpen(false)}>
+        <StudioSidePanel id="studio-ai-panel" title="AI Co-Designer" side="right" size="narrow" open={isAiPanelOpen} onClose={() => setIsAiPanelOpen(false)}>
           <ProjectCuratorialGuide
             docked open={isAiPanelOpen} onOpenChange={setIsAiPanelOpen}
             projectId={project.id} projectName={project.name} items={items}
@@ -331,9 +331,9 @@ export default function TradeProjectStudio() {
             onRecommendationHover={setIsRecommendationHovered}
           />
         </StudioSidePanel>
-        <StudioSidePanel id="studio-spec-panel" title="Specsheet" side="right" open={isSpecPanelOpen} onClose={() => setIsSpecPanelOpen(false)}>
+        <StudioSidePanel id="studio-spec-panel" title="Specsheet" side="left" size="wide" open={isSpecPanelOpen} onClose={() => setIsSpecPanelOpen(false)}>
         <div className="flex min-h-0 flex-1 flex-col px-6 py-6 md:px-8">
-          {/* Header — fixed at the top of the right pane */}
+          {/* Header — fixed at the top of the left pane */}
           <div className="shrink-0 border-b border-border pb-6">
             <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
               <div>

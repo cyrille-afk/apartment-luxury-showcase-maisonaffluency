@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Project Studio sliding panels
+- [x] Specsheet moved left, canvas right, AI drawer right with original widths; controls align exactly above the left close control. Signed-in 1955px and 390px checks confirm independent slides, three/four-column density, fixed right canvas edge on Specsheet collapse, all eight pieces retained, and no page errors; build OK.
 - [x] Separate AI Co-Designer and Specsheet into independent sliding drawers with black close controls and persistent reopen actions; released space expands the canvas.
 - [x] Signed-in real project verified: both drawers open independently, close/reopen preserves Frenchmen context, closing Specsheet expands canvas from 1019px to 1699px, and 390px controls fit with one drawer at a time; no browser errors and build OK.
 
