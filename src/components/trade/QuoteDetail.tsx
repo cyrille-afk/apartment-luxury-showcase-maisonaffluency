@@ -3013,7 +3013,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               )}
               <div className="my-3 max-w-sm print:hidden">
                 {!projectName && <QuoteWorkspaceClient quoteId={quoteId} projectId={projectId} onClientProfileChange={setWorkspaceClientProfile} />}
-                <QuoteWorkspaceInvite projectId={projectId} quoteId={quoteId} label="Invite Collaborator to Review Invoice" />
+                <QuoteWorkspaceInvite projectId={projectId} quoteId={quoteId} label="Invite Collaborator to Review Invoice" showProjectLabel={false} />
               </div>
               {!isDraft && (
                 clientName && (
