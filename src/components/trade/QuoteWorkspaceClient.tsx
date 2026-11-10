@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useProjectWorkspace } from "@/contexts/ProjectWorkspaceContext";
+import { useProjectWorkspace, type WorkspaceClientProfile } from "@/contexts/ProjectWorkspaceContext";
 import { supabase } from "@/integrations/supabase/client";
 
 /** Saved quote sheet wins; unrelated project contacts must never appear on this document. */
-export default function QuoteWorkspaceClient({ quoteId, projectId }: { quoteId: string; projectId: string | null }) {
+export default function QuoteWorkspaceClient({ quoteId, projectId, onClientProfileChange }: { quoteId: string; projectId: string | null; onClientProfileChange?: (profile: WorkspaceClientProfile | null) => void }) {
   const workspace = useProjectWorkspace();
   const activeFolderId = workspace?.activeFolder?.projectId === projectId ? workspace.activeFolder.folderId : null;
   const { data, isPending, isError, refetch } = useQuery({
@@ -34,21 +34,27 @@ export default function QuoteWorkspaceClient({ quoteId, projectId }: { quoteId: 
       const { data: project, error: projectError } = await supabase.from("projects").select("client_id, client_name").eq("id", projectId).maybeSingle();
       if (projectError) throw projectError;
       const clientId = board.client_id || project?.client_id;
-      const profile = { companyName: "", clientName: "", email: emails[0] || board.client_email?.trim() || "" };
+      const profile: WorkspaceClientProfile = { companyName: "", clientName: "", email: emails[0] || board.client_email?.trim() || "" };
       if (clientId) {
         const [{ data: client, error: clientError }, { data: contacts, error: contactsError }] = await Promise.all([
-          supabase.from("clients").select("name, type").eq("id", clientId).maybeSingle(),
-          supabase.from("client_contacts").select("first_name, last_name, email, is_primary").eq("client_id", clientId).order("is_primary", { ascending: false }),
+          supabase.from("clients").select("name, type, billing_address_line1, billing_address_line2, billing_city, billing_region, billing_postal_code, billing_country").eq("id", clientId).maybeSingle(),
+          supabase.from("client_contacts").select("first_name, last_name, email, phone, is_primary").eq("client_id", clientId).order("is_primary", { ascending: false }),
         ]);
         if (clientError) throw clientError;
         if (contactsError) throw contactsError;
-        const contact = profile.email ? contacts?.find(contact => contact.email?.trim().toLowerCase() === profile.email.toLowerCase()) : contacts?.find(contact => contact.is_primary);
+        const contact = profile.email ? contacts?.find(contact => contact.email?.trim().toLowerCase() === profile.email?.toLowerCase()) : contacts?.find(contact => contact.is_primary);
+        if (client) profile.corporateAddress = {
+          line1: client.billing_address_line1 || "", line2: client.billing_address_line2 || "",
+          city: client.billing_city || "", region: client.billing_region || "",
+          postalCode: client.billing_postal_code || "", country: client.billing_country || "",
+        };
+        if (contact?.phone) profile.phone = contact.phone;
         if (client?.type === "company" || client?.type === "studio") profile.companyName = client.name.trim();
         profile.clientName = contact ? [contact.first_name, contact.last_name].filter(Boolean).join(" ").trim() : "";
         if (!profile.clientName && !profile.email && client?.type === "individual") profile.clientName = client.name.trim();
         if (!profile.email) profile.email = contact?.email?.trim() || "";
       }
-      if (!profile.clientName && board.client_email?.trim().toLowerCase() === profile.email.toLowerCase()) profile.clientName = board.client_name?.trim() || "";
+      if (!profile.clientName && board.client_email?.trim().toLowerCase() === profile.email?.toLowerCase()) profile.clientName = board.client_name?.trim() || "";
       if (!profile.clientName && !profile.email) profile.clientName = board.client_name?.trim() || project?.client_name?.trim() || "";
       if (!emails.length && profile.email) emails.push(profile.email);
       return { folderId, emails, profile };
@@ -67,6 +73,9 @@ export default function QuoteWorkspaceClient({ quoteId, projectId }: { quoteId: 
   const email = projectId && folderId ? workspace?.projects[projectId]?.folders[folderId]?.primaryContact || data?.emails[0] : null;
   const profile = projectId && folderId ? workspace?.projects[projectId]?.folders[folderId]?.clientProfile || data?.profile : null;
   const matchesContact = !email || !profile?.email || profile.email.toLowerCase() === email.toLowerCase();
+  useEffect(() => {
+    onClientProfileChange?.(matchesContact && profile ? { ...profile, email: email || profile.email } : null);
+  }, [profile, email, matchesContact, onClientProfileChange]);
   const companyName = matchesContact ? profile?.companyName?.trim() : "";
   const clientName = matchesContact ? profile?.clientName?.trim() : "";
   const contactLine = clientName ? `Attn: ${clientName}${email ? ` (${email})` : ""}` : email;

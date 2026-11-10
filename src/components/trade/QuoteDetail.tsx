@@ -32,6 +32,8 @@ import { Link, useNavigate } from "@/lib/router-compat";
 import CopyTearsheetLink from "@/components/trade/CopyTearsheetLink";
 import QuoteWorkspaceInvite from "@/components/trade/QuoteWorkspaceInvite";
 import QuoteWorkspaceClient from "@/components/trade/QuoteWorkspaceClient";
+import type { WorkspaceClientProfile } from "@/contexts/ProjectWorkspaceContext";
+import { quoteShipToFromClient } from "@/lib/quoteShipTo";
 import { QuoteItemSkeleton } from "@/components/trade/skeletons";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import AlphabetProductPicker, { type PickerItem } from "@/components/trade/AlphabetProductPicker";
@@ -509,6 +511,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const INCOTERMS = ["EXW", "FCA", "FOB", "CIF", "CIP", "DAP", "DDP", "DPU"] as const;
   type Incoterm = (typeof INCOTERMS)[number];
   const [shipToSameAsBill, setShipToSameAsBill] = useState(true);
+  const [workspaceClientProfile, setWorkspaceClientProfile] = useState<WorkspaceClientProfile | null>(null);
+  const [useClientShippingAddress, setUseClientShippingAddress] = useState(false);
+  const [shippingAddressSaving, setShippingAddressSaving] = useState(false);
   const [incoterm, setIncoterm] = useState<Incoterm | "">("");
   const [shipTo, setShipTo] = useState({
     name: "", attention: "", address1: "", address2: "",
@@ -2982,7 +2987,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 <div className="mb-2">
                   <span className="text-[10px] text-muted-foreground uppercase tracking-widest block">Project</span>
                   <p className="font-display text-sm text-foreground uppercase tracking-wider">{projectName}</p>
-                  <QuoteWorkspaceClient quoteId={quoteId} projectId={projectId} />
+                  <QuoteWorkspaceClient quoteId={quoteId} projectId={projectId} onClientProfileChange={setWorkspaceClientProfile} />
                   {projectId && (
                     <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 print:hidden">
                       <a
@@ -3007,7 +3012,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 </div>
               )}
               <div className="my-3 max-w-sm print:hidden">
-                {!projectName && <QuoteWorkspaceClient quoteId={quoteId} projectId={projectId} />}
+                {!projectName && <QuoteWorkspaceClient quoteId={quoteId} projectId={projectId} onClientProfileChange={setWorkspaceClientProfile} />}
                 <QuoteWorkspaceInvite projectId={projectId} quoteId={quoteId} label="Invite Collaborator to Review Invoice" />
               </div>
               {!isDraft && (
@@ -3034,28 +3039,48 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   <label className="flex items-center gap-2 cursor-pointer mb-2">
                     <input
                       type="checkbox"
-                      checked={!shipToSameAsBill}
+                      checked={useClientShippingAddress}
+                      disabled={shippingAddressSaving || !workspaceClientProfile}
                       onChange={async (e) => {
-                        const different = e.target.checked;
-                        const same = !different;
-                        setShipToSameAsBill(same);
-                        setShipToOpen(different);
-                        const patch: any = { ship_to_same_as_bill: same };
-                        // Default Incoterm to DAP when enabling separate ship-to
-                        if (different && !incoterm) {
+                        const checked = e.target.checked;
+                        const nextAddress = quoteShipToFromClient(checked, workspaceClientProfile);
+                        const previousAddress = shipTo;
+                        const previousSame = shipToSameAsBill;
+                        const previousIncoterm = incoterm;
+                        setUseClientShippingAddress(checked);
+                        setShipTo(nextAddress);
+                        setShipToSameAsBill(false);
+                        setShipToOpen(true);
+                        setShippingAddressSaving(true);
+                        const patch = {
+                          ship_to_same_as_bill: false,
+                          ...Object.fromEntries(Object.entries(nextAddress).map(([key, value]) => [`ship_to_${key}`, value || null])),
+                          ...(!incoterm ? { incoterm: "DAP" } : {}),
+                        };
+                        if (!incoterm) {
                           setIncoterm("DAP");
-                          patch.incoterm = "DAP";
                         }
-                        await supabase.from("trade_quotes").update(patch).eq("id", quoteId);
+                        try {
+                          const { error } = await supabase.from("trade_quotes").update(patch).eq("id", quoteId);
+                          if (error) throw error;
+                        } catch {
+                          setUseClientShippingAddress(!checked);
+                          setShipTo(previousAddress);
+                          setShipToSameAsBill(previousSame);
+                          setIncoterm(previousIncoterm);
+                          toast({ title: "Delivery details not saved", description: "Please try again.", variant: "destructive" });
+                        } finally {
+                          setShippingAddressSaving(false);
+                        }
                       }}
                       className="h-3.5 w-3.5"
                     />
                     <span className="text-[10px] text-muted-foreground uppercase tracking-widest">
-                      Different ship-to address
+                      Use client corporate address
                     </span>
                   </label>
 
-                  {!shipToSameAsBill && (
+                  {(
                     <div className="space-y-2">
                       <div>
                         <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-1">Incoterm</span>
@@ -3097,6 +3122,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                             <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-0.5">{labelMap[key]}</span>
                             <input
                               type="text"
+                              aria-label={labelMap[key]}
+                              disabled={shippingAddressSaving}
                               value={key === "name" && !shipToNameEditing ? (displayNameForContact(shipTo.name, shipTo.email) || "") : (shipTo[key] || "")}
                               onFocus={() => {
                                 if (key === "name") {
@@ -3104,7 +3131,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                                   setShipToNameEditing(true);
                                 }
                               }}
-                              onChange={(e) => setShipTo((s) => ({ ...s, [key]: e.target.value }))}
+                              onChange={(e) => {
+                                setUseClientShippingAddress(false);
+                                setShipTo((s) => ({ ...s, [key]: e.target.value }));
+                                setShipToSameAsBill(false);
+                              }}
                               onBlur={async (e) => {
                                 if (key === "name") {
                                   setShipToNameEditing(false);
@@ -3112,7 +3143,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                                   if (e.target.value === shipToNameBeforeEdit.current) return;
                                 }
                                 const { error } = await supabase.from("trade_quotes")
-                                  .update({ [dbCol]: e.target.value || null } as any)
+                                  .update({ [dbCol]: e.target.value || null, ship_to_same_as_bill: false } as any)
                                   .eq("id", quoteId);
                                 if (error) {
                                   console.error("ship_to save failed", dbCol, error);
