@@ -59,7 +59,7 @@ export function FinishChips({ fo, size = "h-8 w-8" }: { fo?: { top?: string | nu
   );
 }
 
-export default function ProcurementBoardPanel({ lockedItemIds = [], boardId, boardTitle, projectId, items, finishOverrides = {}, onOpenFinishes, onDraftChange, onRequestedFinishes }: {
+export default function ProcurementBoardPanel({ lockedItemIds = [], boardId, boardTitle, projectId, items, finishOverrides = {}, onOpenFinishes, onDraftChange, onRequestedFinishes, onStatusChange }: {
   boardId: string;
   boardTitle?: string;
   projectId?: string | null;
