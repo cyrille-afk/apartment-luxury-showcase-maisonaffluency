@@ -30,10 +30,9 @@ import QuoteReviewSummary from "@/components/trade/QuoteReviewSummary";
 import ReviewedQuotePdfDownload from "@/components/trade/ReviewedQuotePdfDownload";
 import { Link, useNavigate } from "@/lib/router-compat";
 import CopyTearsheetLink from "@/components/trade/CopyTearsheetLink";
-import ShareQuoteWithClient from "@/components/trade/ShareQuoteWithClient";
+import QuoteWorkspaceInvite from "@/components/trade/QuoteWorkspaceInvite";
 import { QuoteItemSkeleton } from "@/components/trade/skeletons";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
-import ClientPicker from "@/components/trade/ClientPicker";
 import AlphabetProductPicker, { type PickerItem } from "@/components/trade/AlphabetProductPicker";
 import affluencyLogo from "@/assets/affluency-quote-logo.jpg";
 import { downloadProcurementWorkbook, autoPoNumber, type ProcurementLine } from "@/lib/procurementExcel";
@@ -2993,7 +2992,6 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         Project tearsheets
                       </a>
                       <CopyTearsheetLink path={`/trade/tearsheets?project=${projectId}`} label="Copy tearsheet link" />
-                      <ShareQuoteWithClient quoteId={quoteId} />
                       <a
                         href={`/trade/boards?project=${projectId}`}
                         className="inline-flex items-center gap-1 font-body text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
@@ -3006,60 +3004,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   )}
                 </div>
               )}
-              {isDraft ? (
-                <div className="w-full max-w-[320px]">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-1">Client</span>
-                  <ClientPicker
-                    value={clientId}
-                    size="sm"
-                    readableNames
-                    showManageLink={false}
-                    placeholder="Select or create a client…"
-                    onChange={(c) => {
-                      const newId = c?.id ?? null;
-                      const newName = c?.name ?? "";
-                      setClientId(newId);
-                      setClientName(newName);
-                      supabase.from("trade_quotes")
-                        .update({ client_id: newId, client_name: newName } as any)
-                        .eq("id", quoteId)
-                        .then(({ error }) => {
-                          if (error) {
-                            console.error("[QuoteDetail] client save failed", error);
-                            toast({
-                              title: "Client not saved",
-                              description: error.message ?? "The client selection could not be saved.",
-                              variant: "destructive",
-                            });
-                          }
-                        });
-                      // One-time currency initialization: apply the client's
-                      // default currency (if any). The member can still switch
-                      // the toggle manually afterwards.
-                      if (newId) {
-                        (supabase.from("clients" as any)
-                          .select("default_currency")
-                          .eq("id", newId)
-                          .maybeSingle() as any
-                        ).then(({ data }: any) => {
-                          const cc = String(data?.default_currency ?? "").trim().toUpperCase();
-                          if (cc && (CURRENCIES as readonly string[]).includes(cc) && cc !== currency) {
-                            handleCurrencyChange(cc as Currency);
-                          }
-                        });
-                      }
-                    }}
-                  />
-                  {clientId && (
-                    <Link
-                      to={`/trade/clients?edit=${clientId}`}
-                      className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-body text-muted-foreground hover:text-foreground"
-                    >
-                      Edit client & contacts <ExternalLink className="h-3 w-3" />
-                    </Link>
-                  )}
-                </div>
-              ) : (
+              <div className="my-3 max-w-sm print:hidden">
+                <QuoteWorkspaceInvite projectId={projectId} quoteId={quoteId} label="Invite Collaborator to Review Invoice" />
+              </div>
+              {!isDraft && (
                 clientName && (
                   <div>
                     <span className="text-[10px] text-muted-foreground uppercase tracking-widest block">Client</span>

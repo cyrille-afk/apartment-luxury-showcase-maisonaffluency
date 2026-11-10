@@ -52,7 +52,7 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
   }, [open]);
   useEffect(() => { setSelectedBoardId(null); }, [selectedProjectId]);
   const activeFolderId = workspace?.activeFolder?.projectId === projectId ? workspace?.activeFolder?.folderId : undefined;
-  const defaultBoardId = clientWorkspace ? activeFolderId || boardId : boardId;
+  const defaultBoardId = clientWorkspace ? boardId || activeFolderId : boardId;
   const targetBoardId = boardOptions ? boardOptions.find(board => board.id === (selectedBoardId ?? defaultBoardId))?.id || "" : boardId;
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"client" | "contractor">("client");
