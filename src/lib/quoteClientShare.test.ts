@@ -2,6 +2,11 @@ import { describe, it, expect } from "vitest";
 import { buildSharedQuoteSnapshot } from "./quoteClientShare";
 
 describe("buildSharedQuoteSnapshot", () => {
+  it("freezes separate Madison designer and publisher credits without trade values", () => {
+    const s = buildSharedQuoteSnapshot("quote", null, [{ quantity: 1, unit_price_cents: 123400, unit_price_currency: "EUR", product: { product_name: "Madison Avenue Side Table by Yabu Pushelberg", brand_name: "Man of Parts", rrp_price_cents: 260000, currency: "EUR" } }]);
+    expect(s.lines[0]).toMatchObject({ name: "Madison Avenue Side Table", designer: "Yabu Pushelberg", house: "Man of Parts", edition: "Man of Parts Edition", unitCents: 260000 });
+    expect(JSON.stringify(s)).not.toContain("123400");
+  });
   it("includes recorded dimensions, materials and finish options without copying private product fields", () => {
     const product = { product_name: "Saint Honoré Sofa", dimensions: "W 280 × D 100 × H 80 cm", materials: "Solid oak and mohair", available_finishes: [" Natural oak ", "Black oak", "Natural oak", ""], internal_notes: "Private supplier notes" };
     const s = buildSharedQuoteSnapshot("e3ccd6aa-0000", null, [{ quantity: 1, unit_price_cents: null, unit_price_currency: null, product }]);

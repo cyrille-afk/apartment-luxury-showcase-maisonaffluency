@@ -15,6 +15,7 @@
  * Used from the "Download PDF" button on the QuoteDetail screen.
  */
 import jsPDF from "jspdf";
+import { productAttribution } from "./productAttribution";
 import affluencyLogoUrl from "@/assets/affluency-quote-logo.jpg";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import { appendHkDapPage, type HkDapPageArgs } from "@/lib/hkDapPdf";
@@ -37,6 +38,8 @@ const MUTED = [115, 115, 115] as const;
 export interface QuotePdfLine {
   productName: string;
   brandName: string;
+  designerName?: string | null;
+  houseName?: string | null;
   dimensions?: string | null;
   materials?: string | null;
   edition?: string | null;
@@ -968,9 +971,8 @@ function drawTable(
   // body rows
   doc.setTextColor(FG[0], FG[1], FG[2]);
   args.lines.forEach((line, idx) => {
-    const editionRaw = (line.edition ?? "").trim();
-    const editionClean = editionRaw.replace(/^edition\s*[:\-—]?\s*/i, "").trim();
-    const editionLabel = editionClean ? `Edition: ${editionClean}` : null;
+    const credits = productAttribution({ title: line.productName, brandName: line.brandName, designerName: line.designerName, houseName: line.houseName, edition: line.edition });
+    const editionLabel = credits.edition;
 
     // Split "Bronze · Chintz · W 15.5 × D 11 × H 57 cm" → finish + dims so the
     // legend is not a run-on. Dimensions are then always rendered on their own
@@ -1019,10 +1021,8 @@ function drawTable(
 
     // Title: split on the last " by " so the designer credit wraps onto its
     // own line and the product name never overflows into the QTY column.
-    const rawTitle = line.productName || "—";
-    const byMatch = rawTitle.match(/^(.*?)(\s+by\s+.+)$/i);
-    const titleMain = byMatch ? byMatch[1].trim() : rawTitle;
-    const titleBy = byMatch ? byMatch[2].trim() : null;
+    const titleMain = credits.title || "—";
+    const titleBy = null;
     const titleMainWrap = doc.splitTextToSize(titleMain, colDesc - 12) as string[];
     const titleByWrap = titleBy ? (doc.splitTextToSize(titleBy, colDesc - 12) as string[]) : [];
     const titleLines = [...titleMainWrap, ...titleByWrap];
@@ -1111,9 +1111,7 @@ function drawTable(
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.5);
     doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-    const brand = (line.brandName || "").includes(" - ")
-      ? line.brandName.split(" - ")[0].trim()
-      : (line.brandName || "");
+    const brand = credits.designer || "";
     if (brand) doc.text(brand.toUpperCase(), xDesc + 6, y + 8);
 
     // title (main line + optional "by Designer" wrapped below)

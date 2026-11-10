@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { SharedQuoteSnapshot } from "@/lib/quoteClientShare";
+import { productAttribution } from "@/lib/productAttribution";
 import { getQuoteShareHead } from "@/lib/quoteShareHead.functions";
 import { quoteAccessToken, quoteShareIdentity } from "@/lib/quoteSharePresentation";
 import { PRODUCTION_ORIGIN } from "@/lib/environmentIndexingGuard";
@@ -177,14 +178,17 @@ function SharedQuotePage() {
       </section>
 
         <ul className="divide-y divide-border">
-          {q.lines.map((l, i) => (
+          {q.lines.map((l, i) => {
+            const credits = productAttribution({ title: l.name, designerName: l.designer, brandName: l.maker, houseName: l.house, edition: l.edition });
+            return (
             <li key={i} className="grid grid-cols-1 sm:grid-cols-[220px_minmax(0,1fr)] gap-6 sm:gap-8 py-8 sm:py-10">
               <div className="aspect-square bg-muted flex items-center justify-center overflow-hidden">
                 {l.image ? <img src={l.image} alt={`${l.name}${l.maker ? ` by ${l.maker}` : ""}`} className="h-full w-full object-contain" loading={i === 0 ? "eager" : "lazy"} /> : <span className="font-display text-4xl text-muted-foreground" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>}
               </div>
               <div className="min-w-0 flex flex-col">
-                {l.maker && <p className="text-sm font-medium text-primary break-words">{l.maker}</p>}
-                <h2 className="font-display text-2xl sm:text-3xl leading-tight mt-2 break-words">{l.name}</h2>
+                {credits.designer && <p className="text-sm font-medium text-primary break-words">{credits.designer}</p>}
+                <h2 className="font-display text-2xl sm:text-3xl leading-tight mt-2 break-words">{credits.title}</h2>
+                {credits.edition && <p className="mt-2 text-xs uppercase text-muted-foreground">{credits.edition}</p>}
                 <section className="mt-5" aria-label={`${l.name} specifications`}>
                   <h3 className="text-xs font-medium text-foreground mb-3">Specifications</h3>
                   <dl className="space-y-3 text-sm">
@@ -236,7 +240,7 @@ function SharedQuotePage() {
                 </div>
               </div>
             </li>
-          ))}
+          ); })}
         </ul>
 
         <section className="border-t border-border py-8 sm:py-10 flex flex-col sm:flex-row sm:justify-between gap-5">

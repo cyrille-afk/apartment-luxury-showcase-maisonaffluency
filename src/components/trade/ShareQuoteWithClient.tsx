@@ -2,6 +2,7 @@ import { useEffect, useId, useState } from "react";
 import { Link2, Loader2, Check, Ban, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { buildSharedQuoteSnapshot, type ShareSourceLine } from "@/lib/quoteClientShare";
+import { productAttribution } from "@/lib/productAttribution";
 import type { QuoteFinishSwatch } from "@/lib/quoteFinishSwatches";
 // quoteShareUrl locks client-facing addresses to PRODUCTION_ORIGIN.
 import { namedQuoteShareUrl, quoteShareSlug } from "@/lib/quoteSharePresentation";
@@ -100,7 +101,19 @@ export default function ShareQuoteWithClient({ quoteId }: { quoteId: string }) {
           (swatchesByPick[row.pick_id] ??= []).push(row as QuoteFinishSwatch);
         }
       }
-      const snapshot = buildSharedQuoteSnapshot(quoteId, quote?.client_name ?? null, items as unknown as ShareSourceLine[], swatchesByPick);
+      let creditedItems = items as unknown as ShareSourceLine[];
+      if (pickIds.length) {
+        const { data: creditPicks, error: creditError } = await supabase.from("designer_curator_picks").select("id, title, edition, edition_number, edition_signing, designers(name, display_name, founder)").in("id", pickIds);
+        if (creditError) throw creditError;
+        creditedItems = creditedItems.map((item) => {
+          const pick = creditPicks?.find((p) => p.id === item.product?.source_pick_id);
+          if (!pick) return item;
+          const owner = Array.isArray(pick.designers) ? pick.designers[0] : pick.designers;
+          const credits = productAttribution({ ...pick, designerName: owner?.display_name || owner?.name, brandName: item.product?.brand_name, houseName: owner?.founder });
+          return { ...item, edition: credits.edition, product: { ...item.product, designer_name: credits.designer, house_name: credits.house } };
+        });
+      }
+      const snapshot = buildSharedQuoteSnapshot(quoteId, quote?.client_name ?? null, creditedItems, swatchesByPick);
       const { data: slug, error: rpcError } = await supabase.rpc("create_named_quote_share", { _quote_id: quoteId, _snapshot: snapshot as never, _slug: quoteShareSlug(snapshot) });
       if (rpcError || !slug) {
         if (rpcError?.message.includes("save client email")) { notify("Save the client's email in this quote before sharing.", true); return; }

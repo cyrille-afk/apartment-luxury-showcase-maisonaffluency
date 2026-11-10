@@ -24,6 +24,7 @@ import { useFounderIsBrand } from "@/hooks/useFounderIsBrand";
 import { cn } from "@/lib/utils";
 import { renderParagraph } from "@/components/EditorialBiography";
 import { composeTitle, splitTitleAttribution } from "@/lib/curatorPickLegend";
+import { productAttribution } from "@/lib/productAttribution";
 import { isFinishSubtitle } from "@/lib/subtitleDisplay";
 import { usePublicRrpMap, formatPublicRrpForDestination } from "@/hooks/usePublicRrp";
 import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
@@ -295,7 +296,10 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
             parentBrand: brandLabelOverride,
             pageDesignerName,
           });
-          const cardEditionLine = profileEditionLine({ ...pick, founder: designer.founder, pageDesignerName }) || houseEditionLabel;
+          const credits = productAttribution({ ...pick, designerName: (pick as any).designer_name || designer.name, brandName: designer.name, houseName: founderIsBrand ? designer.founder : null });
+          const cardEditionLine = isEcartReedition({ designerName: designer.name, founder: designer.founder })
+            ? profileEditionLine({ ...pick, founder: designer.founder, pageDesignerName }) || houseEditionLabel
+            : credits.edition;
 
           return (
             <motion.div
@@ -400,7 +404,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
                     && !attribution.title.toLowerCase().includes(editorSuffix.toLowerCase())
                     ? `${creditedTitle} ${editorSuffix}`
                     : creditedTitle;
-                  const brandSlug = resolveSlug(brandLine);
+                  const consistentBrandLine = credits.designer || brandLine;
+                  const brandSlug = resolveSlug(consistentBrandLine);
                   return (
                     <>
                       {/* Designer / brand — top, prominent */}
@@ -411,20 +416,20 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
                             className="group/designer block w-full cursor-pointer truncate whitespace-nowrap font-body text-[10px] font-semibold uppercase tracking-wider text-foreground antialiased transition-colors duration-300 ease-in-out hover:text-foreground/70"
                           >
                             <span className="relative inline-block max-w-full pb-1 align-bottom">
-                              {brandLine}
+                              {consistentBrandLine}
                               <span aria-hidden="true" className="pointer-events-none absolute bottom-0 left-0 h-px w-full origin-left scale-x-0 bg-current transition-transform duration-300 ease-in-out group-hover:scale-x-100 group-hover/designer:scale-x-100 motion-reduce:transition-none" />
                             </span>
                           </Link>
                          ) : brandLine ? (
                           <span className="block w-full truncate whitespace-nowrap font-body text-[10px] font-semibold uppercase tracking-wider text-foreground antialiased">
-                            {brandLine}
+                             {consistentBrandLine}
                           </span>
                          ) : (
                            <span aria-hidden="true" className="block h-5" />
                          )}
                       {/* Product name — secondary, elegant italic */}
                       <h3 className="mt-0.5 line-clamp-1 font-body text-xs font-medium leading-snug text-muted-foreground antialiased">
-                        {productLine}
+                        {credits.title}
                       </h3>
                     </>
                   );

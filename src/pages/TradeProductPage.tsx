@@ -66,6 +66,7 @@ import CustomRequestModal from "@/components/trade/CustomRequestModal";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates, convertCents } from "@/components/trade/CurrencyToggle";
 import { productDisplayPolicy } from "@/lib/productDisplayMode";
 import { isEcartReedition } from "@/lib/editionLabel";
+import { productAttribution } from "@/lib/productAttribution";
 import { ProductTitleBlock } from "@/components/trade/ProductTitleBlock";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import ProductDetailSkeleton from "@/components/product/ProductDetailSkeleton";
@@ -1708,6 +1709,7 @@ const TradeProductPage: React.FC<{ embeddedProduct?: { id?: string; designerSlug
   const { product, designer, relatedPicks, pricing, tradeProductId, glbUrl } = data;
 
   const designerDisplay = formatDesignerDisplayName(designer.name);
+  const credits = productAttribution({ ...product, designerName: designerDisplay, brandName: designerDisplay, houseName: designer.founder });
   const isEcartProduct = isEcartReedition({
     designerName: designer.name,
     founder: designer.founder,
@@ -2793,12 +2795,12 @@ const TradeProductPage: React.FC<{ embeddedProduct?: { id?: string; designerSlug
                   }}
                   className="font-body text-[12px] uppercase tracking-[0.18em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors"
                 >
-                   {showTradePrice ? designerDisplay : "Curated Collection"}
+                   {showTradePrice ? credits.designer : "Curated Collection"}
                 </Link>
                 <ProductTitleBlock
-                  title={product.title}
+                  title={credits.title}
                   subtitleLine={formatProductSubtitleLine(product.title, product.subtitle)}
-                  product={product}
+                  product={{ ...product, edition: credits.edition }}
                   isEcartProduct={isEcartProduct}
                   showBadge={showTradePrice}
                 />

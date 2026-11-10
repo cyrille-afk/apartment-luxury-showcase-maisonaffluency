@@ -11,10 +11,14 @@
  */
 
 import { formatMoneyIn } from "@/lib/displayMoney";
+import { productAttribution } from "./productAttribution";
 
 export type TearsheetPrintProduct = {
   brand_name?: string | null;
   product_name: string;
+  designer_name?: string | null;
+  reedition_by?: string | null;
+  edition?: string | null;
   category?: string | null;
   description?: string | null;
   image_url?: string | null;
@@ -66,6 +70,7 @@ export function buildTearsheetPrintHtml(input: TearsheetPrintInput): string {
   } = input;
 
   const priceStr = priceString(selectedProduct);
+  const credits = productAttribution({ title: selectedProduct.product_name, designerName: selectedProduct.designer_name, brandName: selectedProduct.brand_name, houseName: selectedProduct.reedition_by, edition: selectedProduct.edition });
 
   return `
       <html><head><title>Tearsheet - ${esc(selectedProduct.product_name)}</title>
@@ -81,8 +86,9 @@ export function buildTearsheetPrintHtml(input: TearsheetPrintInput): string {
         .footer { margin-top: 40px; border-top: 1px solid #e5e5e5; padding-top: 16px; font-size: 10px; color: #999; }
       </style></head><body>
       <div class="header">
-        <p class="brand">${esc(selectedProduct.brand_name)}</p>
-        <h1 class="name">${esc(selectedProduct.product_name)}</h1>
+        <p class="brand">${esc(credits.designer)}</p>
+        <h1 class="name">${esc(credits.title)}</h1>
+        ${credits.edition ? `<p class="brand">${esc(credits.edition)}</p>` : ""}
         ${chosenFinishes.variant ? `<p class="brand" style="margin-top:6px">Variant · ${esc(chosenFinishes.variant)}</p>` : ""}
       </div>
       ${selectedProduct.image_url ? `<img class="img" src="${esc(selectedProduct.image_url)}" />` : ""}

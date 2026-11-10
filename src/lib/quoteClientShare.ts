@@ -1,5 +1,6 @@
 import { quoteLinePricing, summarizeQuoteLines, type QuoteSummaryLine } from "./quoteLineSummary";
 import { dimensionsFromVariantLabel } from "./drawerDimensions";
+import { productAttribution } from "./productAttribution";
 import { findQuoteFinishSwatch, type QuoteFinishSwatch, type QuoteFinishVariant } from "./quoteFinishSwatches";
 
 /** A finish the client may switch to; price is retail for the line's size. */
@@ -16,6 +17,9 @@ export type SharedFinishChoice = {
 export type SharedQuoteLine = {
   name: string;
   maker: string | null;
+  designer?: string | null;
+  house?: string | null;
+  edition?: string | null;
   image: string | null;
   finish: string | null;
   dimensions: string | null;
@@ -50,12 +54,15 @@ export type SharedQuoteSnapshot = {
 
 export type ShareSourceLine = QuoteSummaryLine & {
   id?: string | null;
+  edition?: string | null;
   image_url?: string | null;
   fabric?: (QuoteSummaryLine["fabric"] & { name?: string | null; image_url?: string | null }) | null;
   wood_fabric?: { name?: string | null; image_url?: string | null } | null;
   product?: (QuoteSummaryLine["product"] & {
     product_name?: string | null;
     brand_name?: string | null;
+    designer_name?: string | null;
+    house_name?: string | null;
     image_url?: string | null;
     dimensions?: string | null;
     materials?: string | null;
@@ -131,6 +138,7 @@ export function buildFinishChoices(item: ShareSourceLine, swatches: QuoteFinishS
  */
 export function buildSharedQuoteSnapshot(quoteId: string, clientName: string | null, items: ShareSourceLine[], swatchesByPick: Record<string, QuoteFinishSwatch[]> = {}): SharedQuoteSnapshot {
   const lines: SharedQuoteLine[] = items.map((item) => {
+    const credits = productAttribution({ title: item.product?.product_name || "Piece", designerName: item.product?.designer_name, brandName: item.product?.brand_name, houseName: item.product?.house_name, edition: item.edition });
     const fc = buildFinishChoices(item, swatchesByPick[item.product?.source_pick_id || ""] ?? []);
     const pricing = quoteLinePricing(item, true);
     const dimensions = dimensionsFromVariantLabel(item.variant_label, item.product?.dimensions ?? null);
@@ -146,8 +154,11 @@ export function buildSharedQuoteSnapshot(quoteId: string, clientName: string | n
       .map((f) => ({ name: String(f.name).trim(), image: f.image_url || null }));
     const finishSwatches = recorded.length ? recorded : designerChoice ? [{ name: designerChoice.name, image: designerChoice.image }] : [];
     return {
-      name: item.product?.product_name || "Piece",
+      name: credits.title,
       maker: item.product?.brand_name || null,
+      designer: credits.designer,
+      house: credits.house,
+      edition: credits.edition,
       image: item.image_url || item.product?.image_url || null,
       finish,
       dimensions,

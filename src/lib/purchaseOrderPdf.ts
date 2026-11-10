@@ -7,6 +7,7 @@
  * supplier dispatch email.
  */
 import jsPDF from "jspdf";
+import { productAttribution } from "./productAttribution";
 
 const FG = [26, 26, 26] as const;
 const MUTED = [110, 110, 110] as const;
@@ -136,9 +137,10 @@ export function buildPurchaseOrderPdf(args: PurchaseOrderPdfArgs): jsPDF {
 
   doc.setFontSize(10.5);
   doc.setTextColor(FG[0], FG[1], FG[2]);
-  const titleLines = doc.splitTextToSize(args.productName, colQty - M - 20) as string[];
+  const credits = productAttribution({ title: args.productName, brandName: args.brandName });
+  const titleLines = doc.splitTextToSize(credits.title, colQty - M - 20) as string[];
   titleLines.forEach((t, i) => doc.text(t, M, y + i * 13));
-  const detail = [args.brandName, args.sku ? `SKU ${args.sku}` : "", args.dimensions, args.materials]
+  const detail = [credits.designer, credits.edition, args.sku ? `SKU ${args.sku}` : "", args.dimensions, args.materials]
     .filter(Boolean)
     .join(" · ");
   let blockH = titleLines.length * 13;

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { productAttribution } from "@/lib/productAttribution";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { displayNameForContact, resolveQuoteContact } from "@/lib/quoteContact";
@@ -104,6 +105,8 @@ interface QuoteItemWithProduct {
   trade_products: {
     product_name: string;
     brand_name: string;
+    designer_name?: string | null;
+    house_name?: string | null;
     trade_price_cents: number | null;
     rrp_price_cents?: number | null;
     price_per_sqm_cents?: number | null;
@@ -881,7 +884,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           )
         );
         if (titles.length > 0 || sourcePickIds.length > 0) {
-          const pickSelect = "id, title, edition, image_url, gallery_images, variant_image_map, size_variants, dimensions";
+          const pickSelect = "id, title, edition, edition_number, edition_signing, image_url, gallery_images, variant_image_map, size_variants, dimensions, designers(name, display_name, founder)";
           const [byTitleRes, byIdRes] = await Promise.all([
             titles.length > 0
               ? supabase.from("designer_curator_picks").select(pickSelect).in("title", titles)
@@ -906,8 +909,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               const t = it.trade_products?.product_name;
               if (!t) return it;
               const key = norm(t);
-              const ed = editionByTitle.get(key);
               const pick = (it.trade_products?.source_pick_id && pickById.get(it.trade_products.source_pick_id)) || pickByTitle.get(key);
+              const owner = Array.isArray(pick?.designers) ? pick.designers[0] : pick?.designers;
+              const credits = productAttribution({ title: pick?.title || t, designerName: owner?.display_name || owner?.name, brandName: it.trade_products?.brand_name, houseName: owner?.founder, edition: pick?.edition, edition_number: pick?.edition_number, edition_signing: pick?.edition_signing });
+              const ed = credits.edition;
               const resolvedImage = resolveQuoteLineImageFromPick(it, pick);
 
               // Fallback dims: prefer the exact selected size from the saved
@@ -961,8 +966,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   }
                 }
               }
-              const patchedProduct = dimsFromPick && it.trade_products
-                ? { ...it.trade_products, dimensions: dimsFromPick }
+              const patchedProduct = it.trade_products
+                ? { ...it.trade_products, designer_name: credits.designer, house_name: credits.house, ...(dimsFromPick ? { dimensions: dimsFromPick } : {}) }
                 : it.trade_products;
 
               return {
@@ -1830,6 +1835,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       return {
         productName: product?.product_name || "—",
         brandName: product?.brand_name || "",
+        designerName: product?.designer_name,
+        houseName: product?.house_name,
         dimensions: product?.dimensions ?? null,
         materials: product?.materials ?? null,
         edition: item.edition ?? null,
@@ -3688,6 +3695,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         {groupItems.map((item) => {
                   const product = item.trade_products;
                   const rawUnitPrice = item.unit_price_cents ?? catalogSourcePriceCents(item) ?? null;
+                  const credits = productAttribution({ title: product?.product_name || "Unknown Product", designerName: product?.designer_name, brandName: product?.brand_name, houseName: product?.house_name, edition: item.edition });
                   const unitPrice = convertCents(rawUnitPrice, itemPriceCurrency(item, currency), currency);
                   const lineTotal = unitPrice ? unitPrice * item.quantity : null;
                   // Brand margin cap actively suppressing this line's discount.
@@ -3783,10 +3791,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider truncate">
-                            {product?.brand_name?.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product?.brand_name}
+                            {credits.designer}
                           </p>
                           <h4 className="font-display text-xs md:text-sm text-foreground leading-tight break-words mt-0.5">
-                            {product?.product_name || "Unknown Product"}
+                            {credits.title}
                           </h4>
                           {(() => {
                             // Split the variant label into finish tokens and

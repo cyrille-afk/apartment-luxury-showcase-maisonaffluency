@@ -1,4 +1,5 @@
 import { parseBudgetAmount, parseGallerySearch, matchesSize, priceForSize, activeBudgetPresetId, budgetPresetFields, budgetPresetLabel, BUDGET_PRESETS, type PricedVariant } from "@/lib/gallerySearchIntent";
+import { productAttribution } from "@/lib/productAttribution";
 import { useState, useMemo, useEffect, useCallback, useRef, lazy, Suspense } from "react";
 import { readSavedViews, saveView, deleteView, type TradeSavedView } from "@/lib/tradeSavedViews";
 import { syncSavedViews, pushSavedView, removeSavedView } from "@/lib/tradeSavedViewsSync";
@@ -899,6 +900,7 @@ const StudioGallery = () => {
             const price = getProductPrice(product);
             const pinned = isPinned(product.product_name, product.id);
             const metadata = tradeCardMetadata(product);
+            const credits = productAttribution({ ...product, title: product.product_name, brandName: product.brand_name, houseName: product.reedition_by });
             return (
               <div key={product.id} data-trade-card={product.product_name} className="group relative min-w-0 cursor-pointer" onClick={(event) => { if (!(event.target instanceof Element) || !event.target.closest('button, a, input, select, textarea, [role="button"], [role="dialog"]')) openProductSheet(product); }} onPointerEnter={() => warmTradeProductPage(product)} onFocusCapture={() => warmTradeProductPage(product)}>
                 <div className="@container relative aspect-square w-full overflow-hidden bg-[hsl(var(--product-canvas))] cursor-pointer">
@@ -995,7 +997,7 @@ const StudioGallery = () => {
                  <div className="flex flex-col pt-2 pb-1 text-left">
                    <div data-card-baseline className="grid h-10 grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)] items-center gap-2">
                      <h3 title={product.product_name} className="min-w-0 truncate font-display text-[14px] leading-snug text-foreground sm:text-[15px]">
-                       {product.product_name}
+                       {credits.title}
                      </h3>
                      <div className="min-w-0 text-right">
                        {renderPriceDisplay(price, "font-mono text-[9px] uppercase tracking-normal flex flex-col items-end gap-0.5 whitespace-nowrap tabular-nums [&>span]:max-w-full [&>span]:truncate [&>span[aria-hidden]]:hidden", product.brand_name, true) || (
@@ -1004,8 +1006,9 @@ const StudioGallery = () => {
                      </div>
                    </div>
                    {!suppressTradeCardBrand(product.brand_name, activeBrand, searchIntent.text) && (
-                     <p data-card-brand className="mt-1 truncate font-mono text-[9px] uppercase tracking-normal text-muted-foreground" title={product.brand_name}>{product.brand_name}</p>
+                     <p data-card-brand className="mt-1 truncate font-mono text-[9px] uppercase tracking-normal text-muted-foreground" title={credits.designer || product.brand_name}>{credits.designer}</p>
                    )}
+                   {credits.edition && <p className="mt-1 font-body text-[10px] uppercase text-muted-foreground">{credits.edition}</p>}
                    {product.hidden_in_trade && <p className="font-body text-xs text-muted-foreground" data-trade-sensitive>Public listing · Hidden in Trade</p>}
                    {isAdmin && !product.hidden_in_trade && (
                      <div className="mt-auto flex flex-col items-start gap-1.5 pt-3">
