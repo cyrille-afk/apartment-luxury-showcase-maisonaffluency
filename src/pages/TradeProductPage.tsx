@@ -1329,12 +1329,14 @@ const TradeProductPage: React.FC<{ embeddedProduct?: { id?: string; designerSlug
 
 
           // Combined override unit price (wood + fabric upcharge), in quote currency.
-          const configuredPatch = quoteConfiguredPricePatch(selectedDrawerPrices);
+          const configuredPatch = quoteConfiguredPricePatch(selectedDrawerPrices, {
+            upchargeCents: patch.fabric_upcharge_cents,
+            currency: patch.fabric_currency,
+          });
           if (configuredPatch) {
+            // Net snapshot includes fabric; the helper splits the surcharge out
+            // so retail stays resolvable and net totals aren't double-charged.
             Object.assign(patch, configuredPatch);
-            // This numeric net snapshot already includes configured fabric cost.
-            // Retain fabric identity/metres without charging the surcharge twice.
-            patch.fabric_upcharge_cents = null;
           } else if (overrideUnitPriceCents != null) {
             patch.unit_price_cents = overrideUnitPriceCents;
             patch.unit_price_currency = productCcy;
