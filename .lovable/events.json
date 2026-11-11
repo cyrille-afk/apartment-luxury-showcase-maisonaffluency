@@ -475,6 +475,30 @@
         }
       }
     },
+    "project.quote_editable_revision_created": {
+      "event_schema_version": 1,
+      "description": "An administrator creates a new editable revision; revisiting an existing revision does not count as creation.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source"
+        ],
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "admin_quotes",
+              "quote_builder"
+            ]
+          }
+        }
+      }
+    },
     "project.quote_opened": {
       "event_schema_version": 1,
       "description": "Quote opens: a valid shared quote successfully loaded in the browser. Counts successful quote access only, not preview impressions, clicks or metadata crawler requests; no client, quote, URL or token properties.",
@@ -486,6 +510,66 @@
         "type": "object",
         "additionalProperties": false,
         "properties": {}
+      }
+    },
+    "project.quote_pricing_saved": {
+      "event_schema_version": 1,
+      "description": "Admin pricing successfully committed, before email dispatch; includes initial pricing and updates.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source",
+          "line_count",
+          "pricing_update"
+        ],
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "admin_quotes"
+            ]
+          },
+          "line_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "pricing_update": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "project.quote_revision_requested": {
+      "event_schema_version": 1,
+      "description": "An administrator's confirmed revision request succeeds in Quote Management or Quote Builder; canceled or failed requests are excluded.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source",
+          "has_reason"
+        ],
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "admin_quotes",
+              "quote_builder"
+            ]
+          },
+          "has_reason": {
+            "type": "boolean"
+          }
+        }
       }
     },
     "project.seating_dropdown_opened": {

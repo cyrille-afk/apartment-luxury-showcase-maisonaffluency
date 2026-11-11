@@ -1926,6 +1926,13 @@
       "when": 1794434372957,
       "tag": "0274_admin_quote_pricing_and_revisions",
       "breakpoints": true
+    },
+    {
+      "idx": 275,
+      "version": "7",
+      "when": 1794435147699,
+      "tag": "0275_quote_revision_creation_result",
+      "breakpoints": true
     }
   ]
 }

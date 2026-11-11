@@ -18,9 +18,13 @@ describe("admin quote actions", () => {
     await expect(saveAdminQuotePricing("q", [], "", { cbm: 1, kg: 1, mode: "road" })).rejects.toThrow("denied");
   });
   it("returns the saved revision identity and rejects failed creation", async () => {
-    rpc.mockResolvedValueOnce({ data: "revision", error: null });
-    expect(await reviseAdminQuote("original", "reason")).toBe("revision");
+    rpc.mockResolvedValueOnce({ data: { draft_id: "revision", created: true }, error: null });
+    expect(await reviseAdminQuote("original", "reason")).toEqual({ draftId: "revision", created: true });
     rpc.mockResolvedValueOnce({ data: null, error: new Error("denied") });
     await expect(reviseAdminQuote("original", "reason")).rejects.toThrow("denied");
+  });
+  it("does not classify revisiting an existing revision as creation", async () => {
+    rpc.mockResolvedValueOnce({ data: { draft_id: "revision", created: false }, error: null });
+    expect(await reviseAdminQuote("original", "retry")).toEqual({ draftId: "revision", created: false });
   });
 });

@@ -1,5 +1,8 @@
 # Roadmap
 
+## Admin quote analytics
+- [x] Added three privacy-safe success events at existing handlers, with server-confirmed new-vs-existing revision results to avoid counting revisits as creation. All 20 event schemas validate; eight tests pass. Signed-in disposable admin flow emitted pricing, request and creation once each; retry returned created=false. Temporary quotes removed; production event arrival awaits published-app usage.
+
 ## Admin submitted-quote pricing and revisions
 - [x] Confirmed live locks; added atomic admin pricing and idempotent owner-retaining draft revisions, checked both screens’ results, and kept issued specification locks. Signed-in disposable UI pricing saved €345.67/€456.78; simulated email failure reported accurately without sending. Request Changes opened an editable revision in Quote Builder, preserving quantities, finishes, ship-to and original issuance; invalid pricing rolled back all writes.
 

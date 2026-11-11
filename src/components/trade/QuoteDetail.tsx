@@ -1632,9 +1632,12 @@ const QuoteDetail = ({ quoteId, quoteStatus: initialQuoteStatus, quoteCreatedAt,
     const header = isSuperAdmin ? "Reopened as draft by admin" : "Client requested changes";
     const newNotes = reason ? appendAdminNote(adminNotes, header, reason) : adminNotes;
     let draftId = quoteId;
+    let revisionCreated = false;
     try {
       if (isSuperAdmin) {
-        draftId = await reviseAdminQuote(quoteId, newNotes || "");
+        const revision = await reviseAdminQuote(quoteId, newNotes || "");
+        draftId = revision.draftId;
+        revisionCreated = revision.created;
       } else {
         const { error, data } = await supabase.from("trade_quotes").update({
           status: "draft", submitted_at: null, responded_at: null, admin_notes: newNotes,
@@ -1644,6 +1647,10 @@ const QuoteDetail = ({ quoteId, quoteStatus: initialQuoteStatus, quoteCreatedAt,
     } catch {
       toast({ title: "Could not open draft", description: "The issued quote is unchanged. Please ask your administrator for a draft revision.", variant: "destructive" });
       return;
+    }
+    if (isSuperAdmin) {
+      window.__lovableEvents?.track?.("project.quote_revision_requested", { source: "quote_builder", has_reason: Boolean(reason) });
+      if (revisionCreated) window.__lovableEvents?.track?.("project.quote_editable_revision_created", { source: "quote_builder" });
     }
     setAdminNotes(newNotes);
     setReviseOpen(false);

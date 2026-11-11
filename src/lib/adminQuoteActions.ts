@@ -16,7 +16,7 @@ export async function saveAdminQuotePricing(quoteId: string, lines: Array<{ id: 
 }
 
 export async function reviseAdminQuote(quoteId: string, notes: string) {
-  const { data, error } = await supabase.rpc("admin_revise_quote", { _quote_id: quoteId, _notes: notes });
-  if (error || !data) throw error || new Error("The draft could not be opened.");
-  return data;
+  const { data, error } = await supabase.rpc("admin_revise_quote_with_result", { _quote_id: quoteId, _notes: notes });
+  if (error || !data || typeof data !== "object" || Array.isArray(data) || typeof data.draft_id !== "string" || typeof data.created !== "boolean") throw error || new Error("The draft could not be opened.");
+  return { draftId: data.draft_id, created: data.created };
 }

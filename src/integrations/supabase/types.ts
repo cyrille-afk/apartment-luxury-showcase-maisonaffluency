@@ -13333,6 +13333,10 @@ export type Database = {
         Args: { _notes: string; _quote_id: string }
         Returns: string
       }
+      admin_revise_quote_with_result: {
+        Args: { _notes: string; _quote_id: string }
+        Returns: Json
+      }
       admin_revoke_studio_invitation: {
         Args: { _invite_id: string; _studio_id: string }
         Returns: undefined

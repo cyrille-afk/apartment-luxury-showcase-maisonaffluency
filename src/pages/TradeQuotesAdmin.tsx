@@ -537,6 +537,7 @@ const AdminQuoteDetail = ({ quoteId, onBack, onRevision }: { quoteId: string; on
     setSaving(true);
     try {
       await saveAdminQuotePricing(quoteId, quotePricingLines(items, itemPrices), adminNotes, landedCostSettings);
+      window.__lovableEvents?.track?.("project.quote_pricing_saved", { source: "admin_quotes", line_count: items.length, pricing_update: quote?.status === "priced" });
       let notificationFailed = false;
       try {
         const { data, error } = await supabase.functions.invoke("send-quote-priced", { body: { quoteId } });
@@ -585,7 +586,9 @@ const AdminQuoteDetail = ({ quoteId, onBack, onRevision }: { quoteId: string; on
     setSaving(true);
     const merged = appendAdminNote(adminNotes, "Changes requested", reason.trim());
     try {
-      const draftId = await reviseAdminQuote(quoteId, merged);
+      const { draftId, created } = await reviseAdminQuote(quoteId, merged);
+      window.__lovableEvents?.track?.("project.quote_revision_requested", { source: "admin_quotes", has_reason: true });
+      if (created) window.__lovableEvents?.track?.("project.quote_editable_revision_created", { source: "admin_quotes" });
       toast({ title: draftId === quoteId ? "Reopened as draft" : "Draft revision opened", description: draftId === quoteId ? "Client can revise the quote." : "The issued quote is preserved; changes belong to the new draft." });
       onRevision(draftId);
     } catch {
