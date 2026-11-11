@@ -9548,6 +9548,56 @@ export type Database = {
         }
         Relationships: []
       }
+      studio_favorite_pairings: {
+        Row: {
+          created_at: string
+          product_id: string
+          reference_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          product_id: string
+          reference_id: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          product_id?: string
+          reference_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "studio_favorite_pairings_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "trade_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "studio_favorite_pairings_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "trade_products_public_rrp"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "studio_favorite_pairings_reference_id_fkey"
+            columns: ["reference_id"]
+            isOneToOne: false
+            referencedRelation: "trade_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "studio_favorite_pairings_reference_id_fkey"
+            columns: ["reference_id"]
+            isOneToOne: false
+            referencedRelation: "trade_products_public_rrp"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       studio_invite_events: {
         Row: {
           actor_id: string | null

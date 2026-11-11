@@ -106,7 +106,7 @@ function editorialPairing(reference: PairingProduct, candidate: PairingProduct, 
   return { editorial_tag: tag, reason: `${spatial[candidateRole] || `${piece} adds a complementary element around ${name}.`}${dialogue}` };
 }
 
-export function rankStudioPairings(reference: PairingProduct, catalogue: PairingProduct[], excludedIds: string[]) {
+export function rankStudioPairings(reference: PairingProduct, catalogue: PairingProduct[], excludedIds: string[], limits = { perRole: 3, total: 8 }) {
   const excluded = new Set([...excludedIds, reference.id, reference.source_pick_id].filter(Boolean));
   const seen = new Set<string>();
   // The same piece can exist twice with spacing/case title variants (e.g. "Tumulte ConvexMirror").
@@ -136,8 +136,8 @@ export function rankStudioPairings(reference: PairingProduct, catalogue: Pairing
   const roleCounts = new Map<string, number>();
   return ranked.filter(product => {
     const count = roleCounts.get(product.pairingRole) || 0;
-    if (count >= 3) return false;
+    if (count >= limits.perRole) return false;
     roleCounts.set(product.pairingRole, count + 1);
     return true;
-  }).slice(0, 8).map(({ pairingRole, ...recommendation }) => recommendation);
+  }).slice(0, limits.total).map(({ pairingRole, ...recommendation }) => recommendation);
 }

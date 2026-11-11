@@ -1912,6 +1912,13 @@
       "when": 1794317151222,
       "tag": "0272_validate_quote_inputs_before_canonical_pricing",
       "breakpoints": true
+    },
+    {
+      "idx": 273,
+      "version": "7",
+      "when": 1794363219148,
+      "tag": "0273_studio_favorite_pairings",
+      "breakpoints": true
     }
   ]
 }

@@ -1,5 +1,9 @@
 # Roadmap
 
+## Favorite Visual Studio pairings
+- [x] Add private account-saved pairings per active piece, saved-only browsing and removal with existing category/finish filters; saved candidates remain available beyond the initial ranking cap without stored prices.
+- [x] Eighteen regressions pass; signed-in Frenchmen → Aragon save, reload readback, other-piece isolation, saved-only revisit and removal persistence verified at 1955px/390px. Temporary favorite removed; no project pieces changed, page errors absent and build OK.
+
 ## Visual Studio curation filters
 - [x] Add category and recorded-finish selectors over the ranked stream, combined filtering, result counts and clear/reset states. Fourteen regressions pass; signed-in Gingko category + brass narrows 8 to 1, clearing restores 8, switching to Madison resets filters, and phone brass returns 4 of 8 without customer writes or page errors.
 

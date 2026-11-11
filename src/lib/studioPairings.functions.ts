@@ -36,6 +36,15 @@ export const getStudioPairings = createServerFn({ method: "POST" })
         size_variants: Array.isArray(product.size_variants) && product.size_variants.length ? product.size_variants : pick?.size_variants };
     };
     const exclusions = [...data.excludedIds, ...catalogue.filter(p => data.excludedIds.includes(p.id)).map(p => p.source_pick_id || p.id)];
+    const { data: favorites, error: favoriteError } = await context.supabase.from("studio_favorite_pairings")
+      .select("product_id").eq("user_id", context.userId).eq("reference_id", data.referenceId);
+    if (favoriteError) throw new Error("Saved pairings could not be read. Please try again.");
+    const favoriteIds = (favorites || []).map(row => row.product_id);
+    const favoriteSet = new Set(favoriteIds);
+    const source = { ...hydrate(reference), selected_finish: data.selectedFinish };
+    const hydratedCatalogue = catalogue.map(hydrate);
     // RLS remains the read boundary; never return catalogue attributes or prices.
-    return { recommendations: rankStudioPairings({ ...hydrate(reference), selected_finish: data.selectedFinish }, catalogue.map(hydrate), exclusions) };
+    return { recommendations: rankStudioPairings(source, hydratedCatalogue, exclusions), favoriteIds,
+      savedRecommendations: rankStudioPairings(source, hydratedCatalogue.filter(product => favoriteSet.has(product.id)), exclusions,
+        { perRole: catalogue.length, total: catalogue.length }) };
   });

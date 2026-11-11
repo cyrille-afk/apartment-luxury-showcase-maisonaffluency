@@ -1,7 +1,8 @@
 import { getStudioPairings } from "@/lib/studioPairings.functions";
+import { setStudioPairingFavorite } from "@/lib/studioPairingFavorites.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Loader2, Plus, X } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Bookmark, Loader2, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { filterStudioPairings, studioPairingFilterOptions } from "@/lib/studioPairingFilters";
@@ -66,6 +67,7 @@ export function ProjectCuratorialGuide({
   onRecommendationHover,
 }: Props) {
   const fetchPairings = useServerFn(getStudioPairings);
+  const saveFavorite = useServerFn(setStudioPairingFavorite);
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = (value: boolean) => {
@@ -74,10 +76,16 @@ export function ProjectCuratorialGuide({
   };
   const [heightIndex, setHeightIndex] = useState(1);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [savedRecommendations, setSavedRecommendations] = useState<Recommendation[]>([]);
+  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
+  const [favoritePending, setFavoritePending] = useState(false);
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
+  const referenceRef = useRef(activeItemId);
   const [categoryFilter, setCategoryFilter] = useState("");
   const [finishFilter, setFinishFilter] = useState("");
-  const filterOptions = useMemo(() => studioPairingFilterOptions(recommendations), [recommendations]);
-  const visibleRecommendations = useMemo(() => filterStudioPairings(recommendations, categoryFilter, finishFilter), [recommendations, categoryFilter, finishFilter]);
+  const streamRecommendations = favoritesOnly ? savedRecommendations : recommendations;
+  const filterOptions = useMemo(() => studioPairingFilterOptions(streamRecommendations), [streamRecommendations]);
+  const visibleRecommendations = useMemo(() => filterStudioPairings(streamRecommendations, categoryFilter, finishFilter), [streamRecommendations, categoryFilter, finishFilter]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [addingId, setAddingId] = useState<string | null>(null);
@@ -93,6 +101,7 @@ export function ProjectCuratorialGuide({
     () => items.find((item) => item.product_id === activeItemId) || items[0] || null,
     [activeItemId, items],
   );
+  referenceRef.current = activeItem?.product_id || null;
 
   useEffect(() => {
     if (!activeItemId && items[0]) onActiveItemChange(items[0].product_id);
@@ -101,6 +110,7 @@ export function ProjectCuratorialGuide({
   useEffect(() => {
     setCategoryFilter("");
     setFinishFilter("");
+    setFavoritesOnly(false);
   }, [activeItem?.product_id, activeItem?.selected_finish]);
 
   useEffect(() => {
@@ -110,11 +120,15 @@ export function ProjectCuratorialGuide({
       setLoading(true);
       setError(null);
       setRecommendations([]);
+      setSavedRecommendations([]);
+      setFavoriteIds(new Set());
       try {
         const data = await fetchPairings({ data: { referenceId: activeItem.product_id, selectedFinish: activeItem.selected_finish?.slice(0, 2000), excludedIds: items.map((item) => item.product_id) } });
         if (cancelled) return;
         const excluded = new Set(items.map((item) => item.product_id));
         const seen = new Set<string>();
+        setFavoriteIds(new Set(data.favoriteIds));
+        setSavedRecommendations(data.savedRecommendations);
         setRecommendations(data.recommendations.filter((rec) => {
           if (excluded.has(rec.product_id) || seen.has(rec.product_id)) return false;
           seen.add(rec.product_id);
@@ -131,6 +145,28 @@ export function ProjectCuratorialGuide({
       cancelled = true;
     };
   }, [open, projectId, items, activeItem, fetchPairings]);
+
+  const toggleFavorite = async (rec: Recommendation) => {
+    if (!activeItem || favoritePending) return;
+    const referenceId = activeItem.product_id;
+    const saved = !favoriteIds.has(rec.product_id);
+    setFavoritePending(true);
+    setError(null);
+    try {
+      await saveFavorite({ data: { referenceId, productId: rec.product_id, saved } });
+      if (referenceRef.current !== referenceId) return;
+      setFavoriteIds(current => {
+        const next = new Set(current);
+        if (saved) next.add(rec.product_id); else next.delete(rec.product_id);
+        return next;
+      });
+      setSavedRecommendations(current => saved ? [...current.filter(item => item.product_id !== rec.product_id), rec] : current.filter(item => item.product_id !== rec.product_id));
+    } catch {
+      if (referenceRef.current === referenceId) setError("Your favorites could not be updated. Please try again.");
+    } finally {
+      setFavoritePending(false);
+    }
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -424,10 +460,14 @@ export function ProjectCuratorialGuide({
             </div>
           </div>
 
+          <div role="group" aria-label="Pairing collection" className="mb-4 flex flex-wrap gap-2">
+            <Button variant={favoritesOnly ? "ghost" : "outline"} size="sm" aria-pressed={!favoritesOnly} onClick={() => { setFavoritesOnly(false); setCategoryFilter(""); setFinishFilter(""); }} className="rounded-none font-body text-[10px] uppercase tracking-[0.12em]">All pairings</Button>
+            <Button variant={favoritesOnly ? "outline" : "ghost"} size="sm" aria-pressed={favoritesOnly} onClick={() => { setFavoritesOnly(true); setCategoryFilter(""); setFinishFilter(""); }} className="rounded-none font-body text-[10px] uppercase tracking-[0.12em]"><Bookmark className="h-3 w-3" />Saved pairings ({savedRecommendations.length})</Button>
+          </div>
           <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="min-w-0 space-y-2">
               <p id="curation-category-label" className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Category</p>
-              <Select value={categoryFilter || "all"} onValueChange={value => setCategoryFilter(value === "all" ? "" : value)} disabled={loading || !recommendations.length}>
+              <Select value={categoryFilter || "all"} onValueChange={value => setCategoryFilter(value === "all" ? "" : value)} disabled={loading || !streamRecommendations.length}>
                 <SelectTrigger aria-labelledby="curation-category-label" className="rounded-none font-body text-[10px] uppercase tracking-[0.12em]"><SelectValue /></SelectTrigger>
                 <SelectContent className="z-[100] rounded-none">
                   <SelectItem value="all">All categories</SelectItem>
@@ -437,7 +477,7 @@ export function ProjectCuratorialGuide({
             </div>
             <div className="min-w-0 space-y-2">
               <p id="curation-finish-label" className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Finish</p>
-              <Select value={finishFilter || "all"} onValueChange={value => setFinishFilter(value === "all" ? "" : value)} disabled={loading || !recommendations.length}>
+              <Select value={finishFilter || "all"} onValueChange={value => setFinishFilter(value === "all" ? "" : value)} disabled={loading || !streamRecommendations.length}>
                 <SelectTrigger aria-labelledby="curation-finish-label" className="rounded-none font-body text-[10px] uppercase tracking-[0.12em]"><SelectValue /></SelectTrigger>
                 <SelectContent className="z-[100] rounded-none">
                   <SelectItem value="all">All finishes</SelectItem>
@@ -446,7 +486,7 @@ export function ProjectCuratorialGuide({
               </Select>
             </div>
             <div className="flex min-h-8 items-center justify-between gap-3 sm:col-span-2">
-              <p role="status" aria-live="polite" className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">{loading ? "Reviewing pairings" : `${visibleRecommendations.length} of ${recommendations.length} pairings`}</p>
+              <p role="status" aria-live="polite" className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">{loading ? "Reviewing pairings" : `${visibleRecommendations.length} of ${streamRecommendations.length} pairings`}</p>
               {(categoryFilter || finishFilter) && <Button variant="ghost" size="sm" onClick={() => { setCategoryFilter(""); setFinishFilter(""); }} className="h-8 rounded-none px-2 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground"><X className="h-3 w-3" />Clear filters</Button>}
             </div>
           </div>
@@ -490,6 +530,10 @@ export function ProjectCuratorialGuide({
                       {rec.title}
                     </p>
                     {focused && <div className="min-w-0 space-y-3 text-muted-foreground"><div className="flex flex-wrap items-center gap-x-3 gap-y-2 font-body text-[10px] uppercase leading-relaxed tracking-[0.15em]"><span>{rec.brand}</span><span className="border border-border px-2 py-1 text-[9px]">{rec.editorial_tag}</span></div><p className="font-body text-sm leading-relaxed">{rationale}</p></div>}
+                    <div className={cn("flex flex-wrap items-center gap-x-5 gap-y-2", focused && "col-start-2")}>
+                    <Button type="button" variant="ghost" size="sm" aria-label={`${favoriteIds.has(rec.product_id) ? "Remove saved pairing" : "Save pairing"}: ${rec.title}`} aria-pressed={favoriteIds.has(rec.product_id)} disabled={favoritePending || loading} onClick={() => void toggleFavorite(rec)} className="min-h-10 rounded-none px-0 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground hover:bg-transparent hover:text-foreground">
+                      <Bookmark className={cn("h-3.5 w-3.5", favoriteIds.has(rec.product_id) && "fill-current")} />{favoriteIds.has(rec.product_id) ? "Saved" : "Save pairing"}
+                    </Button>
                     <Button
                       type="button"
                       variant="ghost"
@@ -500,15 +544,16 @@ export function ProjectCuratorialGuide({
                       {addingId === rec.product_id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
                       {added ? "Added" : "Add"}
                     </Button>
+                    </div>
                   </article>
 
                 );
               })}
             </div>
           ) : (
-            <p className="py-10 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">{error || (recommendations.length ? "No pairings match these filters." : activeItem ? "No complementary pairings are currently available." : "Add pieces to this project to begin a curatorial analysis.")}</p>
+            <p className="py-10 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">{error || (streamRecommendations.length ? "No pairings match these filters." : favoritesOnly ? "No saved pairings for this piece yet." : activeItem ? "No complementary pairings are currently available." : "Add pieces to this project to begin a curatorial analysis.")}</p>
           )}
-          {error && recommendations.length > 0 && <p role="alert" className="mt-2 font-body text-[10px] text-destructive">{error}</p>}
+          {error && streamRecommendations.length > 0 && <p role="alert" className="mt-2 font-body text-[10px] text-destructive">{error}</p>}
         </div>
       </div>
     </section>
