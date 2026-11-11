@@ -13,7 +13,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
 import { useParams, useNavigate, useLocation, Link } from "@/lib/router-compat";
 import type { ReactNode } from "react";
-import { ArrowLeft, Plus, Share2, FileText, Trash2, Check, X, FolderPlus, Folder, ChevronDown, ChevronRight, MoreHorizontal, Pencil, RefreshCw, Palette, Box, Mail, Phone, ExternalLink, Lock, ArrowRight } from "lucide-react";
+import { ArrowLeft, Plus, Share2, FileText, Trash2, Check, X, FolderPlus, Folder, ChevronDown, ChevronRight, MoreHorizontal, Pencil, RefreshCw, Palette, Mail, Phone, ExternalLink, Lock, ArrowRight } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,6 +48,7 @@ import { CreateQuoteFromBoard } from "@/components/trade/concierge/CreateQuoteFr
 import { fillHotspotImages } from "@/lib/hotspotImageFallback";
 import { fillTradeProductImageFallbacks } from "@/lib/tradeProductImageFallback";
 import { HotspotImageBadge } from "@/components/trade/HotspotImageBadge";
+import { Product3dBadge } from "@/components/trade/Product3dBadge";
 import { rememberActiveQuoteId } from "@/lib/activeProjectId";
 import { copyTextToClipboard } from "@/lib/clipboard";
 import ProcurementBoardPanel, { FinishChips } from "@/components/trade/procurement/ProcurementBoardPanel";
@@ -93,6 +94,7 @@ interface BoardItem {
     image_from_hotspot?: boolean;
     materials: string | null;
     dimensions: string | null;
+    glb_url?: string | null;
   };
 }
 
@@ -226,7 +228,7 @@ const TradeBoardBuilder = () => {
       const productIds = itemsData.map((i: any) => i.product_id);
       const { data: prods } = await supabase
         .from("trade_products")
-        .select("id, product_name, brand_name, image_url, materials, dimensions, source_pick_id")
+        .select("id, product_name, brand_name, image_url, materials, dimensions, source_pick_id, glb_url")
         .in("id", productIds);
 
       // Fill missing image_url: first from the linked curator pick (the canonical
@@ -652,16 +654,11 @@ const TradeBoardBuilder = () => {
           <div className="w-full h-full flex items-center justify-center text-muted-foreground font-body text-xs">No image</div>
         )}
         {item.product?.image_from_hotspot && <HotspotImageBadge />}
-        <span
-          role="button"
-          tabIndex={0}
-          aria-label={`Materials and finishes for ${item.product?.product_name ?? "product"}`}
-          onClick={(e) => { e.stopPropagation(); setFinishItem(item); }}
-          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); setFinishItem(item); } }}
-          className="absolute top-2 left-2 z-10 inline-flex items-center gap-1.5 border border-border/60 bg-background/85 px-2.5 py-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-foreground backdrop-blur-sm transition-colors hover:bg-background"
-        >
-          <Box className="h-3.5 w-3.5" strokeWidth={1.5} /> 3D View
-        </span>
+        <Product3dBadge
+          glbUrl={item.product?.glb_url}
+          productName={item.product?.product_name}
+          onOpen={() => setFinishItem(item)}
+        />
         {item.approval_status === "approved" && (
           <div className="absolute top-2 right-2 w-7 h-7 rounded-full bg-green-500 flex items-center justify-center">
             <Check className="h-4 w-4 text-white" />

@@ -3,7 +3,7 @@ import { invitationEmailState, latestInvitationEmail, type InvitationEmailStatus
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toDiscountFraction, tradePriceCents, clientPriceCents, clientUnitCents, discountPercentLabel, effectiveProjectMultiplier } from "@/lib/tradePricing";
 import { AnimatePresence, motion } from "framer-motion";
-import { Heart, MessageSquare, ThumbsDown, ThumbsUp, UserPlus, X, Box } from "lucide-react";
+import { Heart, MessageSquare, ThumbsDown, ThumbsUp, UserPlus, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +19,7 @@ import { toast } from "@/hooks/use-toast";
 import { useStudio } from "@/hooks/useStudio";
 import InviteCollaboratorDialog from "./InviteCollaboratorDialog";
 import BoardInviteEmailPreview from "./BoardInviteEmailPreview";
+import { Product3dBadge } from "@/components/trade/Product3dBadge";
 
 type Row = {
   id: string;
@@ -31,6 +32,7 @@ type Row = {
   currency: string;
   lead_time: string | null;
   ship_mode: string | null;
+  glb_url: string | null;
 };
 
 type Invite = { id: string; email: string; role: string; status: string; last_seen_at: string | null; created_at: string };
@@ -129,7 +131,7 @@ export default function ProcurementBoardPanel({ lockedItemIds = [], boardId, boa
     setPricingReady(false);
     supabase
       .from("trade_products")
-      .select("id, trade_price_cents, currency, lead_time, lead_time_weeks_min, lead_time_weeks_max, default_ship_mode")
+      .select("id, trade_price_cents, currency, lead_time, lead_time_weeks_min, lead_time_weeks_max, default_ship_mode, glb_url")
       .in("id", ids)
       .then(({ data }) => setPricing(new Map((data || []).map((p: any) => [p.id, p]))));
     supabase.rpc("current_trade_discount_pct" as any).then(({ data, error }) => { if (!error) { setDiscountPct(toDiscountFraction(data)); setPricingReady(true); } });
@@ -232,6 +234,7 @@ export default function ProcurementBoardPanel({ lockedItemIds = [], boardId, boa
       currency: quoteNet.get(i.id)?.currency || p.currency || "EUR",
       lead_time: lead,
       ship_mode: p.default_ship_mode || null,
+      glb_url: p.glb_url ?? null,
     };
   });
   const draftSources: BoardDraftSource[] = rows.map((row) => ({ ...row, quantity: quoteNet.get(row.id)?.quantity ?? 1,
@@ -344,10 +347,12 @@ export default function ProcurementBoardPanel({ lockedItemIds = [], boardId, boa
               <article key={r.id} className="flex flex-col">
                 <div className="relative aspect-[4/5] bg-[hsl(var(--product-canvas))] p-6">
                   {onOpenFinishes && (
-                    <button type="button" onClick={() => onOpenFinishes(r.id)} aria-label={`Materials and finishes for ${r.product_name}`}
-                      className="absolute left-3 top-3 z-10 inline-flex items-center gap-1.5 border border-border/60 bg-background/85 px-2.5 py-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-foreground backdrop-blur-sm transition-colors hover:bg-background">
-                      <Box className="h-3.5 w-3.5" strokeWidth={1.5} /> 3D View
-                    </button>
+                    <Product3dBadge
+                      glbUrl={r.glb_url}
+                      productName={r.product_name}
+                      onOpen={() => onOpenFinishes(r.id)}
+                      className="left-3 top-3 z-10"
+                    />
                   )}
                   {(finishOverrides[r.id]?.image_url || r.image_url) && <img src={finishOverrides[r.id]?.image_url || r.image_url!} alt={r.product_name} onClick={onOpenFinishes ? () => onOpenFinishes(r.id) : undefined} className={`h-full w-full object-contain${onOpenFinishes ? " cursor-pointer" : ""}`} loading="lazy" />}
                 </div>
