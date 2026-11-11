@@ -1,5 +1,8 @@
 # Roadmap
 
+## Visual Studio editorial curation
+- [x] Remove thumbnail overlays and native description tooltips; replace visible percentages with editorial tags and descriptions based on typology, material relationships and unambiguous saved finishes. Eight finish/exclusion regressions pass; signed-in Frenchmen/Madison streams, pointer hover and Close verified without customer writes or browser errors. Build OK.
+
 ## Visual Studio recommendation accuracy
 - [x] Deduplicate canonical product identities, exclude composed pieces, score complementary roles and recorded materials per active reference. Signed-in Frenchmen shows unique table/lighting pairings at 92–94%; switching to Madison changes to stone/brass seating, lighting and mirrors at 90–96%. Close returns to canvas; no browser errors or customer writes. Six scoring regressions pass; build OK.
 

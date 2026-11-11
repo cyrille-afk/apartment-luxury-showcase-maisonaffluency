@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { rankStudioPairings, type PairingProduct } from "./studioPairings";
+import { rankStudioPairings, studioPairingTraits, type PairingProduct } from "./studioPairings";
 
 const product = (id: string, name: string, materials = "dark stained wood, bronze"): PairingProduct => ({
   id, product_name: name, brand_name: "Maker", category: "Furniture", subcategory: null,
@@ -7,6 +7,20 @@ const product = (id: string, name: string, materials = "dark stained wood, bronz
 });
 const chair = product("chair", "Frenchmen Street Lounge Chair");
 describe("Studio reference pairings", () => {
+  it("uses saved pale timber and bouclé without borrowing a default dark finish", () => {
+    const selected = { ...chair, selected_finish: "Nude Oak / cream bouclé", default_variant_label: "Black Oak" };
+    const traits = studioPairingTraits(selected);
+    expect(traits.has("light timber")).toBe(true);
+    expect(traits.has("bouclé")).toBe(true);
+    expect(traits.has("dark timber")).toBe(false);
+  });
+  it("does not treat alternative variant finishes as the selected palette", () => {
+    const traits = studioPairingTraits({ ...chair, materials: null, size_variants: [{ base: "Nude Oak", top: "Cream bouclé" }, { base: "Black Oak", top: "Blue leather" }] });
+    expect(traits.has("oak")).toBe(true);
+    expect(traits.has("light timber")).toBe(false);
+    expect(traits.has("bouclé")).toBe(false);
+    expect(traits.has("leather")).toBe(false);
+  });
   it("returns a product ID only once, including catalogue mirrors", () => {
     const side = product("side", "Side Table");
     expect(rankStudioPairings(chair, [side, side, { ...side, id: "mirror", source_pick_id: "side" }], []).map(p => p.product_id)).toEqual(["side"]);

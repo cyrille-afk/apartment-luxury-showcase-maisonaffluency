@@ -11,11 +11,13 @@ export type CuratorialSourceItem = {
   name: string;
   designer: string;
   image_url: string | null;
+  selected_finish?: string | null;
 };
 
 type Recommendation = {
   product_id: string;
   score: number;
+  editorial_tag: string;
   reason: string;
   title: string;
   subtitle: string;
@@ -97,7 +99,7 @@ export function ProjectCuratorialGuide({
       setError(null);
       setRecommendations([]);
       try {
-        const data = await fetchPairings({ data: { referenceId: activeItem.product_id, excludedIds: items.map((item) => item.product_id) } });
+        const data = await fetchPairings({ data: { referenceId: activeItem.product_id, selectedFinish: activeItem.selected_finish?.slice(0, 2000), excludedIds: items.map((item) => item.product_id) } });
         if (cancelled) return;
         const excluded = new Set(items.map((item) => item.product_id));
         const seen = new Set<string>();
@@ -423,7 +425,6 @@ export function ProjectCuratorialGuide({
                   <article
                     ref={index === 0 ? firstRecommendationRef : undefined}
                     key={rec.product_id}
-                    title={rationale}
                     className={focused ? "group relative grid w-full shrink-0 grid-cols-[120px_minmax(0,1fr)] gap-5 border-b border-border pb-6 sm:grid-cols-[180px_minmax(0,1fr)]" : docked ? "group relative flex w-full shrink-0 flex-col border-b border-border pb-4" : "group relative flex h-full w-[140px] shrink-0 snap-start flex-col md:w-[170px]"}
                     onMouseEnter={() => onRecommendationHover(true)}
                     onMouseLeave={() => onRecommendationHover(false)}
@@ -437,22 +438,19 @@ export function ProjectCuratorialGuide({
                       variant="ghost"
                       onClick={() => void openRecommendation(rec)}
                       disabled={openingId === rec.product_id}
-                      className={cn("relative block w-full rounded-none bg-transparent p-0 hover:bg-transparent", focused ? "row-span-3 h-[140px] sm:h-[180px]" : "h-[110px] md:h-[140px]")}
-                      aria-label={`${Math.round(rec.score)}% match — view curation intent for ${rec.title}`}
+                      className={cn("relative block w-full cursor-pointer overflow-hidden rounded-none bg-transparent p-0 hover:bg-transparent", focused ? "row-span-3 h-[140px] sm:h-[180px]" : "h-[110px] md:h-[140px]")}
+                      aria-label={`View ${rec.title}`}
                     >
                       {rec.image_url ? (
-                        <img src={rec.image_url} alt={`${rec.title} by ${rec.brand}`} loading="lazy" className="h-full w-full object-contain" />
+                        <img src={rec.image_url} alt={`${rec.title} by ${rec.brand}`} loading="lazy" className="h-full w-full object-contain transition-transform duration-300 hover:scale-[1.03] motion-reduce:transition-none" />
                       ) : (
                         <span className="grid h-full place-items-center font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Image on request</span>
                       )}
-                      <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-background/80 px-2 text-center font-body text-[9px] uppercase leading-relaxed tracking-[0.15em] text-foreground opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-within:opacity-100">
-                        {Math.round(rec.score)}% Match // View Curation Intent
-                      </span>
                     </Button>
                     <p className={cn("mt-2 font-body text-[10px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground", !focused && "truncate")}>
                       {rec.title}
                     </p>
-                    {focused && <div className="space-y-2 text-muted-foreground"><p className="font-body text-[10px] uppercase tracking-[0.15em]">{rec.brand} · {Math.round(rec.score)}% match</p><p className="font-body text-sm leading-relaxed">{rationale}</p></div>}
+                    {focused && <div className="min-w-0 space-y-3 text-muted-foreground"><div className="flex flex-wrap items-center gap-x-3 gap-y-2 font-body text-[10px] uppercase leading-relaxed tracking-[0.15em]"><span>{rec.brand}</span><span className="border border-border px-2 py-1 text-[9px]">{rec.editorial_tag}</span></div><p className="font-body text-sm leading-relaxed">{rationale}</p></div>}
                     <Button
                       type="button"
                       variant="ghost"

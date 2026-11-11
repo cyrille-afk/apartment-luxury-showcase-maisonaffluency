@@ -38,6 +38,7 @@ type StudioItem = {
   currency: string;
   source_pick_id: string | null;
   quantity: number;
+  selected_finish: string | null;
 };
 
 function leadLabel(item: StudioItem) {
@@ -104,13 +105,13 @@ export default function TradeProjectStudio() {
         quoteIds.length
           ? sb
               .from("trade_quote_items")
-              .select(`id, quantity, product_id, trade_products(${productFields})`)
+              .select(`id, quantity, product_id, variant_label, trade_products(${productFields})`)
               .in("quote_id", quoteIds)
           : Promise.resolve({ data: [] }),
         boardIds.length
           ? sb
               .from("client_board_items")
-              .select(`id, product_id, trade_products(${productFields})`)
+              .select(`id, product_id, variant_label, wood_label, fabric_label, trade_products(${productFields})`)
               .in("board_id", boardIds)
           : Promise.resolve({ data: [] }),
       ]);
@@ -120,9 +121,12 @@ export default function TradeProjectStudio() {
         const p = row.trade_products;
         if (!p) return;
         const key = p.id || row.product_id;
+        const selectedFinish = [row.variant_label, row.wood_label, row.fabric_label].filter(Boolean).join(" / ") || null;
         const existing = map.get(key);
         if (existing) {
           existing.quantity += quantity;
+          // Different saved configurations must not masquerade as one selected finish.
+          if (existing.selected_finish !== selectedFinish) existing.selected_finish = null;
           return;
         }
         map.set(key, {
@@ -142,6 +146,7 @@ export default function TradeProjectStudio() {
           currency: (p.currency || "SGD").toUpperCase(),
           source_pick_id: p.source_pick_id ?? null,
           quantity,
+          selected_finish: selectedFinish,
         });
       };
 

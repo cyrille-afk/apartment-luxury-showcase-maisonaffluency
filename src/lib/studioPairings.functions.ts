@@ -5,7 +5,7 @@ import { rankStudioPairings, type PairingProduct } from "./studioPairings";
 
 export const getStudioPairings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) => z.object({ referenceId: z.string().uuid(), excludedIds: z.array(z.string().uuid()).max(5000) }).parse(input))
+  .inputValidator((input) => z.object({ referenceId: z.string().uuid(), selectedFinish: z.string().max(2000).nullable().optional(), excludedIds: z.array(z.string().uuid()).max(5000) }).parse(input))
   .handler(async ({ data, context }) => {
     const fields = "id, source_pick_id, product_name, brand_name, category, subcategory, materials, materials_description, default_variant_label, image_url, size_variants";
     const { data: reference, error } = await context.supabase.from("trade_products").select(fields).eq("id", data.referenceId).single();
@@ -37,5 +37,5 @@ export const getStudioPairings = createServerFn({ method: "POST" })
     };
     const exclusions = [...data.excludedIds, ...catalogue.filter(p => data.excludedIds.includes(p.id)).map(p => p.source_pick_id || p.id)];
     // RLS remains the read boundary; never return catalogue attributes or prices.
-    return { recommendations: rankStudioPairings(hydrate(reference), catalogue.map(hydrate), exclusions) };
+    return { recommendations: rankStudioPairings({ ...hydrate(reference), selected_finish: data.selectedFinish }, catalogue.map(hydrate), exclusions) };
   });
