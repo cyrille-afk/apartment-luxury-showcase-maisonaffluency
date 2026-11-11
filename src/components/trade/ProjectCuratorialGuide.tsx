@@ -2,8 +2,9 @@ import { getStudioPairings } from "@/lib/studioPairings.functions";
 import { setStudioPairingFavorite } from "@/lib/studioPairingFavorites.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Bookmark, Loader2, Plus, X } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Bookmark, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { StudioPairingFolderPicker } from "./StudioPairingFolderPicker";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { filterStudioPairings, studioPairingFilterOptions } from "@/lib/studioPairingFilters";
 import { supabase } from "@/integrations/supabase/client";
@@ -88,10 +89,7 @@ export function ProjectCuratorialGuide({
   const visibleRecommendations = useMemo(() => filterStudioPairings(streamRecommendations, categoryFilter, finishFilter), [streamRecommendations, categoryFilter, finishFilter]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [addingId, setAddingId] = useState<string | null>(null);
   const [openingId, setOpeningId] = useState<string | null>(null);
-  const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
-  const [boardId, setBoardId] = useState<string | null>(null);
   const [connector, setConnector] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
   const streamRef = useRef<HTMLDivElement | null>(null);
   const drawerRef = useRef<HTMLElement | null>(null);
@@ -169,13 +167,13 @@ export function ProjectCuratorialGuide({
   };
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || focused) return;
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [open, focused]);
 
   useEffect(() => {
     if (!open) onRecommendationHover(false);
@@ -221,81 +219,6 @@ export function ProjectCuratorialGuide({
       window.removeEventListener("scroll", measure, true);
     };
   }, [activeItem, heightIndex, open, visibleRecommendations]);
-
-  const resolveBoard = async () => {
-    if (boardId) return boardId;
-    const { data: existing, error: boardError } = await supabase
-      .from("client_boards")
-      .select("id")
-      .eq("project_id", projectId)
-      .order("updated_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (boardError) throw boardError;
-    if (existing?.id) {
-      setBoardId(existing.id);
-      return existing.id;
-    }
-    const { data: userData } = await supabase.auth.getUser();
-    const userId = userData.user?.id;
-    if (!userId) throw new Error("Sign in is required to update this composition.");
-    const { data: created, error: createError } = await supabase
-      .from("client_boards")
-      .insert({
-        project_id: projectId,
-        title: `${projectName} — Curatorial Composition`,
-        client_name: "",
-        user_id: userId,
-      })
-      .select("id")
-      .single();
-    if (createError) throw createError;
-    setBoardId(created.id);
-    return created.id;
-  };
-
-  const addToComposition = async (rec: Recommendation) => {
-    setAddingId(rec.product_id);
-    setError(null);
-    try {
-      const targetBoardId = await resolveBoard();
-      let productId = rec.product_id;
-      const { data: direct } = await supabase
-        .from("trade_products")
-        .select("id")
-        .eq("id", rec.product_id)
-        .maybeSingle();
-      if (!direct?.id) {
-        const { data: twin } = await supabase
-          .from("trade_products")
-          .select("id")
-          .eq("source_pick_id", rec.product_id)
-          .eq("is_active", true)
-          .limit(1)
-          .maybeSingle();
-        if (!twin?.id) throw new Error("This piece is not yet available in the trade catalogue.");
-        productId = twin.id;
-      }
-      const { data: duplicate } = await supabase
-        .from("client_board_items")
-        .select("id")
-        .eq("board_id", targetBoardId)
-        .eq("product_id", productId)
-        .maybeSingle();
-      if (!duplicate) {
-        const { error: insertError } = await supabase
-          .from("client_board_items")
-          .insert({ board_id: targetBoardId, product_id: productId, sort_order: items.length });
-        if (insertError) throw insertError;
-      }
-      setAddedIds((current) => new Set(current).add(rec.product_id));
-      onCompositionChanged();
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "The piece could not be added.");
-    } finally {
-      setAddingId(null);
-    }
-  };
 
   const openRecommendation = async (rec: Recommendation) => {
     setOpeningId(rec.product_id);
@@ -499,7 +422,6 @@ export function ProjectCuratorialGuide({
             <div ref={streamRef} className={docked ? "flex flex-col gap-6 pb-3" : "flex h-full snap-x gap-5 overflow-x-auto pb-3 [scrollbar-width:thin]"}>
               {visibleRecommendations.map((rec, index) => {
                 const rationale = rec.reason;
-                const added = addedIds.has(rec.product_id);
                 return (
                   <article
                     ref={index === 0 ? firstRecommendationRef : undefined}
@@ -534,16 +456,9 @@ export function ProjectCuratorialGuide({
                     <Button type="button" variant="ghost" size="sm" aria-label={`${favoriteIds.has(rec.product_id) ? "Remove saved pairing" : "Save pairing"}: ${rec.title}`} aria-pressed={favoriteIds.has(rec.product_id)} disabled={favoritePending || loading} onClick={() => void toggleFavorite(rec)} className="min-h-10 rounded-none px-0 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground hover:bg-transparent hover:text-foreground">
                       <Bookmark className={cn("h-3.5 w-3.5", favoriteIds.has(rec.product_id) && "fill-current")} />{favoriteIds.has(rec.product_id) ? "Saved" : "Save pairing"}
                     </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={() => void addToComposition(rec)}
-                      disabled={addingId === rec.product_id || added}
+                    <StudioPairingFolderPicker projectId={projectId} productId={rec.product_id} productName={rec.title} onSaved={onCompositionChanged}
                       className={cn("mt-1 h-auto justify-start rounded-none p-0 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground/70 transition-opacity hover:bg-transparent hover:text-foreground group-hover:opacity-100 group-focus-within:opacity-100 disabled:opacity-100", focused ? "col-start-2 min-h-10 justify-self-start text-left opacity-100" : "opacity-0")}
-                    >
-                      {addingId === rec.product_id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
-                      {added ? "Added" : "Add"}
-                    </Button>
+                    />
                     </div>
                   </article>
 

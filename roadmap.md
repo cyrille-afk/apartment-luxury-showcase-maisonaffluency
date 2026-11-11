@@ -1,5 +1,9 @@
 # Roadmap
 
+## Curation destination folder choice
+- [x] Replace automatic + ADD with an active-project sub-folder picker and inline creation; save only after explicit destination choice, retain created folder on retry and confirm the exact folder name.
+- [x] Twenty-four regressions pass. Signed-in desktop/phone show all three real project folders; opening/cancelling makes no writes and keeps Visual Studio open. Create & save verified named toast, refreshed canvas/specsheet and exact-folder matrix readback. Temporary folder/item removed, no page errors and build OK.
+
 ## Favorite Visual Studio pairings
 - [x] Add private account-saved pairings per active piece, saved-only browsing and removal with existing category/finish filters; saved candidates remain available beyond the initial ranking cap without stored prices.
 - [x] Eighteen regressions pass; signed-in Frenchmen → Aragon save, reload readback, other-piece isolation, saved-only revisit and removal persistence verified at 1955px/390px. Temporary favorite removed; no project pieces changed, page errors absent and build OK.
