@@ -41,11 +41,11 @@ const topItems: NavItem[] = [
   { title: "My Dashboard", url: "/trade/me", icon: UserCircle },
   { title: "THE COLLECTION", url: "/trade/the-collection", icon: MapPin },
   { title: "Favorites", url: "/trade/favorites", icon: Heart },
+  { title: "Tools", url: "/trade/tools", icon: Wrench },
   { title: "Trade Concierge (Powered by Felix)", url: "/trade/concierge", icon: Sparkles },
   { title: "AI Extension Sync", url: "/trade/extension-sync", icon: Wand2 },
   { title: "3D Room Layout & Walkthrough", url: "/trade/ai-layout", icon: Clapperboard },
   { title: "QUOTES & PROFORMAS", url: "/trade/quotes", icon: FileText },
-  { title: "Tools", url: "/trade/tools", icon: Wrench },
   { title: "BETA FEEDBOARD", url: "/trade/beta-feedboard", icon: MessageSquare },
   { title: "Settings", url: "/trade/settings", icon: Settings },
 ];
@@ -125,10 +125,10 @@ export function TradeSidebar() {
     ? [{ title: "Visualiser Sandbox", url: "/trade/visualiser", icon: Scan }]
     : visibleTopItems;
   const { order: sidebarOrder, update: updateSidebarOrder, showReorderTip } = useSidebarOrder(user?.id);
-  const toolsUrls = ["/trade/concierge", "/trade/extension-sync", "/trade/ai-layout", "/trade/tools"];
+  const aiUrls = ["/trade/concierge", "/trade/extension-sync", "/trade/ai-layout"];
   const sections = orderedSidebarItems([
-    { id: "core", label: "Core Navigation", items: navTopItems.filter(item => !toolsUrls.includes(item.url) && item.url !== "/trade/quotes") },
-    { id: "tools", label: "AI & Tools", items: navTopItems.filter(item => toolsUrls.includes(item.url)) },
+    { id: "core", label: "Core Navigation & Tools", items: navTopItems.filter(item => !aiUrls.includes(item.url) && item.url !== "/trade/quotes") },
+    { id: "tools", label: "AI & Co-Pilot", items: navTopItems.filter(item => aiUrls.includes(item.url)) },
     { id: "quotes", label: "Quotes & Procurement", items: navTopItems.filter(item => item.url === "/trade/quotes") },
     ...(!TRADE_SANDBOX_ONLY ? [{ id: "projects", label: "Projects & Interventions", items: [] as NavItem[] }] : []),
   ].filter(section => section.id === "projects" || section.items.length > 0), sidebarOrder.sections);

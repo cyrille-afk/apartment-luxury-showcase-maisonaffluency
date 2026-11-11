@@ -1,5 +1,8 @@
 # Roadmap
 
+## Sidebar Tools placement
+- [x] Tools now sits directly below Favorites in Core Navigation & Tools; AI & Co-Pilot contains only the three existing AI destinations. Stable section identities, saved ordering, handles and tour anchors retained. Eleven regressions pass; signed-in pointer drag, reload persistence, unique anchors and Tools navigation verified without page errors. Original account order restored; build OK.
+
 ## Automatic onboarding dashboard
 - [x] Added private consent/GPC-aware operational run feed and admin Tour Activity dashboard with period/traffic/tour filters, cohort completion/replay rates, daily chart and last-step drop-offs; existing injected events retained. Signed-in replay/dismiss and completed-tour readback verified: preview 2 starts, 1 completion, 50% replay, Welcome drop-off; published stays empty. Database denies anonymous reads/RPC and direct member inserts; desktop/mobile and 22 regressions verified. No historical backfill; localhost QA runs remain clearly separated in Preview.
 
