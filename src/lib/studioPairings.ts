@@ -129,7 +129,7 @@ export function rankStudioPairings(reference: PairingProduct, catalogue: Pairing
     const specific = shared.filter((trait) => trait !== "timber" && trait !== "stone" && trait !== "upholstery");
     const score = Math.min(98, 85 + Math.max(0, 4 - priority) + shared.length * 2 + specific.length);
     return [{ product_id: product.id, title: product.product_name.trim(), subtitle: "", brand: product.brand_name, pairingRole: candidateRole,
-      image_url: product.image_url || "", category: product.subcategory || product.category, score,
+      image_url: product.image_url || "", category: product.subcategory || product.category, finishes: [...candidateTraits].sort(), score,
       ...editorialPairing(reference, product, candidateRole, sourceTraits, candidateTraits) }];
   }).sort((a, b) => b.score - a.score || a.product_id.localeCompare(b.product_id));
   // Keep different complementary functions visible rather than eight identical surfaces.

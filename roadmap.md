@@ -1,5 +1,8 @@
 # Roadmap
 
+## Visual Studio curation filters
+- [x] Add category and recorded-finish selectors over the ranked stream, combined filtering, result counts and clear/reset states. Fourteen regressions pass; signed-in Gingko category + brass narrows 8 to 1, clearing restores 8, switching to Madison resets filters, and phone brass returns 4 of 8 without customer writes or page errors.
+
 ## Visual Studio editorial curation
 - [x] Remove thumbnail overlays and native description tooltips; replace visible percentages with editorial tags and descriptions based on typology, material relationships and unambiguous saved finishes. Eight finish/exclusion regressions pass; signed-in Frenchmen/Madison streams, pointer hover and Close verified without customer writes or browser errors. Build OK.
 

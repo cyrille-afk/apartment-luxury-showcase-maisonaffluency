@@ -3,6 +3,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Loader2, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { filterStudioPairings, studioPairingFilterOptions } from "@/lib/studioPairingFilters";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +25,7 @@ type Recommendation = {
   subtitle: string;
   image_url: string;
   category: string;
+  finishes: string[];
   brand: string;
   anchors?: Array<{ name: string; brand: string; category: string }>;
 };
@@ -71,6 +74,10 @@ export function ProjectCuratorialGuide({
   };
   const [heightIndex, setHeightIndex] = useState(1);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [finishFilter, setFinishFilter] = useState("");
+  const filterOptions = useMemo(() => studioPairingFilterOptions(recommendations), [recommendations]);
+  const visibleRecommendations = useMemo(() => filterStudioPairings(recommendations, categoryFilter, finishFilter), [recommendations, categoryFilter, finishFilter]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [addingId, setAddingId] = useState<string | null>(null);
@@ -90,6 +97,11 @@ export function ProjectCuratorialGuide({
   useEffect(() => {
     if (!activeItemId && items[0]) onActiveItemChange(items[0].product_id);
   }, [activeItemId, items, onActiveItemChange]);
+
+  useEffect(() => {
+    setCategoryFilter("");
+    setFinishFilter("");
+  }, [activeItem?.product_id, activeItem?.selected_finish]);
 
   useEffect(() => {
     if (!open || !activeItem) return;
@@ -172,7 +184,7 @@ export function ProjectCuratorialGuide({
       window.removeEventListener("resize", measure);
       window.removeEventListener("scroll", measure, true);
     };
-  }, [activeItem, heightIndex, open, recommendations]);
+  }, [activeItem, heightIndex, open, visibleRecommendations]);
 
   const resolveBoard = async () => {
     if (boardId) return boardId;
@@ -412,13 +424,40 @@ export function ProjectCuratorialGuide({
             </div>
           </div>
 
+          <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="min-w-0 space-y-2">
+              <p id="curation-category-label" className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Category</p>
+              <Select value={categoryFilter || "all"} onValueChange={value => setCategoryFilter(value === "all" ? "" : value)} disabled={loading || !recommendations.length}>
+                <SelectTrigger aria-labelledby="curation-category-label" className="rounded-none font-body text-[10px] uppercase tracking-[0.12em]"><SelectValue /></SelectTrigger>
+                <SelectContent className="z-[100] rounded-none">
+                  <SelectItem value="all">All categories</SelectItem>
+                  {filterOptions.categories.map(category => <SelectItem key={category} value={category}>{category}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="min-w-0 space-y-2">
+              <p id="curation-finish-label" className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Finish</p>
+              <Select value={finishFilter || "all"} onValueChange={value => setFinishFilter(value === "all" ? "" : value)} disabled={loading || !recommendations.length}>
+                <SelectTrigger aria-labelledby="curation-finish-label" className="rounded-none font-body text-[10px] uppercase tracking-[0.12em]"><SelectValue /></SelectTrigger>
+                <SelectContent className="z-[100] rounded-none">
+                  <SelectItem value="all">All finishes</SelectItem>
+                  {filterOptions.finishes.map(finish => <SelectItem key={finish} value={finish} className="capitalize">{finish}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex min-h-8 items-center justify-between gap-3 sm:col-span-2">
+              <p role="status" aria-live="polite" className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">{loading ? "Reviewing pairings" : `${visibleRecommendations.length} of ${recommendations.length} pairings`}</p>
+              {(categoryFilter || finishFilter) && <Button variant="ghost" size="sm" onClick={() => { setCategoryFilter(""); setFinishFilter(""); }} className="h-8 rounded-none px-2 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground"><X className="h-3 w-3" />Clear filters</Button>}
+            </div>
+          </div>
+
           {loading ? (
             <div className="flex h-40 items-center gap-3 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" /> Analysing the composition
             </div>
-          ) : recommendations.length ? (
+          ) : visibleRecommendations.length ? (
             <div ref={streamRef} className={docked ? "flex flex-col gap-6 pb-3" : "flex h-full snap-x gap-5 overflow-x-auto pb-3 [scrollbar-width:thin]"}>
-              {recommendations.map((rec, index) => {
+              {visibleRecommendations.map((rec, index) => {
                 const rationale = rec.reason;
                 const added = addedIds.has(rec.product_id);
                 return (
@@ -467,7 +506,7 @@ export function ProjectCuratorialGuide({
               })}
             </div>
           ) : (
-            <p className="py-10 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">{error || "Add pieces to this project to begin a curatorial analysis."}</p>
+            <p className="py-10 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">{error || (recommendations.length ? "No pairings match these filters." : activeItem ? "No complementary pairings are currently available." : "Add pieces to this project to begin a curatorial analysis.")}</p>
           )}
           {error && recommendations.length > 0 && <p role="alert" className="mt-2 font-body text-[10px] text-destructive">{error}</p>}
         </div>
