@@ -1,5 +1,8 @@
 # Roadmap
 
+## Admin submitted-quote pricing and revisions
+- [ ] Confirmed live archive guards reject admin line pricing and reopening, while both screens ignore write errors. Await plan approval for atomic admin pricing and editable draft revisions that preserve issued archives.
+
 ## Move saved Studio pieces
 - [x] Add Move on canvas and Specsheet with explicit saved-row/source choice when a piece belongs to multiple folders, destination selection and named confirmation; update the original row without changing configuration or quote-linked pieces.
 - [x] Eleven regressions pass. Signed-in temporary piece moves source → target → source on desktop/phone; original ID, finish and notes retained, source empties, canvas/Specsheet labels refresh, target matrix and reload readback verified. Temporary records removed; no customer selections changed, page errors absent and build OK.
