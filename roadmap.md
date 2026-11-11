@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Customizable Trade sidebar
-- [ ] Add independent draggable sections, projects and nested folders, subtle handles/drop indicators, user-scoped local persistence and Settings reset; verify drag, reload and navigation.
+- [x] Independent dnd-kit section/project/folder lists with hover handles, elevated dragging and thin drop markers; hydrated user-scoped local ordering and immediate Settings reset. Nine regressions pass. Signed-in pointer drags at all three levels, reload persistence, keyboard reordering, folder navigation and reset verified; original user preference restored. Separate phone navigation remains unchanged; build OK and no page errors.
 
 ## Quote audit timeline
 - [x] Transactional actor/time records for pricing, change requests and new editable revisions; shared admin-only original/revision history, UTC timestamps and quote links. Seven regressions pass; disposable signed-in UI flow verified save/revise/reload on desktop and phone, rollback/no duplicate retries, denied browser writes and anonymous access. Temporary quotes removed; no emails sent and build OK.
