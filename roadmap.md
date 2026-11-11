@@ -1,5 +1,8 @@
 # Roadmap
 
+## Visual Studio recommendation accuracy
+- [x] Deduplicate canonical product identities, exclude composed pieces, score complementary roles and recorded materials per active reference. Signed-in Frenchmen shows unique table/lighting pairings at 92–94%; switching to Madison changes to stone/brass seating, lighting and mirrors at 90–96%. Close returns to canvas; no browser errors or customer writes. Six scoring regressions pass; build OK.
+
 ## Project Studio sliding panels
 - [x] Replaced AI sidebar with an accessible blurred product-preview/curation lightbox and large suggestion rows. Signed-in desktop/390px checks confirm loaded selected images, live eight-result curation, source changes updating preview, close/Escape returning to four columns, no dialog overflow or page errors; build OK. Existing add/view actions preserved; no project pieces added during verification.
 - [x] Specsheet moved left, canvas right, AI drawer right with original widths; controls align exactly above the left close control. Signed-in 1955px and 390px checks confirm independent slides, three/four-column density, fixed right canvas edge on Specsheet collapse, all eight pieces retained, and no page errors; build OK.

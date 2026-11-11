@@ -1,4 +1,5 @@
-import { invokeWithAuthRetry } from "@/lib/invokeWithAuthRetry";
+import { getStudioPairings } from "@/lib/studioPairings.functions";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Loader2, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -45,44 +46,6 @@ const HEIGHTS = [
   "min(620px,calc(100dvh - 48px))",
 ] as const;
 
-function clientReason(rec: Recommendation, sourceName: string) {
-  const category = rec.category ? rec.category.toLowerCase() : "piece";
-  return `Suggested ${category} for the ${sourceName}, balancing its silhouette through complementary scale, material tone, and spatial rhythm.`;
-}
-
-function recommendationContext(rec: Recommendation, sourceName: string) {
-  const descriptor = `${rec.category} ${rec.title} ${rec.subtitle}`.toLowerCase();
-
-  if (/mirror|wall|tapestry|panel|screen|artwork/.test(descriptor)) {
-    return {
-      label: "Material Harmony // Complementary Material Accent",
-      explanation: `Sourced to echo the organic textures and stone or wood grain finishes present in the ${sourceName} composition.`,
-    };
-  }
-  if (/rug|carpet|textile|fabric|upholster|cushion|throw/.test(descriptor)) {
-    return {
-      label: "Texture Balance // Dialogue with Fabric",
-      explanation: "Selected to build a measured dialogue between the existing upholstery, tactile depth, and surrounding surface tones.",
-    };
-  }
-  if (/table|stool|console|desk|pedestal|bench/.test(descriptor)) {
-    return {
-      label: "Spatial Composition // Pairing Recommendation",
-      explanation: "Positioned as a proportional counterpoint that reinforces circulation, usable scale, and the rhythm of the furniture plan.",
-    };
-  }
-  if (/lamp|light|sconce|chandelier|pendant/.test(descriptor)) {
-    return {
-      label: "Light Balance // Ambient Counterpoint",
-      explanation: "Chosen to add a controlled layer of illumination while preserving the composition's material warmth and visual hierarchy.",
-    };
-  }
-  return {
-    label: "Form Dialogue // Complementary Silhouette",
-    explanation: "Selected as a complementary form whose scale, silhouette, and material presence strengthen the wider composition.",
-  };
-}
-
 export function ProjectCuratorialGuide({
   projectId,
   projectName,
@@ -97,6 +60,7 @@ export function ProjectCuratorialGuide({
   onCompositionChanged,
   onRecommendationHover,
 }: Props) {
+  const fetchPairings = useServerFn(getStudioPairings);
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = (value: boolean) => {
@@ -126,18 +90,25 @@ export function ProjectCuratorialGuide({
   }, [activeItemId, items, onActiveItemChange]);
 
   useEffect(() => {
-    if (!open || items.length === 0) return;
+    if (!open || !activeItem) return;
     let cancelled = false;
     const load = async () => {
       setLoading(true);
       setError(null);
-      const { data, error: invokeError } = await invokeWithAuthRetry("board-recommendations", { product_ids: items.map((item) => item.product_id).slice(0, 20), source: "mood_board" });
-      if (cancelled) return;
-      if (invokeError) {
-        setError(invokeError.message || "Curation analysis is temporarily unavailable.");
-        setRecommendations([]);
-      } else {
-        setRecommendations((data?.recommendations || []) as Recommendation[]);
+      setRecommendations([]);
+      try {
+        const data = await fetchPairings({ data: { referenceId: activeItem.product_id, excludedIds: items.map((item) => item.product_id) } });
+        if (cancelled) return;
+        const excluded = new Set(items.map((item) => item.product_id));
+        const seen = new Set<string>();
+        setRecommendations(data.recommendations.filter((rec) => {
+          if (excluded.has(rec.product_id) || seen.has(rec.product_id)) return false;
+          seen.add(rec.product_id);
+          return true;
+        }));
+      } catch {
+        if (cancelled) return;
+        setError("Curation analysis is temporarily unavailable. Please reopen the studio to try again.");
       }
       setLoading(false);
     };
@@ -145,7 +116,7 @@ export function ProjectCuratorialGuide({
     return () => {
       cancelled = true;
     };
-  }, [open, projectId, items]);
+  }, [open, projectId, items, activeItem, fetchPairings]);
 
   useEffect(() => {
     if (!open) return;
@@ -365,7 +336,7 @@ export function ProjectCuratorialGuide({
           <p className="mt-1 font-body text-[10px] uppercase leading-relaxed tracking-[0.15em] text-foreground">
             {isClientMode
               ? "AI Curation: Aesthetic pairings selected to balance the textural composition."
-              : `AI Curation: Sourcing active wood variants and high-margin pairs matching ${activeItem?.name || "the active composition"}.`}
+              : `Curating complementary pieces for ${activeItem?.name || "the active composition"}.`}
           </p>
         </div>
         <div className="flex shrink-0 items-center">
@@ -446,9 +417,7 @@ export function ProjectCuratorialGuide({
           ) : recommendations.length ? (
             <div ref={streamRef} className={docked ? "flex flex-col gap-6 pb-3" : "flex h-full snap-x gap-5 overflow-x-auto pb-3 [scrollbar-width:thin]"}>
               {recommendations.map((rec, index) => {
-                const context = recommendationContext(rec, activeItem?.name || "active piece");
-                const briefReason = isClientMode ? clientReason(rec, activeItem?.name || "composition") : rec.reason;
-                const rationale = `${briefReason} ${context.explanation}`;
+                const rationale = rec.reason;
                 const added = addedIds.has(rec.product_id);
                 return (
                   <article
