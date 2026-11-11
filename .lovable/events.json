@@ -418,6 +418,197 @@
         }
       }
     },
+    "project.onboarding_tour_completed": {
+      "event_schema_version": 1,
+      "description": "The member explicitly finishes the onboarding walkthrough; closing or skipping its last card is not a completion.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "tour",
+          "step_id",
+          "step_number",
+          "total_steps"
+        ],
+        "properties": {
+          "tour": {
+            "type": "string",
+            "enum": [
+              "felix",
+              "quick"
+            ]
+          },
+          "step_id": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "step_number": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "total_steps": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "project.onboarding_tour_exited": {
+      "event_schema_version": 1,
+      "description": "An active onboarding run is explicitly dismissed or the document exits; page-exit delivery is best effort, never emitted for ordinary route navigation or effect cleanup.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "tour",
+          "step_id",
+          "step_number",
+          "total_steps",
+          "reason"
+        ],
+        "properties": {
+          "tour": {
+            "type": "string",
+            "enum": [
+              "felix",
+              "quick"
+            ]
+          },
+          "step_id": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "step_number": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "total_steps": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "dismissed",
+              "page_exit"
+            ]
+          }
+        }
+      }
+    },
+    "project.onboarding_tour_replayed": {
+      "event_schema_version": 1,
+      "description": "The existing Replay Onboarding Tour action resets completion/progress and requests a new walkthrough from step one.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "tour"
+        ],
+        "properties": {
+          "tour": {
+            "type": "string",
+            "enum": [
+              "felix",
+              "quick"
+            ]
+          }
+        }
+      }
+    },
+    "project.onboarding_tour_started": {
+      "event_schema_version": 1,
+      "description": "A desktop onboarding walkthrough opens, distinguishing manual launch, automatic start, and resumed progress.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "tour",
+          "mode",
+          "total_steps"
+        ],
+        "properties": {
+          "tour": {
+            "type": "string",
+            "enum": [
+              "felix",
+              "quick"
+            ]
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "manual",
+              "automatic",
+              "resumed"
+            ]
+          },
+          "total_steps": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "project.onboarding_tour_step_viewed": {
+      "event_schema_version": 1,
+      "description": "A walkthrough card is actually revealed on its destination page, once per step per run; last observed step supports drop-off funnels even without an exit event.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "tour",
+          "step_id",
+          "step_number",
+          "total_steps",
+          "target_available"
+        ],
+        "properties": {
+          "tour": {
+            "type": "string",
+            "enum": [
+              "felix",
+              "quick"
+            ]
+          },
+          "step_id": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "step_number": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "total_steps": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "target_available": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
     "project.order_paid": {
       "event_schema_version": 2,
       "description": "An order was paid: Stripe confirmed a card/PayNow/wallet checkout, or an admin marked a bank-transfer order paid (source=admin_marked).",

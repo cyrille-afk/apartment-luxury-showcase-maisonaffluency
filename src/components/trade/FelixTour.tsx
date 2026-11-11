@@ -371,12 +371,44 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const manualStartRef = useRef(false);
   const previousClientSafe = useRef(clientSafe);
   const stepTargetRef = useRef<Element | null>(null);
+  const tourRun = useRef({ active: false, viewed: new Set<string>() });
+  const [runVersion, setRunVersion] = useState(0);
 
   const step = FELIX_STEPS[currentStep];
   const isLast = currentStep === FELIX_STEPS.length - 1;
   // Collection navigation always resolves to the actual Collection route.
   const stepRoute = step.route;
   const stepTarget = step.target;
+
+  // Only count cards actually revealed, not requested steps during navigation.
+  useEffect(() => {
+    if (!open || isPaused || !settled || transitioning || position?.step !== currentStep || position.path !== location.pathname) return;
+    if (tourRun.current.viewed.has(step.id)) return;
+    tourRun.current.viewed.add(step.id);
+    window.__lovableEvents?.track?.("project.onboarding_tour_step_viewed", {
+      tour: "felix", step_id: step.id, step_number: currentStep + 1,
+      total_steps: FELIX_STEPS.length, target_available: !targetUnavailable,
+    });
+  }, [open, isPaused, settled, transitioning, position, currentStep, step.id, location.pathname, targetUnavailable, runVersion]);
+
+  useEffect(() => {
+    if (!open && !initializing) return;
+    const onPageHide = () => {
+      if (!tourRun.current.active) return;
+      tourRun.current.active = false;
+      window.__lovableEvents?.track?.("project.onboarding_tour_exited", {
+        tour: "felix", step_id: step.id, step_number: currentStep + 1,
+        total_steps: FELIX_STEPS.length, reason: "page_exit",
+      });
+    };
+    window.addEventListener("pagehide", onPageHide);
+    const onPageShow = () => { tourRun.current.active = true; };
+    window.addEventListener("pageshow", onPageShow);
+    return () => {
+      window.removeEventListener("pagehide", onPageHide);
+      window.removeEventListener("pageshow", onPageShow);
+    };
+  }, [open, initializing, step.id, currentStep]);
 
   const measure = useCallback(() => {
     const s = FELIX_STEPS[currentStep];
@@ -771,7 +803,16 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       if (Number.isInteger(saved) && saved > 0 && saved < FELIX_STEPS.length) setCurrentStep(saved);
     } catch {}
     const t = window.setTimeout(() => {
-      if (!manualStartRef.current) setOpen(true);
+      if (!manualStartRef.current && !tourRun.current.active) {
+        tourRun.current = { active: true, viewed: new Set() };
+        let saved = 0;
+        try { saved = Number(localStorage.getItem(PROGRESS_KEY)); } catch { /* storage optional */ }
+        window.__lovableEvents?.track?.("project.onboarding_tour_started", {
+          tour: "felix", mode: Number.isInteger(saved) && saved > 0 && saved < FELIX_STEPS.length ? "resumed" : "automatic",
+          total_steps: FELIX_STEPS.length,
+        });
+        setOpen(true);
+      }
     }, 900);
     return () => window.clearTimeout(t);
   }, [autoStart]);
@@ -779,6 +820,10 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
   // External relaunch: window.dispatchEvent(new Event("felix-tour:start"))
   useEffect(() => {
     const onStart = () => {
+      tourRun.current = { active: true, viewed: new Set() };
+      setRunVersion((version) => version + 1);
+      window.__lovableEvents?.track?.("project.onboarding_tour_started", { tour: "felix", mode: "manual", total_steps: FELIX_STEPS.length });
+      clearTourStartRequest();
       // An explicit Meet Felix/restart always begins at Welcome. Saved progress
       // is reserved for automatic continuation after an interrupted tour.
       manualStartRef.current = true;
@@ -808,6 +853,15 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
   }, [open]);
 
   const close = useCallback((completed: boolean) => {
+    if (tourRun.current.active) {
+      tourRun.current.active = false;
+      if (completed) window.__lovableEvents?.track?.("project.onboarding_tour_completed", {
+        tour: "felix", step_id: FELIX_STEPS[currentStep].id, step_number: currentStep + 1, total_steps: FELIX_STEPS.length,
+      });
+      else window.__lovableEvents?.track?.("project.onboarding_tour_exited", {
+        tour: "felix", step_id: FELIX_STEPS[currentStep].id, step_number: currentStep + 1, total_steps: FELIX_STEPS.length, reason: "dismissed",
+      });
+    }
     if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current);
     transitionTimer.current = null;
     setOpen(false);

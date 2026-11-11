@@ -51,6 +51,9 @@ function DesktopQuickTour() {
   const [stepIdx, setStepIdx] = useState(0);
   const [STEPS, setSteps] = useState<Step[]>(DEFAULT_STEPS);
   const [lang, setLang] = useState(() => loadLang());
+  const tourRunActive = useRef(false);
+  const [runVersion, setRunVersion] = useState(0);
+  const viewedStepsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     const onLang = () => setLang(loadLang());
@@ -87,6 +90,10 @@ function DesktopQuickTour() {
   // Listen for the start event
   useEffect(() => {
     const onStart = () => {
+      viewedStepsRef.current.clear();
+      setRunVersion((version) => version + 1);
+      tourRunActive.current = true;
+      window.__lovableEvents?.track?.("project.onboarding_tour_started", { tour: "quick", mode: "manual", total_steps: STEPS.length });
       setStepIdx(0);
       setActive(true);
       try { localStorage.setItem(STORAGE_KEY, "0"); } catch {}
@@ -104,13 +111,16 @@ function DesktopQuickTour() {
       if (raw === null) return;
       const idx = parseInt(raw, 10);
       if (!Number.isFinite(idx) || idx < 0 || idx >= STEPS.length) return;
+      if (!tourRunActive.current) {
+        tourRunActive.current = true;
+        window.__lovableEvents?.track?.("project.onboarding_tour_started", { tour: "quick", mode: "resumed", total_steps: STEPS.length });
+      }
       setStepIdx(idx);
       setActive(true);
     } catch {}
   }, [STEPS.length]);
 
   // Dedup tour_step_view fires per session so refresh/back navigation don't double-count.
-  const viewedStepsRef = useRef<Set<string>>(new Set());
   useEffect(() => {
     if (!active) return;
     const step = STEPS[stepIdx];
@@ -118,11 +128,16 @@ function DesktopQuickTour() {
     const target = revealSidebarTourTarget(sidebarTourId(step.path));
     const timer = window.setTimeout(() => { if (target) scrollSidebarTourTarget(target); }, 250);
     return () => window.clearTimeout(timer);
-  }, [active, stepIdx, STEPS, location.pathname]);
+  }, [active, stepIdx, STEPS, location.pathname, runVersion]);
 
-  const finish = useCallback(() => {
+  const finish = useCallback((completed = false) => {
     const lastId = STEPS[stepIdx]?.id ?? "unknown";
-    if (stepIdx >= STEPS.length - 1) {
+    if (tourRunActive.current) {
+      tourRunActive.current = false;
+      if (completed) window.__lovableEvents?.track?.("project.onboarding_tour_completed", { tour: "quick", step_id: lastId, step_number: stepIdx + 1, total_steps: STEPS.length });
+      else window.__lovableEvents?.track?.("project.onboarding_tour_exited", { tour: "quick", step_id: lastId, step_number: stepIdx + 1, total_steps: STEPS.length, reason: "dismissed" });
+    }
+    if (completed) {
       trackTour.complete(lastId, STEPS.length);
     } else {
       trackTour.skip(lastId, stepIdx, STEPS.length);
@@ -138,7 +153,7 @@ function DesktopQuickTour() {
   const next = useCallback(() => {
     const nextIdx = stepIdx + 1;
     if (nextIdx >= STEPS.length) {
-      finish();
+      finish(true);
       return;
     }
     setStepIdx(nextIdx);
@@ -163,11 +178,29 @@ function DesktopQuickTour() {
     const id = STEPS[stepIdx]?.id ?? "";
     document.body.setAttribute("data-tour-step", id);
     // Fire one tour_step_view per step per session (when the step actually mounts).
-    if (id && !viewedStepsRef.current.has(id)) {
+    const onStepRoute = location.pathname === STEPS[stepIdx]?.path || location.pathname.startsWith(STEPS[stepIdx]?.path + "/");
+    if (id && onStepRoute && !viewedStepsRef.current.has(id)) {
       viewedStepsRef.current.add(id);
       trackTour.stepView(id, stepIdx, STEPS.length);
+      window.__lovableEvents?.track?.("project.onboarding_tour_step_viewed", { tour: "quick", step_id: id, step_number: stepIdx + 1, total_steps: STEPS.length, target_available: true });
     }
     return () => { document.body.removeAttribute("data-tour-step"); };
+  }, [active, stepIdx, STEPS, location.pathname, runVersion]);
+
+  useEffect(() => {
+    if (!active) return;
+    const onPageHide = () => {
+      if (!tourRunActive.current) return;
+      tourRunActive.current = false;
+      window.__lovableEvents?.track?.("project.onboarding_tour_exited", { tour: "quick", step_id: STEPS[stepIdx]?.id ?? "unknown", step_number: stepIdx + 1, total_steps: STEPS.length, reason: "page_exit" });
+    };
+    const onPageShow = () => { tourRunActive.current = true; };
+    window.addEventListener("pagehide", onPageHide);
+    window.addEventListener("pageshow", onPageShow);
+    return () => {
+      window.removeEventListener("pagehide", onPageHide);
+      window.removeEventListener("pageshow", onPageShow);
+    };
   }, [active, stepIdx, STEPS]);
 
   if (!active) return null;
@@ -207,7 +240,7 @@ function DesktopQuickTour() {
                     <h4 key={`t-${stepIdx}`} className="font-display text-sm text-foreground truncate animate-fade-in">{localizedStep.title.replace(/^\d+\.\s*/, "")}</h4>
                   </div>
                   <button
-                    onClick={finish}
+                    onClick={() => finish()}
                     className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted -mr-1 -mt-1 shrink-0"
                     aria-label="Skip tour"
                     title={chrome.skipTour}
@@ -246,7 +279,7 @@ function DesktopQuickTour() {
                   </div>
                   <div className="flex items-center gap-1.5">
                     <button
-                      onClick={finish}
+                      onClick={() => finish()}
                       className="font-body text-[11px] uppercase tracking-widest text-muted-foreground hover:text-foreground px-2 py-1.5"
                     >
                       {chrome.skip}

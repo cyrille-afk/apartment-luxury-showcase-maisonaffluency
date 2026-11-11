@@ -41,6 +41,7 @@ export const startFelixTour = () => {
 };
 
 export const replayFelixTour = () => {
+  window.__lovableEvents?.track?.("project.onboarding_tour_replayed", { tour: "felix" });
   try {
     localStorage.removeItem("felix_dashboard_tour_seen_v1");
     localStorage.removeItem("felix_tour_progress_v1");
