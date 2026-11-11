@@ -5,7 +5,7 @@ export const FELIX_STEP_ORDER = [
   "direct-client-billing", "projects", "portfolio-management", "client-view",
   "branding-panel", "white-label", "invite", "tools", "bespoke-commissions",
   "technical-assets", "felix-chat", "priority-concierge", "ai-extension-sync",
-  "pwa-install", "settings", "beta-feedboard",
+  "pwa-install", "settings", "sidebar-reorder", "beta-feedboard",
 ] as const;
 
 export function orderFelixSteps<T extends { id: string }>(steps: T[]): T[] {

@@ -48,6 +48,13 @@ const switchOn = (sel: string) =>
 
 const FELIX_STEPS: FelixStep[] = orderFelixSteps<FelixStep>([
   {
+    id: "sidebar-reorder",
+    title: "Your Sidebar, Your Order",
+    target: "sidebar-reorder",
+    route: "/trade",
+    dialogue: "Customize your sidebar like a watchlist. Click and drag the six-dot handle beside any section header or project folder to change its order. Your layout is saved automatically. You can restore the original order in Settings.",
+  },
+  {
     id: "welcome",
     title: "Welcome & Trade Tier Validation",
     target: "greeting",

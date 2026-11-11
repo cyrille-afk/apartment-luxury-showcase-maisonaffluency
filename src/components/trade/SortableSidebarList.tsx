@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button";
 
 type Item = { id: string; label: string };
 const sidebarCollision: CollisionDetection = args => args.pointerCoordinates ? pointerWithin(args) : closestCenter(args);
-function SortableRow({ item, children, list, over, active, disabled, tag }: { item: Item; children: (handle: ReactNode) => ReactNode; list: string; over: string | null; active: string | null; disabled: boolean; tag: "div" | "li" }) {
+function SortableRow({ item, children, list, over, active, disabled, tag, tourTarget }: { item: Item; children: (handle: ReactNode) => ReactNode; list: string; over: string | null; active: string | null; disabled: boolean; tag: "div" | "li"; tourTarget: boolean }) {
   const sortable = useSortable({ id: item.id, disabled });
   const Tag = tag;
-  const handle = disabled ? null : <Button ref={sortable.setActivatorNodeRef} variant="ghost" size="icon" {...sortable.attributes} {...sortable.listeners} aria-label={`Reorder ${item.label}`} title={`Reorder ${item.label}`} className="sidebar-drag-handle ml-auto h-6 w-5 shrink-0 touch-none cursor-grab text-muted-foreground active:cursor-grabbing"><GripVertical className="h-3 w-3" /></Button>;
+  const handle = disabled ? null : <Button ref={sortable.setActivatorNodeRef} variant="ghost" size="icon" {...sortable.attributes} {...sortable.listeners} data-tour-id={tourTarget ? "tour-sidebar-reorder" : undefined} aria-label={`Reorder ${item.label}`} title={`Reorder ${item.label}`} className="sidebar-drag-handle ml-auto h-6 w-5 shrink-0 touch-none cursor-grab active:cursor-grabbing"><GripVertical className="h-3 w-3" /></Button>;
   return <Tag ref={sortable.setNodeRef} data-sidebar-sortable={item.id} data-sidebar-list={list} data-dragging={sortable.isDragging || undefined} data-drop-before={over === item.id && active !== item.id && sortable.index < (sortable.activeIndex ?? 0) || undefined} data-drop-after={over === item.id && active !== item.id && sortable.index > (sortable.activeIndex ?? 0) || undefined} className="sidebar-sortable relative min-w-0" style={{ transform: CSS.Transform.toString(sortable.transform), transition: sortable.transition }}>{children(handle)}</Tag>;
 }
 
@@ -24,5 +24,5 @@ export function SortableSidebarList<T extends Item>({ items, onReorder, children
     const ids = items.map(item => item.id);
     const from = ids.indexOf(String(event.active.id)), to = ids.indexOf(String(event.over.id));
     if (from >= 0 && to >= 0) onReorder(arrayMove(ids, from, to));
-  }}><SortableContext items={items.map(item => item.id)} strategy={verticalListSortingStrategy}>{items.map(item => <SortableRow key={item.id} item={item} list={list} over={over} active={active} disabled={disabled} tag={tag}>{handle => children(item, handle)}</SortableRow>)}</SortableContext></DndContext>;
+  }}><SortableContext items={items.map(item => item.id)} strategy={verticalListSortingStrategy}>{items.map((item, index) => <SortableRow key={item.id} item={item} list={list} over={over} active={active} disabled={disabled} tag={tag} tourTarget={list === "sections" && index === 0}>{handle => children(item, handle)}</SortableRow>)}</SortableContext></DndContext>;
 }

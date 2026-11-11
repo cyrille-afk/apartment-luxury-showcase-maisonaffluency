@@ -4,6 +4,7 @@ export function sidebarTourId(path: string) {
   return `tour-${names[path] ?? path.replace(/^\//, "").replace(/[^a-z0-9]+/g, "-")}`;
 }
 export function tourTargetSelector(target: string) {
+  if (target === "sidebar-reorder") return '[data-tour-id="tour-sidebar-reorder"]';
   const sidebar: Record<string, string> = { "nav-collection": "collection", "nav-quotes": "quotes", "nav-tools": "tools", "nav-settings": "settings", "nav-concierge": "concierge", "sidebar-ai-sync": "extension-sync", "sidebar-beta-feedboard": "beta-feedboard", "sidebar-pwa": "pwa" };
   return sidebar[target] ? `[data-tour-id="tour-${sidebar[target]}"]` : `[data-felix-target="${target}"]`;
 }

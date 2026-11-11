@@ -1,5 +1,8 @@
 # Roadmap
 
+## Sidebar reorder discovery
+- [x] Subtle resting handles with gold hover; unique first-section tour target, reorder walkthrough, account-scoped tip dismissed on successful reorder and retained through reset. Twenty-six tests pass; signed-in pointer drag/reload, reordered tour spotlight and mobile verified. Original user preferences restored; build OK.
+
 ## Reorder-safe onboarding
 - [x] Permanent unique sidebar section/link/project/folder tour IDs; ID-only sidebar tour selectors and highlights, reveal/ancestor expansion plus nearest scrolling before stable measurement, Settings replay from Welcome via durable request. Eighteen regressions pass; signed-in reversed-order/collapsed-sidebar replay verified Welcome → tier → Collection → click advance, unique IDs on every link, nested-project expansion and no page errors. User order/progress restored; existing page/Client View placement safeguards retained and build OK.
 

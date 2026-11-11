@@ -1,5 +1,5 @@
 /**
- * Global step → sidebar mapping for the 23-step Trade onboarding tour.
+ * Global step → sidebar mapping for the Trade onboarding tour.
  *
  * FelixTour publishes the mapped anchor on <html data-felix-tour-sidebar="…">
  * alongside data-felix-tour-step; styles.css pulses the matching
@@ -9,6 +9,7 @@
  */
 export type TourSidebarAnchor =
   | "dashboard"
+  | "sidebar-reorder"
   | "collection"
   | "quotes"
   | "projects"
@@ -29,6 +30,7 @@ export interface TourSidebarRef {
 
 export const FELIX_STEP_SIDEBAR: Record<string, TourSidebarRef> = {
   welcome: { anchor: "dashboard", label: "Dashboard" },
+  "sidebar-reorder": { anchor: "sidebar-reorder", label: "Section headers & project folders" },
   collection: { anchor: "collection", label: "The Collection" },
   quotes: { anchor: "collection", label: "The Collection" },
   projects: { anchor: "projects", label: "Projects & Interventions → Projects" },

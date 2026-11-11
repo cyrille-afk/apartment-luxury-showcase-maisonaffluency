@@ -8,12 +8,12 @@ const STEP_IDS = [
   "direct-client-billing", "projects", "portfolio-management", "client-view",
   "branding-panel", "white-label", "invite", "tools", "bespoke-commissions",
   "technical-assets", "felix-chat", "priority-concierge", "ai-extension-sync",
-  "pwa-install", "settings", "beta-feedboard",
+  "pwa-install", "settings", "sidebar-reorder", "beta-feedboard",
 ];
 
 const VALID_ANCHORS: TourSidebarAnchor[] = [
   "dashboard", "collection", "quotes", "projects", "tools",
-  "settings", "concierge", "extension-sync", "beta-feedboard", "pwa",
+  "settings", "concierge", "extension-sync", "beta-feedboard", "pwa", "sidebar-reorder",
 ];
 
 describe("global tour step → sidebar map", () => {

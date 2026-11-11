@@ -124,7 +124,7 @@ export function TradeSidebar() {
   const navTopItems: NavItem[] = TRADE_SANDBOX_ONLY
     ? [{ title: "Visualiser Sandbox", url: "/trade/visualiser", icon: Scan }]
     : visibleTopItems;
-  const { order: sidebarOrder, update: updateSidebarOrder } = useSidebarOrder(user?.id);
+  const { order: sidebarOrder, update: updateSidebarOrder, showReorderTip } = useSidebarOrder(user?.id);
   const toolsUrls = ["/trade/concierge", "/trade/extension-sync", "/trade/ai-layout", "/trade/tools"];
   const sections = orderedSidebarItems([
     { id: "core", label: "Core Navigation", items: navTopItems.filter(item => !toolsUrls.includes(item.url) && item.url !== "/trade/quotes") },
@@ -421,7 +421,7 @@ export function TradeSidebar() {
         </SidebarGroup>
           )}
         </SortableSidebarList>
-
+        {!collapsed && !TRADE_SANDBOX_ONLY && showReorderTip && <p className="px-5 py-2 font-body text-[10px] text-muted-foreground/70">Tip: Drag headers to reorder</p>}
 
         {showAdminNav && (
           <SidebarGroup>

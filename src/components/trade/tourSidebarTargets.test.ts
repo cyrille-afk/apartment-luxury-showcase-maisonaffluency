@@ -3,6 +3,9 @@ import { sidebarTourId, tourTargetSelector, revealSidebarTourTarget, scrollSideb
 import { replayFelixTour, clearTourStartRequest, hasPendingTourStart } from "./felixTourUtils";
 afterEach(() => { document.body.innerHTML = ""; vi.restoreAllMocks(); });
 describe("stable sidebar tour targets", () => {
+  it("resolves the dedicated reorder handle rather than a DOM position", () => {
+    expect(tourTargetSelector("sidebar-reorder")).toBe('[data-tour-id="tour-sidebar-reorder"]');
+  });
   it("finds the same named navigation item after DOM reordering", () => {
     document.body.innerHTML = '<a data-tour-id="tour-quotes"></a><a data-tour-id="tour-collection"></a>';
     const collection = document.querySelector(tourTargetSelector("nav-collection"));
