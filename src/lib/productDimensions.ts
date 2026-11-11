@@ -23,6 +23,11 @@ function toMm(value: string, unitFactor: number) {
   return Math.round(Number(value) * unitFactor);
 }
 
+/** Recorded W × D × H measurements with only the height axis labelled. */
+function mixedAxisDimensions(raw?: string | null) {
+  return raw?.match(/^\s*([\d.]+)\s*[×xX]\s*([\d.]+)\s*[×xX]\s*H\s*([\d.]+)\s*(mm|cm)\b/i);
+}
+
 /** Parse a free-text dimension string such as "W 82 × D 77 × H 73 cm — SH 41 cm". */
 export function parseDimensionString(raw?: string | null): ProductDimensions | null {
   if (!raw) return null;
@@ -49,7 +54,7 @@ export function parseDimensionString(raw?: string | null): ProductDimensions | n
   }
 
   // Canvas snapshots also carry canonical, unlabelled W × D × H strings.
-  const triple = text.match(/^\s*([\d.]+)\s*[×xX]\s*([\d.]+)\s*[×xX]\s*([\d.]+)\s*(mm|cm)\b/i);
+  const triple = mixedAxisDimensions(text) || text.match(/^\s*([\d.]+)\s*[×xX]\s*([\d.]+)\s*[×xX]\s*([\d.]+)\s*(mm|cm)\b/i);
   if (triple) {
     const factor = triple[4].toLowerCase() === "mm" ? 1 : 10;
     return { w: toMm(triple[1], factor), d: toMm(triple[2], factor), h: toMm(triple[3], factor) };
@@ -92,5 +97,10 @@ export function formatDimensions(dims: ProductDimensions | null): string | null 
 
 /** Badge text for a product, falling back to the requesting-data placeholder. */
 export function dimensionBadgeLabel(product?: DimensionSource | null): string {
+  const recorded = mixedAxisDimensions(product?.dimensions);
+  if (recorded) {
+    // Preserve the supplier's unit and height label, omitting weight/finish suffixes.
+    return `${recorded[1]} × ${recorded[2]} × H ${recorded[3]} ${recorded[4].toLowerCase()}`;
+  }
   return formatDimensions(resolveDimensions(product)) || DIMENSIONS_PLACEHOLDER;
 }
