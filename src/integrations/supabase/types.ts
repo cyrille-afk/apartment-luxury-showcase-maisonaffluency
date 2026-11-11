@@ -8060,6 +8060,51 @@ export type Database = {
           },
         ]
       }
+      quote_audit_events: {
+        Row: {
+          action: string
+          actor_id: string
+          actor_name: string
+          id: string
+          occurred_at: string
+          quote_id: string
+          related_quote_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_id: string
+          actor_name: string
+          id?: string
+          occurred_at?: string
+          quote_id: string
+          related_quote_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string
+          actor_name?: string
+          id?: string
+          occurred_at?: string
+          quote_id?: string
+          related_quote_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_audit_events_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "trade_quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_audit_events_related_quote_id_fkey"
+            columns: ["related_quote_id"]
+            isOneToOne: false
+            referencedRelation: "trade_quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quote_client_shares: {
         Row: {
           created_at: string
@@ -13324,6 +13369,24 @@ export type Database = {
       admin_price_list_audit: { Args: never; Returns: Json }
       admin_price_list_content_inventory: { Args: never; Returns: Json }
       admin_queue_overview: { Args: never; Returns: Json }
+      admin_quote_audit_timeline: {
+        Args: { _quote_id: string }
+        Returns: {
+          action: string
+          actor_id: string
+          actor_name: string
+          id: string
+          occurred_at: string
+          quote_id: string
+          related_quote_id: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "quote_audit_events"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       admin_requeue_webhook_event: { Args: { p_id: string }; Returns: Json }
       admin_reset_onboarding_for_user: {
         Args: { _user_id: string }

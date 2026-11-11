@@ -19,6 +19,7 @@ import { QuoteDisplayCurrencyToggle } from "@/components/trade/QuoteDisplayCurre
 import { DEFAULT_GBP_LANDED_CBM, GBP_LANDED_KG_PER_CBM, useGbpLandedCost, fmtGbp } from "@/hooks/useGbpLandedCost";
 import { priceRugVariantFromLabel } from "@/lib/rugPricing";
 import { quotePricingLines, saveAdminQuotePricing, reviseAdminQuote } from "@/lib/adminQuoteActions";
+import { QuoteAuditTimeline } from "@/components/trade/QuoteAuditTimeline";
 
 interface AdminQuote {
   id: string;
@@ -654,6 +655,7 @@ const AdminQuoteDetail = ({ quoteId, onBack, onRevision }: { quoteId: string; on
       </button>
 
       <div className="border border-border rounded-lg bg-background">
+        <div className="px-4 md:px-6"><QuoteAuditTimeline quoteId={quoteId} /></div>
         {/* Header */}
         <div className="border-b border-border p-4 md:p-6">
           <div className="flex items-start justify-between gap-4">

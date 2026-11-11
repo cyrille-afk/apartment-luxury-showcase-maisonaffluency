@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useProcurementStatus } from "@/hooks/useProcurementStatus";
 import { quoteDocumentEditable } from "@/lib/procurementStatus";
 import { reviseAdminQuote } from "@/lib/adminQuoteActions";
+import { QuoteAuditTimeline } from "./QuoteAuditTimeline";
 import { ProcurementStatusBadge } from "./ProcurementStatusBadge";
 import { productAttribution } from "@/lib/productAttribution";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
@@ -5299,6 +5300,8 @@ const QuoteDetail = ({ quoteId, quoteStatus: initialQuoteStatus, quoteCreatedAt,
           </div>
         )}
       </fieldset>
+
+      {isQuoteAdmin && <QuoteAuditTimeline key={`${quoteId}:${quoteStatus}`} quoteId={quoteId} />}
 
       {isArchive && isSuperAdmin && (quoteStatus === "submitted" || quoteStatus === "priced") && (
         <div className="flex justify-end py-4 print:hidden">

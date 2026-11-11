@@ -1,5 +1,8 @@
 # Roadmap
 
+## Quote audit timeline
+- [x] Transactional actor/time records for pricing, change requests and new editable revisions; shared admin-only original/revision history, UTC timestamps and quote links. Seven regressions pass; disposable signed-in UI flow verified save/revise/reload on desktop and phone, rollback/no duplicate retries, denied browser writes and anonymous access. Temporary quotes removed; no emails sent and build OK.
+
 ## Admin quote analytics
 - [x] Added three privacy-safe success events at existing handlers, with server-confirmed new-vs-existing revision results to avoid counting revisits as creation. All 20 event schemas validate; eight tests pass. Signed-in disposable admin flow emitted pricing, request and creation once each; retry returned created=false. Temporary quotes removed; production event arrival awaits published-app usage.
 

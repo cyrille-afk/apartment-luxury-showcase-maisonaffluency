@@ -161,6 +161,7 @@
 - Product menus and the image-free All Categories directory consume the same sorted NAVIGATION_DATA arrays derived from taxonomy plus centralized navigation placements/labels; directory columns own placement only, with counts/routing using each link's actual catalogue identity — prevents missing subcategories and cross-department count drift while room imagery stays separate.
 - Navigation dropdowns share a body-portaled viewport backdrop beneath the elevated active header; include New In and clear every menu/timer on dismissal so floating gallery panels cannot bypass the blur or intercept background clicks.
 - Desktop header display overrides stay inside the desktop media query; primary navigation controls retain 40px targets, and accessibility checks ignore genuinely hidden/offscreen controls — prevents duplicate phone headers and false hidden-menu failures.
+- Quote audit history uses transactional database triggers with authenticated actor snapshots and an admin-only revision-chain read; the shared timeline remains outside disabled quote fields and Client View — failed writes and idempotent revisits cannot invent audit entries.
 <!-- LOVABLE:END -->
 - Felix sourcing matching/ranking runs only in the `felix-sourcing` edge function; the client receives final results only — keeps matching rules out of the browser bundle.
 - No standalone Collectibles page: collectibles live only in the unified designers directory and shared product templates; /collectibles redirects to /designers.
