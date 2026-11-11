@@ -109,13 +109,18 @@ function editorialPairing(reference: PairingProduct, candidate: PairingProduct, 
 export function rankStudioPairings(reference: PairingProduct, catalogue: PairingProduct[], excludedIds: string[]) {
   const excluded = new Set([...excludedIds, reference.id, reference.source_pick_id].filter(Boolean));
   const seen = new Set<string>();
+  // The same piece can exist twice with spacing/case title variants (e.g. "Tumulte ConvexMirror").
+  const titleKey = (p: PairingProduct) => `${p.brand_name} ${p.product_name}`.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const seenTitles = new Set<string>([titleKey(reference)]);
   const sourceTraits = studioPairingTraits(reference);
   const allowed = complements[role(reference)];
   const ranked = catalogue.flatMap((product) => {
     const identity = product.source_pick_id || product.id;
-    if (excluded.has(product.id) || excluded.has(identity) || seen.has(identity) || seen.has(product.id)) return [];
+    const title = titleKey(product);
+    if (excluded.has(product.id) || excluded.has(identity) || seen.has(identity) || seen.has(product.id) || seenTitles.has(title)) return [];
     seen.add(identity);
     seen.add(product.id);
+    seenTitles.add(title);
     const candidateRole = role(product);
     const priority = allowed.indexOf(candidateRole);
     if (priority < 0) return [];
