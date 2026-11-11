@@ -234,6 +234,7 @@ import { Route as TradeAdminSyncStatusRouteImport } from './routes/trade.admin_.
 import { Route as TradeAdminTaxonomyAuditRouteImport } from './routes/trade.admin_.taxonomy-audit'
 import { Route as TradeAdminTiersRouteImport } from './routes/trade.admin_.tiers'
 import { Route as TradeAdminToolsRouteImport } from './routes/trade.admin_.tools'
+import { Route as TradeAdminTourAnalyticsRouteImport } from './routes/trade.admin_.tour-analytics'
 import { Route as TradeAdminTradeApplicationsRouteImport } from './routes/trade.admin_.trade-applications'
 import { Route as TradeAdminTradeReviewRouteImport } from './routes/trade.admin_.trade-review'
 import { Route as TradeAdminWhatsappAlertsRouteImport } from './routes/trade.admin_.whatsapp-alerts'
@@ -1425,6 +1426,11 @@ const TradeAdminToolsRoute = TradeAdminToolsRouteImport.update({
   path: '/admin/tools',
   getParentRoute: () => TradeRoute,
 } as any)
+const TradeAdminTourAnalyticsRoute = TradeAdminTourAnalyticsRouteImport.update({
+  id: '/admin_/tour-analytics',
+  path: '/admin/tour-analytics',
+  getParentRoute: () => TradeRoute,
+} as any)
 const TradeAdminTradeApplicationsRoute =
   TradeAdminTradeApplicationsRouteImport.update({
     id: '/admin_/trade-applications',
@@ -1844,6 +1850,7 @@ export interface FileRoutesByFullPath {
   '/trade/admin/taxonomy-audit': typeof TradeAdminTaxonomyAuditRoute
   '/trade/admin/tiers': typeof TradeAdminTiersRoute
   '/trade/admin/tools': typeof TradeAdminToolsRoute
+  '/trade/admin/tour-analytics': typeof TradeAdminTourAnalyticsRoute
   '/trade/admin/trade-applications': typeof TradeAdminTradeApplicationsRoute
   '/trade/admin/trade-review': typeof TradeAdminTradeReviewRoute
   '/trade/admin/whatsapp-alerts': typeof TradeAdminWhatsappAlertsRoute
@@ -2106,6 +2113,7 @@ export interface FileRoutesByTo {
   '/trade/admin/taxonomy-audit': typeof TradeAdminTaxonomyAuditRoute
   '/trade/admin/tiers': typeof TradeAdminTiersRoute
   '/trade/admin/tools': typeof TradeAdminToolsRoute
+  '/trade/admin/tour-analytics': typeof TradeAdminTourAnalyticsRoute
   '/trade/admin/trade-applications': typeof TradeAdminTradeApplicationsRoute
   '/trade/admin/trade-review': typeof TradeAdminTradeReviewRoute
   '/trade/admin/whatsapp-alerts': typeof TradeAdminWhatsappAlertsRoute
@@ -2370,6 +2378,7 @@ export interface FileRoutesById {
   '/trade/admin_/taxonomy-audit': typeof TradeAdminTaxonomyAuditRoute
   '/trade/admin_/tiers': typeof TradeAdminTiersRoute
   '/trade/admin_/tools': typeof TradeAdminToolsRoute
+  '/trade/admin_/tour-analytics': typeof TradeAdminTourAnalyticsRoute
   '/trade/admin_/trade-applications': typeof TradeAdminTradeApplicationsRoute
   '/trade/admin_/trade-review': typeof TradeAdminTradeReviewRoute
   '/trade/admin_/whatsapp-alerts': typeof TradeAdminWhatsappAlertsRoute
@@ -2635,6 +2644,7 @@ export interface FileRouteTypes {
     | '/trade/admin/taxonomy-audit'
     | '/trade/admin/tiers'
     | '/trade/admin/tools'
+    | '/trade/admin/tour-analytics'
     | '/trade/admin/trade-applications'
     | '/trade/admin/trade-review'
     | '/trade/admin/whatsapp-alerts'
@@ -2897,6 +2907,7 @@ export interface FileRouteTypes {
     | '/trade/admin/taxonomy-audit'
     | '/trade/admin/tiers'
     | '/trade/admin/tools'
+    | '/trade/admin/tour-analytics'
     | '/trade/admin/trade-applications'
     | '/trade/admin/trade-review'
     | '/trade/admin/whatsapp-alerts'
@@ -3160,6 +3171,7 @@ export interface FileRouteTypes {
     | '/trade/admin_/taxonomy-audit'
     | '/trade/admin_/tiers'
     | '/trade/admin_/tools'
+    | '/trade/admin_/tour-analytics'
     | '/trade/admin_/trade-applications'
     | '/trade/admin_/trade-review'
     | '/trade/admin_/whatsapp-alerts'
@@ -4887,6 +4899,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TradeAdminToolsRouteImport
       parentRoute: typeof TradeRoute
     }
+    '/trade/admin_/tour-analytics': {
+      id: '/trade/admin_/tour-analytics'
+      path: '/admin/tour-analytics'
+      fullPath: '/trade/admin/tour-analytics'
+      preLoaderRoute: typeof TradeAdminTourAnalyticsRouteImport
+      parentRoute: typeof TradeRoute
+    }
     '/trade/admin_/trade-applications': {
       id: '/trade/admin_/trade-applications'
       path: '/admin/trade-applications'
@@ -5276,6 +5295,7 @@ interface TradeRouteChildren {
   TradeAdminTaxonomyAuditRoute: typeof TradeAdminTaxonomyAuditRoute
   TradeAdminTiersRoute: typeof TradeAdminTiersRoute
   TradeAdminToolsRoute: typeof TradeAdminToolsRoute
+  TradeAdminTourAnalyticsRoute: typeof TradeAdminTourAnalyticsRoute
   TradeAdminTradeApplicationsRoute: typeof TradeAdminTradeApplicationsRoute
   TradeAdminTradeReviewRoute: typeof TradeAdminTradeReviewRoute
   TradeAdminWhatsappAlertsRoute: typeof TradeAdminWhatsappAlertsRoute
@@ -5430,6 +5450,7 @@ const TradeRouteChildren: TradeRouteChildren = {
   TradeAdminTaxonomyAuditRoute: TradeAdminTaxonomyAuditRoute,
   TradeAdminTiersRoute: TradeAdminTiersRoute,
   TradeAdminToolsRoute: TradeAdminToolsRoute,
+  TradeAdminTourAnalyticsRoute: TradeAdminTourAnalyticsRoute,
   TradeAdminTradeApplicationsRoute: TradeAdminTradeApplicationsRoute,
   TradeAdminTradeReviewRoute: TradeAdminTradeReviewRoute,
   TradeAdminWhatsappAlertsRoute: TradeAdminWhatsappAlertsRoute,

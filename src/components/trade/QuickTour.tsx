@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
+import { beginTourActivity } from '@/lib/onboardingTourActivity';
 import { useNavigate, useLocation } from "@/lib/router-compat";
 import { MapPin, Users, FileText, X, ArrowRight, ArrowLeft, Check, Sparkles, Image as ImageIcon, Box, Compass, BookOpen, FolderOpen, Smartphone } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -52,6 +53,7 @@ function DesktopQuickTour() {
   const [STEPS, setSteps] = useState<Step[]>(DEFAULT_STEPS);
   const [lang, setLang] = useState(() => loadLang());
   const tourRunActive = useRef(false);
+  const activity = useRef<ReturnType<typeof beginTourActivity>>(null);
   const [runVersion, setRunVersion] = useState(0);
   const viewedStepsRef = useRef<Set<string>>(new Set());
 
@@ -93,6 +95,7 @@ function DesktopQuickTour() {
       viewedStepsRef.current.clear();
       setRunVersion((version) => version + 1);
       tourRunActive.current = true;
+      activity.current = beginTourActivity('quick', 'manual', STEPS.length);
       window.__lovableEvents?.track?.("project.onboarding_tour_started", { tour: "quick", mode: "manual", total_steps: STEPS.length });
       setStepIdx(0);
       setActive(true);
@@ -113,6 +116,7 @@ function DesktopQuickTour() {
       if (!Number.isFinite(idx) || idx < 0 || idx >= STEPS.length) return;
       if (!tourRunActive.current) {
         tourRunActive.current = true;
+        activity.current = beginTourActivity('quick', 'resumed', STEPS.length);
         window.__lovableEvents?.track?.("project.onboarding_tour_started", { tour: "quick", mode: "resumed", total_steps: STEPS.length });
       }
       setStepIdx(idx);
@@ -133,6 +137,8 @@ function DesktopQuickTour() {
   const finish = useCallback((completed = false) => {
     const lastId = STEPS[stepIdx]?.id ?? "unknown";
     if (tourRunActive.current) {
+      if (completed) activity.current?.finish(lastId, stepIdx + 1);
+      else activity.current?.exit(lastId, stepIdx + 1, 'dismissed');
       tourRunActive.current = false;
       if (completed) window.__lovableEvents?.track?.("project.onboarding_tour_completed", { tour: "quick", step_id: lastId, step_number: stepIdx + 1, total_steps: STEPS.length });
       else window.__lovableEvents?.track?.("project.onboarding_tour_exited", { tour: "quick", step_id: lastId, step_number: stepIdx + 1, total_steps: STEPS.length, reason: "dismissed" });
@@ -181,6 +187,7 @@ function DesktopQuickTour() {
     const onStepRoute = location.pathname === STEPS[stepIdx]?.path || location.pathname.startsWith(STEPS[stepIdx]?.path + "/");
     if (id && onStepRoute && !viewedStepsRef.current.has(id)) {
       viewedStepsRef.current.add(id);
+      activity.current?.view(id, stepIdx + 1);
       trackTour.stepView(id, stepIdx, STEPS.length);
       window.__lovableEvents?.track?.("project.onboarding_tour_step_viewed", { tour: "quick", step_id: id, step_number: stepIdx + 1, total_steps: STEPS.length, target_available: true });
     }
@@ -193,6 +200,7 @@ function DesktopQuickTour() {
       if (!tourRunActive.current) return;
       tourRunActive.current = false;
       window.__lovableEvents?.track?.("project.onboarding_tour_exited", { tour: "quick", step_id: STEPS[stepIdx]?.id ?? "unknown", step_number: stepIdx + 1, total_steps: STEPS.length, reason: "page_exit" });
+      activity.current?.exit(STEPS[stepIdx]?.id ?? 'unknown', stepIdx + 1, 'page_exit');
     };
     const onPageShow = () => { tourRunActive.current = true; };
     window.addEventListener("pagehide", onPageHide);

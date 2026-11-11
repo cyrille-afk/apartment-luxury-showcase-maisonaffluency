@@ -1,4 +1,5 @@
 import { ensureSampleBoard } from "@/lib/sampleBoard";
+import { beginTourActivity } from '@/lib/onboardingTourActivity';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal, flushSync } from "react-dom";
 import { ArrowLeft, ArrowRight, Check, PanelLeft, Pause, Play, Sparkles, X } from "lucide-react";
@@ -379,6 +380,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const previousClientSafe = useRef(clientSafe);
   const stepTargetRef = useRef<Element | null>(null);
   const tourRun = useRef({ active: false, viewed: new Set<string>() });
+  const activity = useRef<ReturnType<typeof beginTourActivity>>(null);
   const [runVersion, setRunVersion] = useState(0);
 
   const step = FELIX_STEPS[currentStep];
@@ -392,6 +394,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     if (!open || isPaused || !settled || transitioning || position?.step !== currentStep || position.path !== location.pathname) return;
     if (tourRun.current.viewed.has(step.id)) return;
     tourRun.current.viewed.add(step.id);
+    activity.current?.view(step.id, currentStep + 1);
     window.__lovableEvents?.track?.("project.onboarding_tour_step_viewed", {
       tour: "felix", step_id: step.id, step_number: currentStep + 1,
       total_steps: FELIX_STEPS.length, target_available: !targetUnavailable,
@@ -403,6 +406,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     const onPageHide = () => {
       if (!tourRun.current.active) return;
       tourRun.current.active = false;
+      activity.current?.exit(step.id, currentStep + 1, 'page_exit');
       window.__lovableEvents?.track?.("project.onboarding_tour_exited", {
         tour: "felix", step_id: step.id, step_number: currentStep + 1,
         total_steps: FELIX_STEPS.length, reason: "page_exit",
@@ -814,6 +818,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
         tourRun.current = { active: true, viewed: new Set() };
         let saved = 0;
         try { saved = Number(localStorage.getItem(PROGRESS_KEY)); } catch { /* storage optional */ }
+        activity.current = beginTourActivity('felix', Number.isInteger(saved) && saved > 0 && saved < FELIX_STEPS.length ? 'resumed' : 'automatic', FELIX_STEPS.length);
         window.__lovableEvents?.track?.("project.onboarding_tour_started", {
           tour: "felix", mode: Number.isInteger(saved) && saved > 0 && saved < FELIX_STEPS.length ? "resumed" : "automatic",
           total_steps: FELIX_STEPS.length,
@@ -829,6 +834,9 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     const onStart = () => {
       tourRun.current = { active: true, viewed: new Set() };
       setRunVersion((version) => version + 1);
+      let replay = false;
+      try { replay = Date.now() - Number(sessionStorage.getItem('ma-tour-replay-pending')) < 15000; sessionStorage.removeItem('ma-tour-replay-pending'); } catch { /* optional storage */ }
+      activity.current = beginTourActivity('felix', 'manual', FELIX_STEPS.length, replay);
       window.__lovableEvents?.track?.("project.onboarding_tour_started", { tour: "felix", mode: "manual", total_steps: FELIX_STEPS.length });
       clearTourStartRequest();
       // An explicit Meet Felix/restart always begins at Welcome. Saved progress
@@ -861,6 +869,8 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
 
   const close = useCallback((completed: boolean) => {
     if (tourRun.current.active) {
+      if (completed) activity.current?.finish(FELIX_STEPS[currentStep].id, currentStep + 1);
+      else activity.current?.exit(FELIX_STEPS[currentStep].id, currentStep + 1, 'dismissed');
       tourRun.current.active = false;
       if (completed) window.__lovableEvents?.track?.("project.onboarding_tour_completed", {
         tour: "felix", step_id: FELIX_STEPS[currentStep].id, step_number: currentStep + 1, total_steps: FELIX_STEPS.length,

@@ -5975,6 +5975,57 @@ export type Database = {
         }
         Relationships: []
       }
+      onboarding_tour_runs: {
+        Row: {
+          completed_at: string | null
+          environment: string
+          exit_reason: string | null
+          id: string
+          last_step: string | null
+          last_step_number: number | null
+          mode: string
+          owner_id: string
+          replay: boolean
+          started_at: string
+          total_steps: number
+          tour: string
+          updated_at: string
+          viewed_steps: Json
+        }
+        Insert: {
+          completed_at?: string | null
+          environment: string
+          exit_reason?: string | null
+          id: string
+          last_step?: string | null
+          last_step_number?: number | null
+          mode: string
+          owner_id: string
+          replay?: boolean
+          started_at?: string
+          total_steps: number
+          tour: string
+          updated_at?: string
+          viewed_steps?: Json
+        }
+        Update: {
+          completed_at?: string | null
+          environment?: string
+          exit_reason?: string | null
+          id?: string
+          last_step?: string | null
+          last_step_number?: number | null
+          mode?: string
+          owner_id?: string
+          replay?: boolean
+          started_at?: string
+          total_steps?: number
+          tour?: string
+          updated_at?: string
+          viewed_steps?: Json
+        }
+        Relationships: []
+      }
       onboarding_tour_steps: {
         Row: {
           body: string
@@ -13356,6 +13407,10 @@ export type Database = {
           total_users: number
         }[]
       }
+      admin_onboarding_tour_activity: {
+        Args: { _days?: number; _environment?: string; _tour?: string }
+        Returns: Json
+      }
       admin_paid_orders_monthly: {
         Args: { _include_test?: boolean; _months?: number }
         Returns: {
@@ -14345,6 +14400,21 @@ export type Database = {
         Returns: undefined
       }
       record_email_portal_click: { Args: { p_ref: string }; Returns: undefined }
+      record_onboarding_tour_run: {
+        Args: {
+          _environment: string
+          _id: string
+          _kind: string
+          _mode: string
+          _number?: number
+          _reason?: string
+          _replay: boolean
+          _step?: string
+          _total: number
+          _tour: string
+        }
+        Returns: undefined
+      }
       record_security_event: {
         Args: {
           _details?: Json
