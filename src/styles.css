@@ -5,6 +5,14 @@
 :root {
   --collection-control-background: #000000;
   --collection-control-foreground: #ffffff;
+  --studio-action-primary: #171717;
+  --studio-action-primary-hover: #404040;
+  --studio-action-primary-ink: #ffffff;
+  --studio-action-utility: #ffffff;
+  --studio-action-utility-hover: #f5f5f5;
+  --studio-action-utility-ink: #262626;
+  --studio-action-utility-border: #d4d4d4;
+  --studio-action-utility-border-hover: #a3a3a3;
   --homepage-header-paper: oklch(1 0 0);
   --homepage-header-ink: #111111;
   --header-dark-glass: rgba(60, 60, 60, 0.55);
@@ -25,6 +33,21 @@
 .navigation-backdrop {
   background-color: var(--navigation-backdrop-dim);
   z-index: var(--navigation-backdrop-layer);
+}
+
+@utility studio-action-primary {
+  background-color: var(--studio-action-primary);
+  color: var(--studio-action-primary-ink);
+  &:hover { background-color: var(--studio-action-primary-hover); }
+}
+@utility studio-action-utility {
+  background-color: var(--studio-action-utility);
+  color: var(--studio-action-utility-ink);
+  border: 1px solid var(--studio-action-utility-border);
+  &:hover {
+    background-color: var(--studio-action-utility-hover);
+    border-color: var(--studio-action-utility-border-hover);
+  }
 }
 [data-site-header].global-overlay-header[data-menu-active="true"] {
   z-index: var(--navigation-active-layer);

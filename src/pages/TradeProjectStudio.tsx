@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "@/lib/router-compat";
-import { ArrowLeft, FileDown, FileText } from "lucide-react";
+import { ArrowLeft, FileDown, FileText, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProject } from "@/hooks/useProjects";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
@@ -242,8 +242,8 @@ export default function TradeProjectStudio() {
       </div>
 
       <div className="flex shrink-0 flex-wrap justify-start gap-2 border-b border-border px-4 py-3 md:px-6">
-        <Button variant="secondary" aria-haspopup="dialog" disabled={!items.length} onClick={openVisualStudio} className="cursor-pointer rounded-none bg-muted font-body text-[10px] uppercase tracking-[0.15em] text-foreground hover:bg-muted/80">AI Co-Designer</Button>
-        <Button variant="outline" aria-controls="studio-spec-panel" aria-expanded={isSpecPanelOpen} onClick={() => setIsSpecPanelOpen(!isSpecPanelOpen)} className="cursor-pointer rounded-none border-foreground/30 bg-transparent font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground hover:bg-muted/40 hover:text-foreground">Specsheet ({items.length})</Button>
+        <Button variant="studio-primary" aria-haspopup="dialog" disabled={!items.length} onClick={openVisualStudio} className="h-10 cursor-pointer rounded-none px-4 py-2 font-body text-[10px] uppercase tracking-[0.15em] transition-colors duration-200 motion-reduce:transition-none [&_svg]:size-3.5"><Sparkles aria-hidden="true" strokeWidth={1.5} />AI Co-Designer</Button>
+        <Button variant="studio-utility" aria-controls="studio-spec-panel" aria-expanded={isSpecPanelOpen} onClick={() => setIsSpecPanelOpen(!isSpecPanelOpen)} className="h-10 cursor-pointer rounded-none px-4 py-2 font-body text-[10px] uppercase tracking-[0.15em] transition-colors duration-200 motion-reduce:transition-none">Specsheet ({items.length})</Button>
       </div>
       <div className="relative min-h-[70dvh] overflow-hidden lg:min-h-0 lg:flex-1">
         {/* Canvas expands into the space released by either independent drawer. */}
