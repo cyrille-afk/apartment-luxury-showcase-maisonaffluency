@@ -12002,6 +12002,7 @@ export type Database = {
           quote_kind: string
           resale_certificate_id: string | null
           responded_at: string | null
+          revision_of_quote_id: string | null
           ship_to_address1: string | null
           ship_to_address2: string | null
           ship_to_attention: string | null
@@ -12067,6 +12068,7 @@ export type Database = {
           quote_kind?: string
           resale_certificate_id?: string | null
           responded_at?: string | null
+          revision_of_quote_id?: string | null
           ship_to_address1?: string | null
           ship_to_address2?: string | null
           ship_to_attention?: string | null
@@ -12132,6 +12134,7 @@ export type Database = {
           quote_kind?: string
           resale_certificate_id?: string | null
           responded_at?: string | null
+          revision_of_quote_id?: string | null
           ship_to_address1?: string | null
           ship_to_address2?: string | null
           ship_to_attention?: string | null
@@ -12193,6 +12196,13 @@ export type Database = {
             columns: ["resale_certificate_id"]
             isOneToOne: false
             referencedRelation: "studio_resale_certificates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_quotes_revision_of_quote_id_fkey"
+            columns: ["revision_of_quote_id"]
+            isOneToOne: false
+            referencedRelation: "trade_quotes"
             referencedColumns: ["id"]
           },
           {
@@ -13319,9 +13329,24 @@ export type Database = {
         Args: { _user_id: string }
         Returns: undefined
       }
+      admin_revise_quote: {
+        Args: { _notes: string; _quote_id: string }
+        Returns: string
+      }
       admin_revoke_studio_invitation: {
         Args: { _invite_id: string; _studio_id: string }
         Returns: undefined
+      }
+      admin_save_quote_pricing: {
+        Args: {
+          _cbm: number
+          _kg: number
+          _lines: Json
+          _mode: string
+          _notes: string
+          _quote_id: string
+        }
+        Returns: string
       }
       admin_stripe_metrics: { Args: { _days?: number }; Returns: Json }
       admin_studio_details: { Args: { _studio_id: string }; Returns: Json }

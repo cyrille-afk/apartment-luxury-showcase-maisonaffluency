@@ -1919,6 +1919,13 @@
       "when": 1794363219148,
       "tag": "0273_studio_favorite_pairings",
       "breakpoints": true
+    },
+    {
+      "idx": 274,
+      "version": "7",
+      "when": 1794434372957,
+      "tag": "0274_admin_quote_pricing_and_revisions",
+      "breakpoints": true
     }
   ]
 }

@@ -9,6 +9,7 @@ import { FxAppliedRates, type FxAppliedPair } from "@/components/trade/FxApplied
 
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "@/lib/router-compat";
+import { useNavigate } from "@/lib/router-compat";
 import { useToast } from "@/hooks/use-toast";
 import { Clock, Send, CheckCircle, DollarSign, ChevronRight, ArrowLeft, Save, CreditCard, Trash2, Edit3, XCircle } from "lucide-react";
 import { QuoteCardSkeleton, QuoteItemSkeleton } from "@/components/trade/skeletons";
@@ -17,6 +18,7 @@ import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
 import { QuoteDisplayCurrencyToggle } from "@/components/trade/QuoteDisplayCurrencyToggle";
 import { DEFAULT_GBP_LANDED_CBM, GBP_LANDED_KG_PER_CBM, useGbpLandedCost, fmtGbp } from "@/hooks/useGbpLandedCost";
 import { priceRugVariantFromLabel } from "@/lib/rugPricing";
+import { quotePricingLines, saveAdminQuotePricing, reviseAdminQuote } from "@/lib/adminQuoteActions";
 
 interface AdminQuote {
   id: string;
@@ -120,6 +122,7 @@ const formatPrice = (cents: number | null, currency: string = "SGD") => {
 };
 
 const TradeQuotesAdmin = () => {
+  const navigate = useNavigate();
   const { isAdmin, isSuperAdmin, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const [quotes, setQuotes] = useState<AdminQuote[]>([]);
@@ -173,7 +176,7 @@ const TradeQuotesAdmin = () => {
   if (!isAdmin) return <Navigate to="/trade" replace />;
 
   if (selectedQuoteId) {
-    return <AdminQuoteDetail quoteId={selectedQuoteId} onBack={() => { setSelectedQuoteId(null); fetchQuotes(); }} />;
+    return <AdminQuoteDetail quoteId={selectedQuoteId} onRevision={id => navigate(`/trade/quotes?quote=${id}`)} onBack={() => { setSelectedQuoteId(null); fetchQuotes(); }} />;
   }
 
   return (
@@ -254,7 +257,7 @@ const TradeQuotesAdmin = () => {
 };
 
 /** Admin detail view — set item prices, add notes, send pricing */
-const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => void }) => {
+const AdminQuoteDetail = ({ quoteId, onBack, onRevision }: { quoteId: string; onBack: () => void; onRevision: (id: string) => void }) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [items, setItems] = useState<AdminQuoteItem[]>([]);
@@ -532,32 +535,20 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
 
   const handleSendPricing = async () => {
     setSaving(true);
-    // Update each item's unit_price_cents
-    for (const item of items) {
-      const priceStr = itemPrices[item.id];
-      const cents = priceStr ? Math.round(parseFloat(priceStr) * 100) : null;
-      if (cents !== item.unit_price_cents) {
-        await supabase.from("trade_quote_items").update({ unit_price_cents: cents }).eq("id", item.id);
-      }
-    }
-    // Update quote status and admin notes
-    await supabase.from("trade_quotes").update({
-      status: "priced",
-      admin_notes: adminNotes || null,
-      responded_at: new Date().toISOString(),
-      landed_cost_cbm: landedCostSettings.cbm,
-      landed_cost_kg: landedCostSettings.kg,
-      landed_cost_mode: landedCostSettings.mode,
-    } as any).eq("id", quoteId);
-
-    // Notify requesting user + admins (fire-and-forget)
-    supabase.functions.invoke("send-quote-priced", {
-      body: { quoteId },
-    }).catch((err) => console.error("Quote priced email failed:", err));
-
-    toast({ title: "Pricing sent", description: "The user can now review and confirm." });
-    setSaving(false);
-    onBack();
+    try {
+      await saveAdminQuotePricing(quoteId, quotePricingLines(items, itemPrices), adminNotes, landedCostSettings);
+      let notificationFailed = false;
+      try {
+        const { data, error } = await supabase.functions.invoke("send-quote-priced", { body: { quoteId } });
+        notificationFailed = Boolean(error || data?.error);
+      } catch { notificationFailed = true; }
+      toast(notificationFailed
+        ? { title: "Pricing saved; notification failed", description: "The prices are saved, but the email could not be sent.", variant: "destructive" }
+        : { title: "Pricing sent", description: "The user can now review and confirm." });
+      onBack();
+    } catch {
+      toast({ title: "Pricing not saved", description: "Check every piece’s price and try again. No pricing email was sent.", variant: "destructive" });
+    } finally { setSaving(false); }
   };
 
   const handleSaveNotes = async () => {
@@ -593,13 +584,13 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
     if (!reason || !reason.trim()) return;
     setSaving(true);
     const merged = appendAdminNote(adminNotes, "Changes requested", reason.trim());
-    await supabase.from("trade_quotes").update({
-      status: "draft",
-      admin_notes: merged,
-    } as any).eq("id", quoteId);
-    toast({ title: "Reopened as draft", description: "Client can revise the quote." });
-    setSaving(false);
-    onBack();
+    try {
+      const draftId = await reviseAdminQuote(quoteId, merged);
+      toast({ title: draftId === quoteId ? "Reopened as draft" : "Draft revision opened", description: draftId === quoteId ? "Client can revise the quote." : "The issued quote is preserved; changes belong to the new draft." });
+      onRevision(draftId);
+    } catch {
+      toast({ title: "Could not open draft", description: "The quote is unchanged. Please try again.", variant: "destructive" });
+    } finally { setSaving(false); }
   };
 
   const handleCancelQuote = async () => {

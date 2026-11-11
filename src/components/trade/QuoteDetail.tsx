@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { useProcurementStatus } from "@/hooks/useProcurementStatus";
 import { quoteDocumentEditable } from "@/lib/procurementStatus";
+import { reviseAdminQuote } from "@/lib/adminQuoteActions";
 import { ProcurementStatusBadge } from "./ProcurementStatusBadge";
 import { productAttribution } from "@/lib/productAttribution";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
@@ -1630,16 +1631,28 @@ const QuoteDetail = ({ quoteId, quoteStatus: initialQuoteStatus, quoteCreatedAt,
     }
     const header = isSuperAdmin ? "Reopened as draft by admin" : "Client requested changes";
     const newNotes = reason ? appendAdminNote(adminNotes, header, reason) : adminNotes;
-    await supabase.from("trade_quotes").update({
-      status: "draft",
-      submitted_at: null,
-      responded_at: null,
-      admin_notes: newNotes,
-    } as any).eq("id", quoteId);
+    let draftId = quoteId;
+    try {
+      if (isSuperAdmin) {
+        draftId = await reviseAdminQuote(quoteId, newNotes || "");
+      } else {
+        const { error, data } = await supabase.from("trade_quotes").update({
+          status: "draft", submitted_at: null, responded_at: null, admin_notes: newNotes,
+        } as any).eq("id", quoteId).select("id").single();
+        if (error || !data) throw error || new Error("Quote was not reopened");
+      }
+    } catch {
+      toast({ title: "Could not open draft", description: "The issued quote is unchanged. Please ask your administrator for a draft revision.", variant: "destructive" });
+      return;
+    }
     setAdminNotes(newNotes);
     setReviseOpen(false);
     setReviseReason("");
-    toast({ title: isSuperAdmin ? "Quote reopened as draft" : "Changes requested", description: isSuperAdmin ? "You can now edit lines directly." : "Quote reopened as draft with your note attached." });
+    toast({ title: draftId !== quoteId ? "Draft revision opened" : isSuperAdmin ? "Quote reopened as draft" : "Changes requested", description: draftId !== quoteId ? "The original issued quote is preserved." : "Quote reopened as draft with your note attached." });
+    if (draftId !== quoteId) {
+      navigate(`/trade/quotes?quote=${draftId}`, { replace: true });
+      return;
+    }
     onStatusChange();
   };
 
@@ -5280,15 +5293,21 @@ const QuoteDetail = ({ quoteId, quoteStatus: initialQuoteStatus, quoteCreatedAt,
         )}
       </fieldset>
 
+      {isArchive && isSuperAdmin && (quoteStatus === "submitted" || quoteStatus === "priced") && (
+        <div className="flex justify-end py-4 print:hidden">
+          <Button variant="outline" onClick={() => setReviseOpen(true)}><Edit3 className="h-3.5 w-3.5" />Open draft revision</Button>
+        </div>
+      )}
+
       {/* Request changes dialog */}
       <Dialog open={reviseOpen} onOpenChange={setReviseOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-display text-base">{isSuperAdmin ? "Reopen as draft" : "Request changes"}</DialogTitle>
+            <DialogTitle className="font-display text-base">{isSuperAdmin ? isArchive ? "Open draft revision" : "Reopen as draft" : "Request changes"}</DialogTitle>
           </DialogHeader>
           <p className="font-body text-xs text-muted-foreground">
             {isSuperAdmin
-              ? "Reopen this quote as a draft so you can edit lines on the client's behalf. Optionally log a note for the audit trail."
+              ? "Open an editable draft on the client's behalf. Issued quotes remain unchanged; their selections carry into a linked revision."
               : "Tell our team what you'd like adjusted. The quote will be reopened as a draft and your note attached for the concierge."}
           </p>
           <textarea

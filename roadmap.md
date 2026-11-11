@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Admin submitted-quote pricing and revisions
-- [ ] Confirmed live archive guards reject admin line pricing and reopening, while both screens ignore write errors. Await plan approval for atomic admin pricing and editable draft revisions that preserve issued archives.
+- [x] Confirmed live locks; added atomic admin pricing and idempotent owner-retaining draft revisions, checked both screens’ results, and kept issued specification locks. Signed-in disposable UI pricing saved €345.67/€456.78; simulated email failure reported accurately without sending. Request Changes opened an editable revision in Quote Builder, preserving quantities, finishes, ship-to and original issuance; invalid pricing rolled back all writes.
 
 ## Move saved Studio pieces
 - [x] Add Move on canvas and Specsheet with explicit saved-row/source choice when a piece belongs to multiple folders, destination selection and named confirmation; update the original row without changing configuration or quote-linked pieces.
