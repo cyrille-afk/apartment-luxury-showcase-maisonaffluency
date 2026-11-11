@@ -7,6 +7,7 @@ import { loadLang } from "@/components/trade/conciergeGreeting";
 import { localizeTourStep, tourChromeCopy } from "@/lib/conciergeI18n";
 import { trackTour } from "@/lib/analytics";
 import { useDesktopTradeTour } from "./useDesktopTradeTour";
+import { sidebarTourId, revealSidebarTourTarget, scrollSidebarTourTarget } from "./tourSidebarTargets";
 
 type Step = {
   id: string;
@@ -110,6 +111,14 @@ function DesktopQuickTour() {
 
   // Dedup tour_step_view fires per session so refresh/back navigation don't double-count.
   const viewedStepsRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (!active) return;
+    const step = STEPS[stepIdx];
+    if (!step || location.pathname !== step.path) return;
+    const target = revealSidebarTourTarget(sidebarTourId(step.path));
+    const timer = window.setTimeout(() => { if (target) scrollSidebarTourTarget(target); }, 250);
+    return () => window.clearTimeout(timer);
+  }, [active, stepIdx, STEPS, location.pathname]);
 
   const finish = useCallback(() => {
     const lastId = STEPS[stepIdx]?.id ?? "unknown";

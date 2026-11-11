@@ -1,5 +1,8 @@
 # Roadmap
 
+## Reorder-safe onboarding
+- [x] Permanent unique sidebar section/link/project/folder tour IDs; ID-only sidebar tour selectors and highlights, reveal/ancestor expansion plus nearest scrolling before stable measurement, Settings replay from Welcome via durable request. Eighteen regressions pass; signed-in reversed-order/collapsed-sidebar replay verified Welcome → tier → Collection → click advance, unique IDs on every link, nested-project expansion and no page errors. User order/progress restored; existing page/Client View placement safeguards retained and build OK.
+
 ## Customizable Trade sidebar
 - [x] Independent dnd-kit section/project/folder lists with hover handles, elevated dragging and thin drop markers; hydrated user-scoped local ordering and immediate Settings reset. Nine regressions pass. Signed-in pointer drags at all three levels, reload persistence, keyboard reordering, folder navigation and reset verified; original user preference restored. Separate phone navigation remains unchanged; build OK and no page errors.
 

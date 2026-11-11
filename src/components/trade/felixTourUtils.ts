@@ -40,6 +40,16 @@ export const startFelixTour = () => {
   window.dispatchEvent(new Event("felix-tour:start"));
 };
 
+export const replayFelixTour = () => {
+  try {
+    localStorage.removeItem("felix_dashboard_tour_seen_v1");
+    localStorage.removeItem("felix_tour_progress_v1");
+    localStorage.removeItem("trade_quick_tour_step");
+    sessionStorage.removeItem(TOUR_COMPLETED_KEY);
+  } catch { /* Replay still works without saved preferences. */ }
+  startFelixTour();
+};
+
 /** True when a restart was requested moments ago and the tour has not closed since. */
 export const hasPendingTourStart = () => {
   try {

@@ -31,6 +31,7 @@ import { resolveTearsheetActiveFolder } from "@/lib/tearsheetActiveFolder";
 import { SortableSidebarList } from "./SortableSidebarList";
 import { useSidebarOrder } from "@/hooks/useSidebarOrder";
 import { orderedSidebarItems } from "@/lib/sidebarOrder";
+import { sidebarTourId, TOUR_SIDEBAR_REVEAL } from "./tourSidebarTargets";
 
 
 type NavItem = { title: string; url: string; icon: React.ElementType; end?: boolean };
@@ -56,7 +57,7 @@ const projectItems: NavItem[] = [
 
 export function TradeSidebar() {
   const guideName = useAIGuideName();
-  const { state } = useSidebar();
+  const { state, setOpen } = useSidebar();
   const collapsed = state === "collapsed";
   const navigate = useNavigate();
   const location = useLocation();
@@ -147,6 +148,16 @@ export function TradeSidebar() {
   const { projects: activeProjects } = useProjects({ activeOnly: true });
   const boards = useProjectBoardTree(activeProjects.map((project) => project.id));
   const [expandedProjects, setExpandedProjects] = useState<string[]>([]);
+  useEffect(() => {
+    const reveal = (event: Event) => {
+      const id = (event as CustomEvent<string>).detail;
+      setOpen(true);
+      const project = activeProjects.find(project => id === `tour-project-${project.id}` || boards.some(board => board.project_id === project.id && id === `tour-folder-${board.id}`));
+      if (project) setExpandedProjects(ids => ids.includes(project.id) ? ids : [...ids, project.id]);
+    };
+    window.addEventListener(TOUR_SIDEBAR_REVEAL, reveal);
+    return () => window.removeEventListener(TOUR_SIDEBAR_REVEAL, reveal);
+  }, [setOpen, activeProjects, boards]);
   const currentBoard = location.pathname.match(/^\/trade\/boards\/([^/]+)/)?.[1];
   const [projectParams] = useSearchParams();
   const selectedProjectId = projectParams.get("project");
@@ -203,7 +214,7 @@ export function TradeSidebar() {
       <SidebarContent>
         {/* Brand */}
         <div className={`px-5 py-8 ${collapsed ? "px-2 py-5" : ""}`}>
-          <NavLink to="/trade" className="block">
+          <NavLink data-tour-id="tour-brand" to="/trade" className="block">
             {collapsed ? (
               <span className="font-display text-lg text-foreground block text-center">MA</span>
             ) : (
@@ -218,7 +229,7 @@ export function TradeSidebar() {
 
         <SortableSidebarList list="sections" items={sections} disabled={collapsed || TRADE_SANDBOX_ONLY} onReorder={sections => updateSidebarOrder({ sections })}>
           {(section, sectionHandle) => section.id !== "projects" ? (
-        <SidebarGroup>
+        <SidebarGroup data-tour-id={`tour-section-${section.id}`}>
           <SidebarGroupLabel className="sidebar-drag-heading flex font-body text-[10px] uppercase text-muted-foreground">
             {!collapsed && <span className="min-w-0 flex-1">{section.label}</span>}{sectionHandle}
           </SidebarGroupLabel>
@@ -230,6 +241,7 @@ export function TradeSidebar() {
                     <NavLink
                       to={item.url}
                       end={item.end}
+                      data-tour-id={sidebarTourId(item.url)}
                       data-tour-sidebar-anchor={
                         item.url === "/trade/the-collection"
                           ? "collection"
@@ -298,7 +310,7 @@ export function TradeSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
           ) : (
-        <SidebarGroup data-felix-target="nav-projects">
+        <SidebarGroup data-tour-id="tour-section-projects" data-felix-target="nav-projects">
           <SidebarGroupLabel data-tour-sidebar-anchor="projects" className="sidebar-drag-heading flex font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
             {!collapsed && <span className="min-w-0 flex-1">PROJECTS &amp; INTERVENTIONS</span>}{sectionHandle}
           </SidebarGroupLabel>
@@ -315,6 +327,7 @@ export function TradeSidebar() {
                       <NavLink
                         to={item.url}
                         end={item.end}
+                        data-tour-id={sidebarTourId(item.url)}
                         data-felix-target={isProjects ? "nav-custom-requests" : undefined}
                         data-tour-sidebar-anchor={isProjects ? "projects" : undefined}
                         className="flex items-center gap-3 px-3 py-3 font-body text-xs text-muted-foreground hover:text-foreground transition-colors border-l border-transparent"
@@ -381,17 +394,17 @@ export function TradeSidebar() {
                                  <Button type="button" variant="ghost" size="icon" className="h-7 w-6 shrink-0" aria-label={`${expanded ? "Collapse" : "Expand"} ${project.name}`} aria-expanded={expanded} onClick={() => setExpandedProjects((ids) => expanded ? ids.filter((id) => id !== project.id) : [...ids, project.id])}>
                                    {expanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
                                  </Button>
-                                 <NavLink to={projectDefaultUrl(project.id, boards)} onClick={() => { pushRecentProject(project.id); setExpandedProjects((ids) => ids.includes(project.id) ? ids : [...ids, project.id]); }} className={`block min-w-0 flex-1 truncate py-1.5 font-body text-[11px] transition-colors hover:text-foreground ${project.id === currentProject?.id ? "font-medium text-accent" : "text-muted-foreground"}`} activeClassName="text-foreground font-medium" title={project.name}>{project.name}</NavLink>
+                                 <NavLink data-tour-id={`tour-project-${project.id}`} to={projectDefaultUrl(project.id, boards)} onClick={() => { pushRecentProject(project.id); setExpandedProjects((ids) => ids.includes(project.id) ? ids : [...ids, project.id]); }} className={`block min-w-0 flex-1 truncate py-1.5 font-body text-[11px] transition-colors hover:text-foreground ${project.id === currentProject?.id ? "font-medium text-accent" : "text-muted-foreground"}`} activeClassName="text-foreground font-medium" title={project.name}>{project.name}</NavLink>
                                  {projectHandle}
                                </div>
                                {expanded && (
                                  <ul className="ml-4 border-l border-border/70 pl-3 font-body text-[10px] text-muted-foreground">
-                                   <li><NavLink to={`/trade/projects/${project.id}?tab=boards`} className="flex items-center gap-2 py-1.5 hover:text-foreground"><FolderOpen className="h-3 w-3 shrink-0" /> Folders & Drafts</NavLink></li>
+                                   <li><NavLink data-tour-id={`tour-project-folders-${project.id}`} to={`/trade/projects/${project.id}?tab=boards`} className="flex items-center gap-2 py-1.5 hover:text-foreground"><FolderOpen className="h-3 w-3 shrink-0" /> Folders & Drafts</NavLink></li>
                                    <SortableSidebarList list={`folders:${project.id}`} tag="li" items={projectBoards.map(board => ({ ...board, label: board.title }))} onReorder={folderIds => updateSidebarOrder({ folders: { ...sidebarOrder.folders, [project.id]: folderIds } })}>
-                                     {(board, folderHandle) => <div className="sidebar-drag-heading ml-2 flex min-w-0 items-center border-l border-border/60 pl-3"><NavLink to={`/trade/boards/${board.id}?project=${project.id}`} data-active-folder={board.id === activeFolderId ? "true" : undefined} className={`block min-w-0 flex-1 truncate py-1.5 hover:text-foreground ${board.id === activeFolderId ? "text-foreground font-medium" : ""}`} activeClassName="text-foreground font-medium" title={board.title}>{board.title}</NavLink>{folderHandle}</div>}
+                                     {(board, folderHandle) => <div className="sidebar-drag-heading ml-2 flex min-w-0 items-center border-l border-border/60 pl-3"><NavLink data-tour-id={`tour-folder-${board.id}`} to={`/trade/boards/${board.id}?project=${project.id}`} data-active-folder={board.id === activeFolderId ? "true" : undefined} className={`block min-w-0 flex-1 truncate py-1.5 hover:text-foreground ${board.id === activeFolderId ? "text-foreground font-medium" : ""}`} activeClassName="text-foreground font-medium" title={board.title}>{board.title}</NavLink>{folderHandle}</div>}
                                    </SortableSidebarList>
-                                   <li><NavLink to={`/trade/projects/${project.id}?tab=tearsheets`} className="block py-1.5 hover:text-foreground">Tearsheets</NavLink></li>
-                                   <li><NavLink to={`/trade/projects/${project.id}/studio`} className="block py-1.5 hover:text-foreground">Project Studio</NavLink></li>
+                                   <li><NavLink data-tour-id={`tour-project-tearsheets-${project.id}`} to={`/trade/projects/${project.id}?tab=tearsheets`} className="block py-1.5 hover:text-foreground">Tearsheets</NavLink></li>
+                                   <li><NavLink data-tour-id={`tour-project-studio-${project.id}`} to={`/trade/projects/${project.id}/studio`} className="block py-1.5 hover:text-foreground">Project Studio</NavLink></li>
                                  </ul>
                                )}
                              </>
@@ -419,8 +432,7 @@ export function TradeSidebar() {
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild className="h-auto min-h-[36px]">
-                    <NavLink
-                      to="/trade/admin-dashboard"
+                    <NavLink data-tour-id="tour-trade-admin-dashboard" to="/trade/admin-dashboard"
                       className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
                       activeClassName="text-foreground font-medium"
                     >
@@ -460,7 +472,7 @@ export function TradeSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <NavLink to="/trade/admin/directory-activity" className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors" activeClassName="text-foreground font-medium">
+                    <NavLink data-tour-id="tour-trade-admin-directory-activity" to="/trade/admin/directory-activity" className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors" activeClassName="text-foreground font-medium">
                       <BarChart3 className="h-4 w-4 shrink-0" />
                       {!collapsed && <span>Directory Activity</span>}
                     </NavLink>
@@ -468,7 +480,7 @@ export function TradeSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <NavLink to="/trade/admin/studios" className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors" activeClassName="text-foreground font-medium">
+                    <NavLink data-tour-id="tour-trade-admin-studios" to="/trade/admin/studios" className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors" activeClassName="text-foreground font-medium">
                       <Users className="h-4 w-4 shrink-0" />
                       {!collapsed && <span>Studios</span>}
                     </NavLink>
@@ -476,8 +488,7 @@ export function TradeSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <NavLink
-                      to="/trade/admin/inquiries"
+                    <NavLink data-tour-id="tour-trade-admin-inquiries" to="/trade/admin/inquiries"
                       className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
                       activeClassName="text-foreground font-medium"
                     >
@@ -505,8 +516,7 @@ export function TradeSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <NavLink
-                      to="/trade/admin/sales-funnel"
+                    <NavLink data-tour-id="tour-trade-admin-sales-funnel" to="/trade/admin/sales-funnel"
                       className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
                       activeClassName="text-foreground font-medium"
                     >
@@ -517,8 +527,7 @@ export function TradeSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <NavLink
-                      to="/trade/admin/procurement-ledger"
+                    <NavLink data-tour-id="tour-procurement" to="/trade/admin/procurement-ledger"
                       className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
                       activeClassName="text-foreground font-medium"
                     >
@@ -529,8 +538,7 @@ export function TradeSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <NavLink
-                      to="/trade/admin/payment-settings"
+                    <NavLink data-tour-id="tour-trade-admin-payment-settings" to="/trade/admin/payment-settings"
                       className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
                       activeClassName="text-foreground font-medium"
                     >
@@ -541,8 +549,7 @@ export function TradeSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <NavLink
-                      to="/trade/admin/queue"
+                    <NavLink data-tour-id="tour-trade-admin-queue" to="/trade/admin/queue"
                       className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
                       activeClassName="text-foreground font-medium"
                     >
@@ -553,7 +560,7 @@ export function TradeSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <NavLink to="/trade/admin/stripe-metrics" className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors" activeClassName="text-foreground font-medium">
+                    <NavLink data-tour-id="tour-trade-admin-stripe-metrics" to="/trade/admin/stripe-metrics" className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors" activeClassName="text-foreground font-medium">
                       <Activity className="h-4 w-4 shrink-0" />
                       {!collapsed && <span>Stripe Monitoring</span>}
                     </NavLink>
@@ -561,7 +568,7 @@ export function TradeSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <NavLink to="/trade/admin/curated-pairings" className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors" activeClassName="text-foreground font-medium">
+                    <NavLink data-tour-id="tour-trade-admin-curated-pairings" to="/trade/admin/curated-pairings" className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors" activeClassName="text-foreground font-medium">
                       <Sparkles className="h-4 w-4 shrink-0" />
                       {!collapsed && <span>Curated Pairings</span>}
                     </NavLink>
@@ -569,8 +576,7 @@ export function TradeSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <NavLink
-                      to="/trade/admin/trade-applications"
+                    <NavLink data-tour-id="tour-trade-admin-trade-applications" to="/trade/admin/trade-applications"
                       className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
                       activeClassName="text-foreground font-medium"
                     >
@@ -581,8 +587,7 @@ export function TradeSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <NavLink
-                      to="/trade/admin/client-acquisitions"
+                    <NavLink data-tour-id="tour-trade-admin-client-acquisitions" to="/trade/admin/client-acquisitions"
                       className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
                       activeClassName="text-foreground font-medium"
                     >
@@ -593,8 +598,7 @@ export function TradeSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <NavLink
-                      to="/trade/admin/kpi-ledger"
+                    <NavLink data-tour-id="tour-trade-admin-kpi-ledger" to="/trade/admin/kpi-ledger"
                       className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
                       activeClassName="text-foreground font-medium"
                     >
@@ -605,8 +609,7 @@ export function TradeSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <NavLink
-                      to="/trade/admin/email-deliverability"
+                    <NavLink data-tour-id="tour-trade-admin-email-deliverability" to="/trade/admin/email-deliverability"
                       className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
                       activeClassName="text-foreground font-medium"
                     >
@@ -617,8 +620,7 @@ export function TradeSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <NavLink
-                      to="/trade/admin/compliance/sub-processors"
+                    <NavLink data-tour-id="tour-trade-admin-compliance-sub-processors" to="/trade/admin/compliance/sub-processors"
                       className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
                       activeClassName="text-foreground font-medium"
                     >
@@ -629,8 +631,7 @@ export function TradeSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <NavLink
-                      to="/trade/admin/price-list-audit"
+                    <NavLink data-tour-id="tour-trade-admin-price-list-audit" to="/trade/admin/price-list-audit"
                       className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
                       activeClassName="text-foreground font-medium"
                     >
@@ -641,7 +642,7 @@ export function TradeSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <a
+                    <a data-tour-id="tour-locked-gallery"
                       href="/designers-hero-lock"
                       className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
                     >

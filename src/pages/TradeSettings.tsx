@@ -14,6 +14,7 @@ import { MobileHandoffDialog } from "@/components/trade/MobileHandoffDialog";
 import GoogleIdentityStatusCard from "@/components/trade/GoogleIdentityStatusCard";
 import { Button } from "@/components/ui/button";
 import { resetSidebarOrder } from "@/lib/sidebarOrder";
+import { replayFelixTour } from "@/components/trade/felixTourUtils";
 
 const COUNTRIES = [
   "Singapore", "Australia", "Canada", "China", "France", "Germany", "Hong Kong",
@@ -676,6 +677,9 @@ const TradeSettings = () => {
           <p className="font-body text-xs text-muted-foreground max-w-md leading-relaxed">
             Reset the guided Quick Tour of the Trade portal. Useful for a refresher or to walk a teammate through the workspace.
           </p>
+          <Button variant="outline" size="sm" onClick={replayFelixTour} className="gap-2 font-body text-xs">
+            <Compass className="h-3.5 w-3.5" />Replay Onboarding Tour
+          </Button>
           <button
             type="button"
             onClick={handleResetTour}

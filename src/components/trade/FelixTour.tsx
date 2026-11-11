@@ -17,6 +17,7 @@ import { StudioInitialization } from "./StudioInitialization";
 import { useDesktopTradeTour } from "./useDesktopTradeTour";
 import { fmtPct, resolveTierTokens, hasPendingTourStart, clearTourStartRequest, markTourCompleted, quoteWorkspaceReady, collectionWorkspaceReady } from "./felixTourUtils";
 import { FELIX_STEP_SIDEBAR } from "./felixTourSidebarMap";
+import { tourTargetSelector, revealSidebarTourTarget, scrollSidebarTourTarget } from "./tourSidebarTargets";
 import { orderFelixSteps } from "./felixTourOrder";
 import { chooseTourCardPlacement, collectionTourCardOrigin, collectionTourCardPlacement, tourPanelLandingScrollDelta, type TourRect } from "./felixTourPlacement";
 
@@ -429,7 +430,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
   useEffect(() => {
     if (!open || isPaused) return;
     const onClick = (e: MouseEvent) => {
-      const el = (e.target as HTMLElement | null)?.closest?.(`[data-felix-target="${stepTarget}"]${step.id === "collection" ? ', [data-felix-target="dashboard-showroom"]' : ''}`);
+      const el = (e.target as HTMLElement | null)?.closest?.(`${tourTargetSelector(stepTarget)}${step.id === "collection" ? ', [data-felix-target="dashboard-showroom"]' : ''}`);
       if (el && step.id === "collection") {
         flushSync(() => {
           setCurrentStep(FELIX_STEPS.findIndex(s => s.id === "quotes"));
@@ -463,6 +464,8 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     let didEnter = false;
     let didScroll = false;
     let didPanelLanding = false;
+    let sidebarRevealed = false;
+    let sidebarScrolled: HTMLElement | null = null;
     let preparedAt = 0;
     let missingSince = 0;
     let loadingSince = 0;
@@ -477,7 +480,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     // Wake the stability check when that specific target changes, not whenever
     // unrelated page content mutates.
     const mutationObserver = new MutationObserver(() => {
-      const target = routeReady ? document.querySelector(`[data-felix-target="${stepTarget}"]`) : null;
+      const target = routeReady ? document.querySelector(tourTargetSelector(stepTarget)) : null;
       if (target !== observedTarget) {
         observedTarget = target;
         stepTargetRef.current = target;
@@ -508,6 +511,17 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       }
       lastSample = now;
       wake = false;
+      const sidebarRef = FELIX_STEP_SIDEBAR[current.id];
+      const sidebarId = current.sidebarAnchor ?? (sidebarRef?.where !== "header" ? sidebarRef?.anchor : null);
+      if (routeReady && sidebarId && !sidebarRevealed && !CLIENT_VIEW_PASSTHROUGH_STEPS.has(current.id) && current.id !== "margin-protection" && current.id !== "client-safe-presentations") {
+        revealSidebarTourTarget(`tour-${sidebarId}`);
+        sidebarRevealed = true;
+      }
+      const sidebarTarget = routeReady && sidebarId ? document.querySelector<HTMLElement>(`[data-tour-id="tour-${sidebarId}"]`) : null;
+      if (sidebarRevealed && sidebarTarget && sidebarTarget.offsetParent !== null && sidebarScrolled !== sidebarTarget) {
+        scrollSidebarTourTarget(sidebarTarget);
+        sidebarScrolled = sidebarTarget;
+      }
       if (routeReady && current.prepare && now - preparedAt >= 1000) {
         preparedAt = now;
         current.prepare();
@@ -517,7 +531,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       const collectionReady = collectionWorkspaceReady(current.id, location.pathname,
         document.querySelector("[data-felix-collection-tabs]") !== null);
       const elements = routeReady && collectionReady
-        ? Array.from(document.querySelectorAll(`[data-felix-target="${stepTarget}"]`))
+        ? Array.from(document.querySelectorAll(tourTargetSelector(stepTarget)))
         : [];
       // Discovery also handles a lazy Quotes mount after the route effect ran.
       if (current.id === "quote-generation" && quoteWorkspaceReady(location.pathname, elements.length > 0)) {
@@ -537,16 +551,12 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
       }
       if (targets.length && !didScroll) {
         didScroll = true;
-        targets[0].scrollIntoView({ block: current.id === "quotes" ? "nearest" : "center", behavior: ["collection", "quotes", "margin-protection"].includes(current.id) || document.documentElement.dataset.felixReducedMotion === "true" || window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+        targets[0].closest('[data-sidebar="content"]') ? scrollSidebarTourTarget(targets[0] as HTMLElement) : targets[0].scrollIntoView({ block: current.id === "quotes" ? "nearest" : "center", behavior: ["collection", "quotes", "margin-protection"].includes(current.id) || document.documentElement.dataset.felixReducedMotion === "true" || window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
       }
       const sidebarTargets = routeReady && current.sidebarAnchor
-        ? Array.from(document.querySelectorAll(`[data-tour-sidebar-anchor="${current.sidebarAnchor}"]`))
+        ? Array.from(document.querySelectorAll(`[data-tour-id="tour-${current.sidebarAnchor}"]`))
             .filter((el) => (el as HTMLElement).offsetParent !== null)
         : [];
-      if (sidebarTargets.length) {
-        const first = sidebarTargets[0].getBoundingClientRect();
-        if (first.top < 16 || first.bottom > window.innerHeight - 24) sidebarTargets[0].scrollIntoView({ block: "nearest", behavior: "instant" });
-      }
       const anchorBoxes = sidebarTargets.map((el) => el.getBoundingClientRect());
       const anchor = anchorBoxes.length ? {
         top: Math.min(...anchorBoxes.map((r) => r.top)),
