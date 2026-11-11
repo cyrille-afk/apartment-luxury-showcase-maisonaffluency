@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { User, Lock, Building, Phone, Mail, Save, Camera, Award, TrendingUp, Compass, Sparkles, Smartphone } from "lucide-react";
+import { User, Lock, Building, Phone, Mail, Save, Camera, Award, TrendingUp, Compass, Sparkles, Smartphone, RotateCcw } from "lucide-react";
 import { saveName, sanitizeName, DEFAULT_NAME } from "@/components/trade/conciergeGreeting";
 import { z } from "zod";
 import { useNavigate } from "@/lib/router-compat";
@@ -12,6 +12,8 @@ import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import StudioMemoryCard from "@/components/trade/StudioMemoryCard";
 import { MobileHandoffDialog } from "@/components/trade/MobileHandoffDialog";
 import GoogleIdentityStatusCard from "@/components/trade/GoogleIdentityStatusCard";
+import { Button } from "@/components/ui/button";
+import { resetSidebarOrder } from "@/lib/sidebarOrder";
 
 const COUNTRIES = [
   "Singapore", "Australia", "Canada", "China", "France", "Germany", "Hong Kong",
@@ -275,6 +277,12 @@ const TradeSettings = () => {
       </p>
 
       <GoogleIdentityStatusCard />
+      <div className="mb-6 border-y border-border py-4">
+        <Button variant="ghost" size="sm" className="gap-2 font-body text-xs text-muted-foreground" onClick={() => {
+          try { resetSidebarOrder(user?.id); toast({ title: "Sidebar order reset" }); }
+          catch { toast({ title: "Could not reset sidebar order", description: "Your browser is blocking saved preferences.", variant: "destructive" }); }
+        }}><RotateCcw className="h-3.5 w-3.5" />Reset Sidebar Order</Button>
+      </div>
 
       {/* Trade tier badge */}
       <div className={`mb-8 flex items-center gap-3 px-4 py-3 rounded-lg border ${

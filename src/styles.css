@@ -3,6 +3,7 @@
 @config "../tailwind.legacy.config.ts";
 
 :root {
+  --sidebar-drag-shadow: 0 4px 14px hsl(var(--foreground) / 0.12);
   --collection-control-background: #000000;
   --collection-control-foreground: #ffffff;
   --studio-action-primary: #171717;
@@ -1801,5 +1802,17 @@ html[data-felix-sheet-open] .gallery-details-floating-nav {
 }
 
 /* Desktop homepage: hero copy shares the full-photo frame (whole shot, ceiling to floor). */
+.sidebar-sortable[data-dragging] { z-index: 20; background: hsl(var(--background)); box-shadow: var(--sidebar-drag-shadow); }
+.sidebar-sortable[data-drop-before]::before,
+.sidebar-sortable[data-drop-after]::after { content: ""; position: absolute; left: 0; right: 0; height: 1px; background: hsl(var(--accent)); z-index: 21; }
+.sidebar-sortable[data-drop-before]::before { top: 0; }
+.sidebar-sortable[data-drop-after]::after { bottom: 0; }
+.sidebar-drag-handle { opacity: 0; transition: opacity 180ms ease; }
+.sidebar-drag-heading:hover > .sidebar-drag-handle,
+.sidebar-drag-heading:focus-within > .sidebar-drag-handle,
+.sidebar-drag-handle:focus-visible,
+.sidebar-sortable[data-dragging] > .sidebar-drag-heading > .sidebar-drag-handle { opacity: 1; }
+@media (hover: none) { .sidebar-drag-handle { opacity: 0.55; } }
+@media (prefers-reduced-motion: reduce) { .sidebar-sortable, .sidebar-drag-handle { transition: none !important; } }
 @media (min-width: 768px) {
 }

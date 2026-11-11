@@ -28,6 +28,9 @@ import { Scan } from "lucide-react";
 import { usePendingInquiryCount } from "@/hooks/usePendingInquiryCount";
 import { readLastVisitedFolder } from "@/lib/lastVisitedFolder";
 import { resolveTearsheetActiveFolder } from "@/lib/tearsheetActiveFolder";
+import { SortableSidebarList } from "./SortableSidebarList";
+import { useSidebarOrder } from "@/hooks/useSidebarOrder";
+import { orderedSidebarItems } from "@/lib/sidebarOrder";
 
 
 type NavItem = { title: string; url: string; icon: React.ElementType; end?: boolean };
@@ -120,6 +123,14 @@ export function TradeSidebar() {
   const navTopItems: NavItem[] = TRADE_SANDBOX_ONLY
     ? [{ title: "Visualiser Sandbox", url: "/trade/visualiser", icon: Scan }]
     : visibleTopItems;
+  const { order: sidebarOrder, update: updateSidebarOrder } = useSidebarOrder(user?.id);
+  const toolsUrls = ["/trade/concierge", "/trade/extension-sync", "/trade/ai-layout", "/trade/tools"];
+  const sections = orderedSidebarItems([
+    { id: "core", label: "Core Navigation", items: navTopItems.filter(item => !toolsUrls.includes(item.url) && item.url !== "/trade/quotes") },
+    { id: "tools", label: "AI & Tools", items: navTopItems.filter(item => toolsUrls.includes(item.url)) },
+    { id: "quotes", label: "Quotes & Procurement", items: navTopItems.filter(item => item.url === "/trade/quotes") },
+    ...(!TRADE_SANDBOX_ONLY ? [{ id: "projects", label: "Projects & Interventions", items: [] as NavItem[] }] : []),
+  ].filter(section => section.id === "projects" || section.items.length > 0), sidebarOrder.sections);
   const navProjectItems: NavItem[] = TRADE_SANDBOX_ONLY ? [] : projectItems;
   const showAdminNav = isAdmin && !TRADE_SANDBOX_ONLY;
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -205,10 +216,15 @@ export function TradeSidebar() {
           <SidebarPwaBadge collapsed={collapsed} />
         </div>
 
+        <SortableSidebarList list="sections" items={sections} disabled={collapsed || TRADE_SANDBOX_ONLY} onReorder={sections => updateSidebarOrder({ sections })}>
+          {(section, sectionHandle) => section.id !== "projects" ? (
         <SidebarGroup>
+          <SidebarGroupLabel className="sidebar-drag-heading flex font-body text-[10px] uppercase text-muted-foreground">
+            {!collapsed && <span className="min-w-0 flex-1">{section.label}</span>}{sectionHandle}
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="gap-1">
-              {navTopItems.map((item) => (
+              {section.items.map((item) => (
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild className="h-auto">
                     <NavLink
@@ -281,10 +297,10 @@ export function TradeSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
+          ) : (
         <SidebarGroup data-felix-target="nav-projects">
-          <SidebarGroupLabel data-tour-sidebar-anchor="projects" className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-            {!collapsed && "PROJECTS & INTERVENTIONS"}
+          <SidebarGroupLabel data-tour-sidebar-anchor="projects" className="sidebar-drag-heading flex font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+            {!collapsed && <span className="min-w-0 flex-1">PROJECTS &amp; INTERVENTIONS</span>}{sectionHandle}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="gap-1">
@@ -355,28 +371,33 @@ export function TradeSidebar() {
                          aria-label="Active project workspaces"
                          className="ml-8 mr-2 mt-0.5 mb-2 space-y-0.5 border-l border-border pl-2"
                       >
-                         {activeProjects.map((project) => {
+                         <SortableSidebarList list="projects" tag="li" items={orderedSidebarItems(activeProjects, sidebarOrder.projects).map(project => ({ ...project, label: project.name }))} onReorder={projects => updateSidebarOrder({ projects })}>
+                         {(project, projectHandle) => {
                            const expanded = expandedProjects.includes(project.id);
-                           const projectBoards = boards.filter((board) => board.project_id === project.id);
+                           const projectBoards = orderedSidebarItems(boards.filter((board) => board.project_id === project.id), sidebarOrder.folders[project.id] ?? []);
                            return (
-                             <li key={project.id}>
-                               <div data-active-project={project.id === currentProject?.id ? "true" : undefined} className={`flex min-w-0 items-center ${project.id === currentProject?.id ? "border-l border-accent bg-accent/10 text-accent" : ""}`}>
+                             <>
+                               <div data-active-project={project.id === currentProject?.id ? "true" : undefined} className={`sidebar-drag-heading flex min-w-0 items-center ${project.id === currentProject?.id ? "border-l border-accent bg-accent/10 text-accent" : ""}`}>
                                  <Button type="button" variant="ghost" size="icon" className="h-7 w-6 shrink-0" aria-label={`${expanded ? "Collapse" : "Expand"} ${project.name}`} aria-expanded={expanded} onClick={() => setExpandedProjects((ids) => expanded ? ids.filter((id) => id !== project.id) : [...ids, project.id])}>
                                    {expanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
                                  </Button>
-                                 <NavLink to={projectDefaultUrl(project.id, boards)} onClick={() => { pushRecentProject(project.id); setExpandedProjects((ids) => ids.includes(project.id) ? ids : [...ids, project.id]); }} className={`block min-w-0 truncate py-1.5 font-body text-[11px] transition-colors hover:text-foreground ${project.id === currentProject?.id ? "font-medium text-accent" : "text-muted-foreground"}`} activeClassName="text-foreground font-medium" title={project.name}>{project.name}</NavLink>
+                                 <NavLink to={projectDefaultUrl(project.id, boards)} onClick={() => { pushRecentProject(project.id); setExpandedProjects((ids) => ids.includes(project.id) ? ids : [...ids, project.id]); }} className={`block min-w-0 flex-1 truncate py-1.5 font-body text-[11px] transition-colors hover:text-foreground ${project.id === currentProject?.id ? "font-medium text-accent" : "text-muted-foreground"}`} activeClassName="text-foreground font-medium" title={project.name}>{project.name}</NavLink>
+                                 {projectHandle}
                                </div>
                                {expanded && (
                                  <ul className="ml-4 border-l border-border/70 pl-3 font-body text-[10px] text-muted-foreground">
                                    <li><NavLink to={`/trade/projects/${project.id}?tab=boards`} className="flex items-center gap-2 py-1.5 hover:text-foreground"><FolderOpen className="h-3 w-3 shrink-0" /> Folders & Drafts</NavLink></li>
-                                   {projectBoards.map((board) => <li key={board.id} className="ml-2 border-l border-border/60 pl-3"><NavLink to={`/trade/boards/${board.id}?project=${project.id}`} data-active-folder={board.id === activeFolderId ? "true" : undefined} className={`block truncate py-1.5 hover:text-foreground ${board.id === activeFolderId ? "text-foreground font-medium" : ""}`} activeClassName="text-foreground font-medium" title={board.title}>{board.title}</NavLink></li>)}
+                                   <SortableSidebarList list={`folders:${project.id}`} tag="li" items={projectBoards.map(board => ({ ...board, label: board.title }))} onReorder={folderIds => updateSidebarOrder({ folders: { ...sidebarOrder.folders, [project.id]: folderIds } })}>
+                                     {(board, folderHandle) => <div className="sidebar-drag-heading ml-2 flex min-w-0 items-center border-l border-border/60 pl-3"><NavLink to={`/trade/boards/${board.id}?project=${project.id}`} data-active-folder={board.id === activeFolderId ? "true" : undefined} className={`block min-w-0 flex-1 truncate py-1.5 hover:text-foreground ${board.id === activeFolderId ? "text-foreground font-medium" : ""}`} activeClassName="text-foreground font-medium" title={board.title}>{board.title}</NavLink>{folderHandle}</div>}
+                                   </SortableSidebarList>
                                    <li><NavLink to={`/trade/projects/${project.id}?tab=tearsheets`} className="block py-1.5 hover:text-foreground">Tearsheets</NavLink></li>
                                    <li><NavLink to={`/trade/projects/${project.id}/studio`} className="block py-1.5 hover:text-foreground">Project Studio</NavLink></li>
                                  </ul>
                                )}
-                             </li>
+                             </>
                            );
-                         })}
+                         }}
+                         </SortableSidebarList>
                       </ul>
                     )}
                   </SidebarMenuItem>
@@ -385,6 +406,8 @@ export function TradeSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+          )}
+        </SortableSidebarList>
 
 
         {showAdminNav && (

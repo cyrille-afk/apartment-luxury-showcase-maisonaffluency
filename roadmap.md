@@ -1,5 +1,8 @@
 # Roadmap
 
+## Customizable Trade sidebar
+- [ ] Add independent draggable sections, projects and nested folders, subtle handles/drop indicators, user-scoped local persistence and Settings reset; verify drag, reload and navigation.
+
 ## Quote audit timeline
 - [x] Transactional actor/time records for pricing, change requests and new editable revisions; shared admin-only original/revision history, UTC timestamps and quote links. Seven regressions pass; disposable signed-in UI flow verified save/revise/reload on desktop and phone, rollback/no duplicate retries, denied browser writes and anonymous access. Temporary quotes removed; no emails sent and build OK.
 
