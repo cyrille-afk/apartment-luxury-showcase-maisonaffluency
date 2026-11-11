@@ -20,6 +20,8 @@ import { effectiveProjectMultiplier, tradePriceCents, clientPriceCents, clientUn
 import { StudioBrand } from "@/components/trade/StudioBrand";
 import { StudioSidePanel } from "@/components/trade/StudioSidePanel";
 import { StudioFocusOverlay } from "@/components/trade/StudioFocusOverlay";
+import { StudioPieceMovePicker } from "@/components/trade/StudioPieceMovePicker";
+import type { StudioFolderPlacement } from "@/lib/studioPairingFolders";
 
 type StudioItem = {
   id: string;
@@ -39,6 +41,7 @@ type StudioItem = {
   source_pick_id: string | null;
   quantity: number;
   selected_finish: string | null;
+  placements: StudioFolderPlacement[];
 };
 
 function leadLabel(item: StudioItem) {
@@ -96,10 +99,11 @@ export default function TradeProjectStudio() {
 
       const [q, b] = await Promise.all([
         sb.from("trade_quotes").select("id").eq("project_id", id),
-        sb.from("client_boards").select("id").eq("project_id", id),
+        sb.from("client_boards").select("id, title").eq("project_id", id),
       ]);
       const quoteIds = ((q.data as any[]) || []).map((r) => r.id);
       const boardIds = ((b.data as any[]) || []).map((r) => r.id);
+      const folderTitles = new Map<string, string>(((b.data as any[]) || []).map(row => [row.id, row.title]));
 
       const [qItems, bItems] = await Promise.all([
         quoteIds.length
@@ -111,7 +115,7 @@ export default function TradeProjectStudio() {
         boardIds.length
           ? sb
               .from("client_board_items")
-              .select(`id, product_id, variant_label, wood_label, fabric_label, trade_products(${productFields})`)
+              .select(`id, board_id, product_id, variant_label, wood_label, fabric_label, procurement_quote_id, source_quote_item_id, trade_products(${productFields})`)
               .in("board_id", boardIds)
           : Promise.resolve({ data: [] }),
       ]);
@@ -122,9 +126,11 @@ export default function TradeProjectStudio() {
         if (!p) return;
         const key = p.id || row.product_id;
         const selectedFinish = [row.variant_label, row.wood_label, row.fabric_label].filter(Boolean).join(" / ") || null;
+        const placement: StudioFolderPlacement | null = row.board_id ? { itemId: row.id, folderId: row.board_id, folderTitle: folderTitles.get(row.board_id) || "Project sub-folder", finish: selectedFinish, locked: Boolean(row.procurement_quote_id || row.source_quote_item_id) } : null;
         const existing = map.get(key);
         if (existing) {
           existing.quantity += quantity;
+          if (placement) existing.placements.push(placement);
           // Different saved configurations must not masquerade as one selected finish.
           if (existing.selected_finish !== selectedFinish) existing.selected_finish = null;
           return;
@@ -147,6 +153,7 @@ export default function TradeProjectStudio() {
           source_pick_id: p.source_pick_id ?? null,
           quantity,
           selected_finish: selectedFinish,
+          placements: placement ? [placement] : [],
         });
       };
 
@@ -280,6 +287,7 @@ export default function TradeProjectStudio() {
                   setIsSpecPanelOpen(false);
                 };
                 return (
+                  <div key={item.product_id} className="min-w-0">
                   <figure
                     key={item.product_id}
                     data-curatorial-source={item.product_id}
@@ -324,6 +332,11 @@ export default function TradeProjectStudio() {
                       </span>
                     </figcaption>
                   </figure>
+                  <div className="mt-1 text-center">
+                    {item.placements.length > 0 && <p className="font-body text-[9px] leading-relaxed text-muted-foreground">{[...new Set(item.placements.map(placement => placement.folderTitle))].join(" · ")}</p>}
+                    {!isClientMode && <StudioPieceMovePicker projectId={project.id} productId={item.product_id} productName={item.name} placements={item.placements} onMoved={() => setItemsVersion(version => version + 1)} />}
+                  </div>
+                  </div>
                 );
               })}
             </div>
@@ -483,6 +496,7 @@ export default function TradeProjectStudio() {
                         </span>
                       </div>
 
+                      {item.placements.length > 0 && <div className="flex flex-wrap items-center justify-between gap-2 pb-3"><p className="min-w-0 flex-1 font-body text-[9px] leading-relaxed text-muted-foreground">{[...new Set(item.placements.map(placement => placement.folderTitle))].join(" · ")}</p>{!isClientMode && <StudioPieceMovePicker projectId={project.id} productId={item.product_id} productName={item.name} placements={item.placements} onMoved={() => setItemsVersion(version => version + 1)} />}</div>}
                       {expanded && (
                         <div className="pb-9">
                           <dl className="space-y-3">

@@ -1,6 +1,24 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export type PairingFolder = { id: string; title: string };
+export type StudioFolderPlacement = { itemId: string; folderId: string; folderTitle: string; finish: string | null; locked: boolean };
+
+export async function moveStudioPiece(projectId: string, itemId: string, sourceFolderId: string, destinationFolderId: string) {
+  if (!destinationFolderId || destinationFolderId === sourceFolderId) throw new Error("Choose a different project sub-folder.");
+  const { data: folders, error: folderError } = await supabase.from("client_boards").select("id, title")
+    .eq("project_id", projectId).in("id", [sourceFolderId, destinationFolderId]);
+  const destination = folders?.find(folder => folder.id === destinationFolderId);
+  if (folderError || !destination || !folders?.some(folder => folder.id === sourceFolderId)) throw new Error("Both sub-folders must belong to the active project.");
+  const { data: item, error: itemError } = await supabase.from("client_board_items")
+    .select("id, procurement_quote_id, source_quote_item_id").eq("id", itemId).eq("board_id", sourceFolderId).single();
+  if (itemError || !item) throw new Error("This saved piece could not be opened. Please refresh and try again.");
+  if (item.procurement_quote_id || item.source_quote_item_id) throw new Error("This piece is linked to a quote and cannot be moved here.");
+  const { data: moved, error } = await supabase.from("client_board_items").update({ board_id: destinationFolderId, subfolder: null })
+    .eq("id", item.id).eq("board_id", sourceFolderId).is("procurement_quote_id", null).is("source_quote_item_id", null)
+    .select("id, board_id").single();
+  if (error || !moved || moved.board_id !== destinationFolderId) throw new Error("The piece could not be moved. Its original folder has been kept.");
+  return destination;
+}
 
 export async function listPairingFolders(projectId: string, productId: string) {
   const folders: PairingFolder[] = [];

@@ -1,5 +1,9 @@
 # Roadmap
 
+## Move saved Studio pieces
+- [x] Add Move on canvas and Specsheet with explicit saved-row/source choice when a piece belongs to multiple folders, destination selection and named confirmation; update the original row without changing configuration or quote-linked pieces.
+- [x] Eleven regressions pass. Signed-in temporary piece moves source → target → source on desktop/phone; original ID, finish and notes retained, source empties, canvas/Specsheet labels refresh, target matrix and reload readback verified. Temporary records removed; no customer selections changed, page errors absent and build OK.
+
 ## Curation destination folder choice
 - [x] Replace automatic + ADD with an active-project sub-folder picker and inline creation; save only after explicit destination choice, retain created folder on retry and confirm the exact folder name.
 - [x] Twenty-four regressions pass. Signed-in desktop/phone show all three real project folders; opening/cancelling makes no writes and keeps Visual Studio open. Create & save verified named toast, refreshed canvas/specsheet and exact-folder matrix readback. Temporary folder/item removed, no page errors and build OK.
