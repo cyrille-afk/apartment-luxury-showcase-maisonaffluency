@@ -98,6 +98,7 @@ type PersistedState = {
   tone: Tone;
   bulkDesigner: string;
   skipExisting: boolean;
+  bulkListOpen?: boolean;
 };
 
 function loadPersisted(): Partial<PersistedState> {
@@ -139,10 +140,11 @@ export default function TradeDescriptionWriter() {
     try {
       const payload: PersistedState = {
         mode, source, tone, bulkDesigner, skipExisting,
+        bulkListOpen: bulkRows.length > 0,
       };
       sessionStorage.setItem(PERSIST_KEY, JSON.stringify(payload));
     } catch { /* quota — ignore */ }
-  }, [mode, source, tone, bulkDesigner, skipExisting]);
+  }, [mode, source, tone, bulkDesigner, skipExisting, bulkRows.length]);
 
   // Warn if the user tries to close/reload while a bulk run is active
   useEffect(() => {
@@ -279,6 +281,29 @@ export default function TradeDescriptionWriter() {
     setBulkRows(rows);
     setBulkProgress({ done: 0, total: rows.length });
   };
+
+  // After a refresh, rebuild the progress list from what is already saved in
+  // the catalogue: rows with saved copy show "Saved", the rest stay pending.
+  const restoreListRef = useRef(!!persisted.bulkListOpen);
+  useEffect(() => {
+    if (!restoreListRef.current || bulkRunning || bulkRows.length > 0 || mode !== "bulk") return;
+    const group = designerGroups.find((g) => g.name === bulkDesigner);
+    if (!group || items.length === 0) return;
+    restoreListRef.current = false;
+    const rows: BulkRow[] = group.items.map((p) => {
+      const hasLong = !!(p.description && String(p.description).trim().length > 0);
+      const hasMeta = !!(p.meta_description && String(p.meta_description).trim().length > 0);
+      const hasExisting = isSeoBundle ? (hasLong && hasMeta) : hasLong;
+      return {
+        id: p.id,
+        label: source === "curator_picks" ? p.title : p.product_name,
+        hasExisting, hasLong, hasMeta,
+        status: (hasExisting ? "saved" : "pending") as RowStatus,
+      };
+    });
+    setBulkRows(rows);
+    setBulkProgress({ done: rows.filter((r) => r.hasExisting).length, total: rows.length });
+  }, [designerGroups, items.length, bulkDesigner, bulkRunning, bulkRows.length, mode, isSeoBundle, source]);
 
   const runBulk = async () => {
     if (bulkRows.length === 0) return;
