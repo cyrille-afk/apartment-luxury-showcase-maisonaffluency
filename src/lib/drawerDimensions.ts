@@ -59,3 +59,27 @@ export function dimensionsFromVariantLabel(
   }
   return formatDrawerDimensions(null, fallback);
 }
+
+/** Finish text for display: variant label minus size segments and repeats (size shows on its own line). */
+export function finishFromVariantLabel(variantLabel?: string | null): string | null {
+  const seen = new Set<string>();
+  const parts = (variantLabel || "").split(" · ").map((s) => s.trim()).filter((s) => {
+    if (!s || formatDrawerDimensions(s)) return false;
+    const k = s.toLowerCase();
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+  return parts.length ? parts.join(" · ") : null;
+}
+
+/** Joins label segments once each (case/space-insensitive) so saved labels never repeat a size. */
+export function joinUniqueLabelSegments(...labels: Array<string | null | undefined>): string {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const l of labels) for (const s of (l || "").split(" · ")) {
+    const t = s.trim(); const k = t.toLowerCase().replace(/\s+/g, "");
+    if (t && !seen.has(k)) { seen.add(k); out.push(t); }
+  }
+  return out.join(" · ");
+}

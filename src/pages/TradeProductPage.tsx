@@ -80,7 +80,7 @@ import { isProductUpholstered } from "@/lib/upholstery";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { getBasePlaceholder, getTopPlaceholder, formatVariantAxisLabel, isDimensionAxisLabel, resolveFinishSectionLabels } from "@/lib/variantPlaceholders";
 import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine, withImperialStacked } from "@/lib/formatDimensions";
-import { formatDrawerDimensions } from "@/lib/drawerDimensions";
+import { formatDrawerDimensions, joinUniqueLabelSegments } from "@/lib/drawerDimensions";
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import { makeSwatchAxisFilter } from "@/lib/finishDuplication";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex, findVariantForImageIndex } from "@/lib/variantImageMap";
@@ -1127,8 +1127,8 @@ const TradeProductPage: React.FC<{ embeddedProduct?: { id?: string; designerSlug
       );
       // Keep the exact priced catalogue label alongside selected finish names;
       // saved retail lookup must not lose a size/finish label shown by the renderer.
-      if (selectedDrawerPrices.variantLabel && !variantLabel?.includes(selectedDrawerPrices.variantLabel)) {
-        variantLabel = [variantLabel, selectedDrawerPrices.variantLabel].filter(Boolean).join(" · ");
+      if (selectedDrawerPrices.variantLabel) {
+        variantLabel = joinUniqueLabelSegments(variantLabel, selectedDrawerPrices.variantLabel);
       }
 
 

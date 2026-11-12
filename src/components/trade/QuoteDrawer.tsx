@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
 import { findQuoteFinishSwatches } from "@/lib/quoteFinishSwatches";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
-import { dimensionsFromVariantLabel } from "@/lib/drawerDimensions";
+import { dimensionsFromVariantLabel, finishFromVariantLabel } from "@/lib/drawerDimensions";
 import PresentationModeToggle from "./PresentationModeToggle";
 import QuoteWorkspaceInvite from "./QuoteWorkspaceInvite";
 import DrawerPricing from "./DrawerPricing";
@@ -440,9 +440,9 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0, activePriceS
                   <p className="font-display text-sm text-foreground leading-tight break-words">
                     {item.product?.product_name}
                   </p>
-                  {item.variant_label && (
+                  {finishFromVariantLabel(item.variant_label) && (
                     <p className="font-body text-[10px] text-foreground/80 mt-0.5 break-words">
-                      <span className="text-muted-foreground">Finish:</span> {item.variant_label}
+                      <span className="text-muted-foreground">Finish:</span> {finishFromVariantLabel(item.variant_label)}
                     </p>
                   )}
                   {(() => {
