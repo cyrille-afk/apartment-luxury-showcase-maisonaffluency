@@ -102,9 +102,13 @@ export default function ExpandableSpec({
   const disabledSet = new Set(disabledIndices ?? []);
   let lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
   // A stacked inch line belongs to its preceding metric option, not a new size.
+  // The metric check must accept mm and m too ("Ø350 x H 640mm"), not just
+  // cm — otherwise the inch line stays separate and DimensionText converts
+  // the metric line again, rendering the inches twice.
+  const METRIC_UNIT_RE = /(?:\b|\d)(?:cm|mm|m)\b/i;
   lines = lines.reduce<string[]>((options, line) => {
     const previous = options[options.length - 1];
-    if (hasDimensionMeasurement(line) && /\bin\b/i.test(line) && !/\bcm\b/i.test(line) && previous && hasDimensionMeasurement(previous) && /\bcm\b/i.test(previous) && !previous.includes(" | ")) {
+    if (hasDimensionMeasurement(line) && /\bin\b/i.test(line) && !METRIC_UNIT_RE.test(line) && previous && hasDimensionMeasurement(previous) && METRIC_UNIT_RE.test(previous) && !previous.includes(" | ")) {
       options[options.length - 1] = `${previous} | ${line}`;
     } else options.push(line);
     return options;
