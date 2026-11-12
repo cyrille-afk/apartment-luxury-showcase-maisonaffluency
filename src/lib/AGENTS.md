@@ -28,3 +28,4 @@
 - Custom paths are never blocked, only warned: checkPathClearance tests the spline against the same 1.4m transformed furniture boxes presets use plus architectural anchor boxes (0.2m margin), so warnings and preset validation agree.
 - Generate Room Layout uses the deterministic src/lib/roomLayoutMatrix.ts (sofa centre, table 0.6m clearance in front, accent in emptiest perimeter quadrant, no overlap, strict budget) fed by fetchLiveCatalogue — same input gives the same scene, prices stay live.
 - Trade sidebar order syncs via the owner-only trade_sidebar_preferences row: account wins on load, an empty account adopts the browser copy once, localStorage is the cache/offline fallback — keeps one layout across browsers.
+- Spec Sheet Generator cards (screen and PDF) map dimensions, client price, finishes and description through src/lib/specSheetCard.ts; price never falls back to net trade — keeps cards uniform and wholesale prices out of client decks.

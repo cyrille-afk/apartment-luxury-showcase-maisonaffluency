@@ -1,5 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
+import { cleanSpecDescription, specClientPriceCents, specDimensions, specFinishes, SPEC_DIMENSIONS_PLACEHOLDER } from "@/lib/specSheetCard";
+import { materialSwatchTone } from "@/lib/materialSwatch";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -28,6 +30,7 @@ interface SpecItem {
   category: string;
   dimensions: string;
   finish: string;
+  finishes: string[];
   description: string;
   image_url: string;
   quantity: number;
@@ -171,7 +174,7 @@ export default function TradeSpecSheetGenerator() {
       const productIds = [...new Set((qItems as any[]).map((i) => i.product_id))];
       const { data: products } = await supabase
         .from("trade_products")
-        .select("id, product_name, brand_name, category, currency, dimensions, description, materials, image_url, gallery_images, available_finishes, rrp_price_cents")
+        .select("id, product_name, brand_name, category, currency, dimensions, width_mm, depth_mm, height_mm, size_variants, default_variant_label, description, materials_description, meta_description, materials, image_url, gallery_images, available_finishes, rrp_price_cents")
         .in("id", productIds);
 
       const projectIds = [...new Set(quotes.map((q: any) => q.project_id).filter(Boolean))] as string[];
@@ -196,12 +199,13 @@ export default function TradeSpecSheetGenerator() {
           product_name: p.product_name || "Unknown item",
           brand_name: p.brand_name || "",
           category: p.category || "",
-          dimensions: p.dimensions || "",
-          finish: (p.available_finishes?.[0] as string) || p.materials || "",
-          description: p.description || "",
+          dimensions: specDimensions(p),
+          finishes: specFinishes(p),
+          finish: specFinishes(p).join(" / "),
+          description: cleanSpecDescription(p),
           image_url: p.image_url || p.gallery_images?.[0] || "",
           quantity: item.quantity || 1,
-          client_price_cents: (p.rrp_price_cents || item.unit_price_cents || null) as number | null,
+          client_price_cents: specClientPriceCents(p, item.unit_price_cents),
           currency: p.currency || "EUR",
           project_name: q?.project_id ? projectMap[q.project_id] || null : null,
           client_name: q?.client_name || null,
@@ -409,7 +413,7 @@ export default function TradeSpecSheetGenerator() {
                     onClick={() => toggleItem(i.item_id)}
                     aria-pressed={isOn}
                     className={cn(
-                      "group relative overflow-hidden rounded-lg border bg-card text-left transition-all duration-200",
+                      "group relative flex h-full flex-col overflow-hidden rounded-lg border bg-card text-left transition-all duration-200",
                       isOn ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-foreground/30",
                     )}
                   >
@@ -421,7 +425,7 @@ export default function TradeSpecSheetGenerator() {
                     >
                       <Check className="h-3.5 w-3.5" />
                     </span>
-                    <div className="aspect-[4/3] w-full overflow-hidden bg-muted">
+                    <div className="aspect-[4/3] w-full shrink-0 overflow-hidden bg-muted">
                       {i.image_url ? (
                         <img
                           src={i.image_url}
@@ -435,24 +439,25 @@ export default function TradeSpecSheetGenerator() {
                         </div>
                       )}
                     </div>
-                    <div className="space-y-1.5 p-3">
-                      {settings.fields.brand && i.brand_name && (
-                        <p className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{i.brand_name}</p>
+                    <div className="flex flex-1 flex-col p-3">
+                      {settings.fields.brand && <p className="h-4 truncate font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{i.brand_name || "\u00a0"}</p>}
+                      <p className="mt-1.5 h-5 truncate font-display text-sm text-foreground">{i.product_name}</p>
+                      {settings.fields.category && <p className="mt-1 h-4 truncate font-body text-xs text-muted-foreground">{i.category || "\u00a0"}</p>}
+                      {settings.fields.dimensions && (
+                        <p className={cn("mt-1.5 h-4 truncate font-body text-xs", i.dimensions === SPEC_DIMENSIONS_PLACEHOLDER ? "italic text-muted-foreground/60" : "text-muted-foreground")}>{i.dimensions}</p>
                       )}
-                      <p className="font-display text-sm text-foreground">{i.product_name}</p>
-                      {settings.fields.category && i.category && (
-                        <p className="font-body text-xs text-muted-foreground">{i.category}</p>
+                      {settings.fields.finish && (
+                        <div className="mt-1.5 flex h-4 min-w-0 items-center gap-1.5">
+                          {i.finishes.slice(0, 3).map((f) => (
+                            <span key={f} className="h-3 w-3 shrink-0 rounded-full border border-border" style={{ background: materialSwatchTone(f).css }} aria-hidden />
+                          ))}
+                          <span className={cn("truncate font-body text-xs", i.finish ? "text-muted-foreground" : "italic text-muted-foreground/60")}>{i.finish || "Finish on request"}</span>
+                        </div>
                       )}
-                      {settings.fields.dimensions && i.dimensions && (
-                        <p className="font-body text-xs text-muted-foreground">{i.dimensions}</p>
+                      {settings.fields.description && (
+                        <p className="mt-1.5 line-clamp-2 h-8 font-body text-xs leading-4 text-muted-foreground">{i.description}</p>
                       )}
-                      {settings.fields.finish && i.finish && (
-                        <p className="font-body text-xs text-muted-foreground">Finish: {i.finish}</p>
-                      )}
-                      {settings.fields.description && i.description && (
-                        <p className="line-clamp-3 font-body text-xs leading-relaxed text-muted-foreground">{i.description}</p>
-                      )}
-                      <div className="flex items-center justify-between pt-1">
+                      <div className="mt-auto flex items-center justify-between pt-3">
                         {settings.fields.quantity ? (
                           <span className="font-body text-[11px] uppercase tracking-widest text-muted-foreground">Qty {i.quantity}</span>
                         ) : <span />}
