@@ -425,7 +425,6 @@ export function TradeSidebar() {
 
         {showAdminNav && (
           <SidebarGroup>
-            {!collapsed && <NavLink to="/trade/admin/tour-analytics" data-tour-id="tour-admin-tour-analytics" className="flex items-center gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground" activeClassName="text-foreground font-medium"><BarChart3 className="h-4 w-4 shrink-0"/>Tour Activity</NavLink>}
             <SidebarGroupLabel className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
               {!collapsed && "Admin"}
             </SidebarGroupLabel>
@@ -468,6 +467,14 @@ export function TradeSidebar() {
                       {collapsed && totalBadge > 0 && (
                         <span className="absolute top-0 right-0 w-2 h-2 bg-muted-foreground" />
                       )}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink data-tour-id="tour-admin-tour-analytics" to="/trade/admin/tour-analytics" className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors" activeClassName="text-foreground font-medium">
+                      <BarChart3 className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span>Tour Activity</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
