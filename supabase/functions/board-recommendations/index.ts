@@ -1,6 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
 import { rankCatalogCandidates, selectCandidateShortlist, summarizeBoardIntent } from './relevance.ts'
+import { groupCatalogueProducts, productIdentity } from './productIdentity.ts'
 import { deriveHardConstraints, applyHardConstraints, type HardConstraints } from '../_shared/hardConstraints.ts'
 import { logAiUsage } from '../_shared/aiUsage.ts'
 import { modelFor, tokenBudget } from '../_shared/aiModels.ts'
@@ -93,7 +94,7 @@ Deno.serve(async (req) => {
     // Resolve board items from both tables
     const { data: tradeProducts } = await supabase
       .from('trade_products')
-      .select('id, product_name, brand_name, category, subcategory, materials, dimensions')
+      .select('id, product_name, brand_name, category, subcategory, materials, dimensions, source_pick_id')
       .in('id', boardProductIds)
 
     const foundTradeIds = new Set((tradeProducts || []).map((p: any) => p.id))
@@ -169,7 +170,7 @@ Deno.serve(async (req) => {
 
     let tradeQuery = supabase
       .from('trade_products')
-      .select('id, product_name, brand_name, category, subcategory, materials, dimensions')
+      .select('id, product_name, brand_name, category, subcategory, materials, dimensions, source_pick_id')
       .eq('is_active', true)
       .not('image_url', 'is', null)
       .limit(300)
@@ -180,7 +181,11 @@ Deno.serve(async (req) => {
     })
     const { data: tradeCatalog } = await tradeQuery
 
-    const availableCatalog = [
+    const boardIdentities = new Set([
+      ...(tradeProducts || []).map((p: any) => productIdentity({ ...p, source: 'trade' })),
+      ...curatorProducts.map((p: any) => productIdentity({ ...p, source: 'curator' })),
+    ])
+    const availableCatalog = groupCatalogueProducts([
       ...(catalog || [])
         .filter((p: any) => !boardTitles.has(p.title?.toLowerCase()) && !boardProductIds.includes(p.id))
         .map((p: any) => ({
@@ -190,10 +195,10 @@ Deno.serve(async (req) => {
       ...(tradeCatalog || [])
         .filter((p: any) => !boardTitles.has(p.product_name?.toLowerCase()) && !boardProductIds.includes(p.id))
         .map((p: any) => ({
-          id: p.id, title: p.product_name, category: p.category || '', materials: p.materials || '',
+          id: p.id, source_pick_id: p.source_pick_id, title: p.product_name, category: p.category || '', materials: p.materials || '',
           subcategory: p.subcategory || '', dimensions: p.dimensions || '', tags: [] as string[], brand: p.brand_name || '', source: 'trade' as const,
         })),
-    ]
+    ], boardIdentities)
 
     if (availableCatalog.length === 0) {
       return new Response(JSON.stringify({
