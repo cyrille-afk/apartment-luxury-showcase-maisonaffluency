@@ -5,11 +5,12 @@ import monogram from "@/assets/studio-monogram-a.png.asset.json";
  * DotCircleLoader — app-wide loading indicator. Renders the studio "A"
  * monogram with a slow, continuous spin (name kept so every caller updates).
  *
- * Sizes: sm (48px), md (96px — default), lg (144px), xl (192px)
+ * One fixed footprint for every loading logo; legacy size props are accepted
+ * for compatibility but no longer change the rendered size.
  */
 type Size = "sm" | "md" | "lg" | "xl";
 
-const SIZE_PX: Record<Size, number> = { sm: 48, md: 96, lg: 144, xl: 192 };
+const LOGO_PX = 96;
 
 interface DotCircleLoaderProps {
   size?: Size;
@@ -17,14 +18,14 @@ interface DotCircleLoaderProps {
   label?: string;
 }
 
-export function DotCircleLoader({ size = "md", className, label = "Loading" }: DotCircleLoaderProps) {
-  const px = SIZE_PX[size];
+export function DotCircleLoader({ className, label = "Loading" }: DotCircleLoaderProps) {
+  const px = LOGO_PX;
   return (
     <div
       role="status"
       aria-label={label}
       className={cn("inline-flex items-center justify-center", className)}
-      style={{ width: px, height: px }}
+      style={{ width: px, height: px, minWidth: px, minHeight: px, maxWidth: px, maxHeight: px, flexShrink: 0 }}
     >
       <img
         src={monogram.url}
