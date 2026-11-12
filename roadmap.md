@@ -1,5 +1,8 @@
 # Roadmap
 
+## Remove duplicate specification cards
+- [x] Per-card X removes rows from the sheet, export and totals; browser/account/project-scoped removals survive refresh and Restore removed brings them back without quote writes. Two tests pass; signed-in duplicate removal, refresh and restore verified with no page errors. Build OK.
+
 ## Specification catalogue replacement
 - [x] Add explicit account-saved replacement of incomplete sheet records with complete same-product catalogue data, preserving original quotes and quantities.
 - [x] Fourteen tests pass; signed-in incomplete Frenchmen record replacement shows Man of Parts, Tobacco Oak / COM Fabric and €4,791 after reload; original restored after verification, phone dialog fits and no page errors. Build OK.

@@ -1,6 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { replacementCandidates, type ReplacementProduct } from "@/lib/specSheetReplacement";
+import { retainedSpecItems, specRemovalKey } from "@/lib/specSheetRemoval";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { cleanSpecDescription, specClientPriceCents, specDimensions, specFinishes, SPEC_DIMENSIONS_PLACEHOLDER } from "@/lib/specSheetCard";
 import { materialSwatchTone } from "@/lib/materialSwatch";
@@ -151,6 +152,20 @@ export default function TradeSpecSheetGenerator() {
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [search, setSearch] = useState("");
   const [initialised, setInitialised] = useState(false);
+  const [removals, setRemovals] = useState<{ key: string; ids: string[] }>({ key: "", ids: [] });
+  const removalKey = user ? specRemovalKey(user.id, projectFilter) : "";
+  const removedIds = removals.key === removalKey ? removals.ids : [];
+  useEffect(() => {
+    if (!removalKey) return;
+    try {
+      const stored: unknown = JSON.parse(localStorage.getItem(removalKey) || "[]");
+      setRemovals({ key: removalKey, ids: Array.isArray(stored) ? stored.filter((id): id is string => typeof id === "string") : [] });
+    } catch { setRemovals({ key: removalKey, ids: [] }); }
+  }, [removalKey]);
+  const saveRemovals = (ids: string[]) => {
+    setRemovals({ key: removalKey, ids });
+    try { localStorage.setItem(removalKey, JSON.stringify(ids)); } catch { /* current page still updates */ }
+  };
 
   useEffect(() => {
     try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch { /* ignore */ }
@@ -280,17 +295,18 @@ export default function TradeSpecSheetGenerator() {
     setInitialised(true);
   }, [items, initialised]);
 
+  const sheetItems = useMemo(() => retainedSpecItems(items, removedIds), [items, removedIds]);
   const visibleItems = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return items;
-    return items.filter((i) =>
+    if (!q) return sheetItems;
+    return sheetItems.filter((i) =>
       [i.product_name, i.brand_name, i.category, i.dimensions, i.finish, i.project_name, i.client_name]
         .filter(Boolean)
         .some((v) => String(v).toLowerCase().includes(q)),
     );
-  }, [items, search]);
+  }, [sheetItems, search]);
 
-  const chosen = useMemo(() => items.filter((i) => selected[i.item_id]), [items, selected]);
+  const chosen = useMemo(() => sheetItems.filter((i) => selected[i.item_id]), [sheetItems, selected]);
   const currency = items[0]?.currency || "EUR";
 
   const toggleItem = (id: string) => setSelected((s) => ({ ...s, [id]: !s[id] }));
@@ -448,8 +464,9 @@ export default function TradeSpecSheetGenerator() {
             </div>
             <Button variant="outline" size="sm" className="font-body text-xs" onClick={selectAll}>Select all</Button>
             <Button variant="ghost" size="sm" className="font-body text-xs" onClick={clearAll}>Clear</Button>
+            {removedIds.length > 0 && <Button variant="ghost" size="sm" onClick={() => saveRemovals([])}>Restore removed ({removedIds.length})</Button>}
             <span className="font-body text-xs uppercase tracking-widest text-muted-foreground">
-              {chosen.length} of {items.length} selected
+              {chosen.length} of {sheetItems.length} selected
             </span>
           </div>
 
@@ -528,6 +545,11 @@ export default function TradeSpecSheetGenerator() {
                     className="absolute left-2 top-2 z-10 h-7 w-7 bg-background/90"
                     onClick={() => { setReplacementError(""); setReplacementItem(i); }}>
                     <Replace className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button variant="outline" size="icon" title="Remove from sheet" aria-label={`Remove ${i.product_name.trim()} from sheet`}
+                    className="absolute right-10 top-2 z-10 h-7 w-7 bg-background/90"
+                    onClick={() => saveRemovals([...removedIds, i.item_id])}>
+                    <X className="h-3.5 w-3.5" />
                   </Button>
                   </div>
                 );
