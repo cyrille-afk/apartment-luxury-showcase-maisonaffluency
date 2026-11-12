@@ -12503,6 +12503,27 @@ export type Database = {
         }
         Relationships: []
       }
+      trade_sidebar_preferences: {
+        Row: {
+          reordered: boolean
+          sidebar_order: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          reordered?: boolean
+          sidebar_order?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          reordered?: boolean
+          sidebar_order?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       trade_tier_config: {
         Row: {
           discount_pct: number

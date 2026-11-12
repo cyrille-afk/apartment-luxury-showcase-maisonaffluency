@@ -14,6 +14,7 @@ import { MobileHandoffDialog } from "@/components/trade/MobileHandoffDialog";
 import GoogleIdentityStatusCard from "@/components/trade/GoogleIdentityStatusCard";
 import { Button } from "@/components/ui/button";
 import { resetSidebarOrder } from "@/lib/sidebarOrder";
+import { clearRemoteSidebarOrder } from "@/lib/sidebarOrderSync";
 import { replayFelixTour } from "@/components/trade/felixTourUtils";
 
 const COUNTRIES = [
@@ -280,7 +281,7 @@ const TradeSettings = () => {
       <GoogleIdentityStatusCard />
       <div className="mb-6 border-y border-border py-4">
         <Button variant="ghost" size="sm" className="gap-2 font-body text-xs text-muted-foreground" onClick={() => {
-          try { resetSidebarOrder(user?.id); toast({ title: "Sidebar order reset" }); }
+          try { resetSidebarOrder(user?.id); if (user?.id) void clearRemoteSidebarOrder(user.id).catch(() => {}); toast({ title: "Sidebar order reset" }); }
           catch { toast({ title: "Could not reset sidebar order", description: "Your browser is blocking saved preferences.", variant: "destructive" }); }
         }}><RotateCcw className="h-3.5 w-3.5" />Reset Sidebar Order</Button>
       </div>
