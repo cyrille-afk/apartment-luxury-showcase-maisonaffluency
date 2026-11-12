@@ -1,5 +1,9 @@
 # Roadmap
 
+## Strict functional complement exclusions
+- [x] Exclude every occupied functional type across the whole board, grouping ceiling/chandelier/pendant lighting; prioritize dining tables/chairs and perimeter storage for overhead-only boards. Specific titles outrank multi-type department lists.
+- [x] Overhead-only boards use architectural references and accurate deterministic copy. Exclusion/ranking/identity/validation regressions pass; signed-in Spider Mini returns eight furniture suggestions, no overhead lighting, correct beneath/perimeter copy and no page errors. User board restored.
+
 ## Trade recommendation record validation
 - [x] Traced CSV/inline price imports, scraper, inactive quote placeholders, historical title-keyed mirrors and source deletion; documented limits in docs/trade-record-creation.md. Yoma creator/path cannot be established from saved provenance; Details was created April 30, not May 31.
 - [x] Exclude unverified/unlinked, archived and incomplete candidates before ranking and final readback; preserve catalogue/quote records. Six validation regressions plus ten identity/ranking tests pass; live signed-in one-item board returned eight visible canonical products with no Yoma duplicates or page errors.

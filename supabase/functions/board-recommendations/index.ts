@@ -1,6 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
-import { rankCatalogCandidates, selectCandidateShortlist, summarizeBoardIntent, selectFurnitureAnchors } from './relevance.ts'
+import { rankCatalogCandidates, selectCandidateShortlist, summarizeBoardIntent, selectPairingReferences, isOverheadLighting } from './relevance.ts'
 import { groupCatalogueProducts, productIdentity } from './productIdentity.ts'
 import { isValidatedRecommendation } from './catalogueValidation.ts'
 import { applyHardConstraints, type HardConstraints } from '../_shared/hardConstraints.ts'
@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
 
       boardProductIds = boardItems.map((i: any) => i.product_id)
     } else if (product_ids && Array.isArray(product_ids) && product_ids.length > 0) {
-      boardProductIds = product_ids.slice(0, 20)
+      boardProductIds = [...new Set(product_ids)]
       boardTitle = source === 'mood_board' ? 'Your Mood Board' : 'Selection'
     } else {
       return new Response(JSON.stringify({ error: 'board_id or product_ids required' }), {
@@ -133,7 +133,7 @@ Deno.serve(async (req) => {
     ]
 
     const boardContext = boardItems.map((p, i) =>
-      `[B${i}] "${p.name}" by ${p.brand} — Category: ${p.category}, Materials: ${p.materials}${p.dimensions ? ', Dimensions: ' + p.dimensions : ''}, Editorial: ${p.description.slice(0, 600)}`
+      `[B${i}] "${p.name}" by ${p.brand} — Category: ${p.category}, Subcategory: ${p.subcategory}, Materials: ${p.materials}${p.dimensions ? ', Dimensions: ' + p.dimensions : ''}, Editorial: ${p.description.slice(0, 600)}`
     ).join('\n')
 
     if (!boardContext.trim()) {
@@ -245,7 +245,7 @@ Deno.serve(async (req) => {
       }))
     )
 
-    const primaryAnchors = selectFurnitureAnchors(boardItems.map((item, index) => ({
+    const primaryAnchors = selectPairingReferences(boardItems.map((item, index) => ({
       id: `board-${index}`, title: item.name, brand: item.brand,
       category: item.category, subcategory: item.subcategory, materials: item.materials,
     })))
@@ -295,7 +295,7 @@ Deno.serve(async (req) => {
 
 ## How to select (in priority order):
 
-1. FURNITURE ANCHORS FIRST — Use sofas, armchairs, lounge chairs and dining tables before lighting. When furniture is present, never make a lighting fixture the primary anchor. Choose only from the primary anchor indices provided below.
+1. FURNITURE ANCHORS FIRST — Use sofas, armchairs, lounge chairs and dining tables before lighting. When furniture is present, never make a lighting fixture the primary anchor. Choose only from the reference indices provided below. On an overhead-lighting-only board, the fixture is an architectural reference, NOT floor furniture: prioritize dining tables, dining chairs, sideboards and consoles beneath/in the room below it.
 2. DIRECT PAIRING — Choose items that directly pair with a specific board item in the same room. A dining table needs dining chairs, pendant lighting, a sideboard, a rug. A chair needs a side table, floor lamp, rug, or sofa context.
 2. SAME-ROOM COMPLETENESS — Fill in the room naturally. Do not select pieces that belong to a different room type.
 3. MATERIAL & FINISH HARMONY — Prioritize items sharing material families, tones, or finishes with the board.
@@ -306,6 +306,8 @@ Deno.serve(async (req) => {
 - Do NOT select random items with no direct pairing logic.
 - Do NOT choose multiple extra tables unless they clearly complete the room.
 - Do NOT ignore the fit notes or pre-scores.
+- Never repeat a functional type already anywhere on the board. Chandeliers, pendants and ceiling lights are one occupied overhead-lighting type. Do not suggest a second dining table or sofa when one is already on the board.
+- Never describe furniture as beside, around, or a footrest for a chandelier/pendant. Describe its furniture-level balance beneath the overhead fixture; perimeter storage/consoles balance the room below it.
 
 ## Reason-writing standard (CRITICAL — your reasons are read by professional interior designers):
 - Write 1-2 full sentences, 18-40 words, in the editorial voice of a design consultant — never casual, never childlike.
@@ -320,7 +322,7 @@ Deno.serve(async (req) => {
 Items currently selected:
 ${boardContext}
 
-Primary anchor indices: ${[...primaryAnchorIndices].map(index => `[B${index}]`).join(', ')}
+Furniture anchor or architectural reference indices: ${[...primaryAnchorIndices].map(index => `[B${index}]`).join(', ')}
 Likely room(s): ${boardIntent.dominantRooms.join(', ') || 'mixed'}
 Pieces already on the board: ${boardIntent.presentRoles.join(', ') || 'mixed'}
 Most needed complement roles: ${boardIntent.desiredRoles.join(', ') || 'mixed'}
@@ -416,6 +418,7 @@ Return a JSON object with a recommendations array:
           score: r.score || Math.max(50, Math.min(100, Math.round(trimmed[r.index].score))),
           reason: typeof r.reason === 'string' && r.reason.trim()
             && !/^pairs with\b/i.test(r.reason.trim())
+            && !primaryAnchors.some(isOverheadLighting)
             && Array.isArray(r.anchors) && r.anchors.some((index: number) => primaryAnchorIndices.has(index))
             ? r.reason : trimmed[r.index].fitNote,
           source: trimmed[r.index].source,

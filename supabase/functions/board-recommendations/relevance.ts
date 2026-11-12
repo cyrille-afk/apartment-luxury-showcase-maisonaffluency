@@ -87,8 +87,11 @@ const ROLE_RULES: Array<{ role: string; keywords: string[] }> = [
   { role: "sideboard", keywords: ["sideboard"] },
   { role: "credenza", keywords: ["credenza", "buffet"] },
   { role: "console", keywords: ["console"] },
+  { role: "cabinet", keywords: ["cabinet", "cupboard"] },
+  { role: "wall_light", keywords: ["wall light", "wall lamp", "sconce"] },
   { role: "pendant", keywords: ["pendant"] },
   { role: "chandelier", keywords: ["chandelier"] },
+  { role: "ceiling_light", keywords: ["ceiling light", "suspension light", "suspension"] },
   { role: "floor_lamp", keywords: ["floor lamp", "standing lamp"] },
   { role: "table_lamp", keywords: ["table lamp", "desk lamp"] },
   { role: "rug", keywords: ["rug", "carpet"] },
@@ -103,6 +106,9 @@ const ROLE_ROOMS: Record<string, string[]> = {
   dining_chair: ["dining"],
   pendant: ["dining", "living"],
   chandelier: ["dining", "living"],
+  ceiling_light: ["dining", "living"],
+  wall_light: ["dining", "living", "bedroom", "entry"],
+  cabinet: ["dining", "living"],
   sideboard: ["dining", "living"],
   credenza: ["dining", "living"],
   bench: ["dining", "bedroom", "living"],
@@ -131,6 +137,9 @@ const ROLE_LABELS: Record<string, string> = {
   dining_chair: "dining chair",
   pendant: "pendant light",
   chandelier: "chandelier",
+  ceiling_light: "ceiling light",
+  wall_light: "wall light",
+  cabinet: "cabinet",
   sideboard: "sideboard",
   credenza: "credenza",
   bench: "bench",
@@ -165,6 +174,9 @@ const ROOM_LABELS: Record<string, string> = {
 };
 
 const PAIRING_WEIGHTS: Record<string, Record<string, number>> = {
+  pendant: { dining_table: 18, dining_chair: 16, sideboard: 14, credenza: 14, console: 13, rug: 7 },
+  chandelier: { dining_table: 18, dining_chair: 16, sideboard: 14, credenza: 14, console: 13, rug: 7 },
+  ceiling_light: { dining_table: 18, dining_chair: 16, sideboard: 14, credenza: 14, console: 13, rug: 7 },
   dining_table: {
     dining_chair: 15,
     pendant: 13,
@@ -320,8 +332,11 @@ export function inferRole(input: ProductContextInput): string {
   )} `;
 
   // Typology metadata wins over a product name (e.g. a table named "Chair").
+  const subtype = normalizeText(input.subcategory);
   const metadata = normalizeText([input.subcategory, input.category].filter(Boolean).join(" "));
-  for (const text of [metadata, haystack]) {
+  // A multi-type department list is not a specific typology (e.g. Yoma Console).
+  const broadSubtype = /[,/&]|\band\b/.test(subtype);
+  for (const text of broadSubtype ? [title, metadata, haystack] : [metadata, haystack]) {
     for (const rule of ROLE_RULES) {
       if (rule.keywords.some((keyword) => new RegExp(`\\b${keyword.trim()}s?\\b`).test(text))) {
       return rule.role;
@@ -335,6 +350,24 @@ export function inferRole(input: ProductContextInput): string {
   if (category.includes("table")) return "table";
 
   return "unknown";
+}
+
+export function isOverheadLighting(input: ProductContextInput): boolean {
+  return ["pendant", "chandelier", "ceiling_light"].includes(inferRole(input));
+}
+
+function functionalType(input: ProductContextInput): string {
+  if (isOverheadLighting(input)) return "overhead_lighting";
+  const role = inferRole(input);
+  if (["sideboard", "credenza"].includes(role)) return "sideboard";
+  if (role !== "unknown" && role !== "table") return role;
+  // Preserve specific typologies not yet represented in the role vocabulary.
+  return normalizeText(input.subcategory || input.category).replace(/s\b/g, "");
+}
+
+export function isFunctionalComplement(board: ProductContextInput[], candidate: ProductContextInput): boolean {
+  const type = functionalType(candidate);
+  return Boolean(type) && !board.some(item => functionalType(item) === type);
 }
 
 function inferRooms(role: string, input: ProductContextInput): string[] {
@@ -369,6 +402,9 @@ function toInsight(input: ProductContextInput): ProductInsight {
 }
 
 function roleWeight(a: string, b: string): number {
+  // Overhead-led grounding priorities must not reverse into furniture-led lighting priorities.
+  if (["pendant", "chandelier", "ceiling_light"].includes(a)) return PAIRING_WEIGHTS[a]?.[b] || 0;
+  if (["pendant", "chandelier", "ceiling_light"].includes(b)) return PAIRING_WEIGHTS[a]?.[b] || 0;
   return Math.max(PAIRING_WEIGHTS[a]?.[b] || 0, PAIRING_WEIGHTS[b]?.[a] || 0);
 }
 
@@ -424,6 +460,18 @@ function buildFitNote(candidate: ProductInsight, anchor: ProductInsight | null, 
       ? `Its recorded ${formatList(ownMaterials)} adds a distinct material accent beside ${anchor.title}.`
       : "";
     const detail = candidate.description?.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().split(/(?<=[.!?])\s/)[0];
+    if (isOverheadLighting(anchor)) {
+      const overheadRoles: Record<string, string> = {
+        dining_table: `Grounds the space beneath ${anchor.title} with a dining surface, balancing the overhead fixture with a horizontal furniture plane.`,
+        dining_chair: `Establishes a dining seating rhythm beneath ${anchor.title}, bringing the overhead composition down to the furniture level.`,
+        sideboard: `Balances ${anchor.title}'s overhead presence with a storage element along the room's perimeter.`,
+        credenza: `Balances ${anchor.title}'s overhead presence with a storage element along the room's perimeter.`,
+        console: `Gives the room beneath ${anchor.title} a console surface at its perimeter, counterbalancing the overhead focal point.`,
+      };
+      const overheadMaterial = ownMaterials.length
+        ? `Its recorded ${formatList(ownMaterials)} introduces a material counterpoint below the fixture.` : "";
+      return `${overheadRoles[candidate.role] || `Adds ${ROLE_LABELS[candidate.role] || "a furniture element"} to the room beneath ${anchor.title}, balancing its overhead presence at room level.`} ${material || aesthetic || overheadMaterial}`.trim();
+    }
     return `${roles[candidate.role] || `Extends the composition around ${anchor.title} with ${describePair(anchor, candidate)}.`} ${material || aesthetic || counterpoint || (detail && detail.length <= 180 ? detail : "")}`.trim();
   }
 
@@ -443,7 +491,12 @@ const PRIMARY_ROLES = new Set(["sofa", "armchair", "lounge_chair", "dining_table
 export function selectFurnitureAnchors<T extends ProductContextInput>(items: T[]): T[] {
   const primary = items.filter(item => PRIMARY_ROLES.has(inferRole(item)));
   if (primary.length) return primary;
-  const furniture = items.filter(item => !["pendant", "chandelier", "floor_lamp", "table_lamp", "rug", "mirror", "unknown"].includes(inferRole(item)));
+  return items.filter(item => !["pendant", "chandelier", "ceiling_light", "wall_light", "floor_lamp", "table_lamp", "rug", "mirror", "unknown"].includes(inferRole(item)));
+}
+
+/** Lighting-only boards have architectural references, never floor-furniture anchors. */
+export function selectPairingReferences<T extends ProductContextInput>(items: T[]): T[] {
+  const furniture = selectFurnitureAnchors(items);
   return furniture.length ? furniture : items;
 }
 
@@ -469,7 +522,7 @@ function buildBoardProfile(boardItems: ProductInsight[]) {
   const presentRoles: Record<string, number> = {};
   const materialTokens = new Set<string>();
 
-  const anchors = selectFurnitureAnchors(boardItems);
+  const anchors = selectPairingReferences(boardItems);
   for (const item of boardItems) {
     presentRoles[item.role] = (presentRoles[item.role] || 0) + 1;
 
@@ -511,6 +564,7 @@ export function summarizeBoardIntent(boardInputs: ProductContextInput[]): BoardI
     dominantRooms: profile.dominantRooms,
     presentRoles: unique(insights.map((item) => ROLE_LABELS[item.role] || item.role)),
     desiredRoles: Object.entries(profile.desiredRoles)
+      .filter(([role]) => !insights.some(item => functionalType(item) === functionalType({ id: role, title: ROLE_LABELS[role] || role, brand: "" })))
       .sort((a, b) => b[1] - a[1])
       .slice(0, 6)
       .map(([role]) => ROLE_LABELS[role] || role),
@@ -520,8 +574,8 @@ export function summarizeBoardIntent(boardInputs: ProductContextInput[]): BoardI
 
 export function rankCatalogCandidates(boardInputs: ProductContextInput[], catalogInputs: ProductContextInput[]): RankedCatalogCandidate[] {
   const boardItems = boardInputs.map(toInsight);
-  const anchors = selectFurnitureAnchors(boardItems);
-  const catalog = catalogInputs.map(toInsight);
+  const anchors = selectPairingReferences(boardItems);
+  const catalog = catalogInputs.filter(candidate => isFunctionalComplement(boardInputs, candidate)).map(toInsight);
   const boardProfile = buildBoardProfile(boardItems);
 
   return catalog
