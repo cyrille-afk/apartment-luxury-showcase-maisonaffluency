@@ -117,6 +117,9 @@ export function getHouseEditionLabel(input: {
   }
   const house = (input.founder || input.parentBrand || input.reeditionBy || "").trim();
   if (!house) return null;
+  // Pouenat is a maker credit, not an automatic edition. Songe carries its
+  // edition explicitly in catalogue data instead of inheriting a house badge.
+  if (["maison pouenat", "pouenat"].includes(normalizeHouseName(house))) return null;
   // The Man of Parts profile already establishes the house; never regenerate
   // its generic badge after suppressing a stored attribution above.
   if (normalizeHouseName(house) === "man of parts" && normalizeHouseName(input.pageDesignerName) === "man of parts") return null;

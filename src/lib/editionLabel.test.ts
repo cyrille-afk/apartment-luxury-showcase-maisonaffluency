@@ -3,6 +3,10 @@ import { describe, expect, it } from "vitest";
 import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, formatEditionLabel, getHouseEditionLabel, isEcartReedition, productEditionBadge, profileEditionLine } from "./editionLabel";
 
 describe("Ecart re-edition labels", () => {
+  it("never infers an edition from Pouenat maker affiliation", () => {
+    expect(getHouseEditionLabel({ designerName: "Gilles & Boissier", founder: "Maison Pouenat" })).toBeNull();
+    expect(getHouseEditionLabel({ designerName: "Tristan Auer", parentBrand: "Pouenat", pageDesignerName: "Maison Pouenat" })).toBeNull();
+  });
   it('does not treat generic stored house attribution as an edition on child profiles', () => {
     expect(profileEditionLine({ edition: 'Man of Parts Edition', founder: 'Man of Parts', pageDesignerName: 'Sebastian Herkner' })).toBeNull();
     expect(profileEditionLine({ edition: 'Man of Parts Edition', founder: 'Man of Parts', pageDesignerName: 'Yabu Pushelberg' })).toBeNull();

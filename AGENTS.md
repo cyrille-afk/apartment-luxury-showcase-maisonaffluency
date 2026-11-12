@@ -11,6 +11,7 @@
 - Password-setup resends reuse the review drawer and retain attempt keys on retry; never change approval. Verified activation links the account; the queue reads user_id for setup status.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Shared product attribution delegates generated house badges to editionLabel; product-specific exceptions use explicit catalogue edition metadata — prevents product pages from bypassing gallery badge rules.
 - Mood Board Builder requests a server-validated full recommendation pool and paginates it locally in six-item slices, exhausting the short final slice before looping; composition changes reset the cursor and invalidate responses — Refresh must be immediate, nonrepeating within a cycle and free of extra inference.
 - Mood board complements require a visible, complete canonical curator identity; unlinked Trade rows are unverified, not automatically invalid or archived. Validate before ranking and on final readback, with linked mirrors grouped under their source pick — supplier PDFs and generated descriptions alone cannot prove a distinct product exists.
 - Mood board picker exhausts stable catalogue pages before combined category/maker filters and incremental rendering; one-item complement requests reject stale compositions, while server ranking uses primary furniture anchors and recorded editorial traits with category-diverse fallbacks — prevents truncated browsing and repetitive lighting-led suggestions.

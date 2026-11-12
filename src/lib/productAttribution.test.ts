@@ -2,6 +2,12 @@ import { describe, expect, it } from "vitest";
 import { productAttribution } from "./productAttribution";
 
 describe("consistent product attribution", () => {
+  it("keeps Alda's maker credit without inventing a Pouenat edition", () => {
+    expect(productAttribution({ title: "Alda Table Lamp", designerName: "Gilles & Boissier", houseName: "Maison Pouenat" })).toMatchObject({ edition: null, houseLine: "Maison Pouenat" });
+  });
+  it("preserves Songe's explicitly recorded Pouenat edition", () => {
+    expect(productAttribution({ title: "Songe Pendant Light", designerName: "Gilles & Boissier", houseName: "Maison Pouenat", edition: "Maison Pouenat Edition" })).toMatchObject({ edition: "Maison Pouenat Edition", houseLine: null });
+  });
   it("separates Madison's designer from its title and publisher", () => {
     expect(productAttribution({ title: "Madison Avenue Side Table by Yabu Pushelberg", brandName: "Man of Parts", edition: "Man of Parts Edition" })).toMatchObject({ title: "Madison Avenue Side Table", designer: "Yabu Pushelberg", house: "Man of Parts", edition: "Man of Parts Edition", houseLine: null });
   });
