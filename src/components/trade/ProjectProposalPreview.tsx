@@ -1,4 +1,5 @@
-import { FileText, Printer, X } from "lucide-react";
+import { downloadDocumentPdf } from "@/lib/appPdfDownload";
+import { FileText, Download, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatMoneyIn } from "@/lib/displayMoney";
 import { StudioBrand, type StudioBranding } from "@/components/trade/StudioBrand";
@@ -60,15 +61,7 @@ export function ProjectProposalPreview({
     const sheet = document.querySelector<HTMLElement>(".proposal-print-sheet");
     if (!sheet) return;
 
-    document.querySelector(".proposal-print-document")?.remove();
-    const printDocument = sheet.cloneNode(true) as HTMLElement;
-    printDocument.classList.remove("proposal-print-sheet");
-    printDocument.classList.add("proposal-print-document");
-    document.body.appendChild(printDocument);
-
-    const cleanup = () => printDocument.remove();
-    window.addEventListener("afterprint", cleanup, { once: true });
-    window.print();
+    void downloadDocumentPdf({ element: sheet, filename: `${projectName} Proposal.pdf` });
   };
 
   return (
@@ -80,7 +73,7 @@ export function ProjectProposalPreview({
       >
         <DialogTitle className="sr-only">White-label project proposal preview</DialogTitle>
         <DialogDescription id="proposal-preview-description" className="sr-only">
-          Preview the current project proposal before opening the browser print system.
+          Preview the current project proposal before downloading the PDF.
         </DialogDescription>
 
         <div className="proposal-preview-controls fixed right-5 top-5 z-[122] flex flex-wrap justify-end gap-2 md:right-8 md:top-8">
@@ -98,7 +91,7 @@ export function ProjectProposalPreview({
             onClick={triggerPrint}
             className="h-9 rounded-none bg-card/95 px-3 font-body text-[10px] uppercase tracking-[0.15em] text-card-foreground backdrop-blur-sm hover:bg-card"
           >
-            <Printer className="mr-2 h-3.5 w-3.5" /> [ Trigger Print System ]
+            <Download className="mr-2 h-3.5 w-3.5" /> [ Download PDF ]
           </Button>
         </div>
 

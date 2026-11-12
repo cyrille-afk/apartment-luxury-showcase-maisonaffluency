@@ -1,5 +1,9 @@
 # Roadmap
 
+## Direct PDF downloads across the website
+- [ ] Replace all eight app print actions with generated/downloaded PDFs, preserving document content, privacy and pagination.
+- [ ] Verify actual downloads, inspect rendered PDF pages, and add a regression guard against browser print calls.
+
 ## Remove duplicate specification cards
 - [x] Per-card X removes rows from the sheet, export and totals; browser/account/project-scoped removals survive refresh and Restore removed brings them back without quote writes. Two tests pass; signed-in duplicate removal, refresh and restore verified with no page errors. Build OK.
 

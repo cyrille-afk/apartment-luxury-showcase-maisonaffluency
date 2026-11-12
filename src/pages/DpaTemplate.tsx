@@ -1,3 +1,4 @@
+import { downloadDocumentPdf } from "@/lib/appPdfDownload";
 /**
  * Baseline GDPR Article 28 Data Processing Agreement, rendered for the legal
  * desk at `/compliance/dpa-template`. Internal reference material: noindex,
@@ -8,7 +9,7 @@ import { Link } from "@/lib/router-compat";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Download, Printer } from "lucide-react";
+import { ArrowLeft, Download } from "lucide-react";
 import {
   DPA_TEMPLATE_EFFECTIVE,
   DPA_TEMPLATE_MARKDOWN,
@@ -42,8 +43,8 @@ const DpaTemplate = () => {
           <ArrowLeft className="h-4 w-4" /> Sub-processor register
         </Link>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => window.print()}>
-            <Printer className="mr-2 h-4 w-4" /> Print
+          <Button variant="outline" size="sm" onClick={() => { const element = document.querySelector<HTMLElement>(".dpa-pdf-document"); if (element) void downloadDocumentPdf({ element, filename: `Maison Affluency DPA v${DPA_TEMPLATE_VERSION}.pdf` }); }}>
+            <Download className="mr-2 h-4 w-4" /> Download PDF
           </Button>
           <Button variant="outline" size="sm" onClick={download}>
             <Download className="mr-2 h-4 w-4" /> Export Markdown
@@ -51,6 +52,7 @@ const DpaTemplate = () => {
         </div>
       </div>
 
+      <section className="dpa-pdf-document">
       <div className="mt-8 border-b border-border pb-6">
         <p className="text-[0.65rem] uppercase tracking-[0.35em] text-muted-foreground">
           Legal desk · Baseline contractual terms
@@ -69,6 +71,7 @@ const DpaTemplate = () => {
       >
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{DPA_TEMPLATE_MARKDOWN}</ReactMarkdown>
       </article>
+      </section>
     </div>
   );
 };

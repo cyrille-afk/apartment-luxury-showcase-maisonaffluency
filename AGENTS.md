@@ -11,6 +11,7 @@
 - Password-setup resends reuse the review drawer and retain attempt keys on retry; never change approval. Verified activation links the account; the queue reads user_id for setup status.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- App document exports never invoke browser printing; existing PDF files download directly and HTML/preview exports use the shared appPdfDownload renderer with element-boundary pagination — prevents browser-added addresses/headers from entering client documents.
 - Specification sheet catalogue replacements are explicit owner-scoped mappings used only by sheet/PDF reads; exact-title/category complete candidates supply live retail data, original quote rows and quantities never change — protects issued quotes and avoids currency-mixed fallback prices.
 - Specification card removal filters the shared sheet/export selection by item ID, persists browser-local account/project exclusions after hydration, and supports restore without quote writes — hides only the chosen duplicate and preserves source documents.
 - Onboarding dashboard reads a separate consent/GPC-aware owner-checked operational run feed via admin-checked RPC, never collector credentials; run-start cohorts define completion/replay rates, explicit exits or 30-minute inactivity define last-step drop-offs, recent runs remain pending, and preview stays separate — preserves existing injected analytics without invented backfill.

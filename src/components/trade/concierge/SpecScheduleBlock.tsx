@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Copy, Download, Check, Eye, Printer, X } from "lucide-react";
+import { Copy, Download, Check, Eye, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -365,21 +365,6 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
     }
   };
 
-  const onPrintPdf = () => {
-    if (!previewUrl) return;
-    const w = window.open(previewUrl, "_blank");
-    if (w) {
-      w.addEventListener("load", () => {
-        try {
-          w.focus();
-          w.print();
-        } catch {
-          /* noop */
-        }
-      });
-    }
-  };
-
   useEffect(() => {
     return () => {
       if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -654,14 +639,6 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
               PDF preview · {zone} · {pageSize === "a4" ? "A4" : "Letter"}
             </DialogTitle>
             <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={onPrintPdf}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background hover:bg-accent/10 hover:border-accent/40 px-2.5 py-1 text-[11px] font-body text-foreground transition"
-              >
-                <Printer className="h-3 w-3" />
-                Print
-              </button>
               <button
                 type="button"
                 onClick={onDownloadPdfFromPreview}

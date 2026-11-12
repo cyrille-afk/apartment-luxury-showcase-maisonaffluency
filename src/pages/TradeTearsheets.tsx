@@ -1,3 +1,4 @@
+import { downloadDocumentPdf } from "@/lib/appPdfDownload";
 import { Helmet } from "react-helmet-async";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useQuery } from "@tanstack/react-query";
@@ -6,7 +7,7 @@ import { fillTradeProductImageFallbacks } from "@/lib/tradeProductImageFallback"
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useRef, useMemo, useEffect } from "react";
 import { useSearchParams, useNavigate } from "@/lib/router-compat";
-import { FileText, Loader2, Search, Printer, LayoutGrid, Check, Plus } from "lucide-react";
+import { FileText, Loader2, Search, Download, LayoutGrid, Check, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -793,10 +794,7 @@ export default function TradeTearsheets() {
     if (!printRef.current || !selectedProduct) return;
     // Print in the member's declared base currency, ledger formatting.
     const printedPriceCents = exportCurrency.convert(snapshotPriceCents, selectedProduct.currency) || null;
-    const win = window.open("", "_blank");
-    if (!win) return;
-    win.document.write(
-      buildTearsheetPrintHtml({
+    const html = buildTearsheetPrintHtml({
         selectedProduct: {
           ...selectedProduct,
           trade_price_cents: printedPriceCents,
@@ -807,10 +805,8 @@ export default function TradeTearsheets() {
         materialsDisplay,
         leadTimeDisplay,
         presentation: getClientSafeMode() || presentationExport,
-      }),
-    );
-    win.document.close();
-    win.print();
+      });
+    void downloadDocumentPdf({ html, filename: `${selectedProduct.product_name} Tearsheet.pdf` });
   };
 
   const exportCurrency = useExportCurrency();
@@ -943,7 +939,7 @@ export default function TradeTearsheets() {
                 <Button variant="outline" size="sm" onClick={() => { setPushedBoardIds(new Set()); setBoardPickerOpen(true); }}>
                   <LayoutGrid className="h-4 w-4 mr-2" />Add to project board
                 </Button>
-                <Button variant="outline" size="sm" onClick={handlePrint}><Printer className="h-4 w-4 mr-2" />Print Tearsheet</Button>
+                <Button variant="outline" size="sm" onClick={handlePrint}><Download className="h-4 w-4 mr-2" />Download Tearsheet</Button>
               </div>
             </div>
 

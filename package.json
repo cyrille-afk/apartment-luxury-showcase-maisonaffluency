@@ -117,6 +117,7 @@
     "exceljs": "^4.4.0",
     "fast-check": "^3",
     "framer-motion": "^12.23.25",
+    "html2canvas-pro": "^2.6.3",
     "input-otp": "^1.4.2",
     "jspdf": "^4.2.1",
     "jszip": "^3.10.1",

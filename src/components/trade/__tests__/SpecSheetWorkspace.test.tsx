@@ -15,7 +15,6 @@ describe("spec-sheet workspace actions", () => {
   it("does not permit document actions without a signed-in user", () => {
     render(<MemoryRouter><SpecSheetWorkspace {...props} signedIn={false} /></MemoryRouter>);
     expect(screen.getByTitle("Download Document").hasAttribute("disabled")).toBe(true);
-    expect(screen.getByTitle("Print").hasAttribute("disabled")).toBe(true);
     expect(screen.getByTitle("Share Spec Sheet Link").hasAttribute("disabled")).toBe(true);
   });
 });

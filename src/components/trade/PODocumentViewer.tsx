@@ -1,5 +1,6 @@
+import { downloadDocumentPdf } from "@/lib/appPdfDownload";
 import { useEffect, useRef, useState } from "react";
-import { BadgeCheck, CheckCircle2, Loader2, Printer, RotateCcw, Send, X } from "lucide-react";
+import { BadgeCheck, CheckCircle2, Loader2, Download, RotateCcw, Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -235,32 +236,9 @@ export default function PODocumentViewer({ document: po, onOpenChange, onStatusC
   };
 
 
-  /** Print the document sheet alone, via an isolated iframe so the app behind stays untouched. */
   const print = () => {
-    const node = sheetRef.current;
-    if (!node) return;
-    const frame = window.document.createElement("iframe");
-    frame.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;";
-    window.document.body.appendChild(frame);
-    const doc = frame.contentDocument;
-    if (!doc) return;
-    const styles = Array.from(window.document.querySelectorAll('link[rel="stylesheet"], style'))
-      .map((el) => el.outerHTML)
-      .join("");
-    doc.open();
-    doc.write(
-      `<!doctype html><html><head><title>${String(po?.po_number || "Purchase Order").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] as string)}</title>${styles}` +
-        `<style>@page{size:A4;margin:14mm}body{background:#fff;margin:0}</style></head>` +
-        `<body>${node.outerHTML}</body></html>`,
-    );
-    doc.close();
-    const run = () => {
-      frame.contentWindow?.focus();
-      frame.contentWindow?.print();
-      window.setTimeout(() => frame.remove(), 1000);
-    };
-    if (frame.contentWindow?.document.readyState === "complete") window.setTimeout(run, 250);
-    else frame.onload = () => window.setTimeout(run, 250);
+    if (!sheetRef.current) return;
+    void downloadDocumentPdf({ element: sheetRef.current, filename: `${po?.po_number || "Purchase Order"}.pdf` });
   };
 
   const currency = po?.currency || "EUR";
@@ -282,8 +260,8 @@ export default function PODocumentViewer({ document: po, onOpenChange, onStatusC
               </div>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" className="font-body text-xs" onClick={print}>
-                  <Printer className="mr-1.5 h-3.5 w-3.5" />
-                  Print / Download PDF
+                  <Download className="mr-1.5 h-3.5 w-3.5" />
+                  Download PDF
                 </Button>
                 <Button variant="ghost" size="sm" className="font-body text-xs" onClick={() => onOpenChange(false)}>
                   <X className="mr-1.5 h-3.5 w-3.5" />

@@ -2,7 +2,7 @@
  * Pure builder for the tearsheet print/PDF HTML.
  *
  * Extracted from `TradeTearsheets.tsx` so the exact document written into
- * `window.open(...)` and sent to `window.print()` can be unit-tested and
+ * the shared app-generated PDF renderer can be unit-tested and
  * exported to a real PDF for E2E verification.
  *
  * The inputs are the same derived variables (`dimensionsDisplay`,

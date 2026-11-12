@@ -1,3 +1,4 @@
+import { downloadDocumentPdf } from "@/lib/appPdfDownload";
 import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -440,12 +441,7 @@ export default function TradeDeliveryTracker() {
         <th>Expected ready</th><th>Required by</th><th>Status</th><th>Quote</th>
       </tr></thead><tbody>${rowsHtml}</tbody></table>
       </body></html>`;
-    const w = window.open("", "_blank", "width=1200,height=800");
-    if (!w) return;
-    w.document.write(html);
-    w.document.close();
-    w.focus();
-    setTimeout(() => w.print(), 300);
+    void downloadDocumentPdf({ html, filename: "Delivery Tracker.pdf", landscape: true });
   }
 
   return (

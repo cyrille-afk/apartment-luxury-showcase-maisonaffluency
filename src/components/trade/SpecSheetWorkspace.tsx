@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Check, Download, Loader2, Lock, Printer, Share2 } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, Check, Download, Loader2, Lock, Share2 } from "lucide-react";
 import { Link } from "@/lib/router-compat";
 import { Button } from "@/components/ui/button";
 import { copyTextToClipboard } from "@/lib/clipboard";
@@ -27,15 +27,8 @@ interface Props {
 
 export default function SpecSheetWorkspace({ brand, product, sheetLabel, sheetIndex, pdfUrl, remoteUrl, coverIncluded, clientView, loading, signedIn, isMobile, onSignIn, onDownload }: Props) {
   const [busy, setBusy] = useState(false);
-  const [printing, setPrinting] = useState(false);
   const [copied, setCopied] = useState(false);
   const [notice, setNotice] = useState("");
-  const printFrame = useRef<HTMLIFrameElement | null>(null);
-  const printBlob = useRef<string | null>(null);
-  useEffect(() => () => {
-    printFrame.current?.remove();
-    if (printBlob.current) URL.revokeObjectURL(printBlob.current);
-  }, []);
   const ready = signedIn && !loading && !!pdfUrl;
   const title = product || "Technical specification";
   const download = async () => {
@@ -53,35 +46,6 @@ export default function SpecSheetWorkspace({ brand, product, sheetLabel, sheetIn
     setCopied(success);
     setNotice(success ? "Client link copied — it opens the clean spec sheet without your trade cover page. Recipients sign in to view." : "The link could not be copied. Please try again.");
   };
-  const print = async () => {
-    if (!pdfUrl) return;
-    setPrinting(true); setNotice("");
-    try {
-      const response = await fetch(pdfUrl);
-      if (!response.ok) throw new Error("Document unavailable");
-      const blob = await response.blob();
-      printFrame.current?.remove();
-      if (printBlob.current) URL.revokeObjectURL(printBlob.current);
-      const blobUrl = URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
-      printBlob.current = blobUrl;
-      const frame = document.createElement("iframe");
-      frame.className = "spec-sheet-print-frame";
-      frame.title = "Print specification sheet";
-      frame.src = blobUrl;
-      printFrame.current = frame;
-      frame.onload = () => window.setTimeout(() => {
-        try {
-          if (!frame.contentWindow) throw new Error("Print unavailable");
-          frame.contentWindow.focus(); frame.contentWindow.print();
-        } catch { setNotice("Use the document viewer’s print control, or download the PDF to print it."); }
-        finally { setPrinting(false); }
-      }, 500);
-      document.body.appendChild(frame);
-    } catch {
-      setPrinting(false);
-      setNotice("Use the document viewer’s print control, or download the PDF to print it.");
-    }
-  };
   return <div className="spec-sheet-workspace flex min-h-[100dvh] flex-col bg-background text-foreground">
     <header className="flex flex-wrap items-center justify-between gap-4 border-b border-border/20 bg-background px-5 py-4 md:px-10">
       <Link to="/trade/the-collection" className="group flex min-w-0 items-center" aria-label="Maison Affluency — The Collection">
@@ -91,7 +55,6 @@ export default function SpecSheetWorkspace({ brand, product, sheetLabel, sheetIn
       </Link>
       <div className="flex flex-wrap items-center gap-1.5" aria-label="Document actions">
         <Button variant="outline" size="sm" title="Download Document" disabled={!ready || busy} onClick={download} className="gap-2 text-xs">{busy ? <Loader2 className="animate-spin" /> : <Download />}<span className="hidden sm:inline">Download Document</span></Button>
-        <Button variant="outline" size="sm" title="Print" disabled={!ready || printing} onClick={print} className="gap-2 text-xs">{printing ? <Loader2 className="animate-spin" /> : <Printer />}<span className="hidden sm:inline">Print</span></Button>
         <Button variant="outline" size="sm" title="Share Spec Sheet Link" disabled={!ready} onClick={share} className="gap-2 text-xs">{copied ? <Check /> : <Share2 />}<span className="hidden sm:inline">{copied ? "Link copied" : "Share Spec Sheet Link"}</span></Button>
       </div>
     </header>

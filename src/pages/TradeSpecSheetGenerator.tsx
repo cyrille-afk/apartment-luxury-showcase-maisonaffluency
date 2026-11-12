@@ -1,3 +1,5 @@
+import { downloadDocumentPdf } from "@/lib/appPdfDownload";
+import coverLogo from "@/assets/affluency-quote-logo.jpg";
 import { Helmet } from "react-helmet-async";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { replacementCandidates, type ReplacementProduct } from "@/lib/specSheetReplacement";
@@ -392,7 +394,7 @@ export default function TradeSpecSheetGenerator() {
            text-transform:uppercase; color:${t.muted}; text-align:center; }
 </style></head><body>
   <div class="cover">
-    ${settings.logoUrl ? `<img src="${escapeHtml(settings.logoUrl)}" alt="Logo" />` : ""}
+    ${settings.logoUrl ? `<img src="${escapeHtml(settings.logoUrl === DEFAULT_LOGO ? coverLogo : settings.logoUrl)}" alt="Logo" />` : ""}
     <h1>${escapeHtml(title)}</h1>
     ${project ? `<p class="project">${escapeHtml(project)}</p>` : ""}
     <div class="rule"></div>
@@ -401,21 +403,7 @@ export default function TradeSpecSheetGenerator() {
   ${sheets}
 </body></html>`;
 
-    const frame = window.document.createElement("iframe");
-    frame.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;";
-    window.document.body.appendChild(frame);
-    const doc = frame.contentDocument;
-    if (!doc) return;
-    doc.open();
-    doc.write(html);
-    doc.close();
-    const run = () => {
-      frame.contentWindow?.focus();
-      frame.contentWindow?.print();
-      window.setTimeout(() => frame.remove(), 1500);
-    };
-    if (frame.contentWindow?.document.readyState === "complete") window.setTimeout(run, 500);
-    else frame.onload = () => window.setTimeout(run, 500);
+    void downloadDocumentPdf({ html, filename: `${title}.pdf`, marginMm: 16 });
   };
 
   /* ---------------- Render ---------------- */
