@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useSearchParams } from "@/lib/router-compat";
-import { Search, Loader2, Paintbrush, Plus, X, Heart, FolderOpen, LayoutGrid, Sparkles, RefreshCw } from "lucide-react";
+import { Search, Loader2, Plus, X, Heart, FolderOpen, LayoutGrid, Sparkles, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MoodBoardActions } from "@/components/trade/MoodBoardActions";
@@ -407,9 +407,19 @@ export default function TradeMoodBoards() {
                 <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">{board.length} item{board.length !== 1 ? "s" : ""} on board</p>
               </div>
               {board.length === 0 ? (
-                <div className="border-2 border-dashed border-border rounded-lg flex min-h-[20rem] flex-col items-center justify-center py-20 [@media(min-width:1440px)]:min-h-[34rem]">
-                  <Paintbrush className="h-10 w-10 text-muted-foreground/30 mb-3" />
-                  <p className="font-body text-sm text-muted-foreground">Add products from the right panel to build your mood board.</p>
+                <div className="border-2 border-dashed border-border rounded-lg flex min-h-[20rem] flex-col items-center justify-center py-20 px-6 text-center [@media(min-width:1440px)]:min-h-[34rem]">
+                  <div className="relative mb-4">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full border border-border bg-muted/40">
+                      <LayoutGrid className="h-6 w-6 text-muted-foreground/50" />
+                    </div>
+                    <div className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-background">
+                      <Sparkles className="h-3 w-3 text-primary" />
+                    </div>
+                  </div>
+                  <p className="font-body text-sm text-foreground">Add an anchor piece from the catalog on the right to start your board.</p>
+                  <p className="font-body text-xs text-muted-foreground mt-2 max-w-md">
+                    Once placed, the AI Curatorial Assistant will automatically suggest complementary furniture, tables, and finishes to build out the room.
+                  </p>
                 </div>
               ) : (
                 <div className={`grid gap-2 ${board.length <= 2 ? "grid-cols-3" : board.length <= 6 ? "grid-cols-3" : "grid-cols-4 [@media(min-width:1440px)]:grid-cols-5"}`}>
@@ -436,26 +446,32 @@ export default function TradeMoodBoards() {
             </div>
 
             {/* AI Recommendations */}
-            {!clientSafe && (shouldRecommendMoodBoard(board.length)) && (
+            {!clientSafe && (
               <div className="border-t border-border pt-5">
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="font-display text-sm text-foreground flex items-center gap-2">
                     <Sparkles className="h-3.5 w-3.5 text-primary" />
                     Suggested complements
                   </h2>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => fetchRecommendations(board.map((b) => b.id))}
-                    disabled={recLoading || !shouldRecommendMoodBoard(board.length)}
-                    className="text-[10px] text-muted-foreground h-7 px-2"
-                  >
-                    <RefreshCw className={`h-3 w-3 mr-1 ${recLoading ? "animate-spin" : ""}`} />
-                    Refresh
-                  </Button>
+                  {shouldRecommendMoodBoard(board.length) && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => fetchRecommendations(board.map((b) => b.id))}
+                      disabled={recLoading}
+                      className="text-[10px] text-muted-foreground h-7 px-2"
+                    >
+                      <RefreshCw className={`h-3 w-3 mr-1 ${recLoading ? "animate-spin" : ""}`} />
+                      Refresh
+                    </Button>
+                  )}
                 </div>
 
-                {recLoading ? (
+                {!shouldRecommendMoodBoard(board.length) ? (
+                  <p className="font-body text-xs text-muted-foreground">
+                    Select your first piece from the right-hand panel to generate tailored pairings.
+                  </p>
+                ) : recLoading ? (
                   <div className="flex gap-3 overflow-hidden">
                     {[1, 2, 3, 4].map((i) => (
                       <div key={i} className="w-32 shrink-0 animate-pulse">
