@@ -2,6 +2,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 
 import { rankCatalogCandidates, selectCandidateShortlist, summarizeBoardIntent, selectFurnitureAnchors } from './relevance.ts'
 import { groupCatalogueProducts, productIdentity } from './productIdentity.ts'
+import { isValidatedRecommendation } from './catalogueValidation.ts'
 import { applyHardConstraints, type HardConstraints } from '../_shared/hardConstraints.ts'
 import { logAiUsage } from '../_shared/aiUsage.ts'
 import { modelFor, tokenBudget } from '../_shared/aiModels.ts'
@@ -61,7 +62,7 @@ Deno.serve(async (req) => {
         .eq('id', board_id)
         .single()
 
-      if (!board || board.user_id !== user!.id) {
+      if (!board || board.user_id !== user.id) {
         return new Response(JSON.stringify({ error: 'Board not found' }), {
           status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
@@ -165,7 +166,7 @@ Deno.serve(async (req) => {
 
     let curatorQuery = supabase
       .from('designer_curator_picks')
-      .select('id, title, subtitle, category, subcategory, materials, materials_description, description, dimensions, tags, designer_id')
+      .select('id, title, subtitle, image_url, is_hidden, category, subcategory, materials, materials_description, description, dimensions, tags, designer_id')
       .eq('is_hidden', false)
       .not('image_url', 'is', null)
       .order('id')
@@ -178,11 +179,16 @@ Deno.serve(async (req) => {
     const allDesignerIds = [...new Set((catalog || []).map((p: any) => p.designer_id))]
     const { data: allDesigners } = await supabase.from('designers').select('id, name').in('id', allDesignerIds)
     const designerMap = new Map((allDesigners || []).map((d: any) => [d.id, d.name]))
+    const canonicalPickIds = new Set<string>(catalog.map((p: any) => p.id))
+    const validCanonicalPickIds = new Set<string>(catalog.filter((p: any) =>
+      isValidatedRecommendation({ ...p, source: 'curator', brand: designerMap.get(p.designer_id) }, canonicalPickIds)
+    ).map((p: any) => p.id))
 
     let tradeQuery = supabase
       .from('trade_products')
-      .select('id, product_name, brand_name, category, subcategory, materials, materials_description, description, dimensions, source_pick_id')
+      .select('id, product_name, brand_name, image_url, is_hidden, is_active, category, subcategory, materials, materials_description, description, dimensions, source_pick_id')
       .eq('is_active', true)
+      .not('source_pick_id', 'is', null)
       .not('image_url', 'is', null)
       .eq('is_hidden', false)
       .order('id')
@@ -199,6 +205,7 @@ Deno.serve(async (req) => {
     ])
     const availableCatalog = groupCatalogueProducts([
       ...(catalog || [])
+        .filter((p: any) => validCanonicalPickIds.has(p.id))
         .filter((p: any) => !boardTitles.has(p.title?.toLowerCase()) && !boardProductIds.includes(p.id))
         .map((p: any) => ({
           id: p.id, title: p.title, category: p.category || '', materials: p.materials || p.materials_description || '',
@@ -206,6 +213,7 @@ Deno.serve(async (req) => {
           subcategory: p.subcategory || '', tags: p.tags || [], brand: designerMap.get(p.designer_id) || '', source: 'curator' as const,
         })),
       ...(tradeCatalog || [])
+        .filter((p: any) => isValidatedRecommendation({ ...p, source: 'trade', title: p.product_name, brand: p.brand_name }, validCanonicalPickIds))
         .filter((p: any) => !boardTitles.has(p.product_name?.toLowerCase()) && !boardProductIds.includes(p.id))
         .map((p: any) => ({
           id: p.id, source_pick_id: p.source_pick_id, title: p.product_name, category: p.category || '', materials: p.materials || p.materials_description || '',
@@ -425,19 +433,6 @@ Return a JSON object with a recommendations array:
       if (recommendations.length >= 8) break
     }
 
-    // Cache for project boards (curator picks only due to FK)
-    if (cacheKey && recommendations.length > 0) {
-      const curatorRecs = recommendations.filter((r: any) => r.source === 'curator')
-      if (curatorRecs.length > 0) {
-        await supabase.from('board_recommendations').delete().eq('board_id', cacheKey)
-        await supabase.from('board_recommendations').insert(
-          curatorRecs.map((r: any) => ({
-            board_id: cacheKey, product_id: r.product_id, score: r.score, reason: r.reason,
-          }))
-        )
-      }
-    }
-
     // Enrich results
     const curatorIds = recommendations.filter((r: any) => r.source === 'curator').map((r: any) => r.product_id)
     const tradeIds = recommendations.filter((r: any) => r.source === 'trade').map((r: any) => r.product_id)
@@ -448,19 +443,43 @@ Return a JSON object with a recommendations array:
     if (curatorIds.length > 0) {
       const { data } = await supabase
         .from('designer_curator_picks')
-        .select('id, title, subtitle, image_url, category, designer_id')
+        .select('id, title, subtitle, image_url, is_hidden, category, designer_id')
+        .eq('is_hidden', false)
         .in('id', curatorIds)
       recCuratorProducts = data || []
     }
     if (tradeIds.length > 0) {
       const { data } = await supabase
         .from('trade_products')
-        .select('id, product_name, brand_name, image_url, category')
+        .select('id, product_name, brand_name, image_url, is_hidden, is_active, source_pick_id, category')
+        .eq('is_hidden', false)
+        .eq('is_active', true)
+        .not('source_pick_id', 'is', null)
         .in('id', tradeIds)
       recTradeProducts = data || []
     }
 
-    const enriched = recommendations.map((r: any) => {
+    // Re-check live rows: archival during AI inference must not leak into the response.
+    const finalSourceIds = [...new Set([...recCuratorProducts.map((p: any) => p.id),
+      ...recTradeProducts.map((p: any) => p.source_pick_id).filter(Boolean)])]
+    const { data: finalSources, error: finalSourceError } = await supabase
+      .from('designer_curator_picks')
+      .select('id, title, image_url, is_hidden, category, designer_id')
+      .in('id', finalSourceIds)
+      .eq('is_hidden', false)
+    if (finalSourceError) throw finalSourceError
+    const finalCanonicalIds = new Set<string>((finalSources || []).filter((p: any) =>
+      isValidatedRecommendation({ ...p, source: 'curator', brand: designerMap.get(p.designer_id) }, validCanonicalPickIds)
+    ).map((p: any) => p.id))
+    const enriched = recommendations.filter((r: any) => {
+      const prod = r.source === 'trade'
+        ? recTradeProducts.find((p: any) => p.id === r.product_id)
+        : recCuratorProducts.find((p: any) => p.id === r.product_id)
+      return prod && isValidatedRecommendation({ ...prod, source: r.source,
+        title: r.source === 'trade' ? prod.product_name : prod.title,
+        brand: r.source === 'trade' ? prod.brand_name : designerMap.get(prod.designer_id),
+      }, finalCanonicalIds)
+    }).map((r: any) => {
       if (r.source === 'trade') {
         const prod = recTradeProducts.find((p: any) => p.id === r.product_id)
         return {
@@ -480,6 +499,20 @@ Return a JSON object with a recommendations array:
         anchors: r.anchors || [],
       }
     })
+
+    // Replace cached project suggestions only after final validation, including empty results.
+    if (cacheKey) {
+      const verifiedIds = new Set(enriched.map((r: any) => r.product_id))
+      const curatorRecs = recommendations.filter((r: any) => r.source === 'curator' && verifiedIds.has(r.product_id))
+      const { error: clearError } = await supabase.from('board_recommendations').delete().eq('board_id', cacheKey)
+      if (clearError) throw clearError
+      if (curatorRecs.length > 0) {
+        const { error: cacheError } = await supabase.from('board_recommendations').insert(
+          curatorRecs.map((r: any) => ({ board_id: cacheKey, product_id: r.product_id, score: r.score, reason: r.reason }))
+        )
+        if (cacheError) throw cacheError
+      }
+    }
 
     return new Response(JSON.stringify({
       recommendations: enriched,

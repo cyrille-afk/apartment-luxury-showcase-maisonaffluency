@@ -1,5 +1,9 @@
 # Roadmap
 
+## Trade recommendation record validation
+- [x] Traced CSV/inline price imports, scraper, inactive quote placeholders, historical title-keyed mirrors and source deletion; documented limits in docs/trade-record-creation.md. Yoma creator/path cannot be established from saved provenance; Details was created April 30, not May 31.
+- [x] Exclude unverified/unlinked, archived and incomplete candidates before ranking and final readback; preserve catalogue/quote records. Six validation regressions plus ten identity/ranking tests pass; live signed-in one-item board returned eight visible canonical products with no Yoma duplicates or page errors.
+
 ## Mood board catalogue and complements
 - [x] Added combined category/maker/search filters, exhaustive database pagination and incremental 40-item catalogue rendering; hidden products remain excluded.
 - [x] Complements start from one item and clear/refetch on composition changes with stale-response protection; primary furniture, recorded editorial materials and category-diverse fallbacks drive pairing. Plural/mixed typologies and bar stools are classified safely.
