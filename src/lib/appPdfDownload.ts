@@ -41,7 +41,7 @@ export async function downloadDocumentPdf(input: { html?: string; element?: HTML
     doc.querySelectorAll('script').forEach(e => e.remove());
     if (getClientSafeMode()) doc.querySelectorAll('[data-trade-sensitive]').forEach(e => e.remove());
     const override = doc.createElement('style');
-    override.textContent = `html,body{margin:0!important;overflow:visible!important;width:${width}px!important;background:var(--background,white)}body{padding:0!important}body>main{margin:0!important;width:100%!important;max-width:none!important}.proposal-print-sheet{box-shadow:none!important}[data-client-placeholder],.print\\:hidden{display:none!important}`;
+    override.textContent = `html,body{margin:0!important;overflow:visible!important;width:${width}px!important;background:var(--background,white)}body{padding:0!important;display:flow-root!important}body>main{margin:0!important;width:100%!important;max-width:none!important}.proposal-print-sheet{box-shadow:none!important}[data-client-placeholder],.print\\:hidden{display:none!important}`;
     doc.head.appendChild(override);
     await doc.fonts.ready;
     await Promise.all(Array.from(document.querySelectorAll('link[rel="stylesheet"]')).map(async link => {
