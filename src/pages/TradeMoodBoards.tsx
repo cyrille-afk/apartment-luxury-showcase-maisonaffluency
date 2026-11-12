@@ -385,7 +385,7 @@ export default function TradeMoodBoards() {
   const filterOptions: { key: PickerFilter; label: string; icon: React.ReactNode }[] = [
     { key: "all", label: "All", icon: <LayoutGrid className="h-3 w-3" /> },
     { key: "favourites", label: "Favourites", icon: <Heart className="h-3 w-3" /> },
-    { key: "board", label: projectId ? "Tearsheet" : "Projects", icon: <FolderOpen className="h-3 w-3" /> },
+    { key: "board", label: projectId ? "Tearsheet" : "From Projects", icon: <FolderOpen className="h-3 w-3" /> },
   ];
 
   return (
@@ -546,6 +546,7 @@ export default function TradeMoodBoards() {
           {/* Product picker — hidden in Client View so the board presents cleanly */}
           <div hidden={clientSafe} className="w-full shrink-0 space-y-3 lg:w-72 [@media(min-width:1440px)]:w-80">
             {/* Filter toggle */}
+            <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Source catalog</p>
             <div className="flex gap-1 p-0.5 bg-muted/50 rounded-lg">
               {filterOptions.map((opt) => (
                 <Button variant="ghost"
