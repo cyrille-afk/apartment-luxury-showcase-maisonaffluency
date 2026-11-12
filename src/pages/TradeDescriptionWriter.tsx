@@ -284,9 +284,9 @@ export default function TradeDescriptionWriter() {
 
   // After a refresh, rebuild the progress list from what is already saved in
   // the catalogue: rows with saved copy show "Saved", the rest stay pending.
-  const restoreListRef = useRef(!!persisted.bulkListOpen);
+  const restoreListRef = useRef(true);
   useEffect(() => {
-    if (!restoreListRef.current || bulkRunning || bulkRows.length > 0 || mode !== "bulk") return;
+    if (!restoreListRef.current || !bulkDesigner || bulkRunning || bulkRows.length > 0 || mode !== "bulk") return;
     const group = designerGroups.find((g) => g.name === bulkDesigner);
     if (!group || items.length === 0) return;
     restoreListRef.current = false;
