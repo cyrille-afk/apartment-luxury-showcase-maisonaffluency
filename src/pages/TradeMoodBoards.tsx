@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { MoodBoardActions } from "@/components/trade/MoodBoardActions";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { filterMoodBoardCatalog, moodBoardCategories, shouldRecommendMoodBoard, type MoodBoardCategory } from "@/lib/moodBoardCatalog";
+import { complementPage, nextComplementPage, COMPLEMENT_PAGE_SIZE } from "@/lib/moodBoardRecommendationPages";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -54,6 +55,8 @@ export default function TradeMoodBoards() {
   const [board, setBoard] = useState<any[]>(() => projectId ? [] : loadBoardFromStorage(null));
   const [filter, setFilter] = useState<PickerFilter>(projectId ? "board" : "all");
   const [recommendations, setRecommendations] = useState<MoodRec[]>([]);
+  const [refreshPage, setRefreshPage] = useState(0);
+  const displayedRecommendations = complementPage(recommendations, refreshPage);
   const [recLoading, setRecLoading] = useState(false);
   const [recError, setRecError] = useState<string | null>(null);
   const prevBoardIdsRef = useRef<string>("");
@@ -158,12 +161,13 @@ export default function TradeMoodBoards() {
     setRecLoading(true);
     setRecError(null);
     try {
-      const { data, error } = await invokeWithAuthRetry("board-recommendations", { product_ids: productIds, source: projectId ? "project_tearsheet_mood_board" : "mood_board", project_id: projectId });
+      const { data, error } = await invokeWithAuthRetry("board-recommendations", { product_ids: productIds, source: projectId ? "project_tearsheet_mood_board" : "mood_board", project_id: projectId, include_pool: true });
       if (revision !== requestRevision.current) return;
       if (error) throw error;
       if (data?.recommendations) {
         const recs: MoodRec[] = data.recommendations;
         setRecommendations(recs);
+        setRefreshPage(0);
 
         // Concierge steps in to narrate WHY these complements were chosen.
         // We only fire when there's something meaningful to say.
@@ -207,6 +211,7 @@ export default function TradeMoodBoards() {
     prevBoardIdsRef.current = currentIds;
     requestRevision.current += 1;
     setRecommendations([]);
+    setRefreshPage(0);
     setRecError(null);
     if (!shouldRecommendMoodBoard(board.length)) {
       setRecLoading(false);
@@ -401,7 +406,7 @@ export default function TradeMoodBoards() {
 
         <div className="flex flex-col gap-6 lg:flex-row [@media(min-width:1440px)]:grid [@media(min-width:1440px)]:grid-cols-[minmax(0,1fr)_320px] [@media(min-width:1440px)]:gap-8">
           {/* Board area */}
-          <div className="flex-1 space-y-6">
+          <div className="min-w-0 flex-1 space-y-6">
             <div>
               <div className="flex items-center justify-between mb-3">
                 <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">{board.length} item{board.length !== 1 ? "s" : ""} on board</p>
@@ -447,7 +452,7 @@ export default function TradeMoodBoards() {
 
             {/* AI Recommendations */}
             {!clientSafe && (
-              <div className="border-t border-border pt-5">
+              <div className="w-full min-w-0 border-t border-border pt-5" aria-label="Suggested complements">
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="font-display text-sm text-foreground flex items-center gap-2">
                     <Sparkles className="h-3.5 w-3.5 text-primary" />
@@ -457,8 +462,10 @@ export default function TradeMoodBoards() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => fetchRecommendations(board.map((b) => b.id))}
-                      disabled={recLoading}
+                      onClick={() => recError
+                        ? fetchRecommendations(board.map((b) => b.id))
+                        : setRefreshPage(page => nextComplementPage(page, recommendations.length))}
+                      disabled={recLoading || (!recError && recommendations.length <= COMPLEMENT_PAGE_SIZE)}
                       className="text-[10px] text-muted-foreground h-7 px-2"
                     >
                       <RefreshCw className={`h-3 w-3 mr-1 ${recLoading ? "animate-spin" : ""}`} />
@@ -472,12 +479,12 @@ export default function TradeMoodBoards() {
                     Select your first piece from the right-hand panel to generate tailored pairings.
                   </p>
                 ) : recLoading ? (
-                  <div className="flex gap-3 overflow-hidden">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="w-32 shrink-0 animate-pulse">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4 w-full">
+                    {Array.from({ length: COMPLEMENT_PAGE_SIZE }, (_, i) => (
+                      <div key={i} className="min-w-0 animate-pulse">
                         <div className="aspect-square bg-muted rounded-lg mb-1.5" />
-                        <div className="h-2.5 w-24 bg-muted rounded mb-1" />
-                        <div className="h-2 w-16 bg-muted rounded" />
+                        <div className="h-2.5 w-3/4 bg-muted rounded mb-1" />
+                        <div className="h-2 w-1/2 bg-muted rounded" />
                       </div>
                     ))}
                   </div>
@@ -487,13 +494,15 @@ export default function TradeMoodBoards() {
                   <p className="font-body text-xs text-muted-foreground">No suitable complements found for this selection.</p>
                 ) : (
                   <TooltipProvider delayDuration={120}>
-                    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                      {recommendations.slice(0, 8).map((rec) => (
-                        <Tooltip key={rec.product_id}>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4 w-full" data-complement-grid>
+                      {displayedRecommendations.map((rec) => (
+                        <div key={rec.product_id} className="flex min-w-0 flex-col" data-complement-id={rec.product_id}>
+                        <Tooltip>
                           <TooltipTrigger asChild>
                             <Button variant="ghost"
                               onClick={() => addRecToBoard(rec)}
-                              className="group h-auto w-44 shrink-0 flex-col items-stretch whitespace-normal p-0 text-left"
+                              aria-label={`Add ${rec.title} to mood board`}
+                              className="group h-auto min-w-0 w-full flex-col items-stretch whitespace-normal p-0 text-left"
                             >
                               <div className="relative aspect-square rounded-lg overflow-hidden bg-muted mb-1.5 border border-border group-hover:border-primary/40 transition-colors">
                                 {rec.image_url ? (
@@ -508,13 +517,10 @@ export default function TradeMoodBoards() {
                                     No image
                                   </div>
                                 )}
-                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                                  <Plus className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
-                                </div>
                               </div>
-                              <p className="font-body text-xs text-foreground truncate">{rec.title}</p>
-                              <p className="font-body text-[11px] text-muted-foreground truncate">{rec.brand}</p>
-                              <p className="font-body text-[11px] text-primary/80 leading-snug mt-1 line-clamp-4">
+                              <p className="w-full font-body text-xs text-foreground truncate">{rec.title}</p>
+                              <p className="w-full font-body text-[11px] text-muted-foreground truncate">{rec.brand}</p>
+                              <p className="w-full font-body text-[11px] text-primary/80 leading-snug mt-1 line-clamp-4 break-words">
                                 {rec.reason}
                               </p>
                             </Button>
@@ -523,6 +529,12 @@ export default function TradeMoodBoards() {
                             {rec.reason}
                           </TooltipContent>
                         </Tooltip>
+                        <Button variant="ghost" size="sm" onClick={() => addRecToBoard(rec)}
+                          aria-label={`Quick add ${rec.title}`}
+                          className="mt-auto h-7 self-start px-1 text-[11px] text-muted-foreground hover:text-primary">
+                          <Plus className="mr-1 h-3 w-3" /> Add
+                        </Button>
+                        </div>
                       ))}
                     </div>
                   </TooltipProvider>

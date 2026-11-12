@@ -1,5 +1,9 @@
 # Roadmap
 
+## Contained mood board complement pages
+- [x] Replaced scrolling strip with six-column contained grid and explicit quick-add controls.
+- [x] Cycle the server-validated matching pool locally in six-item pages; composition changes reset the cursor. Signed-in Spider Mini returned 464 candidates, three pages shared no IDs and Refresh made no further AI requests; quick-add survived reload and refreshed suggestions. Exact right-edge alignment/no overflow verified at 1955/1280/390px; 30 regressions and deployed boot/live checks pass. Original browser board restored; build OK.
+
 ## Strict functional complement exclusions
 - [x] Exclude every occupied functional type across the whole board, grouping ceiling/chandelier/pendant lighting; prioritize dining tables/chairs and perimeter storage for overhead-only boards. Specific titles outrank multi-type department lists.
 - [x] Overhead-only boards use architectural references and accurate deterministic copy. Exclusion/ranking/identity/validation regressions pass; signed-in Spider Mini returns eight furniture suggestions, no overhead lighting, correct beneath/perimeter copy and no page errors. User board restored.

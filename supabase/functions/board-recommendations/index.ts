@@ -28,8 +28,8 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey)
 
     const body = await req.json()
-    const { board_id, product_ids, source, constraints: explicitConstraints } = body as {
-      board_id?: string; product_ids?: string[]; source?: string; constraints?: HardConstraints
+    const { board_id, product_ids, source, constraints: explicitConstraints, include_pool } = body as {
+      board_id?: string; product_ids?: string[]; source?: string; constraints?: HardConstraints; include_pool?: boolean
     }
 
     // Require an authenticated caller for every code path. The previous
@@ -162,6 +162,16 @@ Deno.serve(async (req) => {
         rows.push(...(data || []))
         if (!data || data.length < 500) return rows
       }
+    }
+    // Full-pool readback uses bounded ID batches, avoiding oversized request URLs.
+    const readIds = async (ids: string[], query: (batch: string[]) => any): Promise<any[]> => {
+      const rows: any[] = []
+      for (let offset = 0; offset < ids.length; offset += 100) {
+        const { data, error } = await query(ids.slice(offset, offset + 100))
+        if (error) throw error
+        rows.push(...(data || []))
+      }
+      return rows
     }
 
     let curatorQuery = supabase
@@ -394,7 +404,12 @@ Return a JSON object with a recommendations array:
         .filter((item): item is { name: string; brand: string; category: string } => item !== null);
     };
 
-    const fallbackRecommendations = selectCandidateShortlist(rankedCatalog, 8).map((item) => ({
+    // Pool mode retains all qualifying, already-scored candidates for local browsing.
+    // Other callers keep their existing bounded eight-item response.
+    const fallbackCandidates = include_pool === true
+      ? [...selectCandidateShortlist(rankedCatalog, 8), ...rankedCatalog.filter(item => item.score >= 8)]
+      : selectCandidateShortlist(rankedCatalog, 8)
+    const fallbackRecommendations = fallbackCandidates.map((item) => ({
       product_id: item.id,
       score: Math.max(50, Math.min(100, Math.round(item.score))),
       reason: item.fitNote,
@@ -433,7 +448,7 @@ Return a JSON object with a recommendations array:
       if (seenProductIds.has(recommendation.product_id)) continue
       seenProductIds.add(recommendation.product_id)
       recommendations.push(recommendation)
-      if (recommendations.length >= 8) break
+      if (include_pool !== true && recommendations.length >= 8) break
     }
 
     // Enrich results
@@ -444,33 +459,30 @@ Return a JSON object with a recommendations array:
     let recTradeProducts: any[] = []
 
     if (curatorIds.length > 0) {
-      const { data } = await supabase
+      recCuratorProducts = await readIds(curatorIds, batch => supabase
         .from('designer_curator_picks')
         .select('id, title, subtitle, image_url, is_hidden, category, designer_id')
         .eq('is_hidden', false)
-        .in('id', curatorIds)
-      recCuratorProducts = data || []
+        .in('id', batch))
     }
     if (tradeIds.length > 0) {
-      const { data } = await supabase
+      recTradeProducts = await readIds(tradeIds, batch => supabase
         .from('trade_products')
         .select('id, product_name, brand_name, image_url, is_hidden, is_active, source_pick_id, category')
         .eq('is_hidden', false)
         .eq('is_active', true)
         .not('source_pick_id', 'is', null)
-        .in('id', tradeIds)
-      recTradeProducts = data || []
+        .in('id', batch))
     }
 
     // Re-check live rows: archival during AI inference must not leak into the response.
     const finalSourceIds = [...new Set([...recCuratorProducts.map((p: any) => p.id),
       ...recTradeProducts.map((p: any) => p.source_pick_id).filter(Boolean)])]
-    const { data: finalSources, error: finalSourceError } = await supabase
+    const finalSources = await readIds(finalSourceIds, batch => supabase
       .from('designer_curator_picks')
       .select('id, title, image_url, is_hidden, category, designer_id')
-      .in('id', finalSourceIds)
-      .eq('is_hidden', false)
-    if (finalSourceError) throw finalSourceError
+      .in('id', batch)
+      .eq('is_hidden', false))
     const finalCanonicalIds = new Set<string>((finalSources || []).filter((p: any) =>
       isValidatedRecommendation({ ...p, source: 'curator', brand: designerMap.get(p.designer_id) }, validCanonicalPickIds)
     ).map((p: any) => p.id))
