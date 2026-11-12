@@ -11,6 +11,7 @@
 - Password-setup resends reuse the review drawer and retain attempt keys on retry; never change approval. Verified activation links the account; the queue reads user_id for setup status.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Mood board picker exhausts stable catalogue pages before combined category/maker filters and incremental rendering; one-item complement requests reject stale compositions, while server ranking uses primary furniture anchors and recorded editorial traits with category-diverse fallbacks — prevents truncated browsing and repetitive lighting-led suggestions.
 - App document exports never invoke browser printing; existing PDF files download directly and HTML/preview exports use the shared appPdfDownload renderer with element-boundary pagination — prevents browser-added addresses/headers from entering client documents.
 - Specification sheet catalogue replacements are explicit owner-scoped mappings used only by sheet/PDF reads; exact-title/category complete candidates supply live retail data, original quote rows and quantities never change — protects issued quotes and avoids currency-mixed fallback prices.
 - Specification card removal filters the shared sheet/export selection by item ID, persists browser-local account/project exclusions after hydration, and supports restore without quote writes — hides only the chosen duplicate and preserves source documents.

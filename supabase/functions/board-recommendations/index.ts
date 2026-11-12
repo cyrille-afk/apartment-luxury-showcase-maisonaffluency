@@ -1,8 +1,8 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
-import { rankCatalogCandidates, selectCandidateShortlist, summarizeBoardIntent } from './relevance.ts'
+import { rankCatalogCandidates, selectCandidateShortlist, summarizeBoardIntent, selectFurnitureAnchors } from './relevance.ts'
 import { groupCatalogueProducts, productIdentity } from './productIdentity.ts'
-import { deriveHardConstraints, applyHardConstraints, type HardConstraints } from '../_shared/hardConstraints.ts'
+import { applyHardConstraints, type HardConstraints } from '../_shared/hardConstraints.ts'
 import { logAiUsage } from '../_shared/aiUsage.ts'
 import { modelFor, tokenBudget } from '../_shared/aiModels.ts'
 
@@ -94,7 +94,7 @@ Deno.serve(async (req) => {
     // Resolve board items from both tables
     const { data: tradeProducts } = await supabase
       .from('trade_products')
-      .select('id, product_name, brand_name, category, subcategory, materials, dimensions, source_pick_id')
+      .select('id, product_name, brand_name, category, subcategory, materials, materials_description, description, dimensions, source_pick_id')
       .in('id', boardProductIds)
 
     const foundTradeIds = new Set((tradeProducts || []).map((p: any) => p.id))
@@ -104,7 +104,7 @@ Deno.serve(async (req) => {
     if (missingIds.length > 0) {
       const { data } = await supabase
         .from('designer_curator_picks')
-        .select('id, title, subtitle, category, subcategory, materials, designer_id')
+        .select('id, title, subtitle, category, subcategory, materials, materials_description, description, dimensions, designer_id')
         .in('id', missingIds)
       curatorProducts = data || []
     }
@@ -120,18 +120,19 @@ Deno.serve(async (req) => {
     const boardItems = [
       ...(tradeProducts || []).map((p: any) => ({
         name: p.product_name, brand: p.brand_name,
-        category: p.category, subcategory: p.subcategory || '', materials: p.materials || 'not specified',
+        category: p.category, subcategory: p.subcategory || '', materials: p.materials || p.materials_description || 'not specified',
+        description: p.description || '',
         dimensions: p.dimensions || '',
       })),
       ...curatorProducts.map((p: any) => ({
         name: p.title, brand: curatorDesignerMap.get(p.designer_id) || 'Unknown',
-        category: p.category || '', subcategory: p.subcategory || '', materials: p.materials || 'not specified',
-        dimensions: '',
+        category: p.category || '', subcategory: p.subcategory || '', materials: p.materials || p.materials_description || 'not specified',
+        description: p.description || '', dimensions: p.dimensions || '',
       })),
     ]
 
     const boardContext = boardItems.map((p, i) =>
-      `[B${i}] "${p.name}" by ${p.brand} — Category: ${p.category}, Materials: ${p.materials}${p.dimensions ? ', Dimensions: ' + p.dimensions : ''}`
+      `[B${i}] "${p.name}" by ${p.brand} — Category: ${p.category}, Materials: ${p.materials}${p.dimensions ? ', Dimensions: ' + p.dimensions : ''}, Editorial: ${p.description.slice(0, 600)}`
     ).join('\n')
 
     if (!boardContext.trim()) {
@@ -148,21 +149,31 @@ Deno.serve(async (req) => {
     // Hard-constraint pre-filter: explicit constraints (from caller) or
     // material/color tokens auto-derived from the board. The AI never sees
     // candidates that violate a listed color / material / category.
-    const hardConstraints = deriveHardConstraints(
-      boardItems.map((i) => ({ title: i.name, materials: i.materials, category: i.category })),
-      explicitConstraints,
-    )
+    // Board traits guide soft ranking; only explicit requests are hard filters.
+    const hardConstraints: HardConstraints = explicitConstraints || {}
     console.log('Hard constraints applied:', JSON.stringify(hardConstraints))
+
+    const readAll = async (query: any): Promise<any[]> => {
+      const rows: any[] = []
+      for (let offset = 0; ; offset += 500) {
+        const { data, error } = await query.range(offset, offset + 499)
+        if (error) throw error
+        rows.push(...(data || []))
+        if (!data || data.length < 500) return rows
+      }
+    }
 
     let curatorQuery = supabase
       .from('designer_curator_picks')
-      .select('id, title, subtitle, category, subcategory, materials, tags, designer_id')
-      .limit(300)
+      .select('id, title, subtitle, category, subcategory, materials, materials_description, description, dimensions, tags, designer_id')
+      .eq('is_hidden', false)
+      .not('image_url', 'is', null)
+      .order('id')
     curatorQuery = applyHardConstraints(curatorQuery as any, hardConstraints, {
       text: ['title', 'subtitle', 'materials', 'category', 'subcategory'],
       category: 'category',
     })
-    const { data: catalog } = await curatorQuery
+    const catalog = await readAll(curatorQuery)
 
     const allDesignerIds = [...new Set((catalog || []).map((p: any) => p.designer_id))]
     const { data: allDesigners } = await supabase.from('designers').select('id, name').in('id', allDesignerIds)
@@ -170,16 +181,17 @@ Deno.serve(async (req) => {
 
     let tradeQuery = supabase
       .from('trade_products')
-      .select('id, product_name, brand_name, category, subcategory, materials, dimensions, source_pick_id')
+      .select('id, product_name, brand_name, category, subcategory, materials, materials_description, description, dimensions, source_pick_id')
       .eq('is_active', true)
       .not('image_url', 'is', null)
-      .limit(300)
+      .eq('is_hidden', false)
+      .order('id')
     tradeQuery = applyHardConstraints(tradeQuery as any, hardConstraints, {
       text: ['product_name', 'materials', 'category', 'subcategory'],
       brand: 'brand_name',
       category: 'category',
     })
-    const { data: tradeCatalog } = await tradeQuery
+    const tradeCatalog = await readAll(tradeQuery)
 
     const boardIdentities = new Set([
       ...(tradeProducts || []).map((p: any) => productIdentity({ ...p, source: 'trade' })),
@@ -189,13 +201,15 @@ Deno.serve(async (req) => {
       ...(catalog || [])
         .filter((p: any) => !boardTitles.has(p.title?.toLowerCase()) && !boardProductIds.includes(p.id))
         .map((p: any) => ({
-          id: p.id, title: p.title, category: p.category || '', materials: p.materials || '',
+          id: p.id, title: p.title, category: p.category || '', materials: p.materials || p.materials_description || '',
+          description: p.description || '', dimensions: p.dimensions || '',
           subcategory: p.subcategory || '', tags: p.tags || [], brand: designerMap.get(p.designer_id) || '', source: 'curator' as const,
         })),
       ...(tradeCatalog || [])
         .filter((p: any) => !boardTitles.has(p.product_name?.toLowerCase()) && !boardProductIds.includes(p.id))
         .map((p: any) => ({
-          id: p.id, source_pick_id: p.source_pick_id, title: p.product_name, category: p.category || '', materials: p.materials || '',
+          id: p.id, source_pick_id: p.source_pick_id, title: p.product_name, category: p.category || '', materials: p.materials || p.materials_description || '',
+          description: p.description || '',
           subcategory: p.subcategory || '', dimensions: p.dimensions || '', tags: [] as string[], brand: p.brand_name || '', source: 'trade' as const,
         })),
     ], boardIdentities)
@@ -218,9 +232,16 @@ Deno.serve(async (req) => {
         category: item.category,
         subcategory: item.subcategory,
         materials: item.materials,
+        description: item.description,
         dimensions: item.dimensions,
       }))
     )
+
+    const primaryAnchors = selectFurnitureAnchors(boardItems.map((item, index) => ({
+      id: `board-${index}`, title: item.name, brand: item.brand,
+      category: item.category, subcategory: item.subcategory, materials: item.materials,
+    })))
+    const primaryAnchorIndices = new Set(primaryAnchors.map(item => Number(item.id.replace('board-', ''))))
 
     const rankedCatalog = rankCatalogCandidates(
       boardItems.map((item, index) => ({
@@ -230,6 +251,7 @@ Deno.serve(async (req) => {
         category: item.category,
         subcategory: item.subcategory,
         materials: item.materials,
+        description: item.description,
         dimensions: item.dimensions,
       })),
       availableCatalog,
@@ -244,7 +266,8 @@ Deno.serve(async (req) => {
       [shortlist[i], shortlist[j]] = [shortlist[j], shortlist[i]]
     }
     // Take only 30 random candidates so the AI must pick from a different subset each time
-    const trimmed = shortlist.slice(0, 30)
+    const trimmed = [...selectCandidateShortlist(rankedCatalog, 8), ...shortlist]
+      .filter((item, index, rows) => rows.findIndex(other => other.id === item.id) === index).slice(0, 30)
 
     if (trimmed.length === 0) {
       return new Response(JSON.stringify({ recommendations: [] }), {
@@ -253,7 +276,7 @@ Deno.serve(async (req) => {
     }
 
     const catalogList = trimmed.map((p, i) =>
-      `${i}: "${p.title}" by ${p.brand} | Role: ${p.role} | Category: ${p.category || 'n/a'} | Materials: ${p.materials || 'n/a'} | Fit: ${p.fitNote} | Pre-score: ${Math.round(p.score)}`
+      `${i}: "${p.title}" by ${p.brand} | Role: ${p.role} | Category: ${p.category || 'n/a'} | Materials: ${p.materials || 'n/a'} | Editorial: ${p.description?.slice(0, 400) || 'n/a'} | Fit: ${p.fitNote} | Pre-score: ${Math.round(p.score)}`
     ).join('\n')
 
     // Extract key materials and categories from board for the prompt
@@ -264,7 +287,8 @@ Deno.serve(async (req) => {
 
 ## How to select (in priority order):
 
-1. DIRECT PAIRING — Choose items that directly pair with a specific board item in the same room. A dining table needs dining chairs, pendant lighting, a sideboard, a rug. A chair needs a side table, floor lamp, rug, or sofa context.
+1. FURNITURE ANCHORS FIRST — Use sofas, armchairs, lounge chairs and dining tables before lighting. When furniture is present, never make a lighting fixture the primary anchor. Choose only from the primary anchor indices provided below.
+2. DIRECT PAIRING — Choose items that directly pair with a specific board item in the same room. A dining table needs dining chairs, pendant lighting, a sideboard, a rug. A chair needs a side table, floor lamp, rug, or sofa context.
 2. SAME-ROOM COMPLETENESS — Fill in the room naturally. Do not select pieces that belong to a different room type.
 3. MATERIAL & FINISH HARMONY — Prioritize items sharing material families, tones, or finishes with the board.
 4. USE THE PRE-SCORE — If two options are close, trust the higher pre-score because the shortlist has already been screened for role and room fit.
@@ -277,6 +301,7 @@ Deno.serve(async (req) => {
 
 ## Reason-writing standard (CRITICAL — your reasons are read by professional interior designers):
 - Write 1-2 full sentences, 18-40 words, in the editorial voice of a design consultant — never casual, never childlike.
+- Prefer one concise sentence. Only claim materials, tones, periods or measurements recorded in the provided data; never invent a finish, patina, silhouette or historical attribution.
 - Name the specific anchor piece by its product name (e.g. "the Serge armchair") rather than a generic category, and explain the scheme logic: scale, silhouette, material dialogue, tonal register, or the functional gap it resolves.
 - Reference at least one concrete design lever: proportion, material/finish, tonal contrast, lighting layer, textural counterpoint, period coherence, or compositional balance.
 - Forbidden phrasings: "you need a lamp with the armchair", "goes well with", "matches nicely", "pairs with the X", "completes the look", "perfect for", "because". If your sentence could pass for a five-year-old's, rewrite it.
@@ -287,6 +312,7 @@ Deno.serve(async (req) => {
 Items currently selected:
 ${boardContext}
 
+Primary anchor indices: ${[...primaryAnchorIndices].map(index => `[B${index}]`).join(', ')}
 Likely room(s): ${boardIntent.dominantRooms.join(', ') || 'mixed'}
 Pieces already on the board: ${boardIntent.presentRoles.join(', ') || 'mixed'}
 Most needed complement roles: ${boardIntent.desiredRoles.join(', ') || 'mixed'}
@@ -354,20 +380,11 @@ Return a JSON object with a recommendations array:
     };
 
     const fallbackAnchors = (): Array<{ name: string; brand: string; category: string }> => {
-      // Pick the top 3 distinct-category board items as a generic anchor set
-      const seen = new Set<string>();
-      const out: Array<{ name: string; brand: string; category: string }> = [];
-      for (const it of boardItems) {
-        const key = (it.category || it.name || '').toLowerCase();
-        if (!key || seen.has(key)) continue;
-        seen.add(key);
-        out.push({ name: it.name, brand: it.brand, category: it.category });
-        if (out.length >= 3) break;
-      }
-      return out;
+      return [...primaryAnchorIndices].slice(0, 3).map(anchorLabel)
+        .filter((item): item is { name: string; brand: string; category: string } => item !== null);
     };
 
-    const fallbackRecommendations = trimmed.slice(0, 8).map((item) => ({
+    const fallbackRecommendations = selectCandidateShortlist(rankedCatalog, 8).map((item) => ({
       product_id: item.id,
       score: Math.max(50, Math.min(100, Math.round(item.score))),
       reason: item.fitNote,
@@ -381,7 +398,7 @@ Return a JSON object with a recommendations array:
       .map((r: any) => {
         const anchors = Array.isArray(r.anchors)
           ? r.anchors
-              .filter((n: any) => Number.isInteger(n) && n >= 0 && n < boardItems.length)
+              .filter((n: any) => Number.isInteger(n) && primaryAnchorIndices.has(n))
               .slice(0, 3)
               .map(anchorLabel)
               .filter(Boolean)
@@ -389,7 +406,10 @@ Return a JSON object with a recommendations array:
         return {
           product_id: trimmed[r.index].id,
           score: r.score || Math.max(50, Math.min(100, Math.round(trimmed[r.index].score))),
-          reason: r.reason || trimmed[r.index].fitNote,
+          reason: typeof r.reason === 'string' && r.reason.trim()
+            && !/^pairs with\b/i.test(r.reason.trim())
+            && Array.isArray(r.anchors) && r.anchors.some((index: number) => primaryAnchorIndices.has(index))
+            ? r.reason : trimmed[r.index].fitNote,
           source: trimmed[r.index].source,
           anchors: anchors.length ? anchors : fallbackAnchors(),
         };

@@ -1,5 +1,10 @@
 # Roadmap
 
+## Mood board catalogue and complements
+- [x] Added combined category/maker/search filters, exhaustive database pagination and incremental 40-item catalogue rendering; hidden products remain excluded.
+- [x] Complements start from one item and clear/refetch on composition changes with stale-response protection; primary furniture, recorded editorial materials and category-diverse fallbacks drive pairing. Plural/mixed typologies and bar stools are classified safely.
+- [x] Thirteen regressions pass; deployed function boot/live checks pass. Signed-in Amboseli search/add shows eight unique furniture-led complements with real ash/bronze rationale; filters, 40→80 pagination, last-item removal and phone overflow checked. Original browser board restored; build OK.
+
 ## Direct PDF downloads across the website
 - [x] Replace all eight app print actions with generated/downloaded PDFs, preserving document content and privacy.
 - [x] Verify specification and legal-document downloads, visually correct missing logo and clipped page breaks, and add a regression guard against browser print calls; 19 affected tests pass.

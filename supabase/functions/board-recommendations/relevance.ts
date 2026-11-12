@@ -7,6 +7,7 @@ export interface ProductContextInput {
   category?: string;
   subcategory?: string;
   materials?: string;
+  description?: string;
   dimensions?: string;
   tags?: string[];
   source?: CatalogSource;
@@ -83,8 +84,8 @@ const ROLE_RULES: Array<{ role: string; keywords: string[] }> = [
   { role: "chair", keywords: [" chair ", "chair"] },
   { role: "sofa", keywords: ["sofa", "settee", "loveseat", "sectional"] },
   { role: "bench", keywords: ["bench", "banquette"] },
-  { role: "credenza", keywords: ["credenza", "buffet"] },
   { role: "sideboard", keywords: ["sideboard"] },
+  { role: "credenza", keywords: ["credenza", "buffet"] },
   { role: "console", keywords: ["console"] },
   { role: "pendant", keywords: ["pendant"] },
   { role: "chandelier", keywords: ["chandelier"] },
@@ -301,20 +302,30 @@ function intersect(a: string[], b: string[]): string[] {
 function extractMaterialTokens(input: ProductContextInput): string[] {
   const tagText = (input.tags || []).join(" ");
   const haystack = normalizeText(
-    [input.title, input.category, input.subcategory, input.materials, input.dimensions, tagText].filter(Boolean).join(" "),
+    [input.materials, input.description, tagText].filter(Boolean).join(" "),
   );
 
-  return unique(MATERIAL_KEYWORDS.filter((token) => haystack.includes(token)));
+  return unique(MATERIAL_KEYWORDS.filter((token) => new RegExp(`\\b${token}\\b`).test(haystack)));
 }
 
-function inferRole(input: ProductContextInput): string {
+export function inferRole(input: ProductContextInput): string {
+  const title = normalizeText(input.title);
+  if (/\b(?:barstool|counterstool)\b/.test(title)) return "stool";
+  if (/\b(?:bar|counter)\b.*\bstool\b/.test(title)) return "stool";
+  if (/\bstool\b/.test(title)) return "stool";
+  if (/ottomans?\s*&\s*stools?/.test(normalizeText(input.subcategory)) && !/\b(?:ottoman|pouf)\b/.test(title)) return "stool";
+  if (/\bbreakfast table\b/.test(title)) return "dining_table";
   const haystack = ` ${normalizeText(
-    [input.title, input.category, input.subcategory, input.materials, (input.tags || []).join(" ")].filter(Boolean).join(" "),
+    [input.title, input.category, input.subcategory].filter(Boolean).join(" "),
   )} `;
 
-  for (const rule of ROLE_RULES) {
-    if (rule.keywords.some((keyword) => haystack.includes(` ${keyword} `) || haystack.includes(keyword))) {
+  // Typology metadata wins over a product name (e.g. a table named "Chair").
+  const metadata = normalizeText([input.subcategory, input.category].filter(Boolean).join(" "));
+  for (const text of [metadata, haystack]) {
+    for (const rule of ROLE_RULES) {
+      if (rule.keywords.some((keyword) => new RegExp(`\\b${keyword.trim()}s?\\b`).test(text))) {
       return rule.role;
+      }
     }
   }
 
@@ -386,14 +397,34 @@ function formatList(items: string[]): string {
 
 function buildFitNote(candidate: ProductInsight, anchor: ProductInsight | null, sharedMaterials: string[], matchedRooms: string[]): string {
   if (anchor) {
-    const pairText = describePair(anchor, candidate);
-    let note = `Pairs with ${anchor.title} as ${pairText}`;
-    if (sharedMaterials.length > 0) {
-      note += ` and echoes ${formatList(sharedMaterials.slice(0, 2))}`;
-    } else if (matchedRooms.length > 0) {
-      note += ` in the same ${ROOM_LABELS[matchedRooms[0]] || "room"}`;
-    }
-    return note;
+    const specificMaterials = sharedMaterials.filter(token => !["wood", "stone", "metal", "fabric", "textile"].includes(token));
+    const shared = specificMaterials.length ? specificMaterials : sharedMaterials;
+    const material = shared.length > 0
+      ? `${candidate.title}'s ${formatList(shared.slice(0, 2))} echoes the recorded materials of ${anchor.title}.`
+      : materialFamilyOverlap(anchor.materialTokens, candidate.materialTokens).length > 0
+        ? `Related ${formatList(materialFamilyOverlap(anchor.materialTokens, candidate.materialTokens))} finishes connect the two pieces without repeating the same material.`
+        : "";
+    const trait = sharedDesignTraits(anchor, candidate)[0];
+    const aesthetic = trait ? `The recorded ${trait} character connects the two pieces.` : "";
+    const roles: Record<string, string> = {
+      side_table: `${candidate.title} introduces a companion surface beside ${anchor.title}, without adding another seating piece.`,
+      coffee_table: `Gives ${anchor.title} a central surface and a lower horizontal register within the seating group.`,
+      floor_lamp: `Adds a separate lighting layer beside ${anchor.title}, balancing the furniture with a vertical accent.`,
+      table_lamp: `Brings a localized lighting layer to the setting around ${anchor.title}.`,
+      rug: `Defines the furniture zone around ${anchor.title} with a continuous textile layer.`,
+      dining_chair: `Introduces seating around ${anchor.title}, establishing a distinct rhythm at the dining table.`,
+      sideboard: `Adds a storage register alongside ${anchor.title}, separating service from the dining surface.`,
+      credenza: `Adds a separate storage register to the setting around ${anchor.title}.`,
+      ottoman: `Introduces a footrest beside ${anchor.title}, extending the seating group without another chair back.`,
+      pendant: `Introduces overhead illumination to the furniture setting anchored by ${anchor.title}.`,
+      chandelier: `Adds an overhead focal point above the furniture setting anchored by ${anchor.title}.`,
+    };
+    const ownMaterials = candidate.materialTokens.filter(token => !["wood", "metal", "stone", "fabric", "textile"].includes(token)).slice(0, 2);
+    const counterpoint = ownMaterials.length
+      ? `Its recorded ${formatList(ownMaterials)} adds a distinct material accent beside ${anchor.title}.`
+      : "";
+    const detail = candidate.description?.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().split(/(?<=[.!?])\s/)[0];
+    return `${roles[candidate.role] || `Extends the composition around ${anchor.title} with ${describePair(anchor, candidate)}.`} ${material || aesthetic || counterpoint || (detail && detail.length <= 180 ? detail : "")}`.trim();
   }
 
   if (matchedRooms.length > 0) {
@@ -407,14 +438,42 @@ function buildFitNote(candidate: ProductInsight, anchor: ProductInsight | null, 
   return "Fits the room composition better than lower-ranked options";
 }
 
+const PRIMARY_ROLES = new Set(["sofa", "armchair", "lounge_chair", "dining_table", "bed", "desk", "dining_chair", "chair"]);
+
+export function selectFurnitureAnchors<T extends ProductContextInput>(items: T[]): T[] {
+  const primary = items.filter(item => PRIMARY_ROLES.has(inferRole(item)));
+  if (primary.length) return primary;
+  const furniture = items.filter(item => !["pendant", "chandelier", "floor_lamp", "table_lamp", "rug", "mirror", "unknown"].includes(inferRole(item)));
+  return furniture.length ? furniture : items;
+}
+
+const MATERIAL_FAMILIES: Record<string, string[]> = {
+  wood: ["wood", "timber", "oak", "walnut", "ash", "rattan", "cane"],
+  stone: ["stone", "marble", "travertine", "limestone", "granite", "alabaster"],
+  metal: ["metal", "brass", "bronze", "copper", "steel"],
+  textile: ["fabric", "textile", "linen", "wool", "velvet", "boucle"],
+};
+
+function materialFamilyOverlap(a: string[], b: string[]): string[] {
+  return Object.entries(MATERIAL_FAMILIES).filter(([, tokens]) => tokens.some(token => a.includes(token)) && tokens.some(token => b.includes(token))).map(([family]) => family);
+}
+
+function sharedDesignTraits(a: ProductContextInput, b: ProductContextInput): string[] {
+  const text = (item: ProductContextInput) => normalizeText([item.materials, item.description, ...(item.tags || [])].join(" "));
+  return ["art deco", "mid-century", "modernist", "contemporary", "sculptural", "black", "white", "ivory", "warm", "patinated", "polished"].filter(trait => text(a).includes(trait) && text(b).includes(trait));
+}
+
 function buildBoardProfile(boardItems: ProductInsight[]) {
   const roomCounts: Record<string, number> = {};
   const desiredRoles: Record<string, number> = {};
   const presentRoles: Record<string, number> = {};
   const materialTokens = new Set<string>();
 
+  const anchors = selectFurnitureAnchors(boardItems);
   for (const item of boardItems) {
     presentRoles[item.role] = (presentRoles[item.role] || 0) + 1;
+
+    if (!anchors.includes(item)) continue;
 
     for (const room of item.roomTags) {
       roomCounts[room] = (roomCounts[room] || 0) + 1;
@@ -461,6 +520,7 @@ export function summarizeBoardIntent(boardInputs: ProductContextInput[]): BoardI
 
 export function rankCatalogCandidates(boardInputs: ProductContextInput[], catalogInputs: ProductContextInput[]): RankedCatalogCandidate[] {
   const boardItems = boardInputs.map(toInsight);
+  const anchors = selectFurnitureAnchors(boardItems);
   const catalog = catalogInputs.map(toInsight);
   const boardProfile = buildBoardProfile(boardItems);
 
@@ -471,12 +531,14 @@ export function rankCatalogCandidates(boardInputs: ProductContextInput[], catalo
       let bestSharedMaterials: string[] = [];
       let bestRoomOverlap: string[] = [];
 
-      for (const anchor of boardItems) {
+      for (const anchor of anchors) {
         const pairWeight = roleWeight(anchor.role, candidate.role);
         const roomOverlap = intersect(anchor.roomTags, candidate.roomTags);
         const materialOverlap = intersect(anchor.materialTokens, candidate.materialTokens);
 
-        let pairScore = pairWeight * 4 + roomOverlap.length * 8 + materialOverlap.length * 5;
+        let pairScore = pairWeight * 4 + roomOverlap.length * 8 + materialOverlap.length * 5
+          + materialFamilyOverlap(anchor.materialTokens, candidate.materialTokens).length * 4
+          + sharedDesignTraits(anchor, candidate).length * 4;
 
         if (anchor.role === candidate.role) {
           pairScore -= ["dining_chair", "chair", "armchair", "lounge_chair"].includes(candidate.role) ? 4 : 14;
@@ -535,8 +597,8 @@ export function selectCandidateShortlist(ranked: RankedCatalogCandidate[], limit
         : 3;
     const brandKey = candidate.normalizedBrand || "__unknown__";
 
-    if ((roleCounts[candidate.role] || 0) >= roleCap && chosen.length >= 16) continue;
-    if ((brandCounts[brandKey] || 0) >= 2 && chosen.length >= 20) continue;
+    if ((roleCounts[candidate.role] || 0) >= (limit <= 8 ? 2 : roleCap)) continue;
+    if ((brandCounts[brandKey] || 0) >= (limit <= 8 ? 2 : 4)) continue;
 
     chosen.push(candidate);
     roleCounts[candidate.role] = (roleCounts[candidate.role] || 0) + 1;

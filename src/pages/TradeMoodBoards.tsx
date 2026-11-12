@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MoodBoardActions } from "@/components/trade/MoodBoardActions";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
+import { filterMoodBoardCatalog, moodBoardCategories, shouldRecommendMoodBoard, type MoodBoardCategory } from "@/lib/moodBoardCatalog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type PickerFilter = "all" | "favourites" | "board";
@@ -45,6 +47,10 @@ export default function TradeMoodBoards() {
   const projectId = searchParams.get("project");
   const { clientSafe } = useClientSafeMode();
   const [search, setSearch] = useState("");
+  const [category, setCategory] = useState<MoodBoardCategory>("All");
+  const [maker, setMaker] = useState("");
+  const [visibleCount, setVisibleCount] = useState(40);
+  const requestRevision = useRef(0);
   const [board, setBoard] = useState<any[]>(() => projectId ? [] : loadBoardFromStorage(null));
   const [filter, setFilter] = useState<PickerFilter>(projectId ? "board" : "all");
   const [recommendations, setRecommendations] = useState<MoodRec[]>([]);
@@ -60,8 +66,8 @@ export default function TradeMoodBoards() {
     queryFn: async () => {
       const ids = new Set<string>();
       const [quotesRes, boardsRes] = await Promise.all([
-        supabase.from("trade_quotes").select("id").eq("project_id", projectId!),
-        supabase.from("client_boards").select("id").eq("project_id", projectId!),
+        supabase.from("trade_quotes").select("id").eq("project_id", projectId || ""),
+        supabase.from("client_boards").select("id").eq("project_id", projectId || ""),
       ]);
 
       const quoteIds = (quotesRes.data || []).map((q: any) => q.id);
@@ -146,29 +152,14 @@ export default function TradeMoodBoards() {
     if (!projectId) localStorage.setItem(storageKeyFor(null), JSON.stringify(board));
   }, [board, projectId]);
 
-  // Auto-fetch recommendations when board has 2+ items and composition changes
-  useEffect(() => {
-    const currentIds = board.map((b) => b.id).sort().join(",");
-    if (currentIds === prevBoardIdsRef.current) return;
-    prevBoardIdsRef.current = currentIds;
-
-    if (board.length < 2) {
-      setRecommendations([]);
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      fetchRecommendations(board.map((b) => b.id));
-    }, 1500); // Debounce 1.5s
-
-    return () => clearTimeout(timer);
-  }, [board]);
-
   const fetchRecommendations = useCallback(async (productIds: string[]) => {
+    if (!shouldRecommendMoodBoard(productIds.length)) return;
+    const revision = ++requestRevision.current;
     setRecLoading(true);
     setRecError(null);
     try {
       const { data, error } = await invokeWithAuthRetry("board-recommendations", { product_ids: productIds, source: projectId ? "project_tearsheet_mood_board" : "mood_board", project_id: projectId });
+      if (revision !== requestRevision.current) return;
       if (error) throw error;
       if (data?.recommendations) {
         const recs: MoodRec[] = data.recommendations;
@@ -202,29 +193,60 @@ export default function TradeMoodBoards() {
         }
       }
     } catch (err: any) {
+      if (revision !== requestRevision.current) return;
       console.warn("Mood board recommendations unavailable:", err?.message);
       setRecError("Could not generate suggestions");
     } finally {
-      setRecLoading(false);
+      if (revision === requestRevision.current) setRecLoading(false);
     }
   }, [projectId]);
 
+  // Invalidate in-flight results on every composition change, including removal.
+  useEffect(() => {
+    const currentIds = board.map(b => b.id).sort().join(",");
+    prevBoardIdsRef.current = currentIds;
+    requestRevision.current += 1;
+    setRecommendations([]);
+    setRecError(null);
+    if (!shouldRecommendMoodBoard(board.length)) {
+      setRecLoading(false);
+      return;
+    }
+    setRecLoading(true);
+    const timer = setTimeout(() => fetchRecommendations(board.map(b => b.id)), 300);
+    return () => { clearTimeout(timer); requestRevision.current += 1; };
+  }, [board, fetchRecommendations]);
+
   // All products: merge trade_products + designer_curator_picks
   const { data: products = [], isLoading } = useQuery({
-    queryKey: ["mood-board-products-merged"],
+    queryKey: ["mood-board-products-merged", user?.id],
+    enabled: !!user,
     queryFn: async () => {
-      const [{ data: trade }, { data: curator }] = await Promise.all([
-        supabase
-          .from("trade_products")
-          .select("id, product_name, brand_name, image_url, category, source_pick_id")
-          .eq("is_active", true)
-          .not("image_url", "is", null)
-          .order("brand_name"),
-        supabase
-          .from("designer_curator_picks")
-          .select("id, title, image_url, category, designer_id")
-          .not("image_url", "is", null)
-          .order("title"),
+      const trade: any[] = [];
+      const curator: any[] = [];
+      await Promise.all([
+        (async () => {
+          for (let offset = 0; ; offset += 500) {
+            const { data, error } = await supabase.from("trade_products")
+              .select("id, product_name, brand_name, image_url, category, subcategory, source_pick_id")
+              .eq("is_active", true).eq("is_hidden", false).not("image_url", "is", null)
+              .order("id").range(offset, offset + 499);
+            if (error) throw error;
+            trade.push(...(data || []));
+            if (!data || data.length < 500) break;
+          }
+        })(),
+        (async () => {
+          for (let offset = 0; ; offset += 500) {
+            const { data, error } = await supabase.from("designer_curator_picks")
+              .select("id, title, image_url, category, subcategory, designer_id")
+              .eq("is_hidden", false).not("image_url", "is", null)
+              .order("id").range(offset, offset + 499);
+            if (error) throw error;
+            curator.push(...(data || []));
+            if (!data || data.length < 500) break;
+          }
+        })(),
       ]);
 
       // Resolve designer names for curator picks
@@ -249,6 +271,7 @@ export default function TradeMoodBoards() {
         brand_name: p.brand_name,
         image_url: p.image_url,
         category: p.category,
+        subcategory: p.subcategory || "",
         source: "trade" as const,
       }));
 
@@ -260,13 +283,14 @@ export default function TradeMoodBoards() {
           brand_name: designerMap.get(p.designer_id) || "Unknown",
           image_url: p.image_url,
           category: p.category || "",
+          subcategory: p.subcategory || "",
           source: "curator" as const,
         }));
 
       // Legacy fallback: any remaining title|brand collision (pre-source_pick_id
       // rows) — prefer the trade entry since that's what tools join through.
       const seen = new Set<string>();
-      const merged: Array<{ id: string; product_name: string; brand_name: string; image_url: string | null; category: string; source: "trade" | "curator" }> = [];
+      const merged: Array<{ id: string; product_name: string; brand_name: string; image_url: string | null; category: string; subcategory?: string; source: "trade" | "curator" }> = [];
       for (const item of [...tradeItems, ...curatorItems]) {
         const key = `${item.product_name?.toLowerCase()}|${item.brand_name?.toLowerCase()}`;
         if (seen.has(key)) continue;
@@ -285,7 +309,7 @@ export default function TradeMoodBoards() {
       const { data: favs } = await supabase
         .from("trade_favorites")
         .select("product_id")
-        .eq("user_id", user!.id);
+        .eq("user_id", user?.id || "");
       if (!favs?.length) return [];
       const ids = favs.map((f) => f.product_id);
       const { data } = await supabase
@@ -303,7 +327,7 @@ export default function TradeMoodBoards() {
     queryKey: ["mood-board-project-items", user?.id, projectId],
     enabled: !!user,
     queryFn: async () => {
-      let q = supabase.from("client_boards").select("id").eq("user_id", user!.id);
+      let q = supabase.from("client_boards").select("id").eq("user_id", user?.id || "");
       if (projectId) q = q.eq("project_id", projectId);
       const { data: boards } = await q;
       if (!boards?.length) return [];
@@ -327,9 +351,9 @@ export default function TradeMoodBoards() {
   const sourceProducts = filter === "favourites" ? favouriteProducts : filter === "board" ? (projectId ? projectTearsheetProducts : boardProducts) : products;
   const sourceLoading = filter === "favourites" ? loadingFavs : filter === "board" ? (projectId ? loadingProjectTearsheetProducts : loadingBoards) : isLoading;
 
-  const filtered = sourceProducts.filter((p: any) =>
-    !search || [p.product_name, p.brand_name].some((f: string) => f?.toLowerCase().includes(search.toLowerCase()))
-  );
+  const makers = useMemo(() => [...new Set(sourceProducts.map((p: any) => p.brand_name as string).filter(Boolean))].sort((a, b) => a.localeCompare(b)), [sourceProducts]);
+  const filtered = filterMoodBoardCatalog(sourceProducts, search, category, maker);
+  useEffect(() => { setVisibleCount(40); }, [search, category, maker, filter]);
 
   const addToBoard = (product: any) => {
     if (board.find((b) => b.id === product.id)) return;
@@ -398,12 +422,13 @@ export default function TradeMoodBoards() {
                           <p className="font-body text-[10px] text-white/80">{item.brand_name}</p>
                         </div>
                       </div>
-                      {!clientSafe && <button
+                      {!clientSafe && <Button variant="ghost" size="icon"
+                        aria-label={`Remove ${item.product_name} from board`}
                         onClick={() => removeFromBoard(item.id)}
                         className="absolute top-2 right-2 w-6 h-6 rounded-full bg-background/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="h-3 w-3" />
-                      </button>}
+                      </Button>}
                     </div>
                   ))}
                 </div>
@@ -411,7 +436,7 @@ export default function TradeMoodBoards() {
             </div>
 
             {/* AI Recommendations */}
-            {!clientSafe && (recLoading || recommendations.length > 0 || recError) && (
+            {!clientSafe && (shouldRecommendMoodBoard(board.length)) && (
               <div className="border-t border-border pt-5">
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="font-display text-sm text-foreground flex items-center gap-2">
@@ -422,7 +447,7 @@ export default function TradeMoodBoards() {
                     variant="ghost"
                     size="sm"
                     onClick={() => fetchRecommendations(board.map((b) => b.id))}
-                    disabled={recLoading || board.length < 2}
+                    disabled={recLoading || !shouldRecommendMoodBoard(board.length)}
                     className="text-[10px] text-muted-foreground h-7 px-2"
                   >
                     <RefreshCw className={`h-3 w-3 mr-1 ${recLoading ? "animate-spin" : ""}`} />
@@ -442,15 +467,17 @@ export default function TradeMoodBoards() {
                   </div>
                 ) : recError ? (
                   <p className="font-body text-xs text-muted-foreground">{recError}</p>
+                ) : recommendations.length === 0 ? (
+                  <p className="font-body text-xs text-muted-foreground">No suitable complements found for this selection.</p>
                 ) : (
                   <TooltipProvider delayDuration={120}>
                     <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
                       {recommendations.slice(0, 8).map((rec) => (
                         <Tooltip key={rec.product_id}>
                           <TooltipTrigger asChild>
-                            <button
+                            <Button variant="ghost"
                               onClick={() => addRecToBoard(rec)}
-                              className="group w-44 shrink-0 text-left"
+                              className="group h-auto w-44 shrink-0 flex-col items-stretch whitespace-normal p-0 text-left"
                             >
                               <div className="relative aspect-square rounded-lg overflow-hidden bg-muted mb-1.5 border border-border group-hover:border-primary/40 transition-colors">
                                 {rec.image_url ? (
@@ -474,7 +501,7 @@ export default function TradeMoodBoards() {
                               <p className="font-body text-[11px] text-primary/80 leading-snug mt-1 line-clamp-4">
                                 {rec.reason}
                               </p>
-                            </button>
+                            </Button>
                           </TooltipTrigger>
                           <TooltipContent side="top" align="center" className="max-w-xs text-xs leading-relaxed">
                             {rec.reason}
@@ -493,10 +520,10 @@ export default function TradeMoodBoards() {
             {/* Filter toggle */}
             <div className="flex gap-1 p-0.5 bg-muted/50 rounded-lg">
               {filterOptions.map((opt) => (
-                <button
+                <Button variant="ghost"
                   key={opt.key}
-                  onClick={() => setFilter(opt.key)}
-                  className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md text-[10px] font-medium transition-colors ${
+                  onClick={() => { setFilter(opt.key); setMaker(""); }}
+                  className={`flex-1 flex items-center justify-center gap-1.5 h-auto px-2 py-1.5 rounded-md text-[10px] font-medium transition-colors ${
                     filter === opt.key
                       ? "bg-background text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
@@ -504,7 +531,7 @@ export default function TradeMoodBoards() {
                 >
                   {opt.icon}
                   {opt.label}
-                </button>
+                </Button>
               ))}
             </div>
 
@@ -512,6 +539,21 @@ export default function TradeMoodBoards() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search products..." className="pl-10 font-body text-sm" />
             </div>
+
+            <div className="flex gap-1 overflow-x-auto pb-1" aria-label="Product categories">
+              {moodBoardCategories.map(value => (
+                <Button key={value} size="sm" variant={category === value ? "secondary" : "ghost"}
+                  aria-pressed={category === value} onClick={() => setCategory(value)}
+                  className="h-7 shrink-0 rounded-full px-2 text-[10px]">{value}</Button>
+              ))}
+            </div>
+            <Select value={maker || "all-makers"} onValueChange={value => setMaker(value === "all-makers" ? "" : value)}>
+              <SelectTrigger aria-label="Brand or maker" className="h-8 font-body text-xs"><SelectValue placeholder="All brands / makers" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all-makers">All brands / makers</SelectItem>
+                {makers.map(name => <SelectItem key={name} value={name}>{name}</SelectItem>)}
+              </SelectContent>
+            </Select>
 
             <p className="font-body text-[10px] text-muted-foreground">
               {filtered.length} product{filtered.length !== 1 ? "s" : ""}
@@ -525,14 +567,14 @@ export default function TradeMoodBoards() {
                   {filter === "favourites" ? "No favourited products yet." : filter === "board" ? (projectId ? "No products in this project's tearsheet yet." : "No products in your project boards.") : "No products found."}
                 </p>
               ) : (
-                filtered.slice(0, 100).map((p: any) => {
+                filtered.slice(0, visibleCount).map((p: any) => {
                   const onBoard = board.find((b) => b.id === p.id);
                   return (
-                    <button
+                    <Button variant="ghost"
                       key={p.id}
                       onClick={() => addToBoard(p)}
                       disabled={!!onBoard}
-                      className={`w-full flex items-center gap-2.5 p-2 rounded-lg text-left transition-colors ${onBoard ? "opacity-40 cursor-default" : "hover:bg-muted/50"}`}
+                      className={`h-auto w-full flex items-center gap-2.5 p-2 rounded-lg text-left transition-colors ${onBoard ? "opacity-40 cursor-default" : "hover:bg-muted/50"}`}
                     >
                       <div className="w-10 h-10 rounded bg-muted overflow-hidden shrink-0">
                         {p.image_url && <img src={p.image_url} alt="" className="w-full h-full object-cover" />}
@@ -542,9 +584,14 @@ export default function TradeMoodBoards() {
                         <p className="font-body text-[10px] text-muted-foreground">{p.brand_name}</p>
                       </div>
                       {!onBoard && <Plus className="h-3.5 w-3.5 text-muted-foreground shrink-0" />}
-                    </button>
+                    </Button>
                   );
                 })
+              )}
+              {!sourceLoading && visibleCount < filtered.length && (
+                <Button variant="outline" size="sm" className="w-full font-body text-xs" onClick={() => setVisibleCount(count => count + 40)}>
+                  Load more · {filtered.length - visibleCount} remaining
+                </Button>
               )}
             </div>
           </div>
