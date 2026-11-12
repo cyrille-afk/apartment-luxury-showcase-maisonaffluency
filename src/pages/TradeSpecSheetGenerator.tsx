@@ -1,5 +1,7 @@
 import { Helmet } from "react-helmet-async";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { replacementCandidates, type ReplacementProduct } from "@/lib/specSheetReplacement";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { cleanSpecDescription, specClientPriceCents, specDimensions, specFinishes, SPEC_DIMENSIONS_PLACEHOLDER } from "@/lib/specSheetCard";
 import { materialSwatchTone } from "@/lib/materialSwatch";
 import { useEffect, useMemo, useState } from "react";
@@ -17,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
-import { Check, FileDown, ImageIcon, Search, Upload, X } from "lucide-react";
+import { Check, FileDown, ImageIcon, Search, Upload, X, Replace } from "lucide-react";
 
 /* ------------------------------------------------------------------ */
 /* Types & constants                                                   */
@@ -25,6 +27,8 @@ import { Check, FileDown, ImageIcon, Search, Upload, X } from "lucide-react";
 
 interface SpecItem {
   item_id: string;
+  source_product_id: string;
+  replacement_id: string | null;
   product_name: string;
   brand_name: string;
   category: string;
@@ -137,6 +141,10 @@ const escapeHtml = (v: string) =>
 
 export default function TradeSpecSheetGenerator() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const [replacementItem, setReplacementItem] = useState<SpecItem | null>(null);
+  const [savingReplacement, setSavingReplacement] = useState(false);
+  const [replacementError, setReplacementError] = useState("");
   const { projectFilter, clearProjectFilter } = useProjectFilter();
 
   const [settings, setSettings] = useState<DeckSettings>(() => loadSettings());
@@ -155,10 +163,11 @@ export default function TradeSpecSheetGenerator() {
   const { data: items = [], isLoading } = useQuery({
     queryKey: ["spec-generator-items", user?.id, projectFilter],
     queryFn: async (): Promise<SpecItem[]> => {
+      if (!user) return [];
       let qq = supabase
         .from("trade_quotes")
         .select("id, client_name, status, project_id")
-        .eq("user_id", user!.id)
+        .eq("user_id", user.id)
         .in("status", ["draft", "confirmed", "submitted", "responded", "priced", "deposit_paid", "paid"]);
       if (projectFilter) qq = qq.eq("project_id", projectFilter);
       const { data: quotes } = await qq;
@@ -171,7 +180,11 @@ export default function TradeSpecSheetGenerator() {
         .in("quote_id", quoteIds);
       if (!qItems?.length) return [];
 
-      const productIds = [...new Set((qItems as any[]).map((i) => i.product_id))];
+      const { data: replacements, error: replacementReadError } = await supabase.from("spec_sheet_catalogue_replacements")
+        .select("source_product_id, replacement_product_id").eq("user_id", user.id);
+      if (replacementReadError) throw replacementReadError;
+      const replacementMap = Object.fromEntries((replacements || []).map(r => [r.source_product_id, r.replacement_product_id]));
+      const productIds = [...new Set([...qItems.map(i => i.product_id), ...Object.values(replacementMap)])];
       const { data: products } = await supabase
         .from("trade_products")
         .select("id, product_name, brand_name, category, currency, dimensions, width_mm, depth_mm, height_mm, size_variants, default_variant_label, description, materials_description, meta_description, materials, image_url, gallery_images, available_finishes, rrp_price_cents")
@@ -189,13 +202,16 @@ export default function TradeSpecSheetGenerator() {
       const seen = new Set<string>();
       const rows: SpecItem[] = [];
       for (const item of qItems as any[]) {
-        const p: any = productMap[item.product_id];
+        const replacementId = replacementMap[item.product_id];
+        const p: any = productMap[replacementId] || productMap[item.product_id];
         if (!p) continue;
-        if (seen.has(p.id)) continue;
-        seen.add(p.id);
+        if (seen.has(item.product_id)) continue;
+        seen.add(item.product_id);
         const q: any = quoteMap[item.quote_id];
         rows.push({
           item_id: item.id,
+          source_product_id: item.product_id,
+          replacement_id: replacementId && productMap[replacementId] ? replacementId : null,
           product_name: p.product_name || "Unknown item",
           brand_name: p.brand_name || "",
           category: p.category || "",
@@ -205,7 +221,7 @@ export default function TradeSpecSheetGenerator() {
           description: cleanSpecDescription(p),
           image_url: p.image_url || p.gallery_images?.[0] || "",
           quantity: item.quantity || 1,
-          client_price_cents: specClientPriceCents(p, item.unit_price_cents),
+          client_price_cents: specClientPriceCents(p, replacementId ? null : item.unit_price_cents),
           currency: p.currency || "EUR",
           project_name: q?.project_id ? projectMap[q.project_id] || null : null,
           client_name: q?.client_name || null,
@@ -215,6 +231,47 @@ export default function TradeSpecSheetGenerator() {
     },
     enabled: !!user,
   });
+
+  const { data: candidates = [], isFetching: loadingCandidates, error: candidateError } = useQuery({
+    queryKey: ["spec-replacement-candidates", user?.id, replacementItem?.source_product_id],
+    enabled: !!user && !!replacementItem,
+    queryFn: async () => {
+      if (!replacementItem) return [];
+      const { data, error } = await supabase.from("trade_products")
+        .select("id, product_name, brand_name, category, currency, description, materials_description, meta_description, materials, size_variants, default_variant_label, available_finishes, rrp_price_cents, is_active, is_hidden")
+        .ilike("product_name", `%${replacementItem.product_name.trim().replace(/[%_]/g, '')}%`);
+      if (error) throw error;
+      const products: ReplacementProduct[] = (data || []).map(p => ({
+        ...p,
+        size_variants: Array.isArray(p.size_variants) ? p.size_variants.flatMap(v => {
+          if (!v || typeof v !== "object" || Array.isArray(v)) return [];
+          return [{ label: typeof v.label === "string" ? v.label : null,
+            base: typeof v.base === "string" ? v.base : null, top: typeof v.top === "string" ? v.top : null,
+            price_cents: typeof v.price_cents === "number" ? v.price_cents : null }];
+        }) : [],
+      }));
+      return replacementCandidates({ id: replacementItem.source_product_id, product_name: replacementItem.product_name, category: replacementItem.category }, products);
+    },
+  });
+
+  const saveReplacement = async (candidate: ReplacementProduct | null) => {
+    if (!user || !replacementItem || savingReplacement) return;
+    setSavingReplacement(true);
+    setReplacementError("");
+    try {
+      const result = candidate
+        ? await supabase.from("spec_sheet_catalogue_replacements").upsert({ user_id: user.id, source_product_id: replacementItem.source_product_id, replacement_product_id: candidate.id })
+        : await supabase.from("spec_sheet_catalogue_replacements").delete().eq("user_id", user.id).eq("source_product_id", replacementItem.source_product_id);
+      if (result.error) throw result.error;
+      await queryClient.invalidateQueries({ queryKey: ["spec-generator-items", user.id] });
+      setReplacementItem(null);
+      toast({ title: candidate ? "Complete catalogue record saved" : "Original record restored" });
+    } catch {
+      setReplacementError("The replacement could not be saved. Please try again.");
+    } finally {
+      setSavingReplacement(false);
+    }
+  };
 
   // Select every item the first time the catalog loads.
   useEffect(() => {
@@ -407,13 +464,13 @@ export default function TradeSpecSheetGenerator() {
               {visibleItems.map((i) => {
                 const isOn = !!selected[i.item_id];
                 return (
+                  <div key={i.item_id} className="relative">
                   <button
-                    key={i.item_id}
                     type="button"
                     onClick={() => toggleItem(i.item_id)}
                     aria-pressed={isOn}
                     className={cn(
-                      "group relative flex h-full flex-col overflow-hidden rounded-lg border bg-card text-left transition-all duration-200",
+                      "group relative flex h-full w-full flex-col overflow-hidden rounded-lg border bg-card text-left transition-all duration-200",
                       isOn ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-foreground/30",
                     )}
                   >
@@ -467,6 +524,12 @@ export default function TradeSpecSheetGenerator() {
                       </div>
                     </div>
                   </button>
+                  <Button variant="outline" size="icon" title="Replace catalogue record" aria-label={`Replace catalogue record for ${i.product_name.trim()}`}
+                    className="absolute left-2 top-2 z-10 h-7 w-7 bg-background/90"
+                    onClick={() => { setReplacementError(""); setReplacementItem(i); }}>
+                    <Replace className="h-3.5 w-3.5" />
+                  </Button>
+                  </div>
                 );
               })}
             </div>
@@ -575,6 +638,30 @@ export default function TradeSpecSheetGenerator() {
           </p>
         </aside>
       </div>
+      <Dialog open={!!replacementItem} onOpenChange={(open) => { if (!open && !savingReplacement) setReplacementItem(null); }}>
+        <DialogContent className="max-h-[85vh] w-[calc(100%-2rem)] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Replace catalogue record</DialogTitle>
+            <DialogDescription>{replacementItem?.product_name} — use complete specifications and catalogue prices in this sheet and its PDF. Saved quotes and quantities remain unchanged.</DialogDescription>
+          </DialogHeader>
+          {loadingCandidates ? <DotCircleLoader /> : candidateError ? <p className="text-sm text-destructive">Catalogue records could not be loaded. Close and try again.</p> : candidates.length === 0 ? <p className="text-sm text-muted-foreground">No complete matching catalogue record is available.</p> : candidates.map(p => (
+            <div key={p.id} className="space-y-3 border-t border-border pt-4">
+              <p className="font-display text-lg">{p.brand_name}</p>
+              <p className="text-sm text-muted-foreground">{specDimensions(p)}</p>
+              <p className="text-sm">{specFinishes(p).join(" / ")}</p>
+              <p className="line-clamp-2 text-sm text-muted-foreground">{cleanSpecDescription(p)}</p>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <span>{money(specClientPriceCents(p), p.currency || "EUR")}</span>
+                <Button disabled={savingReplacement || replacementItem?.replacement_id === p.id} onClick={() => saveReplacement(p)}>
+                  <Replace className="mr-2 h-4 w-4" />{replacementItem?.replacement_id === p.id ? "Current record" : "Use this record"}
+                </Button>
+              </div>
+            </div>
+          ))}
+          {replacementItem?.replacement_id && <Button variant="outline" disabled={savingReplacement} onClick={() => saveReplacement(null)}>Restore original record</Button>}
+          <p role="alert" className="min-h-5 text-sm text-destructive">{replacementError}</p>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

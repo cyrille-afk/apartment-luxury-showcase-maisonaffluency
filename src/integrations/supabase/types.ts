@@ -9456,6 +9456,53 @@ export type Database = {
         }
         Relationships: []
       }
+      spec_sheet_catalogue_replacements: {
+        Row: {
+          replacement_product_id: string
+          source_product_id: string
+          user_id: string
+        }
+        Insert: {
+          replacement_product_id: string
+          source_product_id: string
+          user_id: string
+        }
+        Update: {
+          replacement_product_id?: string
+          source_product_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spec_sheet_catalogue_replacements_replacement_product_id_fkey"
+            columns: ["replacement_product_id"]
+            isOneToOne: false
+            referencedRelation: "trade_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spec_sheet_catalogue_replacements_replacement_product_id_fkey"
+            columns: ["replacement_product_id"]
+            isOneToOne: false
+            referencedRelation: "trade_products_public_rrp"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spec_sheet_catalogue_replacements_source_product_id_fkey"
+            columns: ["source_product_id"]
+            isOneToOne: false
+            referencedRelation: "trade_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spec_sheet_catalogue_replacements_source_product_id_fkey"
+            columns: ["source_product_id"]
+            isOneToOne: false
+            referencedRelation: "trade_products_public_rrp"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stripe_delivery_checks: {
         Row: {
           available: boolean

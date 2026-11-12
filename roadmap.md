@@ -1,5 +1,9 @@
 # Roadmap
 
+## Specification catalogue replacement
+- [x] Add explicit account-saved replacement of incomplete sheet records with complete same-product catalogue data, preserving original quotes and quantities.
+- [x] Fourteen tests pass; signed-in incomplete Frenchmen record replacement shows Man of Parts, Tobacco Oak / COM Fabric and €4,791 after reload; original restored after verification, phone dialog fits and no page errors. Build OK.
+
 ## Sidebar Tools placement
 - [x] Tools now sits directly below Favorites in Core Navigation & Tools; AI & Co-Pilot contains only the three existing AI destinations. Stable section identities, saved ordering, handles and tour anchors retained. Eleven regressions pass; signed-in pointer drag, reload persistence, unique anchors and Tools navigation verified without page errors. Original account order restored; build OK.
 
