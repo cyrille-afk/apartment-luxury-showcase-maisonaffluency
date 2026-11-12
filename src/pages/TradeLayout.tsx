@@ -3,7 +3,7 @@ import { CollaboratorInviteProvider } from "@/components/trade/CollaboratorInvit
 import { heldTradePageHeight, setHeldTradePageHeight } from "@/lib/tradePageHeightHold";
 import { lazy, Suspense, useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
-import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { DotCircleLoader, PageLoader } from "@/components/ui/dot-circle-loader";
 import { LayoutDashboard, ChevronUp, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Outlet, Navigate, useLocation, Link } from "@/lib/router-compat";
@@ -465,9 +465,7 @@ const TradeLayout = () => {
       );
     }
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <DotCircleLoader size="md" />
-      </div>
+      <PageLoader />
     );
   }
 
@@ -659,9 +657,7 @@ const TradeLayout = () => {
                 // Holds the outgoing page's height so the browser never snaps the
                 // window up while the next page (e.g. a product) is loading.
                 <div data-trade-page-loading role="status" aria-label="Loading workspace" style={{ minHeight: heldTradePageHeight() || undefined }} className="relative">
-                  <div className="sticky top-1/2 flex items-center justify-center py-20">
-                    <DotCircleLoader size="sm" className="text-muted-foreground" />
-                  </div>
+                  <PageLoader />
                 </div>
               }>
                 <StudioSetupNavigationGate locked={studioLocked} ready={!isTradeUser || (rolesLoaded && !studioSetupLoading)}>

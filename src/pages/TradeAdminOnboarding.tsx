@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { DotCircleLoader, PageLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
 import { Navigate } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
@@ -249,7 +249,7 @@ const TradeAdminOnboarding = () => {
         )}
 
         {loading ? (
-          <div className="py-20 flex items-center justify-center text-muted-foreground"><DotCircleLoader size="sm" /></div>
+          <PageLoader />
         ) : (
           <>
             {/* Welcome panel editor */}

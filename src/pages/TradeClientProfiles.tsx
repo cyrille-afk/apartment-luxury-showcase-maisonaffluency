@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { DotCircleLoader, PageLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -146,9 +146,7 @@ const TradeClientProfiles = () => {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <DotCircleLoader size="sm" className="text-muted-foreground" />
-        </div>
+        <PageLoader />
       ) : profiles.length === 0 ? (
         <Card>
           <CardContent className="py-16 text-center">

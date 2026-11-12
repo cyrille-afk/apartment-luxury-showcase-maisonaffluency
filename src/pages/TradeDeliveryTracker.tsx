@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "@/lib/router-compat";
-import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { DotCircleLoader, PageLoader } from "@/components/ui/dot-circle-loader";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
 import { CalendarClock, ChevronRight, CalendarPlus, ImageOff, Download, FileSpreadsheet, FileText, Search } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -458,7 +458,7 @@ export default function TradeDeliveryTracker() {
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center py-20"><DotCircleLoader size="sm" className="text-muted-foreground" /></div>
+          <PageLoader />
         ) : groups.length === 0 ? (
           <div className="text-center py-20 border border-dashed border-border rounded-lg">
             <CalendarClock className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />

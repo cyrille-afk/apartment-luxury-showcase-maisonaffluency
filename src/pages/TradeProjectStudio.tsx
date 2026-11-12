@@ -3,7 +3,7 @@ import { Link, useParams } from "@/lib/router-compat";
 import { ArrowLeft, FileDown, FileText, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProject } from "@/hooks/useProjects";
-import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { DotCircleLoader, PageLoader } from "@/components/ui/dot-circle-loader";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
@@ -219,9 +219,7 @@ export default function TradeProjectStudio() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <DotCircleLoader size="sm" className="text-muted-foreground" />
-      </div>
+      <PageLoader />
     );
   }
 
@@ -266,9 +264,7 @@ export default function TradeProjectStudio() {
             <p className="trade-micro-label text-muted-foreground">Visual canvas</p>
           </div>
           {loadingItems ? (
-            <div className="flex items-center justify-center py-24">
-              <DotCircleLoader size="sm" className="text-muted-foreground" />
-            </div>
+            <PageLoader />
           ) : items.length === 0 ? (
             <div className="px-4 pb-16 md:px-8 lg:px-12">
               <p className="font-body text-sm text-muted-foreground">

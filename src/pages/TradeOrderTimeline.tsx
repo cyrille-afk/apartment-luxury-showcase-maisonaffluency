@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { DotCircleLoader, PageLoader } from "@/components/ui/dot-circle-loader";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate, Link } from "@/lib/router-compat";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -326,9 +326,7 @@ export default function TradeOrderTimeline() {
         )}
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <DotCircleLoader size="md" />
-          </div>
+          <PageLoader />
         ) : orders.length === 0 ? (
           <div className="text-center py-20">
             <PackageCheck className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />

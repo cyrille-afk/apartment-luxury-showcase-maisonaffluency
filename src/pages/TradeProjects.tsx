@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { DotCircleLoader, PageLoader } from "@/components/ui/dot-circle-loader";
 import { Link, useSearchParams } from "@/lib/router-compat";
 import { Plus, FolderOpen, Loader2, Calendar, MapPin, User as UserIcon, Users, EyeOff, Trash2, Scan } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
@@ -233,9 +233,7 @@ export default function TradeProjects() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <DotCircleLoader size="sm" className="text-muted-foreground" />
-        </div>
+        <PageLoader />
       ) : filtered.length === 0 ? (
         projects.length === 0 && tab === "active" ? (
           // Studio-wide empty state: no visible projects in any tab

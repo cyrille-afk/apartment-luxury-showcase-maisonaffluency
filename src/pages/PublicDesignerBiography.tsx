@@ -10,7 +10,7 @@ import HeritageSlider from "@/components/HeritageSlider";
 import { useHeritageSlides } from "@/hooks/useHeritageSlides";
 import { useDesigner } from "@/hooks/useDesigner";
 import { useAuth } from "@/hooks/useAuth";
-import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { DotCircleLoader, PageLoader } from "@/components/ui/dot-circle-loader";
 import NotFound from "@/pages/NotFound";
 
 function displayName(name: string): string {
@@ -37,9 +37,7 @@ export default function PublicDesignerBiography() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <DotCircleLoader />
-      </div>
+      <PageLoader />
     );
   }
 

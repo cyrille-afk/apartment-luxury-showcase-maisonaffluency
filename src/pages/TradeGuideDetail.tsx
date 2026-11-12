@@ -1,5 +1,5 @@
 import { useParams, Navigate } from "@/lib/router-compat";
-import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { DotCircleLoader, PageLoader } from "@/components/ui/dot-circle-loader";
 import { lazy, Suspense, useMemo, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { GUIDE_LOADERS, GUIDE_SLUG_ALIASES } from "./guides/registry";
@@ -57,9 +57,7 @@ export default function TradeGuideDetail() {
   return (
     <Suspense
       fallback={
-        <div className="flex items-center justify-center py-20">
-          <DotCircleLoader size="sm" className="text-muted-foreground" />
-        </div>
+        <PageLoader />
       }
     >
       <GuideComponent />

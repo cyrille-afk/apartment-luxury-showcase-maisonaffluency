@@ -2,7 +2,7 @@ import { Helmet } from "react-helmet-async";
 import { useParams } from "@/lib/router-compat";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { DotCircleLoader, PageLoader } from "@/components/ui/dot-circle-loader";
 import { resolvePublicUrlsByPickIds } from "@/lib/comparatorCatalogue";
 
 export interface ShortlistItem {
@@ -47,7 +47,7 @@ export default function SharedShortlist() {
     <main className="mx-auto max-w-6xl px-6 py-12">
       <Helmet><title>Shortlist — Maison Affluency</title><meta name="robots" content="noindex" /></Helmet>
       <p className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Maison Affluency</p>
-      {isLoading ? <div className="py-20 flex justify-center"><DotCircleLoader size="sm" /></div> : !data ? (
+      {isLoading ? <PageLoader /> : !data ? (
         <p className="py-20 text-center font-body text-sm text-muted-foreground">This shortlist is unavailable.</p>
       ) : <>
         <h1 className="mt-2 font-display text-3xl text-foreground">{data.name}</h1>

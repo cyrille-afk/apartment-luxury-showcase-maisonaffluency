@@ -11,7 +11,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProjectFilter } from "@/hooks/useProjectFilter";
-import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { DotCircleLoader, PageLoader } from "@/components/ui/dot-circle-loader";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -459,7 +459,7 @@ export default function TradeSpecSheetGenerator() {
           </div>
 
           {isLoading ? (
-            <div className="flex justify-center py-20"><DotCircleLoader /></div>
+            <PageLoader />
           ) : visibleItems.length === 0 ? (
             <div className="rounded-lg border border-dashed border-border p-12 text-center font-body text-sm text-muted-foreground">
               No project items found. Add products to a quote to build a presentation deck.

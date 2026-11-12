@@ -1,5 +1,5 @@
 import { useMemo, useEffect, useState, useCallback, useRef } from "react";
-import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { DotCircleLoader, PageLoader } from "@/components/ui/dot-circle-loader";
 import HeritageSlider from "@/components/HeritageSlider";
 import { useHeritageSlides } from "@/hooks/useHeritageSlides";
 import { useParams, useNavigate, Link, useSearchParams } from "@/lib/router-compat";
@@ -267,9 +267,7 @@ const TradeAtelierProfile = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-32">
-        <DotCircleLoader size="md" />
-      </div>
+      <PageLoader />
     );
   }
 

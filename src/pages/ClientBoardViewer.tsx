@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { DotCircleLoader, PageLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
 import { Link, useLocation, useParams } from "@/lib/router-compat";
 import { Check, X, MessageSquare, Send, Folder } from "lucide-react";
@@ -166,9 +166,7 @@ const ClientBoardViewer = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <DotCircleLoader size="md" />
-      </div>
+      <PageLoader />
     );
   }
 

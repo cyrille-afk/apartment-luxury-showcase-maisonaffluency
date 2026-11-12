@@ -1,4 +1,4 @@
-import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { DotCircleLoader, PageLoader } from "@/components/ui/dot-circle-loader";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "@/lib/router-compat";
 import { Upload, Loader2, FileBox, AlertTriangle, CheckCircle2, XCircle, Info, Box } from "lucide-react";
@@ -239,7 +239,7 @@ export default function TradeSpatialFit() {
     if (productId) await loadProductAssets(productId);
   };
 
-  if (authLoading) return <div className="min-h-screen flex items-center justify-center bg-background"><DotCircleLoader size="lg" /></div>;
+  if (authLoading) return <PageLoader />;
   if (!user) return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <p className="text-muted-foreground">Sign in to use Spatial Fit.</p>

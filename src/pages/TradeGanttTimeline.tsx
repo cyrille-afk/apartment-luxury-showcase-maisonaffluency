@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProjectFilter } from "@/hooks/useProjectFilter";
-import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { DotCircleLoader, PageLoader } from "@/components/ui/dot-circle-loader";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -387,7 +387,7 @@ export default function TradeGanttTimeline() {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-20"><DotCircleLoader /></div>
+        <PageLoader />
       ) : filtered.length === 0 ? (
         <div className="rounded-xl border border-border bg-muted/20 px-6 py-16 text-center">
           <CalendarRange className="mx-auto mb-3 h-6 w-6 text-muted-foreground" />

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { DotCircleLoader, PageLoader } from "@/components/ui/dot-circle-loader";
 import { Link, useNavigate } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
@@ -65,9 +65,7 @@ const ResetPassword = () => {
 
   if (checking) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <DotCircleLoader size="md" />
-      </div>
+      <PageLoader />
     );
   }
 

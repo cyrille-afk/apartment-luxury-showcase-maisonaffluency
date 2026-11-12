@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { Navigate, Link } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { DotCircleLoader, PageLoader } from "@/components/ui/dot-circle-loader";
 import { ArrowLeft, BarChart3, Smartphone, Monitor, Tablet, Globe, X, ExternalLink } from "lucide-react";
 
 type EventType = "tour_step_view" | "tour_substep_click" | "tour_complete" | "tour_skip";
@@ -269,7 +269,7 @@ const TradeAdminOnboardingFunnel = () => {
         </div>
 
         {loading ? (
-          <div className="py-20 flex items-center justify-center text-muted-foreground"><DotCircleLoader size="sm" /></div>
+          <PageLoader />
         ) : (
           <>
             {/* KPI cards (clickable) */}

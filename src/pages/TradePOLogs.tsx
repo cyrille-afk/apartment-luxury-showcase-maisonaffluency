@@ -17,7 +17,7 @@ import { useProjectFilter } from "@/hooks/useProjectFilter";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { formatMoneyIn } from "@/lib/displayMoney";
-import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { DotCircleLoader, PageLoader } from "@/components/ui/dot-circle-loader";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -280,9 +280,7 @@ export default function TradePOLogs() {
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center py-20">
-            <DotCircleLoader size="sm" className="text-muted-foreground" />
-          </div>
+          <PageLoader />
         ) : (
           <>
             {/* Summary bar */}

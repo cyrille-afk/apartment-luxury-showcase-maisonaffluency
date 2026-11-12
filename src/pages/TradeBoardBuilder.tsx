@@ -9,7 +9,7 @@ import {
   isSupportedLogoUrl,
   logoFormatLabel,
 } from "@/lib/studioLogoFormat";
-import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { DotCircleLoader, PageLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
 import { useParams, useNavigate, useLocation, Link } from "@/lib/router-compat";
 import type { ReactNode } from "react";
@@ -625,7 +625,7 @@ const TradeBoardBuilder = () => {
     navigate("/trade/boards");
   };
 
-  if (loading) return <div className="flex items-center justify-center py-20"><DotCircleLoader size="sm" /></div>;
+  if (loading) return <PageLoader />;
   if (!board) return <div className="text-center py-20 text-muted-foreground">Board not found</div>;
 
   const approvedCount = items.filter(i => i.approval_status === "approved").length;

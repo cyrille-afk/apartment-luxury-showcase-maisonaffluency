@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import monogram from "@/assets/studio-monogram-a.png.asset.json";
 
@@ -42,3 +44,16 @@ export function DotCircleLoader({ className, label = "Loading" }: DotCircleLoade
 }
 
 export default DotCircleLoader;
+
+/** Page-level loader: always pinned to the exact centre of the screen, so successive loading stages never jump. */
+export function PageLoader({ label = "Loading" }: { label?: string }) {
+  // Portal to <body> so a transformed ancestor can't turn "fixed" into "relative to the panel".
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const node = (
+    <div className="fixed inset-0 z-40 flex items-center justify-center pointer-events-none" data-page-loader>
+      <DotCircleLoader label={label} />
+    </div>
+  );
+  return mounted ? createPortal(node, document.body) : node;
+}

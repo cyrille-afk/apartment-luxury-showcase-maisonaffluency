@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { DotCircleLoader, PageLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -190,9 +190,7 @@ export default function TradeMediaLibrary() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <DotCircleLoader size="sm" className="text-muted-foreground" />
-        </div>
+        <PageLoader />
       ) : filtered.length === 0 ? (
         <p className="py-12 text-center font-body text-sm text-muted-foreground">No files found.</p>
       ) : viewMode === "grid" ? (

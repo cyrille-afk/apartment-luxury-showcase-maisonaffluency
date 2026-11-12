@@ -4,7 +4,7 @@
  * Each event includes website link + .ics download.
  */
 import { useEffect, useMemo, useState } from "react";
-import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { DotCircleLoader, PageLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
 import { Loader2, CalendarDays, MapPin, ExternalLink, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -105,9 +105,7 @@ export default function TradeFairCalendar() {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-20">
-            <DotCircleLoader size="sm" className="text-muted-foreground" />
-          </div>
+          <PageLoader />
         ) : (
           <>
             {events.length > 0 && (

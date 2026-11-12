@@ -4,7 +4,7 @@
  * admins see all and can reply directly with concierge notes + status updates.
  */
 import { useEffect, useMemo, useState } from "react";
-import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { DotCircleLoader, PageLoader } from "@/components/ui/dot-circle-loader";
 import { useSearchParams } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
 import { Loader2, Wand2, Inbox, Save, ShieldCheck, History, ChevronDown, ChevronUp } from "lucide-react";
@@ -194,9 +194,7 @@ export default function TradeCustomRequests() {
         </div>
 
         {authLoading || loading ? (
-          <div className="flex justify-center py-20">
-            <DotCircleLoader size="sm" className="text-muted-foreground" />
-          </div>
+          <PageLoader />
         ) : !user ? (
           <div className="text-center py-20 border border-dashed border-border rounded-lg">
             <p className="font-body text-sm text-muted-foreground">Sign in to view your custom requests.</p>
