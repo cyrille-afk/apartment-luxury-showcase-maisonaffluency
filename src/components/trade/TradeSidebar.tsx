@@ -4,7 +4,7 @@ import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import {
   LayoutDashboard, LogOut, Shield, MapPin, Heart, FolderKanban,
   DollarSign, ClipboardList, Package, FileText, Settings, Wrench, MessageSquare, UserCircle, Wand2, Image, Users, Inbox, Sparkles,
-  TrendingDown, Lock, Wallet, Activity, ShieldCheck, Target, BarChart3, ChevronDown, ChevronRight, FolderOpen, Clapperboard,
+  TrendingDown, Lock, Wallet, Activity, ShieldCheck, Target, BarChart3, ChevronDown, ChevronRight, FolderOpen,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate, useLocation, useSearchParams } from "@/lib/router-compat";
@@ -44,7 +44,6 @@ const topItems: NavItem[] = [
   { title: "Tools", url: "/trade/tools", icon: Wrench },
   { title: "Trade Concierge (Powered by Felix)", url: "/trade/concierge", icon: Sparkles },
   { title: "AI Extension Sync", url: "/trade/extension-sync", icon: Wand2 },
-  { title: "3D Room Layout & Walkthrough", url: "/trade/ai-layout", icon: Clapperboard },
   { title: "QUOTES & PROFORMAS", url: "/trade/quotes", icon: FileText },
   { title: "BETA FEEDBOARD", url: "/trade/beta-feedboard", icon: MessageSquare },
   { title: "Settings", url: "/trade/settings", icon: Settings },
@@ -118,14 +117,14 @@ export function TradeSidebar() {
   const visibleTopItems = (
     hasTradeAccess
       ? topItems.filter((i) => i.url !== "/trade/me")
-      : topItems.filter((i) => i.url !== "/trade/concierge" && i.url !== "/trade/ai-layout")
+      : topItems.filter((i) => i.url !== "/trade/concierge")
   ).filter((i) => i.url !== "/trade/beta-feedboard" || canSeeBetaFeedboard);
   // Sandbox-only mode: the whole portal menu collapses to the Visualiser.
   const navTopItems: NavItem[] = TRADE_SANDBOX_ONLY
     ? [{ title: "Visualiser Sandbox", url: "/trade/visualiser", icon: Scan }]
     : visibleTopItems;
   const { order: sidebarOrder, update: updateSidebarOrder, showReorderTip } = useSidebarOrder(user?.id);
-  const aiUrls = ["/trade/concierge", "/trade/extension-sync", "/trade/ai-layout"];
+  const aiUrls = ["/trade/concierge", "/trade/extension-sync"];
   const sections = orderedSidebarItems([
     { id: "core", label: "Core Navigation & Tools", items: navTopItems.filter(item => !aiUrls.includes(item.url) && item.url !== "/trade/quotes") },
     { id: "tools", label: "AI & Co-Pilot", items: navTopItems.filter(item => aiUrls.includes(item.url)) },

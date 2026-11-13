@@ -5,6 +5,7 @@ import {
   Columns, Paintbrush, MessageCircle, CalendarClock, Package, Truck,
   CalendarDays, Wallet, RefreshCw, ArrowRightLeft, GraduationCap, Box, BookOpen,
   Wand2, Star, Search, X, Scan, Presentation, ClipboardList, CalendarRange, CheckCircle2, Circle, Save,
+  Clapperboard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { categorySlug } from "@/lib/toolsBreadcrumbs";
@@ -39,6 +40,7 @@ const categories: ToolCategory[] = [
       { title: "Product Comparator", description: "Compare specs side by side", url: "/trade/comparator", icon: Columns },
       { title: "Markup & Annotation", description: "Annotate images and drawings", url: "/trade/annotations", icon: MessageCircle },
       { title: "Visualiser", description: "Render premium spaces, arrange curated furniture, and visualize custom fabric drape options.", url: "/trade/visualiser", icon: Scan },
+      { title: "Curated Room Layout & Walkthrough", description: "Furnish a room from your brief within budget, then render a cinematic walkthrough", url: "/trade/ai-layout", icon: Clapperboard },
       { title: "Tearsheet Builder", description: "Create printable product specs", url: "/trade/tearsheets", icon: Scissors },
       { title: "Specification Sheet Generator", description: "Branded client presentation decks & pitch PDFs", url: "/trade/spec-generator", icon: Presentation },
       { title: "FF&E Schedule", description: "Auto-generate furniture schedules", url: "/trade/ffe-schedule", icon: FileSpreadsheet },
@@ -384,7 +386,7 @@ export default function TradeTools() {
                           onClick={() => { setProjectId(project.id); completion.reset(); targetMutation.reset(); document.getElementById('specification-project-progress')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>
                           {project.name}
                         </Button>
-                        <p className="text-xs text-muted-foreground">{summary.count}/8 complete · {summary.percent}%</p>
+                        <p className="text-xs text-muted-foreground">{summary.count}/{specificationStages.length} complete · {summary.percent}%</p>
                         {targetsQuery.isSuccess && summary.overdueCount > 0 && <p className="text-xs text-destructive">{summary.overdueCount} overdue</p>}
                         <Progress value={summary.percent} className="h-1 bg-muted" aria-label={`${project.name} Specification completion`} />
                       </div>
@@ -414,13 +416,13 @@ export default function TradeTools() {
                 <div className="space-y-1">
                   <h3 className="font-body text-sm font-medium text-foreground">Project progress</h3>
                   <p className="font-body text-xs text-muted-foreground" aria-live="polite">
-                    {projectsLoading ? "Loading projects…" : !projects.length ? "No projects available" : !activeProjectId ? "Select a project" : progressQuery.isError ? "Progress unavailable" : !progressReady ? "Loading progress…" : `${workflow.count} of 8 stages complete · ${workflow.percent}%`}
+                    {projectsLoading ? "Loading projects…" : !projects.length ? "No projects available" : !activeProjectId ? "Select a project" : progressQuery.isError ? "Progress unavailable" : !progressReady ? "Loading progress…" : `${workflow.count} of ${specificationStages.length} stages complete · ${workflow.percent}%`}
                   </p>
                 </div>
                 <Select value={activeProjectId} onValueChange={value => { setProjectId(value); completion.reset(); targetMutation.reset(); }} disabled={projectsLoading || !projects.length || completion.isPending || targetMutation.isPending}>
                   <SelectTrigger className="w-full sm:w-80" aria-label="Workflow project"><SelectValue placeholder="Select a project" /></SelectTrigger>
                   <SelectContent>
-                    {projects.map(project => <SelectItem key={project.id} value={project.id}>{project.name}{progressQuery.isSuccess ? ` · ${projectWorkflow(project.id, progressQuery.data).count}/8` : ""}</SelectItem>)}
+                    {projects.map(project => <SelectItem key={project.id} value={project.id}>{project.name}{progressQuery.isSuccess ? ` · ${projectWorkflow(project.id, progressQuery.data).count}/${specificationStages.length}` : ""}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>

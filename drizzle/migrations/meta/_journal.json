@@ -1989,6 +1989,13 @@
       "when": 1794538061681,
       "tag": "0283_restrict_specification_target_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 284,
+      "version": "7",
+      "when": 1794569023799,
+      "tag": "0284_curated_layout_specification_stage",
+      "breakpoints": true
     }
   ]
 }

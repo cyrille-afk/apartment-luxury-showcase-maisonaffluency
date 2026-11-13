@@ -35,6 +35,7 @@ import { generateRoomLayoutMatrix } from "@/lib/roomLayoutMatrix";
 import { readSharedRoomLayout, sceneToSharedItems, sharedToScene, writeSharedRoomLayout } from "@/lib/sharedRoomLayout";
 import { useNavigate, useSearchParams } from "@/lib/router-compat";
 import { Box as BoxIcon } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAiLayoutForm } from "@/hooks/useAiLayoutForm";
 import { anchorsForPrompt, buildArchitectCatalog, validateArchitectLayout, type ArchitectOutput } from "@/lib/aiArchitectLayout";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
@@ -111,6 +112,7 @@ const TradeAILayoutStudio = () => {
       const row = await saveLayout({ id: asNew ? undefined : current?.id, title, brief, scene, products: snapshotProducts(scene, catalogue) });
       setCurrent(row);
       toast.success("Layout saved");
+      void markLayoutStage();
       void refreshSaved();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not save layout");
@@ -158,6 +160,7 @@ const TradeAILayoutStudio = () => {
   const [extraItems, setExtraItems] = useState<LiveCatalogueItem[]>([]);
   const byId = useMemo(() => new Map([...extraItems, ...catalogue].map((c) => [c.componentId, c])), [catalogue, extraItems]);
   const navigate = useNavigate();
+  const queryClientRef = useQueryClient();
   const [searchParams] = useSearchParams();
   const sharedProjectId = searchParams.get("project");
 
@@ -185,6 +188,16 @@ const TradeAILayoutStudio = () => {
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
+
+  // Generating or saving a layout for the active project completes its Curated Room Layout stage.
+  const markLayoutStage = async () => {
+    if (!sharedProjectId) return;
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth.user) return;
+    const { error } = await supabase.from("project_specification_progress")
+      .upsert({ project_id: sharedProjectId, stage: "curated-layout", completed_by: auth.user.id }, { onConflict: "project_id,stage", ignoreDuplicates: true });
+    if (!error) void queryClientRef.invalidateQueries({ queryKey: ["specification-progress"] });
+  };
 
   const openInVisualiser = () => {
     if (!scene) return;
@@ -232,6 +245,7 @@ const TradeAILayoutStudio = () => {
       setScene(next);
       setOverviewRevision((r) => r + 1);
       setSkipped(miss);
+      if (next.curatedAssets.length) void markLayoutStage();
     } catch {
       setLayoutError("Your room could not be prepared. Please try again; your previous layout is unchanged.");
     } finally {
