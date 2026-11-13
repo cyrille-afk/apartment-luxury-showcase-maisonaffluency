@@ -49,7 +49,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { checkpointStatusText, type CheckpointEvent } from "@/lib/visualiserRenderCheckpoint";
 import type { SceneCaptureHandle } from "@/components/trade/visualiser/InitialRoomReveal";
-import { captureCanvasPng, downloadDataUrl, mockupCapturePrep, mockupFilename, nextPaintedFrame } from "@/lib/visualiserExport";
+import { captureCanvasPng, MOCKUP_BACKGROUND, downloadDataUrl, mockupCapturePrep, mockupFilename, nextPaintedFrame } from "@/lib/visualiserExport";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
@@ -990,7 +990,8 @@ const TradeVisualiser = () => {
       await nextPaintedFrame();
     }
     try {
-      downloadDataUrl(captureCanvasPng(canvas), mockupFilename());
+      const frame = !pathTrace && captureHandle.current ? captureHandle.current.captureOpaqueFrame(MOCKUP_BACKGROUND) : captureCanvasPng(canvas);
+      downloadDataUrl(frame, mockupFilename());
       toast.success("Mockup exported.");
     } catch {
       toast.error("Could not export the mockup.");
