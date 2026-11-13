@@ -14,6 +14,7 @@ import cementImage from "@/assets/room-micro-cement.jpg";
 import woolImage from "@/assets/cream-wool-rug.jpg";
 import { roundedRugGeometry, RUG_TOP_Y } from "@/lib/visualiserRug";
 import { rugYaw } from "@/lib/visualiserRugRotation";
+import { berberWeaveHeight, usesPilePhotograph } from "@/lib/visualiserRugWeave";
 export { RUG_TOP_Y } from "@/lib/visualiserRug";
 import { WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallFinishIntensity, clampWallHeight, roomWallColor, roomWallFinish, wallColorHex, wallFinishSpec, clampRugPile, clampRugSize, clampRugOffset, clampRugBorderThicknessMm, clampRugBorderTwistMm, clampRugBorderRoughness, rugColorHex, rugWeave, type RugColor, type RugBorderColor, type RugWeave, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
 import type { PlacedObject } from "./SceneObject";
@@ -131,7 +132,7 @@ function ArchitecturalCoves({ cx, cz, radius, height, color, ceilingHeight, ceil
   </group>;
 }
 
-/** Procedural cream wool: warm off-white albedo + tight loop-pile normal map. */
+/** Each selected weave owns its albedo and relief; only loop pile uses the pile photograph. */
 function useWoolMaps(weave: RugWeave, pile: number, repeat: [number, number] = [6, 5]) {
   const source = useTexture(woolImage);
   const anisotropy = useThree((s) => Math.min(16, s.gl.capabilities.getMaxAnisotropy()));
@@ -169,17 +170,14 @@ function useWoolMaps(weave: RugWeave, pile: number, repeat: [number, number] = [
             const block = (Math.floor(x / 8) + Math.floor(y / 8)) % 2;
             h = block ? Math.abs(Math.sin((Math.PI * (y % 4)) / 4)) : Math.abs(Math.sin((Math.PI * (x % 4)) / 4));
           } else if (weave === "herringbone") {
-            // Zig-zag berber ribs alternating direction every 16px column band.
-            const dir = Math.floor(x / 16) % 2 ? 1 : -1;
-            const t = (((y + dir * x) % 8) + 8) % 8;
-            h = Math.sin((Math.PI * t) / 8);
+            h = berberWeaveHeight(x, y);
           } else {
             // Ribbed cord: parallel raised ribs with fine fibre noise.
             h = Math.pow(Math.sin((Math.PI * (y % 10)) / 10), 2) * 0.85 + (Math.sin(x * 12.9898 + y * 78.233) * 0.5 + 0.5) * 0.15;
           }
           height[y * size + x] = h;
           // Neutral fibre shading; material colour tints it.
-          const shade = Math.min(255, 205 + h * 50 * contrast);
+          const shade = weave === "herringbone" ? 174 + h * 65 : Math.min(255, 205 + h * 50 * contrast);
           const i = (y * size + x) * 4;
           cimg.data[i] = cimg.data[i + 1] = cimg.data[i + 2] = shade; cimg.data[i + 3] = 255;
         }
@@ -202,10 +200,11 @@ function useWoolMaps(weave: RugWeave, pile: number, repeat: [number, number] = [
       }
       // Authentic-looking high-resolution yarn detail; the procedural weave
       // remains the adjustable micro-relief, never a strong painted shadow.
+      cctx.putImageData(cimg, 0, 0);
       const image = source.image;
-      if (image instanceof HTMLImageElement) cctx.drawImage(image, 0, 0, size, size);
+      if (usesPilePhotograph(weave) && image instanceof HTMLImageElement) cctx.drawImage(image, 0, 0, size, size);
       const fibers = cctx.getImageData(0, 0, size, size);
-      for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+      if (usesPilePhotograph(weave)) for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
         const i = (y * size + x) * 4;
         const l = (y * size + ((x - 1 + size) % size)) * 4;
         const r = (y * size + ((x + 1) % size)) * 4;
@@ -272,7 +271,7 @@ export function Rug({ objects, color, borderColor = "match", borderThicknessMm, 
   return (
     <group name="room-rug-placement" position={[cx, RUG_TOP_Y, cz]} rotation={[0, rugYaw(layout?.rotation), 0]}>
     <group rotation={[-Math.PI / 2, 0, 0]}>
-    <mesh name="room-area-rug" geometry={geometry} receiveShadow>
+    <mesh name="room-area-rug" userData={{ rugWeave: weave }} geometry={geometry} receiveShadow>
       <meshStandardMaterial {...GROUND_OVERLAY_OFFSET} color={color === "cream" ? SHOWROOM.rim : rugColorHex(color)} map={maps.color} normalMap={maps.normal} normalScale={new THREE.Vector2(0.25 + (p / 100) * 0.25, 0.25 + (p / 100) * 0.25)} roughness={0.88 + (p / 100) * 0.04} metalness={0} envMapIntensity={0.05} />
     </mesh>
     </group>

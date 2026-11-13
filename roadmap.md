@@ -1,5 +1,9 @@
 # Roadmap
 
+## Correct Berber rug appearance
+- [x] Remove shared pile-photo override from woven rug colours/normals and render visible diagonal Berber twill without changing saved fit or weave choice.
+- [ ] Verify Herringbone Berber selection and rendered pattern in a signed-in room.
+
 ## Restore project-room rug
 - [x] Render the shared saved/auto-fit rug independently of project walls/floor, preserving colour, weave, size, offsets and rotation; elevate contact shadows with it.
 - [x] Signed-in project room renders a textured auto-fit 4.5×3.8m rug at Y=.004; hide/show restores identical dimensions, colour and texture. Four rug regressions pass, no browser errors, preview build OK.
