@@ -1,4 +1,4 @@
-import { KEY_SHADOW } from "./visualiserGroundLayers";
+import { CONTACT_SHADOW, KEY_SHADOW } from "./visualiserGroundLayers";
 
 export type EnvironmentSourcePref = "empty-room-exr" | "studio-hdr" | "studio-softbox-exr" | "window-interior-exr";
 
@@ -34,14 +34,14 @@ export function advancedSceneLighting(settings: AdvancedRenderingSettings, light
 
   return {
     lightScale,
-    contactOpacity: 0.35 * ((clampAdvancedRendering(settings).contactShadowIntensity ?? 72) / 72),
+    contactOpacity: CONTACT_SHADOW.opacity * ((clampAdvancedRendering(settings).contactShadowIntensity ?? 72) / 72),
     // Preserve authored opacity at the default 72%, but allow complete shadow removal.
     shadowIntensity: Math.min(1, ((clampAdvancedRendering(settings).contactShadowIntensity ?? 72) / 72)),
     shadowCatcherOpacity: 0.28 * ((clampAdvancedRendering(settings).contactShadowIntensity ?? 72) / 72),
     shadowBias: KEY_SHADOW.bias,
     shadowNormalBias: KEY_SHADOW.normalBias,
     shadowRadius: 4 - sharpness * 3.75,
-    contactBlur: 3.4 - sharpness * 2.4,
+    contactBlur: CONTACT_SHADOW.blur + (0.5 - sharpness) * 2.4,
     directionalIntensity: (1.25 + contrast * 2.5) * lightScale,
     ambientIntensity: (0.35 - contrast * 0.3) * lightScale,
     fillIntensity: (0.6 - contrast * 0.4) * lightScale,

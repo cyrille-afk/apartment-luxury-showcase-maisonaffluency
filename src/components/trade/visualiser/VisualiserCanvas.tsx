@@ -12,7 +12,7 @@ import softboxAsset from "@/assets/studio-softbox.exr.asset.json";
 import windowAsset from "@/assets/window-interior.exr.asset.json";
 import emptyRoomAsset from "@/assets/small-empty-room.exr.asset.json";
 import type { CeilingSettings } from "@/lib/visualiserCeilingSettings";
-import { FURNITURE_CONTACT_LAYER, GROUND_LAYERS, GROUND_OVERLAY_OFFSET, KEY_SHADOW } from "@/lib/visualiserGroundLayers";
+import { CONTACT_SHADOW, FURNITURE_CONTACT_LAYER, GROUND_LAYERS, GROUND_OVERLAY_OFFSET, KEY_SHADOW } from "@/lib/visualiserGroundLayers";
 import { RUG_TOP_Y } from "./RoomSurfaces";
 import type { RugBorderColor, RugColor, RugWeave } from "@/lib/visualiserRoomSurfaces";
 import { Suspense, useEffect, useLayoutEffect, useState, useRef } from "react";
@@ -534,10 +534,10 @@ const VisualiserCanvas = ({
       shadow-mapSize-width={KEY_SHADOW.mapSize}
       shadow-mapSize-height={KEY_SHADOW.mapSize}
       shadow-camera-far={40}
-      shadow-camera-left={-12}
-      shadow-camera-right={12}
-      shadow-camera-top={12}
-      shadow-camera-bottom={-12}
+      shadow-camera-left={-KEY_SHADOW.cameraExtent}
+      shadow-camera-right={KEY_SHADOW.cameraExtent}
+      shadow-camera-top={KEY_SHADOW.cameraExtent}
+      shadow-camera-bottom={-KEY_SHADOW.cameraExtent}
       shadow-bias={lighting.shadowBias}
       shadow-normalBias={lighting.shadowNormalBias}
       shadow-radius={lighting.shadowRadius}
@@ -564,7 +564,7 @@ const VisualiserCanvas = ({
     </Suspense>
     {!pathTrace && <FurnitureContactShadows
       position={[center[0], (showRug && !hasBackdrop && !photoCalibration && floorFinish !== "none" ? RUG_TOP_Y : GROUND_LAYERS.floor) + GROUND_LAYERS.contact, center[2]]}
-      scale={Math.max(8, ...objects.map(object => Math.hypot(object.position[0] - center[0], object.position[2] - center[2]) * 2 + footprintRadius(parseDimensionString(object.dimensions), object.scale) * 2 + 2))}
+      scale={Math.max(CONTACT_SHADOW.minimumScale, ...objects.map(object => Math.hypot(object.position[0] - center[0], object.position[2] - center[2]) * 2 + footprintRadius(parseDimensionString(object.dimensions), object.scale) * 2 + 2))}
       opacity={lighting.contactOpacity}
       blur={lighting.contactBlur}
       far={1.5}

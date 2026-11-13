@@ -14,8 +14,8 @@ describe("advanced rendering scene mappings", () => {
   it("100% furniture softness increases edge blur independently of intensity", () => {
     const soft = advancedSceneLighting({ ...DEFAULT_ADVANCED_RENDERING, shadowSharpness: 0 });
     const hard = advancedSceneLighting({ ...DEFAULT_ADVANCED_RENDERING, shadowSharpness: 100 });
-    expect(soft.contactBlur).toBe(3.4);
-    expect(hard.contactBlur).toBeCloseTo(1);
+    expect(soft.contactBlur).toBe(3.7);
+    expect(hard.contactBlur).toBeCloseTo(1.3);
     expect(soft.contactOpacity).toBe(hard.contactOpacity);
   });
   it("keeps 100% lighting at the baseline", () => {
@@ -56,7 +56,7 @@ describe("advanced rendering scene mappings", () => {
     const defaults = advancedSceneLighting(DEFAULT_ADVANCED_RENDERING);
     expect(defaults.directionalIntensity).toBe(2.5);
     expect(defaults.ambientIntensity).toBeCloseTo(0.2);
-    expect(defaults.contactBlur).toBeCloseTo(2.2);
+    expect(defaults.contactBlur).toBeCloseTo(2.5);
   });
   it("retains all three selected EXR environments and legacy presets", () => {
     for (const source of ["studio-softbox-exr", "window-interior-exr", "empty-room-exr", "studio-hdr"]) expect(environmentSourcePref(source)).toBe(source);
@@ -66,12 +66,12 @@ describe("advanced rendering scene mappings", () => {
     expect(clampAdvancedRendering({ shadowSharpness: 200, contrastIntensity: -1 })).toEqual({ shadowSharpness: 100, contrastIntensity: 0, contactShadowIntensity: 72 });
     expect(clampAdvancedRendering({ shadowSharpness: NaN })).toEqual(DEFAULT_ADVANCED_RENDERING);
   });
-  it("uses subtle 0.35 contact opacity for default and legacy saved scenes", () => {
-    expect(advancedSceneLighting(DEFAULT_ADVANCED_RENDERING).contactOpacity).toBe(0.35);
-    expect(advancedSceneLighting({ shadowSharpness: 50, contrastIntensity: 50 }).contactOpacity).toBe(0.35);
+  it("uses subtle 0.25 contact opacity for default and legacy saved scenes", () => {
+    expect(advancedSceneLighting(DEFAULT_ADVANCED_RENDERING).contactOpacity).toBe(0.25);
+    expect(advancedSceneLighting({ shadowSharpness: 50, contrastIntensity: 50 }).contactOpacity).toBe(0.25);
   });
   it("maps adjustable contact intensity directly to opacity and clamps saved values", () => {
-    for (const [percentage, opacity] of [[0, 0], [35, 0.35 * 35 / 72], [100, 0.35 * 100 / 72], [200, 0.35 * 100 / 72], [-1, 0]]) {
+    for (const [percentage, opacity] of [[0, 0], [35, 0.25 * 35 / 72], [100, 0.25 * 100 / 72], [200, 0.25 * 100 / 72], [-1, 0]]) {
       expect(advancedSceneLighting({ ...DEFAULT_ADVANCED_RENDERING, contactShadowIntensity: percentage }).contactOpacity).toBeCloseTo(opacity);
     }
   });
