@@ -55,15 +55,36 @@ const matchesStyle = (item: LiveCatalogueItem, style: LayoutBrief["style"]) =>
 
 export interface LayoutMatrixResult { scene: AICuratedSceneSchema; skipped: string[]; matrix: FloorMatrix }
 
+/** Rank equally relevant pieces by makers not yet represented in the room. */
+export function balanceLayoutMakers(items: LiveCatalogueItem[], placed: LiveCatalogueItem[] = []) {
+  const counts = new Map<string, number>();
+  for (const item of placed) {
+    const maker = item.manufacturer ?? "";
+    counts.set(maker, (counts.get(maker) ?? 0) + 1);
+  }
+  const pending = [...items];
+  const result: LiveCatalogueItem[] = [];
+  while (pending.length) {
+    pending.sort((a, b) => Number(Boolean(b.projectPriority)) - Number(Boolean(a.projectPriority)) ||
+      (counts.get(a.manufacturer ?? "") ?? 0) - (counts.get(b.manufacturer ?? "") ?? 0));
+    const next = pending.shift();
+    if (!next) break;
+    result.push(next);
+    const maker = next.manufacturer ?? "";
+    counts.set(maker, (counts.get(maker) ?? 0) + 1);
+  }
+  return result;
+}
+
 /** Room/style are ranking preferences; a thin strict pool expands to priced catalogue pieces. */
 export function selectLayoutCandidates(criteria: LayoutBrief, catalogue: LiveCatalogueItem[]): LiveCatalogueItem[] {
   const usable = catalogue.filter((c) => c.available && c.price != null && c.price > 0 && c.price <= criteria.totalBudget);
   const roomMatch = (c: LiveCatalogueItem) => !c.category || /living|lounge|salon|seating|sofa|chair|table|console|stool|lighting|lamp/i.test(c.category);
   const strict = usable.filter((c) => roomMatch(c) && matchesStyle(c, criteria.style));
-  return [...(strict.length >= 3 ? strict : usable)].sort((a, b) =>
+  return balanceLayoutMakers([...(strict.length >= 3 ? strict : usable)].sort((a, b) =>
     Number(Boolean(b.projectPriority)) - Number(Boolean(a.projectPriority)) || Number(roomMatch(b)) - Number(roomMatch(a)) ||
     Number(matchesStyle(b, criteria.style)) - Number(matchesStyle(a, criteria.style)) ||
-    (a.price ?? 0) - (b.price ?? 0) || a.componentId.localeCompare(b.componentId));
+    (a.price ?? 0) - (b.price ?? 0) || a.componentId.localeCompare(b.componentId)));
 }
 
 export function generateRoomLayoutMatrix(criteria: LayoutBrief, catalogue: LiveCatalogueItem[]): LayoutMatrixResult {
@@ -81,6 +102,7 @@ export function generateRoomLayoutMatrix(criteria: LayoutBrief, catalogue: LiveC
     b.minZ >= -L / 2 + WALL_MARGIN && b.maxZ <= L / 2 - WALL_MARGIN && !overlaps(b, door) &&
     !boxes.some((q) => overlaps(b, { minX: q.minX - 0.15, maxX: q.maxX + 0.15, minZ: q.minZ - 0.15, maxZ: q.maxZ + 0.15 }));
   const placedIds = new Set<string>();
+  const placedItems: LiveCatalogueItem[] = [];
   const place = (item: LiveCatalogueItem, x: number, z: number, yaw = 0) => {
     const size = footprint(item);
     const turned = Math.abs(Math.sin(yaw)) > 0.5;
@@ -88,6 +110,7 @@ export function generateRoomLayoutMatrix(criteria: LayoutBrief, catalogue: LiveC
     if (spend + (item.price ?? 0) > budget || (item.dimensionsCubic?.h ?? 0) > H || !fits(b)) return false;
     spend += item.price ?? 0;
     placedIds.add(item.componentId);
+    placedItems.push(item);
     boxes.push(b); mark(matrix, b, W, L);
     assets.push(toAsset(item, [x, 0, z], [0, yaw, 0]));
     return true;
@@ -100,12 +123,12 @@ export function generateRoomLayoutMatrix(criteria: LayoutBrief, catalogue: LiveC
     const z = -Math.min(L * 0.12, Math.max(0, L / 2 - WALL_MARGIN - d / 2));
     if (place(item, 0, z)) { sofaFront = z + d / 2; sofaWidth = w; break; }
   }
-  for (const item of usable.filter((c) => c.role === "table")) {
+  for (const item of balanceLayoutMakers(usable.filter((c) => c.role === "table"), placedItems)) {
     const { d } = footprint(item);
     if (place(item, 0, sofaFront == null ? 0 : sofaFront + TABLE_CLEARANCE + d / 2)) break;
   }
   const roleOrder: Role[] = ["seat", "accent", "light", "anchor", "table"];
-  for (const role of roleOrder) for (const item of usable.filter((c) => c.role === role && !placedIds.has(c.componentId))) {
+  for (const role of roleOrder) for (const item of balanceLayoutMakers(usable.filter((c) => c.role === role && !placedIds.has(c.componentId)), placedItems)) {
     if (spend + (item.price ?? 0) > budget) { skipped.push(`${item.name} (over budget)`); continue; }
     const { w, d } = footprint(item);
     const perimeter = /console|sideboard|credenza|cabinet/i.test(item.name + " " + (item.category ?? ""));

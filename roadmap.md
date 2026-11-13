@@ -1,5 +1,10 @@
 # Roadmap
 
+## Unobstructed multi-maker curated rooms
+- [x] Hide room labels by default with an optional Show Labels switch that does not reload the scene.
+- [x] Exhaust the all-maker 3D-ready catalogue for generation and briefs; balance makers and show actual catalogue count (21 live pieces; five Kerstens pieces have no price and remain excluded from budgeted placement).
+- [x] Signed-in generation places 16 pieces across four maker credits (€116,976); brief curation places 10 (€49,038), labels default to zero and toggle on/off. Screenshots confirm unobstructed room; some GLBs still use temporary loading volumes on software graphics.
+
 ## Populated AI room layouts
 - [x] Relax missing style metadata with a fewer-than-three candidate fallback; reject empty AI results.
 - [x] Zone all fitting priced pieces safely, retain model-less volumes and update the shared scene ledger/count/breakdown.

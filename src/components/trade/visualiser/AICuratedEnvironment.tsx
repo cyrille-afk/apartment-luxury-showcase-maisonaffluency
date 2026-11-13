@@ -19,6 +19,7 @@ interface Props {
   isEditable?: boolean;
   /** Catalogue names in studio view, frozen public names in shared view. */
   pieceNames?: ReadonlyMap<string, string>;
+  showLabels?: boolean;
   /** Runs only after all furniture has loaded. */
   children?: ReactNode;
 }
@@ -39,7 +40,7 @@ function ModelReady({ onReady }: { onReady: (ready: boolean) => void }) {
 }
 
 /** Renders an AICuratedSceneSchema inside an R3F <Canvas>: room shell, anchors and editable assets. */
-const AICuratedEnvironment = ({ schema, selectedId, onSelect, onAssetTransform, onDragStateChange, isEditable = true, pieceNames, children }: Props) => {
+const AICuratedEnvironment = ({ schema, selectedId, onSelect, onAssetTransform, onDragStateChange, isEditable = true, pieceNames, showLabels = false, children }: Props) => {
   const { width: W, length: L, height: H } = schema.roomDimensions;
 
   const objects = useMemo<PlacedObject[]>(
@@ -93,6 +94,7 @@ const AICuratedEnvironment = ({ schema, selectedId, onSelect, onAssetTransform, 
             object={objects[i]}
             scaleVector={asset.scale}
             label={pieceNames?.get(asset.componentId) ?? asset.sku}
+            showLabels={showLabels}
             isEditable={isEditable}
             selected={selectedId === instanceIdFor(i, asset.sku)}
             onSelect={onSelect}

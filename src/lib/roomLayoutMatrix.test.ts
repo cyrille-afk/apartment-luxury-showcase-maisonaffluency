@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { boxAt, generateRoomLayoutMatrix, overlaps, selectLayoutCandidates, footprint } from "./roomLayoutMatrix";
+import { balanceLayoutMakers, boxAt, generateRoomLayoutMatrix, overlaps, selectLayoutCandidates, footprint } from "./roomLayoutMatrix";
 import type { LiveCatalogueItem } from "./mockAiLayoutService";
 
 const item = (id: string, role: LiveCatalogueItem["role"], price: number | null, dims = { w: 1, d: 1, h: 1 }): LiveCatalogueItem => ({
@@ -9,6 +9,15 @@ const cat = [item("sofa", "anchor", 20000, { w: 2.4, d: 1, h: 0.8 }), item("tabl
 const brief = { roomType: "living" as const, style: "quiet-luxury" as const, totalBudget: 60000, roomDimensions: { width: 7, length: 6, height: 3 } };
 
 describe("generateRoomLayoutMatrix", () => {
+  it("balances Man of Parts, Kerstens and Delcourt before repeating a maker", () => {
+    const pool = [
+      { ...item("mop-1", "seat", 1000), manufacturer: "Man of Parts" },
+      { ...item("mop-2", "seat", 1000), manufacturer: "Man of Parts" },
+      { ...item("kerstens", "seat", 1000), manufacturer: "Kerstens" },
+      { ...item("delcourt", "seat", 1000), manufacturer: "Delcourt Collection" },
+    ];
+    expect(balanceLayoutMakers(pool).slice(0, 3).map((c) => c.manufacturer)).toEqual(["Man of Parts", "Kerstens", "Delcourt Collection"]);
+  });
   it("falls back to all 8 pieces when fewer than 3 match Quiet luxury", () => {
     const eight = [...cat, ...Array.from({ length: 5 }, (_, i) => item(`chair-${i}`, "seat", 2000))];
     eight[0] = { ...eight[0], styleTokens: ["Quiet luxury"] };

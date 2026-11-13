@@ -56,7 +56,7 @@ const cleanName = (n: string) => n.replace(/\s+by Yabu Pushelberg$/i, "").trim()
 
 /** Loads live price + availability for every placeable piece. Requires an approved trade session. */
 export async function fetchLiveCatalogue(onlyIds?: string[], projectId?: string | null): Promise<LiveCatalogueItem[]> {
-  const ids = onlyIds ?? Object.keys(ROLES);
+  const ids = onlyIds ?? [];
   let projectIds: string[] = [];
   if (projectId) {
     const { data: boards, error: boardError } = await supabase.from("client_boards").select("id").eq("project_id", projectId);
@@ -68,11 +68,24 @@ export async function fetchLiveCatalogue(onlyIds?: string[], projectId?: string 
     }
   }
   const allIds = [...new Set([...ids, ...projectIds])];
-  const { data: products, error } = await supabase
-    .from("trade_products")
-    .select("id, product_name, brand_name, sku, category, subcategory, glb_url, trade_price_cents, currency, source_pick_id, is_active, is_hidden, design_style_tokens, style_tags, dimensions_cubic, dimensions, width_mm, depth_mm, height_mm")
-    .or(`id.in.(${allIds.join(",")}),source_pick_id.in.(${allIds.join(",")})`);
-  if (error) throw error;
+  // Explicit IDs hydrate saved/handoff pieces, including model-less volumes.
+  // Normal curation exhausts the whole 3D-ready catalogue; a project only ranks it.
+  const products = [];
+  for (let offset = 0; ; offset += 250) {
+    let query = supabase.from("trade_products")
+      .select("id, product_name, brand_name, sku, category, subcategory, glb_url, trade_price_cents, currency, source_pick_id, is_active, is_hidden, design_style_tokens, style_tags, dimensions_cubic, dimensions, width_mm, depth_mm, height_mm")
+      .order("id").range(offset, offset + 249);
+    if (onlyIds) {
+      if (!allIds.length) return [];
+      query = query.or(`id.in.(${allIds.join(",")}),source_pick_id.in.(${allIds.join(",")})`);
+    } else {
+      query = query.eq("is_active", true).or("is_hidden.is.null,is_hidden.eq.false").not("glb_url", "is", null).neq("glb_url", "");
+    }
+    const { data, error } = await query;
+    if (error) throw error;
+    products.push(...(data ?? []));
+    if (!data || data.length < 250) break;
+  }
 
   const pickIds = (products ?? []).map((p) => p.source_pick_id).filter(Boolean) as string[];
   const { data: pricing } = pickIds.length
@@ -116,7 +129,7 @@ export async function fetchLiveCatalogue(onlyIds?: string[], projectId?: string 
           sku: p.sku || p.id,
           name: cleanName(p.product_name),
           role: ROLES[p.id] ?? (/sofa|settee|couch/i.test(`${p.category} ${p.subcategory} ${p.product_name}`) ? "anchor" : /coffee|centre table|center table/i.test(`${p.subcategory} ${p.product_name}`) ? "table" : /chair|armchair/i.test(`${p.category} ${p.product_name}`) ? "seat" : /lamp|lighting/i.test(`${p.category} ${p.product_name}`) ? "light" : "accent"),
-          glbUrl: p.glb_url ?? "",
+          glbUrl: p.glb_url?.trim() ?? "",
           category: `${p.category} ${p.subcategory ?? ""}`,
           projectPriority: projectIds.includes(p.id) || Boolean(p.source_pick_id && projectIds.includes(p.source_pick_id)),
           price: cents > 0 && (p.currency ?? "EUR") === "EUR" ? cents / 100 : null,

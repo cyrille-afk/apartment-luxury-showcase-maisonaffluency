@@ -84,6 +84,7 @@ const TradeAILayoutStudio = () => {
   const [curating, setCurating] = useState(false);
   const [layoutError, setLayoutError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [showLabels, setShowLabels] = useState(false);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [compareOpen, setCompareOpen] = useState(false);
   const [clientPreviewRows, setClientPreviewRows] = useState<import("@/lib/furnishingSchedulePdf").ScheduleRow[] | null>(null);
@@ -290,7 +291,8 @@ const TradeAILayoutStudio = () => {
       });
       const out = (data as { layout?: ArchitectOutput } | null)?.layout;
       const result = out ? validateArchitectLayout(out, brief, live, rows, anchors) : null;
-      if (result?.ok && result.scene && result.scene.curatedAssets.length >= Math.min(3, fallback.scene.curatedAssets.length)) {
+      const makerCount = (s: AICuratedSceneSchema) => new Set(s.curatedAssets.map((a) => live.find((c) => c.componentId === a.componentId)?.manufacturer).filter(Boolean)).size;
+      if (result?.ok && result.scene && result.scene.curatedAssets.length >= Math.min(3, fallback.scene.curatedAssets.length) && makerCount(result.scene) >= Math.min(3, makerCount(fallback.scene))) {
         setScene(result.scene);
         setSkipped([]);
         setCuration(null);
@@ -317,7 +319,9 @@ const TradeAILayoutStudio = () => {
     // Give the pending state a paint before synchronous catalogue selection.
     await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
     try {
-    const result = curate(briefText, catalogue, brief.totalBudget);
+    const live = await fetchLiveCatalogue();
+    setCatalogue(live);
+    const result = curate(briefText, live, brief.totalBudget);
     setCuration(result);
     setSelectedId(null);
     setCompareIds([]);
@@ -325,7 +329,11 @@ const TradeAILayoutStudio = () => {
     setCurrent(null);
     setSkipped(result.matrix.filter((r) => !r.eligible).map((r) => `${r.item.name} (${r.reason})`));
     if (result.parsed.budget) setBrief((b) => ({ ...b, totalBudget: result.budget }));
-    setScene(sceneFromCuration(result, brief));
+    const next = sceneFromCuration(result, brief);
+    const placed = new Set(next.curatedAssets.map((a) => a.componentId));
+    const selected = result.selected.filter((r) => placed.has(r.item.componentId));
+    setCuration({ ...result, selected, total: next.financialSummary.allocatedSpend, utilisation: result.budget ? next.financialSummary.allocatedSpend / result.budget : 0 });
+    setScene(next);
     setOverviewRevision((r) => r + 1);
     } catch {
       setLayoutError("Your selection could not be prepared. Please try again; your previous layout is unchanged.");
@@ -784,7 +792,7 @@ const TradeAILayoutStudio = () => {
           <p className={micro}>AI Ingestion</p>
           <h1 className="mt-1 font-serif text-2xl">Curated Room Layout</h1>
           <p className="mt-1 text-xs text-muted-foreground">
-            {catLoading ? "Loading live catalogue prices…" : catError ? `Prices unavailable: ${catError}` : `Live RRPs · ${catalogue.filter((c) => c.available).length} of ${catalogue.length} pieces available`}
+            {catLoading ? "Loading live catalogue prices…" : catError ? `Prices unavailable: ${catError}` : `Live RRPs · ${catalogue.filter((c) => c.glbUrl).length} 3D-ready pieces across all makers`}
           </p>
           <Button variant="ghost" size="sm" className="mt-1 h-7 px-2 text-xs" onClick={() => void loadCatalogue()} disabled={catLoading}>
             <RefreshCw className={`mr-1 h-3 w-3 ${catLoading ? "animate-spin" : ""}`} /> Refresh prices
@@ -1366,6 +1374,12 @@ const TradeAILayoutStudio = () => {
           </Canvas>
         )}
         {scene && (
+          <div className="absolute bottom-3 left-3 z-10 flex items-center gap-2 border border-border bg-background/95 px-3 py-2">
+            <Switch id="curated-show-labels" checked={showLabels} onCheckedChange={setShowLabels} />
+            <Label htmlFor="curated-show-labels" className="text-xs">Show Labels</Label>
+          </div>
+        )}
+        {scene && (
           <Canvas frameloop={walking || dragging ? "always" : "demand"} shadows dpr={[1, 1.5]} gl={{ preserveDrawingBuffer: true }} onPointerMissed={() => setSelectedId(null)}>
             {authorMode === "draw"
               ? <FloorPlanDrawLayer width={scene.roomDimensions.width} length={scene.roomDimensions.length}
@@ -1377,6 +1391,7 @@ const TradeAILayoutStudio = () => {
             <Suspense fallback={null}><Environment preset="apartment" /></Suspense>
             <ContactShadows position={[0, 0.002, 0]} scale={20} opacity={0.3} blur={1.2} far={8} />
             <AICuratedEnvironment schema={scene} selectedId={selectedId} onSelect={setSelectedId}
+              showLabels={showLabels && !walkActive}
               pieceNames={new Map([...byId].map(([id, item]) => [id, item.name]))}
               onAssetTransform={onAssetTransform} onDragStateChange={setDragging} isEditable={!walkActive && !authorMode}>
               <RoomOverviewCamera revision={overviewRevision} view={cameraView} enabled={!walkActive && !authorMode && !dragging} />
@@ -1484,7 +1499,7 @@ const TradeAILayoutStudio = () => {
             <ul className="divide-y divide-border text-xs">
               {scene.curatedAssets.map((a, i) => (
                 <li key={`${a.componentId}-${i}`} className="flex items-start justify-between gap-3 py-2">
-                  <p className="min-w-0 truncate font-medium">{byId.get(a.componentId)?.name ?? a.sku}</p>
+                  <div className="min-w-0"><p className="truncate font-medium">{byId.get(a.componentId)?.name ?? a.sku}</p><p className="mt-0.5 truncate text-muted-foreground">{byId.get(a.componentId)?.manufacturer}</p></div>
                   <span className="shrink-0 tabular-nums">{byId.get(a.componentId)?.price == null ? "Price upon Request" : eur(a.priceAtCuration)}</span>
                 </li>
               ))}

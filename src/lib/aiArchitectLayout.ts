@@ -14,7 +14,7 @@ const ANCHOR_DEPTH: Record<ArchitecturalAnchor["type"], number> = { window: 0.3,
 
 const CATEGORY: Record<Role, string> = { anchor: "sofa", table: "coffee_table", seat: "accent_chair", accent: "side_table", light: "floor_lamp" };
 
-export interface ArchitectCatalogRow { sku: string; name: string; category: string; style_tokens: string[]; width_m: number; depth_m: number; height_m: number; trade_cost: number | null }
+export interface ArchitectCatalogRow { sku: string; name: string; maker: string; category: string; style_tokens: string[]; width_m: number; depth_m: number; height_m: number; trade_cost: number | null }
 export interface ArchitectPlacement { sku: string; category: string; position: [number, number, number]; rotation: number; layout_logic_justification: string }
 export interface ArchitectOutput { layout_metadata: { total_items_placed: number; total_trade_spend_eur: number; budget_buffer_remaining: number }; placements: ArchitectPlacement[] }
 
@@ -23,7 +23,7 @@ export function buildArchitectCatalog(items: LiveCatalogueItem[], discountPct: n
   return items.map((c) => {
     const { w, d } = footprint(c);
     const cents = c.available && c.price != null ? applyTradeDiscount(Math.round(c.price * 100), discountPct) : null;
-    return { sku: c.componentId, name: c.name, category: CATEGORY[c.role], style_tokens: c.styleTokens.slice(0, 8), width_m: w, depth_m: d, height_m: c.dimensionsCubic?.h ?? 0.8, trade_cost: cents != null ? cents / 100 : null };
+    return { sku: c.componentId, name: c.name, maker: c.manufacturer ?? "", category: CATEGORY[c.role], style_tokens: c.styleTokens.slice(0, 8), width_m: w, depth_m: d, height_m: c.dimensionsCubic?.h ?? 0.8, trade_cost: cents != null ? cents / 100 : null };
   });
 }
 

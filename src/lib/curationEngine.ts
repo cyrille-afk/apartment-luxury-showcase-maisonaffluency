@@ -1,5 +1,6 @@
-import type { AICuratedSceneSchema, CuratedAsset, Vec3 } from "@/types/aiCuratedScene";
-import { toAsset, type LayoutBrief, type LiveCatalogueItem, type Role } from "@/lib/mockAiLayoutService";
+import type { AICuratedSceneSchema } from "@/types/aiCuratedScene";
+import { type LayoutBrief, type LiveCatalogueItem, type Role } from "@/lib/mockAiLayoutService";
+import { generateRoomLayoutMatrix } from "@/lib/roomLayoutMatrix";
 
 /**
  * Client-side curation matrix for the AI Layout Studio: parses a text brief,
@@ -98,7 +99,8 @@ export function curate(text: string, catalogue: LiveCatalogueItem[], fallbackBud
   const walk = (i: number, rows: MatrixRow[], cost: number, value: number) => {
     if (cost > budget) return;
     if (i === roles.length) {
-      const v = value * 1e6 + cost;
+      const makers = new Set(rows.map((r) => r.item.manufacturer).filter(Boolean)).size;
+      const v = (value + makers * 0.25) * 1e6 + cost;
       if (!best || v > best.value) best = { rows: [...rows], value: v, cost };
       return;
     }
@@ -138,28 +140,5 @@ export function curate(text: string, catalogue: LiveCatalogueItem[], fallbackBud
 
 /** Places a curation result into an AICuratedSceneSchema with role-based slots. */
 export function sceneFromCuration(result: CurationResult, brief: LayoutBrief): AICuratedSceneSchema {
-  const { width: W, length: L, height: H } = brief.roomDimensions;
-  const slots: Record<Role, Array<[Vec3, Vec3]>> = {
-    anchor: [[[0, 0, -L * 0.22], [0, 0, 0]]],
-    table: [[[0, 0, 0.15], [0, 0, 0]]],
-    seat: [[[-1.7, 0, 0.9], [0, Math.PI * 0.75, 0]], [[1.7, 0, 0.9], [0, -Math.PI * 0.75, 0]]],
-    accent: [[[1.55, 0, -L * 0.22], [0, 0, 0]], [[W / 2 - 0.9, 0, L / 2 - 1.1], [0, 0.6, 0]]],
-    light: [[[-W / 2 + 0.6, 0, -L / 2 + 0.6], [0, Math.PI / 4, 0]], [[W / 2 - 0.6, 0, -L / 2 + 0.6], [0, -Math.PI / 4, 0]]],
-  };
-  const used: Record<Role, number> = { anchor: 0, table: 0, seat: 0, accent: 0, light: 0 };
-  const curatedAssets: CuratedAsset[] = result.selected.map((r, i) => {
-    const list = slots[r.role];
-    const [pos, rot] = list[used[r.role]++ % list.length] ?? [[i * 0.8, 0, 2], [0, 0, 0]];
-    return toAsset(r.item, pos, rot);
-  });
-  const allocatedSpend = curatedAssets.reduce((s, a) => s + a.priceAtCuration, 0);
-  return {
-    roomDimensions: { width: W, length: L, height: H },
-    architecturalAnchors: [
-      { type: "window", position: [0, 1.5, -L / 2], rotation: [0, 0, 0], scale: [2.4, 1.8, 0.1] },
-      { type: "door", position: [W / 2, 1.1, L / 4], rotation: [0, -Math.PI / 2, 0], scale: [1.0, 2.2, 0.1] },
-    ],
-    curatedAssets,
-    financialSummary: { totalBudget: result.budget, allocatedSpend, remainingBuffer: result.budget - allocatedSpend },
-  };
+  return generateRoomLayoutMatrix({ ...brief, totalBudget: result.budget }, result.selected.map((r) => r.item)).scene;
 }
