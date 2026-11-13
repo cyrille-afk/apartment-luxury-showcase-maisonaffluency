@@ -63,10 +63,10 @@ function useSurfaceMaps(url: string, repeat: number, polished: boolean, glare = 
   return maps;
 }
 
-export function Floor({ finish, glare, size }: { finish: Exclude<RoomFloorFinish, "none">; glare: number; size?: [number, number] }) {
+export function Floor({ finish, glare, size, patternScale = 100 }: { finish: Exclude<RoomFloorFinish, "none">; glare: number; size?: [number, number]; patternScale?: number }) {
   const [w, d] = size ?? [80, 80];
   // Keep the plank scale identical to the 80 m studio floor (repeat per metre).
-  const baseRepeat = finish === "oak-chevron" ? 32 : 20;
+  const baseRepeat = (finish === "oak-chevron" ? 32 : 20) * (100 / patternScale);
   const maps = useSurfaceMaps(finish === "oak-chevron" ? oakImage : cementImage, (baseRepeat * w) / 80, finish === "oak-chevron", glare, (baseRepeat * d) / 80);
   // Glare 0 = 0.05 env reflection, 100 = 0.45.
   const envMapIntensity = 0.05 + (clampFloorGlare(glare) / 100) * 0.4;

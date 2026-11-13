@@ -1,3 +1,4 @@
+import { clampFloorExtension, clampFloorPatternScale, FLOOR_EXTENSION_MIN, FLOOR_EXTENSION_MAX } from "@/lib/visualiserFloorView";
 import { clampPtQuality, loadPtQuality, PT_QUALITY_KEY, type PathTraceQuality, detectGpuTier, matchPhotorealPreset, photorealPreset, GPU_TIER_LABEL, PHOTOREAL_PRESET_LABEL, photorealPresetSettings, photorealQualitySummary, previewScaleLabel, renderScaleLabel, sampleCountLabel, type GpuTier, type PhotorealPresetName } from "@/lib/visualiserPathTracing";
 import { adaptiveSummary, type AdaptiveSamplingState } from "@/lib/visualiserAdaptiveSampling";
 import { loadPhotorealGhostPreference, PHOTOREAL_GHOST_KEY, type PhotorealFrameCaptureRef } from "@/lib/visualiserPhotorealGhost";
@@ -128,6 +129,8 @@ type PersistedSandbox = CeilingSettings & {
   showRearWall?: boolean;
   wallHeight?: number;
   floorGlare?: number;
+  floorExtension?: number;
+  floorPatternScale?: number;
   wallColor?: RoomWallColor;
   wallFinish?: RoomWallFinish;
   wallCustomHex?: string | null;
@@ -194,6 +197,8 @@ const readSandbox = (storageKey = STORAGE_KEY, projectId?: string): PersistedSan
       ceilingThickness: clampCeilingThickness(parsed.ceilingThickness),
       ceilingOpening: clampCeilingOpening(parsed.ceilingOpening),
       floorGlare: clampFloorGlare(parsed.floorGlare),
+      floorExtension: clampFloorExtension(parsed.floorExtension),
+      floorPatternScale: clampFloorPatternScale(parsed.floorPatternScale),
       wallColor: roomWallColor(parsed.wallColor),
       wallFinish: roomWallFinish(parsed.wallFinish),
       wallCustomHex: normalizeHexColor(parsed.wallCustomHex) ?? null,
@@ -344,6 +349,8 @@ const TradeVisualiser = () => {
   const [ceilingThickness, setCeilingThickness] = useState(clampCeilingThickness(initial.ceilingThickness));
   const [ceilingOpening, setCeilingOpening] = useState(clampCeilingOpening(initial.ceilingOpening));
   const [floorGlare, setFloorGlare] = useState<number>(clampFloorGlare(initial.floorGlare));
+  const [floorExtension, setFloorExtension] = useState<number>(clampFloorExtension(initial.floorExtension));
+  const [floorPatternScale, setFloorPatternScale] = useState<number>(clampFloorPatternScale(initial.floorPatternScale));
   const [wallColor, setWallColor] = useState<RoomWallColor>(roomWallColor(initial.wallColor));
   const [wallFinish, setWallFinish] = useState<RoomWallFinish>(roomWallFinish(initial.wallFinish));
   const [wallCustomHex, setWallCustomHex] = useState<string | null>(normalizeHexColor(initial.wallCustomHex) ?? null);
@@ -516,6 +523,8 @@ const TradeVisualiser = () => {
         showRearWall,
         wallHeight, ceilingHeight, ceilingThickness, ceilingOpening,
         floorGlare,
+        floorExtension,
+        floorPatternScale,
         wallColor,
         wallFinish,
         wallCustomHex,
@@ -546,7 +555,7 @@ const TradeVisualiser = () => {
       try { sessionStorage.setItem(LAST_GOOD_KEY, json); } catch { /* ignore */ }
     }, STABLE_AFTER_MS);
     return () => window.clearTimeout(timer);
-  }, [photoCalibration, sceneFailed, backdrop, backdropDataUrl, objects, projectId, selectedId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, advancedRendering, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColorKey, rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, rugRotation, showRug, featureWallFinishKey, backdropColor, backdropBrightness]);
+  }, [photoCalibration, sceneFailed, backdrop, backdropDataUrl, objects, projectId, selectedId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, advancedRendering, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, floorExtension, floorPatternScale, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColorKey, rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, rugRotation, showRug, featureWallFinishKey, backdropColor, backdropBrightness]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -1104,6 +1113,8 @@ const TradeVisualiser = () => {
             ceilingThickness={ceilingThickness}
             ceilingOpening={ceilingOpening}
             floorGlare={floorGlare}
+            floorExtension={floorExtension}
+            floorPatternScale={floorPatternScale}
             wallColor={wallColor}
             wallFinish={wallFinish}
             wallCustomHex={wallCustomHex}
@@ -1485,6 +1496,26 @@ const TradeVisualiser = () => {
                     className="w-full accent-primary"
                   />
                   <p className="mt-1 text-[10px] text-muted-foreground">Lower = matte floor, reflections fade; texture stays visible.</p>
+                </div>
+                <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
+                  <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    <span>Floor Beyond Room</span>
+                    <span>{floorExtension} m</span>
+                  </div>
+                  <input type="range" min={FLOOR_EXTENSION_MIN} max={FLOOR_EXTENSION_MAX} step={1} value={floorExtension}
+                    onChange={(e) => setFloorExtension(clampFloorExtension(Number(e.target.value)))}
+                    aria-label="Floor extension beyond room" className="w-full accent-primary" />
+                  <p className="mt-1 text-[10px] text-muted-foreground">How far the floor runs out of the open front; the camera can step back the same distance.</p>
+                </div>
+                <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
+                  <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    <span>Floor Pattern Size</span>
+                    <span>{floorPatternScale}%</span>
+                  </div>
+                  <input type="range" min={50} max={200} step={10} value={floorPatternScale}
+                    onChange={(e) => setFloorPatternScale(clampFloorPatternScale(Number(e.target.value)))}
+                    aria-label="Floor pattern size" className="w-full accent-primary" />
+                  <p className="mt-1 text-[10px] text-muted-foreground">Larger = wider planks / cement tiles in view.</p>
                 </div>
               </DropdownMenuContent>
             </DropdownMenu>

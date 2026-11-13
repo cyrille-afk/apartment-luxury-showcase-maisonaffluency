@@ -281,6 +281,8 @@ interface VisualiserCanvasProps {
   environmentSource?: VisualiserEnvironmentSource;
   advancedRendering?: AdvancedRenderingSettings;
   floorFinish?: RoomFloorFinish;
+  floorExtension?: number;
+  floorPatternScale?: number;
   showRearWall?: boolean;
   /** Wall height percentage of the full cyclorama (20–100). */
   wallHeight?: number;
@@ -391,6 +393,8 @@ const VisualiserCanvas = ({
   environmentSource = "empty-room-exr",
   advancedRendering = DEFAULT_ADVANCED_RENDERING,
   floorFinish = "oak-chevron",
+  floorExtension = 8,
+  floorPatternScale = 100,
   showRearWall = true,
   wallHeight = 100,
   ceilingHeight, ceilingThickness, ceilingOpening,
@@ -469,7 +473,7 @@ const VisualiserCanvas = ({
   >
     {onInitialReady && <InitialRoomReveal ready={roomReady && objectsReady && environmentReady} modelCount={objects.filter((object) => Boolean(object.glb_url)).length} onReady={onInitialReady} />}
     <RenderOnDemand
-      signature={`plan:${JSON.stringify(projectArchitecture ?? null)}:${JSON.stringify(roomBounds ?? null)}|photo:${JSON.stringify(photoCalibration)}|lighting:${JSON.stringify(advancedRendering)}:${lighting.lightScale}|environment:${environmentSource}|${floorFinish}|${showRearWall}|${wallHeight}|${ceilingHeight}|${ceilingThickness}|${ceilingOpening}|${floorGlare}|${wallColor}|${wallCustomHex ?? ""}|${wallFinish}|${wallFinishIntensity}|${featureWallFinish}|${rugColor}|${rugBorderColor}|${rugBorderThicknessMm}|${rugBorderTwistMm}|${rugBorderRoughness}|${rugWeave}|${rugPile}|${JSON.stringify(rugLayout)}|${showRug ? "rug" : "no-rug"}|${backdropColor ?? ""}|${backdropBrightness}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
+      signature={`plan:${JSON.stringify(projectArchitecture ?? null)}:${JSON.stringify(roomBounds ?? null)}|photo:${JSON.stringify(photoCalibration)}|lighting:${JSON.stringify(advancedRendering)}:${lighting.lightScale}|environment:${environmentSource}|${floorFinish}|${floorExtension}|${floorPatternScale}|${showRearWall}|${wallHeight}|${ceilingHeight}|${ceilingThickness}|${ceilingOpening}|${floorGlare}|${wallColor}|${wallCustomHex ?? ""}|${wallFinish}|${wallFinishIntensity}|${featureWallFinish}|${rugColor}|${rugBorderColor}|${rugBorderThicknessMm}|${rugBorderTwistMm}|${rugBorderRoughness}|${rugWeave}|${rugPile}|${JSON.stringify(rugLayout)}|${showRug ? "rug" : "no-rug"}|${backdropColor ?? ""}|${backdropBrightness}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
         .map(
           (o) =>
             `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}` +
@@ -494,7 +498,7 @@ const VisualiserCanvas = ({
       maxAzimuthAngle={Infinity}
       target={workspaceCamera?.target ?? (photoStage ? LUXURY_BACKDROP.cameraTarget : SHOWROOM.cameraTarget)}
     />
-    {roomBounds && !photoCalibration && (!workspaceCamera || workspaceCamera.polar === Math.PI / 2) && <SandboxCameraBounds bounds={roomBounds} />}
+    {roomBounds && !photoCalibration && (!workspaceCamera || workspaceCamera.polar === Math.PI / 2) && <SandboxCameraBounds bounds={roomBounds} frontRetreat={floorExtension} />}
     {roomBounds && !photoCalibration && !projectArchitecture && <group name="Active project bounds">{[
       { position: [0, 0.01, -roomBounds.depth / 2], size: [roomBounds.width, 0.01, 0.025] },
       { position: [0, 0.01, roomBounds.depth / 2], size: [roomBounds.width, 0.01, 0.025] },
@@ -536,7 +540,7 @@ const VisualiserCanvas = ({
     <Suspense fallback={null}>
       {showLuxuryBackdrop && <LuxuryBackdrop />}
       {/* Both renderers retain the designed architecture; only room photos suppress it. */}
-      {projectArchitecture && roomBounds && !photoCalibration && <ProjectArchitecture bounds={roomBounds} columns={projectArchitecture.columns} floorFinish={hasBackdrop ? "none" : floorFinish} floorGlare={floorGlare} />}
+      {projectArchitecture && roomBounds && !photoCalibration && <ProjectArchitecture bounds={roomBounds} columns={projectArchitecture.columns} floorFinish={hasBackdrop ? "none" : floorFinish} floorGlare={floorGlare} floorExtension={floorExtension} floorPatternScale={floorPatternScale} />}
       {!hasBackdrop && !projectArchitecture && <ArchitecturalFeatureWall finish={featureWallFinish} />}
       {!projectArchitecture && <RoomSurfaces floor={hasBackdrop ? "none" : floorFinish} rearWall={hasBackdrop ? false : showRearWall} objects={objects} glare={floorGlare} wallHeight={wallHeight} ceilingHeight={ceilingHeight} ceilingThickness={ceilingThickness} ceilingOpening={ceilingOpening} wallColor={wallColor} wallFinish={wallFinish} wallCustomHex={wallCustomHex} wallFinishIntensity={wallFinishIntensity} rugColor={rugColor} rugBorderColor={rugBorderColor} rugBorderThicknessMm={rugBorderThicknessMm} rugBorderTwistMm={rugBorderTwistMm} rugBorderRoughness={rugBorderRoughness} rugWeave={rugWeave} rugPile={rugPile} rugLayout={rugLayout} showRug={showRug && !hasBackdrop} />}
       <InitialAssetsCommitted onReady={setRoomReady} />

@@ -10,7 +10,7 @@ import { WALL_THICKNESS_M, type PlanColumn, type RoomBounds } from "@/lib/active
  * room height (front left open so both cameras see in), and structural
  * columns from the plan.
  */
-export default function ProjectArchitecture({ bounds, columns, floorFinish = "oak-chevron", floorGlare = 50 }: { bounds: RoomBounds; columns: PlanColumn[]; floorFinish?: RoomFloorFinish; floorGlare?: number }) {
+export default function ProjectArchitecture({ bounds, columns, floorFinish = "oak-chevron", floorGlare = 50, floorExtension = CAMERA_FRONT_RETREAT_M, floorPatternScale = 100 }: { bounds: RoomBounds; columns: PlanColumn[]; floorFinish?: RoomFloorFinish; floorGlare?: number; floorExtension?: number; floorPatternScale?: number }) {
   const { width, depth, height } = bounds;
   const t = WALL_THICKNESS_M;
   const walls: Array<{ name: string; position: [number, number, number]; size: [number, number, number] }> = [
@@ -29,8 +29,8 @@ export default function ProjectArchitecture({ bounds, columns, floorFinish = "oa
       ) : (
         <Suspense fallback={null}>
           {/* Floor continues out of the open front so stepping back never shows a floating slab. */}
-          <group position={[0, 0, CAMERA_FRONT_RETREAT_M / 2]}>
-            <Floor finish={floorFinish} glare={floorGlare} size={[width + t * 2, depth + CAMERA_FRONT_RETREAT_M]} />
+          <group position={[0, 0, floorExtension / 2]}>
+            <Floor finish={floorFinish} glare={floorGlare} size={[width + t * 2, depth + floorExtension]} patternScale={floorPatternScale} />
           </group>
         </Suspense>
       )}
