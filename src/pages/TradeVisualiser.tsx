@@ -25,6 +25,7 @@ import { createPlacedObject, inventoryItemToPlaceable, type PlaceableProduct } f
 import ProjectLayoutOverview from "@/components/trade/visualiser/ProjectLayoutOverview";
 import { Helmet } from "react-helmet-async";
 import { Link, useSearchParams } from "@/lib/router-compat";
+import ToolsBreadcrumb from "@/components/trade/ToolsBreadcrumb";
 import { finishTargetsFromParts, getPartMaterial, hasAnyFinish, materialFitsTarget, targetLabel, withPartMaterial, type FinishPart, type FinishTarget } from "@/lib/visualiserFinishTargets";
 import { findProductSchema, schemaFits, schemaLabels, schemaTargets } from "@/lib/visualiserProductSchema";
 import PartMappingControl from "@/components/trade/visualiser/PartMappingControl";
@@ -962,6 +963,11 @@ const TradeVisualiser = () => {
         <meta name="description" content="Compose interiors in a live 3D sandbox with collectible design assets." />
         <meta name="robots" content="noindex" />
       </Helmet>
+
+      {/* Tools breadcrumb — the full-bleed layout suppresses the global bar, so the workspace renders its own. */}
+      <div className="relative z-40 w-full shrink-0 border-b border-border/40 bg-background px-3 py-2 sm:px-4">
+        <ToolsBreadcrumb className="mb-0" />
+      </div>
 
       <div ref={mediaRef} className="relative min-h-0 flex-1 overflow-hidden">
       <ProjectLayoutOverview />

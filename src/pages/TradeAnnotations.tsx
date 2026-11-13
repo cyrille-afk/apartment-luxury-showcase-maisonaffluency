@@ -137,7 +137,37 @@ export default function TradeAnnotations() {
   // Database image picker — use same data source as Gallery
   const [browseOpen, setBrowseOpen] = useState(false);
   const [dbSearch, setDbSearch] = useState("");
+  const [dbCategory, setDbCategory] = useState("all");
+  const [dbSubcategory, setDbSubcategory] = useState("all");
   const { allProducts } = useTradeProducts();
+
+  // Categories present in the catalogue, ordered by the shared taxonomy
+  const dbCategories = useMemo(() => {
+    const present = new Set<string>();
+    for (const p of allProducts) {
+      if (p.image_url && p.category) present.add(p.category);
+    }
+    return [...present].sort((a, b) => {
+      const ai = CATEGORY_ORDER.indexOf(a);
+      const bi = CATEGORY_ORDER.indexOf(b);
+      return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi) || a.localeCompare(b);
+    });
+  }, [allProducts]);
+
+  // Subcategories within the selected category, ordered by the shared taxonomy
+  const dbSubcategories = useMemo(() => {
+    if (dbCategory === "all") return [];
+    const present = new Set<string>();
+    for (const p of allProducts) {
+      if (p.image_url && p.category === dbCategory) present.add(p.subcategory || "Other");
+    }
+    const canonical = SUBCATEGORY_MAP[dbCategory] || [];
+    return [...present].sort((a, b) => {
+      const ai = canonical.indexOf(a);
+      const bi = canonical.indexOf(b);
+      return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi) || a.localeCompare(b);
+    });
+  }, [allProducts, dbCategory]);
 
   // Filter products for the browse dialog (same data as Gallery)
   const dbImages: DbImage[] = useMemo(() => {
@@ -151,6 +181,8 @@ export default function TradeAnnotations() {
       if (seen.has(key)) continue;
       seen.add(key);
 
+      if (dbCategory !== "all" && p.category !== dbCategory) continue;
+      if (dbSubcategory !== "all" && (p.subcategory || "Other") !== dbSubcategory) continue;
       if (q && !p.product_name.toLowerCase().includes(q) && !p.brand_name.toLowerCase().includes(q)) continue;
 
       results.push({
@@ -365,6 +397,31 @@ export default function TradeAnnotations() {
               placeholder="Search by product or brand…"
               className="pl-9"
             />
+          </div>
+          <div className="mt-2 flex items-center gap-2">
+            <select
+              value={dbCategory}
+              onChange={(e) => { setDbCategory(e.target.value); setDbSubcategory("all"); }}
+              aria-label="Filter by category"
+              className="h-8 flex-1 min-w-0 rounded-md border border-border bg-background px-2 font-body text-xs text-foreground focus:outline-hidden focus:border-foreground/40"
+            >
+              <option value="all">All categories</option>
+              {dbCategories.map((cat) => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+            <select
+              value={dbSubcategory}
+              onChange={(e) => setDbSubcategory(e.target.value)}
+              aria-label="Filter by subcategory"
+              disabled={dbCategory === "all"}
+              className="h-8 flex-1 min-w-0 rounded-md border border-border bg-background px-2 font-body text-xs text-foreground focus:outline-hidden focus:border-foreground/40 disabled:opacity-40"
+            >
+              <option value="all">All subcategories</option>
+              {dbSubcategories.map((sub) => (
+                <option key={sub} value={sub}>{sub}</option>
+              ))}
+            </select>
           </div>
           <div className="flex-1 overflow-y-auto min-h-0 mt-2">
             {dbImages.length === 0 ? (
