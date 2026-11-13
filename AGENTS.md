@@ -11,6 +11,7 @@
 - Password-setup resends reuse the review drawer and retain attempt keys on retry; never change approval. Verified activation links the account; the queue reads user_id for setup status.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Furniture-shadow controls reuse persisted advancedRendering: softness is inverse sharpness and intensity drives every live contact/cast/catcher path, including photos, without floor material writes; Photoreal retains physical shadows — keeps tuning independent of surface textures.
 - Visualiser finish tabs and mapper share isNamedFinishTarget, exposing declared/named roles only and hiding anonymous import groups without rewriting saved material assignments — supplier controls must not count exporter IDs as finishes.
 - Uploaded floor-plan drawings remain 2D underlays only; ProjectArchitecture uses bounds/columns and an untextured shadow-receiving 3D floor — preserves blueprint alignment without printing technical marks into rendered interiors.
 - Manual model rotation uses the selected-piece orientation controls and existing persisted quaternion; reset clears import repair only, preserving position, placement yaw, scale and finishes — prevents corrective controls from erasing room edits.

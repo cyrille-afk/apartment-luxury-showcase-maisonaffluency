@@ -2,6 +2,22 @@ import { describe, expect, it } from "vitest";
 import { advancedSceneLighting, clampAdvancedRendering, DEFAULT_ADVANCED_RENDERING, environmentSourcePref } from "./visualiserAdvancedRendering";
 
 describe("advanced rendering scene mappings", () => {
+  it("zero furniture intensity removes cast, contact and catcher shadows without changing illumination", () => {
+    const off = advancedSceneLighting({ ...DEFAULT_ADVANCED_RENDERING, contactShadowIntensity: 0 });
+    expect(off.contactOpacity).toBe(0);
+    expect(off.shadowIntensity).toBe(0);
+    expect(off.shadowCatcherOpacity).toBe(0);
+    expect(off.directionalIntensity).toBe(2.5);
+    expect(advancedSceneLighting(DEFAULT_ADVANCED_RENDERING).shadowCatcherOpacity).toBe(0.28);
+    expect(advancedSceneLighting(DEFAULT_ADVANCED_RENDERING).shadowIntensity).toBe(1);
+  });
+  it("100% furniture softness increases edge blur independently of intensity", () => {
+    const soft = advancedSceneLighting({ ...DEFAULT_ADVANCED_RENDERING, shadowSharpness: 0 });
+    const hard = advancedSceneLighting({ ...DEFAULT_ADVANCED_RENDERING, shadowSharpness: 100 });
+    expect(soft.contactBlur).toBe(2.8);
+    expect(hard.contactBlur).toBeCloseTo(0.2);
+    expect(soft.contactOpacity).toBe(hard.contactOpacity);
+  });
   it("keeps 100% lighting at the baseline", () => {
     const lighting = advancedSceneLighting(DEFAULT_ADVANCED_RENDERING, 1);
     expect(lighting.directionalIntensity).toBe(2.5);

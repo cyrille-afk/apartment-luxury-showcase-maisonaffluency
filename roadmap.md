@@ -1,5 +1,9 @@
 # Roadmap
 
+## Furniture shadow tuning
+- [x] Add paired softness/intensity and shadow-only reset controls; connect all live floor/photo shadow paths without surface edits, preserving saved settings and physical Photoreal shadows.
+- [ ] Verify sliders, refresh persistence and unchanged floor textures with real furniture; run shadow regressions.
+
 ## Named Visualiser finish groups
 - [x] Filter anonymous imported groups from finish tabs, mapper rows and destinations without altering saved scene materials; retain named and declared supplier components.
 - [x] 28 regressions pass; signed-in Frenchmen retains Frame/Base/Upholstery, DUP hides all nine anonymous Mat0–Mat8 groups while linked oak/walnut/lacquer finishes remain. Reload and screenshots verified, no page errors; build OK.

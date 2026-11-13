@@ -521,6 +521,7 @@ const VisualiserCanvas = ({
       shadow-bias={lighting.shadowBias * 0.4}
       shadow-normalBias={lighting.shadowNormalBias * 0.4}
       shadow-radius={lighting.shadowRadius}
+      shadow-intensity={lighting.shadowIntensity}
     />
     {/* Fill: opposite side, low and cool. */}
     <directionalLight position={[7, 4, 4]} intensity={lighting.fillIntensity} color={SHOWROOM.fill} />
@@ -567,7 +568,7 @@ const VisualiserCanvas = ({
       />
     )}
     {/* Faint floor grid at Y = 0 — the design-canvas ground reference. Hideable for room-photo backdrops. */}
-    {!pathTrace && (showLuxuryBackdrop || showUploadedEnvironment) && <ContactShadows position={[center[0], 0.002, center[2]]} opacity={LUXURY_BACKDROP.contactOpacity} blur={LUXURY_BACKDROP.contactBlur} scale={LUXURY_BACKDROP.contactScale} far={1.5} resolution={1024} depthWrite={false} />}
+    {!pathTrace && !photoCalibration && (showLuxuryBackdrop || showUploadedEnvironment) && <ContactShadows position={[center[0], 0.002, center[2]]} opacity={lighting.contactOpacity * (LUXURY_BACKDROP.contactOpacity / SHOWROOM.contactOpacity)} blur={lighting.contactBlur * (LUXURY_BACKDROP.contactBlur / 1.5)} scale={LUXURY_BACKDROP.contactScale} far={1.5} resolution={1024} depthWrite={false} />}
     {showGrid && !hasCustomBackdrop && !showLuxuryBackdrop && !showUploadedEnvironment && (
       <Grid
         position={[0, 0.001, 0]}
@@ -586,9 +587,9 @@ const VisualiserCanvas = ({
     {/* Invisible shadow-catcher floor: lets the backdrop's own flooring read through the shadows. */}
     {!photoCalibration && !showLuxuryBackdrop && !showUploadedEnvironment && (hasBackdrop || floorFinish === "none") && <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
       <planeGeometry args={[80, 80]} />
-      <shadowMaterial transparent opacity={0.28} />
+      <shadowMaterial transparent opacity={lighting.shadowCatcherOpacity} />
     </mesh>}
-    {photoCalibration && <ContactShadows position={[center[0], 0.002, center[2]]} opacity={LUXURY_BACKDROP.contactOpacity} blur={LUXURY_BACKDROP.contactBlur} scale={LUXURY_BACKDROP.contactScale} far={1.5} resolution={1024} depthWrite={false} />}
+    {!pathTrace && photoCalibration && <ContactShadows position={[center[0], 0.002, center[2]]} opacity={lighting.contactOpacity * (LUXURY_BACKDROP.contactOpacity / SHOWROOM.contactOpacity)} blur={lighting.contactBlur * (LUXURY_BACKDROP.contactBlur / 1.5)} scale={LUXURY_BACKDROP.contactScale} far={1.5} resolution={1024} depthWrite={false} />}
 
     <Suspense fallback={<SceneLoader />}>
       {objects.map((object) => (

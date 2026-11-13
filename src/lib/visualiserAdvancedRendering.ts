@@ -33,6 +33,9 @@ export function advancedSceneLighting(settings: AdvancedRenderingSettings, light
   return {
     lightScale,
     contactOpacity: (clampAdvancedRendering(settings).contactShadowIntensity ?? 72) / 100,
+    // Preserve authored opacity at the default 72%, but allow complete shadow removal.
+    shadowIntensity: Math.min(1, ((clampAdvancedRendering(settings).contactShadowIntensity ?? 72) / 72)),
+    shadowCatcherOpacity: 0.28 * ((clampAdvancedRendering(settings).contactShadowIntensity ?? 72) / 72),
     shadowBias: (-0.0007 + sharpness * 0.0006) / biasScale,
     shadowNormalBias: (0.035 - sharpness * 0.03) / biasScale,
     shadowRadius: 4 - sharpness * 3.75,

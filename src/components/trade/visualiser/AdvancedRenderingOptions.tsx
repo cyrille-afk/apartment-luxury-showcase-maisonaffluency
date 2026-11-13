@@ -4,7 +4,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { VISUALISER_ENVIRONMENTS, environmentSourcePref, type AdvancedRenderingSettings, type EnvironmentSourcePref } from "@/lib/visualiserAdvancedRendering";
+import { DEFAULT_ADVANCED_RENDERING, VISUALISER_ENVIRONMENTS, environmentSourcePref, type AdvancedRenderingSettings, type EnvironmentSourcePref } from "@/lib/visualiserAdvancedRendering";
 
 export default function AdvancedRenderingOptions({ settings, onChange, environment, onEnvironmentChange, className, inline = false, pathTrace, depthOfField, onDepthOfFieldChange, dofStrength, onDofStrengthChange }: {
   settings: AdvancedRenderingSettings;
@@ -22,18 +22,17 @@ export default function AdvancedRenderingOptions({ settings, onChange, environme
   const label = VISUALISER_ENVIRONMENTS.find((item) => item.value === environment)?.label ?? "Studio";
   const content = <>
         <div className="space-y-3">
-          <div className="flex items-center justify-between text-xs"><span>Contact Shadow Intensity</span><output className="tabular-nums text-muted-foreground">{settings.contactShadowIntensity ?? 72}%</output></div>
-          <Slider thumbLabel="Contact Shadow Intensity" min={0} max={100} step={1} value={[settings.contactShadowIntensity ?? 72]} disabled={pathTrace} title={pathTrace ? "Photoreal contact shadows follow physical lighting." : "Furniture contact shadow opacity"} onValueChange={([value]) => onChange({ ...settings, contactShadowIntensity: value })} />
+          <div className="flex items-center justify-between text-xs"><span>Furniture Shadow Intensity</span><output className="tabular-nums text-muted-foreground">{settings.contactShadowIntensity ?? 72}%</output></div>
+          <Slider thumbLabel="Furniture Shadow Intensity" min={0} max={100} step={1} value={[settings.contactShadowIntensity ?? 72]} disabled={pathTrace} title={pathTrace ? "Photoreal shadows follow physical lighting; switch Photoreal Render off to tune live shadows." : "Furniture shadow intensity"} onValueChange={([value]) => onChange({ ...settings, contactShadowIntensity: value })} />
+          <div className="flex items-center justify-between text-xs"><span>Furniture Shadow Softness</span><output className="tabular-nums text-muted-foreground">{100 - settings.shadowSharpness}%</output></div>
+          <Slider thumbLabel="Furniture Shadow Softness" min={0} max={100} step={1} value={[100 - settings.shadowSharpness]} disabled={pathTrace} title={pathTrace ? "Photoreal shadows follow physical lighting; switch Photoreal Render off to tune live shadows." : "Softness of furniture shadow edges"} onValueChange={([value]) => onChange({ ...settings, shadowSharpness: 100 - value })} />
+          <Button variant="outline" size="sm" className="w-full text-xs" disabled={pathTrace} onClick={() => onChange({ ...settings, shadowSharpness: DEFAULT_ADVANCED_RENDERING.shadowSharpness, contactShadowIntensity: DEFAULT_ADVANCED_RENDERING.contactShadowIntensity })}>Reset Furniture Shadows</Button>
         </div>
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs"><label htmlFor="advanced-dof">Depth of Field</label><Switch id="advanced-dof" checked={depthOfField} onCheckedChange={onDepthOfFieldChange} /></div>
           <div className="flex items-center justify-between text-xs"><span>Bokeh Strength</span><output className="tabular-nums text-muted-foreground">{dofStrength.toFixed(1)}</output></div>
           <Slider thumbLabel="Bokeh Strength" min={1} max={10} step={0.1} value={[dofStrength]} disabled={!depthOfField} onValueChange={([value]) => onDofStrengthChange(value)} />
-          <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => { onChange({ ...settings, contactShadowIntensity: 72 }); onDepthOfFieldChange(true); onDofStrengthChange(1); }}>Reset Shadows &amp; DoF</Button>
-        </div>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between text-xs"><span>Shadow Sharpness</span><output className="tabular-nums text-muted-foreground">{settings.shadowSharpness}%</output></div>
-          <Slider thumbLabel="Shadow Sharpness" min={0} max={100} step={1} value={[settings.shadowSharpness]} disabled={pathTrace} title={pathTrace ? "Shadow-map controls apply to the live view; photoreal shadows follow physical light sources." : "Contact shadow sharpness"} onValueChange={([value]) => onChange({ ...settings, shadowSharpness: value })} />
+          <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => { onDepthOfFieldChange(true); onDofStrengthChange(1); }}>Reset DoF</Button>
         </div>
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs"><span>Contrast / Intensity</span><output className="tabular-nums text-muted-foreground">{settings.contrastIntensity}%</output></div>
