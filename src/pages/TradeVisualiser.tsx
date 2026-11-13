@@ -1575,7 +1575,7 @@ const TradeVisualiser = () => {
             <Button variant="ghost" className={toolbarButton} onClick={() => fileRef.current?.click()}><ImageUp className="h-4 w-4" />{backdropSrc ? "Change Backdrop" : "Import Backdrop Prop"}</Button>
           </div>
         </section>
-        <details open className="visualiser-palette visualiser-lighting-palette" aria-label="Lighting & camera">
+        <details className="visualiser-palette visualiser-lighting-palette" aria-label="Lighting & camera">
           <summary><SlidersHorizontal className="h-4 w-4" /><span>Lighting &amp; Camera</span><ChevronDown className="visualiser-palette-chevron h-4 w-4" /></summary>
           <div className="visualiser-lighting-content">
             <div className="flex h-9 items-center justify-between px-3 text-xs">

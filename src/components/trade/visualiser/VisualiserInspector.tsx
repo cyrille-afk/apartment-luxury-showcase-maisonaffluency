@@ -41,7 +41,7 @@ const VisualiserInspector = ({
   sidebarActions?: ReactNode;
 }) => {
   const { selected } = useVisualiserSelection();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
 
   if (collapsed) {
     return (
