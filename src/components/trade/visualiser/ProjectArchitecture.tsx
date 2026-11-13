@@ -1,5 +1,7 @@
 import { CAMERA_FRONT_RETREAT_M } from "./sandboxCameraBounds";
 import ProceduralWallMaterial from "./ProceduralWallMaterial";
+import ArchitecturalShadowGap from "./ArchitecturalShadowGap";
+import { ARCHITECTURAL_RENDERING as R } from "@/lib/visualiserArchitecturalRendering";
 import type { FeatureWallFinish } from "@/lib/visualiserFeatureWall";
 import { Suspense } from "react";
 import { Floor } from "./RoomSurfaces";
@@ -16,9 +18,9 @@ export default function ProjectArchitecture({ bounds, columns, wallFinish = "tra
   const { width, depth, height } = bounds;
   const t = WALL_THICKNESS_M;
   const walls: Array<{ name: string; position: [number, number, number]; size: [number, number, number] }> = [
-    { name: "Rear wall", position: [0, height / 2, -depth / 2 - t / 2], size: [width + t * 2, height, t] },
-    { name: "Left wall", position: [-width / 2 - t / 2, height / 2, 0], size: [t, height, depth] },
-    { name: "Right wall", position: [width / 2 + t / 2, height / 2, 0], size: [t, height, depth] },
+    { name: "Rear wall", position: [0, (height + R.shadowGapHeight) / 2, -depth / 2 - t / 2], size: [width + t * 2, height - R.shadowGapHeight, t] },
+    { name: "Left wall", position: [-width / 2 - t / 2, (height + R.shadowGapHeight) / 2, 0], size: [t, height - R.shadowGapHeight, depth] },
+    { name: "Right wall", position: [width / 2 + t / 2, (height + R.shadowGapHeight) / 2, 0], size: [t, height - R.shadowGapHeight, depth] },
   ];
 
   return (
@@ -42,6 +44,9 @@ export default function ProjectArchitecture({ bounds, columns, wallFinish = "tra
           <ProceduralWallMaterial finish={wallFinish} width={wall.name === "Rear wall" ? width : depth} height={height} />
         </mesh>
       ))}
+      <ArchitecturalShadowGap width={width} position={[0, 0, -depth / 2]} />
+      <ArchitecturalShadowGap width={depth} position={[-width / 2, 0, 0]} rotation={Math.PI / 2} />
+      <ArchitecturalShadowGap width={depth} position={[width / 2, 0, 0]} rotation={-Math.PI / 2} />
       {/* Front wall shown as a kerb so the opening still reads as a boundary. */}
       <mesh name="Front wall line" position={[0, 0.05, depth / 2 + t / 2]}>
         <boxGeometry args={[width + t * 2, 0.1, t]} />

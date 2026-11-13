@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import ProceduralWallMaterial from "./ProceduralWallMaterial";
+import ArchitecturalShadowGap from "./ArchitecturalShadowGap";
+import { ARCHITECTURAL_RENDERING as R } from "@/lib/visualiserArchitecturalRendering";
 import { FEATURE_WALL, featureWallLayout, type FeatureWallFinish } from "@/lib/visualiserFeatureWall";
 import { architecturalRoomLayout } from "@/lib/visualiserArchitecture";
 import ArchitecturalMezzanine from "./ArchitecturalMezzanine";
@@ -31,8 +33,9 @@ export default function ArchitecturalFeatureWall({ finish = "travertine" }: { fi
     <group name="architectural-interior">
     <ArchitecturalMezzanine layout={room} width={layout.width} rearZ={layout.frontZ} />
     <group name="architectural-feature-wall" position={[layout.centerX, 0, layout.frontZ]}>
-      <mesh name={`feature-wall-continuous-${finish}`} position={[0, room.height / 2, -FEATURE_WALL.thickness / 2]} castShadow receiveShadow>
-        <boxGeometry args={[layout.width, room.height, FEATURE_WALL.thickness]} />
+      <ArchitecturalShadowGap width={layout.width} position={[0, 0, 0]} />
+      <mesh name={`feature-wall-continuous-${finish}`} position={[0, (room.height + R.shadowGapHeight) / 2, -FEATURE_WALL.thickness / 2]} castShadow receiveShadow>
+        <boxGeometry args={[layout.width, room.height - R.shadowGapHeight, FEATURE_WALL.thickness]} />
         <ProceduralWallMaterial finish={finish} width={layout.width} height={room.height} />
       </mesh>
     </group>

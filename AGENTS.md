@@ -11,6 +11,7 @@
 - Password-setup resends reuse the review drawer and retain attempt keys on retry; never change approval. Verified activation links the account; the queue reads user_id for setup status.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Architectural rendering shares visualiserArchitecturalRendering; one live N8AO/Bloom/ACES composer stays separate from path tracing, hosted apartment HDR uses the existing environment loader/fallback and preserves saved selections, recessed trim lifts walls by its exact height, and rug relief maps are owned/disposed — prevents competing render passes, network-dependent blank rooms and lost finishes.
 - Project-room rugs render through the shared RoomSurfaces Rug independently of architecture, using saved layout/finish settings and the same elevated contact-shadow layer — project floor ownership must not hide an enabled rug.
 - Rug weave albedo and normals both follow the saved weave; only loop pile uses the pile photograph, while Berber uses alternating diagonal yarn courses — prevents the photographic pile from overriding woven finishes.
 - Piece Inspector collapse remains component-local UI state; its left-anchored pill never controls Canvas keys, readiness or scene state — preserves renderer, camera and loaded furniture across toggles.

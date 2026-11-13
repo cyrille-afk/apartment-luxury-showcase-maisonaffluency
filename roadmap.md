@@ -1,5 +1,10 @@
 # Roadmap
 
+## Architectural rendering upgrade
+- [x] Upgrade ACES exposure, hosted apartment HDR lighting, warm key/sky fill and single-composer N8AO/bloom without replacing saved environment choices.
+- [x] Add 4cm recessed perimeter shadow gaps and owned rug bump/roughness maps, retaining wall/floor maps and saved room/furniture settings.
+- [x] Forty regressions and preview build pass. Signed-in Frenchmen room verifies apartment HDR, exposure 1.05, saved 160% light multiplier, three recessed trims and wall/floor/rug relief maps with no page errors. Software-rendered screenshot remains bright; real-GPU photorealism/performance unverified. Bundled 3D harness only reaches sign-in and reports a pre-existing root stylesheet-script hydration warning, not a room check.
+
 ## Correct Berber rug appearance
 - [x] Remove shared pile-photo override from woven rug colours/normals and render visible diagonal Berber twill without changing saved fit or weave choice.
 - [x] Signed-in Herringbone Berber selection produces its own 1536px colour/normal maps; captured actual colour map confirms diagonal woven courses, no pile photograph. Four regressions pass, no browser errors, build OK. Distant room view remains washed out; real-device contrast is unverified.

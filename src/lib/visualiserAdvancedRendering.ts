@@ -1,8 +1,9 @@
 import { CONTACT_SHADOW, KEY_SHADOW } from "./visualiserGroundLayers";
 
-export type EnvironmentSourcePref = "empty-room-exr" | "studio-hdr" | "studio-softbox-exr" | "window-interior-exr";
+export type EnvironmentSourcePref = "apartment-hdr" | "empty-room-exr" | "studio-hdr" | "studio-softbox-exr" | "window-interior-exr";
 
 export const VISUALISER_ENVIRONMENTS = [
+  { value: "apartment-hdr", label: "Apartment" },
   { value: "studio-hdr", label: "Studio" },
   { value: "studio-softbox-exr", label: "Studio Softbox" },
   { value: "window-interior-exr", label: "Window Interior" },
@@ -23,7 +24,7 @@ export const clampAdvancedRendering = (value?: Partial<AdvancedRenderingSettings
   contactShadowIntensity: typeof value?.contactShadowIntensity === "number" && Number.isFinite(value.contactShadowIntensity) ? percentage(value.contactShadowIntensity) : 72,
 });
 export const environmentSourcePref = (value: unknown): EnvironmentSourcePref =>
-  value === "studio-hdr" || value === "studio-softbox-exr" || value === "window-interior-exr" ? value : "empty-room-exr";
+  value === "apartment-hdr" || value === "studio-hdr" || value === "studio-softbox-exr" || value === "window-interior-exr" ? value : "empty-room-exr";
 
 /** Midpoints preserve the existing key/ambient balance and contact-shadow blur. */
 export function advancedSceneLighting(settings: AdvancedRenderingSettings, lightIntensity = 1) {

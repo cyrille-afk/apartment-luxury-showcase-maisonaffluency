@@ -39,11 +39,11 @@ describe("showroom rendering", () => {
     const source = new THREE.BoxGeometry();
     expect(withFallbackTextureCoordinates(source)).toBe(source);
   });
-  it("uses neutral ACES exposure without amplifying HDR lighting", () => {
-    expect(SHOWROOM.exposure).toBe(1);
+  it("uses architectural ACES exposure of 1.05", () => {
+    expect(SHOWROOM.exposure).toBe(1.05);
   });
-  it("reduces environment intensity in live and photoreal rendering", () => {
-    expect(SHOWROOM.environmentIntensity).toBe(0.35);
+  it("uses 0.65 indirect light in live rendering while preserving the tracer scale", () => {
+    expect(SHOWROOM.environmentIntensity).toBe(0.65);
     expect(1.6 * SHOWROOM.photorealEnvironmentScale).toBe(0.8);
   });
   it("keeps oak scalar and mapped roughness within 0.4–0.6 at every glare level", () => {

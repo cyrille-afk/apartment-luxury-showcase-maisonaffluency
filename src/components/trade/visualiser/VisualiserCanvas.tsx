@@ -30,12 +30,14 @@ import UploadedEnvironmentBackdrop from "./UploadedEnvironmentBackdrop";
 import { LUXURY_BACKDROP, windowLightPosition } from "./luxuryBackdropSettings";
 import InitialRoomReveal, { InitialAssetsCommitted } from "./InitialRoomReveal";
 import type { PhotorealFrameCaptureRef } from "@/lib/visualiserPhotorealGhost";
-import { Bloom, EffectComposer, DepthOfField, SSAO, ToneMapping } from "@react-three/postprocessing";
-import { BlendFunction, ToneMappingMode, type DepthOfFieldEffect } from "postprocessing";
+import { Bloom, EffectComposer, DepthOfField, N8AO, ToneMapping } from "@react-three/postprocessing";
+import { ToneMappingMode, type DepthOfFieldEffect } from "postprocessing";
 import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js";
 import { createExrEnvironmentTexture } from "@/lib/visualiserExrTexture";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
 import studioAsset from "@/assets/showroom-studio.hdr.asset.json";
+import apartmentAsset from "@/assets/apartment-interior.hdr.asset.json";
+import { ARCHITECTURAL_RENDERING as ARCH_RENDER } from "@/lib/visualiserArchitecturalRendering";
 import { SHOWROOM } from "@/lib/showroomRendering";
 import { validateEmptyRoomExr } from "@/lib/emptyRoomExr";
 import { getLocalExr, LOCAL_EXR_EVENT } from "@/lib/localEnvironmentExr";
@@ -128,7 +130,8 @@ const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1, o
         }
       }).catch(() => fallbackToStudioHdr("unreadable"));
     };
-    if (preferred === "empty-room-exr") loadEmptyRoom();
+    if (preferred === "apartment-hdr") new RGBELoader().load(apartmentAsset.url, accept("apartment-hdr"), undefined, () => fallbackToStudioHdr("unreadable"));
+    else if (preferred === "empty-room-exr") loadEmptyRoom();
     else if (preferred === "studio-softbox-exr") loadHostedExr(preferred, softboxAsset.url);
     else if (preferred === "window-interior-exr") loadHostedExr(preferred, windowAsset.url);
     else fallbackToStudioHdr();
@@ -356,11 +359,9 @@ const ShowroomEffects = ({ target, range, strength = 1, depthOfField, hasBackdro
   });
   const bokehScale = Math.min(10, Math.max(1, strength));
   return (
-    <EffectComposer multisampling={4} enableNormalPass>
-      {/* Contact SSAO: tight radius + low bias darkens the crevices where legs/rug meet the floor. */}
-      <SSAO blendFunction={BlendFunction.MULTIPLY} samples={24} rings={5} radius={0.07} intensity={hasBackdrop ? 0.9 : SHOWROOM.aoIntensity * 1.6} luminanceInfluence={0.35} bias={0.012} worldDistanceThreshold={30} worldDistanceFalloff={10} worldProximityThreshold={0.25} worldProximityFalloff={0.08} />
-      {/* Subtle bloom: only HDR highlights above ~0.9 luminance glow softly. */}
-      <Bloom intensity={0.25} luminanceThreshold={0.9} luminanceSmoothing={0.2} mipmapBlur />
+    <EffectComposer multisampling={4}>
+      <N8AO aoRadius={ARCH_RENDER.aoRadius} intensity={hasBackdrop ? 0.9 : ARCH_RENDER.aoIntensity} distanceFalloff={ARCH_RENDER.aoDistanceFalloff} quality="medium" />
+      <Bloom intensity={ARCH_RENDER.bloomIntensity} luminanceThreshold={ARCH_RENDER.bloomThreshold} luminanceSmoothing={0.2} mipmapBlur />
       {depthOfField ? <DepthOfField ref={effect} target={target} worldFocusRange={DEFAULT_ARCHITECTURAL_DOF.focusRange} bokehScale={bokehScale} height={720} /> : <></>}
       {/* Composer disables renderer tone mapping; apply ACES once after the HDR effects. */}
       <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
@@ -406,7 +407,7 @@ const VisualiserCanvas = ({
   onPathTraceAdaptiveChange,
   dofStrength = 1,
   dofFocusSelected = true,
-  environmentSource = "empty-room-exr",
+  environmentSource = "apartment-hdr",
   advancedRendering = DEFAULT_ADVANCED_RENDERING,
   floorFinish = "oak-chevron",
   floorExtension = 8,
@@ -527,8 +528,8 @@ const VisualiserCanvas = ({
     {photoStage && <ambientLight intensity={SHOWROOM.ambient * lighting.lightScale} />}
     {/* Key: soft window light, front-left, casts the shadows. */}
     <directionalLight
-      position={photoStage ? windowLightPosition(center) : [-6, 9, 6]}
-      intensity={lighting.directionalIntensity}
+      position={photoStage ? windowLightPosition(center) : ARCH_RENDER.keyPosition}
+      intensity={lighting.directionalIntensity * (ARCH_RENDER.keyIntensity / 2.5)}
       color={SHOWROOM.key}
       castShadow
       shadow-mapSize-width={KEY_SHADOW.mapSize}
@@ -544,6 +545,7 @@ const VisualiserCanvas = ({
       shadow-intensity={lighting.shadowIntensity}
     />
     {/* Fill: opposite side, low and cool. */}
+    <hemisphereLight args={[SHOWROOM.fill, SHOWROOM.groundFill, 0.3 * lighting.lightScale]} />
     <directionalLight castShadow={false} position={[7, 4, 4]} intensity={lighting.fillIntensity} color={SHOWROOM.fill} />
     {/* Rim: behind the pieces to lift silhouettes. */}
     <directionalLight castShadow={false} position={[0, 6, -9]} intensity={0.6 * lighting.lightScale} color={SHOWROOM.rim} />

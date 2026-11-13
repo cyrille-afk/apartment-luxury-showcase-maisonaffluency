@@ -340,7 +340,7 @@ const TradeVisualiser = () => {
   const [depthOfField, setDepthOfField] = useState<boolean>(initial.depthOfField ?? true);
   const [dofStrength, setDofStrength] = useState<number>(initial.dofStrength ?? 1);
   const [dofFocusSelected, setDofFocusSelected] = useState<boolean>(initial.dofFocusSelected ?? true);
-  const [environmentSource, setEnvironmentSource] = useState<EnvironmentSourcePref>(initial.environmentSource ?? "empty-room-exr");
+  const [environmentSource, setEnvironmentSource] = useState<EnvironmentSourcePref>(initial.environmentSource ?? "apartment-hdr");
   const [advancedRendering, setAdvancedRendering] = useState(() => clampAdvancedRendering(initial.advancedRendering));
   const [floorFinish, setFloorFinish] = useState<RoomFloorFinish>(roomFloorFinish(initial.floorFinish));
   const [showRearWall, setShowRearWall] = useState(initial.showRearWall !== false);

@@ -22,6 +22,8 @@ import { footprintRadius } from "@/lib/visualiserPlacement";
 import { parseDimensionString } from "@/lib/productDimensions";
 import { SHOWROOM, floorSurfaceRoughness, floorRoughnessTexel } from "@/lib/showroomRendering";
 import RecessedCeiling from "./RecessedCeiling";
+import ArchitecturalShadowGap from "./ArchitecturalShadowGap";
+import { ARCHITECTURAL_RENDERING as R } from "@/lib/visualiserArchitecturalRendering";
 import { GROUND_LAYERS, GROUND_OVERLAY_OFFSET } from "@/lib/visualiserGroundLayers";
 import type { CeilingSettings } from "@/lib/visualiserCeilingSettings";
 
@@ -104,9 +106,10 @@ function PlasterWall({ objects, heightPct, color, finish, customHex, intensity =
   }, [objects, heightPct]);
   return (
     <group>
-    <mesh name="room-rear-plaster-wall" position={[cx, height / 2, backZ]} receiveShadow>
-      <planeGeometry args={[80, height]} />
-      <meshStandardMaterial color={wallColorHex(color, customHex)} roughness={spec.roughness} bumpMap={maps.bump} bumpScale={spec.bumpScale} metalness={0} envMapIntensity={spec.envMapIntensity * (clampWallFinishIntensity(intensity) / 100)} side={THREE.FrontSide} />
+    <ArchitecturalShadowGap width={80} position={[cx, 0, backZ]} />
+    <mesh name="room-rear-plaster-wall" position={[cx, (height + R.shadowGapHeight) / 2, backZ]} receiveShadow>
+      <planeGeometry args={[80, height - R.shadowGapHeight]} />
+      <meshStandardMaterial color={wallColorHex(color, customHex)} roughness={spec.roughness} roughnessMap={maps.roughness} bumpMap={maps.bump} bumpScale={spec.bumpScale} metalness={0} envMapIntensity={spec.envMapIntensity * (clampWallFinishIntensity(intensity) / 100)} side={THREE.FrontSide} />
     </mesh>
     <ArchitecturalCoves cx={cx} cz={cz} radius={radius} height={height} color={wallColorHex(color, customHex)} ceilingHeight={ceilingHeight} ceilingThickness={ceilingThickness} ceilingOpening={ceilingOpening} />
     </group>
@@ -146,6 +149,8 @@ function useWoolMaps(weave: RugWeave, pile: number, repeat: [number, number] = [
     const nctx = normalCanvas.getContext("2d");
     let color: THREE.CanvasTexture | null = null;
     let normal: THREE.CanvasTexture | null = null;
+    let bump: THREE.DataTexture | null = null;
+    let roughness: THREE.DataTexture | null = null;
     if (cctx && nctx) {
       const cimg = cctx.createImageData(size, size);
       const nimg = nctx.createImageData(size, size);
@@ -222,16 +227,34 @@ function useWoolMaps(weave: RugWeave, pile: number, repeat: [number, number] = [
       color.colorSpace = THREE.SRGBColorSpace;
       normal = new THREE.CanvasTexture(normalCanvas);
       normal.colorSpace = THREE.NoColorSpace;
-      for (const map of [color, normal]) {
+      const bumpPixels = new Uint8Array(size * size * 4);
+      const roughPixels = new Uint8Array(size * size * 4);
+      for (let i = 0; i < height.length; i++) {
+        const h = height[i];
+        const offset = i * 4;
+        bumpPixels.fill(Math.round(h * 255), offset, offset + 3);
+        roughPixels.fill(Math.round(242 + h * 13), offset, offset + 3);
+        bumpPixels[offset + 3] = roughPixels[offset + 3] = 255;
+      }
+      bump = new THREE.DataTexture(bumpPixels, size, size);
+      roughness = new THREE.DataTexture(roughPixels, size, size);
+      for (const map of [bump, roughness]) {
+        map.colorSpace = THREE.NoColorSpace;
+        map.magFilter = THREE.LinearFilter;
+        map.minFilter = THREE.LinearMipmapLinearFilter;
+        map.generateMipmaps = true;
+        map.flipY = true;
+      }
+      for (const map of [color, normal, bump, roughness]) {
         map.wrapS = map.wrapT = THREE.RepeatWrapping;
         map.repeat.set(repeat[0], repeat[1]);
         map.anisotropy = anisotropy;
         map.needsUpdate = true;
       }
     }
-    return { color, normal };
+    return { color, normal, bump, roughness };
   }, [source, anisotropy, weave, pile, repeat[0], repeat[1]]);
-  useEffect(() => () => { maps.color?.dispose(); maps.normal?.dispose(); }, [maps]);
+  useEffect(() => () => { maps.color?.dispose(); maps.normal?.dispose(); maps.bump?.dispose(); maps.roughness?.dispose(); }, [maps]);
   return maps;
 }
 
@@ -272,7 +295,7 @@ export function Rug({ objects, color, borderColor = "match", borderThicknessMm, 
     <group name="room-rug-placement" position={[cx, RUG_TOP_Y, cz]} rotation={[0, rugYaw(layout?.rotation), 0]}>
     <group rotation={[-Math.PI / 2, 0, 0]}>
     <mesh name="room-area-rug" userData={{ rugWeave: weave }} geometry={geometry} receiveShadow>
-      <meshStandardMaterial {...GROUND_OVERLAY_OFFSET} color={color === "cream" ? SHOWROOM.rim : rugColorHex(color)} map={maps.color} normalMap={maps.normal} normalScale={new THREE.Vector2(0.25 + (p / 100) * 0.25, 0.25 + (p / 100) * 0.25)} roughness={0.88 + (p / 100) * 0.04} metalness={0} envMapIntensity={0.05} />
+      <meshStandardMaterial {...GROUND_OVERLAY_OFFSET} color={color === "cream" ? SHOWROOM.rim : rugColorHex(color)} map={maps.color} normalMap={maps.normal} bumpMap={maps.bump} bumpScale={0.0015} roughnessMap={maps.roughness} normalScale={new THREE.Vector2(0.25 + (p / 100) * 0.25, 0.25 + (p / 100) * 0.25)} roughness={0.88 + (p / 100) * 0.04} metalness={0} envMapIntensity={0.2} />
     </mesh>
     </group>
     </group>
