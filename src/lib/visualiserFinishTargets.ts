@@ -61,6 +61,9 @@ const GENERIC_PART_NAME = /^(?:(?:standard|physical|default|lambert|phong)\s*)?(
  * Returns "" for names that carry no usable words (UUIDs, "Material.001").
  */
 export function humanizePartName(raw: string): string {
+  const bare = raw.replace(/^part:/, "").trim();
+  // UUIDs / hashes (with or without separators) are exporter IDs, never names.
+  if (/^[0-9a-f]{8}[-_ ]?[0-9a-f]{4}/i.test(bare) || /^[0-9a-f]{12,}$/i.test(bare.replace(/[-_\s.]/g, ""))) return "";
   const cleaned = raw
     .replace(/^part:/, "")
     .replace(/\.\d+$/, "")
@@ -71,7 +74,7 @@ export function humanizePartName(raw: string): string {
   if (!cleaned) return "";
   // Exporter identifiers and UUIDs are not supplier component names.
   if (/^(?:[0-9a-f]{8}-[0-9a-f-]+|[a-z]{1,8}\d+|\d+\s*(?:default|material))$/i.test(cleaned)) return "";
-  if (/^[0-9a-f-]+$/i.test(cleaned) && cleaned.length >= 16) return "";
+  if (/^[0-9a-f\s]+$/i.test(cleaned) && cleaned.replace(/\s/g, "").length >= 8) return "";
   if (!/[a-z]{3}/i.test(cleaned)) return "";
   const label = cleaned
     .split(" ")
@@ -90,7 +93,8 @@ export function isNamedFinishTarget(target: string, labels: Record<string, strin
 
 export function targetLabel(target: FinishTarget, customLabels: Record<string, string> = {}): string {
   // A declared component name ("Table Top") always beats the generic role label ("Top").
-  return customLabels[target]
+  const custom = customLabels[target];
+  return (custom && humanizePartName(custom) ? custom : "")
     || (target === "all" || isKnownPart(target)
       ? FINISH_TARGET_LABELS[target as "all" | KnownPart]
       : humanizePartName(target))

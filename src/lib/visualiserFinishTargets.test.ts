@@ -108,6 +108,8 @@ describe("component tab labels", () => {
   it("rejects names with no readable component word", () => {
     expect(humanizePartName("Material.001")).toBe("");
     expect(humanizePartName("Object_12")).toBe("");
+    expect(humanizePartName("part:b31e63b9-fcb7-4c7e-afa0-06b1d2e3f4a5")).toBe("");
+    expect(humanizePartName("086E9346 2BC2 4ECA AF7F")).toBe("");
     expect(humanizePartName("a3f1b2c4-5d6e-7f80-9101-121314151617")).toBe("");
     expect(humanizePartName("")).toBe("");
   });

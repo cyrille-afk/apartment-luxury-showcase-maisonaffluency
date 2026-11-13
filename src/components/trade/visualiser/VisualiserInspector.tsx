@@ -1,5 +1,5 @@
-import { X } from "lucide-react";
-import type { ReactNode } from "react";
+import { ChevronLeft, PanelLeftOpen, X } from "lucide-react";
+import { useState, type ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -38,10 +38,36 @@ const VisualiserInspector = ({
   sidebarActions?: ReactNode;
 }) => {
   const { selected } = useVisualiserSelection();
+  const [collapsed, setCollapsed] = useState(false);
+
+  if (collapsed) {
+    return (
+      <Button
+        variant="outline"
+        size="sm"
+        data-testid="visualiser-inspector-pill"
+        aria-label="Open piece inspector"
+        onClick={() => setCollapsed(false)}
+        className={cn(panelClass, "w-auto gap-2 rounded-full border px-4 py-2 shadow-md")}
+      >
+        <PanelLeftOpen className="h-4 w-4" />
+        <span className="text-xs">Piece Inspector{selected ? ` · ${selected.product_name}` : ""}</span>
+      </Button>
+    );
+  }
+  const header = (
+    <div className="-mx-5 -mt-4 mb-4 flex items-center justify-between gap-2 border-b border-foreground/10 px-5 py-2">
+      <p className={cn(microLabel, "truncate text-foreground")} title={selected?.product_name}>{selected ? selected.product_name : "Piece Inspector"}</p>
+      <Button variant="ghost" size="icon-sm" aria-label="Hide inspector" title="Hide inspector" onClick={() => setCollapsed(true)} className="shrink-0 text-muted-foreground hover:text-foreground">
+        <ChevronLeft className="h-4 w-4" />
+      </Button>
+    </div>
+  );
 
   if (!selected) {
     return (
       <aside aria-label="Object inspector" data-testid="visualiser-inspector" className={panelClass}>
+        {header}
         {sidebarActions && <div className="mb-4">{sidebarActions}</div>}
         <p className={cn(microLabel, "text-muted-foreground")}>Inspector</p>
         <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
@@ -57,6 +83,7 @@ const VisualiserInspector = ({
       data-testid="visualiser-inspector"
       className={cn(panelClass, "max-h-[calc(100vh-260px)] overflow-y-auto")}
     >
+      {header}
       {sidebarActions && <div className="mb-4">{sidebarActions}</div>}
       <div className="flex items-start justify-between gap-3">
         <div>
