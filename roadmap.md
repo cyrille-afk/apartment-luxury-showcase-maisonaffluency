@@ -2,7 +2,7 @@
 
 ## Furniture shadow tuning
 - [x] Add paired softness/intensity and shadow-only reset controls; connect all live floor/photo shadow paths without surface edits, preserving saved settings and physical Photoreal shadows.
-- [ ] Verify sliders, refresh persistence and unchanged floor textures with real furniture; run shadow regressions.
+- [x] 11 shadow regressions pass; signed-in Madison sliders reach 100% softness and 0/100% intensity with unchanged floor/furniture; refresh restores both values. Screenshots confirm controls and furniture shadows; build OK. Reset end-to-end remains unverified because browser input stalls after reload; real-GPU appearance not checked.
 
 ## Named Visualiser finish groups
 - [x] Filter anonymous imported groups from finish tabs, mapper rows and destinations without altering saved scene materials; retain named and declared supplier components.
