@@ -52,8 +52,8 @@ const UNAVAILABLE = new Set(["discontinued", "out_of_stock", "unavailable", "sol
 const cleanName = (n: string) => n.replace(/\s+by Yabu Pushelberg$/i, "").trim();
 
 /** Loads live price + availability for every placeable piece. Requires an approved trade session. */
-export async function fetchLiveCatalogue(): Promise<LiveCatalogueItem[]> {
-  const ids = Object.keys(ROLES);
+export async function fetchLiveCatalogue(onlyIds?: string[]): Promise<LiveCatalogueItem[]> {
+  const ids = onlyIds ?? Object.keys(ROLES);
   const { data: products, error } = await supabase
     .from("trade_products")
     .select("id, product_name, brand_name, sku, glb_url, trade_price_cents, currency, source_pick_id, is_active, is_hidden, design_style_tokens, style_tags, dimensions_cubic, dimensions")
@@ -102,7 +102,7 @@ export async function fetchLiveCatalogue(): Promise<LiveCatalogueItem[]> {
           componentId: p.id,
           sku: p.sku || p.id,
           name: cleanName(p.product_name),
-          role: ROLES[p.id],
+          role: ROLES[p.id] ?? "accent",
           glbUrl: p.glb_url as string,
           price: cents > 0 && (p.currency ?? "EUR") === "EUR" ? cents / 100 : null,
           stockStatus,
@@ -194,7 +194,7 @@ export async function generateRoomLayout(
 /** Re-prices every asset from the live catalogue, then recomputes the ledger. */
 export const repriceScene = (scene: AICuratedSceneSchema, catalogue: LiveCatalogueItem[]): AICuratedSceneSchema => {
   const byId = new Map(catalogue.map((c) => [c.componentId, c]));
-  const curatedAssets = scene.curatedAssets.map((a) => ({ ...a, priceAtCuration: byId.get(a.componentId)?.price ?? 0 }));
+  const curatedAssets = scene.curatedAssets.map((a) => ({ ...a, priceAtCuration: byId.has(a.componentId) ? byId.get(a.componentId)?.price ?? 0 : a.priceAtCuration }));
   const next = { ...scene, curatedAssets };
   return { ...next, financialSummary: summarise(next) };
 };

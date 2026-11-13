@@ -26,7 +26,9 @@ import { formatGap, nearestClearance } from "@/lib/layoutGuides";
 import { createPlacedObject, inventoryItemToPlaceable, type PlaceableProduct } from "@/lib/placedObjectFactory";
 import ProjectLayoutOverview from "@/components/trade/visualiser/ProjectLayoutOverview";
 import { Helmet } from "react-helmet-async";
-import { useSearchParams } from "@/lib/router-compat";
+import { useNavigate, useSearchParams } from "@/lib/router-compat";
+import { readSharedRoomLayout, writeSharedRoomLayout } from "@/lib/sharedRoomLayout";
+
 import ToolsBreadcrumb from "@/components/trade/ToolsBreadcrumb";
 import { finishTargetsFromParts, getPartMaterial, hasAnyFinish, isNamedFinishTarget, materialFitsTarget, targetLabel, withPartMaterial, type FinishPart, type FinishTarget } from "@/lib/visualiserFinishTargets";
 import { findProductSchema, schemaFits, schemaLabels, schemaTargets } from "@/lib/visualiserProductSchema";
@@ -43,7 +45,7 @@ import {
   SLOT_SPACING_STEP,
 } from "@/lib/visualiserPlacement";
 import FinishPresets from "@/components/trade/visualiser/FinishPresets";
-import { ChevronDown, Download, Grid2X2, Layers, MoveHorizontal, SlidersHorizontal, Tags, Box, Ghost, ImageUp, Loader2, Lock, Plus, RotateCcw, Search, Unlock, X } from "lucide-react";
+import { ChevronDown, LayoutGrid, Download, Grid2X2, Layers, MoveHorizontal, SlidersHorizontal, Tags, Box, Ghost, ImageUp, Loader2, Lock, Plus, RotateCcw, Search, Unlock, X } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -590,6 +592,7 @@ const TradeVisualiser = () => {
   useEffect(() => {
     const incoming = searchParams.get("project");
     if (!incoming || intakeRef.current === incoming) return;
+    if (searchParams.get("handoff") === "curated") { intakeRef.current = incoming; setProjectId(incoming); return; }
     intakeRef.current = incoming;
     const alreadyComposed = (activeProject?.state.projectId === incoming && (activeProject.hasSavedLayout || activeProject.objects.length > 0)) || (initial.projectId === incoming && initial.objects.length > 0);
     setProjectId(incoming);
@@ -965,6 +968,44 @@ const TradeVisualiser = () => {
   };
 
   const backdropSrc = backdrop ?? backdropDataUrl;
+
+  // Shared room hand-off with the Curated Room Layout (same pieces, positions and prices).
+  const navigateTo = useNavigate();
+  const rawSharedProject = activeProject?.state.projectId ?? projectId ?? null;
+  const sharedProject = rawSharedProject === "sandbox" ? null : rawSharedProject;
+  const sendToCuratedLayout = () => {
+    const bounds = activeProject?.state.bounds;
+    writeSharedRoomLayout({
+      projectId: sharedProject, source: "visualiser", updatedAt: Date.now(),
+      room: bounds ? { width: bounds.width, length: bounds.depth, height: bounds.height } : { width: 7.2, length: 6, height: 3.2 },
+      wallFinish, floorFinish,
+      items: objects.map((o) => ({ productId: o.id, name: o.product_name, glbUrl: o.glb_url, x: o.position[0], z: o.position[2], rotationY: o.rotation[1], priceEur: null })),
+    });
+    navigateTo(`/trade/ai-layout?handoff=visualiser${sharedProject ? `&project=${encodeURIComponent(sharedProject)}` : ""}`);
+  };
+  const curatedHandoffDone = useRef(false);
+  useEffect(() => {
+    if (curatedHandoffDone.current || searchParams.get("handoff") !== "curated") return;
+    curatedHandoffDone.current = true;
+    const shared = readSharedRoomLayout(searchParams.get("project"));
+    if (!shared) return;
+    void (async () => {
+      const ids = [...new Set(shared.items.map((i) => i.productId))];
+      const { data } = ids.length ? await (supabase as any).from("trade_products").select("id, product_name, brand_name, image_url, dimensions, glb_url").in("id", ids) : { data: [] };
+      const rows = new Map(((data ?? []) as Array<{ id: string; product_name: string; brand_name: string; image_url: string | null; dimensions: string | null; glb_url: string | null }>).map((r) => [r.id, r]));
+      const placed = shared.items.map((item) => {
+        const row = rows.get(item.productId);
+        const next = createPlacedObject({ id: item.productId, product_name: row?.product_name ?? item.name, brand_name: row?.brand_name ?? "", image_url: row?.image_url ?? null, dimensions: row?.dimensions ?? null, glb_url: row?.glb_url ?? item.glbUrl }, [item.x, 0, item.z]);
+        return { ...next, rotation: [0, item.rotationY, 0] as [number, number, number] };
+      });
+      setObjects(placed);
+      setSelectedId(null);
+      if (shared.wallFinish) setWallFinish(roomWallFinish(shared.wallFinish));
+      if (shared.floorFinish) setFloorFinish(roomFloorFinish(shared.floorFinish));
+      toast.success(`Curated layout loaded — ${placed.length} piece${placed.length === 1 ? "" : "s"}.`);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   // Export a clean PNG mockup: hide the floor grid, let one frame render,
   // capture the WebGL canvas, then restore the grid exactly as it was.
@@ -1792,6 +1833,7 @@ const TradeVisualiser = () => {
           </div>
           <span className="visualiser-dock-divider" />
           <Button variant="ghost" className={toolbarButton} aria-label="Reset Canvas" title="Reset Canvas" onClick={resetSandbox}><RotateCcw className="h-4 w-4" /></Button>
+          <Button variant="ghost" className={toolbarButton} onClick={sendToCuratedLayout} disabled={!objects.length} title="Send to Curated Layout"><LayoutGrid className="h-4 w-4" /><span className="visualiser-dock-label">Send to Curated Layout</span></Button>
           <Button variant="studio-primary" className={cn(toolbarButton, "visualiser-primary-control")} onClick={downloadPresentationMockup} disabled={exporting}><Download className="h-4 w-4" />{exporting ? "Exporting…" : "Export Mockup"}</Button>
         </div>
       </div>

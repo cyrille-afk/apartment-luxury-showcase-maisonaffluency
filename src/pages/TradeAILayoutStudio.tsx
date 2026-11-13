@@ -32,6 +32,9 @@ import { filterVideoRendersByMonth, formatSecondsDelta, formatUsdCents, formatUs
 import { Bar, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { cn } from "@/lib/utils";
 import { generateRoomLayoutMatrix } from "@/lib/roomLayoutMatrix";
+import { readSharedRoomLayout, sceneToSharedItems, sharedToScene, writeSharedRoomLayout } from "@/lib/sharedRoomLayout";
+import { useNavigate, useSearchParams } from "@/lib/router-compat";
+import { Box as BoxIcon } from "lucide-react";
 import { useAiLayoutForm } from "@/hooks/useAiLayoutForm";
 import { anchorsForPrompt, buildArchitectCatalog, validateArchitectLayout, type ArchitectOutput } from "@/lib/aiArchitectLayout";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
@@ -152,7 +155,47 @@ const TradeAILayoutStudio = () => {
     }
   };
 
-  const byId = useMemo(() => new Map(catalogue.map((c) => [c.componentId, c])), [catalogue]);
+  const [extraItems, setExtraItems] = useState<LiveCatalogueItem[]>([]);
+  const byId = useMemo(() => new Map([...extraItems, ...catalogue].map((c) => [c.componentId, c])), [catalogue, extraItems]);
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const sharedProjectId = searchParams.get("project");
+
+  // Visualiser → Curated: render the sandbox arrangement on the grid with live prices.
+  const handoffDone = useRef(false);
+  useEffect(() => {
+    if (handoffDone.current || searchParams.get("handoff") !== "visualiser") return;
+    handoffDone.current = true;
+    const shared = readSharedRoomLayout(sharedProjectId);
+    if (!shared) return;
+    void (async () => {
+      let priced = shared.items;
+      try {
+        const live = await fetchLiveCatalogue([...new Set(shared.items.map((i) => i.productId))]);
+        setExtraItems(live);
+        const byLive = new Map(live.map((l) => [l.componentId, l]));
+        priced = shared.items.map((i) => ({ ...i, priceEur: byLive.get(i.productId)?.price ?? i.priceEur, glbUrl: i.glbUrl ?? byLive.get(i.productId)?.glbUrl ?? null }));
+      } catch { /* keep the prices sent from the Visualiser */ }
+      setBrief((b) => ({ ...b, roomDimensions: shared.room }));
+      setSelectedId(null); setCurrent(null);
+      setScene(sharedToScene({ ...shared, items: priced }, brief.totalBudget));
+      setOverviewRevision((r) => r + 1);
+      const missing = shared.items.filter((i) => !i.glbUrl).length;
+      toast.success(`${priced.length - missing} piece${priced.length - missing === 1 ? "" : "s"} loaded from the Visualiser${missing ? ` · ${missing} without a 3D model skipped` : ""}.`);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  const openInVisualiser = () => {
+    if (!scene) return;
+    const prev = readSharedRoomLayout(sharedProjectId);
+    writeSharedRoomLayout({
+      projectId: sharedProjectId, room: scene.roomDimensions, source: "curated", updatedAt: Date.now(),
+      wallFinish: prev?.wallFinish ?? null, floorFinish: prev?.floorFinish ?? null,
+      items: sceneToSharedItems(scene, (id) => byId.get(id)?.name ?? "Piece", (id, fallback) => byId.get(id)?.price ?? fallback),
+    });
+    navigate(`/trade/visualiser?handoff=curated${sharedProjectId ? `&project=${encodeURIComponent(sharedProjectId)}` : ""}`);
+  };
   const selectedAsset = scene?.curatedAssets.find((a, i) => `ai-${i}-${a.sku}` === selectedId);
   const selectedPiece = selectedAsset ? byId.get(selectedAsset.componentId) : undefined;
 
@@ -759,6 +802,9 @@ const TradeAILayoutStudio = () => {
           <Button className="w-full" onClick={generate} disabled={loading || aiLoading || curating || catLoading || !!catError}>
             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
             {loading ? "Generating layout..." : "Generate Room Layout"}
+          </Button>
+          <Button variant="outline" className="w-full" onClick={openInVisualiser} disabled={!scene?.curatedAssets.length}>
+            <BoxIcon className="mr-2 h-4 w-4" />Open in Visualiser Sandbox
           </Button>
           {videoStatus?.isAdmin && (
           <Button variant="outline" className="w-full" onClick={generateWithAI} disabled={aiLoading || loading || curating || catLoading || !!catError}>
@@ -1407,6 +1453,19 @@ const TradeAILayoutStudio = () => {
           <p className={micro}>Curation matrix</p>
           <h2 className="mt-1 font-serif text-xl">Curation Breakdown</h2>
         </div>
+        {scene && scene.curatedAssets.length > 0 && (
+          <div className="space-y-1">
+            <p className={micro}>Placed in room ({scene.curatedAssets.length})</p>
+            <ul className="divide-y divide-border text-xs">
+              {scene.curatedAssets.map((a, i) => (
+                <li key={`${a.componentId}-${i}`} className="flex items-start justify-between gap-3 py-2">
+                  <p className="min-w-0 truncate font-medium">{byId.get(a.componentId)?.name ?? a.sku}</p>
+                  <span className="shrink-0 tabular-nums">{byId.get(a.componentId)?.price == null ? "Price upon Request" : eur(a.priceAtCuration)}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         <div className="space-y-2">
           <Textarea value={briefText} onChange={(e) => setBriefText(e.target.value)} rows={3} maxLength={2000}
             className="resize-none text-xs" placeholder="e.g. Warm minimalism, neutral tones, budget €50,000" />
