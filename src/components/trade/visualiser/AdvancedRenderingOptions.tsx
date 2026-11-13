@@ -6,12 +6,13 @@ import { Switch } from "@/components/ui/switch";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { VISUALISER_ENVIRONMENTS, environmentSourcePref, type AdvancedRenderingSettings, type EnvironmentSourcePref } from "@/lib/visualiserAdvancedRendering";
 
-export default function AdvancedRenderingOptions({ settings, onChange, environment, onEnvironmentChange, className, pathTrace, depthOfField, onDepthOfFieldChange, dofStrength, onDofStrengthChange }: {
+export default function AdvancedRenderingOptions({ settings, onChange, environment, onEnvironmentChange, className, inline = false, pathTrace, depthOfField, onDepthOfFieldChange, dofStrength, onDofStrengthChange }: {
   settings: AdvancedRenderingSettings;
   onChange: (settings: AdvancedRenderingSettings) => void;
   environment: EnvironmentSourcePref;
   onEnvironmentChange: (source: EnvironmentSourcePref) => void;
   className?: string;
+  inline?: boolean;
   pathTrace: boolean;
   depthOfField: boolean;
   onDepthOfFieldChange: (enabled: boolean) => void;
@@ -19,15 +20,7 @@ export default function AdvancedRenderingOptions({ settings, onChange, environme
   onDofStrengthChange: (strength: number) => void;
 }) {
   const label = VISUALISER_ENVIRONMENTS.find((item) => item.value === environment)?.label ?? "Studio";
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="ghost" className={className} aria-label="Advanced Rendering Options">
-          <SlidersHorizontal className="mr-2 h-3.5 w-3.5" /> Advanced Rendering Options
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent side="top" align="start" className="z-[80] w-80 max-w-[calc(100vw-2rem)] max-h-[70vh] overflow-y-auto space-y-5" aria-label="Advanced Rendering Options">
-        <h3 className="text-sm font-medium">Advanced Rendering Options</h3>
+  const content = <>
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs"><span>Contact Shadow Intensity</span><output className="tabular-nums text-muted-foreground">{settings.contactShadowIntensity ?? 72}%</output></div>
           <Slider thumbLabel="Contact Shadow Intensity" min={0} max={100} step={1} value={[settings.contactShadowIntensity ?? 72]} disabled={pathTrace} title={pathTrace ? "Photoreal contact shadows follow physical lighting." : "Furniture contact shadow opacity"} onValueChange={([value]) => onChange({ ...settings, contactShadowIntensity: value })} />
@@ -57,6 +50,18 @@ export default function AdvancedRenderingOptions({ settings, onChange, environme
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+      </>;
+  if (inline) return <div className="space-y-5">{content}</div>;
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="ghost" className={className} aria-label="Advanced Rendering Options">
+          <SlidersHorizontal className="mr-2 h-3.5 w-3.5" /> Advanced Rendering Options
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent side="top" align="start" className="z-[80] w-80 max-w-[calc(100vw-2rem)] max-h-[70vh] overflow-y-auto space-y-5" aria-label="Advanced Rendering Options">
+        <h3 className="text-sm font-medium">Advanced Rendering Options</h3>
+        {content}
       </PopoverContent>
     </Popover>
   );

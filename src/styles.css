@@ -3,6 +3,10 @@
 @config "../tailwind.legacy.config.ts";
 
 :root {
+  --visualiser-palette-paper: oklch(1 0 0 / 0.95);
+  --visualiser-palette-ink: oklch(0.22 0 0);
+  --visualiser-palette-border: oklch(0.9 0 0);
+  --visualiser-palette-shadow: 0 2px 8px oklch(0 0 0 / 0.06);
   --sidebar-drag-shadow: 0 4px 14px hsl(var(--foreground) / 0.12);
   --sidebar-drag-ink: #a3a3a3;
   --sidebar-drag-highlight: #d97706;

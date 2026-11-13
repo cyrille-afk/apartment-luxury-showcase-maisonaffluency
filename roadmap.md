@@ -1,5 +1,9 @@
 # Roadmap
 
+## Floating Visualiser palettes
+- [x] Replace stacked tool rows with build/surfaces, collapsible lighting/camera and bottom guide/export palettes; preserve existing controls and header navigation.
+- [x] Signed-in real-product placement, collapsible lighting/advanced options, grid toggling, surface menu and PNG export verified; desktop/phone fit checked and three regressions pass. Build OK. Preview source-label injection breaks R3F; scene/export verification removed those labels only in the test browser, not project code.
+
 ## Visualiser header hierarchy
 - [x] Move shared breadcrumbs above workspace mode tabs with matching horizontal alignment and a subtle divider; retain standalone breadcrumbs without duplicates.
 - [x] Signed-in all three views show exactly one breadcrumb above tabs with a 1px divider; phone hierarchy and Tools back link verified with no page errors. Visualiser regression passes; build OK.

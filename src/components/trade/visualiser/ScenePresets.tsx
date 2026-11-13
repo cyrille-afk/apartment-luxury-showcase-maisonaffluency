@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Layers, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { deleteScenePreset, makePresetThumbnail, readScenePresets, saveScenePreset, type ScenePreset, type ScenePresetData } from "@/lib/visualiserScenePresets";
 
@@ -30,7 +30,7 @@ const ScenePresets = ({ className, current, onLoad }: Props) => {
   return (
     <Popover open={open} onOpenChange={(o) => { setOpen(o); if (o) setPresets(readScenePresets()); }}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" className={className} title="Save or reopen named furniture arrangements">[ &#9733; Scene Presets ]</Button>
+        <Button variant="ghost" className={className} title="Save or reopen named furniture arrangements"><Layers className="h-4 w-4" />Scene Presets</Button>
       </PopoverTrigger>
       <PopoverContent className="w-72 p-3" align="end" side="top">
         <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); if (name.trim()) save(); }}>

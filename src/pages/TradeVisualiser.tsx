@@ -41,13 +41,14 @@ import {
   SLOT_SPACING_STEP,
 } from "@/lib/visualiserPlacement";
 import FinishPresets from "@/components/trade/visualiser/FinishPresets";
-import { Box, Ghost, ImageUp, Loader2, Lock, Plus, RotateCcw, Search, Unlock, X } from "lucide-react";
+import { ChevronDown, Download, Grid2X2, Layers, MoveHorizontal, SlidersHorizontal, Tags, Box, Ghost, ImageUp, Loader2, Lock, Plus, RotateCcw, Search, Unlock, X } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { checkpointStatusText, type CheckpointEvent } from "@/lib/visualiserRenderCheckpoint";
 import { captureCanvasPng, downloadDataUrl, mockupCapturePrep, mockupFilename, nextPaintedFrame } from "@/lib/visualiserExport";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
 
 /** localStorage key for the adaptive Photoreal sampling preference (default on). */
@@ -948,7 +949,7 @@ const TradeVisualiser = () => {
   };
 
   const toolbarButton = cn(
-    "h-auto min-h-9 rounded-sm font-mono text-[10px] uppercase tracking-normal",
+    "visualiser-palette-control h-9 rounded-md font-body text-xs normal-case tracking-normal",
     "flex items-center gap-2 whitespace-nowrap px-3 py-2 text-foreground/80 transition-colors duration-200 hover:text-foreground hover:bg-foreground/[0.04] disabled:opacity-40",
   );
 
@@ -984,15 +985,8 @@ const TradeVisualiser = () => {
       {showPhotorealGhost && photorealGhost && (
         <img src={photorealGhost} alt="" aria-hidden data-photoreal-ghost className="pointer-events-none absolute inset-0 z-0 h-full w-full object-fill" />
       )}
-      {!photoMode && !pathTrace && !sceneFailed && initialRoomReady && (
-        <div className="absolute bottom-3 left-3 z-30">
-          <Button variant="outline" size="sm" onClick={togglePhotoreal} className="gap-2 bg-background/90 text-xs backdrop-blur-sm">
-            <span aria-hidden="true">✦</span> Start Photoreal Render
-          </Button>
-        </div>
-      )}
       {pathTrace && checkpointStatus && (
-        <div role="status" aria-live="polite" data-checkpoint-status className="pointer-events-none absolute bottom-3 left-3 z-30 rounded-sm border border-border bg-background/85 px-3 py-1.5 font-mono text-[10px] uppercase tracking-normal text-foreground/80 backdrop-blur-sm">
+        <div role="status" aria-live="polite" data-checkpoint-status className="pointer-events-none absolute bottom-24 left-3 z-30 rounded-sm border border-border bg-background/85 px-3 py-1.5 font-mono text-[10px] uppercase tracking-normal text-foreground/80 backdrop-blur-sm">
           {restoredInfo && <div>Restored after refresh · {restoredInfo.samples} SPP · from checkpoint {new Date(restoredInfo.savedAt).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</div>}
           {checkpointStatus.kind !== "restored" && <div className={restoredInfo ? "text-muted-foreground" : undefined}>{checkpointStatusText(checkpointStatus)}</div>}
         </div>
@@ -1096,7 +1090,7 @@ const TradeVisualiser = () => {
 
 
       {/* Header */}
-      <div className="pointer-events-none absolute left-0 right-0 top-0 z-20 flex items-start justify-between px-4 pt-4 sm:px-8 sm:pt-6">
+      <div className="visualiser-canvas-heading pointer-events-none absolute left-0 right-0 top-0 z-20 flex items-start justify-between px-4 pt-4">
         <div>
           <h1 className="font-serif text-2xl text-foreground">{activeProject?.view === "axonometric" ? "Axonometric Studio" : "Visualiser Sandbox"}</h1>
           <p className={cn(microLabel, "mt-2 text-muted-foreground")}>
@@ -1231,122 +1225,21 @@ const TradeVisualiser = () => {
       </VisualiserInspector>
 
       {/* Project Assets — pieces added from product pages, placeable into the layout */}
-      {(activeProject?.view === "axonometric" || photoMode) && <ProjectAssetsDrawer onPlace={placeInventoryAsset} />}
+      {(activeProject?.view === "axonometric" || photoMode) && <ProjectAssetsDrawer anchorClassName="visualiser-assets-position" onPlace={placeInventoryAsset} />}
 
       {/* Sourcing tray */}
       {trayOpen && (
         <CatalogDrawer products={products} loading={loadingProducts} onAdd={addObject} onClose={() => setTrayOpen(false)} />
       )}
 
-      </div>
-
-      {/* Dock reserves its own space: controls never cover the canvas. */}
-      <div data-testid="visualiser-toolbar" role="toolbar" aria-label="Visualiser controls" className="relative z-[60] w-full shrink-0 border-t border-border bg-background px-1 pb-[env(safe-area-inset-bottom)] sm:px-3">
-        <div className="flex flex-col items-stretch">
-        <div className="visualiser-toolbar-row" role="group" aria-label="Scene actions" tabIndex={0}>
-          <Button variant="ghost" className={toolbarButton} onClick={() => setTrayOpen((value) => !value)}>[ + Add 3D Object ]</Button>
-          <span className="h-5 w-px bg-border" />
-          <RugLayoutControls className={toolbarButton} width={rugWidth} depth={rugDepth} offsetX={rugOffsetX} offsetZ={rugOffsetZ} rotation={rugRotation} visible={showRug} disabled={floorFinish === "none" || Boolean(backdropSrc)} onWidthChange={setRugWidth} onDepthChange={setRugDepth} onOffsetXChange={setRugOffsetX} onOffsetZChange={setRugOffsetZ} onRotationChange={setRugRotation} onVisibleChange={setShowRug} />
-          <FeatureWallControls className={toolbarButton} finish={featureWallFinishKey} disabled={Boolean(backdropSrc)} onChange={setFeatureWallFinishKey} />
-          <MarbleSurfaceControls className={toolbarButton} tables={objects.filter((object) => Boolean(object.glb_url) && isCoffeeTable(object.product_name))} selectedId={selectedId} onSelect={setSelectedId} onChange={(id, marbleSurface) => setObjects((current) => current.map((object) => object.instanceId === id ? { ...object, marbleSurface } : object))} />
-          <span className="h-5 w-px bg-border" />
-          <Button variant="ghost" className={toolbarButton} onClick={cycleDepth} disabled={!selected}>[ &#9099; Depth Stack ]</Button>
-          <span className="h-5 w-px bg-border" />
-          <div className="flex items-center gap-1" aria-label="Object spacing">
-            <Button variant="ghost"
-              className={toolbarButton}
-              aria-label="Decrease spacing"
-              disabled={spacing <= MIN_SLOT_SPACING}
-              onClick={() => adjustSpacing(-SLOT_SPACING_STEP)}
-            >
-              [ &#8722;
-            </Button>
-            <span className={cn(microLabel, "min-w-14 text-center text-muted-foreground")} title="Distance between pieces">
-              {spacing.toFixed(1)} m
-            </span>
-            <Button variant="ghost"
-              className={toolbarButton}
-              aria-label="Increase spacing"
-              disabled={spacing >= MAX_SLOT_SPACING}
-              onClick={() => adjustSpacing(SLOT_SPACING_STEP)}
-            >
-              + ]
-            </Button>
-            <Button variant="ghost" className={toolbarButton} onClick={applySpacingToScene} disabled={objects.length < 2}>
-              [ &#8596; Respace ]
-            </Button>
-          </div>
-          <span className="h-5 w-px bg-border" />
-          <Button variant="ghost" className={toolbarButton} onClick={() => fileRef.current?.click()}>
-            [ &#8593; {backdropSrc ? "Change Backdrop" : "Import backdrop prop"} ]
-          </Button>
-          <span className="h-5 w-px bg-border" />
-          <Button variant="ghost"
-            className={toolbarButton}
-            onClick={downloadPresentationMockup}
-            disabled={exporting}
-            title="Download a clean PNG of the canvas — the floor grid is hidden during capture"
-          >
-            [ &#128248; {exporting ? "Exporting…" : "Export Mockup"} ]
-          </Button>
-          <span className="h-5 w-px bg-border" />
-          <ProjectSnapshots
-            className={toolbarButton}
-            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, advancedRendering, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, featureWallFinish: featureWallFinishKey, rugColor: rugColorKey, rugBorderColor: rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeave: rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, rugRotation, showRug, backdropColor, backdropBrightness })}
-            onLoad={(data) => {
-              setSelectedId(null);
-              setObjects(data.objects);
-              setBackdrop(null);
-              setBackdropDataUrl(data.backdropDataUrl ?? null);
-              if (typeof data.spacing === "number") setSpacing(data.spacing);
-              setSnapToGrid(data.snapToGrid === true);
-              setShowGrid(data.showGrid !== false);
-              setShowLabels(data.showLabels !== false);
-              setDepthOfField(data.depthOfField === true);
-              if (typeof data.dofStrength === "number") setDofStrength(Math.min(10, Math.max(1, data.dofStrength)));
-              setDofFocusSelected(data.dofFocusSelected !== false);
-              setEnvironmentSource(environmentSourcePref(data.environmentSource));
-              setAdvancedRendering(clampAdvancedRendering(data.advancedRendering));
-              setFloorFinish(roomFloorFinish(data.floorFinish));
-              setShowRearWall(data.showRearWall !== false);
-              setWallHeight(clampWallHeight(data.wallHeight));
-              setCeilingHeight(clampCeilingHeight(data.ceilingHeight));
-              setCeilingThickness(clampCeilingThickness(data.ceilingThickness));
-              setCeilingOpening(clampCeilingOpening(data.ceilingOpening));
-              setFloorGlare(clampFloorGlare(data.floorGlare));
-              setWallColor(roomWallColor(data.wallColor));
-              setWallFinish(roomWallFinish(data.wallFinish));
-              const restoredHex = normalizeHexColor(data.wallCustomHex);
-              setWallCustomHex(restoredHex ?? null);
-              if (restoredHex) setCustomHexDraft(restoredHex);
-              setWallFinishIntensity(clampWallFinishIntensity(data.wallFinishIntensity));
-              setRugColorKey(toRugColor(data.rugColor));
-              setRugBorderColorKey(toRugBorderColor(data.rugBorderColor));
-              setRugBorderThicknessMm(clampRugBorderThicknessMm(data.rugBorderThicknessMm));
-              setRugBorderTwistMm(clampRugBorderTwistMm(data.rugBorderTwistMm));
-              setRugBorderRoughness(clampRugBorderRoughness(data.rugBorderRoughness));
-              setRugWeaveKey(toRugWeave(data.rugWeave));
-              setRugPile(clampRugPile(data.rugPile));
-              setRugWidth(clampRugSize(data.rugWidth));
-              setRugDepth(clampRugSize(data.rugDepth));
-              setRugOffsetX(clampRugOffset(data.rugOffsetX));
-              setRugOffsetZ(clampRugOffset(data.rugOffsetZ));
-              setRugRotation(clampRugRotation(data.rugRotation));
-              setShowRug(rugVisible(data.showRug));
-              setFeatureWallFinishKey(toFeatureWallFinish(data.featureWallFinish));
-              setBackdropColor(normalizeHexColor(data.backdropColor) ?? null);
-              setBackdropBrightness(clampBackdropBrightness(data.backdropBrightness));
-            }}
-          />
-          <span className="h-5 w-px bg-border" />
-          <Button variant="ghost" className={toolbarButton} onClick={resetSandbox}>[ &#10005; Reset Canvas ]</Button>
-        </div>
-        <div className="h-px w-full bg-border" />
-          <div className="visualiser-toolbar-row visualiser-toolbar-settings" role="group" aria-label="View settings" tabIndex={0}>
+      <div data-testid="visualiser-toolbar" role="toolbar" aria-label="Visualiser controls" className="visualiser-floating-tools">
+        <section className="visualiser-palette visualiser-build-palette" aria-label="Build & surfaces">
+          <div className="visualiser-build-row">
+            <Button variant="studio-primary" className={cn(toolbarButton, "visualiser-primary-control")} onClick={() => setTrayOpen(value => !value)} aria-expanded={trayOpen}><Plus className="h-4 w-4" />Add 3D Object</Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className={toolbarButton} aria-label="Room surfaces">
-                  <Box className="mr-2 h-3.5 w-3.5" /> Room: {floorFinish === "oak-chevron" ? "Oak Chevron" : floorFinish === "micro-cement" ? "Micro-Cement" : "Backdrop"}
+                  <Box className="mr-2 h-3.5 w-3.5" /> Floor: {floorFinish === "oak-chevron" ? "Oak Chevron" : floorFinish === "micro-cement" ? "Micro-Cement" : "Backdrop"}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" side="top" className="max-h-[70vh] overflow-y-auto">
@@ -1551,53 +1444,108 @@ const TradeVisualiser = () => {
                 </div>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button variant="ghost"
-              className={cn(toolbarButton, snapToGrid && "border-primary text-primary")}
-              onClick={() => setSnapToGrid((value) => !value)}
-              aria-pressed={snapToGrid}
-              title="Snap dragged pieces to a 0.25 m grid"
-            >
-              [ &#8862; Snap Grid: {snapToGrid ? "On" : "Off"} ]
-            </Button>
-            <Button variant="ghost"
-              className={cn(toolbarButton, showGrid ? "border-primary text-primary" : "opacity-60")}
-              onClick={() => setShowGrid((value) => !value)}
-              aria-pressed={showGrid}
-              title="Show or hide the faint floor grid — hide it when using a room photo backdrop"
-            >
-              [ &#127760; Show Grid: {showGrid ? "On" : "Off"} ]
-            </Button>
-            <Button variant="ghost"
-              className={cn(toolbarButton, showLabels ? "border-primary text-primary" : "opacity-60")}
-              onClick={() => setShowLabels((value) => !value)}
-              aria-pressed={showLabels}
-              title="Show or hide the floating name labels and lock badges above pieces"
-            >
-              [ &#128065;&#65039; Show Labels: {showLabels ? "On" : "Off"} ]
-            </Button>
-            <AdvancedRenderingOptions className={toolbarButton} settings={advancedRendering} onChange={setAdvancedRendering} environment={environmentSource} onEnvironmentChange={setEnvironmentSource} pathTrace={pathTrace} depthOfField={depthOfField} onDepthOfFieldChange={(enabled) => { if (enabled) setDofFocusSelected(true); setDepthOfField(enabled); }} dofStrength={dofStrength} onDofStrengthChange={setDofStrength} />
-            <LocalExrButton className={toolbarButton} onLoaded={() => setEnvironmentSource("empty-room-exr")} />
-            <Button variant="ghost" className={toolbarButton} onClick={resetIndustrialRoom} title="Clear any saved lighting file or room photo and restore the industrial room">[ Reset Industrial Room ]</Button>
-            <Button variant="ghost"
+          <RugLayoutControls className={toolbarButton} width={rugWidth} depth={rugDepth} offsetX={rugOffsetX} offsetZ={rugOffsetZ} rotation={rugRotation} visible={showRug} disabled={floorFinish === "none" || Boolean(backdropSrc)} onWidthChange={setRugWidth} onDepthChange={setRugDepth} onOffsetXChange={setRugOffsetX} onOffsetZChange={setRugOffsetZ} onRotationChange={setRugRotation} onVisibleChange={setShowRug} />
+          <FeatureWallControls className={toolbarButton} finish={featureWallFinishKey} disabled={Boolean(backdropSrc)} onChange={setFeatureWallFinishKey} />
+          <MarbleSurfaceControls className={toolbarButton} tables={objects.filter((object) => Boolean(object.glb_url) && isCoffeeTable(object.product_name))} selectedId={selectedId} onSelect={setSelectedId} onChange={(id, marbleSurface) => setObjects((current) => current.map((object) => object.instanceId === id ? { ...object, marbleSurface } : object))} />
+          </div>
+          <div className="visualiser-scene-actions" role="group" aria-label="Scene actions">
+          <ProjectSnapshots
+            className={toolbarButton}
+            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, advancedRendering, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, featureWallFinish: featureWallFinishKey, rugColor: rugColorKey, rugBorderColor: rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeave: rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, rugRotation, showRug, backdropColor, backdropBrightness })}
+            onLoad={(data) => {
+              setSelectedId(null);
+              setObjects(data.objects);
+              setBackdrop(null);
+              setBackdropDataUrl(data.backdropDataUrl ?? null);
+              if (typeof data.spacing === "number") setSpacing(data.spacing);
+              setSnapToGrid(data.snapToGrid === true);
+              setShowGrid(data.showGrid !== false);
+              setShowLabels(data.showLabels !== false);
+              setDepthOfField(data.depthOfField === true);
+              if (typeof data.dofStrength === "number") setDofStrength(Math.min(10, Math.max(1, data.dofStrength)));
+              setDofFocusSelected(data.dofFocusSelected !== false);
+              setEnvironmentSource(environmentSourcePref(data.environmentSource));
+              setAdvancedRendering(clampAdvancedRendering(data.advancedRendering));
+              setFloorFinish(roomFloorFinish(data.floorFinish));
+              setShowRearWall(data.showRearWall !== false);
+              setWallHeight(clampWallHeight(data.wallHeight));
+              setCeilingHeight(clampCeilingHeight(data.ceilingHeight));
+              setCeilingThickness(clampCeilingThickness(data.ceilingThickness));
+              setCeilingOpening(clampCeilingOpening(data.ceilingOpening));
+              setFloorGlare(clampFloorGlare(data.floorGlare));
+              setWallColor(roomWallColor(data.wallColor));
+              setWallFinish(roomWallFinish(data.wallFinish));
+              const restoredHex = normalizeHexColor(data.wallCustomHex);
+              setWallCustomHex(restoredHex ?? null);
+              if (restoredHex) setCustomHexDraft(restoredHex);
+              setWallFinishIntensity(clampWallFinishIntensity(data.wallFinishIntensity));
+              setRugColorKey(toRugColor(data.rugColor));
+              setRugBorderColorKey(toRugBorderColor(data.rugBorderColor));
+              setRugBorderThicknessMm(clampRugBorderThicknessMm(data.rugBorderThicknessMm));
+              setRugBorderTwistMm(clampRugBorderTwistMm(data.rugBorderTwistMm));
+              setRugBorderRoughness(clampRugBorderRoughness(data.rugBorderRoughness));
+              setRugWeaveKey(toRugWeave(data.rugWeave));
+              setRugPile(clampRugPile(data.rugPile));
+              setRugWidth(clampRugSize(data.rugWidth));
+              setRugDepth(clampRugSize(data.rugDepth));
+              setRugOffsetX(clampRugOffset(data.rugOffsetX));
+              setRugOffsetZ(clampRugOffset(data.rugOffsetZ));
+              setRugRotation(clampRugRotation(data.rugRotation));
+              setShowRug(rugVisible(data.showRug));
+              setFeatureWallFinishKey(toFeatureWallFinish(data.featureWallFinish));
+              setBackdropColor(normalizeHexColor(data.backdropColor) ?? null);
+              setBackdropBrightness(clampBackdropBrightness(data.backdropBrightness));
+            }}
+          />
+            <Button variant="ghost" className={toolbarButton} onClick={() => fileRef.current?.click()}><ImageUp className="h-4 w-4" />{backdropSrc ? "Change Backdrop" : "Import Backdrop Prop"}</Button>
+          </div>
+        </section>
+        <details open className="visualiser-palette visualiser-lighting-palette" aria-label="Lighting & camera">
+          <summary><SlidersHorizontal className="h-4 w-4" /><span>Lighting &amp; Camera</span><ChevronDown className="visualiser-palette-chevron h-4 w-4" /></summary>
+          <div className="visualiser-lighting-content">
+            <div className="flex h-9 items-center justify-between px-3 text-xs">
+              <label htmlFor="visualiser-dof">Depth of Field</label>
+              <Switch id="visualiser-dof" checked={depthOfField} onCheckedChange={enabled => { if (enabled) setDofFocusSelected(true); setDepthOfField(enabled); }} />
+            </div>
+            {depthOfField && (
+              <label className="flex h-9 items-center justify-between px-3 text-xs">Focus
+                <select aria-label="Focus mode" className="max-w-40 bg-transparent text-right outline-hidden" value={dofFocusSelected ? "selected" : "centre"} onChange={event => setDofFocusSelected(event.target.value === "selected")}>
+                  <option value="selected">Clicked Piece</option><option value="centre">Centre</option>
+                </select>
+              </label>
+            )}
+            {depthOfField && (
+              <label className="visualiser-toolbar-blur flex items-center gap-2" title="How softly the background is blurred">
+                <span className={cn(microLabel, "text-muted-foreground")}>Blur</span>
+                <input
+                  type="range"
+                  min={1}
+                  max={10}
+                  step={0.1}
+                  value={dofStrength}
+                  onChange={(event) => setDofStrength(Number(event.target.value))}
+                  className="h-1 w-24 cursor-pointer accent-primary"
+                  aria-label="Background blur strength"
+                />
+                <span className={cn(microLabel, "w-8 tabular-nums text-muted-foreground")}>{dofStrength.toFixed(1)}</span>
+              </label>
+            )}
+
+            <EnvironmentStatusChip environment={environmentSource} onChange={setEnvironmentSource} className={toolbarButton} />            <LocalExrButton className={toolbarButton} onLoaded={() => setEnvironmentSource("empty-room-exr")} />            <Button variant="ghost"
               className={cn(toolbarButton, pathTrace ? "border-primary text-primary" : "opacity-60")}
               onClick={togglePhotoreal}
               aria-pressed={pathTrace}
               title="Offline-quality path tracing: real light bounces and reflections, refining while the camera is still"
             >
               {/* Fixed-width counter: growing digits must never reflow the toolbar and resize the canvas (a resize restarts accumulation). */}
-              [ &#10022; Photoreal Render: <span className="inline-block min-w-[11ch] text-left tabular-nums">{pathTrace ? `On · ${ptSamples}${ptQuality.maxSamples ? `/${ptQuality.maxSamples}` : ""} spp` : "Off"}</span> ]
+              Photoreal Render: <span className="inline-block min-w-[11ch] text-left tabular-nums">{pathTrace ? `On · ${ptSamples}${ptQuality.maxSamples ? `/${ptQuality.maxSamples}` : ""} spp` : "Off"}</span>
             </Button>
-            <Button variant="ghost" className={cn(toolbarButton, !keepPhotorealGhost && "opacity-60")}
-              aria-label="Keep photoreal ghost" aria-pressed={keepPhotorealGhost}
-              title="Keep the last settled photoreal frame behind the interactive live view when Photoreal Render is off. The frame stays fixed as you edit or move the camera."
-              onClick={() => {
-                const enabled = !keepPhotorealGhost;
-                setKeepPhotorealGhost(enabled);
-                if (!enabled) setPhotorealGhost(null);
-                try { localStorage.setItem(PHOTOREAL_GHOST_KEY, String(enabled)); } catch { /* storage unavailable */ }
-              }}>
-              <Ghost className="h-3.5 w-3.5" /> Keep Ghost: {keepPhotorealGhost ? "On" : "Off"}
-            </Button>
+            <details className="visualiser-advanced-section">
+              <summary>Advanced Rendering Options<ChevronDown className="visualiser-palette-chevron h-4 w-4" /></summary>
+              <div className="visualiser-advanced-content">
+            <AdvancedRenderingOptions inline className={toolbarButton} settings={advancedRendering} onChange={setAdvancedRendering} environment={environmentSource} onEnvironmentChange={setEnvironmentSource} pathTrace={pathTrace} depthOfField={depthOfField} onDepthOfFieldChange={(enabled) => { if (enabled) setDofFocusSelected(true); setDepthOfField(enabled); }} dofStrength={dofStrength} onDofStrengthChange={setDofStrength} />
+
+            <Button variant="ghost" className={toolbarButton} onClick={resetIndustrialRoom} title="Clear any saved lighting file or room photo and restore the industrial room"><RotateCcw className="h-4 w-4" /> Reset Industrial Room</Button>
             {pathTrace && (
               <>
                 <DropdownMenu>
@@ -1687,43 +1635,81 @@ const TradeVisualiser = () => {
                 </label>
               </>
             )}
-            <Button variant="ghost"
-              className={cn(toolbarButton, depthOfField ? "border-primary text-primary" : "opacity-60")}
-              onClick={() => { if (!depthOfField) setDofFocusSelected(true); setDepthOfField((value) => !value); }}
-              aria-pressed={depthOfField}
-              title="Photographic focus on the selected piece, with gentle foreground and background blur"
-            >
-              [ &#9673; Depth of Field: {depthOfField ? "On" : "Off"} ]
-            </Button>
-            {depthOfField && (
-              <Button variant="ghost"
-                className={cn(toolbarButton, dofFocusSelected ? "border-primary text-primary" : "opacity-60")}
-                onClick={() => setDofFocusSelected((value) => !value)}
-                aria-pressed={dofFocusSelected}
-                title="Click a piece to keep it sharp while the background blurs — off keeps focus at the centre of the view"
-              >
-                [ &#10022; Focus: {dofFocusSelected ? "Clicked Piece" : "Centre"} ]
-              </Button>
-            )}
-            {depthOfField && (
-              <label className="visualiser-toolbar-blur flex items-center gap-2" title="How softly the background is blurred">
-                <span className={cn(microLabel, "text-muted-foreground")}>Blur</span>
-                <input
-                  type="range"
-                  min={1}
-                  max={10}
-                  step={0.1}
-                  value={dofStrength}
-                  onChange={(event) => setDofStrength(Number(event.target.value))}
-                  className="h-1 w-24 cursor-pointer accent-primary"
-                  aria-label="Background blur strength"
-                />
-                <span className={cn(microLabel, "w-8 tabular-nums text-muted-foreground")}>{dofStrength.toFixed(1)}</span>
-              </label>
-            )}
-            <EnvironmentStatusChip environment={environmentSource} onChange={setEnvironmentSource} className={toolbarButton} />
+              </div>
+            </details>
           </div>
+        </details>
+        <div className="visualiser-palette visualiser-bottom-dock" role="group" aria-label="Canvas guides & export">
+            <Button variant="ghost"
+              className={cn(toolbarButton, snapToGrid && "border-primary text-primary")}
+              onClick={() => setSnapToGrid((value) => !value)}
+              aria-pressed={snapToGrid}
+              aria-label="Snap Grid"
+              title="Snap dragged pieces to a 0.25 m grid"
+            >
+              <Grid2X2 className="h-4 w-4" /><span className="visualiser-dock-label">Snap Grid</span>
+            </Button>
+            <Button variant="ghost"
+              className={cn(toolbarButton, showGrid ? "border-primary text-primary" : "opacity-60")}
+              onClick={() => setShowGrid((value) => !value)}
+              aria-pressed={showGrid}
+              aria-label="Show Grid"
+              title="Show or hide the faint floor grid — hide it when using a room photo backdrop"
+            >
+              <Box className="h-4 w-4" /><span className="visualiser-dock-label">Show Grid</span>
+            </Button>
+            <Button variant="ghost"
+              className={cn(toolbarButton, showLabels ? "border-primary text-primary" : "opacity-60")}
+              onClick={() => setShowLabels((value) => !value)}
+              aria-pressed={showLabels}
+              aria-label="Show Labels"
+              title="Show or hide the floating name labels and lock badges above pieces"
+            >
+              <Tags className="h-4 w-4" /><span className="visualiser-dock-label">Show Labels</span>
+            </Button>
+            <Button variant="ghost" className={cn(toolbarButton, !keepPhotorealGhost && "opacity-60")}
+              aria-label="Keep photoreal ghost" aria-pressed={keepPhotorealGhost}
+              title="Keep the last settled photoreal frame behind the interactive live view when Photoreal Render is off. The frame stays fixed as you edit or move the camera."
+              onClick={() => {
+                const enabled = !keepPhotorealGhost;
+                setKeepPhotorealGhost(enabled);
+                if (!enabled) setPhotorealGhost(null);
+                try { localStorage.setItem(PHOTOREAL_GHOST_KEY, String(enabled)); } catch { /* storage unavailable */ }
+              }}>
+              <Ghost className="h-3.5 w-3.5" /> <span className="visualiser-dock-label">Keep Ghost</span>
+            </Button>
+          <span className="visualiser-dock-divider" />
+          <Button variant="ghost" className={toolbarButton} onClick={cycleDepth} aria-label="Depth Stack" title="Depth Stack" disabled={!selected}><Layers className="h-4 w-4" /><span className="visualiser-dock-label">Depth Stack</span></Button>
+          <span className="h-5 w-px bg-border" />
+          <div className="flex items-center gap-1" aria-label="Object spacing">
+            <Button variant="ghost"
+              className={toolbarButton}
+              aria-label="Decrease spacing"
+              disabled={spacing <= MIN_SLOT_SPACING}
+              onClick={() => adjustSpacing(-SLOT_SPACING_STEP)}
+            >
+              −
+            </Button>
+            <span className={cn(microLabel, "min-w-14 text-center text-muted-foreground")} title="Distance between pieces">
+              {spacing.toFixed(1)} m
+            </span>
+            <Button variant="ghost"
+              className={toolbarButton}
+              aria-label="Increase spacing"
+              disabled={spacing >= MAX_SLOT_SPACING}
+              onClick={() => adjustSpacing(SLOT_SPACING_STEP)}
+            >
+              +
+            </Button>
+            <Button variant="ghost" className={toolbarButton} onClick={applySpacingToScene} aria-label="Respace" title="Respace" disabled={objects.length < 2}>
+              <MoveHorizontal className="h-4 w-4" /><span className="visualiser-dock-label">Respace</span>
+            </Button>
+          </div>
+          <span className="visualiser-dock-divider" />
+          <Button variant="ghost" className={toolbarButton} aria-label="Reset Canvas" title="Reset Canvas" onClick={resetSandbox}><RotateCcw className="h-4 w-4" /></Button>
+          <Button variant="studio-primary" className={cn(toolbarButton, "visualiser-primary-control")} onClick={downloadPresentationMockup} disabled={exporting}><Download className="h-4 w-4" />{exporting ? "Exporting…" : "Export Mockup"}</Button>
         </div>
+      </div>
       </div>
 
       <input

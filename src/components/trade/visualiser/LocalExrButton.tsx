@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { clearLocalExr, getLocalExr, saveLocalExr, LOCAL_EXR_EVENT } from "@/lib/localEnvironmentExr";
 
@@ -28,11 +29,11 @@ export const LocalExrButton = ({ className, onLoaded }: { className?: string; on
         }} />
       <Button variant="ghost" className={className} disabled={busy} onClick={() => input.current?.click()}
         title="Load an .exr lighting file from your computer (saved in this browser only)">
-        [ {busy ? "Loading…" : name ? `EXR: ${name}` : "Upload Lighting (.exr)"} ]
+        <Upload className="h-4 w-4" /><span className="truncate">{busy ? "Loading…" : name ? `EXR: ${name}` : "Upload Lighting (.EXR)"}</span>
       </Button>
       {name && (
-        <Button variant="ghost" className={className} onClick={() => clearLocalExr()} title="Remove the uploaded lighting file">
-          [ ✕ ]
+        <Button variant="ghost" className={className} onClick={() => clearLocalExr()} aria-label="Remove uploaded lighting" title="Remove the uploaded lighting file">
+          <X className="h-4 w-4" />
         </Button>
       )}
     </>
