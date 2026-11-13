@@ -36,12 +36,14 @@ details[open] > summary > .visualiser-palette-chevron { transform: rotate(180deg
 .visualiser-assets-position { top: 230px; left: 16px; max-height: calc(100% - 320px); }
 .visualiser-workspace [data-testid="visualiser-inspector"] { top: 230px; right: auto; left: 16px; z-index: 35; max-height: min(calc(100vh - 260px), calc(100% - 320px)); overflow-y: auto; border-radius: 8px; border: 1px solid var(--visualiser-palette-border); box-shadow: var(--visualiser-palette-shadow); }
 .visualiser-workspace:has(.visualiser-assets-position) [data-testid="visualiser-inspector"] { left: 320px; }
+.visualiser-workspace [data-testid="visualiser-inspector-pill"] { top: 235px; left: 16px; right: auto; max-width: min(320px, calc(100% - 32px)); }
 @container (max-width: 1250px) { .visualiser-dock-label { display: none; } }
 @container (max-width: 800px) {
   .visualiser-build-palette { max-width: calc(100% - 252px); top: 110px; left: 8px; }
   .visualiser-lighting-palette { top: 110px; width: 228px; right: 8px; }
   .visualiser-canvas-heading { flex-wrap: wrap; gap: 8px; }
   .visualiser-workspace [data-testid="visualiser-inspector"], .visualiser-assets-position { top: 320px; max-height: calc(100% - 400px); }
+  .visualiser-workspace [data-testid="visualiser-inspector-pill"] { top: 325px; left: 8px; }
   .visualiser-workspace:has(.visualiser-assets-position) [data-testid="visualiser-inspector"] { left: auto; right: 8px; }
 }
 @container (max-width: 520px) {
@@ -51,6 +53,7 @@ details[open] > summary > .visualiser-palette-chevron { transform: rotate(180deg
   .visualiser-lighting-palette { top: 275px; max-height: calc(100% - 360px); }
   .visualiser-lighting-palette:not([open]) { width: auto; }
   .visualiser-workspace [data-testid="visualiser-inspector"] { top: 330px; left: 8px; max-width: calc(100% - 16px); }
+  .visualiser-workspace [data-testid="visualiser-inspector-pill"] { top: 335px; max-width: calc(100% - 16px); }
   .visualiser-bottom-dock { border-radius: 8px; max-width: calc(100% - 16px); }
   .visualiser-workspace:has(.visualiser-lighting-palette[open]) [data-testid="visualiser-inspector"] { visibility: hidden; }
 }

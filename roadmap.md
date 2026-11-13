@@ -1,5 +1,9 @@
 # Roadmap
 
+## Collapsed Piece Inspector
+- [x] Anchor the compact inspector pill below Build & Surfaces on the left, with bounded/truncated labels and narrow-screen positioning.
+- [x] Signed-in Frenchmen room: three open/close cycles retain identical canvas, renderer, scene and camera; no loading mask appears and no page errors. Pill aligns below the left toolbar without touching Lighting & Camera; readiness regression and preview build pass.
+
 ## Sandbox surfaces and opening view
 - [x] Connect wall picker to project walls and generated architecture; create local 2048px PBR wall/floor maps and a cluster-centred 4.5m eye-level opening.
 - [x] Signed-in Frenchmen: walnut and travertine visibly switch all three project walls with 2048px colour/bump/roughness maps; opening camera/target verified at 4.5m. 13 tests pass, no browser errors, preview build OK. Real-GPU texture sharpness remains device-dependent.

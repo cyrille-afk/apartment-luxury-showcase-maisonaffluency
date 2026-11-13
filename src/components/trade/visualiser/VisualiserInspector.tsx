@@ -51,10 +51,10 @@ const VisualiserInspector = ({
         data-testid="visualiser-inspector-pill"
         aria-label="Open piece inspector"
         onClick={() => setCollapsed(false)}
-        className={cn(panelClass, "w-auto gap-2 rounded-full border px-4 py-2 shadow-md")}
+        className="absolute left-4 top-[235px] z-[35] h-auto max-w-[calc(100%-2rem)] gap-2 rounded-full border px-4 py-2 shadow-md"
       >
         <PanelLeftOpen className="h-4 w-4" />
-        <span className="text-xs">Piece Inspector{selected ? ` · ${selected.product_name}` : ""}</span>
+        <span className="truncate text-xs">Piece Inspector{selected ? ` · ${selected.product_name}` : ""}</span>
       </Button>
     );
   }

@@ -11,6 +11,7 @@
 - Password-setup resends reuse the review drawer and retain attempt keys on retry; never change approval. Verified activation links the account; the queue reads user_id for setup status.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Piece Inspector collapse remains component-local UI state; its left-anchored pill never controls Canvas keys, readiness or scene state — preserves renderer, camera and loaded furniture across toggles.
 - Procedural room surfaces share visualiserProceduralSurfaces with owned 2048px sRGB colour and linear bump/roughness maps; project walls and rear slabs consume the same persisted finish. Eye-level project opening uses layoutCamera at 4.5m from the initial cluster, never re-centering on piece edits — prevents network texture failures and camera jumps.
 - Ground layers share visualiserGroundLayers: floor Y=0, elevated offset overlays; furniture-only contact depth captures exclude architecture and grids, and the single key uses fixed acne-safe bias. Imported oversized thin ground sheets detach on instance clones before fitting — avoids floor streaks and contaminated sizing without changing textures or cached assets.
 - Furniture-shadow controls reuse persisted advancedRendering: softness is inverse sharpness and intensity drives every live contact/cast/catcher path, including photos, without floor material writes; Photoreal retains physical shadows — keeps tuning independent of surface textures.
