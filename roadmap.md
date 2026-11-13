@@ -1,5 +1,9 @@
 # Roadmap
 
+## Curated furniture proportions and maker labels
+- [x] Normalize catalogue measurements to metres; share dimensions between placement, loaded geometry and fallback volumes; ground pieces and replace brief-result IDs with makers.
+- [ ] Verify dimension/grounding/spacing regressions and signed-in brief curation.
+
 ## Unobstructed multi-maker curated rooms
 - [x] Hide room labels by default with an optional Show Labels switch that does not reload the scene.
 - [x] Exhaust the all-maker 3D-ready catalogue for generation and briefs; balance makers and show actual catalogue count (21 live pieces; five Kerstens pieces have no price and remain excluded from budgeted placement).

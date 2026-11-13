@@ -1,6 +1,7 @@
 import { Suspense, useMemo, useState, useLayoutEffect, type ReactNode } from "react";
 import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/SceneObject";
 import type { AICuratedSceneSchema, ArchitecturalAnchor, Vec3 } from "@/types/aiCuratedScene";
+import { curatedDimensions } from "@/lib/curatedLayoutDimensions";
 
 const ANCHOR_COLOR: Record<ArchitecturalAnchor["type"], string> = {
   window: "#bcd3dc",
@@ -48,19 +49,20 @@ const AICuratedEnvironment = ({ schema, selectedId, onSelect, onAssetTransform, 
       schema.curatedAssets.map((a, i) => ({
         instanceId: instanceIdFor(i, a.sku),
         id: a.componentId,
-        product_name: a.sku,
+        product_name: pieceNames?.get(a.componentId) ?? a.sku,
+        exactDimensionsM: curatedDimensions(a),
         brand_name: "",
         image_url: null,
         dimensions: null,
-        width_mm: a.dimensionsCubic ? a.dimensionsCubic.w * 1000 : null,
-        depth_mm: a.dimensionsCubic ? a.dimensionsCubic.d * 1000 : null,
-        height_mm: a.dimensionsCubic ? a.dimensionsCubic.h * 1000 : null,
+        width_mm: curatedDimensions(a).w * 1000,
+        depth_mm: curatedDimensions(a).d * 1000,
+        height_mm: curatedDimensions(a).h * 1000,
         glb_url: a.glbUrl,
         position: a.position,
         rotation: a.rotation,
         scale: 1,
       })),
-    [schema.curatedAssets],
+    [schema.curatedAssets, pieceNames],
   );
 
   return (
@@ -113,8 +115,8 @@ export default AICuratedEnvironment;
 
 /** Dimensioned, selectable massing stays visible even without a catalogue GLB. */
 function ArchitecturalVolume({ asset, name, selected, onSelect }: { asset: AICuratedSceneSchema["curatedAssets"][number]; name: string; selected: boolean; onSelect: () => void }) {
-  const size = asset.dimensionsCubic ?? { w: 0.8, d: 0.8, h: 0.8 };
-  return <group position={asset.position} rotation={asset.rotation} scale={asset.scale}>
+  const size = curatedDimensions({ ...asset, name });
+  return <group position={[asset.position[0], 0, asset.position[2]]} rotation={asset.rotation} scale={asset.scale}>
     <mesh position={[0, size.h / 2, 0]} castShadow receiveShadow onClick={(event) => { event.stopPropagation(); onSelect(); }}>
       <boxGeometry args={[size.w, size.h, size.d]} />
       <meshStandardMaterial color={ANCHOR_COLOR[selected ? "window" : "door"]} roughness={0.85} />

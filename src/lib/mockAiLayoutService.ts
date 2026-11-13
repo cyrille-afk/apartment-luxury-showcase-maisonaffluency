@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { AICuratedSceneSchema, CuratedAsset, Vec3 } from "@/types/aiCuratedScene";
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
-import { resolveDimensions } from "@/lib/productDimensions";
+import { curatedDimensions } from "@/lib/curatedLayoutDimensions";
 
 /**
  * Client-side layout generator. Placement is mocked; prices and availability are
@@ -141,12 +141,7 @@ export async function fetchLiveCatalogue(onlyIds?: string[], projectId?: string 
           manufacturer: normalizeBrandToParent(p.brand_name) || null,
           productUrl: `/trade/products/${encodeURIComponent(p.source_pick_id || p.id)}`,
           publicProductUrl: p.source_pick_id ? publicUrls.get(p.source_pick_id) ?? null : null,
-          dimensionsCubic: (() => {
-            const d = p.dimensions_cubic as { w?: number; d?: number; h?: number } | null;
-            if (d && typeof d.w === "number" && typeof d.d === "number" && typeof d.h === "number" && d.w > 0 && d.d > 0 && d.h > 0) return { w: d.w, d: d.d, h: d.h };
-            const mm = resolveDimensions(p);
-            return mm ? { w: mm.w / 1000, d: mm.d / 1000, h: mm.h / 1000 } : null;
-          })(),
+          dimensionsCubic: curatedDimensions({ ...p, dimensions_cubic: p.dimensions_cubic as { w?: number; d?: number; h?: number } | null, name: p.product_name, role: ROLES[p.id] ?? (/sofa/i.test(p.product_name) ? "anchor" : /chair/i.test(p.product_name) ? "seat" : /coffee.*table/i.test(p.product_name) ? "table" : /lamp/i.test(p.product_name) ? "light" : "accent") }),
         } satisfies LiveCatalogueItem;
       }),
   );
@@ -167,8 +162,8 @@ export const toAsset = (item: LiveCatalogueItem, position: Vec3, rotation: Vec3,
   componentId: item.componentId,
   glbUrl: item.glbUrl,
   priceAtCuration: item.price ?? 0,
-  ...(item.dimensionsCubic ? { dimensionsCubic: item.dimensionsCubic } : {}),
-  position,
+  dimensionsCubic: curatedDimensions(item),
+  position: [position[0], 0, position[2]],
   rotation,
   scale,
 });
@@ -225,7 +220,7 @@ export async function generateRoomLayout(
 /** Re-prices every asset from the live catalogue, then recomputes the ledger. */
 export const repriceScene = (scene: AICuratedSceneSchema, catalogue: LiveCatalogueItem[]): AICuratedSceneSchema => {
   const byId = new Map(catalogue.map((c) => [c.componentId, c]));
-  const curatedAssets = scene.curatedAssets.map((a) => ({ ...a, priceAtCuration: byId.has(a.componentId) ? byId.get(a.componentId)?.price ?? 0 : a.priceAtCuration }));
+  const curatedAssets = scene.curatedAssets.map((a) => ({ ...a, dimensionsCubic: curatedDimensions(byId.get(a.componentId) ?? a), priceAtCuration: byId.has(a.componentId) ? byId.get(a.componentId)?.price ?? 0 : a.priceAtCuration }));
   const next = { ...scene, curatedAssets };
   return { ...next, financialSummary: summarise(next) };
 };

@@ -2,6 +2,23 @@ import { Box3, Euler, Group, MathUtils, Mesh, Object3D, Quaternion, Vector3 } fr
 import { parseDimensionString, type ProductDimensions } from "./productDimensions";
 
 const Y_UP = new Vector3(0, 1, 0);
+/** Curated rooms fit all three catalogue axes after upright import correction. */
+export function fitExactModelDimensions(model: Object3D, metres: { w: number; d: number; h: number }): Group {
+  const frame = new Group();
+  frame.add(model);
+  frame.updateWorldMatrix(true, true);
+  const extent = new Box3().setFromObject(frame).getSize(new Vector3());
+  if ([extent.x, extent.y, extent.z].every(n => Number.isFinite(n) && n > 0)) {
+    frame.scale.set(metres.w / extent.x, metres.h / extent.y, metres.d / extent.z);
+    frame.updateWorldMatrix(true, true);
+    const box = new Box3().setFromObject(frame);
+    const center = box.getCenter(new Vector3());
+    frame.position.set(-center.x, -box.min.y, -center.z);
+    frame.updateWorldMatrix(true, true);
+  }
+  frame.userData = model.userData;
+  return frame;
+}
 export type ModelOrientation = [number, number, number, number];
 export const DEFAULT_MODEL_ORIENTATION: ModelOrientation = [0, 0, 0, 1];
 export type ModelRotationDegrees = [number, number, number];

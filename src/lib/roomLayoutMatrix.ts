@@ -1,5 +1,6 @@
 import type { AICuratedSceneSchema, CuratedAsset, Vec3 } from "@/types/aiCuratedScene";
 import { toAsset, type LayoutBrief, type LiveCatalogueItem, type Role } from "@/lib/mockAiLayoutService";
+import { curatedDimensions } from "./curatedLayoutDimensions";
 
 /**
  * Deterministic, rule-based room layout. Same criteria + catalogue → same scene.
@@ -25,8 +26,10 @@ const DEFAULT_SIZE: Record<Role, { w: number; d: number }> = {
 export interface Box { minX: number; maxX: number; minZ: number; maxZ: number }
 export interface FloorMatrix { cols: number; rows: number; cell: number; occupied: boolean[][] }
 
-export const footprint = (item: LiveCatalogueItem) =>
-  item.dimensionsCubic ? { w: item.dimensionsCubic.w, d: item.dimensionsCubic.d } : DEFAULT_SIZE[item.role];
+export const footprint = (item: LiveCatalogueItem) => {
+  const { w, d } = curatedDimensions(item);
+  return { w, d };
+};
 
 export const boxAt = (x: number, z: number, w: number, d: number): Box => ({ minX: x - w / 2, maxX: x + w / 2, minZ: z - d / 2, maxZ: z + d / 2 });
 export const overlaps = (a: Box, b: Box) => a.minX < b.maxX && a.maxX > b.minX && a.minZ < b.maxZ && a.maxZ > b.minZ;
@@ -105,9 +108,9 @@ export function generateRoomLayoutMatrix(criteria: LayoutBrief, catalogue: LiveC
   const placedItems: LiveCatalogueItem[] = [];
   const place = (item: LiveCatalogueItem, x: number, z: number, yaw = 0) => {
     const size = footprint(item);
-    const turned = Math.abs(Math.sin(yaw)) > 0.5;
-    const b = boxAt(x, z, turned ? size.d : size.w, turned ? size.w : size.d);
-    if (spend + (item.price ?? 0) > budget || (item.dimensionsCubic?.h ?? 0) > H || !fits(b)) return false;
+    const cos = Math.abs(Math.cos(yaw)), sin = Math.abs(Math.sin(yaw));
+    const b = boxAt(x, z, size.w * cos + size.d * sin, size.w * sin + size.d * cos);
+    if (spend + (item.price ?? 0) > budget || curatedDimensions(item).h > H || !fits(b)) return false;
     spend += item.price ?? 0;
     placedIds.add(item.componentId);
     placedItems.push(item);

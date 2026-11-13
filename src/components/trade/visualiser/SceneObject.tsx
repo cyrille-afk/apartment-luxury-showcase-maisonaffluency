@@ -11,7 +11,7 @@ import { findProductSchema } from "@/lib/visualiserProductSchema";
 import { BOND_STREET_BASE_FINISH, isBondStreetStool } from "@/lib/visualiserProductFinishes";
 import { classifyMeshPart, humanizePartName, meshPartMaterial, type FinishPart } from "@/lib/visualiserFinishTargets";
 import { meshKey, registerModelMeshes, usePartOverrides, type ModelMesh, type PartOverrides } from "@/lib/visualiserPartMapping";
-import { applyModelOrientation, fitUprightModel, type ModelOrientation } from "@/lib/modelOrientation";
+import { applyModelOrientation, fitExactModelDimensions, fitUprightModel, type ModelOrientation } from "@/lib/modelOrientation";
 import { clampToRoom, type RoomBounds } from "@/lib/activeProjectLayout";
 import { snapCoordinate, resolveDragPosition, DEFAULT_FOOTPRINT_RADIUS, type FootprintObstacle } from "@/lib/visualiserPlacement";
 import { applyMatteTextile, applyPolishedMarble, textileNormalPixels, toPbrMaterial, withFallbackTextureCoordinates, withSmoothAssetNormals } from "@/lib/showroomRendering";
@@ -48,6 +48,8 @@ export type PlacedObject = {
   position: [number, number, number];
   rotation: [number, number, number];
   scale: number;
+  /** Opt-in exact catalogue fit for Curated Room Layout; Sandbox keeps authored ratios. */
+  exactDimensionsM?: { w: number; d: number; h: number };
   modelOrientation?: ModelOrientation;
   material?: VisualiserMaterial | null;
   topMaterial?: VisualiserMaterial | null;
@@ -401,12 +403,13 @@ function useFittedModel(object: PlacedObject) {
       });
       mesh.material = Array.isArray(mesh.material) ? next : next[0];
     });
-    const model = groundModel(applyModelOrientation(fitUprightModel(clone, object.dimensions, url, resolveDimensions(object)), object.modelOrientation));
+    const upright = applyModelOrientation(fitUprightModel(clone, object.dimensions, url, resolveDimensions(object)), object.modelOrientation);
+    const model = groundModel(object.exactDimensionsM ? fitExactModelDimensions(upright, object.exactDimensionsM) : upright);
     // Project only after import-axis correction: this frame is actually Y-up.
     applyCoffeeTableMarbleProjection(model, object.product_name);
     model.userData.visualiserInitialReady = subdivisionSettled && [holder.material, holder.topMaterial, holder.baseMaterial, holder.upholsteryMaterial, ...Object.values(holder.partMaterials ?? {})].every((finish) => !finish || maps.has(finish.id));
     return model;
-  }, [scene, partOverrides, holder, maps, productId, object.product_name, object.dimensions, object.width_mm, object.depth_mm, object.height_mm, object.size_variants, url, object.modelOrientation, subdivision, subdivisionSettled]);
+  }, [scene, partOverrides, holder, maps, productId, object.product_name, object.dimensions, object.width_mm, object.depth_mm, object.height_mm, object.size_variants, object.exactDimensionsM, url, object.modelOrientation, subdivision, subdivisionSettled]);
 }
 
 /** Pieces always rest on the floor plane (Y = 0). */

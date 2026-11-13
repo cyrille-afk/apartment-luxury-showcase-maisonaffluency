@@ -1,6 +1,7 @@
 import type { AICuratedSceneSchema, ArchitecturalAnchor } from "@/types/aiCuratedScene";
 import { applyTradeDiscount } from "@/lib/productPricing";
 import { footprint } from "@/lib/roomLayoutMatrix";
+import { curatedDimensions } from "./curatedLayoutDimensions";
 import { toAsset, type LayoutBrief, type LiveCatalogueItem, type Role } from "@/lib/mockAiLayoutService";
 
 /**
@@ -23,7 +24,7 @@ export function buildArchitectCatalog(items: LiveCatalogueItem[], discountPct: n
   return items.map((c) => {
     const { w, d } = footprint(c);
     const cents = c.available && c.price != null ? applyTradeDiscount(Math.round(c.price * 100), discountPct) : null;
-    return { sku: c.componentId, name: c.name, maker: c.manufacturer ?? "", category: CATEGORY[c.role], style_tokens: c.styleTokens.slice(0, 8), width_m: w, depth_m: d, height_m: c.dimensionsCubic?.h ?? 0.8, trade_cost: cents != null ? cents / 100 : null };
+    return { sku: c.componentId, name: c.name, maker: c.manufacturer ?? "", category: CATEGORY[c.role], style_tokens: c.styleTokens.slice(0, 8), width_m: w, depth_m: d, height_m: curatedDimensions(c).h, trade_cost: cents != null ? cents / 100 : null };
   });
 }
 

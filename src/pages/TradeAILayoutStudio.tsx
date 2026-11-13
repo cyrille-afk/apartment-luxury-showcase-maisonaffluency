@@ -1527,7 +1527,7 @@ const TradeAILayoutStudio = () => {
                   <li key={`${r.item.componentId}-${i}`} className="flex items-start justify-between gap-3 py-2">
                     <div className="min-w-0">
                       <p className="truncate font-medium">{r.item.name}</p>
-                      <p className="truncate text-[10px] uppercase tracking-[0.12em] text-muted-foreground">{r.item.sku} · {r.role} · {Math.round(r.score * 100)}% match</p>
+                      <p className="mt-0.5 truncate text-muted-foreground">{r.item.manufacturer}</p>
                     </div>
                     <span className="shrink-0 tabular-nums">{eur(r.item.price ?? 0)}</span>
                   </li>
