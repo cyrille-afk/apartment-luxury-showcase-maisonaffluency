@@ -1,4 +1,4 @@
-import { ChevronLeft, PanelLeftOpen, X } from "lucide-react";
+import { ChevronLeft, Lock, PanelLeftOpen, Unlock, X } from "lucide-react";
 import { useState, type ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
@@ -27,8 +27,11 @@ const VisualiserInspector = ({
   onRestore,
   nearestClearance,
   sidebarActions,
+  onToggleLock,
   children,
 }: {
+  /** Header lock toggle — always visible while a piece is selected. */
+  onToggleLock?: () => void;
   onRemove: (instanceId: string) => void;
   onScale: (instanceId: string, scale: number) => void;
   onRestore?: (instanceId: string) => void;
@@ -58,9 +61,18 @@ const VisualiserInspector = ({
   const header = (
     <div className="-mx-5 -mt-4 mb-4 flex items-center justify-between gap-2 border-b border-foreground/10 px-5 py-2">
       <p className={cn(microLabel, "truncate text-foreground")} title={selected?.product_name}>{selected ? selected.product_name : "Piece Inspector"}</p>
+      <div className="flex shrink-0 items-center gap-1">
+      {selected && onToggleLock && (
+        <Button variant="ghost" size="sm" data-testid="inspector-lock" aria-pressed={Boolean(selected.positionLocked)} aria-label={selected.positionLocked ? "Unlock piece position" : "Lock piece position"} onClick={onToggleLock}
+          className={cn(microLabel, "h-7 gap-1 px-2", selected.positionLocked ? "text-foreground" : "text-muted-foreground hover:text-foreground")}>
+          {selected.positionLocked ? <Lock className="h-3.5 w-3.5" /> : <Unlock className="h-3.5 w-3.5" />}
+          {selected.positionLocked ? "Locked" : "Lock"}
+        </Button>
+      )}
       <Button variant="ghost" size="icon-sm" aria-label="Hide inspector" title="Hide inspector" onClick={() => setCollapsed(true)} className="shrink-0 text-muted-foreground hover:text-foreground">
         <ChevronLeft className="h-4 w-4" />
       </Button>
+      </div>
     </div>
   );
 
