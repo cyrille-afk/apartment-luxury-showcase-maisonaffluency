@@ -8,7 +8,7 @@ import { FEATURE_WALL_FINISHES, type FeatureWallFinish } from "@/lib/visualiserF
 
 const microLabel = "text-[10px] uppercase tracking-[0.15em]";
 
-const ORDER: FeatureWallFinish[] = ["travertine", "microcement", "raw-concrete"];
+const ORDER: FeatureWallFinish[] = ["travertine", "venetian-plaster", "limewash", "raw-concrete", "dark-walnut", "warm-white", "microcement"];
 
 const FINISH_NAMES = ORDER.map((id) => FEATURE_WALL_FINISHES[id].label).join(", ");
 const FINISH_TIP = `Click to switch the feature wall between ${FINISH_NAMES}.`;
@@ -50,18 +50,18 @@ export default function FeatureWallControls({ className, finish, disabled, onCha
                 <p className={cn(microLabel, "mb-2 text-muted-foreground")}>Feature wall finish</p>
                 <div className="grid grid-cols-3 gap-1.5">
                   {ORDER.map((id) => (
-                    <button
+                    <Button variant="ghost"
                       key={id}
                       type="button"
                       aria-pressed={finish === id}
                       onClick={() => onChange(id)}
                       className={cn(
-                        "rounded-md border px-1 py-2 text-center text-[11px] leading-tight transition-colors",
+                        "h-auto min-h-10 whitespace-normal rounded-md border px-1 py-2 text-center text-[11px] leading-tight transition-colors",
                         finish === id ? "border-primary bg-primary/10 text-foreground" : "border-border text-muted-foreground hover:bg-muted/50",
                       )}
                     >
                       {FEATURE_WALL_FINISHES[id].label}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </PopoverContent>

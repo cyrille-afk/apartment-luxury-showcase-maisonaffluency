@@ -243,7 +243,7 @@ const CanvasLoader = () => (
 const TradeVisualiser = () => {
   const { user } = useAuth();
   const activeProject = useActiveProject();
-  const workspaceCamera = useMemo(() => activeProject && activeProject.view !== "plan" ? layoutCamera(activeProject.state.bounds, activeProject.view) : undefined, [activeProject?.view, activeProject?.state.bounds]);
+  const workspaceCamera = useMemo(() => activeProject && activeProject.view !== "plan" ? layoutCamera(activeProject.state.bounds, activeProject.view, activeProject.objects.map(o => o.position)) : undefined, [activeProject?.view, activeProject?.state.bounds]);
   const sandboxStorageKey = activeProject?.sandboxStorageKey ?? STORAGE_KEY;
   const initial = useMemo(() => readSandbox(sandboxStorageKey, activeProject?.state.projectId), [sandboxStorageKey]);
   const [sceneFailed, setSceneFailed] = useState(false);

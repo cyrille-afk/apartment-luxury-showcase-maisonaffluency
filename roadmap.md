@@ -1,5 +1,9 @@
 # Roadmap
 
+## Sandbox surfaces and opening view
+- [x] Connect wall picker to project walls and generated architecture; create local 2048px PBR wall/floor maps and a cluster-centred 4.5m eye-level opening.
+- [x] Signed-in Frenchmen: walnut and travertine visibly switch all three project walls with 2048px colour/bump/roughness maps; opening camera/target verified at 4.5m. 13 tests pass, no browser errors, preview build OK. Real-GPU texture sharpness remains device-dependent.
+
 ## Clean Sandbox grounding
 - [x] Separate floor/rug/grid/shadow depth, strip oversized embedded import floors, and use one acne-safe key with subtle furniture-only soft contact shadows.
 - [x] 44 regressions pass; signed-in Frenchmen on Oak Chevron verified before/after a 0.35m inspector move, with clean following shadows, floor Y=0, furniture-only contact capture and exactly one shadow-casting key at requested settings. No page errors; build OK. Real-device GPU appearance remains unverified.

@@ -21,6 +21,7 @@ describe("architectural feature wall", () => {
     expect(featureWallFinish("microcement")).toBe("microcement");
     expect(featureWallFinish("raw-concrete")).toBe("raw-concrete");
     expect(featureWallFinish("travertine")).toBe("travertine");
+    for (const id of ["venetian-plaster", "limewash", "dark-walnut", "warm-white"]) expect(featureWallFinish(id)).toBe(id);
     expect(featureWallFinish("marble")).toBe("travertine");
     expect(featureWallFinish(undefined)).toBe("travertine");
   });

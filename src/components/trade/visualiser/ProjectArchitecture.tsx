@@ -1,4 +1,6 @@
 import { CAMERA_FRONT_RETREAT_M } from "./sandboxCameraBounds";
+import ProceduralWallMaterial from "./ProceduralWallMaterial";
+import type { FeatureWallFinish } from "@/lib/visualiserFeatureWall";
 import { Suspense } from "react";
 import { Floor } from "./RoomSurfaces";
 import type { RoomFloorFinish } from "@/lib/visualiserRoomSurfaces";
@@ -10,7 +12,7 @@ import { WALL_THICKNESS_M, type PlanColumn, type RoomBounds } from "@/lib/active
  * room height (front left open so both cameras see in), and structural
  * columns from the plan.
  */
-export default function ProjectArchitecture({ bounds, columns, floorFinish = "oak-chevron", floorGlare = 50, floorExtension = CAMERA_FRONT_RETREAT_M, floorPatternScale = 100 }: { bounds: RoomBounds; columns: PlanColumn[]; floorFinish?: RoomFloorFinish; floorGlare?: number; floorExtension?: number; floorPatternScale?: number }) {
+export default function ProjectArchitecture({ bounds, columns, wallFinish = "travertine", floorFinish = "oak-chevron", floorGlare = 50, floorExtension = CAMERA_FRONT_RETREAT_M, floorPatternScale = 100 }: { bounds: RoomBounds; columns: PlanColumn[]; wallFinish?: FeatureWallFinish; floorFinish?: RoomFloorFinish; floorGlare?: number; floorExtension?: number; floorPatternScale?: number }) {
   const { width, depth, height } = bounds;
   const t = WALL_THICKNESS_M;
   const walls: Array<{ name: string; position: [number, number, number]; size: [number, number, number] }> = [
@@ -37,7 +39,7 @@ export default function ProjectArchitecture({ bounds, columns, floorFinish = "oa
       {walls.map(wall => (
         <mesh key={wall.name} name={wall.name} position={wall.position} receiveShadow castShadow>
           <boxGeometry args={wall.size} />
-          <meshStandardMaterial color="#f3efe8" roughness={0.9} />
+          <ProceduralWallMaterial finish={wallFinish} width={wall.name === "Rear wall" ? width : depth} height={height} />
         </mesh>
       ))}
       {/* Front wall shown as a kerb so the opening still reads as a boundary. */}
@@ -48,7 +50,7 @@ export default function ProjectArchitecture({ bounds, columns, floorFinish = "oa
       {columns.map(column => (
         <mesh key={column.id} name={`Column ${column.id}`} position={[column.x, height / 2, column.y]} castShadow receiveShadow>
           <boxGeometry args={[column.size, height, column.size]} />
-          <meshStandardMaterial color="#ebe6de" roughness={0.8} />
+          <ProceduralWallMaterial finish={wallFinish} width={column.size} height={height} />
         </mesh>
       ))}
     </group>

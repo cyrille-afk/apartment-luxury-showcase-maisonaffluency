@@ -18,8 +18,13 @@ describe("synchronized project coordinates", () => {
     const locked = { ...object, positionLocked: true };
     expect(patchLayoutItem([locked], locked.instanceId, { x: 0 })[0]).toBe(locked);
   });
-  it("sets a level room-wide camera without a furniture close-up", () => {
-    expect(layoutCamera({ width: 11.475, depth: 5.81, height: 3 }, "sandbox")).toEqual({ position: [0, 1.6, 13.77], target: [0, 1.6, 0], polar: Math.PI / 2, fov: 60 });
+  it("opens at eye level 4.5m from the cluster", () => {
+    expect(layoutCamera({ width: 11.475, depth: 5.81, height: 3 }, "sandbox")).toEqual({ position: [0, 1.6, 4.5], target: [0, 1.6, 0], polar: Math.PI / 2, fov: 60 });
+  });
+  it("targets the placed furniture cluster without changing its positions", () => {
+    const camera = layoutCamera({ width: 12, depth: 8, height: 3 }, "sandbox", [[2, 0, -2], [4, 0, 0]]);
+    expect(camera.target).toEqual([3, 1.6, -1]);
+    expect(camera.position).toEqual([3, 1.6, 3.5]);
   });
   it("places the isometric camera above the same project footprint", () => {
     const camera = layoutCamera({ width: 12, depth: 8, height: 3 }, "axonometric");

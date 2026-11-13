@@ -1,8 +1,12 @@
 import * as THREE from "three";
 
-export type FeatureWallFinish = "travertine" | "microcement" | "raw-concrete";
+export type FeatureWallFinish = "travertine" | "microcement" | "raw-concrete" | "venetian-plaster" | "limewash" | "dark-walnut" | "warm-white";
 
 export const FEATURE_WALL_FINISHES: Record<FeatureWallFinish, { label: string; roughness: number; bumpScale: number; tint: string }> = {
+  "venetian-plaster": { label: "Venetian Plaster", roughness: 0.55, bumpScale: 0.002, tint: "#ffffff" },
+  limewash: { label: "Limewash", roughness: 0.96, bumpScale: 0.004, tint: "#ffffff" },
+  "dark-walnut": { label: "Dark Walnut Paneling", roughness: 0.65, bumpScale: 0.003, tint: "#ffffff" },
+  "warm-white": { label: "Warm White", roughness: 0.94, bumpScale: 0.001, tint: "#ffffff" },
   travertine: { label: "Travertine", roughness: 0.88, bumpScale: 0.008, tint: "#ffffff" },
   microcement: { label: "Microcement", roughness: 0.92, bumpScale: 0.005, tint: "#ffffff" },
   "raw-concrete": { label: "Raw Concrete", roughness: 0.95, bumpScale: 0.011, tint: "#f6f6f4" },

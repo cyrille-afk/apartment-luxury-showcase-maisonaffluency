@@ -8,7 +8,7 @@ declare module "react" {
   }
 }
 import * as THREE from "three";
-import oakImage from "@/assets/room-oak-chevron.jpg";
+import { useProceduralMaps } from "./ProceduralWallMaterial";
 import cementImage from "@/assets/room-micro-cement.jpg";
 import woolImage from "@/assets/cream-wool-rug.jpg";
 import { roundedRugGeometry, RUG_TOP_Y } from "@/lib/visualiserRug";
@@ -68,7 +68,7 @@ export function Floor({ finish, glare, size, patternScale = 100 }: { finish: Exc
   const [w, d] = size ?? [80, 80];
   // Keep the plank scale identical to the 80 m studio floor (repeat per metre).
   const baseRepeat = (finish === "oak-chevron" ? 32 : 20) * (100 / patternScale);
-  const maps = useSurfaceMaps(finish === "oak-chevron" ? oakImage : cementImage, (baseRepeat * w) / 80, finish === "oak-chevron", glare, (baseRepeat * d) / 80);
+  const maps = useProceduralMaps(finish, w, d, 80 / baseRepeat);
   // Glare 0 = 0.05 env reflection, 100 = 0.45.
   const envMapIntensity = 0.05 + (clampFloorGlare(glare) / 100) * 0.4;
   return (

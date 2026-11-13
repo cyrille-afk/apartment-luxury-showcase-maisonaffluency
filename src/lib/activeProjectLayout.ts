@@ -47,7 +47,9 @@ export function columnObstacles(columns: PlanColumn[]): Array<{ position: [numbe
 }
 
 /** Both 3D cameras aim at the room centre — the 2D plan origin — never a fixed showroom point. */
-export function layoutCamera(bounds: RoomBounds, view: WorkspaceView): { position: [number, number, number]; target: [number, number, number]; polar: number; fov: number } {
+export function layoutCamera(bounds: RoomBounds, view: WorkspaceView, positions: ReadonlyArray<readonly number[]> = []): { position: [number, number, number]; target: [number, number, number]; polar: number; fov: number } {
   if (view === "axonometric") return { position: [bounds.width * 0.65, Math.max(bounds.width, bounds.depth) * 1.25, bounds.depth * 0.9], target: [0, 0, 0], polar: Math.PI / 5, fov: 45 };
-  return { position: [0, 1.6, Math.max(bounds.width, bounds.depth) * 1.2], target: [0, 1.6, 0], polar: Math.PI / 2, fov: 60 };
+  const x = positions.length ? (Math.min(...positions.map(p => p[0])) + Math.max(...positions.map(p => p[0]))) / 2 : 0;
+  const z = positions.length ? (Math.min(...positions.map(p => p[2])) + Math.max(...positions.map(p => p[2]))) / 2 : 0;
+  return { position: [x, 1.6, z + 4.5], target: [x, 1.6, z], polar: Math.PI / 2, fov: 60 };
 }
