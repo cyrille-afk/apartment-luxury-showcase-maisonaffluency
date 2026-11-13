@@ -20,6 +20,7 @@ import type { OpenSubdivModule } from "@nasedkinpv/opensubdiv-wasm";
 import { applyCoffeeTableMarbleProjection, disposeMarbleSlabMaps, isStoneSlabFinish } from "@/lib/visualiserMarbleProjection";
 import { withCachedModelLoader } from "@/lib/visualiserModelCache";
 import { addWoodRoughness, deepenArmchairWeave, disposeMicroSurfaceMaps } from "@/lib/visualiserMicroSurfaces";
+import { resolveDimensions } from "@/lib/productDimensions";
 
 export type PlacedObject = {
   instanceId: string;
@@ -330,7 +331,7 @@ function assignParts(root: THREE.Object3D, overrides: PartOverrides, materialRol
   return groupLabels;
 }
 
-/** Normalises any GLB to roughly 1.4m tall and seats it on the floor plane. */
+/** Fits GLB units to recorded product metres and seats the corrected frame. */
 function useFittedModel(object: PlacedObject) {
   const productId = object.id;
   const url = object.glb_url ?? "";
@@ -396,12 +397,12 @@ function useFittedModel(object: PlacedObject) {
       });
       mesh.material = Array.isArray(mesh.material) ? next : next[0];
     });
-    const model = groundModel(applyModelOrientation(fitUprightModel(clone, object.dimensions, url), object.modelOrientation));
+    const model = groundModel(applyModelOrientation(fitUprightModel(clone, object.dimensions, url, resolveDimensions(object)), object.modelOrientation));
     // Project only after import-axis correction: this frame is actually Y-up.
     applyCoffeeTableMarbleProjection(model, object.product_name);
     model.userData.visualiserInitialReady = subdivisionSettled && [holder.material, holder.topMaterial, holder.baseMaterial, holder.upholsteryMaterial, ...Object.values(holder.partMaterials ?? {})].every((finish) => !finish || maps.has(finish.id));
     return model;
-  }, [scene, partOverrides, holder, maps, productId, object.product_name, object.dimensions, url, object.modelOrientation, subdivision, subdivisionSettled]);
+  }, [scene, partOverrides, holder, maps, productId, object.product_name, object.dimensions, object.width_mm, object.depth_mm, object.height_mm, object.size_variants, url, object.modelOrientation, subdivision, subdivisionSettled]);
 }
 
 /** Pieces always rest on the floor plane (Y = 0). */
@@ -414,6 +415,7 @@ function groundModel(model: THREE.Object3D): THREE.Object3D {
   holder.updateMatrixWorld(true);
   const bounds = new THREE.Box3().setFromObject(model);
   if (Number.isFinite(bounds.min.y)) model.position.y -= bounds.min.y;
+  holder.updateMatrixWorld(true);
   holder.userData = model.userData;
   return holder;
 }
@@ -513,6 +515,16 @@ const ImageBody = ({ url, name, locked, showLabels = true, instanceId }: { url: 
 };
 
 const FLOOR_PLANE = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+
+/** Clip only editor handles, never product geometry or its materials. */
+const clipFloorGizmo = (controls: THREE.Object3D | null) => {
+  controls?.traverse(node => {
+    const mesh = node as THREE.Mesh;
+    if (!mesh.material) return;
+    const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+    materials.forEach(material => { material.clippingPlanes = [FLOOR_PLANE]; material.needsUpdate = true; });
+  });
+};
 
 const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChange, isEditable = true, scaleVector, label, showLabels = true, onTextureParts, snapToGrid = false, obstacles, selfRadius, roomLimits }: Props) => {
   // Refs so the window-level drag handlers always read the latest obstacles
@@ -674,6 +686,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
         <>
           {/* Floor-plane arrows: X / Z translation only. */}
           {!object.positionLocked && <TransformControls
+            ref={clipFloorGizmo}
             object={groupNode}
             mode="translate"
             showY={false}
@@ -690,6 +703,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
           />}
           {/* Outer ring: free 360° yaw so the piece can be aligned to the backdrop perspective. */}
           <TransformControls
+            ref={clipFloorGizmo}
             object={groupNode}
             mode="rotate"
             showX={false}

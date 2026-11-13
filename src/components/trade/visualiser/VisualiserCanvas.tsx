@@ -48,6 +48,7 @@ import { backdropStageColor, type RoomFloorFinish, type RoomWallColor, type Room
 import type { RoomBounds, layoutCamera } from "@/lib/activeProjectLayout";
 import PhotoMatchedCamera from "./PhotoMatchedCamera";
 import type { PhotoCalibration } from "@/lib/photoPerspective";
+import SandboxCameraBounds from "./SandboxCameraBounds";
 
 export type VisualiserEnvironmentSource = EnvironmentSourcePref | "local";
 export type VisualiserEnvironmentStatus = { source: VisualiserEnvironmentSource; exr?: "missing" | "unreadable" };
@@ -459,6 +460,7 @@ const VisualiserCanvas = ({
       gl.toneMapping = THREE.ACESFilmicToneMapping;
       gl.toneMappingExposure = SHOWROOM.exposure;
       gl.outputColorSpace = THREE.SRGBColorSpace;
+      gl.localClippingEnabled = true;
       gl.shadowMap.enabled = true;
       gl.shadowMap.type = THREE.PCFShadowMap;
     }}
@@ -493,6 +495,7 @@ const VisualiserCanvas = ({
       maxAzimuthAngle={photoStage ? LUXURY_BACKDROP.maxAzimuthAngle : Infinity}
       target={workspaceCamera?.target ?? (photoStage ? LUXURY_BACKDROP.cameraTarget : SHOWROOM.cameraTarget)}
     />
+    {roomBounds && !photoCalibration && (!workspaceCamera || workspaceCamera.polar === Math.PI / 2) && <SandboxCameraBounds bounds={roomBounds} />}
     {roomBounds && !photoCalibration && !projectArchitecture && <group name="Active project bounds">{[
       { position: [0, 0.01, -roomBounds.depth / 2], size: [roomBounds.width, 0.01, 0.025] },
       { position: [0, 0.01, roomBounds.depth / 2], size: [roomBounds.width, 0.01, 0.025] },

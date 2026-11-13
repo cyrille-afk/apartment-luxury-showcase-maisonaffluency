@@ -1,5 +1,9 @@
 # Roadmap
 
+## Sandbox physical dimensions and camera bounds
+- [x] Normalize loaded furniture to recorded metre dimensions, ground on Y=0 and clip below-floor editor handles; unknown dimensions use a 1m fallback.
+- [x] Clamp eye-level camera with 0.5m wall clearance. 31 tests pass; signed-in Frenchmen armchair measured 0.8m maximum and Y=0, forced diagonal camera clamped to X=5.5/Z=3.5. Desktop/phone render without page errors; software-rendering harness passes (existing empty-room EXR fallback request returns 406). Real-device GPU performance unverified.
+
 ## Sandbox recovery and polish
 - [x] Fixed preview source labels crashing R3F; palette toggles retain the same canvas. Real WebGL loss/restoration verified in place; a 12-second timeout exposes Retry, which remounts only the renderer and retains the piece.
 - [x] Sandbox has one client-sharing control and its dialog opens; inspector scrolls within desktop/phone bounds. Signed-in checks ran without bypasses or page errors; four regressions pass and build OK.

@@ -60,8 +60,8 @@ describe("model import frame", () => {
     source.rotation.x = -Math.PI / 2;
     const fitted = bounds(fitUprightModel(source, "W 90 x D 77 x H 75 cm"));
     const size = fitted.getSize(new Vector3());
-    expect(size.y).toBeCloseTo(1.4 * 750 / 900);
-    expect(size.z).toBeCloseTo(1.4 * 770 / 900);
+    expect(size.y).toBeCloseTo(0.75);
+    expect(size.z).toBeCloseTo(0.77);
     expect(fitted.min.y).toBeCloseTo(0);
     expect(source.getWorldQuaternion(new Quaternion()).angleTo(new Quaternion())).toBeCloseTo(0);
   });
@@ -71,11 +71,11 @@ describe("model import frame", () => {
     const fitted = bounds(fitUprightModel(source, "W 90 x D 77 x H 75 cm", "/glb-models/f72b4185-9eeb-4ec0-b862-0972abc93a9f/default.glb"));
     expect(source.getWorldQuaternion(new Quaternion()).angleTo(new Quaternion())).toBeCloseTo(0);
     expect(fitted.min.y).toBeCloseTo(0);
-    expect(fitted.getSize(new Vector3()).y).toBeCloseTo(1.4 * 750 / 900);
+    expect(fitted.getSize(new Vector3()).y).toBeCloseTo(0.75);
   });
   it("leaves a correctly exported wide low table upright", () => {
     const fitted = bounds(fitUprightModel(piece(1280, 340, 830), "W 128 x D 83 x H 34 cm"));
-    expect(fitted.getSize(new Vector3()).y).toBeCloseTo(1.4 * 340 / 1280);
+    expect(fitted.getSize(new Vector3()).y).toBeCloseTo(0.34);
     expect(fitted.min.y).toBeCloseTo(0);
   });
   it("corrects X-up while preserving authored offsets and scale", () => {
@@ -84,7 +84,7 @@ describe("model import frame", () => {
     source.position.set(40, -50, 20);
     source.scale.setScalar(1000);
     const fitted = bounds(fitUprightModel(source, "W 62 × D 59 × H 80 cm"));
-    expect(fitted.getSize(new Vector3()).y).toBeCloseTo(1.4);
+    expect(fitted.getSize(new Vector3()).y).toBeCloseTo(0.8);
     expect(fitted.min.y).toBeCloseTo(0);
     expect(fitted.getCenter(new Vector3()).x).toBeCloseTo(0);
     expect(source.scale.x).toBe(1000);
@@ -92,9 +92,23 @@ describe("model import frame", () => {
   it("uses dimension-bearing asset names when dimensions are absent", () => {
     const source = piece(1280, 340, 830);
     source.rotation.x = -Math.PI / 2;
-    expect(bounds(fitUprightModel(source, null, "https://example.invalid/rectangle---w-128-x-d-83-x-h-34-cm-1.glb")).getSize(new Vector3()).y).toBeCloseTo(1.4 * 340 / 1280);
+    expect(bounds(fitUprightModel(source, null, "https://example.invalid/rectangle---w-128-x-d-83-x-h-34-cm-1.glb")).getSize(new Vector3()).y).toBeCloseTo(0.34);
   });
   it("does not guess an axis for dimensionless compliant models", () => {
-    expect(bounds(fitUprightModel(piece(3, 1, 2))).getSize(new Vector3()).y).toBeCloseTo(1.4 / 3);
+    expect(bounds(fitUprightModel(piece(3, 1, 2))).getSize(new Vector3()).y).toBeCloseTo(1 / 3);
+  });
+  it.each([1, 100, 1000])("normalizes an armchair authored at %s units per metre", units => {
+    const source = piece(0.82 * units, 0.78 * units, 1.0 * units);
+    source.position.set(25 * units, -3 * units, -8 * units);
+    const fitted = bounds(fitUprightModel(source, "W 82 × D 100 × H 78 cm"));
+    const size = fitted.getSize(new Vector3());
+    expect(Math.max(size.x, size.y, size.z)).toBeCloseTo(1.0);
+    expect(size.y).toBeCloseTo(0.78);
+    expect(fitted.min.y).toBeCloseTo(0);
+  });
+  it("prefers structured product dimensions over stale display text", () => {
+    const fitted = bounds(fitUprightModel(piece(820, 780, 900), "W 400 × D 400 × H 400 cm", "", { w: 820, d: 900, h: 780 }));
+    expect(Math.max(...fitted.getSize(new Vector3()).toArray())).toBeCloseTo(0.9);
+    expect(fitted.min.y).toBeCloseTo(0);
   });
 });

@@ -11,6 +11,7 @@
 - Password-setup resends reuse the review drawer and retain attempt keys on retry; never change approval. Verified activation links the account; the queue reads user_id for setup status.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Sandbox furniture fits recorded millimetre metadata to metre-scale bounds before import repair and floor grounding; camera clamps run after OrbitControls with 0.5m wall clearance, excluding axonometric/photo calibration — prevents unit-size drift and wall clipping.
 - Visualiser scene controls float in build/surface, collapsible lighting/camera and guide/export palettes inside the canvas; preserve existing state handlers and keep breadcrumb/view navigation outside — editing controls must not shrink or remount the rendered scene.
 - Project workspace owns ToolsBreadcrumb above view tabs; embedded Visualiser omits its own breadcrumb while standalone rendering retains it — preserves one top-level navigation trail across views.
 - Specification overview uses the shared single collapsible Accordion with no initial open value; only Specification descriptions reserve two clamped lines — keeps growing project lists out of the initial tool view.

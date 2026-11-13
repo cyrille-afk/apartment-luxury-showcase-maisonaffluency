@@ -1,5 +1,5 @@
 import { Box3, Euler, Group, MathUtils, Mesh, Object3D, Quaternion, Vector3 } from "three";
-import { parseDimensionString } from "./productDimensions";
+import { parseDimensionString, type ProductDimensions } from "./productDimensions";
 
 const Y_UP = new Vector3(0, 1, 0);
 export type ModelOrientation = [number, number, number, number];
@@ -54,12 +54,13 @@ const VERIFIED_UP: Record<string, [number, number, number]> = {
 };
 
 /** Correct the import frame, never the cached GLTF scene or individual meshes. */
-export function fitUprightModel(model: Object3D, dimensions?: string | null, url = ""): Group {
+export function fitUprightModel(model: Object3D, dimensions?: string | null, url = "", recorded?: ProductDimensions | null): Group {
   const frame = new Group();
   frame.add(model);
   frame.updateWorldMatrix(true, true);
   const size = new Box3().setFromObject(frame).getSize(new Vector3());
-  const expected = parseDimensionString(dimensions) ?? parseDimensionString(url.replace(/-/g, " "));
+  const candidate = recorded ?? parseDimensionString(dimensions) ?? parseDimensionString(url.replace(/-/g, " "));
+  const expected = candidate && [candidate.w, candidate.d, candidate.h].every(value => Number.isFinite(value) && value > 0) ? candidate : null;
   const authoredUp = new Vector3();
   model.traverse(node => {
     const mesh = node as Mesh;
@@ -88,7 +89,10 @@ export function fitUprightModel(model: Object3D, dimensions?: string | null, url
   }
   frame.updateWorldMatrix(true, true);
   const extent = new Box3().setFromObject(frame).getSize(new Vector3());
-  frame.scale.setScalar(1.4 / (Math.max(extent.x, extent.y, extent.z) || 1));
+  // Recorded dimensions are millimetres; geometry units are irrelevant once
+  // measured. Preserve proportions rather than stretching individual axes.
+  const targetMetres = expected ? Math.max(expected.w, expected.d, expected.h) / 1000 : 1.0;
+  frame.scale.setScalar(targetMetres / (Math.max(extent.x, extent.y, extent.z) || 1));
   frame.updateWorldMatrix(true, true);
   const fitted = new Box3().setFromObject(frame);
   if (!fitted.isEmpty()) {
