@@ -1,5 +1,9 @@
 # Roadmap
 
+## Visualiser header hierarchy
+- [x] Move shared breadcrumbs above workspace mode tabs with matching horizontal alignment and a subtle divider; retain standalone breadcrumbs without duplicates.
+- [x] Signed-in all three views show exactly one breadcrumb above tabs with a 1px divider; phone hierarchy and Tools back link verified with no page errors. Visualiser regression passes; build OK.
+
 ## Compact Specification hub
 - [x] Collapse project overview by default with an animated accordion bar, muted active-project count and chevron; reserve two-line description slots on Specification cards only.
 - [x] Signed-in initial collapse, active project count, expand/collapse, refresh default and phone interaction verified without overflow/page errors; descriptions occupy two lines and Specification grid uses equal-height rows. Build OK.

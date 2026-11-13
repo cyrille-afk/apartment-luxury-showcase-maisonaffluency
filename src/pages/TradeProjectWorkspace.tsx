@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import SourceUpload from "@/components/trade/SourceUpload";
 import WorkspaceShare from "@/components/trade/WorkspaceShare";
+import ToolsBreadcrumb from "@/components/trade/ToolsBreadcrumb";
 import LayoutPlanCanvas from "@/components/trade/visualiser/LayoutPlanCanvas";
 import ProjectAssetsDrawer from "@/components/trade/visualiser/ProjectAssetsDrawer";
 import { ActiveProjectProvider, useActiveProject } from "@/contexts/ActiveProjectContext";
@@ -86,6 +87,9 @@ function WorkspacePanels() {
 
   const tabs: { value: WorkspaceView; label: string; icon: typeof Map }[] = [{ value: "plan", label: "2D Layout Plan", icon: Map }, { value: "axonometric", label: "Axonometric Studio", icon: Layers }, { value: "sandbox", label: "Eye-Level Sandbox", icon: Armchair }];
   return <div className="flex h-full min-h-0 flex-col bg-background">
+    <div className="relative z-40 w-full shrink-0 border-b border-border/40 bg-background px-3 py-3 sm:px-6">
+      <ToolsBreadcrumb className="mb-0" />
+    </div>
     <div role="tablist" aria-label="Project workspace views" className="flex shrink-0 gap-1 overflow-x-auto border-b border-border px-3 py-2 sm:px-6">
       {tabs.map(tab => <Button key={tab.value} id={`workspace-${tab.value}`} role="tab" aria-selected={view === tab.value} aria-controls={`panel-${tab.value}`} variant="ghost" className={cn("shrink-0 rounded-none border-b-2 text-xs sm:text-sm", view === tab.value ? "border-primary text-foreground" : "border-transparent text-muted-foreground")} onClick={() => setView(tab.value)}><tab.icon className="h-4 w-4" />{tab.label}</Button>)}
       <div className="ml-auto flex items-center"><WorkspaceShare /></div>

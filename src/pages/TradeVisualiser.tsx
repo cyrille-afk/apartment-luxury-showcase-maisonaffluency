@@ -964,10 +964,10 @@ const TradeVisualiser = () => {
         <meta name="robots" content="noindex" />
       </Helmet>
 
-      {/* Tools breadcrumb — the full-bleed layout suppresses the global bar, so the workspace renders its own. */}
-      <div className="relative z-40 w-full shrink-0 border-b border-border/40 bg-background px-3 py-2 sm:px-4">
+      {/* The parent workspace owns breadcrumbs above its tabs; standalone rendering retains its own row. */}
+      {!activeProject && <div className="relative z-40 w-full shrink-0 border-b border-border/40 bg-background px-3 py-3 sm:px-4">
         <ToolsBreadcrumb className="mb-0" />
-      </div>
+      </div>}
 
       <div ref={mediaRef} className="relative min-h-0 flex-1 overflow-hidden">
       <ProjectLayoutOverview />
