@@ -1,5 +1,9 @@
 # Roadmap
 
+## Restore project-room rug
+- [x] Render the shared saved/auto-fit rug independently of project walls/floor, preserving colour, weave, size, offsets and rotation; elevate contact shadows with it.
+- [x] Signed-in project room renders a textured auto-fit 4.5×3.8m rug at Y=.004; hide/show restores identical dimensions, colour and texture. Four rug regressions pass, no browser errors, preview build OK.
+
 ## Natural stone and narrow parquet
 - [x] Single continuous rear wall, mirrored rough wall maps, layered simplex porous travertine and 12cm 45° oak chevron with satin-matte material.
 - [x] Signed-in Frenchmen room visibly shows natural stone and narrow chevron; one rear mesh has mirrored 1024px maps, roughness .92/metalness 0; parquet roughness .68 and metre-scaled tiling verified. Eight regressions pass, no browser errors, preview build OK. Real-GPU appearance remains unverified.

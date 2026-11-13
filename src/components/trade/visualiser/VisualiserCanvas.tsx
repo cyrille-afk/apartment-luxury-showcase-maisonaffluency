@@ -40,7 +40,7 @@ import { SHOWROOM } from "@/lib/showroomRendering";
 import { validateEmptyRoomExr } from "@/lib/emptyRoomExr";
 import { getLocalExr, LOCAL_EXR_EVENT } from "@/lib/localEnvironmentExr";
 import { uploadedEnvironmentPresentation } from "./uploadedEnvironmentPresentation";
-import RoomSurfaces from "./RoomSurfaces";
+import RoomSurfaces, { Rug } from "./RoomSurfaces";
 import ArchitecturalFeatureWall from "./ArchitecturalFeatureWall";
 import ProjectArchitecture from "./ProjectArchitecture";
 import { columnObstacles, type PlanColumn } from "@/lib/activeProjectLayout";
@@ -558,11 +558,12 @@ const VisualiserCanvas = ({
       {/* Both renderers retain the designed architecture; only room photos suppress it. */}
       {projectArchitecture && roomBounds && !photoCalibration && <ProjectArchitecture wallFinish={featureWallFinish} bounds={roomBounds} columns={projectArchitecture.columns} floorFinish={hasBackdrop ? "none" : floorFinish} floorGlare={floorGlare} floorExtension={floorExtension} floorPatternScale={floorPatternScale} />}
       {!hasBackdrop && !projectArchitecture && <ArchitecturalFeatureWall finish={featureWallFinish} />}
+      {projectArchitecture && !hasBackdrop && !photoCalibration && floorFinish !== "none" && showRug && <Rug objects={objects} color={rugColor} borderColor={rugBorderColor} borderThicknessMm={rugBorderThicknessMm} borderTwistMm={rugBorderTwistMm} borderRoughness={rugBorderRoughness} weave={rugWeave} pile={rugPile} layout={rugLayout} />}
       {!projectArchitecture && <RoomSurfaces floor={hasBackdrop ? "none" : floorFinish} rearWall={hasBackdrop ? false : showRearWall} objects={objects} glare={floorGlare} wallHeight={wallHeight} ceilingHeight={ceilingHeight} ceilingThickness={ceilingThickness} ceilingOpening={ceilingOpening} wallColor={wallColor} wallFinish={wallFinish} wallCustomHex={wallCustomHex} wallFinishIntensity={wallFinishIntensity} rugColor={rugColor} rugBorderColor={rugBorderColor} rugBorderThicknessMm={rugBorderThicknessMm} rugBorderTwistMm={rugBorderTwistMm} rugBorderRoughness={rugBorderRoughness} rugWeave={rugWeave} rugPile={rugPile} rugLayout={rugLayout} showRug={showRug && !hasBackdrop} />}
       <InitialAssetsCommitted onReady={setRoomReady} />
     </Suspense>
     {!pathTrace && <FurnitureContactShadows
-      position={[center[0], (showRug && !hasBackdrop && !projectArchitecture && floorFinish !== "none" ? RUG_TOP_Y : GROUND_LAYERS.floor) + GROUND_LAYERS.contact, center[2]]}
+      position={[center[0], (showRug && !hasBackdrop && !photoCalibration && floorFinish !== "none" ? RUG_TOP_Y : GROUND_LAYERS.floor) + GROUND_LAYERS.contact, center[2]]}
       scale={Math.max(8, ...objects.map(object => Math.hypot(object.position[0] - center[0], object.position[2] - center[2]) * 2 + footprintRadius(parseDimensionString(object.dimensions), object.scale) * 2 + 2))}
       opacity={lighting.contactOpacity}
       blur={lighting.contactBlur}

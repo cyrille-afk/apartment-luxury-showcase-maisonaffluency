@@ -244,7 +244,7 @@ function useWoolMaps(weave: RugWeave, pile: number, repeat: [number, number] = [
 const RUG_TILE: [number, number] = [1.35, 1.35];
 
 export type RugLayout = { width?: number | null; depth?: number | null; offsetX?: number; offsetZ?: number; rotation?: number };
-function Rug({ objects, color, borderColor = "match", borderThicknessMm, borderTwistMm, borderRoughness, weave, pile, layout }: { objects: PlacedObject[]; color: RugColor; borderColor?: RugBorderColor; borderThicknessMm?: number; borderTwistMm?: number; borderRoughness?: number; weave: RugWeave; pile: number; layout?: RugLayout }) {
+export function Rug({ objects, color, borderColor = "match", borderThicknessMm, borderTwistMm, borderRoughness, weave, pile, layout }: { objects: PlacedObject[]; color: RugColor; borderColor?: RugBorderColor; borderThicknessMm?: number; borderTwistMm?: number; borderRoughness?: number; weave: RugWeave; pile: number; layout?: RugLayout }) {
   const p = clampRugPile(pile);
   // Metre-space UVs preserve yarn scale when the rug is resized.
   const maps = useWoolMaps(rugWeave(weave), p, RUG_TILE);
