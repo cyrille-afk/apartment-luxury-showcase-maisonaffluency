@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { classifyMeshPart, classifyTextureNode, finishTargetsFromParts, humanizePartName, materialFitsTarget, meshPartMaterial, targetLabel, withPartMaterial } from "./visualiserFinishTargets";
+import { classifyMeshPart, classifyTextureNode, finishTargetsFromParts, humanizePartName, isNamedFinishTarget, materialFitsTarget, meshPartMaterial, targetLabel, withPartMaterial } from "./visualiserFinishTargets";
 
 const m = (category: string, material_type: string | null = null) => ({
   id: category, name: category, brand_name: "x", category, material_type, color_family: null, image_url: null,
@@ -87,6 +87,17 @@ describe("three-axis pieces", () => {
 });
 
 describe("component tab labels", () => {
+  it("hides anonymous imported material groups including legacy numbered labels", () => {
+    const anonymous = ["part:Material.001", "part:StandardMaterial2", "part:VIFS01", "part:Mat0", "part:Mat8", "part:Object_12", "part:09 - Default", "part:a3f1b2c4-5d6e-7f80-9101-121314151617"];
+    expect(anonymous.filter((target) => isNamedFinishTarget(target))).toEqual([]);
+    expect(isNamedFinishTarget("part:anonymous", { "part:anonymous": "Part 7" })).toBe(false);
+    expect(isNamedFinishTarget("none")).toBe(false);
+  });
+  it("retains named supplier components and declared coded-material mappings", () => {
+    expect(isNamedFinishTarget("part:BrushedBronze")).toBe(true);
+    expect(isNamedFinishTarget("part:Material.001", { "part:Material.001": "Table Top" })).toBe(true);
+    expect(["all", "top", "base", "backrest"].every((target) => isNamedFinishTarget(target))).toBe(true);
+  });
   it("humanizes GLB material and node names into component names", () => {
     expect(humanizePartName("WoodFinish")).toBe("Wood Finish");
     expect(humanizePartName("Table_Top_Mesh")).toBe("Table Top Mesh");

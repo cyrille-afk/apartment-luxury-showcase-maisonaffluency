@@ -27,7 +27,7 @@ import ProjectLayoutOverview from "@/components/trade/visualiser/ProjectLayoutOv
 import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "@/lib/router-compat";
 import ToolsBreadcrumb from "@/components/trade/ToolsBreadcrumb";
-import { finishTargetsFromParts, getPartMaterial, hasAnyFinish, materialFitsTarget, targetLabel, withPartMaterial, type FinishPart, type FinishTarget } from "@/lib/visualiserFinishTargets";
+import { finishTargetsFromParts, getPartMaterial, hasAnyFinish, isNamedFinishTarget, materialFitsTarget, targetLabel, withPartMaterial, type FinishPart, type FinishTarget } from "@/lib/visualiserFinishTargets";
 import { findProductSchema, schemaFits, schemaLabels, schemaTargets } from "@/lib/visualiserProductSchema";
 import PartMappingControl from "@/components/trade/visualiser/PartMappingControl";
 import { usePartGroupLabels } from "@/lib/visualiserPartMapping";
@@ -686,18 +686,19 @@ const TradeVisualiser = () => {
   // Sub-tabs come from the selected model's texture nodes; Bond Street declares its own parts.
   // Declared product schemas (components + allowed finish groups) override model detection.
   const productSchema = useMemo(() => findProductSchema(selected?.product_name), [selected?.product_name]);
-  const availableTargets = useMemo<FinishTarget[]>(
-    () => productSchema
-      ? schemaTargets(productSchema)
-      : finishTargetsFromParts(selected ? textureParts[selected.instanceId] ?? [] : []),
-    [selected, textureParts, productSchema],
-  );
-  const effectiveTarget: FinishTarget = availableTargets.includes(finishTarget) ? finishTarget : "all";
   const detectedGroupLabels = usePartGroupLabels(selected?.id);
   const partGroupLabels = useMemo(
     () => (productSchema ? { ...detectedGroupLabels, ...schemaLabels(productSchema) } : detectedGroupLabels),
     [detectedGroupLabels, productSchema],
   );
+  const availableTargets = useMemo<FinishTarget[]>(
+    () => (productSchema
+      ? schemaTargets(productSchema)
+      : finishTargetsFromParts(selected ? textureParts[selected.instanceId] ?? [] : []))
+      .filter((target) => isNamedFinishTarget(target, partGroupLabels)),
+    [selected, textureParts, productSchema, partGroupLabels],
+  );
+  const effectiveTarget: FinishTarget = availableTargets.includes(finishTarget) ? finishTarget : "all";
   const targetMaterial = selected ? getPartMaterial(selected, effectiveTarget) : null;
 
   const focusRef = useRef<(() => [number, number] | null) | null>(null);
@@ -1191,7 +1192,7 @@ const TradeVisualiser = () => {
                 </Button>
               ))}
             </div>
-            <PartMappingControl productId={selected.id} />
+            <PartMappingControl productId={selected.id} targets={availableTargets} labels={partGroupLabels} />
             <input
               value={materialSearch}
               onChange={(event) => setMaterialSearch(event.target.value)}

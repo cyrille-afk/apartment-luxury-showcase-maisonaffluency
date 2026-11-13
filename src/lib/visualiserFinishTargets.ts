@@ -53,7 +53,7 @@ export function finishTargetsFromParts(parts: Iterable<FinishPart>): FinishTarge
   return ["all", ...PART_ORDER.filter((part) => found.has(part)), ...custom];
 }
 
-const GENERIC_PART_NAME = /^(material|object|mesh|group|node|geometry|scene|model|part|component|defaultmaterial)$/i;
+const GENERIC_PART_NAME = /^(?:(?:standard|physical|default|lambert|phong)\s*)?(?:material|object|mesh|group|node|geometry|scene|model|part|component|default)(?:\s*(?:material|mesh|copy|instance|\d+))*$/i;
 
 /**
  * Turns a raw GLB material/node name into a readable component label
@@ -69,6 +69,8 @@ export function humanizePartName(raw: string): string {
     .replace(/\s+/g, " ")
     .trim();
   if (!cleaned) return "";
+  // Exporter identifiers and UUIDs are not supplier component names.
+  if (/^(?:[0-9a-f]{8}-[0-9a-f-]+|[a-z]{1,8}\d+|\d+\s*(?:default|material))$/i.test(cleaned)) return "";
   if (/^[0-9a-f-]+$/i.test(cleaned) && cleaned.length >= 16) return "";
   if (!/[a-z]{3}/i.test(cleaned)) return "";
   const label = cleaned
@@ -77,6 +79,13 @@ export function humanizePartName(raw: string): string {
     .join(" ");
   const stem = label.replace(/\s+\d+$/, "");
   return GENERIC_PART_NAME.test(stem) ? "" : label;
+}
+
+/** Visibility only: retain saved mesh mappings/materials, but never advertise anonymous import groups. */
+export function isNamedFinishTarget(target: string, labels: Record<string, string> = {}): boolean {
+  if (target === "all" || isKnownPart(target)) return true;
+  if (!target.startsWith("part:")) return false;
+  return Boolean(humanizePartName(labels[target] ?? target));
 }
 
 export function targetLabel(target: FinishTarget, customLabels: Record<string, string> = {}): string {

@@ -1,5 +1,9 @@
 # Roadmap
 
+## Named Visualiser finish groups
+- [x] Filter anonymous imported groups from finish tabs, mapper rows and destinations without altering saved scene materials; retain named and declared supplier components.
+- [x] 28 regressions pass; signed-in Frenchmen retains Frame/Base/Upholstery, DUP hides all nine anonymous Mat0–Mat8 groups while linked oak/walnut/lacquer finishes remain. Reload and screenshots verified, no page errors; build OK.
+
 ## Remove 3D floor drawing marks
 - [x] Traced marks to the uploaded blueprint mapped onto ProjectArchitecture's floor; removed the 3D texture loader without changing furniture or shadows.
 - [x] Signed-in saved-plan reload and both 3D views have no blueprint floor map; 2D retains the upload, shadow receiver stays enabled and screenshot confirms furniture contact shadows. 31 regressions pass; build OK. Real-GPU appearance not checked.
