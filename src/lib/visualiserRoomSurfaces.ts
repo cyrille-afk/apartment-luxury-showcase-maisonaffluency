@@ -121,9 +121,9 @@ export function clampRugOffset(value: unknown): number {
   return typeof value === "number" && Number.isFinite(value) ? Math.min(4, Math.max(-4, Math.round(value * 10) / 10)) : 0;
 }
 
-/** Whether the area rug is shown. Only an explicit `false` hides it — missing/legacy state shows it. */
+/** Rugs are opt-in; missing/legacy state must never add a floor mat. */
 export function rugVisible(value: unknown): boolean {
-  return value !== false;
+  return value === true;
 }
 
 /** Braided border cord: thickness (radius) in mm, 4–20, default 10. */

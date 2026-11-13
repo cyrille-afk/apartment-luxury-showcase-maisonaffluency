@@ -428,7 +428,7 @@ const VisualiserCanvas = ({
   rugWeave = "loop",
   rugPile = 50,
   rugLayout,
-  showRug = true,
+  showRug = false,
   backdropColor = null,
   backdropBrightness = 50,
 }: VisualiserCanvasProps) => {
@@ -564,7 +564,8 @@ const VisualiserCanvas = ({
       {!projectArchitecture && <RoomSurfaces floor={hasBackdrop ? "none" : floorFinish} rearWall={hasBackdrop ? false : showRearWall} objects={objects} glare={floorGlare} wallHeight={wallHeight} ceilingHeight={ceilingHeight} ceilingThickness={ceilingThickness} ceilingOpening={ceilingOpening} wallColor={wallColor} wallFinish={wallFinish} wallCustomHex={wallCustomHex} wallFinishIntensity={wallFinishIntensity} rugColor={rugColor} rugBorderColor={rugBorderColor} rugBorderThicknessMm={rugBorderThicknessMm} rugBorderTwistMm={rugBorderTwistMm} rugBorderRoughness={rugBorderRoughness} rugWeave={rugWeave} rugPile={rugPile} rugLayout={rugLayout} showRug={showRug && !hasBackdrop} />}
       <InitialAssetsCommitted onReady={setRoomReady} />
     </Suspense>
-    {!pathTrace && <FurnitureContactShadows
+    {/* Built rooms use real floor-received key shadows + N8AO, never a rectangular contact overlay. */}
+    {!pathTrace && (hasBackdrop || floorFinish === "none") && <FurnitureContactShadows
       position={[center[0], (showRug && !hasBackdrop && !photoCalibration && floorFinish !== "none" ? RUG_TOP_Y : GROUND_LAYERS.floor) + GROUND_LAYERS.contact, center[2]]}
       scale={Math.max(CONTACT_SHADOW.minimumScale, ...objects.map(object => Math.hypot(object.position[0] - center[0], object.position[2] - center[2]) * 2 + footprintRadius(parseDimensionString(object.dimensions), object.scale) * 2 + 2))}
       opacity={lighting.contactOpacity}

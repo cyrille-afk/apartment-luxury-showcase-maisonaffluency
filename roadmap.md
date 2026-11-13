@@ -1,5 +1,9 @@
 # Roadmap
 
+## Continuous floor and explicit rug visibility
+- [x] Remove the room-floor contact overlay and use existing directional shadows/N8AO; make rugs opt-in with a real toolbar checkbox (old rectangle icon only opened settings and did not indicate visibility).
+- [x] Signed-in Frenchmen off/on/off/reload: off has one continuous oak floor, no rug and no contact overlay; on restores 4.5×3.8m rug; reload stays unchecked with no rug. Screenshot confirms continuous floor, 26 tests pass and no page errors; real-GPU appearance remains unverified.
+
 ## Architectural rendering upgrade
 - [x] Upgrade ACES exposure, hosted apartment HDR lighting, warm key/sky fill and single-composer N8AO/bloom without replacing saved environment choices.
 - [x] Add 4cm recessed perimeter shadow gaps and owned rug bump/roughness maps, retaining wall/floor maps and saved room/furniture settings.

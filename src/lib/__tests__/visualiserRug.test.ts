@@ -38,12 +38,13 @@ describe("rug layout", () => {
 
 import { rugVisible } from "../visualiserRoomSurfaces";
 describe("rug visibility toggle", () => {
-  it("shows the rug unless explicitly hidden", () => {
-    expect(rugVisible(undefined)).toBe(true);
-    expect(rugVisible(null)).toBe(true);
+  it("shows the rug only when explicitly enabled", () => {
+    expect(rugVisible(undefined)).toBe(false);
+    expect(rugVisible(null)).toBe(false);
     expect(rugVisible(true)).toBe(true);
     expect(rugVisible(false)).toBe(false);
-    expect(rugVisible("false")).toBe(true);
+    expect(rugVisible("false")).toBe(false);
+    expect(rugVisible("true")).toBe(false);
   });
   it("rides in presets", () => {
     saveScenePreset("Rug hidden", { objects: [], showRug: false });

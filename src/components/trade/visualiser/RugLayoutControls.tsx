@@ -1,8 +1,9 @@
-import { Move, RotateCcw, RectangleHorizontal } from "lucide-react";
+import { Move, RotateCcw, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { clampRugOffset, clampRugSize } from "@/lib/visualiserRoomSurfaces";
 import { clampRugRotation } from "@/lib/visualiserRugRotation";
 
@@ -31,9 +32,14 @@ export default function RugLayoutControls(props: Props) {
     { label: "Left / Right", aria: "Rug left right position", value: props.offsetX, min: -4, max: 4, display: `${props.offsetX > 0 ? "+" : ""}${props.offsetX.toFixed(1)} m`, change: (v: number) => props.onOffsetXChange(clampRugOffset(v)) },
     { label: "Back / Front", aria: "Rug back front position", value: props.offsetZ, min: -4, max: 4, display: `${props.offsetZ > 0 ? "+" : ""}${props.offsetZ.toFixed(1)} m`, change: (v: number) => props.onOffsetZChange(clampRugOffset(v)) },
   ];
-  return <Popover>
+  return <div className="flex items-center gap-1">
+    <label className="flex cursor-pointer items-center gap-2 px-2 text-xs">
+      <Checkbox aria-label="Rug" checked={props.visible} disabled={props.disabled} onCheckedChange={checked => props.onVisibleChange(checked === true)} />
+      Rug
+    </label>
+    <Popover>
     <PopoverTrigger asChild>
-      <Button variant="ghost" className={props.className} aria-label="Rug size and position"><RectangleHorizontal className="mr-2 h-3.5 w-3.5" />Rug</Button>
+      <Button variant="ghost" className={props.className} aria-label="Rug size and position" title="Rug size and position"><SlidersHorizontal className="h-3.5 w-3.5" /></Button>
     </PopoverTrigger>
     <PopoverContent side="top" align="start" className="z-[80] w-80 max-w-[calc(100vw-2rem)] space-y-5" aria-label="Rug size and position">
       <div className="flex items-center justify-between"><h3 className="text-sm font-medium">Rug size &amp; position</h3><Switch checked={props.visible} onCheckedChange={props.onVisibleChange} disabled={props.disabled} aria-label="Show rug" /></div>
@@ -61,5 +67,5 @@ export default function RugLayoutControls(props: Props) {
         <Button variant="outline" size="sm" className="flex-1 text-xs" disabled={inactive} onClick={() => { props.onOffsetXChange(0); props.onOffsetZChange(0); }}><Move className="mr-1.5 h-3.5 w-3.5" />Centre</Button>
       </div>
     </PopoverContent>
-  </Popover>;
+  </Popover></div>;
 }
