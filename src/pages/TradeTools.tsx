@@ -73,6 +73,13 @@ const categories: ToolCategory[] = [
 
 const FAV_KEY = "trade_tools_favorites_v1";
 
+function CompletionDate({ value }: { value: string | undefined }) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return <time dateTime={value} title={date.toLocaleString('en-GB')} className="block text-xs text-muted-foreground">{date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</time>;
+}
+
 export default function TradeTools() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -327,7 +334,7 @@ export default function TradeTools() {
                       <div className="min-w-0">
                         <h4 className="text-xs font-medium text-foreground mb-2">Completed · {summary.completedStages.length}</h4>
                         {summary.completedStages.length === 0 ? <p className="text-xs text-muted-foreground">None yet</p> : <ul className="space-y-1.5">
-                          {summary.completedStages.map(stage => <li key={stage.id} className="flex items-start gap-2 text-xs text-foreground"><CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true" /><span>{categories.find(category => category.label === 'Specification')?.tools.find(tool => tool.url === stage.url)?.title}</span></li>)}
+                          {summary.completedStages.map(stage => <li key={stage.id} className="flex items-start gap-2 text-xs text-foreground"><CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true" /><div className="min-w-0"><span>{categories.find(category => category.label === 'Specification')?.tools.find(tool => tool.url === stage.url)?.title}</span><CompletionDate value={stage.completedAt} /></div></li>)}
                         </ul>}
                       </div>
                       <div className="min-w-0">
@@ -406,9 +413,10 @@ export default function TradeTools() {
                       <Checkbox id={`workflow-${stage.id}`} aria-label={`Mark ${tool.title} complete`} checked={progressReady && isComplete}
                         disabled={!progressReady || editQuery.data !== true || completion.isPending}
                         onCheckedChange={checked => completion.mutate({ project: activeProjectId, stage: stage.id, complete: checked === true })} />
-                      <label htmlFor={`workflow-${stage.id}`} className="text-xs text-muted-foreground cursor-pointer">
+                      <div className="min-w-0"><label htmlFor={`workflow-${stage.id}`} className="text-xs text-muted-foreground cursor-pointer">
                         {completion.isPending && completion.variables?.stage === stage.id ? "Saving…" : !progressReady ? "—" : isComplete ? "Complete" : "Not complete"}
                       </label>
+                      {progressReady && isComplete && <CompletionDate value={workflow.completionDates.get(stage.id)} />}</div>
                     </div>
                   )}
                 </div>

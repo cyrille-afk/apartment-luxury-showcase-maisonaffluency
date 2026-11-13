@@ -1,5 +1,9 @@
 # Roadmap
 
+## Specification stage completion dates
+- [x] Show existing saved completion dates on finished tool cards and in every project overview; reopening removes the date and recompletion uses the newly recorded date.
+- [x] Six regressions pass; signed-in Mood Board completion shows the same saved date on its card and project overview after reload, second project stays independent, desktop/phone fit without overflow or page errors. Original progress restored; build OK.
+
 ## Specification project overview
 - [x] Show every accessible project's completed/remaining stage lists and completion percentage from existing saved progress; project names select its stage controls.
 - [x] Four regressions pass; signed-in completion moves Mood Board to Completed with seven remaining after reload, second project stays independent, selection works and phone has no overflow/page errors. Original completion restored; build OK.

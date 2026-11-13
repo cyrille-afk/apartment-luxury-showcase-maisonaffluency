@@ -13,9 +13,10 @@ export type SpecificationStage = typeof specificationStages[number]['id'];
 export type StageCompletion = { project_id: string; stage: string; completed_at: string };
 
 export function projectWorkflow(projectId: string, rows: StageCompletion[]) {
-  const completed = new Set(rows.filter(row => row.project_id === projectId).map(row => row.stage));
-  const completedStages = specificationStages.filter(stage => completed.has(stage.id));
+  const completionDates = new Map(rows.filter(row => row.project_id === projectId).map(row => [row.stage, row.completed_at]));
+  const completed = new Set(completionDates.keys());
+  const completedStages = specificationStages.filter(stage => completed.has(stage.id)).map(stage => ({ ...stage, completedAt: completionDates.get(stage.id) }));
   const remainingStages = specificationStages.filter(stage => !completed.has(stage.id));
   const count = completedStages.length;
-  return { completed, completedStages, remainingStages, count, percent: Math.round(count / specificationStages.length * 100) };
+  return { completed, completionDates, completedStages, remainingStages, count, percent: Math.round(count / specificationStages.length * 100) };
 }
