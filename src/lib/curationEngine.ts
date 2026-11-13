@@ -81,9 +81,9 @@ function scoreItem(item: LiveCatalogueItem, tokens: string[]) {
 }
 
 /** Builds the curation matrix and selects a cohesive set within budget. */
-export function curate(text: string, catalogue: LiveCatalogueItem[], fallbackBudget: number): CurationResult {
+export function curate(text: string, catalogue: LiveCatalogueItem[], activeBudget: number): CurationResult {
   const parsed = parseBrief(text);
-  const budget = parsed.budget ?? fallbackBudget;
+  const budget = Math.max(0, Math.min(parsed.budget ?? activeBudget, activeBudget));
 
   const matrix: MatrixRow[] = catalogue.map((item) => {
     const { score, matched } = scoreItem(item, parsed.styleTokens);

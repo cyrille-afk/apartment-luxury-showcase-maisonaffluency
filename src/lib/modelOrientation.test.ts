@@ -14,6 +14,32 @@ function bounds(model: Group) {
   return new Box3().setFromObject(model);
 }
 describe("model import frame", () => {
+  it("stands the Frenchmen Side Chair upright despite two nested -90° CAD rotations", () => {
+    const source = new Group(), root = new Group();
+    source.add(root); root.rotation.x = -Math.PI / 2;
+    const body = new Mesh(new BoxGeometry(0.533, 0.792, 0.59), new MeshBasicMaterial());
+    body.position.z = 0.396; body.rotation.x = -Math.PI / 2;
+    const glides = new Mesh(new BoxGeometry(0.42, 0.003, 0.49), new MeshBasicMaterial());
+    glides.rotation.x = -Math.PI / 2; glides.name = "Glides";
+    root.add(body, glides);
+    const fitted = fitUprightModel(source);
+    const bodyBox = new Box3().setFromObject(body), feet = new Box3().setFromObject(glides);
+    expect(bodyBox.getCenter(new Vector3()).y).toBeGreaterThan(feet.getCenter(new Vector3()).y);
+    expect(bounds(fitted).min.y).toBeCloseTo(0);
+  });
+  it("uses -PI/2 for positive Z-up geometry despite misleading CAD node rotations", () => {
+    const source = new Group();
+    const body = new Mesh(new BoxGeometry(620, 800, 590), new MeshBasicMaterial());
+    body.geometry.rotateX(Math.PI);
+    body.position.y = -400;
+    source.add(body);
+    source.rotation.x = -Math.PI / 2;
+    const fitted = fitUprightModel(source, null, "cad-chair.glb", { w: 620, d: 590, h: 800 });
+    const up = new Vector3(0, -1, 0).transformDirection(body.matrixWorld);
+    expect(up.y).toBeCloseTo(1);
+    expect(bounds(fitted).min.y).toBeCloseTo(0);
+    expect(fitted.children[0].rotation.x).toBeCloseTo(-Math.PI / 2);
+  });
   it("corrects a positive Z-up chair with 800mm height and 590mm depth", () => {
     const source = piece(620, 800, 590);
     source.rotation.x = Math.PI / 2;

@@ -75,11 +75,16 @@ export function fitUprightModel(model: Object3D, dimensions?: string | null, url
   const frame = new Group();
   frame.add(model);
   frame.updateWorldMatrix(true, true);
-  const size = new Box3().setFromObject(frame).getSize(new Vector3());
+  const sourceBox = new Box3().setFromObject(frame);
+  const size = sourceBox.getSize(new Vector3());
+  // A feet-origin model extending entirely toward -Z explicitly declares
+  // negative-Z up; centred CAD geometry defaults to the positive-Z contract.
+  const zSign = Math.abs(sourceBox.max.z) < size.z * 0.01 && sourceBox.min.z < -size.z * 0.5 ? -1 : 1;
   const candidate = recorded ?? parseDimensionString(dimensions) ?? parseDimensionString(url.replace(/-/g, " "));
   const expected = candidate && [candidate.w, candidate.d, candidate.h].every(value => Number.isFinite(value) && value > 0) ? candidate : null;
   const authoredUp = new Vector3();
   const contactUp = new Vector3();
+  const contactCenter = new Vector3();
   model.traverse(node => {
     const mesh = node as Mesh;
     if (!mesh.isMesh) return;
@@ -88,12 +93,14 @@ export function fitUprightModel(model: Object3D, dimensions?: string | null, url
     // Floor-contact geometry is stronger evidence than overall proportions:
     // armchair backs/arms often differ substantially from catalogue dimensions.
     if (/\b(glides?|footpads?|floor[_ -]?contacts?)\b/i.test(mesh.name)) {
-      const contact = new Box3().setFromObject(mesh).getSize(new Vector3());
+      const contactBox = new Box3().setFromObject(mesh);
+      const contact = contactBox.getSize(new Vector3());
       const axes = contact.toArray();
       const smallest = Math.min(...axes);
       const axis = axes.indexOf(smallest);
       if (smallest > 0 && axes.filter(value => value > smallest * 4).length === 2) {
         contactUp.set(axis === 0 ? 1 : 0, axis === 1 ? 1 : 0, axis === 2 ? 1 : 0);
+        contactBox.getCenter(contactCenter);
       }
     }
   });
@@ -104,7 +111,11 @@ export function fitUprightModel(model: Object3D, dimensions?: string | null, url
   if (verified) {
     frame.quaternion.setFromUnitVectors(new Vector3(...verified), Y_UP);
   } else if (contactUp.lengthSq() > 0) {
-    const sign = authoredUp.dot(contactUp) < -0.5 ? -1 : 1;
+    // CAD node rotations are not a declaration of the geometry's up axis.
+    // Positive Z-up must map to +Y (-PI/2 around X), never its inverse.
+    const awayFromFeet = sourceBox.getCenter(new Vector3()).sub(contactCenter).dot(contactUp);
+    const sign = Math.abs(awayFromFeet) > size.dot(contactUp) * 0.1 ? Math.sign(awayFromFeet)
+      : contactUp.z > 0 ? zSign : authoredUp.dot(contactUp) < -0.5 ? -1 : 1;
     frame.quaternion.setFromUnitVectors(contactUp.multiplyScalar(sign), Y_UP);
   } else if (expected && Math.min(size.x, size.y, size.z) > 0) {
     const score = (w: number, h: number, d: number) => Math.min(
@@ -117,7 +128,7 @@ export function fitUprightModel(model: Object3D, dimensions?: string | null, url
     // X-up needs exporter evidence: width alone must never tip a chair sideways.
     const credibleXUp = Math.abs(authoredUp.x) > 0.5 && xUp < zUp;
     if ((credibleXUp ? xUp : zUp) + 0.025 < current) {
-      const axis = credibleXUp ? new Vector3(authoredUp.x < 0 ? -1 : 1, 0, 0) : new Vector3(0, 0, authoredUp.z < 0 ? -1 : 1);
+      const axis = credibleXUp ? new Vector3(authoredUp.x < 0 ? -1 : 1, 0, 0) : new Vector3(0, 0, zSign);
       frame.quaternion.setFromUnitVectors(axis, Y_UP);
     }
   }

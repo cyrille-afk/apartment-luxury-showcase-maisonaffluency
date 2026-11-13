@@ -9,6 +9,17 @@ const cat = [item("sofa", "anchor", 20000, { w: 2.4, d: 1, h: 0.8 }), item("tabl
 const brief = { roomType: "living" as const, style: "quiet-luxury" as const, totalBudget: 60000, roomDimensions: { width: 7, length: 6, height: 3 } };
 
 describe("generateRoomLayoutMatrix", () => {
+  it("faces all Living room seating inward, including fallback placements", () => {
+    const seats = Array.from({ length: 5 }, (_, i) => item(`chair-${i}`, "seat", 1000, { w: 0.6, d: 0.6, h: 0.8 }));
+    const assets = generateRoomLayoutMatrix(brief, [...cat, ...seats]).scene.curatedAssets;
+    const table = assets.find(a => a.componentId === "table");
+    if (!table) throw new Error("Missing central table");
+    expect(assets.filter(a => a.componentId.startsWith("chair-"))).toHaveLength(5);
+    for (const a of assets.filter(a => a.componentId.startsWith("chair-") || a.componentId === "sofa")) {
+      const dx = table.position[0] - a.position[0], dz = table.position[2] - a.position[2];
+      expect(Math.sin(a.rotation[1]) * dx + Math.cos(a.rotation[1]) * dz).toBeGreaterThan(0);
+    }
+  });
   it("balances Man of Parts, Kerstens and Delcourt before repeating a maker", () => {
     const pool = [
       { ...item("mop-1", "seat", 1000), manufacturer: "Man of Parts" },

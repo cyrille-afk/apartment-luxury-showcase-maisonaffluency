@@ -28,6 +28,7 @@ import { fetchLiveCatalogue, repriceScene, summarise, toAsset, type LayoutBrief,
 import type { AICuratedSceneSchema, Vec3 } from "@/types/aiCuratedScene";
 import { Textarea } from "@/components/ui/textarea";
 import { curate, sceneFromCuration, type CurationResult } from "@/lib/curationEngine";
+import { criteriaBrief, syncCriteriaBrief } from "@/lib/curatedBrief";
 import { filterVideoRendersByMonth, formatSecondsDelta, formatUsdCents, formatUsdCentsDelta, monthlyCostBreakdown, renderExceedsEstimate, summarizeVideoRenders, videoRenderChartSeries, videoRenderDelta, videoRenderMonthComparison, videoRenderMonthLabel, videoRenderMonthOptions, VIDEO_RENDER_MONTH_ALL } from "@/lib/videoRenderSummary";
 import { Bar, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { cn } from "@/lib/utils";
@@ -99,7 +100,14 @@ const TradeAILayoutStudio = () => {
   const [current, setCurrent] = useState<SavedLayout | null>(null);
   const [saved, setSaved] = useState<SavedLayout[]>([]);
   const [saving, setSaving] = useState(false);
-  const [briefText, setBriefText] = useState("Warm minimalism, neutral tones, budget €50,000");
+  const generatedBrief = criteriaBrief(brief);
+  const previousGeneratedBrief = useRef(generatedBrief);
+  const [briefText, setBriefText] = useState(() => generatedBrief);
+  useEffect(() => {
+    const previous = previousGeneratedBrief.current;
+    setBriefText(text => syncCriteriaBrief(text, previous, generatedBrief));
+    previousGeneratedBrief.current = generatedBrief;
+  }, [generatedBrief]);
   const [curation, setCuration] = useState<CurationResult | null>(null);
 
   const refreshSaved = useCallback(async () => {
@@ -319,7 +327,7 @@ const TradeAILayoutStudio = () => {
     // Give the pending state a paint before synchronous catalogue selection.
     await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
     try {
-    const live = await fetchLiveCatalogue();
+    const live = await fetchLiveCatalogue(undefined, sharedProjectId);
     setCatalogue(live);
     const result = curate(briefText, live, brief.totalBudget);
     setCuration(result);
@@ -328,8 +336,8 @@ const TradeAILayoutStudio = () => {
     setCompareOpen(false);
     setCurrent(null);
     setSkipped(result.matrix.filter((r) => !r.eligible).map((r) => `${r.item.name} (${r.reason})`));
-    if (result.parsed.budget) setBrief((b) => ({ ...b, totalBudget: result.budget }));
     const next = sceneFromCuration(result, brief);
+    next.financialSummary = summarise({ ...next, financialSummary: { ...next.financialSummary, totalBudget: brief.totalBudget } });
     const placed = new Set(next.curatedAssets.map((a) => a.componentId));
     const selected = result.selected.filter((r) => placed.has(r.item.componentId));
     setCuration({ ...result, selected, total: next.financialSummary.allocatedSpend, utilisation: result.budget ? next.financialSummary.allocatedSpend / result.budget : 0 });
@@ -1507,7 +1515,7 @@ const TradeAILayoutStudio = () => {
           </div>
         )}
         <div className="space-y-2">
-          <Textarea value={briefText} onChange={(e) => setBriefText(e.target.value)} rows={3} maxLength={2000}
+          <Textarea aria-label="Curate from brief" value={briefText} onChange={(e) => setBriefText(e.target.value || generatedBrief)} rows={3} maxLength={2000}
             className="resize-none text-xs" placeholder="e.g. Warm minimalism, neutral tones, budget €50,000" />
           <Button className="w-full" variant="outline" onClick={runCuration} disabled={loading || aiLoading || curating || catLoading || !!catError || !briefText.trim()}>
             {curating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />} {curating ? "Curating…" : "Curate from brief"}

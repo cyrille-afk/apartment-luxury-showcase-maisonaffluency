@@ -15,6 +15,12 @@ export const GRID_CELL = 0.5; // metres per floor-grid cell
 export const TABLE_CLEARANCE = 0.6; // metres between sofa front and table
 const WALL_MARGIN = 0.4;
 
+/** Model front is +Z; cardinal inward turns retain collision-safe footprints. */
+export function inwardSeatingYaw(x: number, z: number, targetX: number, targetZ: number): number {
+  const dx = targetX - x, dz = targetZ - z;
+  return Math.abs(dx) > Math.abs(dz) ? (dx > 0 ? Math.PI / 2 : -Math.PI / 2) : (dz >= 0 ? 0 : Math.PI);
+}
+
 const DEFAULT_SIZE: Record<Role, { w: number; d: number }> = {
   anchor: { w: 2.4, d: 1.0 },
   table: { w: 1.2, d: 0.7 },
@@ -106,7 +112,11 @@ export function generateRoomLayoutMatrix(criteria: LayoutBrief, catalogue: LiveC
     !boxes.some((q) => overlaps(b, { minX: q.minX - 0.15, maxX: q.maxX + 0.15, minZ: q.minZ - 0.15, maxZ: q.maxZ + 0.15 }));
   const placedIds = new Set<string>();
   const placedItems: LiveCatalogueItem[] = [];
+  let conversationTarget: [number, number] = [0, 0];
   const place = (item: LiveCatalogueItem, x: number, z: number, yaw = 0) => {
+    if (criteria.roomType === "living" && (item.role === "seat" || item.role === "anchor")) {
+      yaw = inwardSeatingYaw(x, z, ...conversationTarget);
+    }
     const size = footprint(item);
     const cos = Math.abs(Math.cos(yaw)), sin = Math.abs(Math.sin(yaw));
     const b = boxAt(x, z, size.w * cos + size.d * sin, size.w * sin + size.d * cos);
@@ -116,6 +126,7 @@ export function generateRoomLayoutMatrix(criteria: LayoutBrief, catalogue: LiveC
     placedItems.push(item);
     boxes.push(b); mark(matrix, b, W, L);
     assets.push(toAsset(item, [x, 0, z], [0, yaw, 0]));
+    if (item.role === "table") conversationTarget = [x, z];
     return true;
   };
   // Anchor a conversation group centrally; try smaller candidates if one cannot fit.

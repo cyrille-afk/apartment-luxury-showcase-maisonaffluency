@@ -1,6 +1,6 @@
 import type { AICuratedSceneSchema, ArchitecturalAnchor } from "@/types/aiCuratedScene";
 import { applyTradeDiscount } from "@/lib/productPricing";
-import { footprint } from "@/lib/roomLayoutMatrix";
+import { footprint, inwardSeatingYaw } from "@/lib/roomLayoutMatrix";
 import { curatedDimensions } from "./curatedLayoutDimensions";
 import { toAsset, type LayoutBrief, type LiveCatalogueItem, type Role } from "@/lib/mockAiLayoutService";
 
@@ -78,6 +78,15 @@ export function validateArchitectLayout(out: ArchitectOutput, brief: LayoutBrief
   if (sofa && table) {
     const g = gapInFront(sofa.r, sofa.p.rotation, table.r);
     if (g == null || Math.abs(g - COFFEE_TABLE_GAP) > GAP_TOLERANCE) errors.push(`Coffee table gap ${g == null ? "not in front of sofa" : `${g.toFixed(2)} m`} (must be ${COFFEE_TABLE_GAP} m)`);
+  }
+
+  if (brief.roomType === "living") {
+    const target = table?.p.position ?? [W / 2, L / 2];
+    for (const seat of placed.filter(x => x.row.category === "accent_chair" || x.row.category === "sofa")) {
+      const expected = inwardSeatingYaw(seat.p.position[0], seat.p.position[1], target[0], target[1]);
+      const yaw = seat.p.rotation * Math.PI / 180;
+      if (Math.cos(yaw - expected) < 0.99) errors.push(`${seat.row.name}: seating must face the conversation zone`);
+    }
   }
 
   if (errors.length) return { ok: false, errors, scene: null, tradeSpend: spend };

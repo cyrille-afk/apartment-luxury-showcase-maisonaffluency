@@ -7,6 +7,17 @@ const piece = (id: string, role: LiveCatalogueItem["role"], manufacturer: string
   available: true, stockStatus: null, leadWeeks: null, styleTokens: [], dimensionsCubic: { w: 0.8, d: 0.6, h: 0.8 },
 });
 describe("all-maker brief curation", () => {
+  it("never raises the active €30,000 ceiling for a custom €50,000 brief", () => {
+    const result = curate("sofa and chairs budget €50,000", [
+      { ...piece("sofa", "anchor", "A"), price: 20000 },
+      { ...piece("chair", "seat", "B"), price: 15000 },
+    ], 30000);
+    expect(result.budget).toBe(30000);
+    expect(result.total).toBe(20000);
+  });
+  it("honours a lower custom budget without increasing the active ceiling", () => {
+    expect(curate("budget €20,000", [], 30000).budget).toBe(20000);
+  });
   it("chooses Man of Parts, Kerstens and Delcourt across equally matched roles", () => {
     const result = curate("quiet luxury budget €150,000", [
       piece("sofa", "anchor", "Man of Parts"), piece("lamp-mop", "light", "Man of Parts"),

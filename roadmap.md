@@ -551,7 +551,11 @@
 - [x] Verify: designer directory, product page credit, comparator grouping, trade filter
       chips, search facets, link-preview titles, unit tests, build
 
-## Waiting on the user
+## Curated orientation and criteria
+- [x] Correct imports using geometric feet direction and inward-facing seating; 53 regressions pass, actual Frenchmen GLB has feet below seat and floor min Y=0.
+- [x] Synchronize automatic brief criteria and enforce the active budget ceiling; signed-in custom €50,000 brief retained €30,000 ceiling, €29,874 allocation and €126 buffer with five pieces. Exact Frenchmen rendered appearance remains unchecked.
+
+## Waiting on the user (existing publishing tasks)
 
 - [ ] Publish the preview so the renamed listings, directory and catalogue files go live
       (designer profile pages already read the database live).
