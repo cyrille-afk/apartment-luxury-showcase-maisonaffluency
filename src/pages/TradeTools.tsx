@@ -25,14 +25,14 @@ const categories: ToolCategory[] = [
   {
     label: "Specification",
     tools: [
-      { title: "Visualiser", description: "Render premium spaces, arrange curated furniture, and visualize custom fabric drape options.", url: "/trade/visualiser", icon: Scan },
       { title: "Mood Board", description: "Visual collage for client presentations", url: "/trade/mood-boards", icon: Paintbrush },
-      { title: "Markup & Annotation", description: "Annotate images and drawings", url: "/trade/annotations", icon: MessageCircle },
-      { title: "Tearsheet Builder", description: "Create printable product specs", url: "/trade/tearsheets", icon: Scissors },
       { title: "Product Comparator", description: "Compare specs side by side", url: "/trade/comparator", icon: Columns },
+      { title: "Markup & Annotation", description: "Annotate images and drawings", url: "/trade/annotations", icon: MessageCircle },
+      { title: "Visualiser", description: "Render premium spaces, arrange curated furniture, and visualize custom fabric drape options.", url: "/trade/visualiser", icon: Scan },
+      { title: "Tearsheet Builder", description: "Create printable product specs", url: "/trade/tearsheets", icon: Scissors },
+      { title: "Specification Sheet Generator", description: "Branded client presentation decks & pitch PDFs", url: "/trade/spec-generator", icon: Presentation },
       { title: "FF&E Schedule", description: "Auto-generate furniture schedules", url: "/trade/ffe-schedule", icon: FileSpreadsheet },
       { title: "Quote Builder", description: "Build and submit project quotes", url: "/trade/quotes", icon: FileText },
-      { title: "Specification Sheet Generator", description: "Branded client presentation decks & pitch PDFs", url: "/trade/spec-generator", icon: Presentation },
     ],
   },
   {
