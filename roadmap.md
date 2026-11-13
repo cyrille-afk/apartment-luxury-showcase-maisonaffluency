@@ -2,7 +2,7 @@
 
 ## Curated furniture proportions and maker labels
 - [x] Normalize catalogue measurements to metres; share dimensions between placement, loaded geometry and fallback volumes; ground pieces and replace brief-result IDs with makers.
-- [ ] Verify dimension/grounding/spacing regressions and signed-in brief curation.
+- [x] 53 regressions and preview checks pass; signed-in €3,000 brief places a visibly small Bond Street Stool (€2,652), with Man of Parts in both result lists and no page errors. Full multi-piece browser inspection stalls on software graphics; exact bounds and non-overlap verified by tests, not live measurement. Restored the original €60,000 brief budget after testing.
 
 ## Unobstructed multi-maker curated rooms
 - [x] Hide room labels by default with an optional Show Labels switch that does not reload the scene.
