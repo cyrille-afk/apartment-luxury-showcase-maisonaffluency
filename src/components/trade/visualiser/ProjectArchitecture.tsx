@@ -1,3 +1,4 @@
+import { CAMERA_FRONT_RETREAT_M } from "./sandboxCameraBounds";
 import { Suspense } from "react";
 import { Floor } from "./RoomSurfaces";
 import type { RoomFloorFinish } from "@/lib/visualiserRoomSurfaces";
@@ -26,7 +27,12 @@ export default function ProjectArchitecture({ bounds, columns, floorFinish = "oa
           <meshStandardMaterial color="#e9e4dc" roughness={0.85} />
         </mesh>
       ) : (
-        <Suspense fallback={null}><Floor finish={floorFinish} glare={floorGlare} size={[width, depth]} /></Suspense>
+        <Suspense fallback={null}>
+          {/* Floor continues out of the open front so stepping back never shows a floating slab. */}
+          <group position={[0, 0, CAMERA_FRONT_RETREAT_M / 2]}>
+            <Floor finish={floorFinish} glare={floorGlare} size={[width + t * 2, depth + CAMERA_FRONT_RETREAT_M]} />
+          </group>
+        </Suspense>
       )}
       {walls.map(wall => (
         <mesh key={wall.name} name={wall.name} position={wall.position} receiveShadow castShadow>

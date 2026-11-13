@@ -3,8 +3,8 @@ import { sandboxCameraPosition } from "./sandboxCameraBounds";
 
 describe("Sandbox interior camera", () => {
   const room = { width: 12, depth: 8, height: 3 };
-  it("keeps diagonal orbit positions 0.5m inside both walls", () => {
-    expect(sandboxCameraPosition([20, 1.6, 20], room)).toEqual([5.5, 1.6, 3.5]);
+  it("keeps side/rear walls 0.5m clear but lets the camera step back 8m out of the open front", () => {
+    expect(sandboxCameraPosition([20, 1.6, 20], room)).toEqual([5.5, 1.6, 12]);
     expect(sandboxCameraPosition([-20, 1.6, -20], room)).toEqual([-5.5, 1.6, -3.5]);
   });
   it("preserves an interior eye-level pose", () => {
