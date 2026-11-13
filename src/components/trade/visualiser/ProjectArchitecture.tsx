@@ -1,3 +1,6 @@
+import { Suspense } from "react";
+import { Floor } from "./RoomSurfaces";
+import type { RoomFloorFinish } from "@/lib/visualiserRoomSurfaces";
 import { WALL_THICKNESS_M, type PlanColumn, type RoomBounds } from "@/lib/activeProjectLayout";
 
 /**
@@ -6,7 +9,7 @@ import { WALL_THICKNESS_M, type PlanColumn, type RoomBounds } from "@/lib/active
  * room height (front left open so both cameras see in), and structural
  * columns from the plan.
  */
-export default function ProjectArchitecture({ bounds, columns }: { bounds: RoomBounds; columns: PlanColumn[] }) {
+export default function ProjectArchitecture({ bounds, columns, floorFinish = "oak-chevron", floorGlare = 50 }: { bounds: RoomBounds; columns: PlanColumn[]; floorFinish?: RoomFloorFinish; floorGlare?: number }) {
   const { width, depth, height } = bounds;
   const t = WALL_THICKNESS_M;
   const walls: Array<{ name: string; position: [number, number, number]; size: [number, number, number] }> = [
@@ -17,10 +20,14 @@ export default function ProjectArchitecture({ bounds, columns }: { bounds: RoomB
 
   return (
     <group name="Project architecture">
-      <mesh name="Plan floor" rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeGeometry args={[width, depth]} />
-        <meshStandardMaterial color="#e9e4dc" roughness={0.85} />
-      </mesh>
+      {floorFinish === "none" ? (
+        <mesh name="Plan floor" rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+          <planeGeometry args={[width, depth]} />
+          <meshStandardMaterial color="#e9e4dc" roughness={0.85} />
+        </mesh>
+      ) : (
+        <Suspense fallback={null}><Floor finish={floorFinish} glare={floorGlare} size={[width, depth]} /></Suspense>
+      )}
       {walls.map(wall => (
         <mesh key={wall.name} name={wall.name} position={wall.position} receiveShadow castShadow>
           <boxGeometry args={wall.size} />
@@ -41,3 +48,4 @@ export default function ProjectArchitecture({ bounds, columns }: { bounds: RoomB
     </group>
   );
 }
+

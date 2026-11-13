@@ -23,7 +23,7 @@ import RecessedCeiling from "./RecessedCeiling";
 import type { CeilingSettings } from "@/lib/visualiserCeilingSettings";
 
 /** Isolate UV repeats and linear data maps from the shared image cache. */
-function useSurfaceMaps(url: string, repeat: number, polished: boolean, glare = 50) {
+function useSurfaceMaps(url: string, repeat: number, polished: boolean, glare = 50, repeatY = repeat) {
   const source = useTexture(url);
   const anisotropy = useThree((s) => Math.min(8, s.gl.capabilities.getMaxAnisotropy()));
   const maps = useMemo(() => {
@@ -51,25 +51,28 @@ function useSurfaceMaps(url: string, repeat: number, polished: boolean, glare = 
     for (const map of [color, bump, roughness]) {
       if (!map) continue;
       map.wrapS = map.wrapT = THREE.RepeatWrapping;
-      map.repeat.set(repeat, repeat);
+      map.repeat.set(repeat, repeatY);
       map.anisotropy = anisotropy;
       map.needsUpdate = true;
     }
     return { color, bump, roughness };
-  }, [source, repeat, polished, glare, anisotropy]);
+  }, [source, repeat, repeatY, polished, glare, anisotropy]);
   useEffect(() => () => {
     maps.color.dispose(); maps.bump.dispose(); maps.roughness?.dispose();
   }, [maps]);
   return maps;
 }
 
-function Floor({ finish, glare }: { finish: Exclude<RoomFloorFinish, "none">; glare: number }) {
-  const maps = useSurfaceMaps(finish === "oak-chevron" ? oakImage : cementImage, finish === "oak-chevron" ? 32 : 20, finish === "oak-chevron", glare);
+export function Floor({ finish, glare, size }: { finish: Exclude<RoomFloorFinish, "none">; glare: number; size?: [number, number] }) {
+  const [w, d] = size ?? [80, 80];
+  // Keep the plank scale identical to the 80 m studio floor (repeat per metre).
+  const baseRepeat = finish === "oak-chevron" ? 32 : 20;
+  const maps = useSurfaceMaps(finish === "oak-chevron" ? oakImage : cementImage, (baseRepeat * w) / 80, finish === "oak-chevron", glare, (baseRepeat * d) / 80);
   // Glare 0 = 0.05 env reflection, 100 = 0.45.
   const envMapIntensity = 0.05 + (clampFloorGlare(glare) / 100) * 0.4;
   return (
     <mesh name={`room-floor-${finish}`} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-      <planeGeometry args={[80, 80]} />
+      <planeGeometry args={[w, d]} />
       <meshStandardMaterial map={maps.color} roughnessMap={maps.roughness} roughness={floorSurfaceRoughness(finish === "oak-chevron", glare)} bumpMap={maps.bump} bumpScale={finish === "oak-chevron" ? 0.008 : 0.003} metalness={0} envMapIntensity={envMapIntensity} />
     </mesh>
   );
