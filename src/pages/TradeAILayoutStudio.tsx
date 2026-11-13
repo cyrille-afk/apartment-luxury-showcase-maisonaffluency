@@ -78,6 +78,22 @@ const ClearanceWarning = ({ conflicts }: { conflicts: ClearanceConflict[] }) => 
 const TradeAILayoutStudio = () => {
   const { brief, setBrief, setDimension } = useAiLayoutForm();
   const [scene, setScene] = useState<AICuratedSceneSchema | null>(null);
+  // Keep the working layout across reloads (dev refreshes, tab restores).
+  const sceneRestored = useRef(false);
+  useEffect(() => {
+    if (sceneRestored.current) return;
+    sceneRestored.current = true;
+    try {
+      const raw = sessionStorage.getItem("ma-ai-layout-working-scene-v1");
+      if (raw) setScene((s) => s ?? (JSON.parse(raw) as AICuratedSceneSchema));
+    } catch { /* ignore corrupt draft */ }
+  }, []);
+  useEffect(() => {
+    if (!sceneRestored.current) return;
+    try {
+      if (scene) sessionStorage.setItem("ma-ai-layout-working-scene-v1", JSON.stringify(scene));
+    } catch { /* storage full */ }
+  }, [scene]);
   const [overviewRevision, setOverviewRevision] = useState(0);
   const [cameraView, setCameraView] = useState("overview");
   useEffect(() => { setCameraView("overview"); }, [overviewRevision]);
