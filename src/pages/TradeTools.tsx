@@ -8,6 +8,15 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { categorySlug } from "@/lib/toolsBreadcrumbs";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useProjects } from "@/hooks/useProjects";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { projectWorkflow, specificationStages, type SpecificationStage, type StageCompletion } from "@/lib/specificationWorkflow";
 
 type Tool = { title: string; description: string; url: string; icon: any };
 type ToolCategory = { label: string; tools: Tool[] };
@@ -71,6 +80,55 @@ export default function TradeTools() {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuth();
+  const { projects, loading: projectsLoading } = useProjects();
+  const [projectId, setProjectId] = useState("");
+  const queryClient = useQueryClient();
+  const progressKey = ["specification-progress", user?.id];
+  const progressQuery = useQuery({
+    queryKey: progressKey,
+    enabled: Boolean(user),
+    queryFn: async () => {
+      const rows: StageCompletion[] = [];
+      for (let offset = 0; ; offset += 500) {
+        const { data, error } = await supabase.from("project_specification_progress")
+          .select("project_id,stage,completed_at").order("project_id").order("stage").range(offset, offset + 499);
+        if (error) throw error;
+        rows.push(...(data || []));
+        if (!data || data.length < 500) break;
+      }
+      return rows;
+    },
+    refetchInterval: 30000,
+  });
+  const activeProjectId = projects.some(project => project.id === projectId) ? projectId : "";
+  const editQuery = useQuery({
+    queryKey: ["specification-project-edit", user?.id, activeProjectId],
+    enabled: Boolean(user && activeProjectId),
+    queryFn: async () => {
+      if (!user || !activeProjectId) return false;
+      const { data, error } = await supabase.rpc("can_edit_project", { _user_id: user.id, _project_id: activeProjectId });
+      if (error) throw error;
+      return data === true;
+    },
+  });
+  const completion = useMutation({
+    mutationFn: async ({ project, stage, complete }: { project: string; stage: SpecificationStage; complete: boolean }) => {
+      if (!user) throw new Error("Sign in required");
+      const result = complete
+        ? await supabase.from("project_specification_progress").upsert({ project_id: project, stage, completed_by: user.id }, { onConflict: "project_id,stage", ignoreDuplicates: true })
+        : await supabase.from("project_specification_progress").delete().eq("project_id", project).eq("stage", stage);
+      if (result.error) throw result.error;
+    },
+    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: progressKey }); },
+  });
+  const workflow = projectWorkflow(activeProjectId, progressQuery.data || []);
+  const progressReady = Boolean(activeProjectId && progressQuery.isSuccess);
+
+  useEffect(() => {
+    if (projectsLoading) return;
+    setProjectId(current => projects.some(project => project.id === current) ? current : projects[0]?.id || "");
+  }, [projects, projectsLoading]);
 
   // Cmd+K / Ctrl+K → focus search. Esc clears it.
   useEffect(() => {
@@ -247,14 +305,38 @@ export default function TradeTools() {
           <h2 className="font-display text-sm uppercase tracking-[0.15em] text-muted-foreground mb-4">
             {cat.label}
           </h2>
+          {cat.label === "Specification" && (
+            <div className="mb-5 border-y border-border py-4 space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="space-y-1">
+                  <h3 className="font-body text-sm font-medium text-foreground">Project progress</h3>
+                  <p className="font-body text-xs text-muted-foreground" aria-live="polite">
+                    {projectsLoading ? "Loading projects…" : !projects.length ? "No projects available" : !activeProjectId ? "Select a project" : progressQuery.isError ? "Progress unavailable" : !progressReady ? "Loading progress…" : `${workflow.count} of 8 stages complete · ${workflow.percent}%`}
+                  </p>
+                </div>
+                <Select value={activeProjectId} onValueChange={value => { setProjectId(value); completion.reset(); }} disabled={projectsLoading || !projects.length || completion.isPending}>
+                  <SelectTrigger className="w-full sm:w-80" aria-label="Workflow project"><SelectValue placeholder="Select a project" /></SelectTrigger>
+                  <SelectContent>
+                    {projects.map(project => <SelectItem key={project.id} value={project.id}>{project.name}{progressQuery.isSuccess ? ` · ${projectWorkflow(project.id, progressQuery.data).count}/8` : ""}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              {progressReady && <Progress value={workflow.percent} className="h-1.5 bg-muted" aria-label="Specification workflow completion" />}
+              {(progressQuery.isError || editQuery.isError) && <div className="flex items-center gap-2 text-sm text-destructive" role="alert">Unable to load project progress.<Button variant="ghost" size="sm" onClick={() => { void progressQuery.refetch(); void editQuery.refetch(); }}>Try again</Button></div>}
+              {completion.isError && <p role="alert" className="text-sm text-destructive">Could not save this stage. Please try again.</p>}
+              {progressReady && editQuery.isSuccess && !editQuery.data && <p className="text-xs text-muted-foreground">View-only project</p>}
+            </div>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {cat.tools.map((tool) => {
               const isFav = favorites.includes(tool.url);
+              const stage = cat.label === "Specification" ? specificationStages.find(stage => stage.url === tool.url) : undefined;
+              const isComplete = Boolean(stage && workflow.completed.has(stage.id));
               return (
                 <div
                   key={tool.url}
                   data-felix-target={tool.url === "/trade/documents" ? "tools-resources" : undefined}
-                  className="group relative flex items-start gap-3 p-4 rounded-xl border border-border bg-background hover:bg-muted/50 hover:border-foreground/20 transition-all"
+                  className="group relative flex flex-wrap items-start gap-3 p-4 rounded-xl border border-border bg-background hover:bg-muted/50 hover:border-foreground/20 transition-all"
                 >
                   <button
                     onClick={() => navigate(tool.url)}
@@ -283,6 +365,16 @@ export default function TradeTools() {
                   >
                     <Star className={cn("h-3.5 w-3.5", isFav && "fill-accent")} />
                   </button>
+                  {stage && (
+                    <div className="w-full flex items-center gap-2 border-t border-border pt-3 mt-auto">
+                      <Checkbox id={`workflow-${stage.id}`} aria-label={`Mark ${tool.title} complete`} checked={progressReady && isComplete}
+                        disabled={!progressReady || editQuery.data !== true || completion.isPending}
+                        onCheckedChange={checked => completion.mutate({ project: activeProjectId, stage: stage.id, complete: checked === true })} />
+                      <label htmlFor={`workflow-${stage.id}`} className="text-xs text-muted-foreground cursor-pointer">
+                        {completion.isPending && completion.variables?.stage === stage.id ? "Saving…" : !progressReady ? "—" : isComplete ? "Complete" : "Not complete"}
+                      </label>
+                    </div>
+                  )}
                 </div>
               );
             })}

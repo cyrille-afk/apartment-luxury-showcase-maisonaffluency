@@ -1,5 +1,9 @@
 # Roadmap
 
+## Specification workflow progress
+- [x] Added project-saved progress across eight Specification cards, completion/reopen controls, project selector counts, access-aware controls and retry states; visits never mark work complete.
+- [x] Three calculation regressions pass; signed-in completion survives reload, second project stays at 0/8, reopening restores 0/8, phone has no overflow and no page errors. Project view/edit policies and explicit grants verified; original progress restored.
+
 ## Contained mood board complement pages
 - [x] Replaced scrolling strip with six-column contained grid and explicit quick-add controls.
 - [x] Cycle the server-validated matching pool locally in six-item pages; composition changes reset the cursor. Signed-in Spider Mini returned 464 candidates, three pages shared no IDs and Refresh made no further AI requests; quick-add survived reload and refreshed suggestions. Exact right-edge alignment/no overflow verified at 1955/1280/390px; 30 regressions and deployed boot/live checks pass. Original browser board restored; build OK.

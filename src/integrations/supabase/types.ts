@@ -7513,6 +7513,35 @@ export type Database = {
           },
         ]
       }
+      project_specification_progress: {
+        Row: {
+          completed_at: string
+          completed_by: string
+          project_id: string
+          stage: string
+        }
+        Insert: {
+          completed_at?: string
+          completed_by?: string
+          project_id: string
+          stage: string
+        }
+        Update: {
+          completed_at?: string
+          completed_by?: string
+          project_id?: string
+          stage?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_specification_progress_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_workspace_shares: {
         Row: {
           board_id: string
