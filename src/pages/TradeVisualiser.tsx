@@ -690,16 +690,30 @@ const TradeVisualiser = () => {
   // Declared product schemas (components + allowed finish groups) override model detection.
   const productSchema = useMemo(() => findProductSchema(selected?.product_name), [selected?.product_name]);
   const detectedGroupLabels = usePartGroupLabels(selected?.id);
-  const partGroupLabels = useMemo(
+  const rawTargets = useMemo<FinishTarget[]>(
+    () => (productSchema
+      ? schemaTargets(productSchema)
+      : finishTargetsFromParts(selected ? textureParts[selected.instanceId] ?? [] : [])),
+    [selected, textureParts, productSchema],
+  );
+  const baseGroupLabels = useMemo(
     () => (productSchema ? { ...detectedGroupLabels, ...schemaLabels(productSchema) } : detectedGroupLabels),
     [detectedGroupLabels, productSchema],
   );
+  // Unnamed imported groups (e.g. "Group#329") get readable "Finish group N" names instead of
+  // disappearing, so multi-material pieces never collapse to "Whole piece" only.
+  const partGroupLabels = useMemo(() => {
+    const labels: Record<string, string> = { ...baseGroupLabels };
+    let n = 0;
+    for (const target of rawTargets) {
+      if (isNamedFinishTarget(target, baseGroupLabels)) continue;
+      labels[target] = `Finish group ${++n}`;
+    }
+    return labels;
+  }, [rawTargets, baseGroupLabels]);
   const availableTargets = useMemo<FinishTarget[]>(
-    () => (productSchema
-      ? schemaTargets(productSchema)
-      : finishTargetsFromParts(selected ? textureParts[selected.instanceId] ?? [] : []))
-      .filter((target) => isNamedFinishTarget(target, partGroupLabels)),
-    [selected, textureParts, productSchema, partGroupLabels],
+    () => rawTargets.filter((target) => isNamedFinishTarget(target, partGroupLabels)),
+    [rawTargets, partGroupLabels],
   );
   const effectiveTarget: FinishTarget = availableTargets.includes(finishTarget) ? finishTarget : "all";
   const targetMaterial = selected ? getPartMaterial(selected, effectiveTarget) : null;
