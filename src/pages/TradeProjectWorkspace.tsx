@@ -110,6 +110,8 @@ function WorkspacePanels() {
           onSelectColumn={(id) => { setSelectedColumnId(id); setPlanSelectedId(null); }}
           onMoveColumn={(id, x, y) => project.setColumns(current => current.map(column => { if (column.id !== id) return column; const [cx, cy] = clampToRoom(x, y, state.bounds, column.size / 2); return { ...column, x: cx, y: cy }; }))}
           onDropAssetKey={handlePlanDrop}
+          onRotate={(instanceId, deltaDeg) => project.setObjects(current => current.map(o => o.instanceId === instanceId ? { ...o, rotation: [o.rotation[0], o.rotation[1] + (deltaDeg * Math.PI) / 180, o.rotation[2]] as typeof o.rotation } : o))}
+          onRemove={(instanceId) => { project.setObjects(current => current.filter(o => o.instanceId !== instanceId)); setPlanSelectedId(null); }}
           showGuides={showGuides}
         />
         <ProjectAssetsDrawer anchorClassName="left-3 top-3 sm:left-4" onPlace={(item) => placeInventoryItem(item)} />

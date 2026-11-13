@@ -78,7 +78,7 @@ export default function ProjectAssetsDrawer({
           </p>
         ) : (
           <ul className="flex flex-col gap-1">
-            {projectInventory.map((item) => {
+            {[...projectInventory].sort((a, b) => (a.addedAt ?? 0) - (b.addedAt ?? 0) || a.instanceId.localeCompare(b.instanceId)).map((item) => {
               const key = item.instanceId;
               return (
                 <li

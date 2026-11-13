@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
 import type { PlanColumn, RoomBounds } from "@/lib/activeProjectLayout";
 import { resolveDimensions } from "@/lib/productDimensions";
@@ -7,10 +7,13 @@ import {
   footprintOf,
   formatGap,
   pieceClearances,
+  footprintClearance,
   wallClearances,
   type ClearanceLevel,
 } from "@/lib/layoutGuides";
 import { cn } from "@/lib/utils";
+import { RotateCcw, RotateCw, Trash2 } from "lucide-react";
+import { fitPlanLabel, tightestPiecePair } from "@/lib/planLabels";
 
 const FALLBACK_FOOTPRINT_M = 0.6;
 const GRID_STEP_M = 1;
@@ -36,6 +39,8 @@ export default function LayoutPlanCanvas({
   selectedColumnId = null,
   onSelectColumn,
   onMoveColumn,
+  onRotate,
+  onRemove,
 }: {
   objects: PlacedObject[];
   bounds: RoomBounds;
@@ -51,7 +56,20 @@ export default function LayoutPlanCanvas({
   selectedColumnId?: string | null;
   onSelectColumn?: (id: string | null) => void;
   onMoveColumn?: (id: string, x: number, y: number) => void;
+  /** Rotate a placed piece by a signed number of degrees. */
+  onRotate?: (instanceId: string, deltaDeg: number) => void;
+  onRemove?: (instanceId: string) => void;
 }) {
+  const [size, setSize] = useState({ w: 0, h: 0 });
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => setSize({ w: el.clientWidth, h: el.clientHeight }));
+    ro.observe(el);
+    setSize({ w: el.clientWidth, h: el.clientHeight });
+    return () => ro.disconnect();
+  }, []);
+  const tightPair = tightestPiecePair(objects);
   const wrapRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{ instanceId: string; moved: boolean; column?: boolean } | null>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -192,9 +210,7 @@ export default function LayoutPlanCanvas({
           const d = ((dims?.d ?? FALLBACK_FOOTPRINT_M * 1000) / 1000) * scale;
           const deg = (object.rotation[1] * 180) / Math.PI;
           const selected = object.instanceId === selectedId;
-          const label = object.product_name;
-          // Keep labels below the rotated footprint, not underneath its corners.
-          const labelY = Math.max(Math.abs(Math.sin(object.rotation[1])) * w + Math.abs(Math.cos(object.rotation[1])) * d, 0.5) / 2;
+          const label = fitPlanLabel(object.product_name, w, d);
           return (
             <g
               key={object.instanceId}
@@ -225,25 +241,37 @@ export default function LayoutPlanCanvas({
                 height={Math.max(d, 0.5)}
                 fill="transparent"
               />
-              <text
-                y={labelY + 0.22}
-                textAnchor="middle"
-                fontSize={0.16}
-                className={cn("pointer-events-none", selected ? "fill-primary" : "fill-foreground")}
-              >
-                {label}
-              </text>
-              <text
-                y={labelY + 0.42}
-                textAnchor="middle"
-                fontSize={0.12}
-                className="pointer-events-none fill-muted-foreground"
-              >
-                {`${w.toFixed(2)} × ${d.toFixed(2)} m`}
-              </text>
+              <g transform={`rotate(${deg})`} className="pointer-events-none">
+                {label.name && (
+                  <text
+                    y={label.showDims ? -label.fontSize * 0.25 : label.fontSize * 0.35}
+                    textAnchor="middle"
+                    fontSize={label.fontSize}
+                    className={selected ? "fill-primary" : "fill-foreground"}
+                  >
+                    <title>{object.product_name}</title>
+                    {label.name}
+                  </text>
+                )}
+                {label.showDims && (
+                  <text y={label.fontSize * 0.95} textAnchor="middle" fontSize={label.fontSize * 0.75} className="fill-muted-foreground">
+                    {`${w.toFixed(2)} × ${d.toFixed(2)} m`}
+                  </text>
+                )}
+              </g>
             </g>
           );
         })}
+        {tightPair && (
+          <g className="pointer-events-none" data-testid="tight-gap-indicator">
+            <line x1={tightPair.from[0]} y1={tightPair.from[1]} x2={tightPair.to[0]} y2={tightPair.to[1]} className="stroke-destructive" strokeWidth={0.025} />
+            <circle cx={tightPair.from[0]} cy={tightPair.from[1]} r={0.04} className="fill-destructive" />
+            <circle cx={tightPair.to[0]} cy={tightPair.to[1]} r={0.04} className="fill-destructive" />
+            <text x={(tightPair.from[0] + tightPair.to[0]) / 2} y={(tightPair.from[1] + tightPair.to[1]) / 2 - 0.08} textAnchor="middle" fontSize={0.12} className="fill-destructive">
+              {formatGap(tightPair.distance)}
+            </text>
+          </g>
+        )}
         {showGuides && selectedId && (() => {
           const selected = objects.find((o) => o.instanceId === selectedId);
           if (!selected) return null;
@@ -320,6 +348,41 @@ export default function LayoutPlanCanvas({
           </text>
         )}
       </svg>
+      {(() => {
+        const selected = selectedId ? objects.find((o) => o.instanceId === selectedId) : null;
+        if (!selected || size.w === 0 || (!onRotate && !onRemove)) return null;
+        const fp = footprintOf(selected);
+        const scale = Math.min(size.w / bounds.width, size.h / bounds.depth);
+        const offsetX = (size.w - bounds.width * scale) / 2;
+        const offsetY = (size.h - bounds.depth * scale) / 2;
+        const aabbHd = fp.hw * Math.abs(Math.sin(fp.rot)) + fp.hd * Math.abs(Math.cos(fp.rot));
+        const left = offsetX + (fp.cx + bounds.width / 2) * scale;
+        const top = Math.max(48, offsetY + (fp.cy - aabbHd + bounds.depth / 2) * scale - 12);
+        const deg = Math.round((((selected.rotation[1] * 180) / Math.PI) % 360 + 360) % 360);
+        const stop = (e: ReactPointerEvent) => e.stopPropagation();
+        return (
+          <div
+            data-testid="plan-piece-actions"
+            role="toolbar"
+            aria-label={`${selected.product_name} controls`}
+            onPointerDown={stop}
+            style={{ left, top }}
+            className="absolute z-20 flex -translate-x-1/2 -translate-y-full items-center gap-1 whitespace-nowrap rounded-full border border-border bg-background/95 px-2 py-1 text-xs shadow-md backdrop-blur-md"
+          >
+            {onRotate && (
+              <>
+                <button type="button" aria-label="Rotate -45°" title="Rotate -45°" onClick={() => onRotate(selected.instanceId, -45)} className="rounded-full p-1.5 hover:bg-muted"><RotateCcw className="h-3.5 w-3.5" /></button>
+                <span className="w-9 text-center tabular-nums text-muted-foreground">{deg}°</span>
+                <button type="button" aria-label="Rotate +45°" title="Rotate +45°" onClick={() => onRotate(selected.instanceId, 45)} className="rounded-full p-1.5 hover:bg-muted"><RotateCw className="h-3.5 w-3.5" /></button>
+              </>
+            )}
+            <span className="border-l border-border pl-2 pr-1 tabular-nums">{Math.round(fp.hw * 200)} × {Math.round(fp.hd * 200)} cm</span>
+            {onRemove && (
+              <button type="button" aria-label="Remove from plan" title="Remove from plan" onClick={() => onRemove(selected.instanceId)} className="rounded-full p-1.5 text-destructive hover:bg-destructive/10"><Trash2 className="h-3.5 w-3.5" /></button>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 }
