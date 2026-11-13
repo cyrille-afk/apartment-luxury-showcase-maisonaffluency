@@ -68,6 +68,10 @@ export function applyModelOrientation(model: Group, orientation?: ModelOrientati
 // Its exporter maps that to -Z, so the actual furniture up direction is +Z.
 const VERIFIED_UP: Record<string, [number, number, number]> = {
   "f72b4185-9eeb-4ec0-b862-0972abc93a9f": [0, 0, 1],
+  // DUP and IBO low tables ship with their tops facing the exporter's Z axis
+  // and have no recorded dimensions to infer it from.
+  "8960e070-49f0-46dd-a137-2209717b7dc0": [0, 0, 1],
+  "fd8c2682-d8a1-48fe-b110-d22209cbcce7": [0, 0, 1],
 };
 
 /** Correct the import frame, never the cached GLTF scene or individual meshes. */

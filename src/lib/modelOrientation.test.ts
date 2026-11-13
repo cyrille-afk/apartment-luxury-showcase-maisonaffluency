@@ -157,3 +157,14 @@ describe("model import frame", () => {
     expect(fitted.min.y).toBeCloseTo(0);
   });
 });
+
+describe("verified low-table import frames", () => {
+  it("lays the DUP coffee table flat (Z-up export, no recorded dimensions)", async () => {
+    const { Group: G, Mesh: M, BoxGeometry: B, MeshBasicMaterial: Mat, Box3: Bx, Vector3: V } = await import("three");
+    const { fitUprightModel: fit } = await import("./modelOrientation");
+    const s = new G(); s.add(new M(new B(0.64, 1.0, 0.18), new Mat()));
+    const size = new Bx().setFromObject(fit(s, null, "https://x/glb-models/8960e070-49f0-46dd-a137-2209717b7dc0/default.glb")).getSize(new V());
+    expect(size.y).toBeLessThan(size.x);
+    expect(size.y).toBeLessThan(size.z);
+  });
+});
