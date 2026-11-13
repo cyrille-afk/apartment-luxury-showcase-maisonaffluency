@@ -17,7 +17,7 @@ import VideoUnlockModal from "@/components/trade/visualiser/VideoUnlockModal";
 import { Lock } from "lucide-react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
-import { deleteLayout, listLayouts, saveLayout, setShared, shareUrl, snapshotProducts, type SavedLayout } from "@/lib/aiLayoutStore";
+import { deleteLayout, listLayouts, saveLayout, setShared, shareUrl, snapshotProducts, type SavedLayout, latestProjectLayout } from "@/lib/aiLayoutStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -109,7 +109,7 @@ const TradeAILayoutStudio = () => {
     if (!scene) return;
     setSaving(true);
     try {
-      const row = await saveLayout({ id: asNew ? undefined : current?.id, title, brief, scene, products: snapshotProducts(scene, catalogue) });
+      const row = await saveLayout({ id: asNew ? undefined : current?.id, title, brief, scene, products: snapshotProducts(scene, catalogue), projectId: sharedProjectId });
       setCurrent(row);
       toast.success("Layout saved");
       void markLayoutStage();
@@ -188,6 +188,18 @@ const TradeAILayoutStudio = () => {
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
+
+  // Project progress milestone → open this project's newest saved layout.
+  const openDone = useRef(false);
+  useEffect(() => {
+    if (openDone.current || !sharedProjectId || searchParams.get("open") !== "saved" || catLoading) return;
+    openDone.current = true;
+    void latestProjectLayout(sharedProjectId).then((l) => {
+      if (l) { openSaved(l); toast.success(`Opened "${l.title}"`); }
+      else toast.message("No saved layout for this project yet — generate one and save it.");
+    }).catch(() => toast.error("Could not open the saved layout"));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, sharedProjectId, catLoading]);
 
   // Generating or saving a layout for the active project completes its Curated Room Layout stage.
   const markLayoutStage = async () => {

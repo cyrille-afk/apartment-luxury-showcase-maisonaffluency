@@ -22,6 +22,7 @@ export interface SavedLayout {
   share_token: string;
   is_shared: boolean;
   updated_at: string;
+  project_id?: string | null;
 }
 
 const statusLabel = (c?: LiveCatalogueItem) => {
@@ -39,7 +40,7 @@ export const snapshotProducts = (scene: AICuratedSceneSchema, catalogue: LiveCat
   });
 };
 
-const COLS = "id, title, brief, scene, share_token, is_shared, updated_at";
+const COLS = "id, title, brief, scene, share_token, is_shared, updated_at, project_id";
 
 export async function listLayouts(): Promise<SavedLayout[]> {
   const { data, error } = await supabase.from("ai_curated_layouts").select(COLS).order("updated_at", { ascending: false }).limit(50);
@@ -47,8 +48,8 @@ export async function listLayouts(): Promise<SavedLayout[]> {
   return (data ?? []) as unknown as SavedLayout[];
 }
 
-export async function saveLayout(input: { id?: string; title: string; brief: LayoutBrief; scene: AICuratedSceneSchema; products: LayoutProductSnapshot[] }): Promise<SavedLayout> {
-  const row = { title: input.title.trim().slice(0, 120) || "Untitled layout", brief: input.brief as unknown as Json, scene: input.scene as unknown as Json, products: input.products as unknown as Json };
+export async function saveLayout(input: { id?: string; title: string; brief: LayoutBrief; scene: AICuratedSceneSchema; products: LayoutProductSnapshot[]; projectId?: string | null }): Promise<SavedLayout> {
+  const row = { ...(input.projectId ? { project_id: input.projectId } : {}), title: input.title.trim().slice(0, 120) || "Untitled layout", brief: input.brief as unknown as Json, scene: input.scene as unknown as Json, products: input.products as unknown as Json };
   const q = input.id
     ? supabase.from("ai_curated_layouts").update(row).eq("id", input.id).select(COLS).single()
     : supabase.from("ai_curated_layouts").insert(row).select(COLS).single();
@@ -68,3 +69,10 @@ export async function deleteLayout(id: string) {
 }
 
 export const shareUrl = (token: string) => `https://maisonaffluency.com/layout/${token}`;
+
+/** Newest saved layout for a project, or null when none has been saved for it. */
+export async function latestProjectLayout(projectId: string): Promise<SavedLayout | null> {
+  const { data, error } = await supabase.from("ai_curated_layouts").select(COLS).eq("project_id", projectId).order("updated_at", { ascending: false }).limit(1).maybeSingle();
+  if (error) throw error;
+  return data as unknown as SavedLayout | null;
+}

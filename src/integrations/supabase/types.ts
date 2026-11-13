@@ -510,6 +510,7 @@ export type Database = {
           id: string
           is_shared: boolean
           products: Json
+          project_id: string | null
           scene: Json
           share_token: string
           title: string
@@ -523,6 +524,7 @@ export type Database = {
           id?: string
           is_shared?: boolean
           products?: Json
+          project_id?: string | null
           scene: Json
           share_token?: string
           title?: string
@@ -536,6 +538,7 @@ export type Database = {
           id?: string
           is_shared?: boolean
           products?: Json
+          project_id?: string | null
           scene?: Json
           share_token?: string
           title?: string
