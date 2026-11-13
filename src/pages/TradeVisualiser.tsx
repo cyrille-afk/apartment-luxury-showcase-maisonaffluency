@@ -383,6 +383,7 @@ const TradeVisualiser = () => {
   // Finishes linked to the selected product (product_fabrics → fabrics).
   // null = no selection or none linked → show the global library.
   const [linkedMaterials, setLinkedMaterials] = useState<VisualiserMaterial[] | null>(null);
+  const [finishCategory, setFinishCategory] = useState<string>("all");
   const [materialSearch, setMaterialSearch] = useState("");
   const [finishTarget, setFinishTarget] = useState<FinishTarget>("all");
   const [textureParts, setTextureParts] = useState<Record<string, FinishPart[]>>({});
@@ -859,10 +860,17 @@ const TradeVisualiser = () => {
     const query = norm(materialSearch);
     const source = linkedMaterials ?? materials;
     return source.filter((material) => (
-      (productSchema ? schemaFits(productSchema, material, effectiveTarget) : materialFitsTarget(material, effectiveTarget))
+      (!linkedMaterials || finishCategory === "all" || (material.category || "Finish") === finishCategory)
+      && (productSchema ? schemaFits(productSchema, material, effectiveTarget) : materialFitsTarget(material, effectiveTarget))
       && (!query || norm(`${material.name} ${material.brand_name} ${material.category} ${material.material_type ?? ""}`).includes(query))
     ));
-  }, [materialSearch, materials, linkedMaterials, effectiveTarget, productSchema]);
+  }, [materialSearch, materials, linkedMaterials, effectiveTarget, productSchema, finishCategory]);
+  // Catalogue finish categories for the selected product (e.g. Fabric, Leather, Wood).
+  const catalogFinishCategories = useMemo(
+    () => (linkedMaterials ? Array.from(new Set(linkedMaterials.map((m) => m.category || "Finish"))) : []),
+    [linkedMaterials],
+  );
+  useEffect(() => { setFinishCategory("all"); }, [selectedProductId]);
 
   const uploadBackdrop = (file: File | null, matchPerspective = false) => {
     if (!file) return;
@@ -1200,11 +1208,25 @@ const TradeVisualiser = () => {
               aria-label="Search finishes"
               className="mt-3 w-full border-b border-foreground/10 bg-transparent pb-2 text-xs outline-hidden placeholder:text-muted-foreground"
             />
-            <div className="mt-3 flex max-h-28 gap-3 overflow-x-auto pb-2">
+            {catalogFinishCategories.length > 0 && (
+              <div role="tablist" aria-label="Catalogue finish category" data-testid="catalog-finish-tabs" className="mt-3 flex flex-row items-center gap-3 overflow-x-auto whitespace-nowrap scrollbar-none pb-1">
+                {["all", ...catalogFinishCategories].map((category) => (
+                  <Button variant="ghost" size="sm" key={category} role="tab" aria-selected={finishCategory === category}
+                    onClick={() => setFinishCategory(category)}
+                    className={cn(microLabel, "h-auto shrink-0 px-0 py-1", finishCategory === category ? "text-foreground underline underline-offset-4" : "text-muted-foreground hover:text-foreground")}>
+                    {category === "all" ? `All catalogue (${linkedMaterials?.length ?? 0})` : category}
+                  </Button>
+                ))}
+              </div>
+            )}
+            <div data-testid="finish-swatches" className="mt-3 flex max-h-32 gap-3 overflow-x-auto pb-2">
               {filteredMaterials.slice(0, 24).map((material) => (
-                <Button variant="ghost" key={material.id} aria-label={`Apply ${material.name} to ${targetLabel(effectiveTarget, partGroupLabels)}`} onClick={() => applyMaterial(material)} className="h-auto w-14 shrink-0 flex-col items-start gap-0 px-0 py-1 text-left" title={`${material.brand_name} — ${material.name}`}>
-                  <img src={material.image_url ?? "/placeholder.svg"} alt="" className={cn("h-10 w-10 object-cover", targetMaterial?.id === material.id && "ring-1 ring-foreground ring-offset-2")} />
-                  <span className="mt-1 block w-full truncate font-mono text-[8px] uppercase tracking-[0.15em] text-muted-foreground">{material.name}</span>
+                <Button variant="ghost" key={material.id} aria-label={`Apply ${material.name} to ${targetLabel(effectiveTarget, partGroupLabels)}`} onClick={() => applyMaterial(material)} className="h-auto w-16 shrink-0 flex-col items-center gap-0 px-0 py-1 text-center" title={`${material.brand_name} — ${material.name}${material.category ? ` · ${material.category}` : ""}`}>
+                  {material.image_url
+                    ? <img src={material.image_url} alt="" className={cn("h-10 w-10 rounded-full border border-foreground/10 object-cover", targetMaterial?.id === material.id && "ring-1 ring-foreground ring-offset-2")} />
+                    : <span aria-hidden className={cn("block h-10 w-10 rounded-full border border-foreground/10", targetMaterial?.id === material.id && "ring-1 ring-foreground ring-offset-2")} style={{ backgroundColor: material.color ?? "var(--muted)" }} />}
+                  <span className="mt-1 block w-full truncate font-mono text-[8px] uppercase tracking-[0.15em] text-foreground">{material.name}</span>
+                  <span className="block w-full truncate font-mono text-[7px] uppercase tracking-[0.15em] text-muted-foreground">{material.material_type || material.category || "Finish"}</span>
                 </Button>
               ))}
             </div>
