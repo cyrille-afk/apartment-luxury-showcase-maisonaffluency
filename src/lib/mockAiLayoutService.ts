@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { AICuratedSceneSchema, CuratedAsset, Vec3 } from "@/types/aiCuratedScene";
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
+import { resolveDimensions } from "@/lib/productDimensions";
 
 /**
  * Client-side layout generator. Placement is mocked; prices and availability are
@@ -34,6 +35,8 @@ export interface LiveCatalogueItem {
   manufacturer?: string | null;
   productUrl?: string | null;
   publicProductUrl?: string | null;
+  category?: string;
+  projectPriority?: boolean;
 }
 
 /** Layout roles for the pieces the generator knows how to place. */
@@ -52,12 +55,23 @@ const UNAVAILABLE = new Set(["discontinued", "out_of_stock", "unavailable", "sol
 const cleanName = (n: string) => n.replace(/\s+by Yabu Pushelberg$/i, "").trim();
 
 /** Loads live price + availability for every placeable piece. Requires an approved trade session. */
-export async function fetchLiveCatalogue(onlyIds?: string[]): Promise<LiveCatalogueItem[]> {
+export async function fetchLiveCatalogue(onlyIds?: string[], projectId?: string | null): Promise<LiveCatalogueItem[]> {
   const ids = onlyIds ?? Object.keys(ROLES);
+  let projectIds: string[] = [];
+  if (projectId) {
+    const { data: boards, error: boardError } = await supabase.from("client_boards").select("id").eq("project_id", projectId);
+    if (boardError) throw boardError;
+    if (boards?.length) {
+      const { data: boardItems, error: itemError } = await supabase.from("client_board_items").select("product_id").in("board_id", boards.map((b) => b.id));
+      if (itemError) throw itemError;
+      projectIds = [...new Set((boardItems ?? []).map((i) => i.product_id))].slice(0, 250);
+    }
+  }
+  const allIds = [...new Set([...ids, ...projectIds])];
   const { data: products, error } = await supabase
     .from("trade_products")
-    .select("id, product_name, brand_name, sku, glb_url, trade_price_cents, currency, source_pick_id, is_active, is_hidden, design_style_tokens, style_tags, dimensions_cubic, dimensions")
-    .in("id", ids);
+    .select("id, product_name, brand_name, sku, category, subcategory, glb_url, trade_price_cents, currency, source_pick_id, is_active, is_hidden, design_style_tokens, style_tags, dimensions_cubic, dimensions, width_mm, depth_mm, height_mm")
+    .or(`id.in.(${allIds.join(",")}),source_pick_id.in.(${allIds.join(",")})`);
   if (error) throw error;
 
   const pickIds = (products ?? []).map((p) => p.source_pick_id).filter(Boolean) as string[];
@@ -82,7 +96,6 @@ export async function fetchLiveCatalogue(onlyIds?: string[]): Promise<LiveCatalo
 
   return Promise.all(
     (products ?? [])
-      .filter((p) => p.glb_url)
       .map(async (p) => {
         let stockStatus: string | null = null;
         let leadWeeks: [number, number] | null = null;
@@ -102,8 +115,10 @@ export async function fetchLiveCatalogue(onlyIds?: string[]): Promise<LiveCatalo
           componentId: p.id,
           sku: p.sku || p.id,
           name: cleanName(p.product_name),
-          role: ROLES[p.id] ?? "accent",
-          glbUrl: p.glb_url as string,
+          role: ROLES[p.id] ?? (/sofa|settee|couch/i.test(`${p.category} ${p.subcategory} ${p.product_name}`) ? "anchor" : /coffee|centre table|center table/i.test(`${p.subcategory} ${p.product_name}`) ? "table" : /chair|armchair/i.test(`${p.category} ${p.product_name}`) ? "seat" : /lamp|lighting/i.test(`${p.category} ${p.product_name}`) ? "light" : "accent"),
+          glbUrl: p.glb_url ?? "",
+          category: `${p.category} ${p.subcategory ?? ""}`,
+          projectPriority: projectIds.includes(p.id) || Boolean(p.source_pick_id && projectIds.includes(p.source_pick_id)),
           price: cents > 0 && (p.currency ?? "EUR") === "EUR" ? cents / 100 : null,
           stockStatus,
           leadWeeks,
@@ -115,7 +130,9 @@ export async function fetchLiveCatalogue(onlyIds?: string[]): Promise<LiveCatalo
           publicProductUrl: p.source_pick_id ? publicUrls.get(p.source_pick_id) ?? null : null,
           dimensionsCubic: (() => {
             const d = p.dimensions_cubic as { w?: number; d?: number; h?: number } | null;
-            return d && typeof d.w === "number" && typeof d.d === "number" && typeof d.h === "number" ? { w: d.w, d: d.d, h: d.h } : null;
+            if (d && typeof d.w === "number" && typeof d.d === "number" && typeof d.h === "number" && d.w > 0 && d.d > 0 && d.h > 0) return { w: d.w, d: d.d, h: d.h };
+            const mm = resolveDimensions(p);
+            return mm ? { w: mm.w / 1000, d: mm.d / 1000, h: mm.h / 1000 } : null;
           })(),
         } satisfies LiveCatalogueItem;
       }),
@@ -137,6 +154,7 @@ export const toAsset = (item: LiveCatalogueItem, position: Vec3, rotation: Vec3,
   componentId: item.componentId,
   glbUrl: item.glbUrl,
   priceAtCuration: item.price ?? 0,
+  ...(item.dimensionsCubic ? { dimensionsCubic: item.dimensionsCubic } : {}),
   position,
   rotation,
   scale,

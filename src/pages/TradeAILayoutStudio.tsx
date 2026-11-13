@@ -31,7 +31,7 @@ import { curate, sceneFromCuration, type CurationResult } from "@/lib/curationEn
 import { filterVideoRendersByMonth, formatSecondsDelta, formatUsdCents, formatUsdCentsDelta, monthlyCostBreakdown, renderExceedsEstimate, summarizeVideoRenders, videoRenderChartSeries, videoRenderDelta, videoRenderMonthComparison, videoRenderMonthLabel, videoRenderMonthOptions, VIDEO_RENDER_MONTH_ALL } from "@/lib/videoRenderSummary";
 import { Bar, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { cn } from "@/lib/utils";
-import { generateRoomLayoutMatrix } from "@/lib/roomLayoutMatrix";
+import { generateRoomLayoutMatrix, selectLayoutCandidates } from "@/lib/roomLayoutMatrix";
 import { readSharedRoomLayout, sceneToSharedItems, sharedToScene, writeSharedRoomLayout } from "@/lib/sharedRoomLayout";
 import { useNavigate, useSearchParams } from "@/lib/router-compat";
 import { Box as BoxIcon } from "lucide-react";
@@ -228,7 +228,7 @@ const TradeAILayoutStudio = () => {
     setCatLoading(true);
     setCatError(null);
     try {
-      const live = await fetchLiveCatalogue();
+      const live = await fetchLiveCatalogue(undefined, sharedProjectId);
       setCatalogue(live);
       // Products changed upstream → re-price the current layout.
       setScene((s) => (s ? repriceScene(s, live) : s));
@@ -239,7 +239,7 @@ const TradeAILayoutStudio = () => {
     } finally {
       setCatLoading(false);
     }
-  }, []);
+  }, [sharedProjectId]);
 
   useEffect(() => { void loadCatalogue(); }, [loadCatalogue]);
 
@@ -276,7 +276,8 @@ const TradeAILayoutStudio = () => {
       const fallback = generateRoomLayoutMatrix(brief, live);
       const anchors = fallback.scene.architecturalAnchors;
       const { width: W, length: L, height: H } = brief.roomDimensions;
-      const rows = buildArchitectCatalog(live, discountPct);
+      const candidates = selectLayoutCandidates(brief, live);
+      const rows = buildArchitectCatalog(candidates, discountPct);
       const { data, error } = await supabase.functions.invoke("ai-architect-layout", {
         body: {
           room_dimensions: { width_m: W, length_m: L, height_m: H },
@@ -288,16 +289,18 @@ const TradeAILayoutStudio = () => {
       });
       const out = (data as { layout?: ArchitectOutput } | null)?.layout;
       const result = out ? validateArchitectLayout(out, brief, live, rows, anchors) : null;
-      if (result?.ok && result.scene) {
+      if (result?.ok && result.scene && result.scene.curatedAssets.length >= Math.min(3, fallback.scene.curatedAssets.length)) {
         setScene(result.scene);
-        setSkipped([`AI layout · trade spend €${result.tradeSpend.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} of €${brief.totalBudget.toLocaleString("en-GB")}`]);
+        setSkipped([]);
+        setCuration(null);
         toast.success("AI layout placed and checked");
       } else {
         setScene(fallback.scene);
-        setSkipped(result ? result.errors.map((e) => `AI rejected: ${e}`) : [error?.message ?? "AI unavailable"]);
-        toast.warning("AI layout broke a room rule — showing the standard layout instead");
+        setSkipped(fallback.skipped);
+        setCuration(null);
+        toast.message(fallback.scene.curatedAssets.length ? "Room arranged using the available pieces and checked clearances" : "No priced pieces fit this room and budget");
       }
-      void markLayoutStage();
+      if ((result?.ok && result.scene?.curatedAssets.length) || fallback.scene.curatedAssets.length) void markLayoutStage();
       setOverviewRevision((r) => r + 1);
     } catch {
       setLayoutError("Your room could not be prepared. Please try again; your previous layout is unchanged.");
@@ -1373,7 +1376,7 @@ const TradeAILayoutStudio = () => {
             <Suspense fallback={null}><Environment preset="apartment" /></Suspense>
             <ContactShadows position={[0, 0.002, 0]} scale={20} opacity={0.3} blur={1.2} far={8} />
             <AICuratedEnvironment schema={scene} selectedId={selectedId} onSelect={setSelectedId}
-              pieceNames={new Map(catalogue.map((item) => [item.componentId, item.name]))}
+              pieceNames={new Map([...byId].map(([id, item]) => [id, item.name]))}
               onAssetTransform={onAssetTransform} onDragStateChange={setDragging} isEditable={!walkActive && !authorMode}>
               <RoomOverviewCamera revision={overviewRevision} view={cameraView} enabled={!walkActive && !authorMode && !dragging} />
             </AICuratedEnvironment>

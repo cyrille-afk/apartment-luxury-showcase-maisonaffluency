@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { boxAt, generateRoomLayoutMatrix, overlaps } from "./roomLayoutMatrix";
+import { boxAt, generateRoomLayoutMatrix, overlaps, selectLayoutCandidates, footprint } from "./roomLayoutMatrix";
 import type { LiveCatalogueItem } from "./mockAiLayoutService";
 
 const item = (id: string, role: LiveCatalogueItem["role"], price: number | null, dims = { w: 1, d: 1, h: 1 }): LiveCatalogueItem => ({
@@ -9,6 +9,37 @@ const cat = [item("sofa", "anchor", 20000, { w: 2.4, d: 1, h: 0.8 }), item("tabl
 const brief = { roomType: "living" as const, style: "quiet-luxury" as const, totalBudget: 60000, roomDimensions: { width: 7, length: 6, height: 3 } };
 
 describe("generateRoomLayoutMatrix", () => {
+  it("falls back to all 8 pieces when fewer than 3 match Quiet luxury", () => {
+    const eight = [...cat, ...Array.from({ length: 5 }, (_, i) => item(`chair-${i}`, "seat", 2000))];
+    eight[0] = { ...eight[0], styleTokens: ["Quiet luxury"] };
+    expect(selectLayoutCandidates({ ...brief, totalBudget: 150000 }, eight)).toHaveLength(8);
+  });
+  it("populates all fitting untagged pieces in a 7.2 × 6m room with a €150,000 ledger", () => {
+    const eight = [...cat, ...Array.from({ length: 3 }, (_, i) => item(`chair-${i}`, "seat", 2000, { w: 0.8, d: 0.8, h: 0.8 })), item("console", "accent", 4000, { w: 1.5, d: 0.4, h: 0.8 }), item("side", "accent", 1500, { w: 0.4, d: 0.4, h: 0.5 })];
+    const s = generateRoomLayoutMatrix({ ...brief, totalBudget: 150000, roomDimensions: { width: 7.2, length: 6, height: 3.2 } }, eight).scene;
+    expect(s.curatedAssets).toHaveLength(8);
+    expect(s.financialSummary).toEqual({ totalBudget: 150000, allocatedSpend: 42500, remainingBuffer: 107500 });
+    const boxes = s.curatedAssets.map((a) => {
+      const c = eight.find((c) => c.componentId === a.componentId);
+      if (!c) throw new Error("Missing catalogue piece");
+      const { w, d } = footprint(c); const turn = Math.abs(Math.sin(a.rotation[1])) > 0.5;
+      return boxAt(a.position[0], a.position[2], turn ? d : w, turn ? w : d);
+    });
+    for (const [i, b] of boxes.entries()) {
+      expect(b.minX).toBeGreaterThanOrEqual(-3.6); expect(b.maxX).toBeLessThanOrEqual(3.6);
+      expect(b.minZ).toBeGreaterThanOrEqual(-3); expect(b.maxZ).toBeLessThanOrEqual(3);
+      for (const other of boxes.slice(i + 1)) expect(overlaps(b, other)).toBe(false);
+    }
+  });
+  it("retains recorded dimensions for a piece without a GLB", () => {
+    const s = generateRoomLayoutMatrix(brief, [item("sofa", "anchor", 1000, { w: 2.4, d: 1, h: 0.8 })]).scene;
+    expect(s.curatedAssets[0].glbUrl).toBe("");
+    expect(s.curatedAssets[0].dimensionsCubic).toEqual({ w: 2.4, d: 1, h: 0.8 });
+  });
+  it("prioritizes active project pieces", () => {
+    const pool = [item("a", "seat", 100), { ...item("z", "seat", 200), projectPriority: true }];
+    expect(selectLayoutCandidates(brief, pool)[0].componentId).toBe("z");
+  });
   it("places the table exactly 0.6 m in front of the sofa", () => {
     const [s, t] = generateRoomLayoutMatrix(brief, cat).scene.curatedAssets;
     expect(t.position[2] - 0.3 - (s.position[2] + 0.5)).toBeCloseTo(0.6);

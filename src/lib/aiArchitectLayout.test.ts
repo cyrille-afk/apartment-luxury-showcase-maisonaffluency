@@ -19,6 +19,9 @@ const out = (tableY = 4.4, extra: ArchitectOutput["placements"] = []): Architect
 });
 
 describe("AI architect layout rules", () => {
+  it("rejects an empty AI response instead of accepting a €0 successful layout", () => {
+    expect(validateArchitectLayout({ ...out(), placements: [] }, brief, cat, rows, []).ok).toBe(false);
+  });
   it("budgets on trade cost (RRP less tier discount), not RRP", () => {
     expect(rows.find((r) => r.sku === "sofa")?.trade_cost).toBe(18000);
     // RRP total 30,000 equals budget; trade total 27,000 fits.

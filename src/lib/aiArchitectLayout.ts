@@ -47,6 +47,7 @@ export interface ArchitectValidation { ok: boolean; errors: string[]; scene: AIC
 export function validateArchitectLayout(out: ArchitectOutput, brief: LayoutBrief, catalogue: LiveCatalogueItem[], rows: ArchitectCatalogRow[], anchors: ArchitecturalAnchor[]): ArchitectValidation {
   const { width: W, length: L, height: H } = brief.roomDimensions;
   const errors: string[] = [];
+  if (!out.placements?.length) errors.push("No furniture was placed");
   const bySku = new Map(rows.map((r) => [r.sku, r]));
   const items = new Map(catalogue.map((c) => [c.componentId, c]));
   const anchorRects = anchorsForPrompt(anchors, W, L).map((a) => rect(a.position[0], a.position[1], a.width_m, a.length_m));
@@ -57,6 +58,9 @@ export function validateArchitectLayout(out: ArchitectOutput, brief: LayoutBrief
     const row = bySku.get(p.sku);
     if (!row) { errors.push(`${p.sku}: not in catalogue`); continue; }
     if (row.trade_cost == null) { errors.push(`${row.name}: Price upon Request — cannot be placed`); continue; }
+    if (!Array.isArray(p.position) || p.position.length !== 3 || !p.position.every(Number.isFinite) || p.position[2] !== 0) { errors.push(`${row.name}: invalid floor position`); continue; }
+    if (!items.has(p.sku)) { errors.push(`${row.name}: missing product`); continue; }
+    if (placed.some((q) => q.p.sku === p.sku)) { errors.push(`${row.name}: duplicate product`); continue; }
     if (![0, 90, 180, 270].includes(p.rotation)) { errors.push(`${row.name}: rotation ${p.rotation} not allowed`); continue; }
     const turned = p.rotation === 90 || p.rotation === 270;
     const r = rect(p.position[0], p.position[1], turned ? row.depth_m : row.width_m, turned ? row.width_m : row.depth_m);
@@ -76,7 +80,10 @@ export function validateArchitectLayout(out: ArchitectOutput, brief: LayoutBrief
   }
 
   if (errors.length) return { ok: false, errors, scene: null, tradeSpend: spend };
-  const assets = placed.map(({ p }) => toAsset(items.get(p.sku)!, [round(p.position[0] - W / 2), 0, round(p.position[1] - L / 2)], [0, (p.rotation * Math.PI) / 180, 0]));
+  const assets = placed.flatMap(({ p }) => {
+    const item = items.get(p.sku);
+    return item ? [toAsset(item, [round(p.position[0] - W / 2), 0, round(p.position[1] - L / 2)], [0, (p.rotation * Math.PI) / 180, 0])] : [];
+  });
   const rrp = assets.reduce((s, a) => s + a.priceAtCuration, 0);
   return {
     ok: true, errors, tradeSpend: spend,

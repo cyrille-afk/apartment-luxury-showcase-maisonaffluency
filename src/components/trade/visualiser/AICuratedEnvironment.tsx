@@ -39,6 +39,9 @@ const AICuratedEnvironment = ({ schema, selectedId, onSelect, onAssetTransform, 
         brand_name: "",
         image_url: null,
         dimensions: null,
+        width_mm: a.dimensionsCubic ? a.dimensionsCubic.w * 1000 : null,
+        depth_mm: a.dimensionsCubic ? a.dimensionsCubic.d * 1000 : null,
+        height_mm: a.dimensionsCubic ? a.dimensionsCubic.h * 1000 : null,
         glb_url: a.glbUrl,
         position: a.position,
         rotation: a.rotation,
@@ -73,7 +76,7 @@ const AICuratedEnvironment = ({ schema, selectedId, onSelect, onAssetTransform, 
       <Suspense fallback={<Html center><span className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Loading assets…</span></Html>}>
         {schema.curatedAssets.map((asset, i) => (
           <group key={instanceIdFor(i, asset.sku)} name={`camera-piece-${instanceIdFor(i, asset.sku)}`}>
-          <SceneObject
+          {asset.glbUrl ? <Suspense fallback={<ArchitecturalVolume asset={asset} name={pieceNames?.get(asset.componentId) ?? asset.sku} selected={selectedId === instanceIdFor(i, asset.sku)} onSelect={() => onSelect(instanceIdFor(i, asset.sku))} />}><SceneObject
             key={instanceIdFor(i, asset.sku)}
             object={objects[i]}
             scaleVector={asset.scale}
@@ -83,7 +86,7 @@ const AICuratedEnvironment = ({ schema, selectedId, onSelect, onAssetTransform, 
             onSelect={onSelect}
             onTransform={(_id, position, rotation) => onAssetTransform(i, position, rotation)}
             onDragStateChange={onDragStateChange}
-          />
+          /></Suspense> : <ArchitecturalVolume asset={asset} name={pieceNames?.get(asset.componentId) ?? asset.sku} selected={selectedId === instanceIdFor(i, asset.sku)} onSelect={() => onSelect(instanceIdFor(i, asset.sku))} />}
           </group>
         ))}
         {children}
@@ -93,3 +96,17 @@ const AICuratedEnvironment = ({ schema, selectedId, onSelect, onAssetTransform, 
 };
 
 export default AICuratedEnvironment;
+
+/** Dimensioned, selectable massing stays visible even without a catalogue GLB. */
+function ArchitecturalVolume({ asset, name, selected, onSelect }: { asset: AICuratedSceneSchema["curatedAssets"][number]; name: string; selected: boolean; onSelect: () => void }) {
+  const size = asset.dimensionsCubic ?? { w: 0.8, d: 0.8, h: 0.8 };
+  return <group position={asset.position} rotation={asset.rotation} scale={asset.scale}>
+    <mesh position={[0, size.h / 2, 0]} castShadow receiveShadow onClick={(event) => { event.stopPropagation(); onSelect(); }}>
+      <boxGeometry args={[size.w, size.h, size.d]} />
+      <meshStandardMaterial color={ANCHOR_COLOR[selected ? "window" : "door"]} roughness={0.85} />
+    </mesh>
+    <Html position={[0, size.h + 0.1, 0]} center distanceFactor={9} style={{ pointerEvents: "none" }}>
+      <span className="block max-w-32 truncate border border-border bg-background px-2 py-1 text-xs text-foreground">{name}</span>
+    </Html>
+  </group>;
+}

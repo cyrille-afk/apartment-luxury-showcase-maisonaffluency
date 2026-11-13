@@ -21,7 +21,7 @@ const INSTRUCTIONS = `You are a principal interior architect and a deterministic
 7. HARD CONSTRAINT: Items MUST NOT collide with architectural_anchors, exceed room_dimensions, or overlap with each other's bounding boxes.
 
 ### CURATORIAL & FINANCIAL RULES
-1. Select items from \`available_catalog\` that strictly match the design aesthetic specified in \`client_brief\`.
+1. Prefer room-appropriate items and style matches from \`available_catalog\`, which is already ranked for the active project and room. Style is subjective: missing style_tokens are neutral, never a reason to exclude furniture. If fewer than 3 pieces match the aesthetic, use available room-appropriate catalogue pieces within budget. Place at least 3 distinct pieces when they fit; never return an empty layout when priced furniture fits. Zone seating centrally, coffee tables in front, side tables beside seating and consoles along perimeter walls with clear circulation.
 2. BUDGET CAP: The cumulative \`trade_cost\` of all placed items MUST NOT exceed \`client_brief.budget_eur\`. Do not use RRP figures.
 3. PRICE UPON REQUEST (POR): Any items missing a numerical \`trade_cost\` value must be ignored completely.
 
