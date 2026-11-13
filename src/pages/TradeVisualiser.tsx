@@ -384,6 +384,8 @@ const TradeVisualiser = () => {
   // null = no selection or none linked → show the global library.
   const [linkedMaterials, setLinkedMaterials] = useState<VisualiserMaterial[] | null>(null);
   const [finishCategory, setFinishCategory] = useState<string>("all");
+  // Temporary finish shown on the selected piece while hovering/focusing a swatch; never saved.
+  const [previewMaterial, setPreviewMaterial] = useState<VisualiserMaterial | null>(null);
   const [materialSearch, setMaterialSearch] = useState("");
   const [finishTarget, setFinishTarget] = useState<FinishTarget>("all");
   const [textureParts, setTextureParts] = useState<Record<string, FinishPart[]>>({});
@@ -816,6 +818,7 @@ const TradeVisualiser = () => {
 
   /** Applies a swatch to the whole piece or to a single GLB sub-mesh group. */
   const applyMaterial = (material: VisualiserMaterial) => {
+    setPreviewMaterial(null);
     setActiveMaterial(material);
     armedMaterialRef.current = !selectedId;
     if (!selectedId) {
@@ -871,6 +874,13 @@ const TradeVisualiser = () => {
     [linkedMaterials],
   );
   useEffect(() => { setFinishCategory("all"); }, [selectedProductId]);
+  useEffect(() => { setPreviewMaterial(null); }, [selectedId, effectiveTarget]);
+  const canvasObjects = useMemo(
+    () => (previewMaterial && selectedId
+      ? objects.map((object) => (object.instanceId === selectedId ? withPartMaterial(object, effectiveTarget, previewMaterial) : object))
+      : objects),
+    [objects, previewMaterial, selectedId, effectiveTarget],
+  );
 
   const uploadBackdrop = (file: File | null, matchPerspective = false) => {
     if (!file) return;
@@ -1044,7 +1054,7 @@ const TradeVisualiser = () => {
             onInitialReady={revealInitialRoom}
             onContextState={setContextState}
             focusRef={focusRef}
-            objects={objects}
+            objects={canvasObjects}
             selectedId={selectedId}
             orbitEnabled={orbitEnabled}
             hasBackdrop={Boolean(backdropSrc)}
@@ -1221,7 +1231,7 @@ const TradeVisualiser = () => {
             )}
             <div data-testid="finish-swatches" className="mt-3 flex max-h-32 gap-3 overflow-x-auto pb-2">
               {filteredMaterials.slice(0, 24).map((material) => (
-                <Button variant="ghost" key={material.id} aria-label={`Apply ${material.name} to ${targetLabel(effectiveTarget, partGroupLabels)}`} onClick={() => applyMaterial(material)} className="h-auto w-16 shrink-0 flex-col items-center gap-0 px-0 py-1 text-center" title={`${material.brand_name} — ${material.name}${material.category ? ` · ${material.category}` : ""}`}>
+                <Button variant="ghost" key={material.id} aria-label={`Apply ${material.name} to ${targetLabel(effectiveTarget, partGroupLabels)}`} onClick={() => applyMaterial(material)} onPointerEnter={() => setPreviewMaterial(material)} onPointerLeave={() => setPreviewMaterial(null)} onFocus={() => setPreviewMaterial(material)} onBlur={() => setPreviewMaterial(null)} className="h-auto w-16 shrink-0 flex-col items-center gap-0 px-0 py-1 text-center" title={`${material.brand_name} — ${material.name}${material.category ? ` · ${material.category}` : ""}`}>
                   {material.image_url
                     ? <img src={material.image_url} alt="" className={cn("h-10 w-10 rounded-full border border-foreground/10 object-cover", targetMaterial?.id === material.id && "ring-1 ring-foreground ring-offset-2")} />
                     : <span aria-hidden className={cn("block h-10 w-10 rounded-full border border-foreground/10", targetMaterial?.id === material.id && "ring-1 ring-foreground ring-offset-2")} style={{ backgroundColor: material.color ?? "var(--muted)" }} />}
@@ -1230,7 +1240,7 @@ const TradeVisualiser = () => {
                 </Button>
               ))}
             </div>
-            <p data-testid="active-finish" aria-live="polite" className={cn(microLabel, "mt-1 truncate text-foreground")}>{targetMaterial?.name ?? (effectiveTarget !== "all" && effectiveTarget !== "upholstery" && effectiveTarget !== "backrest" ? selected.material?.name : null) ?? "No finish applied"}</p>
+            <p data-testid="active-finish" aria-live="polite" className={cn(microLabel, "mt-1 truncate text-foreground")}>{previewMaterial ? `Previewing ${previewMaterial.name} — click to apply` : null}{!previewMaterial && (targetMaterial?.name ?? (effectiveTarget !== "all" && effectiveTarget !== "upholstery" && effectiveTarget !== "backrest" ? selected.material?.name : null) ?? "No finish applied")}</p>
             <FinishPresets
               object={selected}
               onRestore={(preset) => {
