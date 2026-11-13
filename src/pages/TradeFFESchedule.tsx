@@ -88,11 +88,11 @@ function UnitPriceWithSource({
 }) {
   const isQuote = source === "quote";
   return (
-    <span className="inline-flex items-center gap-1.5">
-      €{(cents / 100).toFixed(0)}
+    <span className="flex min-w-0 max-w-full flex-col items-start gap-1 whitespace-normal">
+      <span className="max-w-full break-all">€{(cents / 100).toFixed(0)}</span>
       <span
         className={
-          "rounded px-1 py-0.5 text-[10px] font-medium uppercase tracking-wide " +
+          "max-w-full break-all rounded px-1 py-0.5 text-[10px] font-medium uppercase tracking-wide " +
           (isQuote ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")
         }
         title={isQuote ? "Price saved on the quote line" : "Price taken from the catalogue"}
@@ -108,11 +108,11 @@ function UnitPriceWithSource({
         const diffLabel = `${sign}€${absAmount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${sign}${pctLabel}%)`;
         return (
           <span
-            className="inline-flex items-center gap-1 rounded bg-amber-500/15 px-1 py-0.5 text-[10px] font-medium uppercase tracking-wide text-amber-700"
+            className="flex min-w-0 max-w-full items-start gap-1 rounded bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground"
             title={`Saved line price differs from the current catalogue price (€${(catalogueCents / 100).toFixed(2)}): ${diffLabel}`}
           >
-            <AlertTriangle className="h-3 w-3" aria-hidden="true" />
-            Differs {diffLabel}
+            <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
+            <span className="min-w-0 break-words [overflow-wrap:anywhere]">Differs {diffLabel}</span>
           </span>
         );
       })()}
@@ -973,7 +973,7 @@ export default function TradeFFESchedule() {
                               {isColVisible("client") && <td className={`${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground`}><TruncatedCellText value={item.client_name} /></td>}
                               {isColVisible("studio") && <td className={`${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground`}><TruncatedCellText value={item.studio_name} /></td>}
                               {isColVisible("qty") && <td className={`${tableDensity.td} text-center font-body ${tableDensity.qty} text-foreground`}>{item.quantity}</td>}
-                              {isColVisible("unit_trade") && <td className={`whitespace-nowrap ${tableDensity.td} font-body ${tableDensity.body} text-foreground tabular-nums`}>{item.unit_price_cents ? <UnitPriceWithSource cents={item.unit_price_cents} source={item.price_source} differsFromCatalogue={item.price_differs_from_catalogue} catalogueCents={item.catalogue_price_cents} /> : "TBD"}</td>}
+                              {isColVisible("unit_trade") && <td className={`overflow-hidden ${tableDensity.td} font-body ${tableDensity.body} text-foreground tabular-nums`}>{item.unit_price_cents ? <UnitPriceWithSource cents={item.unit_price_cents} source={item.price_source} differsFromCatalogue={item.price_differs_from_catalogue} catalogueCents={item.catalogue_price_cents} /> : "TBD"}</td>}
                               {isColVisible("total") && <td className={`whitespace-nowrap ${tableDensity.td} font-body ${tableDensity.body} font-medium text-foreground tabular-nums`}>{item.unit_price_cents ? `€${((item.unit_price_cents * item.quantity) / 100).toFixed(0)}` : "TBD"}</td>}
                               {isColVisible("lead") && <td className={`whitespace-nowrap ${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground`}>{lead === 0 ? <span className="text-emerald-700 font-medium">In stock</span> : lead != null ? `${lead} wks` : "—"}</td>}
                               {isColVisible("stage") && <td className={`${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground`}><TruncatedCellText value={STAGE_LABEL[item.kanban_status || ""] || item.kanban_status} /></td>}
