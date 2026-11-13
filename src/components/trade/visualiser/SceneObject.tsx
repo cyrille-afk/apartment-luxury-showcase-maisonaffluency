@@ -657,6 +657,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
       [group.position.x, FLOOR_Y, group.position.z],
       [0, group.rotation.y, 0],
     );
+    invalidateFrame();
   };
 
   const content = (
@@ -725,6 +726,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
                 group.rotation.x = 0;
                 group.rotation.z = 0;
               }
+              invalidateFrame();
             }}
           />
         </>
