@@ -48,6 +48,7 @@ import { ChevronDown, Download, Grid2X2, Layers, MoveHorizontal, SlidersHorizont
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { checkpointStatusText, type CheckpointEvent } from "@/lib/visualiserRenderCheckpoint";
+import type { SceneCaptureHandle } from "@/components/trade/visualiser/InitialRoomReveal";
 import { captureCanvasPng, downloadDataUrl, mockupCapturePrep, mockupFilename, nextPaintedFrame } from "@/lib/visualiserExport";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -264,6 +265,7 @@ const TradeVisualiser = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const fileRef = useRef<HTMLInputElement>(null);
   const canvasWrapRef = useRef<HTMLDivElement>(null);
+  const captureHandle = useRef<SceneCaptureHandle | null>(null);
 
   const [products, setProducts] = useState<CatalogueProduct[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -977,7 +979,13 @@ const TradeVisualiser = () => {
     const hadSelection = selectedId;
     if (prep.hideGrid) setShowGrid(false);
     if (prep.clearSelection) setSelectedId(null); // keep the transform gizmo out of live mockups
-    if (prep.hideGrid || prep.clearSelection) {
+    if (!pathTrace) {
+      // Finish textures load asynchronously; never capture pieces before their materials are applied.
+      const deadline = Date.now() + 20000;
+      while (captureHandle.current && !captureHandle.current.modelsReady() && Date.now() < deadline) await nextPaintedFrame();
+      captureHandle.current?.invalidate();
+    }
+    if (prep.hideGrid || prep.clearSelection || !pathTrace) {
       await nextPaintedFrame();
       await nextPaintedFrame();
     }
@@ -1075,6 +1083,7 @@ const TradeVisualiser = () => {
             roomBounds={activeProject?.state.bounds ?? DEFAULT_LAYOUT_BOUNDS}
             projectArchitecture={activeProject && activeProject.view !== "plan" ? { floorPlanUrl: activeProject.state.floorPlanUrl, columns: activeProject.state.columns } : null}
             onInitialReady={revealInitialRoom}
+            captureHandle={captureHandle}
             onContextState={setContextState}
             focusRef={focusRef}
             objects={canvasObjects}

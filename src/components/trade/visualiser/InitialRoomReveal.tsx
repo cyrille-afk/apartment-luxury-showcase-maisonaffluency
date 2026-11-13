@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 
 export function InitialAssetsCommitted({ onReady }: { onReady: (ready: boolean) => void }) {
   useEffect(() => { onReady(true); return () => onReady(false); }, [onReady]);
@@ -21,5 +21,24 @@ export default function InitialRoomReveal({ ready, modelCount, onReady }: { read
     revealed.current = true;
     pending.current = requestAnimationFrame(onReady);
   });
+  return null;
+}
+export type SceneCaptureHandle = { modelsReady: () => boolean; invalidate: () => void };
+
+/** Lets mockup export wait until every piece's finishes are loaded into its materials. */
+export function SceneCaptureProbe({ modelCount, handle }: { modelCount: number; handle: { current: SceneCaptureHandle | null } }) {
+  const scene = useThree((s) => s.scene);
+  const invalidate = useThree((s) => s.invalidate);
+  useEffect(() => {
+    handle.current = {
+      invalidate: () => invalidate(),
+      modelsReady: () => {
+        let loaded = 0;
+        scene.traverse((node) => { if (node.userData.visualiserInitialReady === true && node.parent?.userData !== node.userData) loaded += 1; });
+        return loaded >= modelCount;
+      },
+    };
+    return () => { handle.current = null; };
+  }, [scene, invalidate, modelCount, handle]);
   return null;
 }

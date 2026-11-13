@@ -28,7 +28,7 @@ import PathTracerLayer from "./PathTracerLayer";
 import LuxuryBackdrop from "./LuxuryBackdrop";
 import UploadedEnvironmentBackdrop from "./UploadedEnvironmentBackdrop";
 import { LUXURY_BACKDROP, windowLightPosition } from "./luxuryBackdropSettings";
-import InitialRoomReveal, { InitialAssetsCommitted } from "./InitialRoomReveal";
+import InitialRoomReveal, { InitialAssetsCommitted, SceneCaptureProbe, type SceneCaptureHandle } from "./InitialRoomReveal";
 import type { PhotorealFrameCaptureRef } from "@/lib/visualiserPhotorealGhost";
 import { Bloom, EffectComposer, DepthOfField, N8AO, ToneMapping } from "@react-three/postprocessing";
 import { ToneMappingMode, type DepthOfFieldEffect } from "postprocessing";
@@ -259,6 +259,7 @@ interface VisualiserCanvasProps {
   /** Active-project plan compiled into the room: blueprint floor, walls at bounds, columns. */
   projectArchitecture?: { floorPlanUrl: string | null; columns: PlanColumn[] } | null;
   onInitialReady?: () => void;
+  captureHandle?: { current: SceneCaptureHandle | null };
   onContextState?: (state: CanvasContextState) => void;
   isEditable?: boolean;
   objects: PlacedObject[];
@@ -380,6 +381,7 @@ const VisualiserCanvas = ({
   roomBounds,
   projectArchitecture,
   onInitialReady,
+  captureHandle,
   onContextState,
   isEditable = true,
   objects,
@@ -488,6 +490,7 @@ const VisualiserCanvas = ({
     }}
     onPointerMissed={() => onSelect(null)}
   >
+    {captureHandle && <SceneCaptureProbe handle={captureHandle} modelCount={objects.filter((object) => Boolean(object.glb_url)).length} />}
     {onInitialReady && <InitialRoomReveal ready={roomReady && objectsReady && environmentReady} modelCount={objects.filter((object) => Boolean(object.glb_url)).length} onReady={onInitialReady} />}
     <RenderOnDemand
       signature={`plan:${JSON.stringify(projectArchitecture ?? null)}:${JSON.stringify(roomBounds ?? null)}|photo:${JSON.stringify(photoCalibration)}|lighting:${JSON.stringify(advancedRendering)}:${lighting.lightScale}|environment:${environmentSource}|${floorFinish}|${floorExtension}|${floorPatternScale}|${showRearWall}|${wallHeight}|${ceilingHeight}|${ceilingThickness}|${ceilingOpening}|${floorGlare}|${wallColor}|${wallCustomHex ?? ""}|${wallFinish}|${wallFinishIntensity}|${featureWallFinish}|${rugColor}|${rugBorderColor}|${rugBorderThicknessMm}|${rugBorderTwistMm}|${rugBorderRoughness}|${rugWeave}|${rugPile}|${JSON.stringify(rugLayout)}|${showRug ? "rug" : "no-rug"}|${backdropColor ?? ""}|${backdropBrightness}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
