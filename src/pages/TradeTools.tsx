@@ -15,6 +15,7 @@ import { useProjects } from "@/hooks/useProjects";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { projectWorkflow, specificationStages, stageTargetStatus, type SpecificationStage, type StageCompletion, type StageTarget } from "@/lib/specificationWorkflow";
 
@@ -361,7 +362,15 @@ export default function TradeTools() {
           </h2>
           {cat.label === "Specification" && (
             <section aria-label="Specification project overview" className="mb-6 border-t border-border">
-              <h3 className="font-body text-sm font-medium text-foreground py-4">Project overview</h3>
+              <Accordion type="single" collapsible>
+                <AccordionItem value="project-overview" className="border-0">
+                  <AccordionTrigger aria-label="Project overview" className="cursor-pointer gap-3 font-body text-sm text-foreground hover:no-underline [&>svg]:h-4 [&>svg]:w-4 motion-reduce:transition-none [&>svg]:motion-reduce:transition-none">
+                    <span className="flex flex-1 flex-wrap items-center justify-between gap-2 text-left">
+                      <span>Project overview</span>
+                      <span className="text-xs font-normal text-muted-foreground">{projectsLoading ? 'Loading…' : `${projects.filter(project => project.status === 'active').length} active projects`}</span>
+                    </span>
+                  </AccordionTrigger>
+                  <AccordionContent className="pb-0">
               {projectsLoading || progressQuery.isPending ? <p className="text-sm text-muted-foreground pb-4">Loading project overview…</p>
                 : progressQuery.isError ? <div role="alert" className="flex items-center gap-2 pb-4 text-sm text-destructive">Project overview unavailable.<Button variant="ghost" size="sm" onClick={() => void progressQuery.refetch()}>Try again</Button></div>
                 : !projects.length ? <p className="text-sm text-muted-foreground pb-4">No projects available</p>
@@ -394,6 +403,9 @@ export default function TradeTools() {
                     </article>
                   );
                 })}
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </section>
           )}
           {cat.label === "Specification" && (
@@ -420,7 +432,7 @@ export default function TradeTools() {
               {progressReady && editQuery.isSuccess && !editQuery.data && <p className="text-xs text-muted-foreground">View-only project</p>}
             </div>
           )}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+          <div className={cn("grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3", cat.label === "Specification" && "auto-rows-fr")}>
             {cat.tools.map((tool) => {
               const isFav = favorites.includes(tool.url);
               const stage = cat.label === "Specification" ? specificationStages.find(stage => stage.url === tool.url) : undefined;
@@ -440,7 +452,7 @@ export default function TradeTools() {
                     </div>
                     <div className="min-w-0 pr-6">
                       <span className="font-body text-sm font-medium text-foreground block">{tool.title}</span>
-                      <span className="font-body text-xs text-muted-foreground leading-snug block mt-0.5">
+                      <span className={cn("font-body text-xs text-muted-foreground leading-snug mt-0.5", stage ? "line-clamp-2 h-8" : "block")}>
                         {tool.description}
                       </span>
                     </div>

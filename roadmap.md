@@ -1,5 +1,9 @@
 # Roadmap
 
+## Compact Specification hub
+- [x] Collapse project overview by default with an animated accordion bar, muted active-project count and chevron; reserve two-line description slots on Specification cards only.
+- [x] Signed-in initial collapse, active project count, expand/collapse, refresh default and phone interaction verified without overflow/page errors; descriptions occupy two lines and Specification grid uses equal-height rows. Build OK.
+
 ## Specification target dates and overdue tracking
 - [x] Add project-saved per-stage target dates, save/clear controls and upcoming/due-today/overdue indicators on cards and project overview; completed stages never show overdue and reopening retains targets.
 - [x] Ten regressions pass; signed-in target save/reload, overdue removal on completion, reopening retaining deadlines, future Upcoming status, second-project isolation and clear restored original data. Desktop/phone dates fit with no overflow/page errors; project-scoped policies verified and anonymous grants revoked; build OK.
