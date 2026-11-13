@@ -38,6 +38,7 @@ import { Box as BoxIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAiLayoutForm } from "@/hooks/useAiLayoutForm";
 import { anchorsForPrompt, buildArchitectCatalog, validateArchitectLayout, type ArchitectOutput } from "@/lib/aiArchitectLayout";
+import { canUseAiLayout } from "@/lib/aiLayoutAccess";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { supabase } from "@/integrations/supabase/client";
 import RoomOverviewCamera from "@/components/trade/visualiser/RoomOverviewCamera";
@@ -829,7 +830,7 @@ const TradeAILayoutStudio = () => {
               </div>
             ))}
           </div>
-          <Button className="w-full" onClick={videoStatus?.isAdmin ? generateWithAI : generate} disabled={loading || aiLoading || curating || catLoading || !!catError}>
+          <Button className="w-full" onClick={canUseAiLayout(videoStatus) ? generateWithAI : generate} disabled={loading || aiLoading || curating || catLoading || !!catError}>
             {loading || aiLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
             {loading || aiLoading ? "Generating layout..." : "Generate Room Layout with AI"}
           </Button>

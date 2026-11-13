@@ -121,6 +121,47 @@ export async function requireAdmin(
   return auth;
 }
 
+/** Require an admin/super_admin role OR a gold/platinum trade tier. */
+export async function requireAdminOrGoldTier(
+  req: Request,
+  source = "unknown",
+): Promise<AuthOk | AuthErr> {
+  const auth = await requireUser(req, source);
+  if (!auth.ok) return auth;
+  const svc = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+  );
+  // Retry the lookups: a transient database blip must never be reported
+  // as "not allowed".
+  let allowed: boolean | null = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const [roles, profile] = await Promise.all([
+      svc.from("user_roles").select("role").eq("user_id", auth.userId).in("role", ["admin", "super_admin"]),
+      svc.from("profiles").select("trade_tier").eq("id", auth.userId).maybeSingle(),
+    ]);
+    if (roles.error || profile.error) {
+      await new Promise((r) => setTimeout(r, 200 * (attempt + 1)));
+      continue;
+    }
+    const tier = (profile.data as { trade_tier?: string } | null)?.trade_tier;
+    allowed = (roles.data?.length ?? 0) > 0 || tier === "gold" || tier === "platinum";
+    break;
+  }
+  if (allowed === null) {
+    return {
+      ok: false,
+      status: 503,
+      body: { error: "Could not verify your permissions, please retry" },
+    };
+  }
+  if (!allowed) {
+    recordAuthFailure(req, source, "edge_forbidden", auth.userId);
+    return { ok: false, status: 403, body: { error: "Forbidden" } };
+  }
+  return auth;
+}
+
 /** Tiny in-memory per-IP / per-user rate limiter (best-effort, edge-instance scoped). */
 const buckets = new Map<string, { count: number; resetAt: number }>();
 export function rateLimit(

@@ -1,7 +1,8 @@
-// AI architect layout: admin-only. Arranges catalogue pieces from a brief using the
-// approved architect prompt. Output is re-validated client-side (bounds, overlap,
-// anchors, 0.6 m gap, trade-cost budget) before anything is shown.
-import { requireAdmin } from "../_shared/auth.ts";
+// AI architect layout: admins and gold/platinum trade members. Arranges catalogue
+// pieces from a brief using the approved architect prompt. Output is re-validated
+// client-side (bounds, overlap, anchors, 0.6 m gap, trade-cost budget) before
+// anything is shown.
+import { requireAdminOrGoldTier } from "../_shared/auth.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -60,7 +61,7 @@ const SCHEMA = {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
-  const auth = await requireAdmin(req, "ai-architect-layout");
+  const auth = await requireAdminOrGoldTier(req, "ai-architect-layout");
   if (!auth.ok) return json(auth.body, auth.status);
   const key = Deno.env.get("LOVABLE_API_KEY");
   if (!key) return json({ error: "AI is not configured" }, 500);
