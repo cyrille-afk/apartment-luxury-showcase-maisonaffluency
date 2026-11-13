@@ -4,7 +4,7 @@ import {
   Image, Users, FolderOpen, Layers, FileText, FileSpreadsheet, Scissors,
   Columns, Paintbrush, MessageCircle, CalendarClock, Package, Truck,
   CalendarDays, Wallet, RefreshCw, ArrowRightLeft, GraduationCap, Box, BookOpen,
-  Wand2, Star, Search, X, Scan, Presentation, ClipboardList, CalendarRange, CheckCircle2, Circle,
+  Wand2, Star, Search, X, Scan, Presentation, ClipboardList, CalendarRange, CheckCircle2, Circle, Save,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { categorySlug } from "@/lib/toolsBreadcrumbs";
@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { projectWorkflow, specificationStages, type SpecificationStage, type StageCompletion } from "@/lib/specificationWorkflow";
+import { projectWorkflow, specificationStages, stageTargetStatus, type SpecificationStage, type StageCompletion, type StageTarget } from "@/lib/specificationWorkflow";
 
 type Tool = { title: string; description: string; url: string; icon: any };
 type ToolCategory = { label: string; tools: Tool[] };
@@ -80,6 +80,29 @@ function CompletionDate({ value }: { value: string | undefined }) {
   return <time dateTime={value} title={date.toLocaleString('en-GB')} className="block text-xs text-muted-foreground">{date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</time>;
 }
 
+function TargetDateEditor({ title, value, disabled, pending, onSave }: { title: string; value: string; disabled: boolean; pending: boolean; onSave: (date: string) => void }) {
+  const [draft, setDraft] = useState(value);
+  useEffect(() => setDraft(value), [value]);
+  return <div className="space-y-1.5">
+    <div className="flex items-center justify-between gap-1 min-w-0">
+      <label htmlFor={`target-${title}`} className="text-xs text-muted-foreground">Target date</label>
+      <div className="flex items-center">
+      <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" title="Save target date" aria-label={`Save ${title} target date`} disabled={disabled || pending || draft === value || !draft} onClick={() => onSave(draft)}><Save className="h-3.5 w-3.5" /></Button>
+      {value && <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" title="Clear target date" aria-label={`Clear ${title} target date`} disabled={disabled || pending} onClick={() => onSave('')}><X className="h-3.5 w-3.5" /></Button>}
+      </div>
+    </div>
+    <input id={`target-${title}`} type="date" aria-label={`${title} target date`} value={draft} disabled={disabled || pending} onChange={event => setDraft(event.target.value)} className="min-w-0 w-full h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground disabled:opacity-50" />
+    {pending && <p role="status" className="text-xs text-muted-foreground">Saving target date…</p>}
+  </div>;
+}
+
+function TargetDateStatus({ value, complete = false }: { value: string | undefined; complete?: boolean }) {
+  const status = stageTargetStatus(value, complete);
+  if (!status || !value) return null;
+  const date = new Date(`${value}T12:00:00`);
+  return <p className={cn('text-xs', status === 'Overdue' ? 'text-destructive' : 'text-muted-foreground')}><span>{status}</span> · <time dateTime={value}>{date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</time></p>;
+}
+
 export default function TradeTools() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -109,6 +132,30 @@ export default function TradeTools() {
     refetchInterval: 30000,
   });
   const activeProjectId = projects.some(project => project.id === projectId) ? projectId : "";
+  const targetKey = ['specification-targets', user?.id];
+  const targetsQuery = useQuery({
+    queryKey: targetKey, enabled: Boolean(user), refetchInterval: 30000,
+    queryFn: async () => {
+      const rows: StageTarget[] = [];
+      for (let offset = 0; ; offset += 500) {
+        const { data, error } = await supabase.from('project_specification_targets').select('project_id,stage,target_date').order('project_id').order('stage').range(offset, offset + 499);
+        if (error) throw error;
+        rows.push(...(data || []));
+        if (!data || data.length < 500) break;
+      }
+      return rows;
+    },
+  });
+  const targetMutation = useMutation({
+    mutationFn: async ({ project, stage, date }: { project: string; stage: SpecificationStage; date: string }) => {
+      if (!user) throw new Error('Sign in required');
+      const result = date
+        ? await supabase.from('project_specification_targets').upsert({ project_id: project, stage, target_date: date }, { onConflict: 'project_id,stage' })
+        : await supabase.from('project_specification_targets').delete().eq('project_id', project).eq('stage', stage);
+      if (result.error) throw result.error;
+    },
+    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: targetKey }); },
+  });
   const editQuery = useQuery({
     queryKey: ["specification-project-edit", user?.id, activeProjectId],
     enabled: Boolean(user && activeProjectId),
@@ -129,7 +176,7 @@ export default function TradeTools() {
     },
     onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: progressKey }); },
   });
-  const workflow = projectWorkflow(activeProjectId, progressQuery.data || []);
+  const workflow = projectWorkflow(activeProjectId, progressQuery.data || [], targetsQuery.data || []);
   const progressReady = Boolean(activeProjectId && progressQuery.isSuccess);
 
   useEffect(() => {
@@ -319,16 +366,17 @@ export default function TradeTools() {
                 : progressQuery.isError ? <div role="alert" className="flex items-center gap-2 pb-4 text-sm text-destructive">Project overview unavailable.<Button variant="ghost" size="sm" onClick={() => void progressQuery.refetch()}>Try again</Button></div>
                 : !projects.length ? <p className="text-sm text-muted-foreground pb-4">No projects available</p>
                 : projects.map(project => {
-                  const summary = projectWorkflow(project.id, progressQuery.data || []);
+                  const summary = projectWorkflow(project.id, progressQuery.data || [], targetsQuery.data || []);
                   return (
                     <article key={project.id} aria-label={`${project.name} Specification overview`} className="border-b border-border py-4 grid grid-cols-1 lg:grid-cols-[220px_1fr_1fr] gap-4 lg:gap-6">
                       <div className="min-w-0 space-y-2">
-                        <Button variant="link" className="p-0 h-auto text-left whitespace-normal justify-start text-foreground" disabled={completion.isPending}
+                        <Button variant="link" className="p-0 h-auto text-left whitespace-normal justify-start text-foreground" disabled={completion.isPending || targetMutation.isPending}
                           aria-label={`View ${project.name} Specification stages`}
-                          onClick={() => { setProjectId(project.id); completion.reset(); document.getElementById('specification-project-progress')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>
+                          onClick={() => { setProjectId(project.id); completion.reset(); targetMutation.reset(); document.getElementById('specification-project-progress')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>
                           {project.name}
                         </Button>
                         <p className="text-xs text-muted-foreground">{summary.count}/8 complete · {summary.percent}%</p>
+                        {targetsQuery.isSuccess && summary.overdueCount > 0 && <p className="text-xs text-destructive">{summary.overdueCount} overdue</p>}
                         <Progress value={summary.percent} className="h-1 bg-muted" aria-label={`${project.name} Specification completion`} />
                       </div>
                       <div className="min-w-0">
@@ -340,7 +388,7 @@ export default function TradeTools() {
                       <div className="min-w-0">
                         <h4 className="text-xs font-medium text-foreground mb-2">Remaining · {summary.remainingStages.length}</h4>
                         {summary.remainingStages.length === 0 ? <p className="text-xs text-primary">All stages complete</p> : <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
-                          {summary.remainingStages.map(stage => <li key={stage.id} className="flex items-start gap-2 text-xs text-muted-foreground"><Circle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" /><span>{categories.find(category => category.label === 'Specification')?.tools.find(tool => tool.url === stage.url)?.title}</span></li>)}
+                          {summary.remainingStages.map(stage => <li key={stage.id} className="flex items-start gap-2 text-xs text-muted-foreground"><Circle className={cn('h-3.5 w-3.5 shrink-0', stage.targetStatus === 'Overdue' && 'text-destructive')} aria-hidden="true" /><div className="min-w-0"><span>{categories.find(category => category.label === 'Specification')?.tools.find(tool => tool.url === stage.url)?.title}</span><TargetDateStatus value={stage.targetDate} /></div></li>)}
                         </ul>}
                       </div>
                     </article>
@@ -357,7 +405,7 @@ export default function TradeTools() {
                     {projectsLoading ? "Loading projects…" : !projects.length ? "No projects available" : !activeProjectId ? "Select a project" : progressQuery.isError ? "Progress unavailable" : !progressReady ? "Loading progress…" : `${workflow.count} of 8 stages complete · ${workflow.percent}%`}
                   </p>
                 </div>
-                <Select value={activeProjectId} onValueChange={value => { setProjectId(value); completion.reset(); }} disabled={projectsLoading || !projects.length || completion.isPending}>
+                <Select value={activeProjectId} onValueChange={value => { setProjectId(value); completion.reset(); targetMutation.reset(); }} disabled={projectsLoading || !projects.length || completion.isPending || targetMutation.isPending}>
                   <SelectTrigger className="w-full sm:w-80" aria-label="Workflow project"><SelectValue placeholder="Select a project" /></SelectTrigger>
                   <SelectContent>
                     {projects.map(project => <SelectItem key={project.id} value={project.id}>{project.name}{progressQuery.isSuccess ? ` · ${projectWorkflow(project.id, progressQuery.data).count}/8` : ""}</SelectItem>)}
@@ -367,6 +415,8 @@ export default function TradeTools() {
               {progressReady && <Progress value={workflow.percent} className="h-1.5 bg-muted" aria-label="Specification workflow completion" />}
               {(progressQuery.isError || editQuery.isError) && <div className="flex items-center gap-2 text-sm text-destructive" role="alert">Unable to load project progress.<Button variant="ghost" size="sm" onClick={() => { void progressQuery.refetch(); void editQuery.refetch(); }}>Try again</Button></div>}
               {completion.isError && <p role="alert" className="text-sm text-destructive">Could not save this stage. Please try again.</p>}
+              {targetsQuery.isError && <div role="alert" className="flex items-center gap-2 text-sm text-destructive">Target dates unavailable.<Button variant="ghost" size="sm" onClick={() => void targetsQuery.refetch()}>Try again</Button></div>}
+              {targetMutation.isError && <p role="alert" className="text-sm text-destructive">Could not save the target date. Please try again.</p>}
               {progressReady && editQuery.isSuccess && !editQuery.data && <p className="text-xs text-muted-foreground">View-only project</p>}
             </div>
           )}
@@ -409,7 +459,8 @@ export default function TradeTools() {
                     <Star className={cn("h-3.5 w-3.5", isFav && "fill-accent")} />
                   </button>
                   {stage && (
-                    <div className="w-full flex items-center gap-2 border-t border-border pt-3 mt-auto">
+                    <div className="w-full space-y-3 border-t border-border pt-3 mt-auto">
+                    <div className="flex items-center gap-2">
                       <Checkbox id={`workflow-${stage.id}`} aria-label={`Mark ${tool.title} complete`} checked={progressReady && isComplete}
                         disabled={!progressReady || editQuery.data !== true || completion.isPending}
                         onCheckedChange={checked => completion.mutate({ project: activeProjectId, stage: stage.id, complete: checked === true })} />
@@ -417,6 +468,9 @@ export default function TradeTools() {
                         {completion.isPending && completion.variables?.stage === stage.id ? "Saving…" : !progressReady ? "—" : isComplete ? "Complete" : "Not complete"}
                       </label>
                       {progressReady && isComplete && <CompletionDate value={workflow.completionDates.get(stage.id)} />}</div>
+                    </div>
+                    <TargetDateEditor key={`${activeProjectId}-${stage.id}`} title={tool.title} value={workflow.targetDates.get(stage.id) || ''} disabled={!progressReady || !targetsQuery.isSuccess || editQuery.data !== true || completion.isPending || targetMutation.isPending} pending={targetMutation.isPending && targetMutation.variables?.stage === stage.id} onSave={date => targetMutation.mutate({ project: activeProjectId, stage: stage.id, date })} />
+                    {progressReady && targetsQuery.isSuccess && <TargetDateStatus value={workflow.targetDates.get(stage.id)} complete={isComplete} />}
                     </div>
                   )}
                 </div>

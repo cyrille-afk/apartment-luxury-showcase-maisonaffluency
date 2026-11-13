@@ -7542,6 +7542,32 @@ export type Database = {
           },
         ]
       }
+      project_specification_targets: {
+        Row: {
+          project_id: string
+          stage: string
+          target_date: string
+        }
+        Insert: {
+          project_id: string
+          stage: string
+          target_date: string
+        }
+        Update: {
+          project_id?: string
+          stage?: string
+          target_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_specification_targets_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_workspace_shares: {
         Row: {
           board_id: string

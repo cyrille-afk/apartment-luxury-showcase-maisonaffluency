@@ -1,5 +1,9 @@
 # Roadmap
 
+## Specification target dates and overdue tracking
+- [x] Add project-saved per-stage target dates, save/clear controls and upcoming/due-today/overdue indicators on cards and project overview; completed stages never show overdue and reopening retains targets.
+- [x] Ten regressions pass; signed-in target save/reload, overdue removal on completion, reopening retaining deadlines, future Upcoming status, second-project isolation and clear restored original data. Desktop/phone dates fit with no overflow/page errors; project-scoped policies verified and anonymous grants revoked; build OK.
+
 ## Specification stage completion dates
 - [x] Show existing saved completion dates on finished tool cards and in every project overview; reopening removes the date and recompletion uses the newly recorded date.
 - [x] Six regressions pass; signed-in Mood Board completion shows the same saved date on its card and project overview after reload, second project stays independent, desktop/phone fit without overflow or page errors. Original progress restored; build OK.

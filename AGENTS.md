@@ -11,6 +11,7 @@
 - Password-setup resends reuse the review drawer and retain attempt keys on retry; never change approval. Verified activation links the account; the queue reads user_id for setup status.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Specification targets persist separately from completion under project view/edit RLS; projectWorkflow compares local calendar days and flags only unfinished past targets — reopening preserves deadlines without marking work complete.
 - Specification stage dates come only from saved completed_at values, shared through projectWorkflow for cards and overview; reopening clears the current date — avoids invented dates and project leakage.
 - Shared product attribution delegates generated house badges to editionLabel; product-specific exceptions use explicit catalogue edition metadata — prevents product pages from bypassing gallery badge rules.
 - Mood Board Builder requests a server-validated full recommendation pool and paginates it locally in six-item slices, exhausting the short final slice before looping; composition changes reset the cursor and invalidate responses — Refresh must be immediate, nonrepeating within a cycle and free of extra inference.

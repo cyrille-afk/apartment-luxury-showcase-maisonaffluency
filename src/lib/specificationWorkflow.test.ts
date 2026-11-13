@@ -1,7 +1,29 @@
 import { describe, it, expect } from 'vitest';
-import { projectWorkflow, specificationStages } from './specificationWorkflow';
+import { projectWorkflow, specificationStages, stageTargetStatus, localCalendarDay } from './specificationWorkflow';
 
 describe('Specification workflow', () => {
+  it('marks only unfinished targets before today overdue', () => {
+    expect(stageTargetStatus('2026-11-12', false, '2026-11-13')).toBe('Overdue');
+    expect(stageTargetStatus('2026-11-12', true, '2026-11-13')).toBeUndefined();
+  });
+  it('keeps today due today and future dates upcoming', () => {
+    expect(stageTargetStatus('2026-11-13', false, '2026-11-13')).toBe('Due today');
+    expect(stageTargetStatus('2026-11-14', false, '2026-11-13')).toBe('Upcoming');
+    expect(stageTargetStatus(undefined, false, '2026-11-13')).toBeUndefined();
+  });
+  it('preserves targets independently of completion and scopes overdue counts to the project', () => {
+    const targets = [{ project_id: 'one', stage: 'quote', target_date: '2026-11-12' }, { project_id: 'two', stage: 'mood-board', target_date: '2026-11-11' }];
+    const completed = projectWorkflow('one', [{ project_id: 'one', stage: 'quote', completed_at: '2026-11-13' }], targets, '2026-11-13');
+    expect(completed.overdueCount).toBe(0);
+    expect(completed.targetDates.get('quote')).toBe('2026-11-12');
+    const reopened = projectWorkflow('one', [], targets, '2026-11-13');
+    expect(reopened.overdueCount).toBe(1);
+    expect(reopened.targetDates.has('mood-board')).toBe(false);
+    expect(reopened.remainingStages.find(stage => stage.id === 'quote')?.targetStatus).toBe('Overdue');
+  });
+  it('compares local calendar dates rather than shifting them through UTC', () => {
+    expect(localCalendarDay(new Date(2026, 10, 13, 0, 1))).toBe('2026-11-13');
+  });
   it('uses each stage’s saved completion timestamp without crossing project boundaries', () => {
     const result = projectWorkflow('one', [
       { project_id: 'one', stage: 'mood-board', completed_at: '2026-11-12T02:30:00Z' },
