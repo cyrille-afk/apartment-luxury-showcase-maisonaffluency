@@ -55,7 +55,7 @@ const VisualiserInspector = ({
     <aside
       aria-label="Object inspector"
       data-testid="visualiser-inspector"
-      className={cn(panelClass, "max-h-[calc(100%-14rem)] overflow-y-auto")}
+      className={cn(panelClass, "max-h-[calc(100vh-260px)] overflow-y-auto")}
     >
       {sidebarActions && <div className="mb-4">{sidebarActions}</div>}
       <div className="flex items-start justify-between gap-3">

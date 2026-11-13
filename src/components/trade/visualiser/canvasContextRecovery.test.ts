@@ -1,0 +1,31 @@
+import { afterEach, expect, it, vi } from "vitest";
+import { attachCanvasContextRecovery } from "./canvasContextRecovery";
+afterEach(() => vi.useRealTimers());
+it("prevents permanent loss and redraws the same canvas when restored", () => {
+  vi.useFakeTimers();
+  const canvas = document.createElement("canvas"), invalidate = vi.fn(), state = vi.fn();
+  const dispose = attachCanvasContextRecovery(canvas, invalidate, state);
+  const loss = new Event("webglcontextlost", { cancelable: true });
+  canvas.dispatchEvent(loss);
+  expect(loss.defaultPrevented).toBe(true);
+  expect(state).toHaveBeenLastCalledWith("restoring");
+  canvas.dispatchEvent(new Event("webglcontextrestored"));
+  expect(invalidate).toHaveBeenCalledTimes(1);
+  expect(state).toHaveBeenLastCalledWith("ready");
+  vi.advanceTimersByTime(12000);
+  expect(state).toHaveBeenCalledTimes(2);
+  dispose();
+});
+it("offers fallback after 12 seconds without restoration and cleans listeners on exit", () => {
+  vi.useFakeTimers();
+  const canvas = document.createElement("canvas"), state = vi.fn();
+  const dispose = attachCanvasContextRecovery(canvas, vi.fn(), state);
+  canvas.dispatchEvent(new Event("webglcontextlost", { cancelable: true }));
+  vi.advanceTimersByTime(11999);
+  expect(state).toHaveBeenLastCalledWith("restoring");
+  vi.advanceTimersByTime(1);
+  expect(state).toHaveBeenLastCalledWith("failed");
+  dispose();
+  canvas.dispatchEvent(new Event("webglcontextrestored"));
+  expect(state).toHaveBeenCalledTimes(2);
+});

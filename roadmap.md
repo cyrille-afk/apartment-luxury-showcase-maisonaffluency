@@ -1,5 +1,9 @@
 # Roadmap
 
+## Sandbox recovery and polish
+- [x] Fixed preview source labels crashing R3F; palette toggles retain the same canvas. Real WebGL loss/restoration verified in place; a 12-second timeout exposes Retry, which remounts only the renderer and retains the piece.
+- [x] Sandbox has one client-sharing control and its dialog opens; inspector scrolls within desktop/phone bounds. Signed-in checks ran without bypasses or page errors; four regressions pass and build OK.
+
 ## Floating Visualiser palettes
 - [x] Replace stacked tool rows with build/surfaces, collapsible lighting/camera and bottom guide/export palettes; preserve existing controls and header navigation.
 - [x] Signed-in real-product placement, collapsible lighting/advanced options, grid toggling, surface menu and PNG export verified; desktop/phone fit checked and three regressions pass. Build OK. Preview source-label injection breaks R3F; scene/export verification removed those labels only in the test browser, not project code.

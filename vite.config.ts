@@ -8,6 +8,7 @@ import path from "node:path";
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
 import { emitOgManifestPlugin, emitVersionPlugin, environmentRobotsPlugin } from "./vite.plugins";
+import { visualiserSourceLabels } from "./visualiserSourceLabels";
 
 // Pin the Worker compatibility date: nitro otherwise stamps the build date into
 // dist/wrangler.json, which can be newer than the workerd binary wrangler ships
@@ -29,7 +30,7 @@ export default defineConfig({
   },
   vite: {
     define: { "import.meta.env.VITE_APP_BUILD_ID": JSON.stringify(buildId) },
-    plugins: [mcpPlugin(), emitVersionPlugin(buildId), emitOgManifestPlugin(), environmentRobotsPlugin()],
+    plugins: [mcpPlugin(), emitVersionPlugin(buildId), emitOgManifestPlugin(), environmentRobotsPlugin(), visualiserSourceLabels()],
     // React Email's parser needs entities v4.5.0; nested v5+ copies removed lib/decode.js.
     resolve: {
       // Exact-match only: a bare "entities" prefix alias hijacks parse5's newer nested entities/* imports.

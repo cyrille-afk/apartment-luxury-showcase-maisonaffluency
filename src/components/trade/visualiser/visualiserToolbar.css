@@ -34,7 +34,7 @@ details[open] > summary > .visualiser-palette-chevron { transform: rotate(180deg
 .visualiser-bottom-dock .visualiser-palette-control { padding-inline: 10px; border-radius: 999px; }
 .visualiser-dock-divider { height: 20px; width: 1px; background: var(--visualiser-palette-border); margin-inline: 4px; }
 .visualiser-assets-position { top: 230px; left: 16px; max-height: calc(100% - 320px); }
-.visualiser-workspace [data-testid="visualiser-inspector"] { top: 230px; right: auto; left: 16px; z-index: 35; max-height: calc(100% - 320px); overflow-y: auto; border-radius: 8px; border: 1px solid var(--visualiser-palette-border); box-shadow: var(--visualiser-palette-shadow); }
+.visualiser-workspace [data-testid="visualiser-inspector"] { top: 230px; right: auto; left: 16px; z-index: 35; max-height: min(calc(100vh - 260px), calc(100% - 320px)); overflow-y: auto; border-radius: 8px; border: 1px solid var(--visualiser-palette-border); box-shadow: var(--visualiser-palette-shadow); }
 .visualiser-workspace:has(.visualiser-assets-position) [data-testid="visualiser-inspector"] { left: 320px; }
 @container (max-width: 1250px) { .visualiser-dock-label { display: none; } }
 @container (max-width: 800px) {

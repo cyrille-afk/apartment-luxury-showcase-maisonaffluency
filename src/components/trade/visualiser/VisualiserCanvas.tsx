@@ -1,4 +1,5 @@
 import type { ThreeElements } from "@react-three/fiber";
+import { attachCanvasContextRecovery, type CanvasContextState } from "./canvasContextRecovery";
 
 declare module "react" {
   namespace JSX {
@@ -237,6 +238,7 @@ interface VisualiserCanvasProps {
   /** Active-project plan compiled into the room: blueprint floor, walls at bounds, columns. */
   projectArchitecture?: { floorPlanUrl: string | null; columns: PlanColumn[] } | null;
   onInitialReady?: () => void;
+  onContextState?: (state: CanvasContextState) => void;
   isEditable?: boolean;
   objects: PlacedObject[];
   selectedId: string | null;
@@ -357,6 +359,7 @@ const VisualiserCanvas = ({
   roomBounds,
   projectArchitecture,
   onInitialReady,
+  onContextState,
   isEditable = true,
   objects,
   selectedId,
@@ -431,6 +434,10 @@ const VisualiserCanvas = ({
   const [objectsReady, setObjectsReady] = useState(false);
   const [environmentReady, setEnvironmentReady] = useState(false);
   const environmentLoaded = useRef(() => setEnvironmentReady(true)).current;
+  const contextStateRef = useRef(onContextState);
+  contextStateRef.current = onContextState;
+  const contextCleanup = useRef<(() => void) | null>(null);
+  useEffect(() => () => contextCleanup.current?.(), []);
   return (
   <Canvas
     shadows={{ type: THREE.PCFShadowMap }}
@@ -445,7 +452,9 @@ const VisualiserCanvas = ({
       outputColorSpace: THREE.SRGBColorSpace,
     }}
     dpr={Math.min(window.devicePixelRatio, 2)}
-    onCreated={({ gl }) => {
+    onCreated={({ gl, invalidate }) => {
+      contextCleanup.current?.();
+      contextCleanup.current = attachCanvasContextRecovery(gl.domElement, invalidate, state => contextStateRef.current?.(state));
       RectAreaLightUniformsLib.init();
       gl.toneMapping = THREE.ACESFilmicToneMapping;
       gl.toneMappingExposure = SHOWROOM.exposure;

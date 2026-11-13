@@ -24,7 +24,7 @@ import { formatGap, nearestClearance } from "@/lib/layoutGuides";
 import { createPlacedObject, inventoryItemToPlaceable, type PlaceableProduct } from "@/lib/placedObjectFactory";
 import ProjectLayoutOverview from "@/components/trade/visualiser/ProjectLayoutOverview";
 import { Helmet } from "react-helmet-async";
-import { Link, useSearchParams } from "@/lib/router-compat";
+import { useSearchParams } from "@/lib/router-compat";
 import ToolsBreadcrumb from "@/components/trade/ToolsBreadcrumb";
 import { finishTargetsFromParts, getPartMaterial, hasAnyFinish, materialFitsTarget, targetLabel, withPartMaterial, type FinishPart, type FinishTarget } from "@/lib/visualiserFinishTargets";
 import { findProductSchema, schemaFits, schemaLabels, schemaTargets } from "@/lib/visualiserProductSchema";
@@ -242,6 +242,7 @@ const TradeVisualiser = () => {
   const initial = useMemo(() => readSandbox(sandboxStorageKey, activeProject?.state.projectId), [sandboxStorageKey]);
   const [sceneFailed, setSceneFailed] = useState(false);
   const [canvasEpoch, setCanvasEpoch] = useState(0);
+  const [contextState, setContextState] = useState<"ready" | "restoring" | "failed">("ready");
   const handleSceneCrash = useCallback(() => {
     // A renderer failure is not permission to edit the designer's composition.
     // Stop automatic retries; an explicit retry remounts only the renderer.
@@ -1018,9 +1019,10 @@ const TradeVisualiser = () => {
         }}
       >
         {!initialRoomReady && !sceneFailed && <div role="status" data-room-loading className="absolute inset-0 z-20 flex items-center justify-center bg-visualiser-canvas"><span className="text-xs text-muted-foreground">Preparing your room…</span></div>}
-        {sceneFailed && <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-background/90">
+        {contextState === "restoring" && !sceneFailed && <div role="status" className="absolute inset-0 z-20 flex items-center justify-center bg-background/90 text-sm text-muted-foreground">Restoring the 3D view… Your furniture layout is unchanged.</div>}
+        {(sceneFailed || contextState === "failed") && <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-background/90">
           <p className="text-sm text-muted-foreground">The 3D view stopped. Your furniture layout is unchanged.</p>
-          <Button variant="outline" onClick={() => { setSceneFailed(false); setCanvasEpoch((n) => n + 1); }}>Retry 3D view</Button>
+          <Button variant="outline" onClick={() => { setSceneFailed(false); setContextState("ready"); setCanvasEpoch((n) => n + 1); }}>Retry 3D view</Button>
         </div>}
         <SceneErrorBoundary key={canvasEpoch} onError={handleSceneCrash}>
         <Suspense fallback={<CanvasLoader />}>
@@ -1030,6 +1032,7 @@ const TradeVisualiser = () => {
             roomBounds={activeProject?.state.bounds ?? DEFAULT_LAYOUT_BOUNDS}
             projectArchitecture={activeProject && activeProject.view !== "plan" ? { floorPlanUrl: activeProject.state.floorPlanUrl, columns: activeProject.state.columns } : null}
             onInitialReady={revealInitialRoom}
+            onContextState={setContextState}
             focusRef={focusRef}
             objects={objects}
             selectedId={selectedId}
@@ -1098,7 +1101,7 @@ const TradeVisualiser = () => {
             {loadingProject ? " // Loading specification…" : ""}
           </p>
         </div>
-        <div className="pointer-events-auto flex flex-wrap justify-end gap-2"><Button variant="outline" size="sm" asChild><Link to="/trade/visualiser/shared-rooms"><Box className="h-3.5 w-3.5" />Shared rooms</Link></Button><VisualiserClientShare objects={objects} projectId={projectId} projectName={projectName} room={() => ({ objects, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl: backdropSrc, environmentSource, advancedRendering, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, featureWallFinish: featureWallFinishKey, rugColor: rugColorKey, rugBorderColor: rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeave: rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, rugRotation, showRug, backdropColor, backdropBrightness })} /></div>
+        <div className="pointer-events-auto flex flex-wrap justify-end gap-2"><VisualiserClientShare objects={objects} projectId={projectId} projectName={projectName} room={() => ({ objects, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl: backdropSrc, environmentSource, advancedRendering, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, featureWallFinish: featureWallFinishKey, rugColor: rugColorKey, rugBorderColor: rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeave: rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, rugRotation, showRug, backdropColor, backdropBrightness })} /></div>
       </div>
 
       {/* Inspector sidebar — reads the shared selection context */}
