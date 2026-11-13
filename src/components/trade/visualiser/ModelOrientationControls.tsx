@@ -33,12 +33,12 @@ export default function ModelOrientationControls({ orientation, onChange, onRese
   return <TooltipProvider delayDuration={200}>
     <div className="mt-4 border-t border-border pt-3" role="group" aria-label="Model orientation">
       <div className="flex items-center justify-between">
-        <p className="text-[10px] uppercase text-muted-foreground">Model orientation</p>
+        <p className="text-[10px] uppercase text-muted-foreground">Rotate model</p>
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon-sm" aria-label="Reset model orientation" onClick={() => { emitted.current = null; setDegrees(["0", "0", "0"]); onReset(); }}><RotateCcw /></Button>
           </TooltipTrigger>
-          <TooltipContent className="z-[80]">Reset to imported orientation</TooltipContent>
+          <TooltipContent className="z-[80]">Reset model rotation; keep position, piece angle and size</TooltipContent>
         </Tooltip>
       </div>
       <div className="mt-2 space-y-2">

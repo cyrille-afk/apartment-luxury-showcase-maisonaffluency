@@ -1,5 +1,9 @@
 # Roadmap
 
+## Manual furniture orientation
+- [x] Expose selected-model X/Y/Z rotation and reset controls; retain size and placement on reset.
+- [x] 27 tests pass; signed-in Frenchmen quarter-turn, inverse rotation, precise 15° tilt, refresh persistence and reset verified; floor minimum remains Y=0 and no page errors. Build OK; real-GPU feel not checked.
+
 ## Upright imports and unlocked 3D navigation
 - [x] Use floor-glide geometry ahead of dimension ratios, with exporter evidence required for X-up; positive Z-up chairs are corrected and re-grounded.
 - [x] Enable scroll zoom, pan and orbit in both 3D views with a 24m control range; preserve explicit calibrated-photo locks and 0.5m interior camera clearance.

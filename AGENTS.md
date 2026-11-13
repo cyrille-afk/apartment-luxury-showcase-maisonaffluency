@@ -11,6 +11,7 @@
 - Password-setup resends reuse the review drawer and retain attempt keys on retry; never change approval. Verified activation links the account; the queue reads user_id for setup status.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Manual model rotation uses the selected-piece orientation controls and existing persisted quaternion; reset clears import repair only, preserving position, placement yaw, scale and finishes — prevents corrective controls from erasing room edits.
 - Sandbox furniture repairs import axes using floor-contact geometry before dimension ratios (X-up requires exporter evidence), then fits recorded millimetre metadata and grounds; shared controls enable zoom/pan/orbit with 24m range while interior camera clamps retain 0.5m clearance — prevents sideways chairs, unit drift and wall clipping.
 - Visualiser scene controls float in build/surface, collapsible lighting/camera and guide/export palettes inside the canvas; preserve existing state handlers and keep breadcrumb/view navigation outside — editing controls must not shrink or remount the rendered scene.
 - Project workspace owns ToolsBreadcrumb above view tabs; embedded Visualiser omits its own breadcrumb while standalone rendering retains it — preserves one top-level navigation trail across views.

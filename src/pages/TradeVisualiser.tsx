@@ -13,6 +13,7 @@ import { architecturalDofSettings } from "@/lib/visualiserDepthOfField";
 import AdvancedRenderingOptions from "@/components/trade/visualiser/AdvancedRenderingOptions";
 import { CEILING_CONTROLS, clampCeilingHeight, clampCeilingThickness, clampCeilingOpening, type CeilingSettings } from "@/lib/visualiserCeilingSettings";
 import { parseDimensionString } from "@/lib/productDimensions";
+import { resetModelOrientation } from "@/lib/resetModelOrientation";
 import { SceneErrorBoundary } from "@/components/trade/visualiser/SceneErrorBoundary";
 import { LAST_GOOD_KEY, STABLE_AFTER_MS, preserveSceneBackup, takeRecoveryNotice } from "@/lib/visualiserSceneRecovery";
 import { LocalExrButton } from "@/components/trade/visualiser/LocalExrButton";
@@ -1119,19 +1120,12 @@ const TradeVisualiser = () => {
             />
           </Suspense>
           {selected.glb_url && <Suspense fallback={null}>
-            <details className="mt-4 border-t border-border pt-3">
-              <summary className="cursor-pointer select-none text-[10px] uppercase text-muted-foreground">
-                Model orientation — import repair only
-              </summary>
-              <p className="mt-1 text-[10px] leading-snug text-muted-foreground">
-                Only touch these if the 3D file itself imports tipped over. To angle a piece, use Piece angle above.
-              </p>
               <ModelOrientationControls
+                key={selected.instanceId}
                 orientation={selected.modelOrientation}
                 onChange={(modelOrientation) => setObjects(current => current.map(object => object.instanceId === selected.instanceId ? { ...object, modelOrientation } : object))}
-                onReset={() => setObjects(current => current.map(object => object.instanceId === selected.instanceId ? { ...object, modelOrientation: undefined, rotation: [0, 0, 0] } : object))}
+                onReset={() => setObjects(current => current.map(object => object.instanceId === selected.instanceId ? resetModelOrientation(object) : object))}
               />
-            </details>
           </Suspense>}
 
           {isBondStreetStool(selected.id) ? (
