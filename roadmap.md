@@ -1,5 +1,10 @@
 # Roadmap
 
+## Upright imports and unlocked 3D navigation
+- [x] Use floor-glide geometry ahead of dimension ratios, with exporter evidence required for X-up; positive Z-up chairs are corrected and re-grounded.
+- [x] Enable scroll zoom, pan and orbit in both 3D views with a 24m control range; preserve explicit calibrated-photo locks and 0.5m interior camera clearance.
+- [x] 35 regressions pass; signed-in Frenchmen import, wheel zoom, orbit and pan verified with no page errors. Real-device GPU feel remains unverified.
+
 ## Sandbox physical dimensions and camera bounds
 - [x] Normalize loaded furniture to recorded metre dimensions, ground on Y=0 and clip below-floor editor handles; unknown dimensions use a 1m fallback.
 - [x] Clamp eye-level camera with 0.5m wall clearance. 31 tests pass; signed-in Frenchmen armchair measured 0.8m maximum and Y=0, forced diagonal camera clamped to X=5.5/Z=3.5. Desktop/phone render without page errors; software-rendering harness passes (existing empty-room EXR fallback request returns 406). Real-device GPU performance unverified.

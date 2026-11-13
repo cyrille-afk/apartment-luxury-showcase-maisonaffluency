@@ -18,6 +18,7 @@ import { Suspense, useEffect, useState, useRef } from "react";
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import { DEFAULT_ARCHITECTURAL_DOF, foregroundFurnitureFocus, selectedObjectFocus } from "@/lib/visualiserDepthOfField";
 import { ContactShadows, Environment, Grid, Lightformer, OrbitControls, PerspectiveCamera, Html } from "@react-three/drei";
+import { VISUALISER_ORBIT_SETTINGS } from "./visualiserOrbitSettings";
 import type { FinishPart } from "@/lib/visualiserFinishTargets";
 import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/SceneObject";
 import { footprintRadius, floorFocusPoint } from "@/lib/visualiserPlacement";
@@ -425,7 +426,7 @@ const VisualiserCanvas = ({
   const showUploadedEnvironment = !photoCalibration && uploadedEnvironment && environmentSource === "empty-room-exr";
   const showLuxuryBackdrop = defaultLuxuryBackdrop && !hasCustomBackdrop && !showUploadedEnvironment && localExrState === "absent";
   const hasBackdrop = hasCustomBackdrop || showLuxuryBackdrop || showUploadedEnvironment;
-  // Uploaded interiors share the room-photo stage: fixed grounded camera, no pan.
+  // Backdrops share the grounded initial pose, not calibrated-photo input locks.
   const photoStage = Boolean(photoCalibration) || showLuxuryBackdrop || showUploadedEnvironment;
   const center: [number, number, number] = objects.length ? objects.reduce<[number, number, number]>((sum, object) => [sum[0] + object.position[0] / objects.length, sum[1] + object.position[1] / objects.length, sum[2] + object.position[2] / objects.length], [0, 0, 0]) : [0, 0, 0];
   const lighting = advancedSceneLighting(advancedRendering, pathTraceQuality?.lightIntensity ?? 1);
@@ -482,17 +483,15 @@ const VisualiserCanvas = ({
     <PerspectiveCamera makeDefault fov={workspaceCamera?.fov ?? SHOWROOM.cameraFov} position={workspaceCamera?.position ?? (photoStage ? LUXURY_BACKDROP.cameraPosition : SHOWROOM.cameraPosition)} up={[0, 1, 0]} near={0.1} far={200} onUpdate={(camera) => { if (workspaceCamera) camera.lookAt(...workspaceCamera.target); else if (photoStage) camera.lookAt(...LUXURY_BACKDROP.cameraTarget); }} />
     {photoCalibration && roomBounds && <PhotoMatchedCamera calibration={photoCalibration} bounds={roomBounds} />}
     <OrbitControls
+      {...VISUALISER_ORBIT_SETTINGS}
       makeDefault
       enabled={orbitEnabled && !photoCalibration}
-      enablePan={!photoStage}
       screenSpacePanning
       enableDamping={false}
-      minDistance={1.5}
-      maxDistance={24}
-      minPolarAngle={workspaceCamera?.polar ?? (photoStage ? LUXURY_BACKDROP.minPolarAngle : SHOWROOM.cameraPolarAngle)}
-      maxPolarAngle={workspaceCamera?.polar ?? (photoStage ? LUXURY_BACKDROP.maxPolarAngle : SHOWROOM.cameraPolarAngle)}
-      minAzimuthAngle={photoStage ? LUXURY_BACKDROP.minAzimuthAngle : -Infinity}
-      maxAzimuthAngle={photoStage ? LUXURY_BACKDROP.maxAzimuthAngle : Infinity}
+      minPolarAngle={0.05}
+      maxPolarAngle={Math.PI / 2}
+      minAzimuthAngle={-Infinity}
+      maxAzimuthAngle={Infinity}
       target={workspaceCamera?.target ?? (photoStage ? LUXURY_BACKDROP.cameraTarget : SHOWROOM.cameraTarget)}
     />
     {roomBounds && !photoCalibration && (!workspaceCamera || workspaceCamera.polar === Math.PI / 2) && <SandboxCameraBounds bounds={roomBounds} />}

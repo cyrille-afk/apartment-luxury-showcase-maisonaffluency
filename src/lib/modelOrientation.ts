@@ -62,11 +62,23 @@ export function fitUprightModel(model: Object3D, dimensions?: string | null, url
   const candidate = recorded ?? parseDimensionString(dimensions) ?? parseDimensionString(url.replace(/-/g, " "));
   const expected = candidate && [candidate.w, candidate.d, candidate.h].every(value => Number.isFinite(value) && value > 0) ? candidate : null;
   const authoredUp = new Vector3();
+  const contactUp = new Vector3();
   model.traverse(node => {
     const mesh = node as Mesh;
     if (!mesh.isMesh) return;
     const weight = mesh.geometry.getAttribute("position")?.count ?? 1;
     authoredUp.addScaledVector(Y_UP.clone().applyQuaternion(mesh.getWorldQuaternion(new Quaternion())), weight);
+    // Floor-contact geometry is stronger evidence than overall proportions:
+    // armchair backs/arms often differ substantially from catalogue dimensions.
+    if (/\b(glides?|footpads?|floor[_ -]?contacts?)\b/i.test(mesh.name)) {
+      const contact = new Box3().setFromObject(mesh).getSize(new Vector3());
+      const axes = contact.toArray();
+      const smallest = Math.min(...axes);
+      const axis = axes.indexOf(smallest);
+      if (smallest > 0 && axes.filter(value => value > smallest * 4).length === 2) {
+        contactUp.set(axis === 0 ? 1 : 0, axis === 1 ? 1 : 0, axis === 2 ? 1 : 0);
+      }
+    }
   });
   authoredUp.normalize();
   const verified = Object.entries(VERIFIED_UP).find(([id]) => url.includes(id))?.[1];
@@ -74,6 +86,9 @@ export function fitUprightModel(model: Object3D, dimensions?: string | null, url
   // the world frame; longest-axis guesses would tip wide sofas and low tables.
   if (verified) {
     frame.quaternion.setFromUnitVectors(new Vector3(...verified), Y_UP);
+  } else if (contactUp.lengthSq() > 0) {
+    const sign = authoredUp.dot(contactUp) < -0.5 ? -1 : 1;
+    frame.quaternion.setFromUnitVectors(contactUp.multiplyScalar(sign), Y_UP);
   } else if (expected && Math.min(size.x, size.y, size.z) > 0) {
     const score = (w: number, h: number, d: number) => Math.min(
       Math.abs(Math.log((w / h) / (expected.w / expected.h))) + Math.abs(Math.log((d / h) / (expected.d / expected.h))),
@@ -82,8 +97,10 @@ export function fitUprightModel(model: Object3D, dimensions?: string | null, url
     const current = score(size.x, size.y, size.z);
     const zUp = score(size.x, size.z, size.y);
     const xUp = score(size.y, size.x, size.z);
-    if (Math.min(zUp, xUp) + 0.025 < current) {
-      const axis = zUp <= xUp ? new Vector3(0, 0, authoredUp.z < 0 ? -1 : 1) : new Vector3(authoredUp.x < 0 ? -1 : 1, 0, 0);
+    // X-up needs exporter evidence: width alone must never tip a chair sideways.
+    const credibleXUp = Math.abs(authoredUp.x) > 0.5 && xUp < zUp;
+    if ((credibleXUp ? xUp : zUp) + 0.025 < current) {
+      const axis = credibleXUp ? new Vector3(authoredUp.x < 0 ? -1 : 1, 0, 0) : new Vector3(0, 0, authoredUp.z < 0 ? -1 : 1);
       frame.quaternion.setFromUnitVectors(axis, Y_UP);
     }
   }

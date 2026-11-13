@@ -14,6 +14,25 @@ function bounds(model: Group) {
   return new Box3().setFromObject(model);
 }
 describe("model import frame", () => {
+  it("corrects a positive Z-up chair with 800mm height and 590mm depth", () => {
+    const source = piece(620, 800, 590);
+    source.rotation.x = Math.PI / 2;
+    const fitted = bounds(fitUprightModel(source, null, "chair.glb", { w: 620, d: 590, h: 800 }));
+    expect(fitted.getSize(new Vector3()).y).toBeCloseTo(0.8);
+    expect(fitted.getSize(new Vector3()).z).toBeCloseTo(0.59);
+    expect(fitted.min.y).toBeCloseTo(0);
+    expect(source.getWorldQuaternion(new Quaternion()).angleTo(new Quaternion())).toBeCloseTo(0);
+  });
+  it.each([0, Math.PI / 2])("uses floor glides rather than misleading chair proportions at rotation %s", rotation => {
+    const source = piece(800, 697, 739);
+    const glides = new Mesh(new BoxGeometry(780, 5, 590), new MeshBasicMaterial());
+    glides.name = "Glides";
+    source.add(glides);
+    source.rotation.x = rotation;
+    const fitted = bounds(fitUprightModel(source, "620 × 590 × 800 mm"));
+    expect(source.getWorldQuaternion(new Quaternion()).angleTo(new Quaternion())).toBeCloseTo(0);
+    expect(fitted.min.y).toBeCloseTo(0);
+  });
   it("round trips precise decimal degree corrections", () => {
     const degrees: [number, number, number] = [12.5, -23.75, 46.125];
     modelOrientationToDegrees(modelOrientationFromDegrees(degrees)).forEach((value, index) => expect(value).toBeCloseTo(degrees[index], 4));
