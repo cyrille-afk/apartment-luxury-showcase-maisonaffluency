@@ -210,7 +210,7 @@ export function TradeSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="trade-editorial-sidebar border-r border-border bg-background">
-      <SidebarContent>
+      <SidebarContent className="pb-4">
         {/* Brand */}
         <div className={`px-5 py-8 ${collapsed ? "px-2 py-5" : ""}`}>
           <NavLink data-tour-id="tour-brand" to="/trade" className="block">

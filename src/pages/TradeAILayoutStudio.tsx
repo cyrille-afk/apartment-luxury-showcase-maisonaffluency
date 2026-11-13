@@ -297,6 +297,7 @@ const TradeAILayoutStudio = () => {
         setSkipped(result ? result.errors.map((e) => `AI rejected: ${e}`) : [error?.message ?? "AI unavailable"]);
         toast.warning("AI layout broke a room rule — showing the standard layout instead");
       }
+      void markLayoutStage();
       setOverviewRevision((r) => r + 1);
     } catch {
       setLayoutError("Your room could not be prepared. Please try again; your previous layout is unchanged.");
@@ -825,19 +826,13 @@ const TradeAILayoutStudio = () => {
               </div>
             ))}
           </div>
-          <Button className="w-full" onClick={generate} disabled={loading || aiLoading || curating || catLoading || !!catError}>
-            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-            {loading ? "Generating layout..." : "Generate Room Layout"}
+          <Button className="w-full" onClick={videoStatus?.isAdmin ? generateWithAI : generate} disabled={loading || aiLoading || curating || catLoading || !!catError}>
+            {loading || aiLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            {loading || aiLoading ? "Generating layout..." : "Generate Room Layout with AI"}
           </Button>
           <Button variant="outline" className="w-full" onClick={openInVisualiser} disabled={!scene?.curatedAssets.length}>
             <BoxIcon className="mr-2 h-4 w-4" />Open in Visualiser Sandbox
           </Button>
-          {videoStatus?.isAdmin && (
-          <Button variant="outline" className="w-full" onClick={generateWithAI} disabled={aiLoading || loading || curating || catLoading || !!catError}>
-            {aiLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-            {aiLoading ? "AI architect arranging..." : "Generate with AI architect"}
-          </Button>
-          )}
         </section>
 
         <section className="space-y-2">
