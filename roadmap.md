@@ -1,5 +1,9 @@
 # Roadmap
 
+## Natural stone and narrow parquet
+- [x] Single continuous rear wall, mirrored rough wall maps, layered simplex porous travertine and 12cm 45° oak chevron with satin-matte material.
+- [x] Signed-in Frenchmen room visibly shows natural stone and narrow chevron; one rear mesh has mirrored 1024px maps, roughness .92/metalness 0; parquet roughness .68 and metre-scaled tiling verified. Eight regressions pass, no browser errors, preview build OK. Real-GPU appearance remains unverified.
+
 ## Collapsed Piece Inspector
 - [x] Anchor the compact inspector pill below Build & Surfaces on the left, with bounded/truncated labels and narrow-screen positioning.
 - [x] Signed-in Frenchmen room: three open/close cycles retain identical canvas, renderer, scene and camera; no loading mask appears and no page errors. Pill aligns below the left toolbar without touching Lighting & Camera; readiness regression and preview build pass.

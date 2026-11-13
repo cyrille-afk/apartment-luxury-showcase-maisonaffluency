@@ -8,6 +8,7 @@ declare module "react" {
   }
 }
 import * as THREE from "three";
+import { OAK_TILE_SIZE_M, OAK_ROUGHNESS } from "@/lib/visualiserSurfacePatterns";
 import { useProceduralMaps } from "./ProceduralWallMaterial";
 import cementImage from "@/assets/room-micro-cement.jpg";
 import woolImage from "@/assets/cream-wool-rug.jpg";
@@ -67,14 +68,14 @@ function useSurfaceMaps(url: string, repeat: number, polished: boolean, glare = 
 export function Floor({ finish, glare, size, patternScale = 100 }: { finish: Exclude<RoomFloorFinish, "none">; glare: number; size?: [number, number]; patternScale?: number }) {
   const [w, d] = size ?? [80, 80];
   // Keep the plank scale identical to the 80 m studio floor (repeat per metre).
-  const baseRepeat = (finish === "oak-chevron" ? 32 : 20) * (100 / patternScale);
-  const maps = useProceduralMaps(finish, w, d, 80 / baseRepeat);
+  const tileSize = (finish === "oak-chevron" ? OAK_TILE_SIZE_M : 4) * (patternScale / 100);
+  const maps = useProceduralMaps(finish, w, d, tileSize);
   // Glare 0 = 0.05 env reflection, 100 = 0.45.
   const envMapIntensity = 0.05 + (clampFloorGlare(glare) / 100) * 0.4;
   return (
     <mesh name={`room-floor-${finish}`} position={[0, GROUND_LAYERS.floor, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
       <planeGeometry args={[w, d]} />
-      <meshStandardMaterial map={maps.color} roughnessMap={maps.roughness} roughness={floorSurfaceRoughness(finish === "oak-chevron", glare)} bumpMap={maps.bump} bumpScale={finish === "oak-chevron" ? 0.008 : 0.003} metalness={0} envMapIntensity={envMapIntensity} />
+      <meshStandardMaterial map={maps.color} roughnessMap={maps.roughness} roughness={finish === "oak-chevron" ? OAK_ROUGHNESS : floorSurfaceRoughness(false, glare)} bumpMap={maps.bump} bumpScale={finish === "oak-chevron" ? 0.008 : 0.003} metalness={0} envMapIntensity={envMapIntensity} />
     </mesh>
   );
 }

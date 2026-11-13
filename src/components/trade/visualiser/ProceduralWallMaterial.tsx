@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { useThree } from '@react-three/fiber';
 import { createProceduralSurface, type ProceduralSurface } from '@/lib/visualiserProceduralSurfaces';
+import { WALL_ROUGHNESS } from '@/lib/visualiserSurfacePatterns';
 import { FEATURE_WALL_FINISHES, type FeatureWallFinish } from '@/lib/visualiserFeatureWall';
 export function useProceduralMaps(finish: ProceduralSurface, width: number, height: number, tileSize = 2) {
   const invalidate = useThree(s => s.invalidate);
@@ -12,5 +13,5 @@ export function useProceduralMaps(finish: ProceduralSurface, width: number, heig
 export default function ProceduralWallMaterial({ finish, width, height }: { finish: FeatureWallFinish; width: number; height: number }) {
   const maps = useProceduralMaps(finish, width, height);
   const surface = FEATURE_WALL_FINISHES[finish];
-  return <meshStandardMaterial map={maps.color} bumpMap={maps.bump} roughnessMap={maps.roughness} bumpScale={surface.bumpScale} roughness={surface.roughness} metalness={0} />;
+  return <meshStandardMaterial map={maps.color} bumpMap={maps.bump} roughnessMap={maps.roughness} bumpScale={surface.bumpScale} roughness={WALL_ROUGHNESS} metalness={0} />;
 }

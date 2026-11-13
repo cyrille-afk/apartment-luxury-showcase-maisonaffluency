@@ -3,10 +3,11 @@ import * as THREE from "three";
 import { FEATURE_WALL, featureWallLayout, featureWallFinish } from "./visualiserFeatureWall";
 
 describe("architectural feature wall", () => {
-  it("creates exactly three slabs separated by two inset gaps", () => {
+  it("defines one continuous wall without joints", () => {
     const layout = featureWallLayout(new THREE.Box3());
-    expect(FEATURE_WALL.panels).toBe(3);
-    expect(layout.panelWidth * 3 + FEATURE_WALL.gap * 2).toBeCloseTo(layout.width);
+    expect(FEATURE_WALL.panels).toBe(1);
+    expect(FEATURE_WALL.gap).toBe(0);
+    expect(layout.panelWidth).toBeCloseTo(layout.width);
   });
   it("stays behind furniture without changing its bounds", () => {
     const bounds = new THREE.Box3(new THREE.Vector3(-5, 0, -6), new THREE.Vector3(3, 3, 2));
