@@ -571,6 +571,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
    * from the window and raycast manually, so the piece keeps following the
    * cursor even when it moves faster than the model or leaves the mesh.
    */
+  const invalidateFrame = useThree((state) => state.invalidate);
   const dragMove = useCallback((event: PointerEvent) => {
     const group = groupRef.current;
     if (!draggingRef.current || !group) return;
@@ -594,7 +595,9 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
     if (roomLimitsRef.current) [x, z] = clampToRoom(x, z, roomLimitsRef.current, selfRadiusRef.current);
     // Floor lock: X/Z translation only, y stays on its depth layer.
     group.position.set(x, floorYRef.current, z);
-  }, [gl, raycaster, camera, snapToGrid]);
+    // Demand frameloop: redraw so cast and contact shadows move with the piece mid-drag.
+    invalidateFrame();
+  }, [gl, raycaster, camera, snapToGrid, invalidateFrame]);
 
   const endDrag = useCallback(() => {
     if (!draggingRef.current) return;
@@ -699,6 +702,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
             onObjectChange={() => {
               const group = groupRef.current;
               if (group) group.position.y = FLOOR_Y;
+              invalidateFrame();
             }}
           />}
           {/* Outer ring: free 360° yaw so the piece can be aligned to the backdrop perspective. */}
