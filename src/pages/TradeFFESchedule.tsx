@@ -107,13 +107,23 @@ function UnitPriceWithSource({
         const pctLabel = Number.isInteger(absPct) ? absPct.toFixed(0) : absPct.toFixed(1);
         const diffLabel = `${sign}€${absAmount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${sign}${pctLabel}%)`;
         return (
-          <span
-            className="flex min-w-0 max-w-full items-start gap-1 rounded bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground"
-            title={`Saved line price differs from the current catalogue price (€${(catalogueCents / 100).toFixed(2)}): ${diffLabel}`}
-          >
-            <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
-            <span className="min-w-0 break-words [overflow-wrap:anywhere]">Differs {diffLabel}</span>
-          </span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span
+                tabIndex={0}
+                className="flex min-w-0 max-w-full cursor-help items-start gap-1 rounded bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label={`Quote price difference: ${diffLabel}`}
+              >
+                <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
+                <span className="min-w-0 break-words [overflow-wrap:anywhere]">Differs {diffLabel}</span>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-xs space-y-2 font-body text-xs">
+              <p>A saved quote may reflect an earlier catalogue price or a price agreed or adjusted for that quote. The current catalogue may have changed since it was saved.</p>
+              <p>Saved quote: €{(cents / 100).toFixed(2)}. Current catalogue: €{(catalogueCents / 100).toFixed(2)}. Difference: {diffLabel}.</p>
+              <p>The schedule keeps the saved quote price. This difference is not an extra charge.</p>
+            </TooltipContent>
+          </Tooltip>
         );
       })()}
     </span>
