@@ -20,6 +20,7 @@ import { footprintRadius } from "@/lib/visualiserPlacement";
 import { parseDimensionString } from "@/lib/productDimensions";
 import { SHOWROOM, floorSurfaceRoughness, floorRoughnessTexel } from "@/lib/showroomRendering";
 import RecessedCeiling from "./RecessedCeiling";
+import { GROUND_LAYERS, GROUND_OVERLAY_OFFSET } from "@/lib/visualiserGroundLayers";
 import type { CeilingSettings } from "@/lib/visualiserCeilingSettings";
 
 /** Isolate UV repeats and linear data maps from the shared image cache. */
@@ -71,7 +72,7 @@ export function Floor({ finish, glare, size, patternScale = 100 }: { finish: Exc
   // Glare 0 = 0.05 env reflection, 100 = 0.45.
   const envMapIntensity = 0.05 + (clampFloorGlare(glare) / 100) * 0.4;
   return (
-    <mesh name={`room-floor-${finish}`} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+    <mesh name={`room-floor-${finish}`} position={[0, GROUND_LAYERS.floor, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
       <planeGeometry args={[w, d]} />
       <meshStandardMaterial map={maps.color} roughnessMap={maps.roughness} roughness={floorSurfaceRoughness(finish === "oak-chevron", glare)} bumpMap={maps.bump} bumpScale={finish === "oak-chevron" ? 0.008 : 0.003} metalness={0} envMapIntensity={envMapIntensity} />
     </mesh>
@@ -271,7 +272,7 @@ function Rug({ objects, color, borderColor = "match", borderThicknessMm, borderT
     <group name="room-rug-placement" position={[cx, RUG_TOP_Y, cz]} rotation={[0, rugYaw(layout?.rotation), 0]}>
     <group rotation={[-Math.PI / 2, 0, 0]}>
     <mesh name="room-area-rug" geometry={geometry} receiveShadow>
-      <meshStandardMaterial color={color === "cream" ? SHOWROOM.rim : rugColorHex(color)} map={maps.color} normalMap={maps.normal} normalScale={new THREE.Vector2(0.25 + (p / 100) * 0.25, 0.25 + (p / 100) * 0.25)} roughness={0.88 + (p / 100) * 0.04} metalness={0} envMapIntensity={0.05} />
+      <meshStandardMaterial {...GROUND_OVERLAY_OFFSET} color={color === "cream" ? SHOWROOM.rim : rugColorHex(color)} map={maps.color} normalMap={maps.normal} normalScale={new THREE.Vector2(0.25 + (p / 100) * 0.25, 0.25 + (p / 100) * 0.25)} roughness={0.88 + (p / 100) * 0.04} metalness={0} envMapIntensity={0.05} />
     </mesh>
     </group>
     </group>

@@ -12,9 +12,10 @@ import softboxAsset from "@/assets/studio-softbox.exr.asset.json";
 import windowAsset from "@/assets/window-interior.exr.asset.json";
 import emptyRoomAsset from "@/assets/small-empty-room.exr.asset.json";
 import type { CeilingSettings } from "@/lib/visualiserCeilingSettings";
+import { FURNITURE_CONTACT_LAYER, GROUND_LAYERS, GROUND_OVERLAY_OFFSET, KEY_SHADOW } from "@/lib/visualiserGroundLayers";
 import { RUG_TOP_Y } from "./RoomSurfaces";
 import type { RugBorderColor, RugColor, RugWeave } from "@/lib/visualiserRoomSurfaces";
-import { Suspense, useEffect, useState, useRef } from "react";
+import { Suspense, useEffect, useLayoutEffect, useState, useRef } from "react";
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import { DEFAULT_ARCHITECTURAL_DOF, foregroundFurnitureFocus, selectedObjectFocus } from "@/lib/visualiserDepthOfField";
 import { ContactShadows, Environment, Grid, Lightformer, OrbitControls, PerspectiveCamera, Html } from "@react-three/drei";
@@ -225,6 +226,21 @@ const RenderOnDemand = ({ signature }: { signature: string }) => {
   }, [domElement, invalidate]);
 
   return null;
+};
+
+/** Capture furniture only: floors, grids and architecture must not smear into the depth map. */
+const FurnitureContactShadows = (props: React.ComponentProps<typeof ContactShadows>) => {
+  const group = useRef<THREE.Group>(null);
+  useLayoutEffect(() => {
+    group.current?.traverse(child => {
+      if (child instanceof THREE.Camera) child.layers.set(FURNITURE_CONTACT_LAYER);
+      if (child instanceof THREE.Mesh) {
+        const materials = Array.isArray(child.material) ? child.material : [child.material];
+        for (const material of materials) Object.assign(material, GROUND_OVERLAY_OFFSET);
+      }
+    });
+  });
+  return <ContactShadows ref={group} {...props} />;
 };
 
 const SceneLoader = () => (
@@ -446,7 +462,7 @@ const VisualiserCanvas = ({
   useEffect(() => () => contextCleanup.current?.(), []);
   return (
   <Canvas
-    shadows={{ type: THREE.PCFShadowMap }}
+    shadows={{ type: THREE.PCFSoftShadowMap }}
     frameloop="demand"
     gl={{
       alpha: true,
@@ -467,7 +483,7 @@ const VisualiserCanvas = ({
       gl.outputColorSpace = THREE.SRGBColorSpace;
       gl.localClippingEnabled = true;
       gl.shadowMap.enabled = true;
-      gl.shadowMap.type = THREE.PCFShadowMap;
+      gl.shadowMap.type = THREE.PCFSoftShadowMap;
     }}
     onPointerMissed={() => onSelect(null)}
   >
@@ -515,22 +531,22 @@ const VisualiserCanvas = ({
       intensity={lighting.directionalIntensity}
       color={SHOWROOM.key}
       castShadow
-      shadow-mapSize-width={2048}
-      shadow-mapSize-height={2048}
+      shadow-mapSize-width={KEY_SHADOW.mapSize}
+      shadow-mapSize-height={KEY_SHADOW.mapSize}
       shadow-camera-far={40}
       shadow-camera-left={-12}
       shadow-camera-right={12}
       shadow-camera-top={12}
       shadow-camera-bottom={-12}
-      shadow-bias={lighting.shadowBias * 0.4}
-      shadow-normalBias={lighting.shadowNormalBias * 0.4}
+      shadow-bias={lighting.shadowBias}
+      shadow-normalBias={lighting.shadowNormalBias}
       shadow-radius={lighting.shadowRadius}
       shadow-intensity={lighting.shadowIntensity}
     />
     {/* Fill: opposite side, low and cool. */}
-    <directionalLight position={[7, 4, 4]} intensity={lighting.fillIntensity} color={SHOWROOM.fill} />
+    <directionalLight castShadow={false} position={[7, 4, 4]} intensity={lighting.fillIntensity} color={SHOWROOM.fill} />
     {/* Rim: behind the pieces to lift silhouettes. */}
-    <directionalLight position={[0, 6, -9]} intensity={0.6 * lighting.lightScale} color={SHOWROOM.rim} />
+    <directionalLight castShadow={false} position={[0, 6, -9]} intensity={0.6 * lighting.lightScale} color={SHOWROOM.rim} />
 
     {/* Local IBL: metals need reflections or they render solid black. Toolbar-switchable HDRI. */}
     {/* Photoreal: no solid grey void — escaping rays must hit the emissive HDRI. */}
@@ -545,37 +561,19 @@ const VisualiserCanvas = ({
       {!projectArchitecture && <RoomSurfaces floor={hasBackdrop ? "none" : floorFinish} rearWall={hasBackdrop ? false : showRearWall} objects={objects} glare={floorGlare} wallHeight={wallHeight} ceilingHeight={ceilingHeight} ceilingThickness={ceilingThickness} ceilingOpening={ceilingOpening} wallColor={wallColor} wallFinish={wallFinish} wallCustomHex={wallCustomHex} wallFinishIntensity={wallFinishIntensity} rugColor={rugColor} rugBorderColor={rugBorderColor} rugBorderThicknessMm={rugBorderThicknessMm} rugBorderTwistMm={rugBorderTwistMm} rugBorderRoughness={rugBorderRoughness} rugWeave={rugWeave} rugPile={rugPile} rugLayout={rugLayout} showRug={showRug && !hasBackdrop} />}
       <InitialAssetsCommitted onReady={setRoomReady} />
     </Suspense>
-    {!pathTrace && !hasBackdrop && floorFinish === "none" && (
-      <ContactShadows
-        position={[0, 0.002, 0]}
-        scale={40}
-        opacity={lighting.contactOpacity * (0.45 / SHOWROOM.contactOpacity)}
-        blur={lighting.contactBlur * (2.6 / 1.5)}
-        far={4}
-        resolution={1024}
-        depthWrite={false}
-      />
-    )}
-    {/* Grounding shadows where legs/bases meet the room floor — stops pieces floating on the wood. */}
-    {/* Raised just above the flat rug's surface so shadows land on the rug fibers;
-        when the rug is hidden they drop back onto the floor itself. */}
-    {!pathTrace && !hasBackdrop && floorFinish !== "none" && (
-      <ContactShadows
-        position={[0, (showRug ? RUG_TOP_Y : 0) + 0.002, 0]}
-        scale={15}
-        opacity={lighting.contactOpacity}
-        blur={lighting.contactBlur * 0.6}
-        far={1}
-        resolution={2048}
-        color="#2b2015"
-        depthWrite={false}
-      />
-    )}
-    {/* Faint floor grid at Y = 0 — the design-canvas ground reference. Hideable for room-photo backdrops. */}
-    {!pathTrace && !photoCalibration && (showLuxuryBackdrop || showUploadedEnvironment) && <ContactShadows position={[center[0], 0.002, center[2]]} opacity={lighting.contactOpacity * (LUXURY_BACKDROP.contactOpacity / SHOWROOM.contactOpacity)} blur={lighting.contactBlur * (LUXURY_BACKDROP.contactBlur / 1.5)} scale={LUXURY_BACKDROP.contactScale} far={1.5} resolution={1024} depthWrite={false} />}
+    {!pathTrace && <FurnitureContactShadows
+      position={[center[0], (showRug && !hasBackdrop && !projectArchitecture && floorFinish !== "none" ? RUG_TOP_Y : GROUND_LAYERS.floor) + GROUND_LAYERS.contact, center[2]]}
+      scale={Math.max(8, ...objects.map(object => Math.hypot(object.position[0] - center[0], object.position[2] - center[2]) * 2 + footprintRadius(parseDimensionString(object.dimensions), object.scale) * 2 + 2))}
+      opacity={lighting.contactOpacity}
+      blur={lighting.contactBlur}
+      far={1.5}
+      resolution={2048}
+      depthWrite={false}
+    />}
     {showGrid && !hasCustomBackdrop && !showLuxuryBackdrop && !showUploadedEnvironment && (
       <Grid
-        position={[0, 0.001, 0]}
+        position={[0, GROUND_LAYERS.grid, 0]}
+        onUpdate={grid => { if (grid.material instanceof THREE.Material) Object.assign(grid.material, GROUND_OVERLAY_OFFSET); }}
         infiniteGrid
         cellSize={0.25}
         cellThickness={0.5}
@@ -589,11 +587,11 @@ const VisualiserCanvas = ({
       />
     )}
     {/* Invisible shadow-catcher floor: lets the backdrop's own flooring read through the shadows. */}
-    {!photoCalibration && !showLuxuryBackdrop && !showUploadedEnvironment && (hasBackdrop || floorFinish === "none") && <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+    {!photoCalibration && !showLuxuryBackdrop && !showUploadedEnvironment && (hasBackdrop || floorFinish === "none") && <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, GROUND_LAYERS.catcher, 0]}>
       <planeGeometry args={[80, 80]} />
-      <shadowMaterial transparent opacity={lighting.shadowCatcherOpacity} />
+      <shadowMaterial {...GROUND_OVERLAY_OFFSET} depthWrite={false} transparent opacity={lighting.shadowCatcherOpacity} />
     </mesh>}
-    {!pathTrace && photoCalibration && <ContactShadows position={[center[0], 0.002, center[2]]} opacity={lighting.contactOpacity * (LUXURY_BACKDROP.contactOpacity / SHOWROOM.contactOpacity)} blur={lighting.contactBlur * (LUXURY_BACKDROP.contactBlur / 1.5)} scale={LUXURY_BACKDROP.contactScale} far={1.5} resolution={1024} depthWrite={false} />}
+
 
     <Suspense fallback={<SceneLoader />}>
       {objects.map((object) => (

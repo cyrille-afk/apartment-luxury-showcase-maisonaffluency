@@ -1,5 +1,9 @@
 # Roadmap
 
+## Clean Sandbox grounding
+- [x] Separate floor/rug/grid/shadow depth, strip oversized embedded import floors, and use one acne-safe key with subtle furniture-only soft contact shadows.
+- [x] 44 regressions pass; signed-in Frenchmen on Oak Chevron verified before/after a 0.35m inspector move, with clean following shadows, floor Y=0, furniture-only contact capture and exactly one shadow-casting key at requested settings. No page errors; build OK. Real-device GPU appearance remains unverified.
+
 ## Furniture shadow tuning
 - [x] Add paired softness/intensity and shadow-only reset controls; connect all live floor/photo shadow paths without surface edits, preserving saved settings and physical Photoreal shadows.
 - [x] 11 shadow regressions pass; signed-in Madison sliders reach 100% softness and 0/100% intensity with unchanged floor/furniture; refresh restores both values. Screenshots confirm controls and furniture shadows; build OK. Reset end-to-end remains unverified because browser input stalls after reload; real-GPU appearance not checked.

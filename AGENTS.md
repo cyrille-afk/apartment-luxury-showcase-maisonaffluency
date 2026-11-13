@@ -11,6 +11,7 @@
 - Password-setup resends reuse the review drawer and retain attempt keys on retry; never change approval. Verified activation links the account; the queue reads user_id for setup status.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Ground layers share visualiserGroundLayers: floor Y=0, elevated offset overlays; furniture-only contact depth captures exclude architecture and grids, and the single key uses fixed acne-safe bias. Imported oversized thin ground sheets detach on instance clones before fitting — avoids floor streaks and contaminated sizing without changing textures or cached assets.
 - Furniture-shadow controls reuse persisted advancedRendering: softness is inverse sharpness and intensity drives every live contact/cast/catcher path, including photos, without floor material writes; Photoreal retains physical shadows — keeps tuning independent of surface textures.
 - Visualiser finish tabs and mapper share isNamedFinishTarget, exposing declared/named roles only and hiding anonymous import groups without rewriting saved material assignments — supplier controls must not count exporter IDs as finishes.
 - Uploaded floor-plan drawings remain 2D underlays only; ProjectArchitecture uses bounds/columns and the selected room floor finish (shared RoomSurfaces Floor, sized to bounds, shadow-receiving) — never the blueprint image, so the floor picker works inside projects without printing technical marks.

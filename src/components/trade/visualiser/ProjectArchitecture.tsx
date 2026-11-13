@@ -22,7 +22,7 @@ export default function ProjectArchitecture({ bounds, columns, floorFinish = "oa
   return (
     <group name="Project architecture">
       {floorFinish === "none" ? (
-        <mesh name="Plan floor" rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <mesh name="Plan floor" position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
           <planeGeometry args={[width, depth]} />
           <meshStandardMaterial color="#e9e4dc" roughness={0.85} />
         </mesh>

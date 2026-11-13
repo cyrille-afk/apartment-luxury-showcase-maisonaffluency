@@ -1,3 +1,5 @@
+import { KEY_SHADOW } from "./visualiserGroundLayers";
+
 export type EnvironmentSourcePref = "empty-room-exr" | "studio-hdr" | "studio-softbox-exr" | "window-interior-exr";
 
 export const VISUALISER_ENVIRONMENTS = [
@@ -29,17 +31,17 @@ export function advancedSceneLighting(settings: AdvancedRenderingSettings, light
   const sharpness = shadowSharpness / 100;
   const contrast = contrastIntensity / 100;
   const lightScale = Number.isFinite(lightIntensity) ? Math.min(3, Math.max(0.2, lightIntensity)) : 1;
-  const biasScale = Math.max(1, lightScale);
+
   return {
     lightScale,
-    contactOpacity: (clampAdvancedRendering(settings).contactShadowIntensity ?? 72) / 100,
+    contactOpacity: 0.35 * ((clampAdvancedRendering(settings).contactShadowIntensity ?? 72) / 72),
     // Preserve authored opacity at the default 72%, but allow complete shadow removal.
     shadowIntensity: Math.min(1, ((clampAdvancedRendering(settings).contactShadowIntensity ?? 72) / 72)),
     shadowCatcherOpacity: 0.28 * ((clampAdvancedRendering(settings).contactShadowIntensity ?? 72) / 72),
-    shadowBias: (-0.0007 + sharpness * 0.0006) / biasScale,
-    shadowNormalBias: (0.035 - sharpness * 0.03) / biasScale,
+    shadowBias: KEY_SHADOW.bias,
+    shadowNormalBias: KEY_SHADOW.normalBias,
     shadowRadius: 4 - sharpness * 3.75,
-    contactBlur: 2.8 - sharpness * 2.6,
+    contactBlur: 3.4 - sharpness * 2.4,
     directionalIntensity: (1.25 + contrast * 2.5) * lightScale,
     ambientIntensity: (0.35 - contrast * 0.3) * lightScale,
     fillIntensity: (0.6 - contrast * 0.4) * lightScale,

@@ -20,6 +20,8 @@ import type { OpenSubdivModule } from "@nasedkinpv/opensubdiv-wasm";
 import { applyCoffeeTableMarbleProjection, disposeMarbleSlabMaps, isStoneSlabFinish } from "@/lib/visualiserMarbleProjection";
 import { withCachedModelLoader } from "@/lib/visualiserModelCache";
 import { addWoodRoughness, deepenArmchairWeave, disposeMicroSurfaceMaps } from "@/lib/visualiserMicroSurfaces";
+import { stripEmbeddedGroundPlanes } from "@/lib/visualiserEmbeddedGround";
+import { FURNITURE_CONTACT_LAYER } from "@/lib/visualiserGroundLayers";
 import { resolveDimensions } from "@/lib/productDimensions";
 
 export type PlacedObject = {
@@ -358,11 +360,13 @@ function useFittedModel(object: PlacedObject) {
   }, []);
   return useMemo(() => {
     const clone = scene.clone(true);
+    stripEmbeddedGroundPlanes(clone);
     const groupLabels = assignParts(clone, partOverrides, findProductSchema(object.product_name)?.materialRoles ?? {});
     clone.userData.groupLabels = Object.fromEntries(groupLabels);
     clone.traverse((child) => {
       const mesh = child as THREE.Mesh;
       if (!mesh.isMesh) return;
+      mesh.layers.enable(FURNITURE_CONTACT_LAYER);
       mesh.castShadow = true;
       mesh.receiveShadow = true;
       const role = mesh.userData.partRole as FinishPart | null;
