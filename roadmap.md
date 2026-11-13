@@ -1,5 +1,9 @@
 # Roadmap
 
+## Remove 3D floor drawing marks
+- [x] Traced marks to the uploaded blueprint mapped onto ProjectArchitecture's floor; removed the 3D texture loader without changing furniture or shadows.
+- [x] Signed-in saved-plan reload and both 3D views have no blueprint floor map; 2D retains the upload, shadow receiver stays enabled and screenshot confirms furniture contact shadows. 31 regressions pass; build OK. Real-GPU appearance not checked.
+
 ## Manual furniture orientation
 - [x] Expose selected-model X/Y/Z rotation and reset controls; retain size and placement on reset.
 - [x] 27 tests pass; signed-in Frenchmen quarter-turn, inverse rotation, precise 15° tilt, refresh persistence and reset verified; floor minimum remains Y=0 and no page errors. Build OK; real-GPU feel not checked.

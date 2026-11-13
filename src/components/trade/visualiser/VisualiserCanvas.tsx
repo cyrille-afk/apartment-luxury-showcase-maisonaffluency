@@ -535,7 +535,7 @@ const VisualiserCanvas = ({
     <Suspense fallback={null}>
       {showLuxuryBackdrop && <LuxuryBackdrop />}
       {/* Both renderers retain the designed architecture; only room photos suppress it. */}
-      {projectArchitecture && roomBounds && !photoCalibration && <ProjectArchitecture bounds={roomBounds} floorPlanUrl={projectArchitecture.floorPlanUrl} columns={projectArchitecture.columns} />}
+      {projectArchitecture && roomBounds && !photoCalibration && <ProjectArchitecture bounds={roomBounds} columns={projectArchitecture.columns} />}
       {!hasBackdrop && !projectArchitecture && <ArchitecturalFeatureWall finish={featureWallFinish} />}
       {!projectArchitecture && <RoomSurfaces floor={hasBackdrop ? "none" : floorFinish} rearWall={hasBackdrop ? false : showRearWall} objects={objects} glare={floorGlare} wallHeight={wallHeight} ceilingHeight={ceilingHeight} ceilingThickness={ceilingThickness} ceilingOpening={ceilingOpening} wallColor={wallColor} wallFinish={wallFinish} wallCustomHex={wallCustomHex} wallFinishIntensity={wallFinishIntensity} rugColor={rugColor} rugBorderColor={rugBorderColor} rugBorderThicknessMm={rugBorderThicknessMm} rugBorderTwistMm={rugBorderTwistMm} rugBorderRoughness={rugBorderRoughness} rugWeave={rugWeave} rugPile={rugPile} rugLayout={rugLayout} showRug={showRug && !hasBackdrop} />}
       <InitialAssetsCommitted onReady={setRoomReady} />
