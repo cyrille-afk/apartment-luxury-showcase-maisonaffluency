@@ -14,6 +14,8 @@ export type StageCompletion = { project_id: string; stage: string; completed_at:
 
 export function projectWorkflow(projectId: string, rows: StageCompletion[]) {
   const completed = new Set(rows.filter(row => row.project_id === projectId).map(row => row.stage));
-  const count = specificationStages.filter(stage => completed.has(stage.id)).length;
-  return { completed, count, percent: Math.round(count / specificationStages.length * 100) };
+  const completedStages = specificationStages.filter(stage => completed.has(stage.id));
+  const remainingStages = specificationStages.filter(stage => !completed.has(stage.id));
+  const count = completedStages.length;
+  return { completed, completedStages, remainingStages, count, percent: Math.round(count / specificationStages.length * 100) };
 }

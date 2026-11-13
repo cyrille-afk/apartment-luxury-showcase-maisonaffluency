@@ -4,7 +4,7 @@ import {
   Image, Users, FolderOpen, Layers, FileText, FileSpreadsheet, Scissors,
   Columns, Paintbrush, MessageCircle, CalendarClock, Package, Truck,
   CalendarDays, Wallet, RefreshCw, ArrowRightLeft, GraduationCap, Box, BookOpen,
-  Wand2, Star, Search, X, Scan, Presentation, ClipboardList, CalendarRange,
+  Wand2, Star, Search, X, Scan, Presentation, ClipboardList, CalendarRange, CheckCircle2, Circle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { categorySlug } from "@/lib/toolsBreadcrumbs";
@@ -306,7 +306,43 @@ export default function TradeTools() {
             {cat.label}
           </h2>
           {cat.label === "Specification" && (
-            <div className="mb-5 border-y border-border py-4 space-y-3">
+            <section aria-label="Specification project overview" className="mb-6 border-t border-border">
+              <h3 className="font-body text-sm font-medium text-foreground py-4">Project overview</h3>
+              {projectsLoading || progressQuery.isPending ? <p className="text-sm text-muted-foreground pb-4">Loading project overview…</p>
+                : progressQuery.isError ? <div role="alert" className="flex items-center gap-2 pb-4 text-sm text-destructive">Project overview unavailable.<Button variant="ghost" size="sm" onClick={() => void progressQuery.refetch()}>Try again</Button></div>
+                : !projects.length ? <p className="text-sm text-muted-foreground pb-4">No projects available</p>
+                : projects.map(project => {
+                  const summary = projectWorkflow(project.id, progressQuery.data || []);
+                  return (
+                    <article key={project.id} aria-label={`${project.name} Specification overview`} className="border-b border-border py-4 grid grid-cols-1 lg:grid-cols-[220px_1fr_1fr] gap-4 lg:gap-6">
+                      <div className="min-w-0 space-y-2">
+                        <Button variant="link" className="p-0 h-auto text-left whitespace-normal justify-start text-foreground" disabled={completion.isPending}
+                          aria-label={`View ${project.name} Specification stages`}
+                          onClick={() => { setProjectId(project.id); completion.reset(); document.getElementById('specification-project-progress')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>
+                          {project.name}
+                        </Button>
+                        <p className="text-xs text-muted-foreground">{summary.count}/8 complete · {summary.percent}%</p>
+                        <Progress value={summary.percent} className="h-1 bg-muted" aria-label={`${project.name} Specification completion`} />
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="text-xs font-medium text-foreground mb-2">Completed · {summary.completedStages.length}</h4>
+                        {summary.completedStages.length === 0 ? <p className="text-xs text-muted-foreground">None yet</p> : <ul className="space-y-1.5">
+                          {summary.completedStages.map(stage => <li key={stage.id} className="flex items-start gap-2 text-xs text-foreground"><CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true" /><span>{categories.find(category => category.label === 'Specification')?.tools.find(tool => tool.url === stage.url)?.title}</span></li>)}
+                        </ul>}
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="text-xs font-medium text-foreground mb-2">Remaining · {summary.remainingStages.length}</h4>
+                        {summary.remainingStages.length === 0 ? <p className="text-xs text-primary">All stages complete</p> : <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
+                          {summary.remainingStages.map(stage => <li key={stage.id} className="flex items-start gap-2 text-xs text-muted-foreground"><Circle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" /><span>{categories.find(category => category.label === 'Specification')?.tools.find(tool => tool.url === stage.url)?.title}</span></li>)}
+                        </ul>}
+                      </div>
+                    </article>
+                  );
+                })}
+            </section>
+          )}
+          {cat.label === "Specification" && (
+            <div id="specification-project-progress" className="mb-5 border-y border-border py-4 space-y-3 scroll-mt-24">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="space-y-1">
                   <h3 className="font-body text-sm font-medium text-foreground">Project progress</h3>

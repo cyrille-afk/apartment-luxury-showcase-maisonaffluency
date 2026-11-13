@@ -1,5 +1,9 @@
 # Roadmap
 
+## Specification project overview
+- [x] Show every accessible project's completed/remaining stage lists and completion percentage from existing saved progress; project names select its stage controls.
+- [x] Four regressions pass; signed-in completion moves Mood Board to Completed with seven remaining after reload, second project stays independent, selection works and phone has no overflow/page errors. Original completion restored; build OK.
+
 ## Specification workflow progress
 - [x] Added project-saved progress across eight Specification cards, completion/reopen controls, project selector counts, access-aware controls and retry states; visits never mark work complete.
 - [x] Three calculation regressions pass; signed-in completion survives reload, second project stays at 0/8, reopening restores 0/8, phone has no overflow and no page errors. Project view/edit policies and explicit grants verified; original progress restored.

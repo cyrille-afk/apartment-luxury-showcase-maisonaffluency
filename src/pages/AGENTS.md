@@ -1,5 +1,5 @@
 # Page rules
-- Specification Tools completion is explicit, project-scoped and stored per stage under project view/edit RLS; tool visits never imply completion, and independent stage writes preserve collaborators' other progress.
+- Specification Tools completion is explicit, project-scoped and stored per stage under project view/edit RLS; tool visits never imply completion, and independent stage writes preserve collaborators' other progress. The project overview partitions the same saved progress into completed/remaining stages, never inferring completion from project status.
 - Standalone public designer portraits reserve the shared desktop `--header-h` for their masthead and close control, retaining mobile offsets — all designers stay clear when site navigation height changes.
 - Product detail sidebars render one transaction anchor after configuration and specs, using the existing price renderer and a shared base utility grid; global clientSafeMode controls the container's editorial swap, with no sidebar-local toggle — avoids duplicate prices and divergent modes.
 - Saved comparator chooser reads all owner comparisons across projects; explicit Restore selects the saved project/name/ordered snapshot and replaces only that shortlist's local draft, while ordinary returns preserve unfinished edits — prevents filtered libraries and accidental draft loss.
