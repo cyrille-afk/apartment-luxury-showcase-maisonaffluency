@@ -2,7 +2,7 @@
 
 ## Correct Berber rug appearance
 - [x] Remove shared pile-photo override from woven rug colours/normals and render visible diagonal Berber twill without changing saved fit or weave choice.
-- [ ] Verify Herringbone Berber selection and rendered pattern in a signed-in room.
+- [x] Signed-in Herringbone Berber selection produces its own 1536px colour/normal maps; captured actual colour map confirms diagonal woven courses, no pile photograph. Four regressions pass, no browser errors, build OK. Distant room view remains washed out; real-device contrast is unverified.
 
 ## Restore project-room rug
 - [x] Render the shared saved/auto-fit rug independently of project walls/floor, preserving colour, weave, size, offsets and rotation; elevate contact shadows with it.
