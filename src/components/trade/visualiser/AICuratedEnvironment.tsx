@@ -1,5 +1,4 @@
-import { Suspense, useMemo, type ReactNode } from "react";
-import { Html } from "@react-three/drei";
+import { Suspense, useMemo, useState, useLayoutEffect, type ReactNode } from "react";
 import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/SceneObject";
 import type { AICuratedSceneSchema, ArchitecturalAnchor, Vec3 } from "@/types/aiCuratedScene";
 
@@ -25,6 +24,19 @@ interface Props {
 }
 
 const instanceIdFor = (index: number, sku: string) => `ai-${index}-${sku}`;
+
+function PieceModel({ children, fallback }: { children: ReactNode; fallback: ReactNode }) {
+  // Keep the visible volume outside React's hidden Suspense tree: Drei Html owns
+  // a DOM portal and must not be re-parented as the model resolves.
+  const [ready, setReady] = useState(false);
+  return <>{!ready && fallback}<Suspense fallback={null}>{children}<ModelReady onReady={setReady} /></Suspense></>;
+}
+
+function ModelReady({ onReady }: { onReady: (ready: boolean) => void }) {
+  // Layout effects only run once this Suspense subtree commits.
+  useLayoutEffect(() => { onReady(true); }, [onReady]);
+  return null;
+}
 
 /** Renders an AICuratedSceneSchema inside an R3F <Canvas>: room shell, anchors and editable assets. */
 const AICuratedEnvironment = ({ schema, selectedId, onSelect, onAssetTransform, onDragStateChange, isEditable = true, pieceNames, children }: Props) => {
@@ -73,10 +85,10 @@ const AICuratedEnvironment = ({ schema, selectedId, onSelect, onAssetTransform, 
         </mesh>
       ))}
 
-      <Suspense fallback={<Html center><span className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Loading assets…</span></Html>}>
+      <Suspense fallback={null}>
         {schema.curatedAssets.map((asset, i) => (
           <group key={instanceIdFor(i, asset.sku)} name={`camera-piece-${instanceIdFor(i, asset.sku)}`}>
-          {asset.glbUrl ? <Suspense fallback={<ArchitecturalVolume asset={asset} name={pieceNames?.get(asset.componentId) ?? asset.sku} selected={selectedId === instanceIdFor(i, asset.sku)} onSelect={() => onSelect(instanceIdFor(i, asset.sku))} />}><SceneObject
+          {asset.glbUrl ? <PieceModel fallback={<ArchitecturalVolume asset={asset} name={pieceNames?.get(asset.componentId) ?? asset.sku} selected={selectedId === instanceIdFor(i, asset.sku)} onSelect={() => onSelect(instanceIdFor(i, asset.sku))} />}><SceneObject
             key={instanceIdFor(i, asset.sku)}
             object={objects[i]}
             scaleVector={asset.scale}
@@ -86,7 +98,7 @@ const AICuratedEnvironment = ({ schema, selectedId, onSelect, onAssetTransform, 
             onSelect={onSelect}
             onTransform={(_id, position, rotation) => onAssetTransform(i, position, rotation)}
             onDragStateChange={onDragStateChange}
-          /></Suspense> : <ArchitecturalVolume asset={asset} name={pieceNames?.get(asset.componentId) ?? asset.sku} selected={selectedId === instanceIdFor(i, asset.sku)} onSelect={() => onSelect(instanceIdFor(i, asset.sku))} />}
+          /></PieceModel> : <ArchitecturalVolume asset={asset} name={pieceNames?.get(asset.componentId) ?? asset.sku} selected={selectedId === instanceIdFor(i, asset.sku)} onSelect={() => onSelect(instanceIdFor(i, asset.sku))} />}
           </group>
         ))}
         {children}
@@ -105,8 +117,5 @@ function ArchitecturalVolume({ asset, name, selected, onSelect }: { asset: AICur
       <boxGeometry args={[size.w, size.h, size.d]} />
       <meshStandardMaterial color={ANCHOR_COLOR[selected ? "window" : "door"]} roughness={0.85} />
     </mesh>
-    <Html position={[0, size.h + 0.1, 0]} center distanceFactor={9} style={{ pointerEvents: "none" }}>
-      <span className="block max-w-32 truncate border border-border bg-background px-2 py-1 text-xs text-foreground">{name}</span>
-    </Html>
   </group>;
 }

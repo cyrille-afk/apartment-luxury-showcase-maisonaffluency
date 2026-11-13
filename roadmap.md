@@ -1,9 +1,9 @@
 # Roadmap
 
 ## Populated AI room layouts
-- [ ] Relax missing style metadata with a fewer-than-three candidate fallback; reject empty AI results.
-- [ ] Zone all fitting priced pieces safely, retain model-less volumes and update the shared scene ledger/count/breakdown.
-- [ ] Run regression tests and signed-in generation with the €150,000, 7.2 × 6m brief.
+- [x] Relax missing style metadata with a fewer-than-three candidate fallback; reject empty AI results.
+- [x] Zone all fitting priced pieces safely, retain model-less volumes and update the shared scene ledger/count/breakdown.
+- [x] 19 regression tests pass; signed-in real generation at €150,000 and 7.2 × 6m shows 8 pieces, €39,857 allocated and €110,143 buffer, with no page errors. Screenshot confirms visible furniture/temporary loading volumes; final appearance of every loaded GLB remains unverified on software graphics.
 
 ## Continuous floor and explicit rug visibility
 - [x] Remove the room-floor contact overlay and use existing directional shadows/N8AO; make rugs opt-in with a real toolbar checkbox (old rectangle icon only opened settings and did not indicate visibility).
