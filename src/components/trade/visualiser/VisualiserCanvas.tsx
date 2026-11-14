@@ -22,6 +22,7 @@ import { ContactShadows, Environment, Grid, Lightformer, OrbitControls, Perspect
 import { VISUALISER_ORBIT_SETTINGS } from "./visualiserOrbitSettings";
 import type { FinishPart } from "@/lib/visualiserFinishTargets";
 import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/SceneObject";
+import VisualiserHotspots from "./VisualiserHotspots";
 import { footprintRadius, floorFocusPoint } from "@/lib/visualiserPlacement";
 import * as THREE from "three";
 import PathTracerLayer from "./PathTracerLayer";
@@ -618,8 +619,6 @@ const VisualiserCanvas = ({
           onTextureParts={onTextureParts}
           snapToGrid={snapToGrid}
           showLabels={showLabels}
-          showHotspots={showHotspots && isEditable}
-          onFindAlternatives={onFindAlternatives}
           selfRadius={footprintRadius(parseDimensionString(object.dimensions), object.scale)}
           obstacles={objects
             .filter((other) => other.instanceId !== object.instanceId)
@@ -633,6 +632,7 @@ const VisualiserCanvas = ({
       ))}
       <InitialAssetsCommitted onReady={setObjectsReady} />
     </Suspense>
+    {showHotspots && isEditable && onFindAlternatives && <VisualiserHotspots objects={objects} onFindAlternatives={onFindAlternatives} />}
     {pathTrace && (
       <PathTracerLayer
         checkpointKey={renderCheckpointKey}

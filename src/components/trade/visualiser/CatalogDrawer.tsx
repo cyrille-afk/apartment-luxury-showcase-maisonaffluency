@@ -24,7 +24,7 @@ export default function CatalogDrawer<T extends VisualiserCatalogItem>({ product
   }, [onClose]);
 
   return (
-    <section aria-label="Designer Collection Index" className="absolute bottom-32 left-1/2 z-[60] flex max-h-[calc(100%-10rem)] w-[calc(100%-2rem)] max-w-[1040px] -translate-x-1/2 flex-col overflow-hidden rounded-md border border-border bg-background shadow-lg">
+    <section aria-label="Designer Collection Index" data-visualiser-hotspot-obstacle className="absolute bottom-32 left-1/2 z-[60] flex max-h-[calc(100%-10rem)] w-[calc(100%-2rem)] max-w-[1040px] -translate-x-1/2 flex-col overflow-hidden rounded-md border border-border bg-background shadow-lg">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-3">
         <h2 className="font-body text-xs font-semibold uppercase">Designer Collection Index</h2>
         <div className="ml-auto flex shrink-0 items-center gap-3">

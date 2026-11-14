@@ -1,5 +1,9 @@
 # Roadmap
 
+## Clear clickable Visualiser hotspots
+- [ ] Keep projected furniture pins inside the usable canvas, clear of open panels and one another, with larger hit targets and edge-aware labels.
+- [ ] Verify camera movement and panel toggles reposition pins without remounting the scene; run focused regressions and signed-in browser checks.
+
 ## Undo Visualiser furniture swaps
 - [x] Capture the complete detached previous piece and atomically snapshot saved specification/Studio finishes before swapping.
 - [x] Show an eight-second bottom-left Undo Swap toast; restore exact pose, finishes and pricing without remounting the room; checked RPC refuses changed or procurement-linked rows.

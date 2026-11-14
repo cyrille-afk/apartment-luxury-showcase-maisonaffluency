@@ -34,6 +34,9 @@ details[open] > summary > .visualiser-palette-chevron { transform: rotate(180deg
 .visualiser-bottom-dock .visualiser-palette-control { padding-inline: 10px; border-radius: 999px; }
 .visualiser-dock-divider { height: 20px; width: 1px; background: var(--visualiser-palette-border); margin-inline: 4px; }
 .visualiser-assets-position { top: 230px; left: 16px; max-height: calc(100% - 320px); }
+.visualiser-hotspot-label { left: calc(100% + 12px); transform: translate(4px, -50%); }
+.visualiser-hotspot[data-tooltip-side="left"] .visualiser-hotspot-label { left: auto; right: calc(100% + 12px); transform: translate(-4px, -50%); }
+.visualiser-hotspot:hover .visualiser-hotspot-label, .visualiser-hotspot:focus-within .visualiser-hotspot-label { transform: translate(0, -50%); opacity: 1; }
 .visualiser-workspace [data-testid="visualiser-inspector"] { top: 230px; right: auto; left: 16px; z-index: 35; max-height: min(calc(100vh - 260px), calc(100% - 320px)); overflow-y: auto; border-radius: 8px; border: 1px solid var(--visualiser-palette-border); box-shadow: var(--visualiser-palette-shadow); }
 .visualiser-workspace:has(.visualiser-assets-position) [data-testid="visualiser-inspector"] { left: 320px; }
 .visualiser-workspace [data-testid="visualiser-inspector-pill"] { top: 235px; left: 16px; right: auto; max-width: min(320px, calc(100% - 32px)); }
