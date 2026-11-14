@@ -237,7 +237,7 @@ const TradeAILayoutStudio = ({ embedded = false }: { embedded?: boolean } = {}) 
   useEffect(() => {
     if (!embedded) return;
     let lastSig = "";
-    const sig = (l: SharedRoomLayout) => JSON.stringify([l.room, l.wallFinish, l.floorFinish, l.items.map((i) => [i.productId, i.glbUrl, i.x, i.z, i.rotationY])]);
+    const sig = (l: SharedRoomLayout) => JSON.stringify([l.room, l.wallFinish, l.floorFinish, l.items.map((i) => [i.productId, i.glbUrl, i.x, i.z, i.rotationY, i.appearance])]);
     const apply = (l: SharedRoomLayout) => { const s = sig(l); if (s === lastSig) return; lastSig = s; loadSharedLayout(l, true); };
     const initial = readSharedRoomLayout(sharedProjectId);
     if (initial?.source === "visualiser") apply(initial);

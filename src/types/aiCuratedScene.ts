@@ -18,9 +18,14 @@ export interface AICuratedSceneSchema {
     scale: Vec3;
     priceAtCuration: number;
     dimensionsCubic?: { w: number; d: number; h: number };
+    /** Sandbox piece appearance (fabrics, finishes, orientation) mirrored into the walkthrough. */
+    appearance?: PieceAppearance;
   }>;
   financialSummary: { totalBudget: number; allocatedSpend: number; remainingBuffer: number };
 }
 
 export type CuratedAsset = AICuratedSceneSchema["curatedAssets"][number];
 export type ArchitecturalAnchor = AICuratedSceneSchema["architecturalAnchors"][number];
+
+/** Opaque per-piece look copied from the Sandbox's PlacedObject (material fields, orientation, scale). */
+export type PieceAppearance = Record<string, unknown>;

@@ -979,6 +979,11 @@ const TradeVisualiser = () => {
   };
   // Walkthrough & Video tab: publish the live arrangement (pieces, finishes, room) for the embedded walkthrough.
   const walkthroughActive = activeProject?.view === "walkthrough";
+  const pieceAppearance = (o: typeof objects[number]) => ({
+    material: o.material, topMaterial: o.topMaterial, baseMaterial: o.baseMaterial, upholsteryMaterial: o.upholsteryMaterial,
+    partMaterials: o.partMaterials, marbleSurface: o.marbleSurface, modelOrientation: o.modelOrientation, scale: o.scale,
+    selectedUpholstery: o.selectedUpholstery, selectedFrameFinish: o.selectedFrameFinish, variantLabel: o.variantLabel,
+  });
   useEffect(() => {
     if (!activeProject) return;
     const bounds = activeProject.state.bounds;
@@ -987,7 +992,7 @@ const TradeVisualiser = () => {
       projectId: sharedProject, source: "visualiser" as const, updatedAt: Date.now(),
       room: bounds ? { width: bounds.width, length: bounds.depth, height: bounds.height } : { width: 7.2, length: 6, height: 3.2 },
       wallFinish, floorFinish, roomType: prev?.roomType, budgetEur: prev?.budgetEur ?? null,
-      items: objects.map((o) => ({ productId: o.id, name: o.product_name, glbUrl: o.glb_url, x: o.position[0], z: o.position[2], rotationY: o.rotation[1], priceEur: null })),
+      items: objects.map((o) => ({ productId: o.id, name: o.product_name, glbUrl: o.glb_url, x: o.position[0], z: o.position[2], rotationY: o.rotation[1], priceEur: null, appearance: pieceAppearance(o) })),
     };
     // Debounced so drags publish once they settle; the walkthrough mirrors every change live.
     const t = window.setTimeout(() => {

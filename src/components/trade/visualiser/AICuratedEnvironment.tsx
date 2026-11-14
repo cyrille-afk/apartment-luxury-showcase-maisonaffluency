@@ -61,6 +61,7 @@ const AICuratedEnvironment = ({ schema, selectedId, onSelect, onAssetTransform, 
         position: a.position,
         rotation: a.rotation,
         scale: 1,
+        ...(a.appearance as Partial<PlacedObject> | undefined),
       })),
     [schema.curatedAssets, pieceNames],
   );

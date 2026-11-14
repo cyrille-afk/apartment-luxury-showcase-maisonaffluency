@@ -18,6 +18,8 @@ export type SharedRoomItem = {
   rotationY: number;
   /** Live EUR RRP; null = Price upon Request (excluded from the budget). */
   priceEur: number | null;
+  /** Selected fabrics/finishes, orientation and scale from the Sandbox piece. */
+  appearance?: import("@/types/aiCuratedScene").PieceAppearance;
 };
 
 export type SharedRoomLayout = {
@@ -85,6 +87,7 @@ export function sharedToScene(layout: SharedRoomLayout, totalBudget: number): AI
       rotation: [0, item.rotationY, 0],
       scale: [1, 1, 1],
       priceAtCuration: item.priceEur ?? 0,
+      ...(item.appearance ? { appearance: item.appearance } : {}),
     })),
     financialSummary: sharedBudget(layout.items, totalBudget),
   };
