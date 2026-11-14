@@ -489,7 +489,7 @@ export default function TradeMoodBoards() {
                   {board.map((item) => (
                     <div key={item.id} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
                       <img src={item.image_url} alt={item.product_name} className="w-full h-full object-cover" />
-                      <div className="absolute bottom-0 left-0 right-0 bg-background/90">
+                      <div className="absolute bottom-0 left-0 right-0 bg-background/55">
                         <div className="p-3">
                           <p className="font-display text-xs text-foreground truncate">{item.product_name}</p>
                           <p className="font-body text-[10px] text-muted-foreground">{item.brand_name}</p>
