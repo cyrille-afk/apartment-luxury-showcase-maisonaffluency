@@ -1,5 +1,5 @@
-// €15 Single Video Pass. mode "create" → Stripe Checkout URL. mode "verify" → confirms
-// the paid session belongs to the caller and grants 1 credit once (idempotent per session).
+// €15 Single Video Pass. Creates Stripe Checkout only. The signature-verified
+// Stripe webhook grants credits; clients read their recorded purchase through RLS.
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { safeOrigin } from "../_shared/safeOrigin.ts";
@@ -20,21 +20,10 @@ Deno.serve(async (req) => {
     const userId = claims?.claims?.sub as string | undefined;
     const email = claims?.claims?.email as string | undefined;
     if (!userId) return json({ error: "Invalid session" }, 401);
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", { apiVersion: "2025-08-27.basil" });
     const body = await req.json().catch(() => ({}));
+    if (body?.mode !== "create") return json({ error: "Unsupported checkout mode" }, 400);
 
-    if (body?.mode === "verify") {
-      const sid = String(body?.session_id || "");
-      if (!/^cs_[A-Za-z0-9_]+$/.test(sid)) return json({ error: "Invalid session id" }, 400);
-      const s = await stripe.checkout.sessions.retrieve(sid);
-      if (s.metadata?.user_id !== userId || s.metadata?.kind !== "video_pass") return json({ error: "Not your purchase" }, 403);
-      if (s.payment_status !== "paid") return json({ granted: false, status: s.payment_status });
-      const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-      const { data, error } = await db.rpc("grant_video_pass", { _session: sid, _user: userId, _credits: 1 });
-      if (error) throw error;
-      return json({ granted: true, newlyGranted: data === true });
-    }
-
+    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", { apiVersion: "2025-08-27.basil" });
     let customer: string | undefined;
     if (email) {
       const c = await stripe.customers.list({ email, limit: 1 });

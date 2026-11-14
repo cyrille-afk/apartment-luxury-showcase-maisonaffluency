@@ -59,7 +59,7 @@ async function notifyInternalPaymentReceived(
         },
       });
       if (error) {
-        console.error(`[verify-adhoc-payment] internal payment notify failed for ${recipient}:`, error);
+        console.error("[verify-adhoc-payment] internal payment notification failed", error);
       }
     }
   } catch (e) {

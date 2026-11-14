@@ -2045,6 +2045,13 @@
       "when": 1794640045948,
       "tag": "0291_visualiser_swap_undo",
       "breakpoints": true
+    },
+    {
+      "idx": 292,
+      "version": "7",
+      "when": 1794644471804,
+      "tag": "0292_protect_hotspot_designer_names",
+      "breakpoints": true
     }
   ]
 }

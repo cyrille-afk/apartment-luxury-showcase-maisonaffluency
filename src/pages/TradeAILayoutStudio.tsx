@@ -595,14 +595,32 @@ const TradeAILayoutStudio = ({ embedded = false }: { embedded?: boolean } = {}) 
   }, []);
   useEffect(() => {
     const sid = new URLSearchParams(window.location.search).get("video_pass");
+    if (!sid) {
+      void refreshVideoStatus();
+      return;
+    }
+    let cancelled = false;
     (async () => {
-      if (sid) {
-        const { data } = await supabase.functions.invoke("video-pass-checkout", { body: { mode: "verify", session_id: sid } });
-        if (data?.granted) toast.success("Video Pass added — 1 credit ready");
-        window.history.replaceState(null, "", window.location.pathname);
+      let granted = false;
+      for (let attempt = 0; attempt < 15 && !cancelled; attempt += 1) {
+        const { data } = await supabase
+          .from("video_pass_purchases")
+          .select("credits")
+          .eq("stripe_session_id", sid)
+          .maybeSingle();
+        if (data) {
+          granted = true;
+          break;
+        }
+        await new Promise((resolve) => window.setTimeout(resolve, 2000));
       }
+      if (cancelled) return;
+      window.history.replaceState(null, "", window.location.pathname);
+      if (granted) toast.success("Video Pass added — 1 credit ready");
+      else toast.info("Video Pass confirmation is pending. Your credit will appear when payment confirmation completes.");
       await refreshVideoStatus();
     })();
+    return () => { cancelled = true; };
   }, [refreshVideoStatus]);
   const videoLocked = !!videoStatus && !videoStatus.allowed;
   const [videoJob, setVideoJob] = useState<{ id: string; token?: string; state: string; url?: string; failure?: string } | null>(null);

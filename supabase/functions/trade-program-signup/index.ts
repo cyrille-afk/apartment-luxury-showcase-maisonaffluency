@@ -391,7 +391,7 @@ Deno.serve(async (req) => {
           },
         },
       })
-      if (notifyErr) console.error(`Admin notification failed for ${adminEmail}`, notifyErr)
+      if (notifyErr) console.error('Trade signup admin notification failed', notifyErr)
     }
   }
 

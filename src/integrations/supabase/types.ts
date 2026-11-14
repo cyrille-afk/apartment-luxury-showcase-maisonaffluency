@@ -13606,6 +13606,7 @@ export type Database = {
         Args: { _pick_id: string }
         Returns: boolean
       }
+      _hotspot_public_ids: { Args: never; Returns: string[] }
       _internal_job_token: { Args: never; Returns: string }
       _norm_board_path: { Args: { _p: string }; Returns: string }
       _norm_designer_name: { Args: { txt: string }; Returns: string }

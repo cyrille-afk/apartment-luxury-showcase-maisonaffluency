@@ -5,6 +5,7 @@ import { resolveAccountDiscount } from "../_shared/accountDiscount.ts";
 import { verifyCatalogLines } from "../_shared/catalogPricing.ts";
 import { resolveConfirmedShipping } from "../_shared/confirmedShipping.ts";
 import { resolveBankTransferTax } from "../_shared/bankTransferTax.ts";
+import { canReuseBankTransferOrder } from "../_shared/orderOwnership.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -163,6 +164,19 @@ serve(async (req) => {
     }
     const orderRef = typeof body?.orderReference === "string" && /^[A-Za-z0-9-]{4,40}$/.test(body.orderReference)
       ? body.orderReference : null;
+    let existingOrder: { id: string; user_id: string | null; payment_method: string; status: string } | null = null;
+    if (orderRef) {
+      const { data, error } = await supabaseAdmin.from("shop_orders")
+        .select("id, user_id, payment_method, status").eq("order_ref", orderRef).maybeSingle();
+      if (error) {
+        console.error("[create-bank-transfer-intent] order ownership lookup failed", error);
+        return json({ error: "Unable to validate the order reference." }, 500);
+      }
+      existingOrder = data;
+      if (!canReuseBankTransferOrder(existingOrder, userId)) {
+        return json({ error: "Order reference already in use. Please start a new checkout." }, 409);
+      }
+    }
     const amount = goodsAmount + shippingCents + taxCents + treatment.clearanceFeeCents;
     if (amount < 100) return json({ error: "Price out of range." }, 400);
 
@@ -232,12 +246,11 @@ serve(async (req) => {
         clearance_fee_cents: treatment.clearanceFeeCents,
         total_cents: amount, stripe_session_id: intent.id,
       };
-      const { data: existing } = await supabaseAdmin.from("shop_orders")
-        .select("id, payment_method, status").eq("order_ref", orderRef).maybeSingle();
+      const existing = existingOrder;
       const { error: recErr } = !existing
         ? await supabaseAdmin.from("shop_orders").insert(row)
         : existing.payment_method === "instant_bank_transfer" && existing.status !== "paid"
-          ? await supabaseAdmin.from("shop_orders").update(row).eq("id", existing.id)
+          ? await supabaseAdmin.from("shop_orders").update(row).eq("id", existing.id).eq("user_id", userId)
           : { error: null };
       if (recErr) console.error("[create-bank-transfer-intent] order record failed", recErr);
     }

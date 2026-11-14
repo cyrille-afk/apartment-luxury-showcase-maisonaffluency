@@ -7,6 +7,10 @@ export type QuoteTotal =
   | { ok: true; totalCents: number; currency: string }
   | { ok: false; error: string };
 
+export function adhocPaymentAmountCents(totalCents: number, paymentKind: "full" | "deposit"): number {
+  return paymentKind === "deposit" ? Math.round(totalCents * 0.6) : totalCents;
+}
+
 export async function resolveQuoteTotal(admin: any, quoteId: string): Promise<QuoteTotal> {
   const { data: quote } = await admin
     .from("trade_quotes")

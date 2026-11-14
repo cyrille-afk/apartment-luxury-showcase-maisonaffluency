@@ -119,16 +119,10 @@ const FunnelPayLinkBlock = ({
   }, [quoteId]);
 
   const handleGenerate = async () => {
-    const value = Number(amount.replace(/,/g, ""));
-    if (!Number.isFinite(value) || value < 1) {
-      toast({ title: "Enter an amount first", variant: "destructive" });
-      return;
-    }
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("create-adhoc-payment-link", {
         body: {
-          amountCents: Math.round(value * 100),
           currency,
           label: testMode ? `[TEST] ${label}` : label,
           payerEmail: email,
@@ -137,7 +131,6 @@ const FunnelPayLinkBlock = ({
           cardStage: cardStage ?? null,
           paymentKind,
           testMode,
-          expectedTotalCents: paymentKind === "full" ? Math.round(value * 100) : null,
         },
       });
       if (error) {
@@ -148,6 +141,9 @@ const FunnelPayLinkBlock = ({
         throw new Error(responseBody?.error ?? error.message);
       }
       if (!data?.url) throw new Error(data?.error || "No link returned");
+      if (Number.isFinite(Number(data.amountCents))) {
+        setAmount((Number(data.amountCents) / 100).toLocaleString("en-US"));
+      }
       try {
         await navigator.clipboard.writeText(data.url);
       } catch {
@@ -181,7 +177,7 @@ const FunnelPayLinkBlock = ({
       // Re-fetch the stored checkout session URL for this quote.
       try {
         const { data, error } = await supabase.functions.invoke("create-adhoc-payment-link", {
-          body: { reuseExisting: true, quoteId, amountCents: 100, currency },
+          body: { reuseExisting: true, quoteId, currency },
         });
         if (error) {
           const response = (error as { context?: Response }).context;
@@ -357,7 +353,7 @@ const FunnelPayLinkBlock = ({
       }
       try {
         const { data, error } = await supabase.functions.invoke("create-adhoc-payment-link", {
-          body: { reuseExisting: true, quoteId, amountCents: 100, currency },
+          body: { reuseExisting: true, quoteId, currency },
         });
         if (error) throw error;
         if (!data?.url) throw new Error(data?.error || "No link returned");
@@ -438,11 +434,15 @@ const FunnelPayLinkBlock = ({
           id={`amt-${quoteId ?? label}`}
           inputMode="decimal"
           value={amount}
-          onChange={(e) => setAmount(e.target.value.replace(/[^\d.,]/g, ""))}
-          placeholder="0.00"
+          readOnly
+          aria-describedby={`amount-note-${quoteId ?? "payment"}`}
+          placeholder="From saved quote"
           className="min-w-0 flex-1 bg-transparent px-2 py-2 font-body text-[13px] text-foreground outline-hidden placeholder:text-muted-foreground/60"
         />
       </div>
+      <p id={`amount-note-${quoteId ?? "payment"}`} className="text-[10px] font-light leading-relaxed text-muted-foreground">
+        Full settlement uses the saved quote total; deposit uses 60%.
+      </p>
 
       <select
         value={paymentKind}

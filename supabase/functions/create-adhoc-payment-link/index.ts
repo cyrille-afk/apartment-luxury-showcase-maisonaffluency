@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { getStripe } from "../_shared/stripeClient.ts";
 import { safeOrigin } from "../_shared/safeOrigin.ts";
-import { resolveQuoteTotal } from "../_shared/quoteTotal.ts";
+import { adhocPaymentAmountCents, resolveQuoteTotal } from "../_shared/quoteTotal.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -44,7 +44,6 @@ serve(async (req) => {
 
     const body = await req.json();
     const currency = String(body.currency ?? "USD").toUpperCase();
-    const amountCents = Math.round(Number(body.amountCents));
     const label = String(body.label ?? "Maison Affluency").slice(0, 120);
     const payerEmail = body.payerEmail ? String(body.payerEmail).slice(0, 255) : null;
     const quoteId = body.quoteId ? String(body.quoteId) : null;
@@ -52,14 +51,8 @@ serve(async (req) => {
     const cardStage = body.cardStage ? String(body.cardStage).slice(0, 60) : null;
     const paymentKind = body.paymentKind === "deposit" ? "deposit" : "full";
     const testMode = Boolean(body.testMode);
-    const expectedTotalCents = Number.isFinite(Number(body.expectedTotalCents))
-      ? Math.round(Number(body.expectedTotalCents))
-      : null;
 
     if (!ALLOWED_CURRENCIES.includes(currency)) throw new Error("Unsupported currency");
-    if (!Number.isFinite(amountCents) || amountCents < 100 || amountCents > 500_000_00) {
-      throw new Error("Amount must be between 1 and 500,000");
-    }
 
     const { stripe } = await getStripe(testMode ? "test" : "auto");
 
@@ -100,17 +93,18 @@ serve(async (req) => {
       );
     }
 
-    // Price is tied to a saved quote: the link may never exceed the quote's
-    // server-computed payable total (5% headroom for card processing fees).
+    // The client chooses only full settlement or deposit. Both amounts come
+    // from the saved quote; request-supplied prices are never used.
     if (!quoteId || !/^[0-9a-f-]{36}$/i.test(quoteId)) {
       throw new Error("Payment links must be generated from a saved quote");
     }
     const qt = await resolveQuoteTotal(admin, quoteId);
     if (!qt.ok) throw new Error(qt.error);
     if (qt.currency !== currency) throw new Error(`Currency must match the quote (${qt.currency})`);
-    const ceiling = Math.round(qt.totalCents * 1.05);
-    if (amountCents > ceiling) {
-      throw new Error(`Amount exceeds the quote total (${(qt.totalCents / 100).toFixed(2)} ${qt.currency})`);
+    const amountCents = adhocPaymentAmountCents(qt.totalCents, paymentKind);
+    const expectedTotalCents = paymentKind === "full" ? qt.totalCents : null;
+    if (amountCents < 100 || amountCents > 500_000_00) {
+      throw new Error("Quote payment amount must be between 1 and 500,000");
     }
 
     const origin = safeOrigin(req);
@@ -191,7 +185,7 @@ serve(async (req) => {
     // always mints live sessions.
     const payUrl = payToken && !testMode ? `${publicOrigin}/pay/${payToken}` : session.url;
 
-    return new Response(JSON.stringify({ url: payUrl, payUrl, token: payToken, stripeUrl: session.url, sessionId: session.id }), {
+    return new Response(JSON.stringify({ url: payUrl, payUrl, token: payToken, stripeUrl: session.url, sessionId: session.id, amountCents, currency }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });

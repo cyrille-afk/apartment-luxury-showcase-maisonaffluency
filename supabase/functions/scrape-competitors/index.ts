@@ -391,7 +391,7 @@ Deno.serve(async (req) => {
             message_id: messageId, idempotency_key: messageId, queued_at: new Date().toISOString(),
           },
         });
-      } catch (e) { console.error(`Email enqueue failed for ${email}`, e); }
+      } catch (e) { console.error("Market brief email enqueue failed", e); }
     }
 
     const { data: admins } = await svc.from("user_roles").select("user_id").eq("role", "admin");
