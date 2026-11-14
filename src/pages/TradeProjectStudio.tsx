@@ -30,6 +30,8 @@ import { StudioFinishControls } from "@/components/trade/StudioFinishControls";
 import { resolveStudioSelection, studioAppearance, studioFinishPrice, studioSelectedFinishes, studioVisibleItems, type StudioFinishProduct, type StudioFinishSelection, type StudioFinish } from "@/lib/studioFinishes";
 import { moodBoardHandoff } from "@/lib/moodBoardHandoff";
 import { readSharedRoomLayout, writeSharedRoomLayout } from "@/lib/sharedRoomLayout";
+import { readStudioRoomContext } from "@/lib/studioRoomContext";
+import { formatPdfMoney } from "@/lib/pdfFormatting";
 
 type StudioItem = {
   id: string;
@@ -291,7 +293,7 @@ export default function TradeProjectStudio() {
       };
     }));
     const previous = readSharedRoomLayout(id);
-    const layout = moodBoardHandoff(pieces, id, previous?.roomType ?? "living", previous, stamp);
+    const layout = moodBoardHandoff(pieces, id, roomContext?.roomType ?? previous?.roomType ?? "living", previous, stamp, roomContext?.targetCents == null ? previous?.budgetEur ?? null : convertCents(roomContext.targetCents, roomContext.currency, "EUR", fxRates) / 100);
     layout.source = "project-studio";
     writeSharedRoomLayout(layout);
     navigate(`/trade/visualiser?project=${encodeURIComponent(id)}&handoff=curated&stamp=${stamp}`);
@@ -323,7 +325,14 @@ export default function TradeProjectStudio() {
     return { msrp, trade, clientEstimateCents };
   }, [items, toBase, discountPct, multiplier]);
 
-  const budgetCents = totals.msrp ? Math.round(totals.msrp * 1.25) : 0;
+  const roomContext = useMemo(() => user && id ? readStudioRoomContext(user.id, id, items.flatMap(item => [item.product_id, item.source_pick_id || ""])) : null, [user, id, items]);
+  const sharedRoom = useMemo(() => id ? readSharedRoomLayout(id) : null, [id]);
+  const roomType = roomContext?.roomType ?? sharedRoom?.roomType;
+  const roomLabel = roomType ? { living: "Living room", dining: "Dining room", bedroom: "Bedroom", office: "Office" }[roomType] : "Room type not set";
+  const savedTarget = (project as any)?.target_ceiling_cents;
+  const budgetCents = roomContext ? roomContext.targetCents == null ? null : toBase(roomContext.targetCents, roomContext.currency)
+    : savedTarget != null ? toBase(savedTarget, (project as any)?.ceiling_currency || "EUR") : sharedRoom?.budgetEur != null ? toBase(Math.round(sharedRoom.budgetEur * 100), "EUR") : null;
+  const unpriced = items.filter(item => item.rrp_cents == null).length;
   const budgetPct = budgetCents ? Math.min(100, Math.round((totals.msrp / budgetCents) * 100)) : 0;
 
   if (loading) {
@@ -530,28 +539,21 @@ export default function TradeProjectStudio() {
               </div>
             </div>
 
-            {isClientMode ? (
-              <div className="mt-6">
-                <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                  Project status: <span className="text-foreground">Active Development</span>
-                </p>
-              </div>
-             ) : (
-               <div data-trade-sensitive className="mt-6">
+            <p className="mt-4 font-body text-xs text-foreground">{roomLabel}</p>
+               <div className="mt-6" aria-label="Studio room budget">
                 <div className="flex items-baseline justify-between font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
                   <span>Budget allocated</span>
                   <span className="text-foreground">
-                    {money(totals.msrp) || "—"} {budgetCents ? `/ ${money(budgetCents)}` : ""}
+                    {formatPdfMoney(totals.msrp, baseCurrency)} / {formatPdfMoney(budgetCents, baseCurrency, currentStudio?.pdf_locale, "Target not set")}
                   </span>
                 </div>
                 <div className="mt-2 h-px w-full bg-border">
                   <div className="h-px bg-foreground" style={{ width: `${budgetPct}%` }} />
                 </div>
                 <p className="mt-2 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/72">
-                  {budgetPct}% committed
+                  {unpriced ? `${unpriced} pieces awaiting pricing · budget incomplete` : budgetCents == null ? "Target not set" : `${budgetPct}% committed`}
                 </p>
               </div>
-            )}
              {!isClientMode && <div data-client-placeholder aria-hidden="true" className="mt-6 h-3 w-40 animate-pulse bg-muted/60" />}
           </div>
 
@@ -594,6 +596,7 @@ export default function TradeProjectStudio() {
                       >
                         <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
                           {String(idx + 1).padStart(2, "0")}
+                          {item.image_url && <img src={item.image_url} alt={item.name} className="mt-2 h-14 w-11 object-contain" />}
                         </span>
                         <span className="min-w-0">
                           <span className="block truncate font-display text-base text-foreground">
@@ -703,6 +706,9 @@ export default function TradeProjectStudio() {
          markupMultiplier={multiplier}
          studio={currentStudio}
         currency={baseCurrency}
+        roomLabel={roomLabel}
+        budget={{ allocated: totals.msrp, target: budgetCents, unpriced }}
+        pdfLocale={currentStudio?.pdf_locale}
       />
     </div>
   );

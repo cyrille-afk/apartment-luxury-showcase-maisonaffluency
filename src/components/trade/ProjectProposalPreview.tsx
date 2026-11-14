@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { formatMoneyIn } from "@/lib/displayMoney";
 import { StudioBrand, type StudioBranding } from "@/components/trade/StudioBrand";
 import { tradePriceCents, clientPriceCents, clientUnitCents } from "@/lib/tradePricing";
+import { formatPdfMoney } from "@/lib/pdfFormatting";
 import {
   Dialog,
   DialogContent,
@@ -34,6 +35,9 @@ interface ProjectProposalPreviewProps {
   studio: StudioBranding | null;
   /** Member's declared base currency — every figure is rendered in it. */
   currency?: string;
+  roomLabel?: string;
+  budget?: { allocated: number; target: number | null; unpriced: number };
+  pdfLocale?: string;
 }
 
 function makeMoney(currency: string) {
@@ -52,6 +56,9 @@ export function ProjectProposalPreview({
   markupMultiplier,
   studio,
   currency = "USD",
+  roomLabel = "Room type not set",
+  budget,
+  pdfLocale,
 }: ProjectProposalPreviewProps) {
   const money = makeMoney(currency);
   const tradeTotal = items.reduce((sum, item) => sum + (tradePriceCents(item.rrp_cents, tradeDiscount) || 0) * item.quantity, 0);
@@ -61,7 +68,7 @@ export function ProjectProposalPreview({
     const sheet = document.querySelector<HTMLElement>(".proposal-print-sheet");
     if (!sheet) return;
 
-    void downloadDocumentPdf({ element: sheet, filename: `${projectName} Proposal.pdf` });
+    void downloadDocumentPdf({ element: sheet, filename: `${projectName} Proposal.pdf`, repeatHeaderSelector: "[data-proposal-page-header]" });
   };
 
   return (
@@ -96,6 +103,10 @@ export function ProjectProposalPreview({
         </div>
 
         <main className="proposal-print-sheet mx-auto my-20 min-h-[1123px] w-[min(794px,calc(100vw-32px))] bg-card px-12 py-14 text-card-foreground shadow-elegant md:px-16 md:py-20">
+          <div data-proposal-page-header className="mb-6 border-b border-border pb-4">
+            <div className="flex items-center justify-between gap-4"><StudioBrand studio={studio} /><span className="font-body text-xs text-card-foreground">{roomLabel}</span></div>
+            {budget && <p className="mt-3 font-body text-xs text-card-foreground">Allocated: {formatPdfMoney(budget.allocated, currency, pdfLocale)}{budget.unpriced ? " (partial)" : ""} / Target: {formatPdfMoney(budget.target, currency, pdfLocale, "Not set")}{budget.unpriced ? " · Budget incomplete" : ""}</p>}
+          </div>
           <header className="flex min-h-[330px] flex-col justify-between border-b border-card-foreground pb-12">
             <div className="flex items-center justify-between gap-6">
                <StudioBrand studio={studio} />

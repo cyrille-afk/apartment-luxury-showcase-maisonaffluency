@@ -12,6 +12,8 @@ import { moodBoardStudioItems } from "@/lib/moodBoardStudioTransfer";
 import { useNavigate } from "@/lib/router-compat";
 import { getActiveProjectId } from "@/lib/activeProjectId";
 import { useProjectWorkspace } from "@/contexts/ProjectWorkspaceContext";
+import { useAuth } from "@/hooks/useAuth";
+import { saveStudioRoomContext } from "@/lib/studioRoomContext";
 
 export const MOOD_BOARD_MAX_SAVE = 15;
 
@@ -24,6 +26,7 @@ interface Props {
 /** Next steps once pieces are chosen: save to a project, export, and present. */
 export function MoodBoardActions({ items, defaultProjectId, pdfContext }: Props) {
   const { currentStudio } = useStudio();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const workspace = useProjectWorkspace();
   const [studioIntent, setStudioIntent] = useState(false);
@@ -63,7 +66,10 @@ export function MoodBoardActions({ items, defaultProjectId, pdfContext }: Props)
       window.dispatchEvent(new Event("trade-projects:changed"));
       setMessage({ tone: "ok", text: destination ? "Saved to the project's boards." : "Saved to your boards." });
       setOpen(false);
-      if (toStudio && destination) navigate(`/trade/projects/${encodeURIComponent(destination)}/studio`);
+      if (toStudio && destination) {
+        if (user) saveStudioRoomContext(user.id, destination, { roomType: pdfContext.roomType, currency: pdfContext.currency, targetCents: pdfContext.target });
+        navigate(`/trade/projects/${encodeURIComponent(destination)}/studio`);
+      }
     } catch (error) {
       const detail = error instanceof Error ? error.message : String((error as { message?: string })?.message || "");
       const text = /unavailable/i.test(detail)

@@ -11,6 +11,7 @@
 - Password-setup resends reuse the review drawer and retain attempt keys on retry; never change approval. Verified activation links the account; the queue reads user_id for setup status.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Studio room/target handoff uses account/project-scoped device context with matching legacy Mood Board recovery and saved project ceiling fallback, never a fabricated percentage; proposal exports repeat a rasterized allowlisted header with reserved page space — keeps room budgets and branding intact without procurement writes.
 - Mood Board PDF receives the live retail-only board ledger, room and currency from the workspace plus current Studio branding; shared export context is optional for other tearsheets, incomplete pricing stays explicit and logos retain their aspect ratio — prevents budget drift and wholesale exposure.
 - Manual Studio removals persist an excluded flag with the existing project-scoped finish selection and filter the shared composition before totals/spec/handoff; source boards, quotes and orders remain unchanged — makes refresh-safe curation non-destructive to procurement.
 - Studio finish inspection uses a separate magnifier dialog with the original uncropped image and react-zoom-pan-pinch; preview never writes selection and stays available for locked finishes — allows close inspection without changing specifications.

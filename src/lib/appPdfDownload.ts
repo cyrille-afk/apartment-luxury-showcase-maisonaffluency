@@ -27,7 +27,7 @@ export function pdfPageCuts(height: number, pageHeight: number, blocks: { top: n
 
 let exporting = false;
 /** Render only the supplied document, never the browser page URL or print chrome. */
-export async function downloadDocumentPdf(input: { html?: string; element?: HTMLElement; filename: string; landscape?: boolean; marginMm?: number }) {
+export async function downloadDocumentPdf(input: { html?: string; element?: HTMLElement; filename: string; landscape?: boolean; marginMm?: number; repeatHeaderSelector?: string }) {
   if (exporting) return;
   exporting = true;
   const notice = toast.loading('Preparing PDF…');
@@ -65,6 +65,9 @@ export async function downloadDocumentPdf(input: { html?: string; element?: HTML
       try { await img.decode(); } catch { /* existing missing-image placeholders remain */ }
     }));
     await new Promise(resolve => setTimeout(resolve, 100));
+    const repeatedHeader = input.repeatHeaderSelector ? doc.querySelector<HTMLElement>(input.repeatHeaderSelector) : null;
+    const headerCanvas = repeatedHeader ? await html2canvas(repeatedHeader, { scale: 1.5, useCORS: true, logging: false, windowWidth: width }) : null;
+    if (repeatedHeader) repeatedHeader.style.display = 'none';
     const root = doc.body;
     const bounds = root.getBoundingClientRect();
     const blocks = Array.from(root.querySelectorAll('tr,article,.sheet,.cover,.proposal-line-item,h1,h2,h3,p,img')).map(e => {
@@ -105,7 +108,8 @@ export async function downloadDocumentPdf(input: { html?: string; element?: HTML
     const pageW = pdf.internal.pageSize.getWidth() - margin * 2;
     const pageH = pdf.internal.pageSize.getHeight() - margin * 2;
     const scale = canvas.width / width;
-    const cuts = pdfPageCuts(root.scrollHeight, pageH * width / pageW, blocks, forcedBreaks);
+    const headerMm = headerCanvas ? headerCanvas.height / headerCanvas.width * pageW + 4 : 0;
+    const cuts = pdfPageCuts(root.scrollHeight, (pageH - headerMm) * width / pageW, blocks, forcedBreaks);
     for (let i = 0; i < cuts.length - 1; i++) {
       if (i > 0) pdf.addPage();
       const slice = document.createElement('canvas');
@@ -114,7 +118,8 @@ export async function downloadDocumentPdf(input: { html?: string; element?: HTML
       const ctx = slice.getContext('2d');
       if (!ctx) throw new Error('PDF rendering unavailable');
       ctx.drawImage(canvas, 0, Math.round(cuts[i] * scale), canvas.width, slice.height, 0, 0, slice.width, slice.height);
-      pdf.addImage(slice.toDataURL('image/jpeg', 0.94), 'JPEG', margin, margin, pageW, slice.height / canvas.width * pageW);
+      if (headerCanvas) pdf.addImage(headerCanvas.toDataURL('image/png'), 'PNG', margin, margin, pageW, headerMm - 4);
+      pdf.addImage(slice.toDataURL('image/jpeg', 0.94), 'JPEG', margin, margin + headerMm, pageW, slice.height / canvas.width * pageW);
     }
     const blob = pdf.output('blob');
     const filename = input.filename.endsWith('.pdf') ? input.filename : `${input.filename}.pdf`;

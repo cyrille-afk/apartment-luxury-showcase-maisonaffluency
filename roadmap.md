@@ -1,5 +1,9 @@
 # Roadmap
 
+## Studio specsheet photos and room-budget context
+- [x] Add compact photos to every specsheet row; carry Mood Board room/target into Studio instead of the fabricated 125% target. Matching old device drafts recover context; otherwise show not set rather than inventing it.
+- [x] Ten regressions pass; signed-in eight-row thumbnails, real Mood Board Dining/€500,000 context recovery and reload verified; two-page proposal repeats logo and €413,990.30 allocation/€500,000 target with unclipped photos. Both pages visually checked; phone has no overflow and preview build OK. No saved projects or customer budgets changed.
+
 ## Branded Mood Board PDF
 - [x] Include current studio logo, room type and live retail allocated/target budget in the board currency; clearly flag incomplete pricing.
 - [x] Twelve regressions pass; signed-in chair export reads €4,791 allocated / €20,000 target, and eight-piece two-page export repeats authentic studio logo, Living room and exact retail totals. Both pages visually inspected: no clipping/overlap; preview build OK. Verification used isolated browser drafts, no saved projects changed.
