@@ -146,7 +146,9 @@ This project is built with:
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/02208d51-b513-401f-a97f-9e38a2a4260f) and click on Share -> Publish.
+Follow the [Maison Affluency deployment checklist](docs/deployment-checklist.md), which separates GitHub sync, database changes, backend deployments, website publishing, and security scans. GitHub sync alone does not deploy or verify the application.
+
+Publish the website through [Lovable](https://lovable.dev/projects/02208d51-b513-401f-a97f-9e38a2a4260f) after completing the applicable release checks.
 
 ## Can I connect a custom domain to my Lovable project?
 
