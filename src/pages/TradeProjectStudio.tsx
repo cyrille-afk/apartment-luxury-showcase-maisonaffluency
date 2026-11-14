@@ -242,7 +242,7 @@ export default function TradeProjectStudio() {
     if (error) { setItems(current => current.map(row => row.id === item.id ? previous : row)); toast.error("Finish couldn't save. Your previous selection is unchanged."); }
     setSavingFinishes(false);
   };
-  const finishControls = (item: StudioItem) => <StudioFinishControls product={item.catalog} selection={item.selection} disabled={!canEdit || savingFinishes || isClientMode} onChange={selection => void changeFinish(item, selection)} />;
+  const finishControls = (item: StudioItem, compact = false) => <StudioFinishControls product={item.catalog} selection={item.selection} compact={compact} disabled={!canEdit || savingFinishes || isClientMode} onChange={selection => void changeFinish(item, selection)} />;
   const openInVisualiser = () => {
     if (!id || !items.length || savingFinishes) return;
     const stamp = Date.now();
@@ -318,7 +318,7 @@ export default function TradeProjectStudio() {
       </div>
 
       <div className="flex shrink-0 flex-wrap justify-start gap-2 border-b border-border px-4 py-3 md:px-6">
-        <Button variant="studio-primary" aria-haspopup="dialog" disabled={!items.length} onClick={openVisualStudio} className="h-10 cursor-pointer rounded-none px-4 py-2 font-body text-[10px] uppercase tracking-[0.15em] transition-colors duration-200 motion-reduce:transition-none [&_svg]:size-3.5"><Sparkles aria-hidden="true" strokeWidth={1.5} />AI Co-Designer</Button>
+        <Button variant="outline" aria-haspopup="dialog" disabled={!items.length} onClick={openVisualStudio} className="felix-surface h-10 cursor-pointer rounded-none px-4 py-2 font-body text-[10px] uppercase tracking-[0.15em] transition-colors duration-200 motion-reduce:transition-none [&_svg]:size-3.5"><Sparkles aria-hidden="true" strokeWidth={1.5} />AI Co-Designer</Button>
         <Button variant="studio-utility" aria-controls="studio-spec-panel" aria-expanded={isSpecPanelOpen} onClick={() => setIsSpecPanelOpen(!isSpecPanelOpen)} className="h-10 cursor-pointer rounded-none px-4 py-2 font-body text-[10px] uppercase tracking-[0.15em] transition-colors duration-200 motion-reduce:transition-none">Specsheet ({items.length})</Button>
         {!isClientMode && <Button variant="studio-primary" disabled={loadingItems || !items.length || savingFinishes || !canEdit} onClick={openInVisualiser} className="h-10 cursor-pointer rounded-none px-4 font-body text-[10px] uppercase"><Box className="size-3.5" />Open in Visualiser Sandbox</Button>}
       </div>
@@ -400,7 +400,7 @@ export default function TradeProjectStudio() {
                     {item.placements.length > 0 && <p className="font-body text-[9px] leading-relaxed text-muted-foreground">{[...new Set(item.placements.map(placement => placement.folderTitle))].join(" · ")}</p>}
                     {!isClientMode && <StudioPieceMovePicker projectId={project.id} productId={item.product_id} productName={item.name} placements={item.placements} onMoved={() => setItemsVersion(version => version + 1)} />}
                   </div>
-                  {finishControls(item)}
+                  {finishControls(item, true)}
                   </div>
                 );
               })}

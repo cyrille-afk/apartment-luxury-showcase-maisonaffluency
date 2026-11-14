@@ -1,5 +1,10 @@
 # Roadmap
 
+## Compact Project Studio finish cards
+- [x] Replace canvas-only swatch rows with active-finish pills and grouped floating pickers; preserve inline Specsheet/lightbox selection, pricing and saved locks.
+- [x] Keep Sandbox charcoal and differentiate AI Co-Designer with shared bronze outline tokens.
+- [x] Signed-in selection, locked-option disabling and reload restoration verified; original finishes restored. Desktop and phone layouts checked without overflow or page errors; seven finish regressions pass and preview build OK.
+
 ## Room-organized Specification Sheets
 - [x] Add project-aware room assignment, custom rooms, filters and grouped selection without changing quote records; exact same-project sub-folder/folder names supply defaults.
 - [x] Add selected-item room subtotals and optional account/project-saved room budgets with remaining/over-budget status; mixed currencies stay separate and unknown prices remain identified.
