@@ -8,6 +8,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useSearchParams, useNavigate } from "@/lib/router-compat";
 import { Search, Loader2, Plus, X, Heart, FolderOpen, LayoutGrid, Sparkles, RefreshCw, Pin } from "lucide-react";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
+import { MakerAZPicker } from "@/components/trade/MakerAZPicker";
 import { MoodBoardBudgetControls, MoodBoardBudgetBar } from "@/components/trade/MoodBoardBudgetControls";
 import { convertMoodBudget, emptyMoodBudget, fitsMoodBudget, formatMoodMoney, isMoodCurrency, moodBudgetLedger, moodPrices, type MoodBudgetSettings, type MoodCurrency } from "@/lib/moodBoardBudget";
 import { fetchMoodBoardDetails } from "@/lib/moodBoardDetails";
@@ -664,13 +665,7 @@ export default function TradeMoodBoards() {
                   className="h-7 shrink-0 rounded-full px-2 text-[10px]">{value}</Button>
               ))}
             </div>
-            <Select value={maker || "all-makers"} onValueChange={value => setMaker(value === "all-makers" ? "" : value)}>
-              <SelectTrigger aria-label="Brand or maker" className="h-8 font-body text-xs"><SelectValue placeholder="All brands / makers" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all-makers">All brands / makers</SelectItem>
-                {makers.map(name => <SelectItem key={name} value={name}>{name}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <MakerAZPicker makers={makers} value={maker} onChange={setMaker} />
 
             <p className="font-body text-[10px] text-muted-foreground">
               {filtered.length} product{filtered.length !== 1 ? "s" : ""}
