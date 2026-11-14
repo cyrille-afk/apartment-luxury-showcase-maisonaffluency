@@ -987,8 +987,9 @@ const TradeVisualiser = () => {
   useEffect(() => {
     if (curatedHandoffDone.current || searchParams.get("handoff") !== "curated") return;
     curatedHandoffDone.current = true;
-    const shared = readSharedRoomLayout(searchParams.get("project"));
-    if (!shared) return;
+    const rawStamp = Number(searchParams.get("stamp"));
+    const shared = readSharedRoomLayout(searchParams.get("project"), Number.isFinite(rawStamp) && rawStamp > 0 ? rawStamp : null);
+    if (!shared) { toast.error("The curated layout didn't come through — click Open in Visualiser Sandbox again."); return; }
     void (async () => {
       const ids = [...new Set(shared.items.map((i) => i.productId))];
       const { data } = ids.length ? await (supabase as any).from("trade_products").select("id, product_name, brand_name, image_url, dimensions, glb_url").in("id", ids) : { data: [] };

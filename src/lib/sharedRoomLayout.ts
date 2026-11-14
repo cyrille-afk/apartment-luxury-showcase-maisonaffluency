@@ -30,15 +30,31 @@ export type SharedRoomLayout = {
 const KEY = "ma-shared-room-layout-v1:";
 export const sharedRoomKey = (projectId: string | null | undefined) => `${KEY}${projectId || "sandbox"}`;
 
-export function readSharedRoomLayout(projectId: string | null | undefined): SharedRoomLayout | null {
+// In-memory copy survives same-tab navigation even when localStorage is full.
+const memory = new Map<string, SharedRoomLayout>();
+
+export function readSharedRoomLayout(projectId: string | null | undefined, stamp?: number | null): SharedRoomLayout | null {
+  const mem = memory.get(sharedRoomKey(projectId));
+  if (mem && (stamp == null || mem.updatedAt === stamp)) return mem;
   try {
     const raw = JSON.parse(localStorage.getItem(sharedRoomKey(projectId)) || "null");
-    return raw && Array.isArray(raw.items) && raw.room ? (raw as SharedRoomLayout) : null;
+    if (!(raw && Array.isArray(raw.items) && raw.room)) return null;
+    // A stamped handoff must never fall back to an older, different layout.
+    if (stamp != null && raw.updatedAt !== stamp) return null;
+    return raw as SharedRoomLayout;
   } catch { return null; }
 }
 
 export function writeSharedRoomLayout(layout: SharedRoomLayout) {
-  try { localStorage.setItem(sharedRoomKey(layout.projectId), JSON.stringify(layout)); } catch { /* full storage: handoff skipped */ }
+  const key = sharedRoomKey(layout.projectId);
+  memory.set(key, layout);
+  const json = JSON.stringify(layout);
+  try { localStorage.setItem(key, json); return; } catch { /* full: free other shared layouts and retry */ }
+  try {
+    Object.keys(localStorage).filter((k) => k.startsWith(KEY) && k !== key).forEach((k) => localStorage.removeItem(k));
+    localStorage.removeItem(key);
+    localStorage.setItem(key, json);
+  } catch { /* still full: in-memory copy carries the handoff in this tab */ }
 }
 
 /** Allocated = sum of priced pieces; POR pieces never count. */

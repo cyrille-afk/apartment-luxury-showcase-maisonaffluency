@@ -240,12 +240,13 @@ const TradeAILayoutStudio = () => {
   const openInVisualiser = () => {
     if (!scene) return;
     const prev = readSharedRoomLayout(sharedProjectId);
+    const stamp = Date.now();
     writeSharedRoomLayout({
-      projectId: sharedProjectId, room: scene.roomDimensions, source: "curated", updatedAt: Date.now(),
+      projectId: sharedProjectId, room: scene.roomDimensions, source: "curated", updatedAt: stamp,
       wallFinish: prev?.wallFinish ?? null, floorFinish: prev?.floorFinish ?? null,
       items: sceneToSharedItems(scene, (id) => byId.get(id)?.name ?? "Piece", (id, fallback) => byId.get(id)?.price ?? fallback),
     });
-    navigate(`/trade/visualiser?handoff=curated${sharedProjectId ? `&project=${encodeURIComponent(sharedProjectId)}` : ""}`);
+    navigate(`/trade/visualiser?handoff=curated&stamp=${stamp}${sharedProjectId ? `&project=${encodeURIComponent(sharedProjectId)}` : ""}`);
   };
   const selectedAsset = scene?.curatedAssets.find((a, i) => `ai-${i}-${a.sku}` === selectedId);
   const selectedPiece = selectedAsset ? byId.get(selectedAsset.componentId) : undefined;
