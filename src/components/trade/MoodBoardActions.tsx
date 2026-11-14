@@ -45,7 +45,8 @@ export function MoodBoardActions({ items, defaultProjectId }: Props) {
       const key = JSON.stringify([destination, title.trim(), configured]);
       if (transferProgress.current.key !== key) transferProgress.current = { key, completed: 0 };
       for (let start = toStudio ? transferProgress.current.completed : 0; start < configured.length; start += MOOD_BOARD_MAX_SAVE) {
-        const { error } = await supabase.rpc("create_visualiser_client_board", {
+        // Generated RPC types omit SQL-nullable UUID arguments used by board saves.
+        const { error } = await (supabase as any).rpc("create_visualiser_client_board", {
           _title: title.trim(),
           _client_id: null,
           _project_id: destination,
