@@ -495,7 +495,7 @@ export default function TradeMoodBoards() {
                           <p className="font-body text-[10px] text-muted-foreground">{item.brand_name}</p>
                           <p className="mt-1 font-body text-[11px] leading-snug tabular-nums text-foreground" aria-label={`Price for ${item.product_name}`}>
                             {pricingPending || ratePending ? <span className="text-muted-foreground">Loading price…</span>
-                              : prices.get(item.id)?.retail != null ? <>RRP {money(prices.get(item.id)?.retail ?? 0)}</>
+                              : prices.get(item.id)?.retail != null ? <>RRP {details.get(item.id)?.priceFrom ? "from " : ""}{money(prices.get(item.id)?.retail ?? 0)}</>
                               : <span className="text-muted-foreground">Price unconfirmed</span>}
                           </p>
                         </div>
@@ -591,7 +591,7 @@ export default function TradeMoodBoards() {
                               <p className="w-full font-body text-xs text-foreground truncate">{rec.title}</p>
                               <p className="w-full font-body text-[11px] text-muted-foreground truncate">{rec.brand}</p>
                               <div className="w-full text-[11px] text-foreground">
-                                {prices.get(rec.product_id)?.retail != null ? <>RRP {money(prices.get(rec.product_id)?.retail ?? 0)}
+                                {prices.get(rec.product_id)?.retail != null ? <>RRP {details.get(rec.product_id)?.priceFrom ? "from " : ""}{money(prices.get(rec.product_id)?.retail ?? 0)}
                                   <span data-trade-sensitive className="block text-muted-foreground">Trade {money(prices.get(rec.product_id)?.trade ?? 0)}</span></> : <span className="text-muted-foreground">Price unconfirmed</span>}
                               </div>
                               <p className="w-full font-body text-[11px] text-primary/80 leading-snug mt-1 line-clamp-4 break-words">
