@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Clear clickable Visualiser hotspots
-- [ ] Keep projected furniture pins inside the usable canvas, clear of open panels and one another, with larger hit targets and edge-aware labels.
-- [ ] Verify camera movement and panel toggles reposition pins without remounting the scene; run focused regressions and signed-in browser checks.
+- [x] Keep projected furniture pins inside the usable canvas, clear of open panels and one another, with 40px hit targets and edge-aware labels; furniture transforms remain untouched.
+- [x] Five placement regressions plus alternatives/source-label checks pass; signed-in real-console pins open alternatives before/after orbit, open panels have no pin collisions, hover labels render and the canvas stays mounted without page errors. Temporary piece removed. A second forced-drag software-graphics check stalled; panel avoidance and coincident-pin separation are covered by unit regressions.
 
 ## Undo Visualiser furniture swaps
 - [x] Capture the complete detached previous piece and atomically snapshot saved specification/Studio finishes before swapping.
