@@ -2024,6 +2024,13 @@
       "when": 1794636164888,
       "tag": "0288_project_studio_specification_stage",
       "breakpoints": true
+    },
+    {
+      "idx": 289,
+      "version": "7",
+      "when": 1794636497388,
+      "tag": "0289_create_spec_sheet_room_preferences",
+      "breakpoints": true
     }
   ]
 }

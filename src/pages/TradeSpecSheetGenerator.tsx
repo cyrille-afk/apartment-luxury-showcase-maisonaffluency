@@ -7,6 +7,12 @@ import { retainedSpecItems, specRemovalKey } from "@/lib/specSheetRemoval";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { cleanSpecDescription, specClientPriceCents, specDimensions, specFinishes, SPEC_DIMENSIONS_PLACEHOLDER } from "@/lib/specSheetCard";
 import { materialSwatchTone } from "@/lib/materialSwatch";
+import { currencySymbol, formatPdfDate, formatPdfMoney } from "@/lib/pdfFormatting";
+import { AddSpecRoomDialog, SpecRoomAssignmentSelect, SpecRoomFilterBar, SpecRoomSectionHeader } from "@/components/trade/SpecSheetRoomControls";
+import {
+  groupSpecItems, normalizeSpecRoomName, specRoomBudgetStatus, specRoomName, specRoomNames,
+  sumSpecClientTotals, unpricedSpecItemCount, type SpecRoomAssignment, type SpecRoomRecord,
+} from "@/lib/specSheetRooms";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -45,6 +51,7 @@ interface SpecItem {
   currency: string;
   project_name: string | null;
   client_name: string | null;
+  inherited_room: string | null;
 }
 
 type ThemeKey = "mono" | "warm" | "corporate";
@@ -129,10 +136,15 @@ function loadSettings(): DeckSettings {
   }
 }
 
+function amount(cents: number, currency = "EUR") {
+  const code = currency.toUpperCase();
+  const symbol = code === "USD" ? "$" : currencySymbol(code);
+  return `${symbol}${(cents / 100).toLocaleString("en", { maximumFractionDigits: 0 })}`;
+}
+
 function money(cents: number | null, currency = "EUR") {
   if (cents == null || cents <= 0) return "Price upon Request";
-  const symbol = currency === "USD" ? "$" : currency === "GBP" ? "£" : currency === "SGD" ? "S$" : "€";
-  return `${symbol}${(cents / 100).toLocaleString("en", { maximumFractionDigits: 0 })}`;
+  return amount(cents, currency);
 }
 
 const escapeHtml = (v: string) =>
@@ -153,6 +165,10 @@ export default function TradeSpecSheetGenerator() {
   const [settings, setSettings] = useState<DeckSettings>(() => loadSettings());
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [search, setSearch] = useState("");
+  const [activeRoom, setActiveRoom] = useState("all");
+  const [groupByRoom, setGroupByRoom] = useState(false);
+  const [addRoomOpen, setAddRoomOpen] = useState(false);
+  const [customRoomItem, setCustomRoomItem] = useState<SpecItem | null>(null);
   const [initialised, setInitialised] = useState(false);
   const [removals, setRemovals] = useState<{ key: string; ids: string[] }>({ key: "", ids: [] });
   const removalKey = user ? specRemovalKey(user.id, projectFilter) : "";
@@ -183,7 +199,7 @@ export default function TradeSpecSheetGenerator() {
       if (!user) return [];
       let qq = supabase
         .from("trade_quotes")
-        .select("id, client_name, status, project_id")
+        .select("id, client_name, status, project_id, project_board_id")
         .eq("user_id", user.id)
         .in("status", ["draft", "confirmed", "submitted", "responded", "priced", "deposit_paid", "paid"]);
       if (projectFilter) qq = qq.eq("project_id", projectFilter);
@@ -216,6 +232,30 @@ export default function TradeSpecSheetGenerator() {
       const quoteMap = Object.fromEntries((quotes as any[]).map((q: any) => [q.id, q]));
       const projectMap = Object.fromEntries((((projects as any[]) || [])).map((p: any) => [p.id, p.name]));
 
+      const { data: boardLinks, error: boardLinkError } = await supabase
+        .from("client_board_items")
+        .select("source_quote_item_id, subfolder, board_id")
+        .in("source_quote_item_id", qItems.map((item: any) => item.id));
+      if (boardLinkError) throw boardLinkError;
+      const boardIds = [...new Set((boardLinks || []).map(link => link.board_id))];
+      const { data: boards, error: boardError } = boardIds.length
+        ? await supabase.from("client_boards").select("id, title, project_id").in("id", boardIds)
+        : { data: [] as { id: string; title: string; project_id: string | null }[], error: null };
+      if (boardError) throw boardError;
+      const boardMap = new Map((boards || []).map(board => [board.id, board]));
+      const inheritedRooms = new Map<string, string>();
+      for (const quoteItem of qItems as any[]) {
+        const quote = quoteMap[quoteItem.quote_id];
+        const candidates = (boardLinks || [])
+          .filter(link => link.source_quote_item_id === quoteItem.id)
+          .map(link => ({ link, board: boardMap.get(link.board_id) }))
+          .filter((entry): entry is { link: any; board: { id: string; title: string; project_id: string | null } } => !!entry.board && entry.board.project_id === quote?.project_id)
+          .sort((a, b) => Number(b.board.id === quote?.project_board_id) - Number(a.board.id === quote?.project_board_id));
+        const inherited = candidates[0];
+        const room = normalizeSpecRoomName(inherited?.link.subfolder) || normalizeSpecRoomName(inherited?.board.title);
+        if (room) inheritedRooms.set(quoteItem.id, room);
+      }
+
       const seen = new Set<string>();
       const rows: SpecItem[] = [];
       for (const item of qItems as any[]) {
@@ -242,12 +282,42 @@ export default function TradeSpecSheetGenerator() {
           currency: p.currency || "EUR",
           project_name: q?.project_id ? projectMap[q.project_id] || null : null,
           client_name: q?.client_name || null,
+          inherited_room: inheritedRooms.get(item.id) || null,
         });
       }
       return rows;
     },
     enabled: !!user,
   });
+
+  const roomScope = projectFilter || "all";
+  useEffect(() => { setActiveRoom("all"); }, [roomScope]);
+  const { data: roomState = { rooms: [], assignments: [] } } = useQuery<{
+    rooms: SpecRoomRecord[];
+    assignments: SpecRoomAssignment[];
+  }>({
+    queryKey: ["spec-sheet-rooms", user?.id, roomScope],
+    enabled: !!user,
+    queryFn: async () => {
+      if (!user) return { rooms: [], assignments: [] };
+      let roomQuery = supabase.from("spec_sheet_rooms")
+        .select("id, name, project_id, budget_cents, currency, position")
+        .eq("user_id", user.id)
+        .order("position")
+        .order("name");
+      roomQuery = projectFilter ? roomQuery.eq("project_id", projectFilter) : roomQuery.is("project_id", null);
+      const { data: rooms, error: roomError } = await roomQuery;
+      if (roomError) throw roomError;
+      const roomIds = (rooms || []).map(room => room.id);
+      const { data: assignments, error: assignmentError } = roomIds.length
+        ? await supabase.from("spec_sheet_item_rooms").select("quote_item_id, room_id").eq("user_id", user.id).in("room_id", roomIds)
+        : { data: [] as SpecRoomAssignment[], error: null };
+      if (assignmentError) throw assignmentError;
+      return { rooms: (rooms || []) as SpecRoomRecord[], assignments: assignments || [] };
+    },
+  });
+  const rooms = roomState.rooms;
+  const assignments = roomState.assignments;
 
   const { data: candidates = [], isFetching: loadingCandidates, error: candidateError } = useQuery({
     queryKey: ["spec-replacement-candidates", user?.id, replacementItem?.source_product_id],
@@ -290,6 +360,79 @@ export default function TradeSpecSheetGenerator() {
     }
   };
 
+  const refreshRooms = () => user
+    ? queryClient.invalidateQueries({ queryKey: ["spec-sheet-rooms", user.id, roomScope] })
+    : Promise.resolve();
+
+  const ensureRoom = async (name: string): Promise<SpecRoomRecord | null> => {
+    if (!user) return null;
+    const normalized = normalizeSpecRoomName(name);
+    const existing = rooms.find(room => room.name.toLocaleLowerCase() === normalized.toLocaleLowerCase());
+    if (existing) return existing;
+    const { data, error } = await supabase.from("spec_sheet_rooms").insert({
+      user_id: user.id,
+      project_id: projectFilter || null,
+      name: normalized,
+      currency: items[0]?.currency || "EUR",
+      position: rooms.length,
+    }).select("id, name, project_id, budget_cents, currency, position").single();
+    if (error) throw error;
+    return data as SpecRoomRecord;
+  };
+
+  const saveAssignment = async (item: SpecItem, room: SpecRoomRecord) => {
+    if (!user) return;
+    const { error } = await supabase.from("spec_sheet_item_rooms").upsert({
+      user_id: user.id,
+      quote_item_id: item.item_id,
+      room_id: room.id,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "user_id,quote_item_id" });
+    if (error) throw error;
+  };
+
+  const changeItemRoom = async (item: SpecItem, name: string) => {
+    if (name === specRoomName(item, assignments, rooms)) return;
+    try {
+      const room = await ensureRoom(name);
+      if (!room) return;
+      await saveAssignment(item, room);
+      await refreshRooms();
+      toast({ title: `${item.product_name} moved to ${room.name}` });
+    } catch {
+      toast({ title: "Room assignment could not be saved", description: "Please try again.", variant: "destructive" });
+    }
+  };
+
+  const saveRoomFromDialog = async (name: string) => {
+    try {
+      const room = await ensureRoom(name);
+      if (!room) return false;
+      if (customRoomItem) await saveAssignment(customRoomItem, room);
+      else setActiveRoom(room.name);
+      await refreshRooms();
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const updateRoomBudget = async (roomName: string, cents: number | null, currency: string) => {
+    try {
+      const room = await ensureRoom(roomName);
+      if (!room || !user) return;
+      const { error } = await supabase.from("spec_sheet_rooms").update({
+        budget_cents: cents,
+        currency,
+        updated_at: new Date().toISOString(),
+      }).eq("id", room.id).eq("user_id", user.id);
+      if (error) throw error;
+      await refreshRooms();
+    } catch {
+      toast({ title: "Room budget could not be saved", description: "Please try again.", variant: "destructive" });
+    }
+  };
+
   // Select every item the first time the catalog loads.
   useEffect(() => {
     if (initialised || !items.length) return;
@@ -298,7 +441,9 @@ export default function TradeSpecSheetGenerator() {
   }, [items, initialised]);
 
   const sheetItems = useMemo(() => retainedSpecItems(items, removedIds), [items, removedIds]);
-  const visibleItems = useMemo(() => {
+  const roomFor = useMemo(() => (item: SpecItem) => specRoomName(item, assignments, rooms), [assignments, rooms]);
+  const roomNames = useMemo(() => specRoomNames(sheetItems, rooms, assignments), [sheetItems, rooms, assignments]);
+  const searchItems = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return sheetItems;
     return sheetItems.filter((i) =>
@@ -307,9 +452,14 @@ export default function TradeSpecSheetGenerator() {
         .some((v) => String(v).toLowerCase().includes(q)),
     );
   }, [sheetItems, search]);
+  const roomCounts = useMemo(() => Object.fromEntries(roomNames.map(name => [name, searchItems.filter(item => roomFor(item) === name).length])), [roomNames, searchItems, roomFor]);
+  const visibleItems = useMemo(() => activeRoom === "all" ? searchItems : searchItems.filter(item => roomFor(item) === activeRoom), [activeRoom, searchItems, roomFor]);
+  const visibleRoomGroups = useMemo(() => groupSpecItems(visibleItems, roomNames, roomFor), [visibleItems, roomNames, roomFor]);
 
   const chosen = useMemo(() => sheetItems.filter((i) => selected[i.item_id]), [sheetItems, selected]);
+  const chosenTotals = useMemo(() => sumSpecClientTotals(chosen), [chosen]);
   const currency = items[0]?.currency || "EUR";
+  const roomRecord = (name: string) => rooms.find(room => room.name === name);
 
   const toggleItem = (id: string) => setSelected((s) => ({ ...s, [id]: !s[id] }));
   const selectAll = () => setSelected(Object.fromEntries(visibleItems.map((i) => [i.item_id, true])));
@@ -335,7 +485,7 @@ export default function TradeSpecSheetGenerator() {
     }
     const t = THEMES[settings.theme];
     const f = settings.fields;
-    const today = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" });
+    const today = formatPdfDate(new Date());
     const title = settings.proposalTitle.trim() || "Specification Proposal";
     const project = settings.projectName.trim() || chosen[0]?.project_name || "";
 
@@ -343,8 +493,9 @@ export default function TradeSpecSheetGenerator() {
       value
         ? `<tr><th>${escapeHtml(label)}</th><td>${escapeHtml(value)}</td></tr>`
         : "";
+    const pdfMoney = (cents: number, currencyCode: string) => formatPdfMoney(cents, currencyCode);
 
-    const sheets = chosen.map((i) => `
+    const productSheet = (i: SpecItem) => `
       <section class="sheet">
         <div class="sheet-img">${
           i.image_url
@@ -359,11 +510,50 @@ export default function TradeSpecSheetGenerator() {
             ${f.dimensions ? row("Dimensions", i.dimensions) : ""}
             ${f.finish ? row("Finish", i.finish) : ""}
             ${f.quantity ? row("Quantity", String(i.quantity)) : ""}
-            ${f.price ? row("Client price", money(i.client_price_cents, i.currency)) : ""}
+            ${f.price ? row("Client price", i.client_price_cents == null ? "Price upon Request" : pdfMoney(i.client_price_cents, i.currency)) : ""}
           </table>
           ${f.description && i.description ? `<p class="desc">${escapeHtml(i.description)}</p>` : ""}
         </div>
-      </section>`).join("");
+      </section>`;
+
+    const exportGroups = groupSpecItems(chosen, roomNames, roomFor);
+    const sheets = exportGroups.map((group, roomIndex) => {
+      const totals = sumSpecClientTotals(group.items);
+      const unpriced = unpricedSpecItemCount(group.items);
+      const room = roomRecord(group.name);
+      const budgetStatus = specRoomBudgetStatus(totals, room?.budget_cents, room?.currency || currency);
+      return `
+        <section class="room-divider${roomIndex === 0 ? " first" : ""}">
+          <p class="room-number">Room ${String(roomIndex + 1).padStart(2, "0")} / ${String(exportGroups.length).padStart(2, "0")}</p>
+          <h1>${escapeHtml(group.name)}</h1>
+          <div class="room-rule"></div>
+          <p class="room-count">${group.items.length} selected item${group.items.length === 1 ? "" : "s"}</p>
+        </section>
+        <div class="room-items">${group.items.map(productSheet).join("")}</div>
+        <section class="room-total">
+          <div><p class="eyebrow">Room subtotal</p><h3>${escapeHtml(group.name)}</h3></div>
+          <div class="room-total-values">
+            ${f.price ? `<p class="subtotal">${totals.length ? totals.map(total => escapeHtml(pdfMoney(total.cents, total.currency))).join(" · ") : "Price upon Request"}</p>` : ""}
+            ${f.price && room?.budget_cents != null ? `<p>Room budget: ${escapeHtml(pdfMoney(room.budget_cents, room.currency))}</p>` : ""}
+            ${f.price && budgetStatus ? `<p class="budget-status">${escapeHtml(pdfMoney(budgetStatus.cents, room?.currency || currency))} ${budgetStatus.kind === "over" ? "over budget" : "remaining"}</p>` : ""}
+            ${unpriced ? `<p>${unpriced} item${unpriced === 1 ? "" : "s"} priced on request</p>` : ""}
+          </div>
+        </section>`;
+    }).join("");
+
+    const summaryRows = exportGroups.map(group => {
+      const totals = sumSpecClientTotals(group.items);
+      const room = roomRecord(group.name);
+      return `<tr><th>${escapeHtml(group.name)}<span>${group.items.length} item${group.items.length === 1 ? "" : "s"}</span></th><td>${f.price ? escapeHtml(totals.map(total => pdfMoney(total.cents, total.currency)).join(" · ") || "Price upon Request") : ""}${f.price && room?.budget_cents != null ? `<small>Budget ${escapeHtml(pdfMoney(room.budget_cents, room.currency))}</small>` : ""}</td></tr>`;
+    }).join("");
+    const projectSummary = `<section class="project-summary">
+      <p class="eyebrow">Project Summary</p>
+      <h1>${escapeHtml(project || title)}</h1>
+      <p class="summary-intro">${chosen.length} selected item${chosen.length === 1 ? "" : "s"} across ${exportGroups.length} room${exportGroups.length === 1 ? "" : "s"}</p>
+      <table class="summary-table">${summaryRows}</table>
+      ${f.price ? `<div class="grand-total"><p class="eyebrow">Project client total</p><p>${chosenTotals.length ? chosenTotals.map(total => escapeHtml(pdfMoney(total.cents, total.currency))).join(" · ") : "Price upon Request"}</p></div>` : ""}
+      <p class="summary-note">Client retail presentation only. Supplier costs and studio margins are not included.</p>
+    </section>`;
 
     const html = `<!doctype html><html><head><meta charset="utf-8" /><title>${escapeHtml(title)}</title>
 <style>
@@ -390,6 +580,32 @@ export default function TradeSpecSheetGenerator() {
                   letter-spacing:.18em; text-transform:uppercase; color:${t.muted}; vertical-align:top; }
   table.meta td { padding: 1.4mm 0; font-size: 9.5pt; color:${t.ink}; }
   .desc { font-size: 9pt; line-height: 1.55; color:${t.ink}; text-align: justify; margin: 0; }
+  .room-divider { height:247mm; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; break-before:page; page-break-before:always; break-after:page; page-break-after:always; break-inside:avoid; }
+  .room-divider.first { break-before:auto; page-break-before:auto; }
+  .room-number,.eyebrow { margin:0 0 6mm; font-size:8pt; letter-spacing:.28em; text-transform:uppercase; color:${t.accent}; }
+  .room-divider h1,.project-summary h1 { margin:0; font-family:${t.heading}; font-size:34pt; font-weight:400; line-height:1.12; }
+  .room-rule { width:34mm; height:1px; margin:12mm 0; background:${t.accent}; }
+  .room-count,.summary-intro { margin:0; font-size:10pt; letter-spacing:.12em; color:${t.muted}; }
+  .room-total { display:flex; justify-content:space-between; gap:10mm; align-items:flex-start; margin:8mm 0 0; padding:7mm 0; border-top:1px solid ${t.accent}; border-bottom:1px solid ${t.rule}; break-inside:avoid; page-break-inside:avoid; }
+  .room-total h3 { margin:0; font-family:${t.heading}; font-size:17pt; font-weight:400; }
+  .room-total-values { text-align:right; font-size:8.5pt; line-height:1.7; color:${t.muted}; }
+  .room-total-values p { margin:0; }
+  .room-total-values .subtotal { font-family:${t.heading}; font-size:17pt; color:${t.ink}; }
+  .room-total-values .budget-status { color:${t.accent}; }
+  .project-summary { min-height:247mm; padding-top:18mm; break-before:page; page-break-before:always; }
+  .project-summary h1 { font-size:28pt; margin-bottom:4mm; }
+  .summary-intro { margin-bottom:14mm; }
+  .summary-table { width:100%; border-collapse:collapse; }
+  .summary-table tr { break-inside:avoid; page-break-inside:avoid; }
+  .summary-table th,.summary-table td { padding:5mm 0; border-bottom:1px solid ${t.rule}; text-align:left; vertical-align:top; }
+  .summary-table th { font-family:${t.heading}; font-size:13pt; font-weight:400; }
+  .summary-table th span { display:block; margin-top:1.5mm; font-family:${t.body}; font-size:8pt; color:${t.muted}; }
+  .summary-table td { text-align:right; font-size:10pt; }
+  .summary-table td small { display:block; margin-top:1.5mm; color:${t.muted}; font-size:8pt; }
+  .grand-total { display:flex; justify-content:space-between; align-items:flex-start; gap:10mm; padding:8mm 0; border-bottom:1px solid ${t.accent}; break-inside:avoid; }
+  .grand-total p { margin:0; }
+  .grand-total p:last-child { font-family:${t.heading}; font-size:20pt; text-align:right; }
+  .summary-note { margin-top:10mm; font-size:8pt; line-height:1.6; color:${t.muted}; }
   footer { position: fixed; bottom: 0; left: 0; right: 0; font-size: 7pt; letter-spacing:.2em;
            text-transform:uppercase; color:${t.muted}; text-align:center; }
 </style></head><body>
@@ -401,9 +617,72 @@ export default function TradeSpecSheetGenerator() {
     <p class="date">${escapeHtml(today)}</p>
   </div>
   ${sheets}
+  ${projectSummary}
 </body></html>`;
 
     void downloadDocumentPdf({ html, filename: `${title}.pdf`, marginMm: 16 });
+  };
+
+  const renderRoomHeader = (name: string) => {
+    const selectedInRoom = chosen.filter(item => roomFor(item) === name);
+    const totals = sumSpecClientTotals(selectedInRoom);
+    const room = roomRecord(name);
+    return <SpecRoomSectionHeader
+      name={name}
+      selectedCount={selectedInRoom.length}
+      totals={totals}
+      unpricedCount={unpricedSpecItemCount(selectedInRoom)}
+      budgetCents={room?.budget_cents ?? null}
+      budgetCurrency={room?.currency || (totals.length === 1 ? totals[0].currency : currency)}
+      onBudgetChange={(cents, budgetCurrency) => updateRoomBudget(name, cents, budgetCurrency)}
+      formatMoney={amount}
+    />;
+  };
+
+  const renderCard = (i: SpecItem) => {
+    const isOn = !!selected[i.item_id];
+    const itemRoom = roomFor(i);
+    return <div key={i.item_id} className="relative">
+      <div
+        onClick={() => toggleItem(i.item_id)}
+        className={cn(
+          "group relative flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-lg border bg-card text-left transition-all duration-200",
+          isOn ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-foreground/30",
+        )}
+      >
+        <button
+          type="button"
+          aria-label={`${isOn ? "Exclude" : "Include"} ${i.product_name}`}
+          aria-pressed={isOn}
+          onClick={event => { event.stopPropagation(); toggleItem(i.item_id); }}
+          className={cn(
+            "absolute right-2 top-2 z-10 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border transition-colors duration-200",
+            isOn ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background/90 text-transparent",
+          )}
+        ><Check className="h-3.5 w-3.5" /></button>
+        <div className="aspect-[4/3] w-full shrink-0 overflow-hidden bg-muted">
+          {i.image_url ? <img src={i.image_url} alt={i.product_name} loading="lazy" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" /> : <div className="flex h-full w-full items-center justify-center text-muted-foreground"><ImageIcon className="h-6 w-6" /></div>}
+        </div>
+        <div className="flex flex-1 flex-col p-3">
+          {settings.fields.brand && <p className="h-4 truncate font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{i.brand_name || "\u00a0"}</p>}
+          <p className="mt-1.5 h-5 truncate font-display text-sm text-foreground">{i.product_name}</p>
+          {settings.fields.category && <p className="mt-1 h-4 truncate font-body text-xs text-muted-foreground">{i.category || "\u00a0"}</p>}
+          {settings.fields.dimensions && <p className={cn("mt-1.5 h-4 truncate font-body text-xs", i.dimensions === SPEC_DIMENSIONS_PLACEHOLDER ? "italic text-muted-foreground/60" : "text-muted-foreground")}>{i.dimensions}</p>}
+          {settings.fields.finish && <div className="mt-1.5 flex h-4 min-w-0 items-center gap-1.5">
+            {i.finishes.slice(0, 3).map(finish => <span key={finish} className="h-3 w-3 shrink-0 rounded-full border border-border" style={{ background: materialSwatchTone(finish).css }} aria-hidden />)}
+            <span className={cn("truncate font-body text-xs", i.finish ? "text-muted-foreground" : "italic text-muted-foreground/60")}>{i.finish || "Finish on request"}</span>
+          </div>}
+          {settings.fields.description && <p className="mt-1.5 line-clamp-2 h-8 font-body text-xs leading-4 text-muted-foreground">{i.description}</p>}
+          <SpecRoomAssignmentSelect value={itemRoom} roomNames={roomNames} productName={i.product_name} onChange={name => void changeItemRoom(i, name)} onCustomRoom={() => { setCustomRoomItem(i); setAddRoomOpen(true); }} />
+          <div className="mt-auto flex items-center justify-between pt-3">
+            {settings.fields.quantity ? <span className="font-body text-[11px] uppercase tracking-widest text-muted-foreground">Qty {i.quantity}</span> : <span />}
+            {settings.fields.price && <span className="font-body text-sm text-foreground">{money(i.client_price_cents, i.currency)}</span>}
+          </div>
+        </div>
+      </div>
+      <Button variant="outline" size="icon" title="Replace catalogue record" aria-label={`Replace catalogue record for ${i.product_name.trim()}`} className="absolute left-2 top-2 z-10 h-7 w-7 bg-background/90" onClick={event => { event.stopPropagation(); setReplacementError(""); setReplacementItem(i); }}><Replace className="h-3.5 w-3.5" /></Button>
+      <Button variant="outline" size="icon" title="Remove from sheet" aria-label={`Remove ${i.product_name.trim()} from sheet`} className="absolute right-10 top-2 z-10 h-7 w-7 bg-background/90" onClick={event => { event.stopPropagation(); saveRemovals([...removedIds, i.item_id]); }}><X className="h-3.5 w-3.5" /></Button>
+    </div>;
   };
 
   /* ---------------- Render ---------------- */
@@ -458,91 +737,36 @@ export default function TradeSpecSheetGenerator() {
             </span>
           </div>
 
+          <SpecRoomFilterBar
+            roomNames={roomNames}
+            counts={roomCounts}
+            totalCount={searchItems.length}
+            activeRoom={activeRoom}
+            onRoomChange={setActiveRoom}
+            onAddRoom={() => { setCustomRoomItem(null); setAddRoomOpen(true); }}
+            groupByRoom={groupByRoom}
+            onGroupChange={setGroupByRoom}
+          />
+
           {isLoading ? (
             <PageLoader />
-          ) : visibleItems.length === 0 ? (
+          ) : sheetItems.length === 0 ? (
             <div className="rounded-lg border border-dashed border-border p-12 text-center font-body text-sm text-muted-foreground">
               No project items found. Add products to a quote to build a presentation deck.
             </div>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-              {visibleItems.map((i) => {
-                const isOn = !!selected[i.item_id];
-                return (
-                  <div key={i.item_id} className="relative">
-                  <button
-                    type="button"
-                    onClick={() => toggleItem(i.item_id)}
-                    aria-pressed={isOn}
-                    className={cn(
-                      "group relative flex h-full w-full flex-col overflow-hidden rounded-lg border bg-card text-left transition-all duration-200",
-                      isOn ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-foreground/30",
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "absolute right-2 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full border transition-colors duration-200",
-                        isOn ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background/90 text-transparent",
-                      )}
-                    >
-                      <Check className="h-3.5 w-3.5" />
-                    </span>
-                    <div className="aspect-[4/3] w-full shrink-0 overflow-hidden bg-muted">
-                      {i.image_url ? (
-                        <img
-                          src={i.image_url}
-                          alt={i.product_name}
-                          loading="lazy"
-                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                          <ImageIcon className="h-6 w-6" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex flex-1 flex-col p-3">
-                      {settings.fields.brand && <p className="h-4 truncate font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{i.brand_name || "\u00a0"}</p>}
-                      <p className="mt-1.5 h-5 truncate font-display text-sm text-foreground">{i.product_name}</p>
-                      {settings.fields.category && <p className="mt-1 h-4 truncate font-body text-xs text-muted-foreground">{i.category || "\u00a0"}</p>}
-                      {settings.fields.dimensions && (
-                        <p className={cn("mt-1.5 h-4 truncate font-body text-xs", i.dimensions === SPEC_DIMENSIONS_PLACEHOLDER ? "italic text-muted-foreground/60" : "text-muted-foreground")}>{i.dimensions}</p>
-                      )}
-                      {settings.fields.finish && (
-                        <div className="mt-1.5 flex h-4 min-w-0 items-center gap-1.5">
-                          {i.finishes.slice(0, 3).map((f) => (
-                            <span key={f} className="h-3 w-3 shrink-0 rounded-full border border-border" style={{ background: materialSwatchTone(f).css }} aria-hidden />
-                          ))}
-                          <span className={cn("truncate font-body text-xs", i.finish ? "text-muted-foreground" : "italic text-muted-foreground/60")}>{i.finish || "Finish on request"}</span>
-                        </div>
-                      )}
-                      {settings.fields.description && (
-                        <p className="mt-1.5 line-clamp-2 h-8 font-body text-xs leading-4 text-muted-foreground">{i.description}</p>
-                      )}
-                      <div className="mt-auto flex items-center justify-between pt-3">
-                        {settings.fields.quantity ? (
-                          <span className="font-body text-[11px] uppercase tracking-widest text-muted-foreground">Qty {i.quantity}</span>
-                        ) : <span />}
-                        {settings.fields.price && (
-                          <span className="font-body text-sm text-foreground">{money(i.client_price_cents, i.currency)}</span>
-                        )}
-                      </div>
-                    </div>
-                  </button>
-                  <Button variant="outline" size="icon" title="Replace catalogue record" aria-label={`Replace catalogue record for ${i.product_name.trim()}`}
-                    className="absolute left-2 top-2 z-10 h-7 w-7 bg-background/90"
-                    onClick={() => { setReplacementError(""); setReplacementItem(i); }}>
-                    <Replace className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button variant="outline" size="icon" title="Remove from sheet" aria-label={`Remove ${i.product_name.trim()} from sheet`}
-                    className="absolute right-10 top-2 z-10 h-7 w-7 bg-background/90"
-                    onClick={() => saveRemovals([...removedIds, i.item_id])}>
-                    <X className="h-3.5 w-3.5" />
-                  </Button>
-                  </div>
-                );
-              })}
+          ) : visibleItems.length === 0 ? (
+            <div className="rounded-lg border border-dashed border-border p-12 text-center font-body text-sm text-muted-foreground">
+              No items match this room and search. Choose another filter or add an item to this room.
             </div>
+          ) : groupByRoom || activeRoom !== "all" ? (
+            <div className="space-y-8">
+              {visibleRoomGroups.map(group => <section key={group.name} className="space-y-4">
+                {renderRoomHeader(group.name)}
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">{group.items.map(renderCard)}</div>
+              </section>)}
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">{visibleItems.map(renderCard)}</div>
           )}
         </section>
 
@@ -641,13 +865,11 @@ export default function TradeSpecSheetGenerator() {
             <FileDown className="mr-2 h-4 w-4" /> Export Branded Pitch PDF
           </Button>
           <p className="text-center font-body text-[11px] text-muted-foreground">
-            {chosen.length} item{chosen.length === 1 ? "" : "s"} · {money(
-              chosen.reduce((s, i) => s + (i.client_price_cents || 0) * i.quantity, 0),
-              currency,
-            )}
+            {chosen.length} item{chosen.length === 1 ? "" : "s"} · {chosenTotals.length ? chosenTotals.map(total => money(total.cents, total.currency)).join(" · ") : "Price upon Request"}
           </p>
         </aside>
       </div>
+      <AddSpecRoomDialog open={addRoomOpen} onOpenChange={open => { setAddRoomOpen(open); if (!open) setCustomRoomItem(null); }} onSave={saveRoomFromDialog} />
       <Dialog open={!!replacementItem} onOpenChange={(open) => { if (!open && !savingReplacement) setReplacementItem(null); }}>
         <DialogContent className="max-h-[85vh] w-[calc(100%-2rem)] overflow-y-auto">
           <DialogHeader>

@@ -9622,6 +9622,86 @@ export type Database = {
           },
         ]
       }
+      spec_sheet_item_rooms: {
+        Row: {
+          quote_item_id: string
+          room_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          quote_item_id: string
+          room_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          quote_item_id?: string
+          room_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spec_sheet_item_rooms_quote_item_id_fkey"
+            columns: ["quote_item_id"]
+            isOneToOne: false
+            referencedRelation: "trade_quote_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spec_sheet_item_rooms_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "spec_sheet_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spec_sheet_rooms: {
+        Row: {
+          budget_cents: number | null
+          created_at: string
+          currency: string
+          id: string
+          name: string
+          position: number
+          project_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          budget_cents?: number | null
+          created_at?: string
+          currency?: string
+          id?: string
+          name: string
+          position?: number
+          project_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          budget_cents?: number | null
+          created_at?: string
+          currency?: string
+          id?: string
+          name?: string
+          position?: number
+          project_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spec_sheet_rooms_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stripe_delivery_checks: {
         Row: {
           available: boolean

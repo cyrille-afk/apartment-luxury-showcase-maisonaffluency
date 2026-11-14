@@ -1,11 +1,17 @@
 import { toast } from 'sonner';
 import { getClientSafeMode } from './clientSafeMode';
 
-export function pdfPageCuts(height: number, pageHeight: number, blocks: { top: number; bottom: number }[]): number[] {
+export function pdfPageCuts(height: number, pageHeight: number, blocks: { top: number; bottom: number }[], forcedBreaks: number[] = []): number[] {
   const cuts = [0];
+  const pageBreaks = [...new Set(forcedBreaks.filter(point => Number.isFinite(point) && point > 0 && point < height))].sort((a, b) => a - b);
   while (cuts[cuts.length - 1] < height) {
     const start = cuts[cuts.length - 1];
     let end = Math.min(height, start + pageHeight);
+    const forced = pageBreaks.find(point => point > start + 1 && point < end);
+    if (forced != null) {
+      cuts.push(forced);
+      continue;
+    }
     for (;;) {
       const crossing = blocks.filter(b => b.top > start + 1 && b.top < end && b.bottom > end && b.bottom - b.top <= pageHeight);
       if (!crossing.length) break;
@@ -65,6 +71,17 @@ export async function downloadDocumentPdf(input: { html?: string; element?: HTML
       const rect = e.getBoundingClientRect();
       return { top: rect.top - bounds.top, bottom: rect.bottom - bounds.top };
     });
+    const forcedBreaks = Array.from(root.querySelectorAll<HTMLElement>('*')).flatMap(element => {
+      const style = doc.defaultView?.getComputedStyle(element);
+      if (!style) return [];
+      const rect = element.getBoundingClientRect();
+      const before = style.breakBefore === 'page' || style.pageBreakBefore === 'always';
+      const after = style.breakAfter === 'page' || style.pageBreakAfter === 'always';
+      return [
+        ...(before ? [rect.top - bounds.top] : []),
+        ...(after ? [rect.bottom - bounds.top] : []),
+      ];
+    });
     // Oversized paragraphs still break between text lines, never through glyphs.
     const walker = doc.createTreeWalker(root, NodeFilter.SHOW_TEXT);
     let textNode = walker.nextNode();
@@ -88,7 +105,7 @@ export async function downloadDocumentPdf(input: { html?: string; element?: HTML
     const pageW = pdf.internal.pageSize.getWidth() - margin * 2;
     const pageH = pdf.internal.pageSize.getHeight() - margin * 2;
     const scale = canvas.width / width;
-    const cuts = pdfPageCuts(root.scrollHeight, pageH * width / pageW, blocks);
+    const cuts = pdfPageCuts(root.scrollHeight, pageH * width / pageW, blocks, forcedBreaks);
     for (let i = 0; i < cuts.length - 1; i++) {
       if (i > 0) pdf.addPage();
       const slice = document.createElement('canvas');

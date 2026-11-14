@@ -1,5 +1,11 @@
 # Roadmap
 
+## Room-organized Specification Sheets
+- [x] Add project-aware room assignment, custom rooms, filters and grouped selection without changing quote records; exact same-project sub-folder/folder names supply defaults.
+- [x] Add selected-item room subtotals and optional account/project-saved room budgets with remaining/over-budget status; mixed currencies stay separate and unknown prices remain identified.
+- [x] Export room-divider pages, room subtotal/budget footers and a final project summary in the Branded Pitch PDF; shared raster pagination now honors forced editorial page breaks.
+- [x] Thirty-six focused regressions pass. Signed-in custom-room assignment and €1,000 budget survived reload; inherited folder rooms, selected subtotals and mixed totals read back. Fifteen-page downloaded PDF visually checked page by page, including exact €36,876 over-budget and separate summary; phone has no horizontal overflow. Temporary rooms/assignments removed. Build OK.
+
 ## Project Studio Tools and workflow visibility
 - [x] Add Project Studio after Mood Board with the supplied two-line description, matching cards and a ninth tracked completion/target-date stage; saved constraints retain legacy stages.
 - [x] Resolve active/explicit workflow/latest accessible project for real Studio links, with a choose-or-create project page when none exists.
