@@ -36,7 +36,7 @@ import {
   type ReactNode,
 } from "react";
 import { cn } from "@/lib/utils";
-import { isProductDetailPath } from "@/lib/collectionScrollPolicy";
+import { isProductDetailPath, isTradeNavigation } from "@/lib/collectionScrollPolicy";
 
 // ---------- shared URL parsing ----------
 
@@ -88,7 +88,7 @@ export function useNavigate(): NavigateFn {
       hash,
       state: options?.state as never,
       replace: options?.replace,
-      resetScroll: options?.preventScrollReset || isProductDetailPath(pathname) ? false : undefined,
+      resetScroll: options?.preventScrollReset || isProductDetailPath(pathname) || isTradeNavigation(pathname, router.state.location.pathname) ? false : undefined,
     });
   }, [tsNav, router]) as NavigateFn;
 }
@@ -198,6 +198,7 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
   ref,
 ) {
   const { pathname, search, hash } = parseTo(to);
+  const router = useRouter();
   return (
     <TSLink
       ref={ref as never}
@@ -206,7 +207,7 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
       hash={hash}
       replace={replace}
       state={state as never}
-      resetScroll={isProductDetailPath(pathname) ? false : undefined}
+      resetScroll={isProductDetailPath(pathname) || isTradeNavigation(pathname, router.state.location.pathname) ? false : undefined}
       {...((rest ?? {}) as Record<string, unknown>)}
     >
       {children}

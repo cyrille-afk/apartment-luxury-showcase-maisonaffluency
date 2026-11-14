@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { isCollectionLanding, isProductDetailPath, routeScrollBehavior, shouldResetRouteScroll } from "./collectionScrollPolicy";
+import { isCollectionLanding, isProductDetailPath, isTradeNavigation, routeScrollBehavior, shouldResetRouteScroll } from "./collectionScrollPolicy";
 
 describe("Collection scroll ownership", () => {
+  it("delegates Tools arrivals and departures to the committed workspace reset", () => {
+    expect(isTradeNavigation('/trade/currency-converter', '/trade/tools')).toBe(true);
+    expect(isTradeNavigation('/designers', '/trade/tools')).toBe(true);
+    expect(isTradeNavigation('/trade/tools', '/journal')).toBe(true);
+    expect(isTradeNavigation('/journal', '/trade-program')).toBe(false);
+  });
   it("lets both Trade product URLs and public product URLs own their content-ready reset", () => {
     expect(isProductDetailPath("/trade/products/4c5447ce-abd1-4c16-80a7-c3c41738f7a8")).toBe(true);
     expect(isProductDetailPath("/trade/products/michel-amar-studio/puzzle-dining-table")).toBe(true);

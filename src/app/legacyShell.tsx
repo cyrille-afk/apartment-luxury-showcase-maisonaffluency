@@ -24,6 +24,7 @@ import { RealtimeMultiplexerProvider } from "@/contexts/RealtimeMultiplexerConte
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import { releaseDesignersLandingScrollLock } from "@/lib/designersScrollLock";
 import { clearDarkIosChrome } from "@/lib/iosChrome";
+import { useRouterState } from "@tanstack/react-router";
 
 // react-helmet-async is imported synchronously — wrapping the whole app in a
 // lazy provider with Suspense fallback={null} blocked ALL React rendering on a
@@ -369,7 +370,16 @@ export function HomeRouteSync() {
 //   - location.state.smoothScroll === false (opt-out for instant jumps)
 //   - prefers-reduced-motion is enabled
 export function ScrollToTopOnNavigate() {
-  const location = useLocation();
+  // The requested URL changes before the outgoing workspace is replaced.
+  // Observe the committed visit so tool clicks never scroll the old page.
+  const committedLocation = useRouterState({ select: state => state.resolvedLocation ?? state.location });
+  const location = {
+    pathname: committedLocation.pathname,
+    search: committedLocation.searchStr,
+    hash: committedLocation.hash,
+    state: committedLocation.state,
+    key: committedLocation.href,
+  };
   const navType = useNavigationType();
   const prevPathRef = useRef<string | null>(null);
 
@@ -397,12 +407,22 @@ export function ScrollToTopOnNavigate() {
     const prefersReduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     const smooth = !isLockedDesignersLanding && !requiresStableTop && state?.smoothScroll !== false && !prefersReduced;
     const behavior = routeScrollBehavior(location.pathname, smooth, prevPath);
-    // Defer one frame so the new route mounts before we animate — prevents the
-    // browser from snapping mid-transition when React commits the new tree.
-    const raf = window.requestAnimationFrame(() => {
-      window.scrollTo({ top: 0, left: 0, behavior });
-    });
-    return () => window.cancelAnimationFrame(raf);
+    // A resolved lazy route can still retain the outgoing Tools tree while
+    // its chunk suspends. Wait for its replacement, including loading masks.
+    let raf = 0;
+    const resetWhenReady = () => {
+      window.cancelAnimationFrame(raf);
+      raf = window.requestAnimationFrame(() => {
+        if ((location.pathname !== '/trade/tools' && document.querySelector('[data-tools-page]')) ||
+          document.querySelector('[data-trade-page-loading]')) return;
+        observer.disconnect();
+        window.scrollTo({ top: 0, left: 0, behavior });
+      });
+    };
+    const observer = new MutationObserver(resetWhenReady);
+    observer.observe(document.body, { childList: true, subtree: true });
+    resetWhenReady();
+    return () => { observer.disconnect(); window.cancelAnimationFrame(raf); };
   }, [location.key, location.pathname, location.hash, location.state, navType]);
 
   return null;

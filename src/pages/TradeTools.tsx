@@ -1,4 +1,4 @@
-import { useNavigate, useSearchParams } from "@/lib/router-compat";
+import { Link, useSearchParams } from "@/lib/router-compat";
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import {
   Image, Users, FolderOpen, Layers, FileText, FileSpreadsheet, Scissors,
@@ -105,7 +105,6 @@ function TargetDateStatus({ value, complete = false }: { value: string | undefin
 }
 
 export default function TradeTools() {
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const categoryParam = searchParams.get("category");
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -256,7 +255,7 @@ export default function TradeTools() {
   const totalMatches = filteredCategories.reduce((n, c) => n + c.tools.length, 0);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-10">
+    <div data-tools-page className="max-w-6xl mx-auto space-y-10 [&_a]:cursor-pointer [&_button:not(:disabled)]:cursor-pointer [&_[role=checkbox]:not([data-disabled])]:cursor-pointer">
       <div>
         <h1 className="font-display text-2xl md:text-3xl text-foreground tracking-wide">Tools</h1>
         <p className="font-body text-sm text-muted-foreground mt-1">
@@ -278,13 +277,13 @@ export default function TradeTools() {
           className="w-full h-11 pl-10 pr-20 rounded-xl border border-border bg-background font-body text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-hidden focus:border-foreground/40 focus:ring-2 focus:ring-foreground/5 transition-colors"
         />
         {query ? (
-          <button
+          <Button variant="ghost" size="icon"
             onClick={() => setQuery("")}
             className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
             aria-label="Clear search"
           >
             <X className="h-3.5 w-3.5" />
-          </button>
+          </Button>
         ) : (
           <kbd className="hidden sm:inline-flex absolute right-3 top-1/2 -translate-y-1/2 items-center gap-1 rounded-md border border-border bg-muted/50 px-1.5 py-0.5 font-body text-[10px] uppercase tracking-wider text-muted-foreground pointer-events-none">
             <span className="text-[11px]">⌘</span>K
@@ -317,8 +316,8 @@ export default function TradeTools() {
                 key={tool.url}
                 className="group relative flex items-center gap-2.5 p-3 rounded-lg border border-border bg-background hover:bg-foreground/5 hover:border-foreground/20 transition-all"
               >
-                <button
-                  onClick={() => navigate(tool.url)}
+                <Link
+                  to={tool.url}
                   className="flex items-center gap-2.5 flex-1 min-w-0 text-left"
                 >
                   <div className="w-8 h-8 rounded-md bg-muted flex items-center justify-center shrink-0 group-hover:bg-foreground/10 transition-colors">
@@ -330,15 +329,15 @@ export default function TradeTools() {
                       {tool.description}
                     </span>
                   </div>
-                </button>
-                <button
+                </Link>
+                <Button variant="ghost" size="icon"
                   onClick={(e) => { e.stopPropagation(); toggleFavorite(tool.url); }}
                   className="shrink-0 p-1 rounded hover:bg-muted text-accent"
                   aria-label={`Remove ${tool.title} from favorites`}
                   title="Remove from favorites"
                 >
                   <Star className="h-3.5 w-3.5 fill-accent" />
-                </button>
+                </Button>
               </div>
             ))}
           </div>
@@ -443,8 +442,8 @@ export default function TradeTools() {
                   data-felix-target={tool.url === "/trade/documents" ? "tools-resources" : undefined}
                   className="group relative flex flex-wrap items-start gap-3 p-4 rounded-xl border border-border bg-background hover:bg-muted/50 hover:border-foreground/20 transition-all"
                 >
-                  <button
-                    onClick={() => navigate(tool.url)}
+                  <Link
+                    to={tool.url}
                     className="flex items-start gap-3 flex-1 min-w-0 text-left"
                   >
                     <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0 group-hover:bg-foreground/10 transition-colors">
@@ -456,8 +455,8 @@ export default function TradeTools() {
                         {tool.description}
                       </span>
                     </div>
-                  </button>
-                  <button
+                  </Link>
+                  <Button variant="ghost" size="icon"
                     onClick={(e) => { e.stopPropagation(); toggleFavorite(tool.url); }}
                     className={cn(
                       "absolute top-2.5 right-2.5 p-1.5 rounded-md transition-colors",
@@ -469,7 +468,7 @@ export default function TradeTools() {
                     title={isFav ? "Remove from favorites" : "Add to favorites"}
                   >
                     <Star className={cn("h-3.5 w-3.5", isFav && "fill-accent")} />
-                  </button>
+                  </Button>
                   {stage && (
                     <div className="w-full space-y-3 border-t border-border pt-3 mt-auto">
                     <div className="flex items-center gap-2">

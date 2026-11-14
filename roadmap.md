@@ -1,5 +1,9 @@
 # Roadmap
 
+## Tools cursor and navigation
+- [x] Give Tools links and available controls a hand cursor.
+- [x] Stop scrolling the outgoing Tools page; signed-in Currency Converter and CPD openings verified at 1954×1184 with pointer cursor, instant destination-only reset and no browser errors. All 42 navigation regressions pass; preview build OK.
+
 ## Budget-aware anchored Mood Board
 - [x] Add account/project-local persisted room/budget/category controls and live EUR RRP allocation, with unconfirmed pricing withheld.
 - [x] Pin anchors and filter the canonical complement pool against live prices and remaining category budgets; all explicit pins drive server references, sensitive tier pricing remains hidden in Client View. Anchor function deployed and live checked.
