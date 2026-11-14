@@ -4,14 +4,16 @@ import {
   Image, Users, FolderOpen, Layers, FileText, FileSpreadsheet, Scissors,
   Columns, Paintbrush, MessageCircle, CalendarClock, Package, Truck,
   CalendarDays, Wallet, RefreshCw, ArrowRightLeft, GraduationCap, Box, BookOpen,
-  Wand2, Star, Search, X, Scan, Presentation, ClipboardList, CalendarRange, CheckCircle2, Circle, Save,
+  Wand2, Star, Search, X, Scan, Presentation, ClipboardList, CalendarRange, CheckCircle2, Circle, Save, LayoutTemplate,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { categorySlug } from "@/lib/toolsBreadcrumbs";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useProjects } from "@/hooks/useProjects";
+import { useProjects, getRecentProjectIds } from "@/hooks/useProjects";
+import { useProjectWorkspace } from "@/contexts/ProjectWorkspaceContext";
+import { studioProjectId, studioProjectHref } from "@/lib/studioProjectRouting";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
@@ -36,6 +38,7 @@ const categories: ToolCategory[] = [
     label: "Specification",
     tools: [
       { title: "Mood Board", description: "Visual collage for client presentations", url: "/trade/mood-boards", icon: Paintbrush },
+      { title: "Project Studio", description: "Curate visual boards, lock material finishes, review live specsheet pricing, and refine AI pairings.", url: "/trade/project-studio", icon: LayoutTemplate },
       { title: "Product Comparator", description: "Compare specs side by side", url: "/trade/comparator", icon: Columns },
       { title: "Markup & Annotation", description: "Annotate images and drawings", url: "/trade/annotations", icon: MessageCircle },
       { title: "Visualiser & Walkthrough", description: "Arrange your Mood Board furniture in 3D, then preview and record a cinematic walkthrough.", url: "/trade/visualiser", icon: Scan },
@@ -113,6 +116,13 @@ export default function TradeTools() {
   const { user } = useAuth();
   const { projects, loading: projectsLoading } = useProjects();
   const [projectId, setProjectId] = useState("");
+  const workspace = useProjectWorkspace();
+  const [recentProjectIds, setRecentProjectIds] = useState<string[]>([]);
+  const [chosenWorkflowProject, setChosenWorkflowProject] = useState(false);
+  useEffect(() => { setRecentProjectIds(getRecentProjectIds()); }, []);
+  const contextProject = searchParams.get('project') || workspace?.activeFolder?.projectId;
+  const studioDestination = studioProjectId(projects.map(project => project.id), chosenWorkflowProject ? projectId : contextProject, recentProjectIds);
+  const toolHref = (url: string) => url === '/trade/project-studio' ? studioProjectHref(studioDestination) : url;
   const queryClient = useQueryClient();
   const progressKey = ["specification-progress", user?.id];
   const progressQuery = useQuery({
@@ -181,8 +191,8 @@ export default function TradeTools() {
 
   useEffect(() => {
     if (projectsLoading) return;
-    setProjectId(current => projects.some(project => project.id === current) ? current : projects[0]?.id || "");
-  }, [projects, projectsLoading]);
+    setProjectId(current => chosenWorkflowProject && projects.some(project => project.id === current) ? current : studioDestination || projects[0]?.id || "");
+  }, [projects, projectsLoading, studioDestination, chosenWorkflowProject]);
 
   // Cmd+K / Ctrl+K → focus search. Esc clears it.
   useEffect(() => {
@@ -317,7 +327,7 @@ export default function TradeTools() {
                 className="group relative flex items-center gap-2.5 p-3 rounded-lg border border-border bg-background hover:bg-foreground/5 hover:border-foreground/20 transition-all"
               >
                 <Link
-                  to={tool.url}
+                  to={toolHref(tool.url)}
                   className="flex items-center gap-2.5 flex-1 min-w-0 text-left"
                 >
                   <div className="w-8 h-8 rounded-md bg-muted flex items-center justify-center shrink-0 group-hover:bg-foreground/10 transition-colors">
@@ -380,7 +390,7 @@ export default function TradeTools() {
                       <div className="min-w-0 space-y-2">
                         <Button variant="link" className="p-0 h-auto text-left whitespace-normal justify-start text-foreground" disabled={completion.isPending || targetMutation.isPending}
                           aria-label={`View ${project.name} Specification stages`}
-                          onClick={() => { setProjectId(project.id); completion.reset(); targetMutation.reset(); document.getElementById('specification-project-progress')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>
+                          onClick={() => { setChosenWorkflowProject(true); setProjectId(project.id); completion.reset(); targetMutation.reset(); document.getElementById('specification-project-progress')?.scrollIntoView({ behavior: 'instant', block: 'start' }); }}>
                           {project.name}
                         </Button>
                         <p className="text-xs text-muted-foreground">{summary.count}/{specificationStages.length} complete · {summary.percent}%</p>
@@ -416,7 +426,7 @@ export default function TradeTools() {
                     {projectsLoading ? "Loading projects…" : !projects.length ? "No projects available" : !activeProjectId ? "Select a project" : progressQuery.isError ? "Progress unavailable" : !progressReady ? "Loading progress…" : `${workflow.count} of ${specificationStages.length} stages complete · ${workflow.percent}%`}
                   </p>
                 </div>
-                <Select value={activeProjectId} onValueChange={value => { setProjectId(value); completion.reset(); targetMutation.reset(); }} disabled={projectsLoading || !projects.length || completion.isPending || targetMutation.isPending}>
+                <Select value={activeProjectId} onValueChange={value => { setChosenWorkflowProject(true); setProjectId(value); completion.reset(); targetMutation.reset(); }} disabled={projectsLoading || !projects.length || completion.isPending || targetMutation.isPending}>
                   <SelectTrigger className="w-full sm:w-80" aria-label="Workflow project"><SelectValue placeholder="Select a project" /></SelectTrigger>
                   <SelectContent>
                     {projects.map(project => <SelectItem key={project.id} value={project.id}>{project.name}{progressQuery.isSuccess ? ` · ${projectWorkflow(project.id, progressQuery.data).count}/${specificationStages.length}` : ""}</SelectItem>)}
@@ -443,7 +453,7 @@ export default function TradeTools() {
                   className="group relative flex flex-wrap items-start gap-3 p-4 rounded-xl border border-border bg-background hover:bg-muted/50 hover:border-foreground/20 transition-all"
                 >
                   <Link
-                    to={tool.url}
+                    to={toolHref(tool.url)}
                     className="flex items-start gap-3 flex-1 min-w-0 text-left"
                   >
                     <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0 group-hover:bg-foreground/10 transition-colors">

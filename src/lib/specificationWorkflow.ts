@@ -1,5 +1,6 @@
 export const specificationStages = [
   { id: 'mood-board', url: '/trade/mood-boards' },
+  { id: 'project-studio', url: '/trade/project-studio' },
   { id: 'comparator', url: '/trade/comparator' },
   { id: 'annotation', url: '/trade/annotations' },
   { id: 'visualiser', url: '/trade/visualiser' },

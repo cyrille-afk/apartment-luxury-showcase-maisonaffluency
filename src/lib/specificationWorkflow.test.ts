@@ -45,23 +45,30 @@ describe('Specification workflow', () => {
       { project_id: 'two', stage: 'visualiser', completed_at: '2026-11-13' },
     ]);
     expect(result.completedStages.map(stage => stage.id)).toEqual(['mood-board', 'quote']);
-    expect(result.remainingStages.map(stage => stage.id)).toEqual(['comparator', 'annotation', 'visualiser', 'tearsheet', 'specification-sheet', 'ffe-schedule']);
-    expect(projectWorkflow('one', []).remainingStages).toHaveLength(8);
+    expect(result.remainingStages.map(stage => stage.id)).toEqual(['project-studio', 'comparator', 'annotation', 'visualiser', 'tearsheet', 'specification-sheet', 'ffe-schedule']);
+    expect(projectWorkflow('one', []).remainingStages).toHaveLength(9);
     expect(projectWorkflow('one', specificationStages.map(stage => ({ project_id: 'one', stage: stage.id, completed_at: '2026-11-13' }))).remainingStages).toHaveLength(0);
   });
   it('tracks nine stages in the requested design workflow order', () => {
-    expect(specificationStages.map(stage => stage.id)).toEqual(['mood-board', 'comparator', 'annotation', 'visualiser', 'tearsheet', 'specification-sheet', 'ffe-schedule', 'quote']);
+    expect(specificationStages.map(stage => stage.id)).toEqual(['mood-board', 'project-studio', 'comparator', 'annotation', 'visualiser', 'tearsheet', 'specification-sheet', 'ffe-schedule', 'quote']);
   });
   it('keeps project completion independent', () => {
     const rows = [{ project_id: 'one', stage: 'mood-board', completed_at: '2026-11-13' }];
     expect(projectWorkflow('one', rows).count).toBe(1);
-    expect(projectWorkflow('one', rows).percent).toBe(13);
+    expect(projectWorkflow('one', rows).percent).toBe(11);
     expect(projectWorkflow('two', rows).count).toBe(0);
+  });
+  it('tracks Project Studio independently without marking Mood Board or Visualiser complete', () => {
+    const result = projectWorkflow('one', [{ project_id: 'one', stage: 'project-studio', completed_at: '2026-11-14T06:00:00Z' }]);
+    expect(result.completedStages.map(stage => stage.id)).toEqual(['project-studio']);
+    expect(result.remainingStages.map(stage => stage.id)).toContain('mood-board');
+    expect(result.remainingStages.map(stage => stage.id)).toContain('visualiser');
+    expect(result.percent).toBe(11);
   });
   it('reopening a stage reduces progress without requiring prior stages', () => {
     const rows = specificationStages.map(stage => ({ project_id: 'one', stage: stage.id, completed_at: '2026-11-13' }));
     expect(projectWorkflow('one', rows).percent).toBe(100);
-    expect(projectWorkflow('one', rows.filter(row => row.stage !== 'quote')).count).toBe(7);
+    expect(projectWorkflow('one', rows.filter(row => row.stage !== 'quote')).count).toBe(8);
     expect(projectWorkflow('one', rows.filter(row => row.stage === 'quote')).count).toBe(1);
   });
 });

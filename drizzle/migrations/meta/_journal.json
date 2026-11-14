@@ -2017,6 +2017,13 @@
       "when": 1794635539169,
       "tag": "0287_project_studio_finishes",
       "breakpoints": true
+    },
+    {
+      "idx": 288,
+      "version": "7",
+      "when": 1794636164888,
+      "tag": "0288_project_studio_specification_stage",
+      "breakpoints": true
     }
   ]
 }

@@ -142,6 +142,7 @@ import { Route as TradeOrderTimelineRouteImport } from './routes/trade.order-tim
 import { Route as TradePayoutsRouteImport } from './routes/trade.payouts'
 import { Route as TradePoLogsRouteImport } from './routes/trade.po-logs'
 import { Route as TradePresentationsRouteImport } from './routes/trade.presentations'
+import { Route as TradeProjectStudioRouteImport } from './routes/trade.project-studio'
 import { Route as TradeProjectsRouteImport } from './routes/trade.projects'
 import { Route as TradeProvenanceRouteImport } from './routes/trade.provenance'
 import { Route as TradeQuotesRouteImport } from './routes/trade.quotes'
@@ -937,6 +938,11 @@ const TradePoLogsRoute = TradePoLogsRouteImport.update({
 const TradePresentationsRoute = TradePresentationsRouteImport.update({
   id: '/presentations',
   path: '/presentations',
+  getParentRoute: () => TradeRoute,
+} as any)
+const TradeProjectStudioRoute = TradeProjectStudioRouteImport.update({
+  id: '/project-studio',
+  path: '/project-studio',
   getParentRoute: () => TradeRoute,
 } as any)
 const TradeProjectsRoute = TradeProjectsRouteImport.update({
@@ -1757,6 +1763,7 @@ export interface FileRoutesByFullPath {
   '/trade/payouts': typeof TradePayoutsRoute
   '/trade/po-logs': typeof TradePoLogsRoute
   '/trade/presentations': typeof TradePresentationsRoute
+  '/trade/project-studio': typeof TradeProjectStudioRoute
   '/trade/projects': typeof TradeProjectsRoute
   '/trade/provenance': typeof TradeProvenanceRoute
   '/trade/quotes': typeof TradeQuotesRoute
@@ -2020,6 +2027,7 @@ export interface FileRoutesByTo {
   '/trade/payouts': typeof TradePayoutsRoute
   '/trade/po-logs': typeof TradePoLogsRoute
   '/trade/presentations': typeof TradePresentationsRoute
+  '/trade/project-studio': typeof TradeProjectStudioRoute
   '/trade/projects': typeof TradeProjectsRoute
   '/trade/provenance': typeof TradeProvenanceRoute
   '/trade/quotes': typeof TradeQuotesRoute
@@ -2285,6 +2293,7 @@ export interface FileRoutesById {
   '/trade/payouts': typeof TradePayoutsRoute
   '/trade/po-logs': typeof TradePoLogsRoute
   '/trade/presentations': typeof TradePresentationsRoute
+  '/trade/project-studio': typeof TradeProjectStudioRoute
   '/trade/projects': typeof TradeProjectsRoute
   '/trade/provenance': typeof TradeProvenanceRoute
   '/trade/quotes': typeof TradeQuotesRoute
@@ -2551,6 +2560,7 @@ export interface FileRouteTypes {
     | '/trade/payouts'
     | '/trade/po-logs'
     | '/trade/presentations'
+    | '/trade/project-studio'
     | '/trade/projects'
     | '/trade/provenance'
     | '/trade/quotes'
@@ -2814,6 +2824,7 @@ export interface FileRouteTypes {
     | '/trade/payouts'
     | '/trade/po-logs'
     | '/trade/presentations'
+    | '/trade/project-studio'
     | '/trade/projects'
     | '/trade/provenance'
     | '/trade/quotes'
@@ -3078,6 +3089,7 @@ export interface FileRouteTypes {
     | '/trade/payouts'
     | '/trade/po-logs'
     | '/trade/presentations'
+    | '/trade/project-studio'
     | '/trade/projects'
     | '/trade/provenance'
     | '/trade/quotes'
@@ -4255,6 +4267,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TradePresentationsRouteImport
       parentRoute: typeof TradeRoute
     }
+    '/trade/project-studio': {
+      id: '/trade/project-studio'
+      path: '/project-studio'
+      fullPath: '/trade/project-studio'
+      preLoaderRoute: typeof TradeProjectStudioRouteImport
+      parentRoute: typeof TradeRoute
+    }
     '/trade/projects': {
       id: '/trade/projects'
       path: '/projects'
@@ -5221,6 +5240,7 @@ interface TradeRouteChildren {
   TradePayoutsRoute: typeof TradePayoutsRoute
   TradePoLogsRoute: typeof TradePoLogsRoute
   TradePresentationsRoute: typeof TradePresentationsRoute
+  TradeProjectStudioRoute: typeof TradeProjectStudioRoute
   TradeProjectsRoute: typeof TradeProjectsRoute
   TradeProvenanceRoute: typeof TradeProvenanceRoute
   TradeQuotesRoute: typeof TradeQuotesRoute
@@ -5376,6 +5396,7 @@ const TradeRouteChildren: TradeRouteChildren = {
   TradePayoutsRoute: TradePayoutsRoute,
   TradePoLogsRoute: TradePoLogsRoute,
   TradePresentationsRoute: TradePresentationsRoute,
+  TradeProjectStudioRoute: TradeProjectStudioRoute,
   TradeProjectsRoute: TradeProjectsRoute,
   TradeProvenanceRoute: TradeProvenanceRoute,
   TradeQuotesRoute: TradeQuotesRoute,

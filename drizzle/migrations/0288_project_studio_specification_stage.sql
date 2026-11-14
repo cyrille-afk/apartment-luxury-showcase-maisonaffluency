@@ -1,0 +1,4 @@
+ALTER TABLE public.project_specification_progress DROP CONSTRAINT project_specification_progress_stage_check;
+ALTER TABLE public.project_specification_progress ADD CONSTRAINT project_specification_progress_stage_check CHECK (stage IN ('mood-board','project-studio','comparator','annotation','visualiser','curated-layout','tearsheet','specification-sheet','ffe-schedule','quote'));
+ALTER TABLE public.project_specification_targets DROP CONSTRAINT project_specification_targets_stage_check;
+ALTER TABLE public.project_specification_targets ADD CONSTRAINT project_specification_targets_stage_check CHECK (stage IN ('mood-board','project-studio','comparator','annotation','visualiser','curated-layout','tearsheet','specification-sheet','ffe-schedule','quote'));

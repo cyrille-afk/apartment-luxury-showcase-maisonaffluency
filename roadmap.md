@@ -1,5 +1,10 @@
 # Roadmap
 
+## Project Studio Tools and workflow visibility
+- [x] Add Project Studio after Mood Board with the supplied two-line description, matching cards and a ninth tracked completion/target-date stage; saved constraints retain legacy stages.
+- [x] Resolve active/explicit workflow/latest accessible project for real Studio links, with a choose-or-create project page when none exists.
+- [x] Signed-in active link, nine-card order, milestone completion/reload/overview, no-context chooser and recent-project routing verified; test milestone restored. Desktop/phone screenshots show matching cards without overflow or page errors; workflow/routing/navigation regressions and build checked.
+
 ## Project Studio finishes and Sandbox handoff
 - [x] Share catalogue finish selection, tier pricing and project-saved finish locks across canvas, Specsheet and Visual Studio without editing procurement records.
 - [x] Preserve configured instances/quantities and send every Studio piece with selected/default finishes into the Sandbox; actual linked samples override materials, missing supplier samples retain authored materials and are labelled unconfirmed.
