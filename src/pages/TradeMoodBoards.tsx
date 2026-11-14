@@ -9,11 +9,12 @@ import { useSearchParams, useNavigate } from "@/lib/router-compat";
 import { Search, Loader2, Plus, X, Heart, FolderOpen, LayoutGrid, Sparkles, RefreshCw, Pin } from "lucide-react";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { MoodBoardBudgetControls, MoodBoardBudgetBar } from "@/components/trade/MoodBoardBudgetControls";
-import { emptyMoodBudget, fitsMoodBudget, moodBudgetLedger, moodPrices, type MoodBudgetSettings } from "@/lib/moodBoardBudget";
+import { convertMoodBudget, emptyMoodBudget, fitsMoodBudget, formatMoodMoney, isMoodCurrency, moodBudgetLedger, moodPrices, type MoodBudgetSettings, type MoodCurrency } from "@/lib/moodBoardBudget";
 import { fetchMoodBoardDetails } from "@/lib/moodBoardDetails";
 import { moodBoardHandoff } from "@/lib/moodBoardHandoff";
 import { readSharedRoomLayout, writeSharedRoomLayout } from "@/lib/sharedRoomLayout";
-import { formatCents } from "@/lib/productPricing";
+import { getFxRate } from "@/lib/fxRates";
+import { loadAccountCurrency } from "@/hooks/useTradeDisplayCurrency";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -81,8 +82,31 @@ export default function TradeMoodBoards() {
     queryFn: () => fetchMoodBoardDetails(detailIds),
   });
   const prices = useMemo(() => new Map(detailIds.map(id => [id, moodPrices(details.get(id)?.retailCents ?? null, discountPct)])), [detailIds, details, discountPct]);
-  const ledger = moodBudgetLedger(board.map(item => ({ ...item, subcategory: details.get(item.id)?.subcategory })), prices, budgetSettings);
-  const affordableRecommendations = recommendations.filter(rec => fitsMoodBudget({ ...rec, subcategory: details.get(rec.product_id)?.subcategory }, prices.get(rec.product_id), ledger, budgetSettings));
+  const boardCurrency: MoodCurrency = budgetSettings.currency ?? "EUR";
+  const { data: eurRate = 1, isFetching: ratePending } = useQuery({ queryKey: ["mood-board-fx", boardCurrency], queryFn: () => getFxRate("EUR", boardCurrency), staleTime: 10 * 60_000 });
+  const money = (eurCents: number) => formatMoodMoney(Math.round(eurCents * eurRate), boardCurrency);
+  const ledger = moodBudgetLedger(board.map(item => ({ ...item, subcategory: details.get(item.id)?.subcategory })), prices, budgetSettings, eurRate);
+  const affordableRecommendations = recommendations.filter(rec => fitsMoodBudget({ ...rec, subcategory: details.get(rec.product_id)?.subcategory }, prices.get(rec.product_id), ledger, budgetSettings, eurRate));
+  const changeBoardCurrency = async (next: MoodCurrency) => {
+    if (next === boardCurrency) return;
+    const factor = await getFxRate(boardCurrency, next);
+    setBudgetSettings(s => convertMoodBudget(s, next, factor));
+  };
+  // Boards without a chosen currency default to the project's, then the account's preferred currency, else EUR.
+  useEffect(() => {
+    if (!draftReady || !user || budgetSettings.currency) return;
+    let cancelled = false;
+    void (async () => {
+      let pick: unknown = null;
+      if (projectId) { const { data } = await supabase.from("projects").select("ceiling_currency").eq("id", projectId).maybeSingle(); pick = data?.ceiling_currency; }
+      if (!isMoodCurrency(pick)) pick = await loadAccountCurrency();
+      const next: MoodCurrency = isMoodCurrency(pick) ? pick : "EUR";
+      if (cancelled) return;
+      const factor = next === "EUR" ? 1 : await getFxRate("EUR", next);
+      if (!cancelled) setBudgetSettings(s => s.currency ? s : convertMoodBudget(s, next, factor));
+    })();
+    return () => { cancelled = true; };
+  }, [draftReady, user?.id, projectId, budgetSettings.currency]);
   const displayedRecommendations = complementPage(affordableRecommendations, refreshPage);
   useEffect(() => { setRefreshPage(0); }, [budgetSettings.totalEur, budgetSettings.caps]);
 
@@ -423,7 +447,7 @@ export default function TradeMoodBoards() {
       const pieces = board.map(p => fresh.get(p.id));
       if (pieces.some(p => !p)) throw new Error("unavailable");
       const stamp = Date.now();
-      writeSharedRoomLayout(moodBoardHandoff(pieces.filter((p): p is NonNullable<typeof p> => !!p), projectId, budgetSettings.roomType, readSharedRoomLayout(projectId), stamp, budgetSettings.totalEur));
+      writeSharedRoomLayout(moodBoardHandoff(pieces.filter((p): p is NonNullable<typeof p> => !!p), projectId, budgetSettings.roomType, readSharedRoomLayout(projectId), stamp, budgetSettings.totalEur == null ? null : Math.round(budgetSettings.totalEur / eurRate)));
       const modelLess = pieces.filter(p => !p?.glb_url).length;
       if (modelLess) toast.info(`${modelLess} piece${modelLess === 1 ? "" : "s"} without a 3D model will use catalogue images.`);
       navigate(`/trade/visualiser?handoff=curated&stamp=${stamp}${projectId ? `&project=${encodeURIComponent(projectId)}` : ""}`);
@@ -453,12 +477,12 @@ export default function TradeMoodBoards() {
           <MoodBoardActions items={board} defaultProjectId={projectId} onOpenVisualiser={clientSafe ? undefined : openInVisualiser} handoffPending={handoffPending} />
         </div>
 
-        {!clientSafe && <MoodBoardBudgetControls settings={budgetSettings} onChange={setBudgetSettings} />}
+        {!clientSafe && <MoodBoardBudgetControls settings={budgetSettings} onChange={setBudgetSettings} onCurrencyChange={c => void changeBoardCurrency(c)} />}
 
         <div className="flex flex-col gap-6 lg:flex-row [@media(min-width:1440px)]:grid [@media(min-width:1440px)]:grid-cols-[minmax(0,1fr)_320px] [@media(min-width:1440px)]:gap-8">
           {/* Board area */}
           <div className="min-w-0 flex-1 space-y-6">
-            <MoodBoardBudgetBar ledger={ledger} pending={pricingPending} />
+            <MoodBoardBudgetBar ledger={ledger} pending={pricingPending || ratePending} currency={boardCurrency} />
             {pricingFailed && <p role="alert" className="text-xs text-destructive">Catalogue prices couldn't load. Budget remains unconfirmed.</p>}
             <div>
               <div className="flex items-center justify-between mb-3">
@@ -581,8 +605,8 @@ export default function TradeMoodBoards() {
                               <p className="w-full font-body text-xs text-foreground truncate">{rec.title}</p>
                               <p className="w-full font-body text-[11px] text-muted-foreground truncate">{rec.brand}</p>
                               <div className="w-full text-[11px] text-foreground">
-                                {prices.get(rec.product_id)?.retail != null ? <>RRP {formatCents(prices.get(rec.product_id)?.retail ?? 0, "EUR")}
-                                  <span data-trade-sensitive className="block text-muted-foreground">Trade {formatCents(prices.get(rec.product_id)?.trade ?? 0, "EUR")}</span></> : <span className="text-muted-foreground">EUR price unconfirmed</span>}
+                                {prices.get(rec.product_id)?.retail != null ? <>RRP {money(prices.get(rec.product_id)?.retail ?? 0)}
+                                  <span data-trade-sensitive className="block text-muted-foreground">Trade {money(prices.get(rec.product_id)?.trade ?? 0)}</span></> : <span className="text-muted-foreground">Price unconfirmed</span>}
                               </div>
                               <p className="w-full font-body text-[11px] text-primary/80 leading-snug mt-1 line-clamp-4 break-words">
                                 {rec.reason}

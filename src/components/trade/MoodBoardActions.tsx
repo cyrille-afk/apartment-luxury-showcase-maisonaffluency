@@ -89,7 +89,7 @@ export function MoodBoardActions({ items, defaultProjectId, onOpenVisualiser, ha
           <FolderPlus className="mr-1.5 h-3.5 w-3.5" />
           Save to project
         </Button>
-        {onOpenVisualiser && <Button size="sm" disabled={disabled || handoffPending} onClick={onOpenVisualiser} className="h-9 gap-1.5 text-[11px]">
+        {onOpenVisualiser && <Button size="sm" disabled={disabled || handoffPending} onClick={onOpenVisualiser} className="h-9 gap-1.5 bg-neutral-900 text-[11px] uppercase tracking-[0.12em] text-white hover:bg-neutral-800">
           {handoffPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Box className="h-3.5 w-3.5" />}Open in Visualiser Sandbox
         </Button>}
         </div>

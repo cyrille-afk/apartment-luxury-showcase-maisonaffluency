@@ -30,3 +30,21 @@ describe("Mood Board budget", () => {
       .toEqual(["Seating", "Tables", "Lighting", "Storage", "Rugs/Objects"]);
   });
 });
+import { convertMoodBudget as _conv, formatMoodMoney as _fmt, moodBudgetLedger as _ledger, emptyMoodBudget as _empty } from "./moodBoardBudget";
+describe("mood board currency", () => {
+  it("formats with board symbols", () => {
+    expect(_fmt(123400, "SGD")).toBe("S$1,234");
+    expect(_fmt(100000, "CHF")).toBe("CHF 1,000");
+    expect(_fmt(100000, "GBP")).toBe("£1,000");
+  });
+  it("converts EUR prices into the board currency for remaining budget", () => {
+    const s = { ..._empty(), currency: "USD" as const, totalEur: 2000 };
+    const l = _ledger([{ id: "a", product_name: "Chair" }], new Map([["a", { retail: 100000, trade: 80000 }]]), s, 1.5);
+    expect(l.allocated).toBe(150000);
+    expect(l.remaining).toBe(50000);
+  });
+  it("keeps budget value when switching currency", () => {
+    const next = _conv({ ..._empty(), totalEur: 1000, caps: { Seating: 200 } }, "SGD", 1.47);
+    expect(next).toMatchObject({ currency: "SGD", totalEur: 1470, caps: { Seating: 294 } });
+  });
+});
