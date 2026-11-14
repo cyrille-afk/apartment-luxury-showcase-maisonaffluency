@@ -983,6 +983,23 @@ const TradeVisualiser = () => {
     });
     navigateTo(`/trade/ai-layout?handoff=visualiser${sharedProject ? `&project=${encodeURIComponent(sharedProject)}` : ""}`);
   };
+  // Walkthrough & Video tab: publish the live arrangement (pieces, finishes, room) for the embedded walkthrough.
+  const walkthroughActive = activeProject?.view === "walkthrough";
+  useEffect(() => {
+    if (!walkthroughActive) return;
+    const bounds = activeProject?.state.bounds;
+    const prev = readSharedRoomLayout(sharedProject);
+    const layout = {
+      projectId: sharedProject, source: "visualiser" as const, updatedAt: Date.now(),
+      room: bounds ? { width: bounds.width, length: bounds.depth, height: bounds.height } : { width: 7.2, length: 6, height: 3.2 },
+      wallFinish, floorFinish, roomType: prev?.roomType, budgetEur: prev?.budgetEur ?? null,
+      items: objects.map((o) => ({ productId: o.id, name: o.product_name, glbUrl: o.glb_url, x: o.position[0], z: o.position[2], rotationY: o.rotation[1], priceEur: null })),
+    };
+    writeSharedRoomLayout(layout);
+    window.dispatchEvent(new CustomEvent("ma-live-room-layout", { detail: layout }));
+    // Snapshot only when the tab opens; arranging happens in the other views.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [walkthroughActive]);
   const curatedHandoffDone = useRef(false);
   useEffect(() => {
     if (curatedHandoffDone.current || searchParams.get("handoff") !== "curated") return;

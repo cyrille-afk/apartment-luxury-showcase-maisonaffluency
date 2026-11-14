@@ -28,6 +28,8 @@ export type SharedRoomLayout = {
   items: SharedRoomItem[];
   source: "visualiser" | "curated" | "mood-board";
   roomType?: "living" | "dining" | "bedroom" | "office";
+  /** Mood Board total budget (EUR) carried into the Sandbox walkthrough breakdown. */
+  budgetEur?: number | null;
   updatedAt: number;
 };
 

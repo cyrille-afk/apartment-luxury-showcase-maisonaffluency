@@ -33,7 +33,7 @@ import { filterVideoRendersByMonth, formatSecondsDelta, formatUsdCents, formatUs
 import { Bar, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { cn } from "@/lib/utils";
 import { generateRoomLayoutMatrix, selectLayoutCandidates } from "@/lib/roomLayoutMatrix";
-import { readSharedRoomLayout, sceneToSharedItems, sharedToScene, writeSharedRoomLayout } from "@/lib/sharedRoomLayout";
+import { readSharedRoomLayout, sceneToSharedItems, sharedToScene, writeSharedRoomLayout, type SharedRoomLayout } from "@/lib/sharedRoomLayout";
 import { useNavigate, useSearchParams } from "@/lib/router-compat";
 import { Box as BoxIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -89,23 +89,25 @@ const ClearanceWarning = ({ conflicts }: { conflicts: ClearanceConflict[] }) => 
   </div>
 );
 
-const TradeAILayoutStudio = () => {
+/** `embedded` = Walkthrough & Video tab inside the Visualiser Sandbox workspace: mirrors the live Sandbox room. */
+const TradeAILayoutStudio = ({ embedded = false }: { embedded?: boolean } = {}) => {
   const { brief, setBrief, setDimension } = useAiLayoutForm();
   const [scene, setScene] = useState<AICuratedSceneSchema | null>(null);
   // Keep the working layout across reloads (dev refreshes, tab restores).
+  const sceneKey = embedded ? "ma-ai-layout-walkthrough-scene-v1" : "ma-ai-layout-working-scene-v1";
   const sceneRestored = useRef(false);
   useEffect(() => {
     if (sceneRestored.current) return;
     sceneRestored.current = true;
     try {
-      const raw = sessionStorage.getItem("ma-ai-layout-working-scene-v1");
+      const raw = sessionStorage.getItem(sceneKey);
       if (raw) setScene((s) => s ?? (JSON.parse(raw) as AICuratedSceneSchema));
     } catch { /* ignore corrupt draft */ }
   }, []);
   useEffect(() => {
     if (!sceneRestored.current) return;
     try {
-      if (scene) sessionStorage.setItem("ma-ai-layout-working-scene-v1", JSON.stringify(scene));
+      if (scene) sessionStorage.setItem(sceneKey, JSON.stringify(scene));
     } catch { /* storage full */ }
   }, [scene]);
   const [overviewRevision, setOverviewRevision] = useState(0);
@@ -206,11 +208,7 @@ const TradeAILayoutStudio = () => {
 
   // Visualiser → Curated: render the sandbox arrangement on the grid with live prices.
   const handoffDone = useRef(false);
-  useEffect(() => {
-    if (handoffDone.current || searchParams.get("handoff") !== "visualiser") return;
-    handoffDone.current = true;
-    const shared = readSharedRoomLayout(sharedProjectId);
-    if (!shared) return;
+  const loadSharedLayout = (shared: SharedRoomLayout, quiet = false) => {
     void (async () => {
       let priced = shared.items;
       try {
@@ -219,15 +217,32 @@ const TradeAILayoutStudio = () => {
         const byLive = new Map(live.map((l) => [l.componentId, l]));
         priced = shared.items.map((i) => ({ ...i, priceEur: byLive.get(i.productId)?.price ?? i.priceEur, glbUrl: i.glbUrl ?? byLive.get(i.productId)?.glbUrl ?? null }));
       } catch { /* keep the prices sent from the Visualiser */ }
-      setBrief((b) => ({ ...b, roomDimensions: shared.room }));
+      const budget = shared.budgetEur && shared.budgetEur > 0 ? shared.budgetEur : brief.totalBudget;
+      setBrief((b) => ({ ...b, roomDimensions: shared.room, totalBudget: budget }));
       setSelectedId(null); setCurrent(null);
-      setScene(sharedToScene({ ...shared, items: priced }, brief.totalBudget));
+      setScene(sharedToScene({ ...shared, items: priced }, budget));
       setOverviewRevision((r) => r + 1);
       const missing = shared.items.filter((i) => !i.glbUrl).length;
-      toast.success(`${priced.length - missing} piece${priced.length - missing === 1 ? "" : "s"} loaded from the Visualiser${missing ? ` · ${missing} without a 3D model skipped` : ""}.`);
+      if (!quiet || missing) toast.success(`${priced.length - missing} piece${priced.length - missing === 1 ? "" : "s"} loaded from the Visualiser${missing ? ` · ${missing} without a 3D model skipped` : ""}.`);
     })();
+  };
+  useEffect(() => {
+    if (embedded || handoffDone.current || searchParams.get("handoff") !== "visualiser") return;
+    handoffDone.current = true;
+    const shared = readSharedRoomLayout(sharedProjectId);
+    if (shared) loadSharedLayout(shared);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
+  // Embedded walkthrough: always mirror the live Sandbox arrangement when the tab opens.
+  useEffect(() => {
+    if (!embedded) return;
+    const initial = readSharedRoomLayout(sharedProjectId);
+    if (initial?.source === "visualiser") loadSharedLayout(initial, true);
+    const onLive = (e: Event) => { const layout = (e as CustomEvent<SharedRoomLayout>).detail; if (layout) loadSharedLayout(layout, true); };
+    window.addEventListener("ma-live-room-layout", onLive);
+    return () => window.removeEventListener("ma-live-room-layout", onLive);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [embedded]);
 
   // Project progress milestone → open this project's newest saved layout.
   const openDone = useRef(false);
@@ -827,16 +842,16 @@ const TradeAILayoutStudio = () => {
   const dim = setDimension;
 
   return (
-    <div className="mx-auto grid max-w-[1500px] gap-6 px-6 py-8 lg:grid-cols-[340px_minmax(0,1fr)] xl:grid-cols-[340px_minmax(0,1fr)_320px]">
-      <Helmet>
+    <div className={cn("mx-auto grid max-w-[1500px] gap-6 px-6 lg:grid-cols-[340px_minmax(0,1fr)] xl:grid-cols-[340px_minmax(0,1fr)_320px]", embedded ? "py-4" : "py-8")}>
+      {!embedded && <Helmet>
         <title>AI Layout Studio | Maison Affluency Trade</title>
         <meta name="robots" content="noindex" />
-      </Helmet>
+      </Helmet>}
 
       <aside className={cn("space-y-6 border border-border bg-card p-6", exploring && "hidden")}>
         <div>
           <p className={micro}>AI Ingestion</p>
-          <h1 className="mt-1 font-serif text-2xl">Curated Room Layout</h1>
+          <h1 className="mt-1 font-serif text-2xl">{embedded ? "Walkthrough & Video" : "Curated Room Layout"}</h1>{embedded && <p className="mt-1 text-xs text-muted-foreground">Live Sandbox room — pieces, positions and finishes as arranged.</p>}
           <p className="mt-1 text-xs text-muted-foreground">
             {catLoading ? "Loading live catalogue prices…" : catError ? `Prices unavailable: ${catError}` : `Live RRPs · ${catalogue.filter((c) => c.glbUrl).length} 3D-ready pieces across all makers`}
           </p>
@@ -888,9 +903,9 @@ const TradeAILayoutStudio = () => {
             {loading || aiLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
             {loading || aiLoading ? "Generating layout..." : "Generate Room Layout with AI"}
           </Button>
-          <Button variant="outline" className="w-full" onClick={openInVisualiser} disabled={detailsPending || !scene?.curatedAssets.length}>
+          {!embedded && <Button variant="outline" className="w-full" onClick={openInVisualiser} disabled={detailsPending || !scene?.curatedAssets.length}>
             <BoxIcon className="mr-2 h-4 w-4" />Open in Visualiser Sandbox
-          </Button>
+          </Button>}
         </section>
 
         <section className="space-y-2">

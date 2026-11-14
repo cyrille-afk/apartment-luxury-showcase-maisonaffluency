@@ -423,7 +423,7 @@ export default function TradeMoodBoards() {
       const pieces = board.map(p => fresh.get(p.id));
       if (pieces.some(p => !p)) throw new Error("unavailable");
       const stamp = Date.now();
-      writeSharedRoomLayout(moodBoardHandoff(pieces.filter((p): p is NonNullable<typeof p> => !!p), projectId, budgetSettings.roomType, readSharedRoomLayout(projectId), stamp));
+      writeSharedRoomLayout(moodBoardHandoff(pieces.filter((p): p is NonNullable<typeof p> => !!p), projectId, budgetSettings.roomType, readSharedRoomLayout(projectId), stamp, budgetSettings.totalEur));
       const modelLess = pieces.filter(p => !p?.glb_url).length;
       if (modelLess) toast.info(`${modelLess} piece${modelLess === 1 ? "" : "s"} without a 3D model will use catalogue images.`);
       navigate(`/trade/visualiser?handoff=curated&stamp=${stamp}${projectId ? `&project=${encodeURIComponent(projectId)}` : ""}`);

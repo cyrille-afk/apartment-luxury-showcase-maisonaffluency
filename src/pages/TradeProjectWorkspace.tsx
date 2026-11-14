@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useLocation, useSearchParams } from "@/lib/router-compat";
-import { Map, Layers, Armchair, Eye, Image, Ruler, Upload, Square, Trash2 } from "lucide-react";
+import { Map, Layers, Armchair, Clapperboard, Eye, Image, Ruler, Upload, Square, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -21,6 +21,7 @@ import { resolveDimensions } from "@/lib/productDimensions";
 import { DEFAULT_SLOT_SPACING, footprintRadius, pickFootprintSlot } from "@/lib/visualiserPlacement";
 const Sandbox = lazy(() => import("./TradeVisualiser"));
 const Axonometric = lazy(() => import("./TradeAxonometric"));
+const WalkthroughStudio = lazy(() => import("./TradeAILayoutStudio"));
 
 function WorkspacePanels() {
   const { isAdmin } = useAuth();
@@ -29,6 +30,7 @@ function WorkspacePanels() {
   const [visited, setVisited] = useState(false);
   const [imageStudio, setImageStudio] = useState(false);
   const [imageVisited, setImageVisited] = useState(false);
+  const [walkVisited, setWalkVisited] = useState(false);
   const [planSelectedId, setPlanSelectedId] = useState<string | null>(null);
   const [showGuides, setShowGuides] = useState(true);
   const [selectedColumnId, setSelectedColumnId] = useState<string | null>(null);
@@ -36,7 +38,7 @@ function WorkspacePanels() {
     setPlanSelectedId(current => current && !project?.objects.some(object => object.instanceId === current) ? null : current);
   }, [project?.objects]);
   useEffect(() => { if (imageStudio) setImageVisited(true); }, [imageStudio]);
-  useEffect(() => { if (project?.view !== "plan") setVisited(true); }, [project?.view]);
+  useEffect(() => { if (project?.view !== "plan") setVisited(true); if (project?.view === "walkthrough") setWalkVisited(true); }, [project?.view]);
   if (!project) return null;
   const { view, setView, state } = project;
   const gap = tightestGap(project.objects, state.bounds);
@@ -85,14 +87,14 @@ function WorkspacePanels() {
     if (item) placeInventoryItem(item, [x, y]);
   };
 
-  const tabs: { value: WorkspaceView; label: string; icon: typeof Map }[] = [{ value: "plan", label: "2D Layout Plan", icon: Map }, { value: "axonometric", label: "Axonometric Studio", icon: Layers }, { value: "sandbox", label: "Eye-Level Sandbox", icon: Armchair }];
+  const tabs: { value: WorkspaceView; label: string; icon: typeof Map }[] = [{ value: "plan", label: "2D Layout Plan", icon: Map }, { value: "axonometric", label: "Axonometric Studio", icon: Layers }, { value: "sandbox", label: "Eye-Level Sandbox", icon: Armchair }, { value: "walkthrough", label: "Walkthrough & Video", icon: Clapperboard }];
   return <div className="flex h-full min-h-0 flex-col bg-background">
     <div className="relative z-40 w-full shrink-0 border-b border-border/40 bg-background px-3 py-3 sm:px-6">
       <ToolsBreadcrumb className="mb-0" />
     </div>
     <div role="tablist" aria-label="Project workspace views" className="flex shrink-0 gap-1 overflow-x-auto border-b border-border px-3 py-2 sm:px-6">
       {tabs.map(tab => <Button key={tab.value} id={`workspace-${tab.value}`} role="tab" aria-selected={view === tab.value} aria-controls={`panel-${tab.value}`} variant="ghost" className={cn("shrink-0 rounded-none border-b-2 text-xs sm:text-sm", view === tab.value ? "border-primary text-foreground" : "border-transparent text-muted-foreground")} onClick={() => setView(tab.value)}><tab.icon className="h-4 w-4" />{tab.label}</Button>)}
-      {view !== "sandbox" && <div className="ml-auto flex items-center"><WorkspaceShare /></div>}
+      {view !== "sandbox" && view !== "walkthrough" && <div className="ml-auto flex items-center"><WorkspaceShare /></div>}
     </div>
     <section id="panel-plan" role="tabpanel" aria-labelledby="workspace-plan" hidden={view !== "plan"} className={cn("flex min-h-0 flex-1 flex-col overflow-hidden", view !== "plan" && "hidden")}>
       <div className="flex shrink-0 flex-wrap items-end justify-between gap-4 px-4 pt-4 sm:px-6"><h1 className="font-display text-2xl">2D Layout Plan</h1><SourceUpload folder="axonometric-sources" label="Upload floor plan" onSourceReady={project.setFloorPlanUrl} /></div>
@@ -120,11 +122,14 @@ function WorkspacePanels() {
         )}
       </div>
     </section>
-    <div id={`panel-${view === "sandbox" ? "sandbox" : "axonometric"}`} role="tabpanel" aria-labelledby={`workspace-${view === "sandbox" ? "sandbox" : "axonometric"}`} hidden={view === "plan"} className={cn("flex min-h-0 flex-1 flex-col", view === "plan" && "hidden")}>
+    <div id={`panel-${view === "sandbox" ? "sandbox" : "axonometric"}`} role="tabpanel" aria-labelledby={`workspace-${view === "sandbox" ? "sandbox" : "axonometric"}`} hidden={view === "plan" || view === "walkthrough"} className={cn("flex min-h-0 flex-1 flex-col", (view === "plan" || view === "walkthrough") && "hidden")}>
       {view === "axonometric" && <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2"><span className="text-xs text-muted-foreground">{state.placedItems.length} placed pieces · {state.bounds.width} × {state.bounds.depth} m</span>{gapChip}<div className="flex gap-2">{isAdmin && <Button variant="ghost" size="sm" aria-pressed={imageStudio} onClick={() => setImageStudio(value => !value)}><Image className="h-4 w-4" />Image Studio</Button>}<Button size="sm" onClick={() => { setImageStudio(false); setView("sandbox"); }}><Eye className="h-4 w-4" />Step Inside Room</Button></div></div>}
       <div className={cn("min-h-0 flex-1", imageStudio && view === "axonometric" && "hidden")}><Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Opening workspace…</div>}>{visited && <Sandbox />}</Suspense></div>
       <div className={cn("min-h-0 flex-1 overflow-auto", (!imageStudio || view !== "axonometric") && "hidden")}><Suspense fallback={<div className="p-6">Opening Image Studio…</div>}>{imageVisited && <Axonometric />}</Suspense></div>
     </div>
+    <section id="panel-walkthrough" role="tabpanel" aria-labelledby="workspace-walkthrough" hidden={view !== "walkthrough"} className={cn("min-h-0 flex-1 overflow-auto", view !== "walkthrough" && "hidden")}>
+      <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Opening walkthrough…</div>}>{walkVisited && <WalkthroughStudio embedded />}</Suspense>
+    </section>
   </div>;
 }
 export default function TradeProjectWorkspace() {

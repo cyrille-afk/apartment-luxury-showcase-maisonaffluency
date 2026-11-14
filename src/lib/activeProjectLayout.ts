@@ -1,6 +1,6 @@
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
 
-export type WorkspaceView = "plan" | "axonometric" | "sandbox";
+export type WorkspaceView = "plan" | "axonometric" | "sandbox" | "walkthrough";
 export type RoomBounds = { width: number; depth: number; height: number };
 /** Structural column in room metres; origin at the room centre (x = 3D x, y = 3D z). */
 export type PlanColumn = { id: string; x: number; y: number; size: number };
