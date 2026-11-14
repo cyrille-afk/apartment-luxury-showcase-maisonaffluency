@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
     const slug = designerMatch[1];
     const { data: designer } = await supabase
       .from("designers")
-      .select("name, display_name, specialty, slug, image_url, hero_image_url, biography, philosophy, notable_works, source")
+      .select("id, name, display_name, specialty, slug, image_url, hero_image_url, biography, philosophy, notable_works, source")
       .eq("slug", slug)
       .eq("is_published", true)
       .single();
@@ -47,6 +47,8 @@ Deno.serve(async (req) => {
         .from("designer_curator_picks")
         .select("title, category, subcategory, materials, dimensions")
         .eq("designer_id", designer.id || "")
+        .eq("is_hidden", false)
+        .eq("trade_only", false)
         .order("sort_order");
 
       // If we don't have designer.id from the select, fetch picks by slug
@@ -62,6 +64,8 @@ Deno.serve(async (req) => {
           .from("designer_curator_picks")
           .select("title, category, subcategory, materials, dimensions")
           .eq("designer_id", designerFull.id)
+          .eq("is_hidden", false)
+          .eq("trade_only", false)
           .order("sort_order");
         picksData = p2;
       }
