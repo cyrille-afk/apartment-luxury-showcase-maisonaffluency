@@ -14789,6 +14789,19 @@ export type Database = {
         }
         Returns: undefined
       }
+      swap_visualiser_board_item: {
+        Args: {
+          _finish_label?: string
+          _item_id: string
+          _product_id: string
+          _project_id: string
+        }
+        Returns: {
+          item_id: string
+          product_id: string
+          variant_label: string
+        }[]
+      }
       sync_approved_trade_directory: {
         Args: { p_account_id: string }
         Returns: undefined

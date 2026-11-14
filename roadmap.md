@@ -1,5 +1,10 @@
 # Roadmap
 
+## Visualiser editorial hotspots and alternatives
+- [x] Add anchored, hover-labelled furniture hotspots with a persisted visibility toggle and automatic mockup-export suppression.
+- [x] Add a same-category, proportion-compatible 3D-ready Curated Alternatives drawer with live approved pricing and Piece Inspector entry.
+- [x] Swap in place with default finishes and preserved pose; linked unlocked Specsheet rows update through the checked RPC with live RRP. Signed-in standalone and isolated-project swaps verified, including exact saved X/Z/yaw, €2,372 budget price, Tobacco Oak · Opera Calla readback, clean export, reload persistence and unchanged canvas; 17 focused regressions pass. Temporary project removed.
+
 ## Mood Board to Project Studio workflow
 - [x] Replace the direct Sandbox action with prominent charcoal Project Studio entry and keep Client View available as a compact switch.
 - [x] Save every current board item with resolved catalogue-default finish labels to the selected/active project before opening Studio; offer project selection when absent. Existing 15-piece RPC batches preserve complete transfers and successful batches on retry.

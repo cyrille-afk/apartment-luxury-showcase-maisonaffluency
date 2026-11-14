@@ -279,6 +279,9 @@ interface VisualiserCanvasProps {
   showGrid?: boolean;
   /** When false, floating name labels and lock badges are unmounted for a clean canvas. */
   showLabels?: boolean;
+  /** Editorial product pins open the curated alternative drawer without selecting a drag. */
+  showHotspots?: boolean;
+  onFindAlternatives?: (instanceId: string) => void;
   /** Filled with a getter returning the floor point the camera is looking at. */
   focusRef?: { current: (() => [number, number] | null) | null };
   /** Subtle background blur focused on the selected piece (or orbit target). */
@@ -397,6 +400,8 @@ const VisualiserCanvas = ({
   snapToGrid = false,
   showGrid = true,
   showLabels = true,
+  showHotspots = false,
+  onFindAlternatives,
   focusRef,
   depthOfField = true,
   pathTrace = false,
@@ -613,6 +618,8 @@ const VisualiserCanvas = ({
           onTextureParts={onTextureParts}
           snapToGrid={snapToGrid}
           showLabels={showLabels}
+          showHotspots={showHotspots && isEditable}
+          onFindAlternatives={onFindAlternatives}
           selfRadius={footprintRadius(parseDimensionString(object.dimensions), object.scale)}
           obstacles={objects
             .filter((other) => other.instanceId !== object.instanceId)

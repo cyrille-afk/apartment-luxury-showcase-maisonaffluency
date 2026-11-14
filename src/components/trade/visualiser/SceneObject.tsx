@@ -31,6 +31,13 @@ export type PlacedObject = {
   /** Bumped by "Restore piece" to remount the mesh and rebuild its materials. */
   restoreKey?: number;
   id: string;
+  source_pick_id?: string | null;
+  category?: string | null;
+  subcategory?: string | null;
+  /** Exact unlocked Project Studio / Specsheet board row, when this placement came from one. */
+  specItemId?: string | null;
+  /** Live EUR RRP snapshot; catalogue hydration replaces it whenever fresher pricing arrives. */
+  retailEurCents?: number | null;
   product_name: string;
   productType?: string;
   selectedUpholstery?: string | null;
@@ -88,6 +95,9 @@ type Props = {
   onTextureParts?: (instanceId: string, parts: FinishPart[]) => void;
   /** When false, floating name labels and lock badges unmount for a clean canvas. */
   showLabels?: boolean;
+  /** Editorial alternatives pin; independent from name labels and always excluded from mockup capture. */
+  showHotspots?: boolean;
+  onFindAlternatives?: (instanceId: string) => void;
 };
 
 type LoadedMaps = {
@@ -533,7 +543,7 @@ const clipFloorGizmo = (controls: THREE.Object3D | null) => {
   });
 };
 
-const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChange, isEditable = true, scaleVector, label, showLabels = true, onTextureParts, snapToGrid = false, obstacles, selfRadius, roomLimits }: Props) => {
+const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChange, isEditable = true, scaleVector, label, showLabels = true, showHotspots = false, onFindAlternatives, onTextureParts, snapToGrid = false, obstacles, selfRadius, roomLimits }: Props) => {
   // Refs so the window-level drag handlers always read the latest obstacles
   // without changing dragMove's identity mid-drag (listener removal depends on it).
   const obstaclesRef = useRef<FootprintObstacle[]>(obstacles ?? []);
@@ -687,6 +697,26 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
       }}
     >
       {body}
+      {showHotspots && onFindAlternatives && (
+        <Html position={[0, Math.max(0.45, (resolveDimensions(object)?.h ?? 900) / 1000) + 0.18, 0]} center zIndexRange={[32, 1]}>
+          <div className="group relative flex size-9 items-center justify-center">
+            <button
+              type="button"
+              aria-label={`Find alternatives to ${object.product_name}`}
+              className="flex size-6 cursor-pointer items-center justify-center rounded-full border border-background/70 bg-background/90 text-foreground shadow-md transition-transform duration-200 hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              onPointerDown={event => event.stopPropagation()}
+              onClick={event => { event.stopPropagation(); onFindAlternatives(object.instanceId); }}
+            >
+              <span aria-hidden className="absolute h-px w-2.5 bg-current" />
+              <span aria-hidden className="absolute h-2.5 w-px bg-current" />
+            </button>
+            <span aria-hidden className="pointer-events-none absolute left-full top-1/2 ml-3 hidden w-max max-w-64 -translate-y-1/2 translate-x-1 flex-col whitespace-nowrap rounded-md border border-border/60 bg-background/95 px-4 py-2.5 opacity-0 shadow-lg backdrop-blur-sm transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100 group-focus-within:translate-x-0 group-focus-within:opacity-100 md:flex">
+              <span className="font-display text-[13px] font-normal leading-snug text-foreground">{object.product_name}</span>
+              <span className="mt-0.5 font-body text-[9px] font-light uppercase tracking-[0.22em] text-muted-foreground">by {object.brand_name}</span>
+            </span>
+          </div>
+        </Html>
+      )}
     </group>
   );
 

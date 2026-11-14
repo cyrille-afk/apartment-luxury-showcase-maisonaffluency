@@ -13,6 +13,9 @@ export type SharedRoomItem = {
   imageUrl?: string | null;
   brandName?: string;
   dimensions?: string | null;
+  category?: string | null;
+  subcategory?: string | null;
+  specItemId?: string | null;
   x: number;
   z: number;
   rotationY: number;

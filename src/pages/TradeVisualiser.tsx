@@ -14,6 +14,11 @@ import { architecturalDofSettings } from "@/lib/visualiserDepthOfField";
 import AdvancedRenderingOptions from "@/components/trade/visualiser/AdvancedRenderingOptions";
 import { CEILING_CONTROLS, clampCeilingHeight, clampCeilingThickness, clampCeilingOpening, type CeilingSettings } from "@/lib/visualiserCeilingSettings";
 import { parseDimensionString } from "@/lib/productDimensions";
+import CuratedAlternativesDrawer, { type PricedVisualiserAlternative } from "@/components/trade/visualiser/CuratedAlternativesDrawer";
+import { curatedVisualiserAlternatives } from "@/lib/visualiserAlternatives";
+import { buildVisualiserSwap } from "@/lib/visualiserSwap";
+import { resolveVisualiserDefaultAppearance } from "@/lib/visualiserDefaultFinishes";
+import { moodRetailEur } from "@/lib/moodBoardDetails";
 import { resetModelOrientation } from "@/lib/resetModelOrientation";
 import { SceneErrorBoundary } from "@/components/trade/visualiser/SceneErrorBoundary";
 import { LAST_GOOD_KEY, STABLE_AFTER_MS, preserveSceneBackup, takeRecoveryNotice } from "@/lib/visualiserSceneRecovery";
@@ -109,6 +114,14 @@ type CatalogueProduct = {
   size_variants?: PlacedObject["size_variants"];
   glb_url: string | null;
   source_pick_id: string | null;
+  materials?: string | null;
+  base_axis_label?: string | null;
+  top_axis_label?: string | null;
+  default_variant_label?: string | null;
+  trade_price_cents?: number | null;
+  rrp_price_cents?: number | null;
+  currency?: string | null;
+  retailEurCents?: number | null;
 };
 
 type PersistedSandbox = CeilingSettings & {
@@ -122,6 +135,7 @@ type PersistedSandbox = CeilingSettings & {
   snapToGrid?: boolean;
   showGrid?: boolean;
   showLabels?: boolean;
+  showHotspots?: boolean;
   depthOfField?: boolean;
   dofRenderVersion?: number;
   dofStrength?: number;
@@ -189,6 +203,7 @@ const readSandbox = (storageKey = STORAGE_KEY, projectId?: string): PersistedSan
       snapToGrid: parsed.snapToGrid === true,
       showGrid: parsed.showGrid !== false,
       showLabels: parsed.showLabels !== false,
+      showHotspots: parsed.showHotspots !== false,
       ...architecturalDofSettings(parsed),
       dofFocusSelected: parsed.dofFocusSelected !== false,
       environmentSource: environmentSourcePref(parsed.environmentSource),
@@ -301,6 +316,9 @@ const TradeVisualiser = () => {
   const [snapToGrid, setSnapToGrid] = useState<boolean>(initial.snapToGrid ?? false);
   const [showGrid, setShowGrid] = useState<boolean>(initial.showGrid ?? true);
   const [showLabels, setShowLabels] = useState<boolean>(initial.showLabels ?? true);
+  const [showHotspots, setShowHotspots] = useState<boolean>(initial.showHotspots ?? true);
+  const [alternativesId, setAlternativesId] = useState<string | null>(null);
+  const [swappingId, setSwappingId] = useState<string | null>(null);
   const [pathTrace, setPathTrace] = useState(false);
   const [initialRoomReady, setInitialRoomReady] = useState(false);
   const revealInitialRoom = useCallback(() => setInitialRoomReady(true), []);
@@ -457,7 +475,7 @@ const TradeVisualiser = () => {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const columns = "id, product_name, brand_name, image_url, category, subcategory, dimensions, width_mm, depth_mm, height_mm, size_variants, glb_url, source_pick_id";
+      const columns = "id, product_name, brand_name, image_url, category, subcategory, dimensions, width_mm, depth_mm, height_mm, size_variants, glb_url, source_pick_id, materials, base_axis_label, top_axis_label, default_variant_label, trade_price_cents, rrp_price_cents, currency";
       const base = () => supabase
         .from("trade_products")
         .select(columns)
@@ -489,13 +507,38 @@ const TradeVisualiser = () => {
         }
       }
       const hydrated = await hydrateCatalogueDimensions([...merged.values()]);
+      const pickIds = [...new Set(hydrated.map(product => product.source_pick_id).filter((id): id is string => Boolean(id)))];
+      const pricing = new Map<string, number | null>();
+      for (let start = 0; start < pickIds.length; start += 200) {
+        const { data, error } = await supabase.from("trade_product_pricing").select("pick_id,trade_price_cents").in("pick_id", pickIds.slice(start, start + 200));
+        if (error) { toast.error("Some live catalogue prices could not be loaded."); break; }
+        for (const row of data ?? []) pricing.set(row.pick_id, row.trade_price_cents);
+      }
+      const priced = await Promise.all(hydrated.map(async product => ({
+        ...product,
+        retailEurCents: await moodRetailEur(
+          (product.source_pick_id ? pricing.get(product.source_pick_id) : null) ?? product.trade_price_cents ?? product.rrp_price_cents,
+          product.currency,
+        ),
+      })));
       if (cancelled) return;
-      setProducts(hydrated);
-      // Restore missing metadata on existing snapshots without changing their transforms/finishes.
-      const byId = new Map(hydrated.map(product => [product.id, product]));
+      setProducts(priced);
+      // Refresh live identity, dimensions and RRP without changing transforms or chosen finishes.
+      const byId = new Map(priced.map(product => [product.id, product]));
       setObjects(current => current.map(object => {
-        const dimensions = visualiserDimensions(object, byId.get(object.id));
-        return dimensions && dimensions !== object.dimensions ? { ...object, dimensions } : object;
+        const product = byId.get(object.id);
+        if (!product) return object;
+        return {
+          ...object,
+          dimensions: visualiserDimensions(object, product) ?? object.dimensions,
+          width_mm: object.width_mm ?? product.width_mm,
+          depth_mm: object.depth_mm ?? product.depth_mm,
+          height_mm: object.height_mm ?? product.height_mm,
+          category: object.category ?? product.category,
+          subcategory: object.subcategory ?? product.subcategory,
+          source_pick_id: object.source_pick_id ?? product.source_pick_id,
+          retailEurCents: product.retailEurCents,
+        };
       }));
       setLoadingProducts(false);
     })();
@@ -517,6 +560,7 @@ const TradeVisualiser = () => {
         snapToGrid,
         showGrid,
         showLabels,
+        showHotspots,
         depthOfField,
         dofRenderVersion: 1,
         dofStrength,
@@ -559,7 +603,7 @@ const TradeVisualiser = () => {
       try { sessionStorage.setItem(LAST_GOOD_KEY, json); } catch { /* ignore */ }
     }, STABLE_AFTER_MS);
     return () => window.clearTimeout(timer);
-  }, [photoCalibration, sceneFailed, backdrop, backdropDataUrl, objects, projectId, selectedId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, advancedRendering, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, floorExtension, floorPatternScale, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColorKey, rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, rugRotation, showRug, featureWallFinishKey, backdropColor, backdropBrightness]);
+  }, [photoCalibration, sceneFailed, backdrop, backdropDataUrl, objects, projectId, selectedId, spacing, snapToGrid, showGrid, showLabels, showHotspots, depthOfField, dofStrength, dofFocusSelected, environmentSource, advancedRendering, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, floorExtension, floorPatternScale, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColorKey, rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, rugRotation, showRug, featureWallFinishKey, backdropColor, backdropBrightness]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -615,7 +659,7 @@ const TradeVisualiser = () => {
           ? sb.from("trade_quote_items").select("product_id").in("quote_id", quoteIds)
           : Promise.resolve({ data: [] }),
         boardIds.length
-          ? sb.from("client_board_items").select("product_id").in("board_id", boardIds)
+          ? sb.from("client_board_items").select("id,product_id,procurement_quote_id,source_quote_item_id").in("board_id", boardIds)
           : Promise.resolve({ data: [] }),
       ]);
       const productIds = [...new Set(
@@ -636,21 +680,24 @@ const TradeVisualiser = () => {
         .in("id", productIds);
 
       const hydratedCatalogue = await hydrateCatalogueDimensions((catalogue ?? []) as CatalogueProduct[]);
-      const placed: PlacedObject[] = hydratedCatalogue.map((product, index) => ({
-        instanceId: `${product.id}-${incoming}-${index}`,
-        id: product.id,
-        product_name: product.product_name,
-        brand_name: product.brand_name,
-        image_url: product.image_url ? optimizeImageUrl(product.image_url, CUTOUT_TRANSFORMS) : null,
-        dimensions: product.dimensions,
-        glb_url: product.glb_url,
-        position: [((index % 4) - 1.5) * 1.4, 0, Math.floor(index / 4) * -1.4],
-        rotation: [0, 0, 0],
-        scale: 1,
-        material: isBondStreetStool(product.id) || !armedMaterialRef.current ? null : activeMaterial,
-        baseMaterial: isBondStreetStool(product.id) ? BOND_STREET_BASE_FINISH : null,
-        upholsteryMaterial: null,
-      }));
+      const specificationQueues = new Map<string, string[]>();
+      for (const row of boardItems.data ?? [] as Array<{ id: string; product_id: string | null; procurement_quote_id: string | null; source_quote_item_id: string | null }>) {
+        if (!row.product_id || row.procurement_quote_id || row.source_quote_item_id) continue;
+        specificationQueues.set(row.product_id, [...(specificationQueues.get(row.product_id) ?? []), row.id]);
+      }
+      const placed: PlacedObject[] = hydratedCatalogue.map((product, index) => {
+        const next = createPlacedObject(
+          { ...product, specItemId: specificationQueues.get(product.id)?.shift() ?? null },
+          [((index % 4) - 1.5) * 1.4, 0, Math.floor(index / 4) * -1.4],
+        );
+        return {
+          ...next,
+          instanceId: `${product.id}-${incoming}-${index}`,
+          material: isBondStreetStool(product.id) || !armedMaterialRef.current ? null : activeMaterial,
+          baseMaterial: isBondStreetStool(product.id) ? BOND_STREET_BASE_FINISH : null,
+          upholsteryMaterial: null,
+        };
+      });
 
       setObjects(placed);
       setSelectedId(null);
@@ -993,7 +1040,14 @@ const TradeVisualiser = () => {
       projectId: sharedProject, source: "visualiser" as const, updatedAt: Date.now(),
       room: bounds ? { width: bounds.width, length: bounds.depth, height: bounds.height } : { width: 7.2, length: 6, height: 3.2 },
       wallFinish, floorFinish, roomType: prev?.roomType, budgetEur: prev?.budgetEur ?? null,
-      items: objects.map((o) => ({ productId: o.id, name: o.product_name, glbUrl: o.glb_url, x: o.position[0], z: o.position[2], rotationY: o.rotation[1], priceEur: null, appearance: pieceAppearance(o) })),
+      items: objects.map((o) => ({
+        productId: o.id, name: o.product_name, glbUrl: o.glb_url,
+        imageUrl: o.image_url, brandName: o.brand_name, dimensions: o.dimensions,
+        category: o.category, subcategory: o.subcategory, specItemId: o.specItemId,
+        x: o.position[0], z: o.position[2], rotationY: o.rotation[1],
+        priceEur: o.retailEurCents == null ? null : o.retailEurCents / 100,
+        appearance: pieceAppearance(o),
+      })),
     };
     // Debounced so drags publish once they settle; the walkthrough mirrors every change live.
     const t = window.setTimeout(() => {
@@ -1003,6 +1057,53 @@ const TradeVisualiser = () => {
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [walkthroughActive, objects, wallFinish, floorFinish, activeProject?.state.bounds]);
+  const alternativesObject = objects.find(object => object.instanceId === alternativesId) ?? null;
+  const alternativesActive = useMemo<PricedVisualiserAlternative | null>(() => {
+    if (!alternativesObject) return null;
+    const catalogue = products.find(product => product.id === alternativesObject.id || product.id === alternativesObject.source_pick_id);
+    return catalogue ?? {
+      ...alternativesObject,
+      category: alternativesObject.category ?? "",
+      subcategory: alternativesObject.subcategory,
+      size_variants: alternativesObject.size_variants,
+    };
+  }, [alternativesObject, products]);
+  const alternatives = useMemo(
+    () => alternativesActive ? curatedVisualiserAlternatives(alternativesActive, products) : [],
+    [alternativesActive, products],
+  );
+  const openAlternatives = useCallback((instanceId: string) => {
+    setSelectedId(instanceId);
+    setAlternativesId(instanceId);
+  }, []);
+  const swapAlternative = async (product: PricedVisualiserAlternative) => {
+    const current = objects.find(object => object.instanceId === alternativesId);
+    if (!current || swappingId) return;
+    setSwappingId(product.id);
+    try {
+      const placeable = { ...product, dimensions: product.dimensions ?? null };
+      const { appearance, finishLabel } = await resolveVisualiserDefaultAppearance(placeable);
+      const replacement = { ...buildVisualiserSwap(current, placeable, appearance, Date.now()), variantLabel: finishLabel };
+      if (sharedProject && current.specItemId) {
+        const { error } = await supabase.rpc("swap_visualiser_board_item", {
+          _item_id: current.specItemId,
+          _project_id: sharedProject,
+          _product_id: product.id,
+          _finish_label: finishLabel ?? undefined,
+        });
+        if (error) throw error;
+      }
+      setObjects(currentObjects => currentObjects.map(object => object.instanceId === current.instanceId ? replacement : object));
+      setSelectedId(current.instanceId);
+      setAlternativesId(null);
+      toast.success(current.specItemId && sharedProject ? `${product.product_name} swapped in — Specsheet and budget updated.` : `${product.product_name} swapped in at the same position.`);
+    } catch {
+      toast.error("The alternative could not be applied. Your room and Specsheet are unchanged.");
+    } finally {
+      setSwappingId(null);
+    }
+  };
+
   const curatedHandoffDone = useRef(false);
   useEffect(() => {
     if (curatedHandoffDone.current || searchParams.get("handoff") !== "curated") return;
@@ -1012,12 +1113,20 @@ const TradeVisualiser = () => {
     if (!shared) { toast.error("The curated layout didn't come through — click Open in Visualiser Sandbox again."); return; }
     void (async () => {
       const ids = [...new Set(shared.items.map((i) => i.productId))];
-      const { data, error } = ids.length ? await (supabase as any).from("trade_products").select("id, product_name, brand_name, image_url, dimensions, glb_url").in("id", ids) : { data: [], error: null };
+      const { data, error } = ids.length ? await (supabase as any).from("trade_products").select("id, product_name, brand_name, image_url, dimensions, width_mm, depth_mm, height_mm, size_variants, category, subcategory, source_pick_id, glb_url").in("id", ids) : { data: [], error: null };
       if (error) { toast.error("Catalogue details couldn't load. Your existing room is unchanged; please try the handoff again."); curatedHandoffDone.current = false; return; }
-      const rows = new Map(((data ?? []) as Array<{ id: string; product_name: string; brand_name: string; image_url: string | null; dimensions: string | null; glb_url: string | null }>).map((r) => [r.id, r]));
+      const rows = new Map(((data ?? []) as Array<{ id: string; product_name: string; brand_name: string; image_url: string | null; dimensions: string | null; width_mm: number | null; depth_mm: number | null; height_mm: number | null; size_variants: PlacedObject["size_variants"]; category: string | null; subcategory: string | null; source_pick_id: string | null; glb_url: string | null }>).map((r) => [r.id, r]));
       const placed = shared.items.map((item) => {
         const row = rows.get(item.productId);
-        const next = createPlacedObject({ id: item.productId, product_name: row?.product_name ?? item.name, brand_name: row?.brand_name ?? item.brandName ?? "", image_url: row?.image_url ?? item.imageUrl ?? null, dimensions: row?.dimensions ?? item.dimensions ?? null, glb_url: row?.glb_url ?? item.glbUrl }, [item.x, 0, item.z]);
+        const next = createPlacedObject({
+          id: item.productId, product_name: row?.product_name ?? item.name,
+          brand_name: row?.brand_name ?? item.brandName ?? "", image_url: row?.image_url ?? item.imageUrl ?? null,
+          dimensions: row?.dimensions ?? item.dimensions ?? null, glb_url: row?.glb_url ?? item.glbUrl,
+          width_mm: row?.width_mm, depth_mm: row?.depth_mm, height_mm: row?.height_mm, size_variants: row?.size_variants,
+          category: row?.category ?? item.category, subcategory: row?.subcategory ?? item.subcategory,
+          source_pick_id: row?.source_pick_id, specItemId: item.specItemId,
+          retailEurCents: item.priceEur == null ? null : Math.round(item.priceEur * 100),
+        }, [item.x, 0, item.z]);
         return { ...next, ...(item.appearance ?? {}), instanceId: `${next.instanceId}-${shared.items.indexOf(item)}`, rotation: [0, item.rotationY, 0] as [number, number, number] };
       });
       setObjects(placed);
@@ -1163,6 +1272,8 @@ const TradeVisualiser = () => {
             snapToGrid={snapToGrid}
             showGrid={showGrid}
             showLabels={showLabels}
+            showHotspots={showHotspots && !exporting}
+            onFindAlternatives={openAlternatives}
             depthOfField={depthOfField}
             pathTrace={!photoMode && pathTrace && (!activeProject || activeProject.view === "sandbox")}
             renderCheckpointKey={user ? `${user.id}:sandbox` : undefined}
@@ -1224,7 +1335,7 @@ const TradeVisualiser = () => {
       </div>
 
       {/* Inspector sidebar — reads the shared selection context */}
-      <VisualiserInspector sidebarActions={(!activeProject || activeProject.view === "sandbox") && <><input ref={roomPhotoRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" aria-label="Empty room photo" onChange={e => { uploadBackdrop(e.target.files?.[0] ?? null, true); e.target.value = ""; }} /><Button variant="outline" size="sm" className="w-full gap-2" onClick={() => roomPhotoRef.current?.click()}><ImageUp className="h-4 w-4" />Upload Empty Room Photo</Button></>} onToggleLock={togglePositionLock} onRemove={removeObject} onScale={scaleObject} onRestore={restoreObject} nearestClearance={selectedClearance}>
+      <VisualiserInspector sidebarActions={(!activeProject || activeProject.view === "sandbox") && <><input ref={roomPhotoRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" aria-label="Empty room photo" onChange={e => { uploadBackdrop(e.target.files?.[0] ?? null, true); e.target.value = ""; }} /><Button variant="outline" size="sm" className="w-full gap-2" onClick={() => roomPhotoRef.current?.click()}><ImageUp className="h-4 w-4" />Upload Empty Room Photo</Button></>} onToggleLock={togglePositionLock} onFindAlternatives={openAlternatives} onRemove={removeObject} onScale={scaleObject} onRestore={restoreObject} nearestClearance={selectedClearance}>
         {selected && (<>
           {activeProject && activeProject.view !== "plan" && <div className="mt-3 grid grid-cols-2 gap-2">{(["x", "y", "rotation"] as const).map(axis => <label key={axis} className="text-xs text-muted-foreground">{axis === "rotation" ? "Rotation (°)" : `${axis === "x" ? "X" : "Y"} (m)`}<input aria-label={`Layout ${axis}`} type="number" step={axis === "rotation" ? 5 : 0.1} disabled={selected.positionLocked} value={axis === "rotation" ? Math.round(selected.rotation[1] * 180 / Math.PI) : Math.round(selected.position[axis === "x" ? 0 : 2] * 100) / 100} className="mt-1 w-full rounded-sm border border-border bg-background px-2 py-1 text-foreground" onChange={event => { const value = Number(event.target.value); if (Number.isFinite(value)) setObjects(current => patchLayoutItem(current, selected.instanceId, { [axis]: axis === "rotation" ? value * Math.PI / 180 : value }, activeProject.state.bounds)); }} /></label>)}</div>}
           <Button variant="ghost" size="sm" onClick={togglePositionLock} aria-pressed={Boolean(selected.positionLocked)} aria-label="Lock object position" className="mt-3 h-8 gap-2 px-0 text-[10px] uppercase text-muted-foreground">
@@ -1816,6 +1927,15 @@ const TradeVisualiser = () => {
             >
               <Tags className="h-4 w-4" /><span className="visualiser-dock-label">Show Labels</span>
             </Button>
+            <Button variant="ghost"
+              className={cn(toolbarButton, showHotspots ? "border-primary text-primary" : "opacity-60")}
+              onClick={() => setShowHotspots(value => !value)}
+              aria-pressed={showHotspots}
+              aria-label="Hotspots"
+              title="Show or hide editorial alternative pins; they are always hidden during mockup export"
+            >
+              <Plus className="h-4 w-4" /><span className="visualiser-dock-label">Hotspots</span>
+            </Button>
             <Button variant="ghost" className={cn(toolbarButton, !keepPhotorealGhost && "opacity-60")}
               aria-label="Keep photoreal ghost" aria-pressed={keepPhotorealGhost}
               title="Keep the last settled photoreal frame behind the interactive live view when Photoreal Render is off. The frame stays fixed as you edit or move the camera."
@@ -1862,6 +1982,14 @@ const TradeVisualiser = () => {
       </div>
       </div>
 
+      <CuratedAlternativesDrawer
+        active={alternativesActive}
+        alternatives={alternatives}
+        loading={loadingProducts}
+        swappingId={swappingId}
+        onClose={() => setAlternativesId(null)}
+        onSwap={product => void swapAlternative(product)}
+      />
       <input
         ref={fileRef}
         type="file"

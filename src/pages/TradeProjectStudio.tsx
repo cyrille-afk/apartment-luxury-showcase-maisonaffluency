@@ -45,6 +45,8 @@ type StudioItem = {
   rrp_cents: number | null;
   currency: string;
   source_pick_id: string | null;
+  category: string | null;
+  subcategory: string | null;
   quantity: number;
   selected_finish: string | null;
   placements: StudioFolderPlacement[];
@@ -111,7 +113,7 @@ export default function TradeProjectStudio() {
       setLoadingItems(true);
       const sb = supabase as any;
       const productFields =
-        "id, product_name, brand_name, image_url, sku, lead_time, dimensions, width_mm, depth_mm, height_mm, size_variants, trade_price_cents, rrp_price_cents, currency, source_pick_id, glb_url, materials, base_axis_label, top_axis_label";
+        "id, product_name, brand_name, image_url, sku, lead_time, dimensions, width_mm, depth_mm, height_mm, size_variants, trade_price_cents, rrp_price_cents, currency, source_pick_id, glb_url, materials, base_axis_label, top_axis_label, category, subcategory";
 
       const [q, b] = await Promise.all([
         sb.from("trade_quotes").select("id").eq("project_id", id),
@@ -167,6 +169,8 @@ export default function TradeProjectStudio() {
           rrp_cents: p.trade_price_cents ?? p.rrp_price_cents ?? null,
           currency: (p.currency || "SGD").toUpperCase(),
           source_pick_id: p.source_pick_id ?? null,
+          category: p.category ?? null,
+          subcategory: p.subcategory ?? null,
           quantity,
           selected_finish: selectedFinish,
           placements: placement ? [placement] : [],
@@ -246,7 +250,18 @@ export default function TradeProjectStudio() {
   const openInVisualiser = () => {
     if (!id || !items.length || savingFinishes) return;
     const stamp = Date.now();
-    const pieces = items.flatMap(item => Array.from({ length: item.quantity }, () => ({ id: item.product_id, product_name: item.name, brand_name: item.designer, image_url: item.image_url, dimensions: item.dimensions, width_mm: item.width_mm, depth_mm: item.depth_mm, glb_url: item.glb_url, retailCents: item.rrp_cents == null ? null : convertCents(item.rrp_cents, item.currency, "EUR", fxRates), appearance: studioAppearance(item.catalog, item.selection) })));
+    const pieces = items.flatMap(item => Array.from({ length: item.quantity }, (_, index) => {
+      const placement = item.placements[index];
+      return {
+        id: item.product_id, product_name: item.name, brand_name: item.designer,
+        image_url: item.image_url, dimensions: item.dimensions, width_mm: item.width_mm, depth_mm: item.depth_mm,
+        category: item.category, subcategory: item.subcategory,
+        specItemId: placement && !placement.locked ? placement.itemId : null,
+        glb_url: item.glb_url,
+        retailCents: item.rrp_cents == null ? null : convertCents(item.rrp_cents, item.currency, "EUR", fxRates),
+        appearance: studioAppearance(item.catalog, item.selection),
+      };
+    }));
     const previous = readSharedRoomLayout(id);
     const layout = moodBoardHandoff(pieces, id, previous?.roomType ?? "living", previous, stamp);
     layout.source = "project-studio";

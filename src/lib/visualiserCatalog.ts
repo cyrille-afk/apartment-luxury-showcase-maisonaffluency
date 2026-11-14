@@ -31,6 +31,8 @@ function placements(item: VisualiserCatalogItem) {
   return { categories, subcategories };
 }
 
+export { placements as visualiserPlacements };
+
 export interface CatalogCriteria { modelsOnly?: boolean; designer?: string; category?: string; subcategory?: string; search?: string }
 
 export function filterVisualiserCatalog<T extends VisualiserCatalogItem>(items: T[], criteria: CatalogCriteria = {}): T[] {

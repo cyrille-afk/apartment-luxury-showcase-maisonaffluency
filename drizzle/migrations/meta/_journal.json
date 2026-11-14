@@ -2031,6 +2031,13 @@
       "when": 1794636497388,
       "tag": "0289_create_spec_sheet_room_preferences",
       "breakpoints": true
+    },
+    {
+      "idx": 290,
+      "version": "7",
+      "when": 1794639058337,
+      "tag": "0290_visualiser_alternative_specification_swap",
+      "breakpoints": true
     }
   ]
 }

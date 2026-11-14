@@ -1,4 +1,4 @@
-import { ChevronLeft, Lock, PanelLeftOpen, Unlock, X } from "lucide-react";
+import { ChevronLeft, Lock, PanelLeftOpen, Sparkles, Unlock, X } from "lucide-react";
 import { useState, type ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
@@ -28,10 +28,12 @@ const VisualiserInspector = ({
   nearestClearance,
   sidebarActions,
   onToggleLock,
+  onFindAlternatives,
   children,
 }: {
   /** Header lock toggle — always visible while a piece is selected. */
   onToggleLock?: () => void;
+  onFindAlternatives?: (instanceId: string) => void;
   onRemove: (instanceId: string) => void;
   onScale: (instanceId: string, scale: number) => void;
   onRestore?: (instanceId: string) => void;
@@ -113,6 +115,13 @@ const VisualiserInspector = ({
       <p className={cn(microLabel, "mt-3 text-muted-foreground")}>
         {formatDimensions(resolveDimensions(selected)) ?? DIMENSIONS_PLACEHOLDER}
       </p>
+
+      {onFindAlternatives && (
+        <Button variant="outline" size="sm" className="mt-4 w-full gap-2 text-xs" onClick={() => onFindAlternatives(selected.instanceId)}>
+          <Sparkles className="h-3.5 w-3.5" />
+          Find Alternatives
+        </Button>
+      )}
 
       {nearestClearance && (
         <p

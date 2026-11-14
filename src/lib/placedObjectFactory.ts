@@ -17,6 +17,15 @@ export type PlaceableProduct = {
   dimensions: string | null;
   glb_url: string | null;
   productType?: string;
+  source_pick_id?: string | null;
+  category?: string | null;
+  subcategory?: string | null;
+  width_mm?: number | null;
+  depth_mm?: number | null;
+  height_mm?: number | null;
+  size_variants?: PlacedObject["size_variants"];
+  retailEurCents?: number | null;
+  specItemId?: string | null;
   selectedUpholstery?: string | null;
   selectedFrameFinish?: string | null;
   variantLabel?: string | null;
@@ -51,6 +60,11 @@ export function createPlacedObject(
     instanceId: `${product.id}-${Date.now()}`,
     inventoryInstanceId: product.inventoryInstanceId,
     id: product.id,
+    source_pick_id: product.source_pick_id,
+    category: product.category,
+    subcategory: product.subcategory,
+    specItemId: product.specItemId,
+    retailEurCents: product.retailEurCents,
     product_name: product.product_name,
     productType: product.product_name,
     selectedUpholstery: product.selectedUpholstery ?? null,
@@ -60,6 +74,10 @@ export function createPlacedObject(
     brand_name: product.brand_name,
     image_url: product.image_url ? optimizeImageUrl(product.image_url, CUTOUT_TRANSFORMS) : null,
     dimensions: product.dimensions,
+    width_mm: product.width_mm,
+    depth_mm: product.depth_mm,
+    height_mm: product.height_mm,
+    size_variants: product.size_variants,
     glb_url: product.glb_url,
     position,
     rotation: [0, 0, 0],

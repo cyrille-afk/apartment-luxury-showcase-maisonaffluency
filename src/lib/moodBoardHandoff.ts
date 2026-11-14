@@ -1,7 +1,7 @@
 import type { MoodRoomType } from "./moodBoardBudget";
 import type { SharedRoomLayout } from "./sharedRoomLayout";
 
-type Piece = { id: string; product_name: string; glb_url: string | null; retailCents: number | null; image_url?: string | null; brand_name?: string; dimensions?: string | null; width_mm?: number | null; depth_mm?: number | null; appearance?: import("@/types/aiCuratedScene").PieceAppearance };
+type Piece = { id: string; product_name: string; glb_url: string | null; retailCents: number | null; image_url?: string | null; brand_name?: string; dimensions?: string | null; width_mm?: number | null; depth_mm?: number | null; category?: string | null; subcategory?: string | null; specItemId?: string | null; appearance?: import("@/types/aiCuratedScene").PieceAppearance };
 /** Pack exact selections in dimensioned rows; never drop unpriced/model-less pieces. */
 export function moodBoardHandoff(pieces: Piece[], projectId: string | null, roomType: MoodRoomType, previous: SharedRoomLayout | null, updatedAt: number, budgetEur: number | null = previous?.budgetEur ?? null): SharedRoomLayout {
   const widths = pieces.map(p => Math.max(.4, (p.width_mm ?? 1200) / 1000));
@@ -15,6 +15,7 @@ export function moodBoardHandoff(pieces: Piece[], projectId: string | null, room
     wallFinish: previous?.wallFinish, floorFinish: previous?.floorFinish,
     items: pieces.map((p, i) => ({ productId: p.id, name: p.product_name, glbUrl: p.glb_url,
       imageUrl: p.image_url, brandName: p.brand_name, dimensions: p.dimensions,
+      category: p.category, subcategory: p.subcategory, specItemId: p.specItemId,
       x: (i % columns - (columns - 1) / 2) * cellW, z: (Math.floor(i / columns) - (rows - 1) / 2) * cellD,
       rotationY: roomType === "living" && /chair|sofa|seat/i.test(p.product_name) && Math.floor(i / columns) >= rows / 2 ? Math.PI : 0,
       priceEur: p.retailCents == null ? null : p.retailCents / 100, ...(p.appearance ? { appearance: p.appearance } : {}) })),
