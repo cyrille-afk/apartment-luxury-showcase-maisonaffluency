@@ -992,18 +992,20 @@ const TradeVisualiser = () => {
     if (!shared) { toast.error("The curated layout didn't come through — click Open in Visualiser Sandbox again."); return; }
     void (async () => {
       const ids = [...new Set(shared.items.map((i) => i.productId))];
-      const { data } = ids.length ? await (supabase as any).from("trade_products").select("id, product_name, brand_name, image_url, dimensions, glb_url").in("id", ids) : { data: [] };
+      const { data, error } = ids.length ? await (supabase as any).from("trade_products").select("id, product_name, brand_name, image_url, dimensions, glb_url").in("id", ids) : { data: [], error: null };
+      if (error) { toast.error("Catalogue details couldn't load. Your existing room is unchanged; please try the handoff again."); curatedHandoffDone.current = false; return; }
       const rows = new Map(((data ?? []) as Array<{ id: string; product_name: string; brand_name: string; image_url: string | null; dimensions: string | null; glb_url: string | null }>).map((r) => [r.id, r]));
       const placed = shared.items.map((item) => {
         const row = rows.get(item.productId);
-        const next = createPlacedObject({ id: item.productId, product_name: row?.product_name ?? item.name, brand_name: row?.brand_name ?? "", image_url: row?.image_url ?? null, dimensions: row?.dimensions ?? null, glb_url: row?.glb_url ?? item.glbUrl }, [item.x, 0, item.z]);
+        const next = createPlacedObject({ id: item.productId, product_name: row?.product_name ?? item.name, brand_name: row?.brand_name ?? item.brandName ?? "", image_url: row?.image_url ?? item.imageUrl ?? null, dimensions: row?.dimensions ?? item.dimensions ?? null, glb_url: row?.glb_url ?? item.glbUrl }, [item.x, 0, item.z]);
         return { ...next, rotation: [0, item.rotationY, 0] as [number, number, number] };
       });
       setObjects(placed);
+      if (shared.source === "mood-board") activeProject?.setBounds({ width: shared.room.width, depth: shared.room.length, height: shared.room.height });
       setSelectedId(null);
       if (shared.wallFinish) setWallFinish(roomWallFinish(shared.wallFinish));
       if (shared.floorFinish) setFloorFinish(roomFloorFinish(shared.floorFinish));
-      toast.success(`Curated layout loaded — ${placed.length} piece${placed.length === 1 ? "" : "s"}.`);
+      toast.success(`${shared.source === "mood-board" ? "Mood board" : "Curated layout"} loaded — ${placed.length} piece${placed.length === 1 ? "" : "s"}${shared.roomType ? ` · ${shared.roomType}` : ""}.`);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);

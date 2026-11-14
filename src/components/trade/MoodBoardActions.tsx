@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FileDown, FolderPlus, Loader2, Check } from "lucide-react";
+import { FileDown, FolderPlus, Loader2, Check, Box } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -14,10 +14,12 @@ export const MOOD_BOARD_MAX_SAVE = 15;
 interface Props {
   items: { id: string; product_name?: string; brand_name?: string; image_url?: string }[];
   defaultProjectId: string | null;
+  onOpenVisualiser?: () => void;
+  handoffPending?: boolean;
 }
 
 /** Next steps once pieces are chosen: save to a project, export, and present. */
-export function MoodBoardActions({ items, defaultProjectId }: Props) {
+export function MoodBoardActions({ items, defaultProjectId, onOpenVisualiser, handoffPending }: Props) {
   const { currentStudio } = useStudio();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("Mood board");
@@ -82,10 +84,15 @@ export function MoodBoardActions({ items, defaultProjectId }: Props) {
           {exporting ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <FileDown className="mr-1.5 h-3.5 w-3.5" />}
           Export PDF
         </Button>
+        <div className="flex flex-wrap items-center gap-2">
         <Button size="sm" disabled={disabled} onClick={() => { setMessage(null); setOpen(true); }} className="h-9 text-[11px] uppercase tracking-[0.12em]">
           <FolderPlus className="mr-1.5 h-3.5 w-3.5" />
           Save to project
         </Button>
+        {onOpenVisualiser && <Button size="sm" disabled={disabled || handoffPending} onClick={onOpenVisualiser} className="h-9 gap-1.5 text-[11px]">
+          {handoffPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Box className="h-3.5 w-3.5" />}Open in Visualiser Sandbox
+        </Button>}
+        </div>
       </div>
       <p role="status" aria-live="polite" className={`min-h-4 font-body text-xs ${message?.tone === "error" ? "text-destructive" : "text-muted-foreground"}`}>
         {message?.tone === "ok" && <Check className="mr-1 inline h-3 w-3" />}

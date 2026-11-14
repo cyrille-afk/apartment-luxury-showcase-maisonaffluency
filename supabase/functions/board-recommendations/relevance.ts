@@ -11,6 +11,7 @@ export interface ProductContextInput {
   dimensions?: string;
   tags?: string[];
   source?: CatalogSource;
+  pinnedAnchor?: boolean;
 }
 
 export interface BoardIntentSummary {
@@ -496,6 +497,8 @@ export function selectFurnitureAnchors<T extends ProductContextInput>(items: T[]
 
 /** Lighting-only boards have architectural references, never floor-furniture anchors. */
 export function selectPairingReferences<T extends ProductContextInput>(items: T[]): T[] {
+  const pinned = items.filter(item => item.pinnedAnchor);
+  if (pinned.length) return pinned;
   const furniture = selectFurnitureAnchors(items);
   return furniture.length ? furniture : items;
 }

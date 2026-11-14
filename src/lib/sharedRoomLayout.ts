@@ -10,6 +10,9 @@ export type SharedRoomItem = {
   productId: string;
   name: string;
   glbUrl: string | null;
+  imageUrl?: string | null;
+  brandName?: string;
+  dimensions?: string | null;
   x: number;
   z: number;
   rotationY: number;
@@ -23,7 +26,8 @@ export type SharedRoomLayout = {
   wallFinish?: string | null;
   floorFinish?: string | null;
   items: SharedRoomItem[];
-  source: "visualiser" | "curated";
+  source: "visualiser" | "curated" | "mood-board";
+  roomType?: "living" | "dining" | "bedroom" | "office";
   updatedAt: number;
 };
 

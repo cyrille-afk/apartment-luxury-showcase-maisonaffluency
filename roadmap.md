@@ -1,5 +1,11 @@
 # Roadmap
 
+## Budget-aware anchored Mood Board
+- [x] Add account/project-local persisted room/budget/category controls and live EUR RRP allocation, with unconfirmed pricing withheld.
+- [x] Pin anchors and filter the canonical complement pool against live prices and remaining category budgets; all explicit pins drive server references, sensitive tier pricing remains hidden in Client View. Anchor function deployed and live checked.
+- [x] Hand off all curated pieces and room type to the existing stamped Sandbox transfer, retaining images and dimensions for model-less picks and preserving catalogue identity.
+- [x] 32 budget/handoff/catalogue/pagination/anchor regressions pass; signed-in chair €4,791 plus lamp €10,700 updates allocation to €15,491 and removal restores €4,791. €20,000 ceiling/€500 Tables cap filter suggestions; budget and anchor restore on reload. Client View has zero visible trade rows; phone has no overflow; chair model/image reads back in Sandbox and rendered chair verified, no page errors. Draft budgets remain browser-local, not cross-device; source chair's 3D finishes are not newly configured by this handoff.
+
 ## Clear curated-room loading
 - [x] Cover incomplete room previews with an opaque loading placeholder; replace furniture rows with skeletons until names and prices are ready, without altering saved layouts.
 - [x] Signed-in delayed catalogue reload verified both skeleton lists, no visible UUID/POR/false missing labels, opaque room placeholder and phone layout; releasing requests restores Frenchmen Street Side Chair and €2,372 with unchanged furniture and no page errors. Existing completed-view video history remains unchanged.

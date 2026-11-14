@@ -28,8 +28,8 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey)
 
     const body = await req.json()
-    const { board_id, product_ids, source, constraints: explicitConstraints, include_pool } = body as {
-      board_id?: string; product_ids?: string[]; source?: string; constraints?: HardConstraints; include_pool?: boolean
+    const { board_id, product_ids, anchor_ids, room_type, source, constraints: explicitConstraints, include_pool } = body as {
+      board_id?: string; product_ids?: string[]; anchor_ids?: string[]; room_type?: string; source?: string; constraints?: HardConstraints; include_pool?: boolean
     }
 
     // Require an authenticated caller for every code path. The previous
@@ -120,12 +120,14 @@ Deno.serve(async (req) => {
     // Build board context with detailed info
     const boardItems = [
       ...(tradeProducts || []).map((p: any) => ({
+        pinnedAnchor: Array.isArray(anchor_ids) && anchor_ids.includes(p.id),
         name: p.product_name, brand: p.brand_name,
         category: p.category, subcategory: p.subcategory || '', materials: p.materials || p.materials_description || 'not specified',
         description: p.description || '',
         dimensions: p.dimensions || '',
       })),
       ...curatorProducts.map((p: any) => ({
+        pinnedAnchor: Array.isArray(anchor_ids) && anchor_ids.includes(p.id),
         name: p.title, brand: curatorDesignerMap.get(p.designer_id) || 'Unknown',
         category: p.category || '', subcategory: p.subcategory || '', materials: p.materials || p.materials_description || 'not specified',
         description: p.description || '', dimensions: p.dimensions || '',
@@ -245,6 +247,7 @@ Deno.serve(async (req) => {
     const boardIntent = summarizeBoardIntent(
       boardItems.map((item, index) => ({
         id: `board-${index}`,
+        pinnedAnchor: item.pinnedAnchor,
         title: item.name,
         brand: item.brand,
         category: item.category,
@@ -257,6 +260,7 @@ Deno.serve(async (req) => {
 
     const primaryAnchors = selectPairingReferences(boardItems.map((item, index) => ({
       id: `board-${index}`, title: item.name, brand: item.brand,
+      pinnedAnchor: item.pinnedAnchor,
       category: item.category, subcategory: item.subcategory, materials: item.materials,
     })))
     const primaryAnchorIndices = new Set(primaryAnchors.map(item => Number(item.id.replace('board-', ''))))
@@ -264,6 +268,7 @@ Deno.serve(async (req) => {
     const rankedCatalog = rankCatalogCandidates(
       boardItems.map((item, index) => ({
         id: `board-${index}`,
+        pinnedAnchor: item.pinnedAnchor,
         title: item.name,
         brand: item.brand,
         category: item.category,
@@ -332,7 +337,8 @@ Deno.serve(async (req) => {
 Items currently selected:
 ${boardContext}
 
-Furniture anchor or architectural reference indices: ${[...primaryAnchorIndices].map(index => `[B${index}]`).join(', ')}
+Pinned anchor / architectural reference indices: ${[...primaryAnchorIndices].map(index => `[B${index}]`).join(', ')}. Consider EVERY pinned anchor across the ensemble, not just the first.
+Selected room: ${['living', 'dining', 'bedroom', 'office'].includes(room_type || '') ? room_type : 'inferred from pieces'}
 Likely room(s): ${boardIntent.dominantRooms.join(', ') || 'mixed'}
 Pieces already on the board: ${boardIntent.presentRoles.join(', ') || 'mixed'}
 Most needed complement roles: ${boardIntent.desiredRoles.join(', ') || 'mixed'}

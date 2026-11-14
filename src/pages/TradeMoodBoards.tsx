@@ -5,8 +5,16 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { useSearchParams } from "@/lib/router-compat";
-import { Search, Loader2, Plus, X, Heart, FolderOpen, LayoutGrid, Sparkles, RefreshCw } from "lucide-react";
+import { useSearchParams, useNavigate } from "@/lib/router-compat";
+import { Search, Loader2, Plus, X, Heart, FolderOpen, LayoutGrid, Sparkles, RefreshCw, Pin } from "lucide-react";
+import { useTradeDiscount } from "@/hooks/useTradeDiscount";
+import { MoodBoardBudgetControls, MoodBoardBudgetBar } from "@/components/trade/MoodBoardBudgetControls";
+import { emptyMoodBudget, fitsMoodBudget, moodBudgetLedger, moodPrices, type MoodBudgetSettings } from "@/lib/moodBoardBudget";
+import { fetchMoodBoardDetails } from "@/lib/moodBoardDetails";
+import { moodBoardHandoff } from "@/lib/moodBoardHandoff";
+import { readSharedRoomLayout, writeSharedRoomLayout } from "@/lib/sharedRoomLayout";
+import { formatCents } from "@/lib/productPricing";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MoodBoardActions } from "@/components/trade/MoodBoardActions";
@@ -44,6 +52,8 @@ interface MoodRec {
 
 export default function TradeMoodBoards() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const { discountPct } = useTradeDiscount();
   const [searchParams] = useSearchParams();
   const projectId = searchParams.get("project");
   const { clientSafe } = useClientSafeMode();
@@ -52,15 +62,29 @@ export default function TradeMoodBoards() {
   const [maker, setMaker] = useState("");
   const [visibleCount, setVisibleCount] = useState(40);
   const requestRevision = useRef(0);
-  const [board, setBoard] = useState<any[]>(() => projectId ? [] : loadBoardFromStorage(null));
+  const [board, setBoard] = useState<any[]>([]);
+  const [budgetSettings, setBudgetSettings] = useState<MoodBudgetSettings>(emptyMoodBudget);
+  const [draftReady, setDraftReady] = useState(false);
+  const draftKey = `ma-mood-workspace-v1:${user?.id ?? "pending"}:${projectId ?? "standalone"}`;
+  const restoredProjectRef = useRef(false);
+  const [handoffPending, setHandoffPending] = useState(false);
   const [filter, setFilter] = useState<PickerFilter>(projectId ? "board" : "all");
   const [recommendations, setRecommendations] = useState<MoodRec[]>([]);
   const [refreshPage, setRefreshPage] = useState(0);
-  const displayedRecommendations = complementPage(recommendations, refreshPage);
   const [recLoading, setRecLoading] = useState(false);
   const [recError, setRecError] = useState<string | null>(null);
   const prevBoardIdsRef = useRef<string>("");
   const seededProjectRef = useRef<string | null>(null);
+  const detailIds = useMemo(() => [...new Set([...board.map(b => b.id), ...recommendations.map(r => r.product_id)])].sort(), [board, recommendations]);
+  const { data: details = new Map(), isFetching: pricingPending, isError: pricingFailed } = useQuery({
+    queryKey: ["mood-board-live-details", user?.id, detailIds], enabled: !!user && detailIds.length > 0,
+    queryFn: () => fetchMoodBoardDetails(detailIds),
+  });
+  const prices = useMemo(() => new Map(detailIds.map(id => [id, moodPrices(details.get(id)?.retailCents ?? null, discountPct)])), [detailIds, details, discountPct]);
+  const ledger = moodBudgetLedger(board.map(item => ({ ...item, subcategory: details.get(item.id)?.subcategory })), prices, budgetSettings);
+  const affordableRecommendations = recommendations.filter(rec => fitsMoodBudget({ ...rec, subcategory: details.get(rec.product_id)?.subcategory }, prices.get(rec.product_id), ledger, budgetSettings));
+  const displayedRecommendations = complementPage(affordableRecommendations, refreshPage);
+  useEffect(() => { setRefreshPage(0); }, [budgetSettings.totalEur, budgetSettings.caps]);
 
 
   const { data: projectTearsheetProducts = [], isLoading: loadingProjectTearsheetProducts } = useQuery({
@@ -135,25 +159,34 @@ export default function TradeMoodBoards() {
 
   // Project mood boards are seeded from that project's tearsheet products, not legacy local storage.
   useEffect(() => {
-    setBoard(projectId ? [] : loadBoardFromStorage(null));
+    if (!user) return;
+    setDraftReady(false);
+    let saved: { items?: any[]; settings?: MoodBudgetSettings } | null = null;
+    try { saved = JSON.parse(localStorage.getItem(draftKey) || "null"); } catch { /* unavailable */ }
+    restoredProjectRef.current = Array.isArray(saved?.items);
+    setBoard(saved?.items ?? (projectId ? [] : loadBoardFromStorage(null)));
+    setBudgetSettings(saved?.settings ?? emptyMoodBudget());
+    setDraftReady(true);
     prevBoardIdsRef.current = "";
     seededProjectRef.current = null;
     setRecommendations([]);
     setRecError(null);
-  }, [projectId]);
+  }, [projectId, user?.id, draftKey]);
 
   useEffect(() => {
-    if (!projectId || loadingProjectTearsheetProducts) return;
+    if (!projectId || !draftReady || restoredProjectRef.current || loadingProjectTearsheetProducts) return;
     const seedKey = `${projectId}:${projectTearsheetProducts.map((p: any) => p.id).sort().join(",")}`;
     if (seededProjectRef.current === seedKey) return;
     seededProjectRef.current = seedKey;
     setBoard(projectTearsheetProducts);
-  }, [projectId, loadingProjectTearsheetProducts, projectTearsheetProducts]);
+  }, [projectId, draftReady, loadingProjectTearsheetProducts, projectTearsheetProducts]);
 
   // Persist the free-form builder only; project mode should always reflect project tearsheets.
   useEffect(() => {
-    if (!projectId) localStorage.setItem(storageKeyFor(null), JSON.stringify(board));
-  }, [board, projectId]);
+    if (!draftReady || !user || (projectId && !restoredProjectRef.current && loadingProjectTearsheetProducts)) return;
+    try { localStorage.setItem(draftKey, JSON.stringify({ items: board, settings: budgetSettings })); }
+    catch { toast.error("This browser couldn't save the mood board draft. Save to project to keep your pieces."); }
+  }, [board, budgetSettings, draftReady, draftKey, user?.id, projectId, loadingProjectTearsheetProducts]);
 
   const fetchRecommendations = useCallback(async (productIds: string[]) => {
     if (!shouldRecommendMoodBoard(productIds.length)) return;
@@ -161,7 +194,7 @@ export default function TradeMoodBoards() {
     setRecLoading(true);
     setRecError(null);
     try {
-      const { data, error } = await invokeWithAuthRetry("board-recommendations", { product_ids: productIds, source: projectId ? "project_tearsheet_mood_board" : "mood_board", project_id: projectId, include_pool: true });
+      const { data, error } = await invokeWithAuthRetry("board-recommendations", { product_ids: productIds, anchor_ids: budgetSettings.anchors.filter(id => productIds.includes(id)), room_type: budgetSettings.roomType, source: projectId ? "project_tearsheet_mood_board" : "mood_board", project_id: projectId, include_pool: true });
       if (revision !== requestRevision.current) return;
       if (error) throw error;
       if (data?.recommendations) {
@@ -203,7 +236,7 @@ export default function TradeMoodBoards() {
     } finally {
       if (revision === requestRevision.current) setRecLoading(false);
     }
-  }, [projectId]);
+  }, [projectId, budgetSettings.anchors, budgetSettings.roomType]);
 
   // Invalidate in-flight results on every composition change, including removal.
   useEffect(() => {
@@ -382,6 +415,22 @@ export default function TradeMoodBoards() {
     setBoard((prev) => prev.filter((p) => p.id !== id));
   };
 
+  const openInVisualiser = async () => {
+    if (!board.length || handoffPending) return;
+    setHandoffPending(true);
+    try {
+      const fresh = await fetchMoodBoardDetails(board.map(p => p.id));
+      const pieces = board.map(p => fresh.get(p.id));
+      if (pieces.some(p => !p)) throw new Error("unavailable");
+      const stamp = Date.now();
+      writeSharedRoomLayout(moodBoardHandoff(pieces.filter((p): p is NonNullable<typeof p> => !!p), projectId, budgetSettings.roomType, readSharedRoomLayout(projectId), stamp));
+      const modelLess = pieces.filter(p => !p?.glb_url).length;
+      if (modelLess) toast.info(`${modelLess} piece${modelLess === 1 ? "" : "s"} without a 3D model will use catalogue images.`);
+      navigate(`/trade/visualiser?handoff=curated&stamp=${stamp}${projectId ? `&project=${encodeURIComponent(projectId)}` : ""}`);
+    } catch { toast.error("Some catalogue details couldn't load. Please try opening the Sandbox again."); }
+    finally { setHandoffPending(false); }
+  };
+
   const filterOptions: { key: PickerFilter; label: string; icon: React.ReactNode }[] = [
     { key: "all", label: "All", icon: <LayoutGrid className="h-3 w-3" /> },
     { key: "favourites", label: "Favourites", icon: <Heart className="h-3 w-3" /> },
@@ -394,19 +443,23 @@ export default function TradeMoodBoards() {
       <div className="mx-auto w-full max-w-6xl space-y-6 [@media(min-width:1440px)]:max-w-[min(90vw,1800px)]">
 
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div>
             <h1 className="font-display text-2xl text-foreground">Mood Board Builder</h1>
             <p className="font-body text-sm text-muted-foreground mt-1">
               Curate product imagery into collages for early-stage concept pitches.
             </p>
           </div>
-          <MoodBoardActions items={board} defaultProjectId={projectId} />
+          <MoodBoardActions items={board} defaultProjectId={projectId} onOpenVisualiser={clientSafe ? undefined : openInVisualiser} handoffPending={handoffPending} />
         </div>
+
+        {!clientSafe && <MoodBoardBudgetControls settings={budgetSettings} onChange={setBudgetSettings} />}
 
         <div className="flex flex-col gap-6 lg:flex-row [@media(min-width:1440px)]:grid [@media(min-width:1440px)]:grid-cols-[minmax(0,1fr)_320px] [@media(min-width:1440px)]:gap-8">
           {/* Board area */}
           <div className="min-w-0 flex-1 space-y-6">
+            <MoodBoardBudgetBar ledger={ledger} pending={pricingPending} />
+            {pricingFailed && <p role="alert" className="text-xs text-destructive">Catalogue prices couldn't load. Budget remains unconfirmed.</p>}
             <div>
               <div className="flex items-center justify-between mb-3">
                 <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">{board.length} item{board.length !== 1 ? "s" : ""} on board</p>
@@ -431,12 +484,19 @@ export default function TradeMoodBoards() {
                   {board.map((item) => (
                     <div key={item.id} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
                       <img src={item.image_url} alt={item.product_name} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent">
-                        <div className="absolute bottom-0 left-0 right-0 p-3">
-                          <p className="font-display text-xs text-white truncate">{item.product_name}</p>
-                          <p className="font-body text-[10px] text-white/80">{item.brand_name}</p>
+                      <div className="absolute bottom-0 left-0 right-0 bg-background/90">
+                        <div className="p-3">
+                          <p className="font-display text-xs text-foreground truncate">{item.product_name}</p>
+                          <p className="font-body text-[10px] text-muted-foreground">{item.brand_name}</p>
                         </div>
                       </div>
+                      {!clientSafe && <Button variant="outline" size="sm"
+                        aria-label={`${budgetSettings.anchors.includes(item.id) ? "Unpin" : "Pin"} ${item.product_name} as anchor`}
+                        aria-pressed={budgetSettings.anchors.includes(item.id)}
+                        onClick={() => setBudgetSettings(s => ({ ...s, anchors: s.anchors.includes(item.id) ? s.anchors.filter(id => id !== item.id) : [...s.anchors, item.id] }))}
+                        className="absolute left-2 top-2 h-7 gap-1 bg-background/90 text-foreground px-2 text-[10px] data-[state=on]:border-primary" data-state={budgetSettings.anchors.includes(item.id) ? "on" : "off"}>
+                        <Pin className="h-3 w-3" />{budgetSettings.anchors.includes(item.id) ? "Anchor" : "Pin as Anchor"}
+                      </Button>}
                       {!clientSafe && <Button variant="ghost" size="icon"
                         aria-label={`Remove ${item.product_name} from board`}
                         onClick={() => removeFromBoard(item.id)}
@@ -464,8 +524,8 @@ export default function TradeMoodBoards() {
                       size="sm"
                       onClick={() => recError
                         ? fetchRecommendations(board.map((b) => b.id))
-                        : setRefreshPage(page => nextComplementPage(page, recommendations.length))}
-                      disabled={recLoading || (!recError && recommendations.length <= COMPLEMENT_PAGE_SIZE)}
+                        : setRefreshPage(page => nextComplementPage(page, affordableRecommendations.length))}
+                      disabled={recLoading || (!recError && affordableRecommendations.length <= COMPLEMENT_PAGE_SIZE)}
                       className="text-[10px] text-muted-foreground h-7 px-2"
                     >
                       <RefreshCw className={`h-3 w-3 mr-1 ${recLoading ? "animate-spin" : ""}`} />
@@ -478,7 +538,7 @@ export default function TradeMoodBoards() {
                   <p className="font-body text-xs text-muted-foreground">
                     Select your first piece from the right-hand panel to generate tailored pairings.
                   </p>
-                ) : recLoading ? (
+                ) : recLoading || pricingPending ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4 w-full">
                     {Array.from({ length: COMPLEMENT_PAGE_SIZE }, (_, i) => (
                       <div key={i} className="min-w-0 animate-pulse">
@@ -490,8 +550,8 @@ export default function TradeMoodBoards() {
                   </div>
                 ) : recError ? (
                   <p className="font-body text-xs text-muted-foreground">{recError}</p>
-                ) : recommendations.length === 0 ? (
-                  <p className="font-body text-xs text-muted-foreground">No suitable complements found for this selection.</p>
+                ) : affordableRecommendations.length === 0 ? (
+                  <p className="font-body text-xs text-muted-foreground">{ledger.unpriced && ledger.total != null ? "Confirm all board prices before budget-aware pairing." : "No suitable complements within the remaining budget and category caps."}</p>
                 ) : (
                   <TooltipProvider delayDuration={120}>
                     <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4 w-full" data-complement-grid>
@@ -520,6 +580,10 @@ export default function TradeMoodBoards() {
                               </div>
                               <p className="w-full font-body text-xs text-foreground truncate">{rec.title}</p>
                               <p className="w-full font-body text-[11px] text-muted-foreground truncate">{rec.brand}</p>
+                              <div className="w-full text-[11px] text-foreground">
+                                {prices.get(rec.product_id)?.retail != null ? <>RRP {formatCents(prices.get(rec.product_id)?.retail ?? 0, "EUR")}
+                                  <span data-trade-sensitive className="block text-muted-foreground">Trade {formatCents(prices.get(rec.product_id)?.trade ?? 0, "EUR")}</span></> : <span className="text-muted-foreground">EUR price unconfirmed</span>}
+                              </div>
                               <p className="w-full font-body text-[11px] text-primary/80 leading-snug mt-1 line-clamp-4 break-words">
                                 {rec.reason}
                               </p>
