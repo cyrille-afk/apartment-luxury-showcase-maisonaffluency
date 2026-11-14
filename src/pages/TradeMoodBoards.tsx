@@ -493,6 +493,11 @@ export default function TradeMoodBoards() {
                         <div className="p-3">
                           <p className="font-display text-xs text-foreground truncate">{item.product_name}</p>
                           <p className="font-body text-[10px] text-muted-foreground">{item.brand_name}</p>
+                          <p className="mt-1 font-body text-[11px] leading-snug tabular-nums text-foreground" aria-label={`Price for ${item.product_name}`}>
+                            {pricingPending || ratePending ? <span className="text-muted-foreground">Loading price…</span>
+                              : prices.get(item.id)?.retail != null ? <>RRP {money(prices.get(item.id)?.retail ?? 0)}</>
+                              : <span className="text-muted-foreground">Price unconfirmed</span>}
+                          </p>
                         </div>
                       </div>
                       {!clientSafe && <Button variant="outline" size="sm"
