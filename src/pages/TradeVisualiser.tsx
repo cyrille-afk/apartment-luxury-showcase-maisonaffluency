@@ -969,19 +969,13 @@ const TradeVisualiser = () => {
 
   const backdropSrc = backdrop ?? backdropDataUrl;
 
-  // Shared room hand-off with the Curated Room Layout (same pieces, positions and prices).
+  // Shared room state for the Walkthrough & Video tab (same pieces, positions and prices).
   const navigateTo = useNavigate();
   const rawSharedProject = activeProject?.state.projectId ?? projectId ?? null;
   const sharedProject = rawSharedProject === "sandbox" ? null : rawSharedProject;
-  const sendToCuratedLayout = () => {
-    const bounds = activeProject?.state.bounds;
-    writeSharedRoomLayout({
-      projectId: sharedProject, source: "visualiser", updatedAt: Date.now(),
-      room: bounds ? { width: bounds.width, length: bounds.depth, height: bounds.height } : { width: 7.2, length: 6, height: 3.2 },
-      wallFinish, floorFinish,
-      items: objects.map((o) => ({ productId: o.id, name: o.product_name, glbUrl: o.glb_url, x: o.position[0], z: o.position[2], rotationY: o.rotation[1], priceEur: null })),
-    });
-    navigateTo(`/trade/ai-layout?handoff=visualiser${sharedProject ? `&project=${encodeURIComponent(sharedProject)}` : ""}`);
+  const openWalkthrough = () => {
+    if (activeProject) { activeProject.setView("walkthrough"); return; }
+    navigateTo(`/trade/visualiser?view=walkthrough${sharedProject ? `&project=${encodeURIComponent(sharedProject)}` : ""}`);
   };
   // Walkthrough & Video tab: publish the live arrangement (pieces, finishes, room) for the embedded walkthrough.
   const walkthroughActive = activeProject?.view === "walkthrough";
@@ -1853,7 +1847,7 @@ const TradeVisualiser = () => {
           </div>
           <span className="visualiser-dock-divider" />
           <Button variant="ghost" className={toolbarButton} aria-label="Reset Canvas" title="Reset Canvas" onClick={resetSandbox}><RotateCcw className="h-4 w-4" /></Button>
-          <Button variant="ghost" className={toolbarButton} onClick={sendToCuratedLayout} disabled={!objects.length} title="Send to Curated Layout"><LayoutGrid className="h-4 w-4" /><span className="visualiser-dock-label">Send to Curated Layout</span></Button>
+          <Button variant="ghost" className={toolbarButton} onClick={openWalkthrough} disabled={!objects.length} title="Walkthrough & Video"><LayoutGrid className="h-4 w-4" /><span className="visualiser-dock-label">Walkthrough & Video</span></Button>
           <Button variant="studio-primary" className={cn(toolbarButton, "visualiser-primary-control")} onClick={downloadPresentationMockup} disabled={exporting}><Download className="h-4 w-4" />{exporting ? "Exporting…" : "Export Mockup"}</Button>
         </div>
       </div>

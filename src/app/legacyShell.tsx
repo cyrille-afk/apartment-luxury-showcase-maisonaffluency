@@ -168,7 +168,6 @@ export const SharedShortlist = lazy(() => import("@/pages/SharedShortlist"));
 export const TradeTools = lazy(() => import("@/pages/TradeTools"));
 
 export const TradeShowroom = lazy(() => import("@/pages/TradeShowroom"));
-export const TradeAILayoutStudio = lazy(() => import("@/pages/TradeAILayoutStudio"));
 export const TradeSamples = lazy(() => import("@/pages/TradeSamples"));
 export const TradeJournal = lazy(() => import("@/pages/TradeJournal"));
 export const TradeProvenance = lazy(() => import("@/pages/TradeProvenance"));

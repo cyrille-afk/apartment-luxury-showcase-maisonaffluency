@@ -5,7 +5,6 @@ import {
   Columns, Paintbrush, MessageCircle, CalendarClock, Package, Truck,
   CalendarDays, Wallet, RefreshCw, ArrowRightLeft, GraduationCap, Box, BookOpen,
   Wand2, Star, Search, X, Scan, Presentation, ClipboardList, CalendarRange, CheckCircle2, Circle, Save,
-  Clapperboard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { categorySlug } from "@/lib/toolsBreadcrumbs";
@@ -39,8 +38,7 @@ const categories: ToolCategory[] = [
       { title: "Mood Board", description: "Visual collage for client presentations", url: "/trade/mood-boards", icon: Paintbrush },
       { title: "Product Comparator", description: "Compare specs side by side", url: "/trade/comparator", icon: Columns },
       { title: "Markup & Annotation", description: "Annotate images and drawings", url: "/trade/annotations", icon: MessageCircle },
-      { title: "Visualiser", description: "Render premium spaces, arrange curated furniture, and visualize custom fabric drape options.", url: "/trade/visualiser", icon: Scan },
-      { title: "Curated Room Layout & Walkthrough", description: "Furnish a room from your brief within budget, then render a cinematic walkthrough", url: "/trade/ai-layout", icon: Clapperboard },
+      { title: "Visualiser & Walkthrough", description: "Arrange your Mood Board furniture in 3D, then preview and record a cinematic walkthrough.", url: "/trade/visualiser", icon: Scan },
       { title: "Tearsheet Builder", description: "Create printable product specs", url: "/trade/tearsheets", icon: Scissors },
       { title: "Specification Sheet Generator", description: "Branded client presentation decks & pitch PDFs", url: "/trade/spec-generator", icon: Presentation },
       { title: "FF&E Schedule", description: "Auto-generate furniture schedules", url: "/trade/ffe-schedule", icon: FileSpreadsheet },
@@ -393,13 +391,13 @@ export default function TradeTools() {
                       <div className="min-w-0">
                         <h4 className="text-xs font-medium text-foreground mb-2">Completed · {summary.completedStages.length}</h4>
                         {summary.completedStages.length === 0 ? <p className="text-xs text-muted-foreground">None yet</p> : <ul className="space-y-1.5">
-                          {summary.completedStages.map(stage => <li key={stage.id} className="flex items-start gap-2 text-xs text-foreground"><CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true" /><div className="min-w-0">{stage.id === 'curated-layout' ? <button type="button" className="text-left underline-offset-2 hover:underline" onClick={() => navigate(`/trade/ai-layout?project=${project.id}&open=saved`)}>{categories.find(category => category.label === 'Specification')?.tools.find(tool => tool.url === stage.url)?.title}</button> : <span>{categories.find(category => category.label === 'Specification')?.tools.find(tool => tool.url === stage.url)?.title}</span>}<CompletionDate value={stage.completedAt} /></div></li>)}
+                          {summary.completedStages.map(stage => <li key={stage.id} className="flex items-start gap-2 text-xs text-foreground"><CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true" /><div className="min-w-0"><span>{categories.find(category => category.label === 'Specification')?.tools.find(tool => tool.url === stage.url)?.title}</span><CompletionDate value={stage.completedAt} /></div></li>)}
                         </ul>}
                       </div>
                       <div className="min-w-0">
                         <h4 className="text-xs font-medium text-foreground mb-2">Remaining · {summary.remainingStages.length}</h4>
                         {summary.remainingStages.length === 0 ? <p className="text-xs text-primary">All stages complete</p> : <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
-                          {summary.remainingStages.map(stage => <li key={stage.id} className="flex items-start gap-2 text-xs text-muted-foreground"><Circle className={cn('h-3.5 w-3.5 shrink-0', stage.targetStatus === 'Overdue' && 'text-destructive')} aria-hidden="true" /><div className="min-w-0">{stage.id === 'curated-layout' ? <button type="button" className="text-left underline-offset-2 hover:underline" onClick={() => navigate(`/trade/ai-layout?project=${project.id}&open=saved`)}>{categories.find(category => category.label === 'Specification')?.tools.find(tool => tool.url === stage.url)?.title}</button> : <span>{categories.find(category => category.label === 'Specification')?.tools.find(tool => tool.url === stage.url)?.title}</span>}<TargetDateStatus value={stage.targetDate} /></div></li>)}
+                          {summary.remainingStages.map(stage => <li key={stage.id} className="flex items-start gap-2 text-xs text-muted-foreground"><Circle className={cn('h-3.5 w-3.5 shrink-0', stage.targetStatus === 'Overdue' && 'text-destructive')} aria-hidden="true" /><div className="min-w-0"><span>{categories.find(category => category.label === 'Specification')?.tools.find(tool => tool.url === stage.url)?.title}</span><TargetDateStatus value={stage.targetDate} /></div></li>)}
                         </ul>}
                       </div>
                     </article>

@@ -137,6 +137,6 @@ export default function TradeProjectWorkspace() {
   const location = useLocation();
   const [params] = useSearchParams();
   const projectId = params.get("project") || "sandbox";
-  const initialView: WorkspaceView = location.pathname.endsWith("axonometric") ? "axonometric" : "sandbox";
+  const initialView: WorkspaceView = location.pathname.endsWith("axonometric") ? "axonometric" : params.get("view") === "walkthrough" ? "walkthrough" : "sandbox";
   return <ActiveProjectProvider key={`${user?.id || "guest"}:${projectId}`} accountId={user?.id || "guest"} projectId={projectId} initialView={initialView}><WorkspacePanels /></ActiveProjectProvider>;
 }

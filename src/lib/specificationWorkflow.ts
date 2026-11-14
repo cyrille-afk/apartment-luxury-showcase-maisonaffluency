@@ -3,7 +3,6 @@ export const specificationStages = [
   { id: 'comparator', url: '/trade/comparator' },
   { id: 'annotation', url: '/trade/annotations' },
   { id: 'visualiser', url: '/trade/visualiser' },
-  { id: 'curated-layout', url: '/trade/ai-layout' },
   { id: 'tearsheet', url: '/trade/tearsheets' },
   { id: 'specification-sheet', url: '/trade/spec-generator' },
   { id: 'ffe-schedule', url: '/trade/ffe-schedule' },
