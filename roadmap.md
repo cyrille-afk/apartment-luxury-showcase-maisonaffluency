@@ -1,5 +1,10 @@
 # Roadmap
 
+## Undo Visualiser furniture swaps
+- [x] Capture the complete detached previous piece and atomically snapshot saved specification/Studio finishes before swapping.
+- [x] Show an eight-second bottom-left Undo Swap toast; restore exact pose, finishes and pricing without remounting the room; checked RPC refuses changed or procurement-linked rows.
+- [x] Six regressions pass; signed-in temporary-project swap/undo restores exact X/Z/yaw, locked appearance, live €2,422 RRP, specification labels and saved Studio selection; same canvas and reload restoration verified with no page errors. Temporary project removed. Software-rendering click stabilization required DOM-click fallback; rendered original chair visually checked.
+
 ## Visualiser editorial hotspots and alternatives
 - [x] Add anchored, hover-labelled furniture hotspots with a persisted visibility toggle and automatic mockup-export suppression.
 - [x] Add a same-category, proportion-compatible 3D-ready Curated Alternatives drawer with live approved pricing and Piece Inspector entry.

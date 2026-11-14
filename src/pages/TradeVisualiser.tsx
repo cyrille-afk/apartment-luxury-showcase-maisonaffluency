@@ -16,7 +16,8 @@ import { CEILING_CONTROLS, clampCeilingHeight, clampCeilingThickness, clampCeili
 import { parseDimensionString } from "@/lib/productDimensions";
 import CuratedAlternativesDrawer, { type PricedVisualiserAlternative } from "@/components/trade/visualiser/CuratedAlternativesDrawer";
 import { curatedVisualiserAlternatives } from "@/lib/visualiserAlternatives";
-import { buildVisualiserSwap } from "@/lib/visualiserSwap";
+import { buildVisualiserSwap, restoreVisualiserSwap, snapshotVisualiserPiece, SWAP_UNDO_DURATION_MS } from "@/lib/visualiserSwap";
+import type { Json } from "@/integrations/supabase/types";
 import { resolveVisualiserDefaultAppearance } from "@/lib/visualiserDefaultFinishes";
 import { moodRetailEur } from "@/lib/moodBoardDetails";
 import { resetModelOrientation } from "@/lib/resetModelOrientation";
@@ -122,6 +123,15 @@ type CatalogueProduct = {
   rrp_price_cents?: number | null;
   currency?: string | null;
   retailEurCents?: number | null;
+};
+
+type SwapSnapshot = {
+  previous: PlacedObject;
+  replacementId: string;
+  replacementKey: number;
+  projectId: string | null;
+  specification: Json | null;
+  toastId: string;
 };
 
 type PersistedSandbox = CeilingSettings & {
@@ -319,6 +329,15 @@ const TradeVisualiser = () => {
   const [showHotspots, setShowHotspots] = useState<boolean>(initial.showHotspots ?? true);
   const [alternativesId, setAlternativesId] = useState<string | null>(null);
   const [swappingId, setSwappingId] = useState<string | null>(null);
+  const [swapSnapshot, setSwapSnapshot] = useState<SwapSnapshot | null>(null);
+  const swapSnapshotRef = useRef<SwapSnapshot | null>(null);
+  const swapBusy = useRef(false);
+  const objectsRef = useRef(objects);
+  objectsRef.current = objects;
+  useEffect(() => {
+    if (!swapSnapshot) return;
+    return () => { toast.dismiss(swapSnapshot.toastId); };
+  }, [swapSnapshot]);
   const [pathTrace, setPathTrace] = useState(false);
   const [initialRoomReady, setInitialRoomReady] = useState(false);
   const revealInitialRoom = useCallback(() => setInitialRoomReady(true), []);
@@ -1076,30 +1095,80 @@ const TradeVisualiser = () => {
     setSelectedId(instanceId);
     setAlternativesId(instanceId);
   }, []);
+  const undoSwap = async (snapshot: SwapSnapshot) => {
+    if (swapBusy.current || swapSnapshotRef.current !== snapshot) return;
+    const current = objectsRef.current.find(object => object.instanceId === snapshot.previous.instanceId);
+    if (!current || current.id !== snapshot.replacementId || current.restoreKey !== snapshot.replacementKey) {
+      toast.dismiss(snapshot.toastId);
+      toast.error("This piece has changed since the swap. Your current room is unchanged.");
+      return;
+    }
+    swapBusy.current = true;
+    setSwappingId(snapshot.previous.id);
+    try {
+      if (snapshot.projectId && snapshot.previous.specItemId && snapshot.specification) {
+        const { error } = await supabase.rpc("undo_visualiser_board_item_swap", {
+          _item_id: snapshot.previous.specItemId, _project_id: snapshot.projectId,
+          _expected_product_id: snapshot.replacementId, _snapshot: snapshot.specification,
+        });
+        if (error) throw error;
+      }
+      setObjects(currentObjects => restoreVisualiserSwap(currentObjects, snapshot.previous, Date.now()));
+      setSelectedId(snapshot.previous.instanceId);
+      setAlternativesId(null);
+      swapSnapshotRef.current = null;
+      setSwapSnapshot(null);
+      toast.dismiss(snapshot.toastId);
+      toast.success(`${snapshot.previous.product_name} restored.`);
+    } catch {
+      toast.error("The swap could not be undone. Your current room and Specsheet are unchanged.");
+    } finally {
+      swapBusy.current = false;
+      setSwappingId(null);
+    }
+  };
   const swapAlternative = async (product: PricedVisualiserAlternative) => {
     const current = objects.find(object => object.instanceId === alternativesId);
-    if (!current || swappingId) return;
+    if (!current || swapBusy.current) return;
+    swapBusy.current = true;
     setSwappingId(product.id);
     try {
+      const previous = snapshotVisualiserPiece(current);
       const placeable = { ...product, dimensions: product.dimensions ?? null };
       const { appearance, finishLabel } = await resolveVisualiserDefaultAppearance(placeable);
-      const replacement = { ...buildVisualiserSwap(current, placeable, appearance, Date.now()), variantLabel: finishLabel };
+      const replacementKey = Date.now();
+      const replacement = { ...buildVisualiserSwap(current, placeable, appearance, replacementKey), variantLabel: finishLabel };
+      let specification: Json | null = null;
       if (sharedProject && current.specItemId) {
-        const { error } = await supabase.rpc("swap_visualiser_board_item", {
+        const { data, error } = await supabase.rpc("swap_visualiser_board_item_snapshot", {
           _item_id: current.specItemId,
           _project_id: sharedProject,
           _product_id: product.id,
           _finish_label: finishLabel ?? undefined,
         });
         if (error) throw error;
+        specification = data;
       }
       setObjects(currentObjects => currentObjects.map(object => object.instanceId === current.instanceId ? replacement : object));
       setSelectedId(current.instanceId);
       setAlternativesId(null);
-      toast.success(current.specItemId && sharedProject ? `${product.product_name} swapped in — Specsheet and budget updated.` : `${product.product_name} swapped in at the same position.`);
+      const snapshot: SwapSnapshot = {
+        previous, replacementId: product.id, replacementKey, projectId: sharedProject,
+        specification, toastId: `visualiser-swap-${current.instanceId}-${replacementKey}`,
+      };
+      swapSnapshotRef.current = snapshot;
+      setSwapSnapshot(snapshot);
+      toast.custom(() => (
+        <div className="flex w-full items-center gap-4 rounded-md border border-border bg-background px-4 py-3 text-foreground shadow-lg">
+          <span className="min-w-0 flex-1 text-sm">Swapped to {product.product_name}</span>
+          <Button variant="outline" size="sm" className="shrink-0 cursor-pointer" onClick={() => void undoSwap(snapshot)}><RotateCcw className="mr-1 h-3.5 w-3.5" />Undo Swap</Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 cursor-pointer" aria-label="Dismiss swap notification" onClick={() => toast.dismiss(snapshot.toastId)}><X className="h-3.5 w-3.5" /></Button>
+        </div>
+      ), { id: snapshot.toastId, duration: SWAP_UNDO_DURATION_MS, position: "bottom-left" });
     } catch {
       toast.error("The alternative could not be applied. Your room and Specsheet are unchanged.");
     } finally {
+      swapBusy.current = false;
       setSwappingId(null);
     }
   };

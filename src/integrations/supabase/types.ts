@@ -14802,6 +14802,15 @@ export type Database = {
           variant_label: string
         }[]
       }
+      swap_visualiser_board_item_snapshot: {
+        Args: {
+          _finish_label?: string
+          _item_id: string
+          _product_id: string
+          _project_id: string
+        }
+        Returns: Json
+      }
       sync_approved_trade_directory: {
         Args: { p_account_id: string }
         Returns: undefined
@@ -14850,6 +14859,15 @@ export type Database = {
       trade_slack_days: {
         Args: { p_expected: string; p_required_by: string }
         Returns: number
+      }
+      undo_visualiser_board_item_swap: {
+        Args: {
+          _expected_product_id: string
+          _item_id: string
+          _project_id: string
+          _snapshot: Json
+        }
+        Returns: undefined
       }
       update_item_approval_by_token: {
         Args: { _approval_status: string; _item_id: string; _token: string }

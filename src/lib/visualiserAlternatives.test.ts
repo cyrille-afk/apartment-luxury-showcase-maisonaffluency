@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { compatibleProportions, curatedVisualiserAlternatives } from "./visualiserAlternatives";
-import { buildVisualiserSwap } from "./visualiserSwap";
+import { buildVisualiserSwap, snapshotVisualiserPiece, restoreVisualiserSwap, SWAP_UNDO_DURATION_MS } from "./visualiserSwap";
 import { createPlacedObject } from "./placedObjectFactory";
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
 
@@ -39,6 +39,28 @@ describe("curated visualiser alternatives", () => {
 });
 
 describe("in-place visualiser swap", () => {
+  it("offers Undo Swap for eight seconds", () => {
+    expect(SWAP_UNDO_DURATION_MS).toBe(8000);
+  });
+
+  it("restores the original product, exact floor pose, locked finishes and price without affecting other pieces", () => {
+    const original: PlacedObject = {
+      ...createPlacedObject(chair("original"), [1.25, 0, -2.5]),
+      rotation: [0, 1.75, 0], finishesLocked: true, finishes: ["Tobacco Oak", "Opera Calla"],
+      baseMaterial: { id: "tobacco-oak" } as PlacedObject["baseMaterial"],
+      retailEurCents: 237200, specItemId: "spec-7",
+    };
+    const snapshot = snapshotVisualiserPiece(original);
+    original.finishes?.push("later edit");
+    const alternative = buildVisualiserSwap(original, { ...chair("new"), retailEurCents: 479100 }, {}, 42);
+    const other = createPlacedObject(chair("other"), [-1, 0, 2]);
+    const restored = restoreVisualiserSwap([alternative, other], snapshot, 43);
+    expect(restored[0]).toMatchObject({ id: "original", position: [1.25, 0, -2.5], rotation: [0, 1.75, 0],
+      finishesLocked: true, finishes: ["Tobacco Oak", "Opera Calla"], baseMaterial: { id: "tobacco-oak" },
+      retailEurCents: 237200, specItemId: "spec-7", restoreKey: 43 });
+    expect(restored[1]).toBe(other);
+    expect(restored.reduce((total, piece) => total + (piece.retailEurCents ?? 0), 0)).toBe(237200);
+  });
   it("keeps the exact pose and specification identity while replacing old materials and live RRP", () => {
     const current: PlacedObject = {
       ...createPlacedObject(chair("old"), [1.25, 0, -2.5]),

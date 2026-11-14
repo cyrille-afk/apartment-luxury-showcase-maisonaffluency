@@ -2038,6 +2038,13 @@
       "when": 1794639058337,
       "tag": "0290_visualiser_alternative_specification_swap",
       "breakpoints": true
+    },
+    {
+      "idx": 291,
+      "version": "7",
+      "when": 1794640045948,
+      "tag": "0291_visualiser_swap_undo",
+      "breakpoints": true
     }
   ]
 }

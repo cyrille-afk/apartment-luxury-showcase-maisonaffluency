@@ -2,6 +2,19 @@ import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
 import type { studioAppearance } from "@/lib/studioFinishes";
 import { createPlacedObject, type PlaceableProduct } from "@/lib/placedObjectFactory";
 
+export const SWAP_UNDO_DURATION_MS = 8000;
+
+/** Detached snapshot: later material edits cannot mutate the saved original. */
+export function snapshotVisualiserPiece(piece: PlacedObject): PlacedObject {
+  return structuredClone(piece);
+}
+
+export function restoreVisualiserSwap(objects: PlacedObject[], snapshot: PlacedObject, restoreKey: number): PlacedObject[] {
+  return objects.map(object => object.instanceId === snapshot.instanceId
+    ? { ...snapshotVisualiserPiece(snapshot), restoreKey }
+    : object);
+}
+
 /** Preserve the exact composition pose and provenance, but never the old product's materials or import tilt. */
 export function buildVisualiserSwap(
   current: PlacedObject,
