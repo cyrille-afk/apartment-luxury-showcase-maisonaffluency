@@ -28,7 +28,7 @@ export type SharedRoomLayout = {
   wallFinish?: string | null;
   floorFinish?: string | null;
   items: SharedRoomItem[];
-  source: "visualiser" | "curated" | "mood-board";
+  source: "visualiser" | "curated" | "mood-board" | "project-studio";
   roomType?: "living" | "dining" | "bedroom" | "office";
   /** Mood Board total budget (EUR) carried into the Sandbox walkthrough breakdown. */
   budgetEur?: number | null;

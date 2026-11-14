@@ -2010,6 +2010,13 @@
       "when": 1794622012011,
       "tag": "0286_project_visualiser_layouts",
       "breakpoints": true
+    },
+    {
+      "idx": 287,
+      "version": "7",
+      "when": 1794635539169,
+      "tag": "0287_project_studio_finishes",
+      "breakpoints": true
     }
   ]
 }

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "@/lib/router-compat";
-import { ArrowLeft, FileDown, FileText, Sparkles } from "lucide-react";
+import { Link, useNavigate, useParams } from "@/lib/router-compat";
+import { ArrowLeft, FileDown, FileText, Sparkles, Box } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProject } from "@/hooks/useProjects";
 import { DotCircleLoader, PageLoader } from "@/components/ui/dot-circle-loader";
@@ -22,6 +22,12 @@ import { StudioSidePanel } from "@/components/trade/StudioSidePanel";
 import { StudioFocusOverlay } from "@/components/trade/StudioFocusOverlay";
 import { StudioPieceMovePicker } from "@/components/trade/StudioPieceMovePicker";
 import type { StudioFolderPlacement } from "@/lib/studioPairingFolders";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
+import { StudioFinishControls } from "@/components/trade/StudioFinishControls";
+import { resolveStudioSelection, studioAppearance, studioFinishPrice, studioSelectedFinishes, type StudioFinishProduct, type StudioFinishSelection, type StudioFinish } from "@/lib/studioFinishes";
+import { moodBoardHandoff } from "@/lib/moodBoardHandoff";
+import { readSharedRoomLayout, writeSharedRoomLayout } from "@/lib/sharedRoomLayout";
 
 type StudioItem = {
   id: string;
@@ -42,6 +48,11 @@ type StudioItem = {
   quantity: number;
   selected_finish: string | null;
   placements: StudioFolderPlacement[];
+  catalog: StudioFinishProduct;
+  selection: StudioFinishSelection;
+  original_finish: string | null;
+  catalogue_rrp: number | null;
+  glb_url: string | null;
 };
 
 function leadLabel(item: StudioItem) {
@@ -55,6 +66,10 @@ function dimsLabel(item: StudioItem) {
 
 export default function TradeProjectStudio() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [canEdit, setCanEdit] = useState(false);
+  const [savingFinishes, setSavingFinishes] = useState(false);
   const { project, loading } = useProject(id);
   const [items, setItems] = useState<StudioItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(true);
@@ -71,12 +86,13 @@ export default function TradeProjectStudio() {
   const fxRates = useFxRates();
 
   const [curatorialItemId, setCuratorialItemId] = useState<string | null>(null);
+  const [curatorialInstanceId, setCuratorialInstanceId] = useState<string | null>(null);
   const [isRecommendationHovered, setIsRecommendationHovered] = useState(false);
   const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
   const [isSpecPanelOpen, setIsSpecPanelOpen] = useState(false);
   const [isProposalPreviewOpen, setIsProposalPreviewOpen] = useState(false);
   const specItem = items.find((i) => i.product_id === specItemId) || null;
-  const curatorialItem = items.find((i) => i.product_id === curatorialItemId) || items[0] || null;
+  const curatorialItem = items.find(i => i.id === curatorialInstanceId && i.product_id === curatorialItemId) || items.find((i) => i.product_id === curatorialItemId) || items[0] || null;
   const openVisualStudio = () => {
     if (!curatorialItem) return;
     setIsSpecPanelOpen(false);
@@ -95,7 +111,7 @@ export default function TradeProjectStudio() {
       setLoadingItems(true);
       const sb = supabase as any;
       const productFields =
-        "id, product_name, brand_name, image_url, sku, lead_time, dimensions, width_mm, depth_mm, height_mm, size_variants, trade_price_cents, rrp_price_cents, currency, source_pick_id";
+        "id, product_name, brand_name, image_url, sku, lead_time, dimensions, width_mm, depth_mm, height_mm, size_variants, trade_price_cents, rrp_price_cents, currency, source_pick_id, glb_url, materials, base_axis_label, top_axis_label";
 
       const [q, b] = await Promise.all([
         sb.from("trade_quotes").select("id").eq("project_id", id),
@@ -124,8 +140,8 @@ export default function TradeProjectStudio() {
       const push = (row: any, quantity: number) => {
         const p = row.trade_products;
         if (!p) return;
-        const key = p.id || row.product_id;
         const selectedFinish = [row.variant_label, row.wood_label, row.fabric_label].filter(Boolean).join(" / ") || null;
+        const key = JSON.stringify([p.id || row.product_id, selectedFinish]);
         const placement: StudioFolderPlacement | null = row.board_id ? { itemId: row.id, folderId: row.board_id, folderTitle: folderTitles.get(row.board_id) || "Project sub-folder", finish: selectedFinish, locked: Boolean(row.procurement_quote_id || row.source_quote_item_id) } : null;
         const existing = map.get(key);
         if (existing) {
@@ -137,7 +153,7 @@ export default function TradeProjectStudio() {
         }
         map.set(key, {
           id: row.id,
-          product_id: key,
+          product_id: p.id || row.product_id,
           name: p.product_name || "Untitled piece",
           designer: p.brand_name || "—",
           image_url: p.image_url,
@@ -154,6 +170,9 @@ export default function TradeProjectStudio() {
           quantity,
           selected_finish: selectedFinish,
           placements: placement ? [placement] : [],
+          original_finish: selectedFinish, catalogue_rrp: p.trade_price_cents ?? p.rrp_price_cents ?? null,
+          catalog: { name: p.product_name, variants: p.size_variants ?? [], finishes: [], materials: p.materials, baseLabel: p.base_axis_label, topLabel: p.top_axis_label },
+          selection: { ids: {}, locked: false }, glb_url: p.glb_url,
         });
       };
 
@@ -183,10 +202,57 @@ export default function TradeProjectStudio() {
         }
       }
 
+      const pickIds = [...new Set(list.map(item => item.source_pick_id || item.product_id))];
+      const [{ data: links, error: finishError }, { data: picks }, { data: saved, error: savedError }, { data: editable }] = await Promise.all([
+        pickIds.length ? sb.from("product_fabrics").select("pick_id,sort_order,price_tier_label,image_indices,price_cents_a,fabrics(id,name,supplier,category,image_url,is_active,price_per_lm_cents,currency)").in("pick_id", pickIds).order("sort_order") : Promise.resolve({ data: [] }),
+        pickIds.length ? sb.from("designer_curator_picks").select("id,base_axis_label,top_axis_label,size_variants,materials,com_meters").in("id", pickIds) : Promise.resolve({ data: [] }),
+        supabase.from("project_studio_finishes").select("item_key,selection").eq("project_id", id),
+        user ? supabase.rpc("can_edit_project", { _project_id: id, _user_id: user.id }) : Promise.resolve({ data: false }),
+      ]);
+      if (finishError || savedError) toast.error("Studio finishes couldn't load. Please reopen the project to try again.");
+      setCanEdit(editable === true && !finishError && !savedError);
+      for (const item of list) {
+        const pickId = item.source_pick_id || item.product_id;
+        const pick = picks?.find((p: any) => p.id === pickId);
+        const finishes: StudioFinish[] = (links ?? []).filter((link: any) => link.pick_id === pickId && link.fabrics?.is_active).map((link: any) => ({
+          id: link.fabrics.id, name: link.fabrics.name, brand_name: link.fabrics.supplier || item.designer,
+          category: link.fabrics.category || "Fabric", material_type: link.fabrics.category, color_family: null,
+          image_url: link.fabrics.image_url, tier: link.price_tier_label, framePrice: link.price_cents_a,
+          perMetre: link.fabrics.price_per_lm_cents, currency: link.fabrics.currency || item.currency, pictured: link.image_indices?.includes(1),
+        }));
+        item.catalog = { ...item.catalog, variants: pick?.size_variants ?? item.catalog.variants, baseLabel: pick?.base_axis_label ?? item.catalog.baseLabel, topLabel: pick?.top_axis_label ?? item.catalog.topLabel, materials: pick?.materials ?? item.catalog.materials, comMetres: pick?.com_meters, finishes };
+        item.catalogue_rrp = item.rrp_cents;
+        item.selection = resolveStudioSelection(item.catalog, item.original_finish, saved?.find(row => row.item_key === item.id)?.selection as StudioFinishSelection | undefined);
+        item.rrp_cents = studioFinishPrice(item.catalog, item.selection, item.catalogue_rrp, item.original_finish, (cents, currency) => convertCents(cents, currency || item.currency, item.currency as DisplayCurrency, fxRates));
+        item.selected_finish = studioSelectedFinishes(item.catalog, item.selection).map(s => s.finish.name).join(" / ") || item.catalog.materials || "Original catalogue materials";
+      }
       setItems(list);
       setLoadingItems(false);
     })();
-  }, [id, itemsVersion]);
+  }, [id, itemsVersion, user?.id]);
+
+  const changeFinish = async (item: StudioItem, selection: StudioFinishSelection) => {
+    if (!id || !user || !canEdit || savingFinishes) return;
+    setSavingFinishes(true);
+    const previous = item;
+    const changed = { ...item, selection, selected_finish: studioSelectedFinishes(item.catalog, selection).map(s => s.finish.name).join(" / ") || item.selected_finish,
+      rrp_cents: studioFinishPrice(item.catalog, selection, item.catalogue_rrp, item.original_finish, (cents, currency) => convertCents(cents, currency || item.currency, item.currency as DisplayCurrency, fxRates)) };
+    setItems(current => current.map(row => row.id === item.id ? changed : row));
+    const { error } = await supabase.from("project_studio_finishes").upsert({ project_id: id, item_key: item.id, selection: JSON.parse(JSON.stringify(selection)), updated_by: user.id, updated_at: new Date().toISOString() });
+    if (error) { setItems(current => current.map(row => row.id === item.id ? previous : row)); toast.error("Finish couldn't save. Your previous selection is unchanged."); }
+    setSavingFinishes(false);
+  };
+  const finishControls = (item: StudioItem) => <StudioFinishControls product={item.catalog} selection={item.selection} disabled={!canEdit || savingFinishes || isClientMode} onChange={selection => void changeFinish(item, selection)} />;
+  const openInVisualiser = () => {
+    if (!id || !items.length || savingFinishes) return;
+    const stamp = Date.now();
+    const pieces = items.flatMap(item => Array.from({ length: item.quantity }, () => ({ id: item.product_id, product_name: item.name, brand_name: item.designer, image_url: item.image_url, dimensions: item.dimensions, width_mm: item.width_mm, depth_mm: item.depth_mm, glb_url: item.glb_url, retailCents: item.rrp_cents == null ? null : convertCents(item.rrp_cents, item.currency, "EUR", fxRates), appearance: studioAppearance(item.catalog, item.selection) })));
+    const previous = readSharedRoomLayout(id);
+    const layout = moodBoardHandoff(pieces, id, previous?.roomType ?? "living", previous, stamp);
+    layout.source = "project-studio";
+    writeSharedRoomLayout(layout);
+    navigate(`/trade/visualiser?project=${encodeURIComponent(id)}&handoff=curated&stamp=${stamp}`);
+  };
 
   // Every ledger figure is expressed in the member's declared base currency.
   const baseCurrency = useMemo<string>(
@@ -254,6 +320,7 @@ export default function TradeProjectStudio() {
       <div className="flex shrink-0 flex-wrap justify-start gap-2 border-b border-border px-4 py-3 md:px-6">
         <Button variant="studio-primary" aria-haspopup="dialog" disabled={!items.length} onClick={openVisualStudio} className="h-10 cursor-pointer rounded-none px-4 py-2 font-body text-[10px] uppercase tracking-[0.15em] transition-colors duration-200 motion-reduce:transition-none [&_svg]:size-3.5"><Sparkles aria-hidden="true" strokeWidth={1.5} />AI Co-Designer</Button>
         <Button variant="studio-utility" aria-controls="studio-spec-panel" aria-expanded={isSpecPanelOpen} onClick={() => setIsSpecPanelOpen(!isSpecPanelOpen)} className="h-10 cursor-pointer rounded-none px-4 py-2 font-body text-[10px] uppercase tracking-[0.15em] transition-colors duration-200 motion-reduce:transition-none">Specsheet ({items.length})</Button>
+        {!isClientMode && <Button variant="studio-primary" disabled={loadingItems || !items.length || savingFinishes || !canEdit} onClick={openInVisualiser} className="h-10 cursor-pointer rounded-none px-4 font-body text-[10px] uppercase"><Box className="size-3.5" />Open in Visualiser Sandbox</Button>}
       </div>
       <div className="relative min-h-[70dvh] overflow-hidden lg:min-h-0 lg:flex-1">
         {/* Canvas expands into the space released by either independent drawer. */}
@@ -273,17 +340,18 @@ export default function TradeProjectStudio() {
               </p>
             </div>
           ) : (
-            <div className={`grid items-start pb-10 transition-all duration-300 ease-in-out motion-reduce:transition-none ${isSpecPanelOpen ? "grid-cols-3 gap-6 px-4 md:px-8 lg:px-12" : "grid-cols-4 gap-4 px-4"}`}>
+            <div className={`grid grid-cols-2 items-start pb-10 transition-all duration-300 ease-in-out motion-reduce:transition-none ${isSpecPanelOpen ? "lg:grid-cols-3 gap-6 px-4 md:px-8 lg:px-12" : "lg:grid-cols-4 gap-4 px-4"}`}>
               {items.map((item, idx) => {
                 const dims = dimsLabel(item);
                 const isCuratorialActive = curatorialItemId === item.product_id;
                 const activate = () => {
+                  setCuratorialInstanceId(item.id);
                   setCuratorialItemId(item.product_id);
                   setIsAiPanelOpen(true);
                   setIsSpecPanelOpen(false);
                 };
                 return (
-                  <div key={item.product_id} className="min-w-0">
+                  <div key={item.id} className="min-w-0">
                   <figure
                     key={item.product_id}
                     data-curatorial-source={item.product_id}
@@ -332,6 +400,7 @@ export default function TradeProjectStudio() {
                     {item.placements.length > 0 && <p className="font-body text-[9px] leading-relaxed text-muted-foreground">{[...new Set(item.placements.map(placement => placement.folderTitle))].join(" · ")}</p>}
                     {!isClientMode && <StudioPieceMovePicker projectId={project.id} productId={item.product_id} productName={item.name} placements={item.placements} onMoved={() => setItemsVersion(version => version + 1)} />}
                   </div>
+                  {finishControls(item)}
                   </div>
                 );
               })}
@@ -341,12 +410,12 @@ export default function TradeProjectStudio() {
 
         </section>
 
-        <StudioFocusOverlay open={isAiPanelOpen} onOpenChange={setIsAiPanelOpen} item={curatorialItem} dimensions={curatorialItem ? dimsLabel(curatorialItem) : ""}>
+        <StudioFocusOverlay open={isAiPanelOpen} onOpenChange={setIsAiPanelOpen} item={curatorialItem} dimensions={curatorialItem ? dimsLabel(curatorialItem) : ""} finishControls={curatorialItem ? finishControls(curatorialItem) : null}>
           <ProjectCuratorialGuide
             docked focused open={isAiPanelOpen} onOpenChange={setIsAiPanelOpen}
             projectId={project.id} projectName={project.name} items={items}
             activeItemId={curatorialItemId} isClientMode={isClientMode}
-            onActiveItemChange={setCuratorialItemId}
+            onActiveItemChange={productId => { setCuratorialItemId(productId); setCuratorialInstanceId(null); }}
             onCompositionChanged={() => setItemsVersion((version) => version + 1)}
             onRecommendationHover={setIsRecommendationHovered}
           />
@@ -444,7 +513,7 @@ export default function TradeProjectStudio() {
                    const client = (clientUnitCents(toBase(item.rrp_cents, item.currency), discountPct, multiplier) || 0) * item.quantity;
                   const expanded = expandedId === item.product_id;
                   return (
-                    <div key={item.product_id} className="border-b border-border">
+                    <div key={item.id} className="border-b border-border">
                       <div
                         className="grid cursor-pointer grid-cols-[44px_minmax(0,1fr)_auto] items-start gap-3 py-9"
                         onClick={() => setExpandedId(expanded ? null : item.product_id)}
@@ -493,6 +562,7 @@ export default function TradeProjectStudio() {
                       </div>
 
                       {item.placements.length > 0 && <div className="flex flex-wrap items-center justify-between gap-2 pb-3"><p className="min-w-0 flex-1 font-body text-[9px] leading-relaxed text-muted-foreground">{[...new Set(item.placements.map(placement => placement.folderTitle))].join(" · ")}</p>{!isClientMode && <StudioPieceMovePicker projectId={project.id} productId={item.product_id} productName={item.name} placements={item.placements} onMoved={() => setItemsVersion(version => version + 1)} />}</div>}
+                      <div className="pb-4">{finishControls(item)}</div>
                       {expanded && (
                         <div className="pb-9">
                           <dl className="space-y-3">

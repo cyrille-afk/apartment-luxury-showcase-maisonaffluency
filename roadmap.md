@@ -1,5 +1,10 @@
 # Roadmap
 
+## Project Studio finishes and Sandbox handoff
+- [x] Share catalogue finish selection, tier pricing and project-saved finish locks across canvas, Specsheet and Visual Studio without editing procurement records.
+- [x] Preserve configured instances/quantities and send every Studio piece with selected/default finishes into the Sandbox; actual linked samples override materials, missing supplier samples retain authored materials and are labelled unconfirmed.
+- [x] Fifteen regressions pass; signed-in change/price update/lock/reload/lightbox and 23-piece Sandbox handoff verified, including project-saved Nude Oak/Safire textures and lock. Desktop circular samples and phone two-column layout inspected without page errors. Full rendered-room appearance remains unverified: software graphics stalls on the 23-piece room. Test Studio finish restored; build OK.
+
 ## Tools cursor and navigation
 - [x] Give Tools links and available controls a hand cursor.
 - [x] Stop scrolling the outgoing Tools page; signed-in Currency Converter and CPD openings verified at 1954×1184 with pointer cursor, instant destination-only reset and no browser errors. All 42 navigation regressions pass; preview build OK.

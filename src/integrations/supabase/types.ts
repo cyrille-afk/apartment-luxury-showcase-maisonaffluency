@@ -7571,6 +7571,38 @@ export type Database = {
           },
         ]
       }
+      project_studio_finishes: {
+        Row: {
+          item_key: string
+          project_id: string
+          selection: Json
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          item_key: string
+          project_id: string
+          selection?: Json
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          item_key?: string
+          project_id?: string
+          selection?: Json
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_studio_finishes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_visualiser_layouts: {
         Row: {
           layout: Json

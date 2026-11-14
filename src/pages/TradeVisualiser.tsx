@@ -983,6 +983,7 @@ const TradeVisualiser = () => {
     material: o.material, topMaterial: o.topMaterial, baseMaterial: o.baseMaterial, upholsteryMaterial: o.upholsteryMaterial,
     partMaterials: o.partMaterials, marbleSurface: o.marbleSurface, modelOrientation: o.modelOrientation, scale: o.scale,
     selectedUpholstery: o.selectedUpholstery, selectedFrameFinish: o.selectedFrameFinish, variantLabel: o.variantLabel,
+    finishesLocked: o.finishesLocked, finishes: o.finishes,
   });
   useEffect(() => {
     if (!activeProject) return;
@@ -1017,14 +1018,14 @@ const TradeVisualiser = () => {
       const placed = shared.items.map((item) => {
         const row = rows.get(item.productId);
         const next = createPlacedObject({ id: item.productId, product_name: row?.product_name ?? item.name, brand_name: row?.brand_name ?? item.brandName ?? "", image_url: row?.image_url ?? item.imageUrl ?? null, dimensions: row?.dimensions ?? item.dimensions ?? null, glb_url: row?.glb_url ?? item.glbUrl }, [item.x, 0, item.z]);
-        return { ...next, rotation: [0, item.rotationY, 0] as [number, number, number] };
+        return { ...next, ...(item.appearance ?? {}), instanceId: `${next.instanceId}-${shared.items.indexOf(item)}`, rotation: [0, item.rotationY, 0] as [number, number, number] };
       });
       setObjects(placed);
-      if (shared.source === "mood-board") activeProject?.setBounds({ width: shared.room.width, depth: shared.room.length, height: shared.room.height });
+      if (shared.source === "mood-board" || shared.source === "project-studio") activeProject?.setBounds({ width: shared.room.width, depth: shared.room.length, height: shared.room.height });
       setSelectedId(null);
       if (shared.wallFinish) setWallFinish(roomWallFinish(shared.wallFinish));
       if (shared.floorFinish) setFloorFinish(roomFloorFinish(shared.floorFinish));
-      toast.success(`${shared.source === "mood-board" ? "Mood board" : "Curated layout"} loaded — ${placed.length} piece${placed.length === 1 ? "" : "s"}${shared.roomType ? ` · ${shared.roomType}` : ""}.`);
+      toast.success(`${shared.source === "project-studio" ? "Project Studio" : shared.source === "mood-board" ? "Mood board" : "Curated layout"} loaded — ${placed.length} piece${placed.length === 1 ? "" : "s"}${shared.roomType ? ` · ${shared.roomType}` : ""}.`);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);

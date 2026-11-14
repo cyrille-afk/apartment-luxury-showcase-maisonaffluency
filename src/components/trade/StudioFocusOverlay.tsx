@@ -8,10 +8,11 @@ type Props = {
   onOpenChange: (open: boolean) => void;
   item: { name: string; image_url: string | null } | null;
   dimensions: string;
+  finishControls?: ReactNode;
   children: ReactNode;
 };
 
-export function StudioFocusOverlay({ open, onOpenChange, item, dimensions, children }: Props) {
+export function StudioFocusOverlay({ open, onOpenChange, item, dimensions, children, finishControls }: Props) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent hideClose aria-describedby={undefined}
@@ -25,11 +26,12 @@ export function StudioFocusOverlay({ open, onOpenChange, item, dimensions, child
           </Button>
         </div>
         <div className="grid min-h-0 flex-1 overflow-y-auto lg:grid-cols-2 lg:overflow-hidden">
-          <figure className="flex min-w-0 flex-col items-center justify-center border-b border-border p-6 md:p-10 lg:border-b-0">
-            {item?.image_url ? <img src={item.image_url} alt={item.name} className="h-[32dvh] w-full object-contain lg:h-[58dvh]" /> : <div className="h-[32dvh]" />}
-            <figcaption className="mt-6 space-y-3 text-center">
+          <figure className="flex min-w-0 flex-col items-center border-b border-border p-6 md:p-10 lg:overflow-y-auto lg:border-b-0">
+            {item?.image_url ? <img src={item.image_url} alt={item.name} className="h-[28dvh] w-full shrink-0 object-contain lg:h-[42dvh]" /> : <div className="h-[28dvh] shrink-0" />}
+            <figcaption className="mt-6 w-full min-w-0 space-y-3 text-center">
               <p className="font-display text-2xl text-foreground md:text-3xl">{item?.name}</p>
               <p className="font-body text-[10px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground">{dimensions}</p>
+              {finishControls}
             </figcaption>
           </figure>
           <div className="flex min-h-0 min-w-0 flex-col lg:overflow-hidden">{children}</div>

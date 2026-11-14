@@ -8,3 +8,7 @@ it("hands off every selected piece including unpriced and model-less pieces with
   expect(layout).toMatchObject({ projectId: "project", roomType: "bedroom", updatedAt: 123 });
   expect(new Set(layout.items.map(i => `${i.x},${i.z}`)).size).toBe(17);
 });
+it("retains each configured copy's locked finishes in the Sandbox handoff", () => {
+  const layout = moodBoardHandoff([{ id: "chair", product_name: "Chair", glb_url: null, retailCents: 100, appearance: { finishesLocked: true, upholsteryMaterial: { id: "fabric-blue" } } }, { id: "chair", product_name: "Chair", glb_url: null, retailCents: 200, appearance: { finishesLocked: false, upholsteryMaterial: { id: "fabric-red" } } }], "project", "living", null, 456);
+  expect(layout.items.map(item => item.appearance)).toEqual([{ finishesLocked: true, upholsteryMaterial: { id: "fabric-blue" } }, { finishesLocked: false, upholsteryMaterial: { id: "fabric-red" } }]);
+});
