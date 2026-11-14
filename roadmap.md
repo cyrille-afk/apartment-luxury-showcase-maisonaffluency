@@ -1,5 +1,9 @@
 # Roadmap
 
+## Branded Mood Board PDF
+- [x] Include current studio logo, room type and live retail allocated/target budget in the board currency; clearly flag incomplete pricing.
+- [x] Twelve regressions pass; signed-in chair export reads €4,791 allocated / €20,000 target, and eight-piece two-page export repeats authentic studio logo, Living room and exact retail totals. Both pages visually inspected: no clipping/overlap; preview build OK. Verification used isolated browser drafts, no saved projects changed.
+
 ## Clear clickable Visualiser hotspots
 - [x] Keep projected furniture pins inside the usable canvas, clear of open panels and one another, with 40px hit targets and edge-aware labels; furniture transforms remain untouched.
 - [x] Five placement regressions plus alternatives/source-label checks pass; signed-in real-console pins open alternatives before/after orbit, open panels have no pin collisions, hover labels render and the canvas stays mounted without page errors. Temporary piece removed. A second forced-drag software-graphics check stalled; panel avoidance and coincident-pin separation are covered by unit regressions.

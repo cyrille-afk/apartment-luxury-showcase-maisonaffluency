@@ -455,7 +455,7 @@ export default function TradeMoodBoards() {
               Curate product imagery into collages for early-stage concept pitches.
             </p>
           </div>
-          <MoodBoardActions items={board} defaultProjectId={projectId} />
+          <MoodBoardActions items={board} defaultProjectId={projectId} pdfContext={{ roomType: budgetSettings.roomType, currency: boardCurrency, allocated: ledger.allocated, target: ledger.total, unpriced: ledger.unpriced, pending: pricingPending || pricingFailed || ratePending }} />
         </div>
 
         {!clientSafe && <MoodBoardBudgetControls settings={budgetSettings} onChange={setBudgetSettings} onCurrencyChange={c => void changeBoardCurrency(c)} />}

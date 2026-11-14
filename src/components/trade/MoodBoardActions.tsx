@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useStudio } from "@/hooks/useStudio";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import ClientViewToggle from "@/components/trade/ClientViewToggle";
-import { buildMoodBoardPdf, moodBoardFileName } from "@/lib/moodBoardExport";
+import { buildMoodBoardPdf, moodBoardFileName, type MoodBoardPdfContext } from "@/lib/moodBoardExport";
 import { moodBoardStudioItems } from "@/lib/moodBoardStudioTransfer";
 import { useNavigate } from "@/lib/router-compat";
 import { getActiveProjectId } from "@/lib/activeProjectId";
@@ -18,10 +18,11 @@ export const MOOD_BOARD_MAX_SAVE = 15;
 interface Props {
   items: { id: string; product_name?: string; brand_name?: string; image_url?: string }[];
   defaultProjectId: string | null;
+  pdfContext: MoodBoardPdfContext;
 }
 
 /** Next steps once pieces are chosen: save to a project, export, and present. */
-export function MoodBoardActions({ items, defaultProjectId }: Props) {
+export function MoodBoardActions({ items, defaultProjectId, pdfContext }: Props) {
   const { currentStudio } = useStudio();
   const navigate = useNavigate();
   const workspace = useProjectWorkspace();
@@ -89,7 +90,9 @@ export function MoodBoardActions({ items, defaultProjectId }: Props) {
     setExporting(true);
     setMessage(null);
     try {
-      const blob = await buildMoodBoardPdf(title.trim() || "Mood board", items, currentStudio?.name);
+      const blob = await buildMoodBoardPdf(title.trim() || "Mood board", items, currentStudio?.display_name || currentStudio?.name, {
+        ...pdfContext, logoUrl: currentStudio?.logo_url, locale: currentStudio?.pdf_locale,
+      });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
