@@ -3,7 +3,7 @@ import { findQuoteFinishSwatch, type QuoteFinishVariant } from "./quoteFinishSwa
 import { configuredProductPrice } from "./configuredProductPrice";
 
 export type StudioFinish = VisualiserMaterial & { tier?: string | null; framePrice?: number | null; perMetre?: number | null; currency?: string; pictured?: boolean };
-export type StudioFinishSelection = { ids: Record<string, string>; locked: boolean };
+export type StudioFinishSelection = { ids: Record<string, string>; locked: boolean; excluded?: boolean };
 export type StudioFinishProduct = { name: string; variants: QuoteFinishVariant[]; finishes: StudioFinish[]; baseLabel?: string | null; topLabel?: string | null; materials?: string | null; comMetres?: number | null };
 export type StudioFinishGroup = { key: string; label: string; options: StudioFinish[] };
 const fold = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -45,7 +45,12 @@ export function resolveStudioSelection(product: StudioFinishProduct, savedLabel:
     const selected = previous ?? named ?? tier ?? group.options.find(f => f.pictured) ?? group.options[0];
     if (selected) ids[group.key] = selected.id;
   }
-  return { ids, locked: saved?.locked === true };
+  return { ids, locked: saved?.locked === true, ...(saved?.excluded === true ? { excluded: true } : {}) };
+}
+
+/** Studio-only removals never delete the source board or issued quote. */
+export function studioVisibleItems<T extends { selection: StudioFinishSelection }>(items: T[]): T[] {
+  return items.filter(item => item.selection.excluded !== true);
 }
 
 export function studioSelectedFinishes(product: StudioFinishProduct, selection: StudioFinishSelection) {

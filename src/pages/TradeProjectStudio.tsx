@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "@/lib/router-compat";
-import { ArrowLeft, FileDown, FileText, Sparkles, Box } from "lucide-react";
+import { ArrowLeft, FileDown, FileText, Sparkles, Box, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProject } from "@/hooks/useProjects";
 import { DotCircleLoader, PageLoader } from "@/components/ui/dot-circle-loader";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel } from "@/components/ui/alert-dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { ProjectSpecDrawer } from "@/components/trade/ProjectSpecDrawer";
 import { ProjectCuratorialGuide } from "@/components/trade/ProjectCuratorialGuide";
@@ -25,7 +27,7 @@ import type { StudioFolderPlacement } from "@/lib/studioPairingFolders";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { StudioFinishControls } from "@/components/trade/StudioFinishControls";
-import { resolveStudioSelection, studioAppearance, studioFinishPrice, studioSelectedFinishes, type StudioFinishProduct, type StudioFinishSelection, type StudioFinish } from "@/lib/studioFinishes";
+import { resolveStudioSelection, studioAppearance, studioFinishPrice, studioSelectedFinishes, studioVisibleItems, type StudioFinishProduct, type StudioFinishSelection, type StudioFinish } from "@/lib/studioFinishes";
 import { moodBoardHandoff } from "@/lib/moodBoardHandoff";
 import { readSharedRoomLayout, writeSharedRoomLayout } from "@/lib/sharedRoomLayout";
 
@@ -72,6 +74,9 @@ export default function TradeProjectStudio() {
   const { user } = useAuth();
   const [canEdit, setCanEdit] = useState(false);
   const [savingFinishes, setSavingFinishes] = useState(false);
+  const [removeItem, setRemoveItem] = useState<StudioItem | null>(null);
+  const [removingItem, setRemovingItem] = useState(false);
+  const [removalError, setRemovalError] = useState<string | null>(null);
   const { project, loading } = useProject(id);
   const [items, setItems] = useState<StudioItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(true);
@@ -230,13 +235,13 @@ export default function TradeProjectStudio() {
         item.rrp_cents = studioFinishPrice(item.catalog, item.selection, item.catalogue_rrp, item.original_finish, (cents, currency) => convertCents(cents, currency || item.currency, item.currency as DisplayCurrency, fxRates));
         item.selected_finish = studioSelectedFinishes(item.catalog, item.selection).map(s => s.finish.name).join(" / ") || item.catalog.materials || "Original catalogue materials";
       }
-      setItems(list);
+      setItems(studioVisibleItems(list));
       setLoadingItems(false);
     })();
   }, [id, itemsVersion, user?.id]);
 
   const changeFinish = async (item: StudioItem, selection: StudioFinishSelection) => {
-    if (!id || !user || !canEdit || savingFinishes) return;
+    if (!id || !user || !canEdit || savingFinishes || removingItem) return;
     setSavingFinishes(true);
     const previous = item;
     const changed = { ...item, selection, selected_finish: studioSelectedFinishes(item.catalog, selection).map(s => s.finish.name).join(" / ") || item.selected_finish,
@@ -246,9 +251,32 @@ export default function TradeProjectStudio() {
     if (error) { setItems(current => current.map(row => row.id === item.id ? previous : row)); toast.error("Finish couldn't save. Your previous selection is unchanged."); }
     setSavingFinishes(false);
   };
-  const finishControls = (item: StudioItem, compact = false) => <StudioFinishControls product={item.catalog} selection={item.selection} compact={compact} disabled={!canEdit || savingFinishes || isClientMode} onChange={selection => void changeFinish(item, selection)} />;
+  const confirmRemoval = async () => {
+    if (!id || !user || !canEdit || !removeItem || removingItem || savingFinishes || isClientMode) return;
+    const item = removeItem;
+    setRemovingItem(true);
+    setRemovalError(null);
+    try {
+      const { error } = await supabase.from("project_studio_finishes").upsert({ project_id: id, item_key: item.id, selection: JSON.parse(JSON.stringify({ ...item.selection, excluded: true })), updated_by: user.id, updated_at: new Date().toISOString() }).select("item_key").single();
+      if (error) throw error;
+      setItems(current => current.filter(row => row.id !== item.id));
+      if (curatorialInstanceId === item.id || curatorialItem?.id === item.id) {
+        setCuratorialInstanceId(null);
+        setCuratorialItemId(null);
+        setIsAiPanelOpen(false);
+      }
+      if (specItemId === item.product_id) setSpecItemId(null);
+      setRemoveItem(null);
+      toast.success(`${item.name} removed from Project Studio.`);
+    } catch {
+      setRemovalError("This piece couldn't be removed. Please try again.");
+    } finally {
+      setRemovingItem(false);
+    }
+  };
+  const finishControls = (item: StudioItem, compact = false) => <StudioFinishControls product={item.catalog} selection={item.selection} compact={compact} disabled={!canEdit || savingFinishes || removingItem || isClientMode} onChange={selection => void changeFinish(item, selection)} />;
   const openInVisualiser = () => {
-    if (!id || !items.length || savingFinishes) return;
+    if (!id || !items.length || savingFinishes || removingItem) return;
     const stamp = Date.now();
     const pieces = items.flatMap(item => Array.from({ length: item.quantity }, (_, index) => {
       const placement = item.placements[index];
@@ -366,7 +394,15 @@ export default function TradeProjectStudio() {
                   setIsSpecPanelOpen(false);
                 };
                 return (
-                  <div key={item.id} className="min-w-0">
+                  <div key={item.id} className="relative min-w-0">
+                  {!isClientMode && canEdit && <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button type="button" variant="outline" size="icon" aria-label={`Remove ${item.name} from Visual Canvas`} disabled={savingFinishes || removingItem} className="absolute right-1 top-1 z-10 size-8 cursor-pointer bg-background text-muted-foreground hover:text-destructive" onClick={() => { setRemovalError(null); setRemoveItem(item); }}>
+                        <Trash2 className="size-3.5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Remove from Project Studio</TooltipContent>
+                  </Tooltip>}
                   <figure
                     key={item.product_id}
                     data-curatorial-source={item.product_id}
@@ -425,6 +461,19 @@ export default function TradeProjectStudio() {
 
         </section>
 
+        <AlertDialog open={removeItem !== null} onOpenChange={open => { if (!open && !removingItem) setRemoveItem(null); }}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Remove {removeItem?.name}?</AlertDialogTitle>
+              <AlertDialogDescription>This removes the piece from Project Studio, its Specsheet and future Sandbox exports. Your source boards, quotes and orders stay unchanged.</AlertDialogDescription>
+            </AlertDialogHeader>
+            {removalError && <p role="alert" className="text-sm text-destructive">{removalError}</p>}
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={removingItem}>Cancel</AlertDialogCancel>
+              <Button variant="destructive" disabled={removingItem || savingFinishes} onClick={() => void confirmRemoval()}>{removingItem ? "Removing…" : "Remove piece"}</Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         <StudioFocusOverlay open={isAiPanelOpen} onOpenChange={setIsAiPanelOpen} item={curatorialItem} dimensions={curatorialItem ? dimsLabel(curatorialItem) : ""} finishControls={curatorialItem ? finishControls(curatorialItem) : null}>
           <ProjectCuratorialGuide
             docked focused open={isAiPanelOpen} onOpenChange={setIsAiPanelOpen}
