@@ -815,8 +815,15 @@ const TradeAILayoutStudio = ({ embedded = false }: { embedded?: boolean } = {}) 
     const t = setInterval(tick, 5000); void tick();
     return () => { stop = true; clearInterval(t); };
   }, [videoJob?.id, videoJob?.url, videoJob?.failure]);
+  // Look of the room at the last render, so a changed fabric/finish offers a fresh video.
+  const lookKey = `ma-walkthrough-rendered-look-v1:${sharedProjectId ?? "standalone"}`;
+  const lookSig = scene ? JSON.stringify(scene.curatedAssets.map((a) => [a.componentId, a.appearance ?? null])) : "";
+  const [renderedLook, setRenderedLook] = useState<string | null>(null);
+  useEffect(() => { try { setRenderedLook(localStorage.getItem(lookKey)); } catch { /* storage unavailable */ } }, [lookKey]);
+  const looksChanged = !!scene && renderedLook != null && renderedLook !== lookSig;
   const runVideo = async () => {
     if (!scene || !cinematic) return;
+    const renderingLook = lookSig;
     setUnlockOpen(false);
     setExporting(true);
     try {
@@ -827,6 +834,7 @@ const TradeAILayoutStudio = ({ embedded = false }: { embedded?: boolean } = {}) 
       if (data?.mock) toast.success(`Render queued (test service, job ${data.response?.job_id ?? ""})${data.charged ? " — 1 credit used" : ""}`);
       const jid = data?.response?.job_id as string | undefined;
       if (jid) setVideoJob({ id: jid, token: data?.poll_token, state: data?.mock ? "test" : "queued" });
+      if (jid) { setRenderedLook(renderingLook); try { localStorage.setItem(lookKey, renderingLook); } catch { /* storage unavailable */ } }
       if (!data?.mock) toast.success(`Render started${data?.response?.job_id ? ` (job ${data.response.job_id})` : ""}${data?.charged ? " — 1 credit used" : ""}`);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Render request failed");
@@ -1095,6 +1103,12 @@ const TradeAILayoutStudio = ({ embedded = false }: { embedded?: boolean } = {}) 
               {videoStatus?.unlimited && <span className="ml-2 border border-border px-1.5 py-0.5 text-[9px] uppercase tracking-[0.14em]">Cinematic HD Render</span>}
               {videoStatus && !videoStatus.unlimited && videoStatus.allowed && <span className="ml-2 text-[10px] text-muted-foreground">{videoStatus.goldIncludedLeft > 0 ? "1 included this month" : `${videoStatus.balance} credit${videoStatus.balance === 1 ? "" : "s"}`}</span>}
             </Button>
+            {looksChanged && <div role="status" className="flex w-full flex-wrap items-center justify-between gap-2 border border-border bg-muted/40 px-3 py-2 text-xs">
+              <span className="text-muted-foreground">Fabrics or finishes have changed since your last video.</span>
+              <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={exportVideo} disabled={!cinematic || exporting}>
+                <RefreshCw className="mr-1.5 h-3 w-3" />Regenerate with latest finishes
+              </Button>
+            </div>}
             <VideoUnlockModal open={unlockOpen} onOpenChange={setUnlockOpen} balance={videoStatus?.balance ?? 0} onUseCredit={() => void runVideo()} />
             {videoJob && (() => {
               const wide = videoWide && !!videoJob.url;
