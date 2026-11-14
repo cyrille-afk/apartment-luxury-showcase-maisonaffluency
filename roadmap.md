@@ -1,5 +1,10 @@
 # Roadmap
 
+## Mood Board to Project Studio workflow
+- [x] Replace the direct Sandbox action with prominent charcoal Project Studio entry and keep Client View available as a compact switch.
+- [x] Save every current board item with resolved catalogue-default finish labels to the selected/active project before opening Studio; offer project selection when absent. Existing 15-piece RPC batches preserve complete transfers and successful batches on retry.
+- [x] Signed-in chair transfer saved Black Pepper Oak/Safire catalogue defaults, opened the active Studio and restored after reload; no-project chooser and phone toolbar verified without overflow or page errors. Test board removed; nine focused regressions and preview build pass.
+
 ## Compact Project Studio finish cards
 - [x] Replace canvas-only swatch rows with active-finish pills and grouped floating pickers; preserve inline Specsheet/lightbox selection, pricing and saved locks.
 - [x] Keep Sandbox charcoal and differentiate AI Co-Designer with shared bronze outline tokens.

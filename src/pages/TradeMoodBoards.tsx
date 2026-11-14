@@ -5,15 +5,13 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { useSearchParams, useNavigate } from "@/lib/router-compat";
+import { useSearchParams } from "@/lib/router-compat";
 import { Search, Loader2, Plus, X, Heart, FolderOpen, LayoutGrid, Sparkles, RefreshCw, Pin } from "lucide-react";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { MakerAZPicker } from "@/components/trade/MakerAZPicker";
 import { MoodBoardBudgetControls, MoodBoardBudgetBar } from "@/components/trade/MoodBoardBudgetControls";
 import { convertMoodBudget, emptyMoodBudget, fitsMoodBudget, formatMoodMoney, isMoodCurrency, moodBudgetLedger, moodPrices, type MoodBudgetSettings, type MoodCurrency } from "@/lib/moodBoardBudget";
 import { fetchMoodBoardDetails } from "@/lib/moodBoardDetails";
-import { moodBoardHandoff } from "@/lib/moodBoardHandoff";
-import { readSharedRoomLayout, writeSharedRoomLayout } from "@/lib/sharedRoomLayout";
 import { getFxRate } from "@/lib/fxRates";
 import { loadAccountCurrency } from "@/hooks/useTradeDisplayCurrency";
 import { toast } from "sonner";
@@ -54,7 +52,6 @@ interface MoodRec {
 
 export default function TradeMoodBoards() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const { discountPct } = useTradeDiscount();
   const [searchParams] = useSearchParams();
   const projectId = searchParams.get("project");
@@ -69,7 +66,6 @@ export default function TradeMoodBoards() {
   const [draftReady, setDraftReady] = useState(false);
   const draftKey = `ma-mood-workspace-v1:${user?.id ?? "pending"}:${projectId ?? "standalone"}`;
   const restoredProjectRef = useRef(false);
-  const [handoffPending, setHandoffPending] = useState(false);
   const [filter, setFilter] = useState<PickerFilter>(projectId ? "board" : "all");
   const [recommendations, setRecommendations] = useState<MoodRec[]>([]);
   const [refreshPage, setRefreshPage] = useState(0);
@@ -440,22 +436,6 @@ export default function TradeMoodBoards() {
     setBoard((prev) => prev.filter((p) => p.id !== id));
   };
 
-  const openInVisualiser = async () => {
-    if (!board.length || handoffPending) return;
-    setHandoffPending(true);
-    try {
-      const fresh = await fetchMoodBoardDetails(board.map(p => p.id));
-      const pieces = board.map(p => fresh.get(p.id));
-      if (pieces.some(p => !p)) throw new Error("unavailable");
-      const stamp = Date.now();
-      writeSharedRoomLayout(moodBoardHandoff(pieces.filter((p): p is NonNullable<typeof p> => !!p), projectId, budgetSettings.roomType, readSharedRoomLayout(projectId), stamp, budgetSettings.totalEur == null ? null : Math.round(budgetSettings.totalEur / eurRate)));
-      const modelLess = pieces.filter(p => !p?.glb_url).length;
-      if (modelLess) toast.info(`${modelLess} piece${modelLess === 1 ? "" : "s"} without a 3D model will use catalogue images.`);
-      navigate(`/trade/visualiser?handoff=curated&stamp=${stamp}${projectId ? `&project=${encodeURIComponent(projectId)}` : ""}`);
-    } catch { toast.error("Some catalogue details couldn't load. Please try opening the Sandbox again."); }
-    finally { setHandoffPending(false); }
-  };
-
   const filterOptions: { key: PickerFilter; label: string; icon: React.ReactNode }[] = [
     { key: "all", label: "All", icon: <LayoutGrid className="h-3 w-3" /> },
     { key: "favourites", label: "Favourites", icon: <Heart className="h-3 w-3" /> },
@@ -475,7 +455,7 @@ export default function TradeMoodBoards() {
               Curate product imagery into collages for early-stage concept pitches.
             </p>
           </div>
-          <MoodBoardActions items={board} defaultProjectId={projectId} onOpenVisualiser={clientSafe ? undefined : openInVisualiser} handoffPending={handoffPending} />
+          <MoodBoardActions items={board} defaultProjectId={projectId} />
         </div>
 
         {!clientSafe && <MoodBoardBudgetControls settings={budgetSettings} onChange={setBudgetSettings} onCurrencyChange={c => void changeBoardCurrency(c)} />}

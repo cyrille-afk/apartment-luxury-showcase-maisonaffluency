@@ -4,7 +4,7 @@ import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { cn } from "@/lib/utils";
 
 /** The shared presentation switch; its external-store update masks trade data before React repaints. */
-export default function ClientViewToggle({ className }: { className?: string }) {
+export default function ClientViewToggle({ className, iconOnly = false }: { className?: string; iconOnly?: boolean }) {
   const { clientSafe, setClientSafe } = useClientSafeMode();
 
   return (
@@ -21,11 +21,12 @@ export default function ClientViewToggle({ className }: { className?: string }) 
         clientSafe
           ? "border-foreground bg-foreground text-background hover:bg-foreground/90 hover:text-background"
           : "bg-background text-foreground hover:bg-muted hover:text-foreground",
+        iconOnly && "w-9 shrink-0 px-0 cursor-pointer",
         className,
       )}
     >
       {clientSafe ? <LockKeyhole aria-hidden="true" className="h-3.5 w-3.5" /> : <Eye aria-hidden="true" className="h-3.5 w-3.5" />}
-      <span>{clientSafe ? "Client View Active" : "Studio Workspace"}</span>
+      <span className={iconOnly ? "sr-only" : undefined}>{clientSafe ? "Client View Active" : "Studio Workspace"}</span>
     </Button>
   );
 }
