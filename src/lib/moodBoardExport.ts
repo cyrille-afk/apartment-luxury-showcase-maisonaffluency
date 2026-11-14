@@ -7,6 +7,8 @@ import type { MoodCurrency, MoodRoomType } from "./moodBoardBudget";
 
 export interface MoodBoardPdfContext {
   logoUrl?: string | null;
+  /** Present only for Mood Board covers, not other shared tearsheet exports. */
+  cover?: { propertyName: string; heroImageUrl: string };
   roomType: MoodRoomType;
   currency: MoodCurrency;
   allocated: number;
@@ -38,7 +40,7 @@ export interface MoodBoardExportItem {
 const INK: [number, number, number] = [33, 33, 31];
 const MUTED: [number, number, number] = [87, 107, 103];
 
-async function toDataUrl(url: string): Promise<{ data: string; w: number; h: number } | null> {
+async function toDataUrl(url: string, max = 900): Promise<{ data: string; w: number; h: number } | null> {
   try {
     const res = await fetch(url, { mode: "cors" });
     if (!res.ok) return null;
@@ -48,7 +50,6 @@ async function toDataUrl(url: string): Promise<{ data: string; w: number; h: num
     try {
       await new Promise<void>((resolve, reject) => { bitmap.onload = () => resolve(); bitmap.onerror = () => reject(new Error("Image unavailable")); bitmap.src = objectUrl; });
     } finally { URL.revokeObjectURL(objectUrl); }
-    const max = 900;
     const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
     const canvas = document.createElement("canvas");
     canvas.width = Math.round(bitmap.width * scale);
@@ -81,6 +82,47 @@ export async function buildMoodBoardPdf(title: string, items: MoodBoardExportIte
   if (context?.logoUrl && !logo) throw new Error("Studio logo unavailable");
   const summary = context ? moodBoardPdfBudget(context) : null;
   const startY = context ? 112 : M + 28;
+
+  if (context?.cover) {
+    const hero = await toDataUrl(context.cover.heroImageUrl, 2000);
+    if (!hero) throw new Error("Cover image unavailable");
+    if (logo) {
+      const ratio = Math.min(180 / logo.w, 42 / logo.h);
+      doc.addImage(logo.data, "PNG", M, 26, logo.w * ratio, logo.h * ratio);
+    } else if (studioName) {
+      doc.setFont("times", "normal");
+      doc.setFontSize(18);
+      doc.setTextColor(...INK);
+      doc.text(doc.splitTextToSize(studioName, W - M * 2)[0], M, 48);
+    }
+    doc.setTextColor(...MUTED);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.text("MOOD BOARD", W - M, 48, { align: "right" });
+    doc.setFont("times", "normal");
+    doc.setFontSize(30);
+    doc.setTextColor(...INK);
+    const lines = doc.splitTextToSize(context.cover.propertyName.trim() || title, W - M * 2);
+    // Fit long property names rather than truncate them.
+    const titleSize = Math.min(30, 52 / Math.max(1, lines.length));
+    doc.setFontSize(titleSize);
+    doc.text(lines, M, 96, { lineHeightFactor: 1.1 });
+    const imageY = 140;
+    const imageH = 310;
+    const ratio = Math.min((W - M * 2) / hero.w, imageH / hero.h);
+    doc.addImage(hero.data, "PNG", M + (W - M * 2 - hero.w * ratio) / 2, imageY + (imageH - hero.h * ratio) / 2, hero.w * ratio, hero.h * ratio);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    if (summary) {
+      doc.text(`${summary.room} · ${context.currency} · ${items.length} pieces`, M, 486);
+      doc.setFontSize(9);
+      doc.text(`Allocated: ${summary.allocated}    /    Target: ${summary.target}`, M, 507);
+      doc.setTextColor(...MUTED);
+      doc.setFontSize(8);
+      if (summary.status) doc.text(summary.status, M, 523);
+    }
+    doc.addPage();
+  }
 
   const header = () => {
     doc.setFont("times", "normal");

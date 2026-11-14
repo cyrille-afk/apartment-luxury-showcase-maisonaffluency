@@ -36,6 +36,9 @@ export function MoodBoardActions({ items, defaultProjectId, pdfContext }: Props)
   const [projectId, setProjectId] = useState<string | null>(defaultProjectId);
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [coverOpen, setCoverOpen] = useState(false);
+  const [propertyName, setPropertyName] = useState("");
+  const [heroImageUrl, setHeroImageUrl] = useState("");
   const [message, setMessage] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
   const disabled = items.length === 0;
   useEffect(() => { setProjectId(defaultProjectId); }, [defaultProjectId]);
@@ -92,18 +95,35 @@ export function MoodBoardActions({ items, defaultProjectId, pdfContext }: Props)
     else setOpen(true);
   };
 
+  const prepareCover = async () => {
+    setExporting(true);
+    setMessage(null);
+    try {
+      const destination = projectId || workspace?.activeFolder?.projectId || getActiveProjectId();
+      const project = destination ? await supabase.from("projects").select("name, cover_image_url").eq("id", destination).maybeSingle() : null;
+      if (project?.error) throw project.error;
+      setPropertyName(project?.data?.name || (title === "Mood board" ? "" : title));
+      setHeroImageUrl(project?.data?.cover_image_url || items.find(item => item.image_url)?.image_url || "");
+      setCoverOpen(true);
+    } catch {
+      setMessage({ tone: "error", text: "The property details couldn't be loaded. Please try again." });
+    } finally { setExporting(false); }
+  };
+
   const exportPdf = async () => {
     setExporting(true);
     setMessage(null);
     try {
       const blob = await buildMoodBoardPdf(title.trim() || "Mood board", items, currentStudio?.display_name || currentStudio?.name, {
         ...pdfContext, logoUrl: currentStudio?.logo_url, locale: currentStudio?.pdf_locale,
+        cover: { propertyName: propertyName.trim(), heroImageUrl },
       });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = moodBoardFileName(title);
       a.click();
+      setCoverOpen(false);
       setTimeout(() => URL.revokeObjectURL(url), 4000);
     } catch {
       setMessage({ tone: "error", text: "The PDF couldn't be prepared. Please try again." });
@@ -116,7 +136,7 @@ export function MoodBoardActions({ items, defaultProjectId, pdfContext }: Props)
     <div className="flex flex-col items-start gap-2 sm:items-end">
       <div className="flex flex-wrap items-center gap-2">
         <ClientViewToggle iconOnly />
-        <Button variant="outline" size="sm" disabled={disabled || exporting} onClick={exportPdf} className="h-9 text-[11px] uppercase tracking-[0.12em]">
+        <Button variant="outline" size="sm" disabled={disabled || exporting} onClick={prepareCover} className="h-9 text-[11px] uppercase tracking-[0.12em]">
           {exporting ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <FileDown className="mr-1.5 h-3.5 w-3.5" />}
           Export PDF
         </Button>
@@ -134,6 +154,41 @@ export function MoodBoardActions({ items, defaultProjectId, pdfContext }: Props)
         {message?.tone === "ok" && <Check className="mr-1 inline h-3 w-3" />}
         {message?.text}
       </p>
+
+      <Dialog open={coverOpen} onOpenChange={value => { if (!exporting) setCoverOpen(value); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle className="font-display">Mood Board cover</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="mood-cover-property" className="font-body text-xs">Property name</label>
+              <Input id="mood-cover-property" value={propertyName} maxLength={120} disabled={exporting} onChange={event => setPropertyName(event.target.value)} placeholder="Property name" />
+            </div>
+            {heroImageUrl && <img src={heroImageUrl} alt="Cover image preview" className="h-48 w-full object-contain" />}
+            <div className="space-y-2">
+              <label htmlFor="mood-cover-image" className="font-body text-xs">Hero image</label>
+              <Input id="mood-cover-image" type="file" accept="image/png,image/jpeg,image/webp" disabled={exporting} onChange={event => {
+                const file = event.target.files?.[0];
+                if (!file) return;
+                if (!/^image\/(png|jpeg|webp)$/.test(file.type) || file.size > 20 * 1024 * 1024) {
+                  setMessage({ tone: "error", text: "Choose a PNG, JPG or WebP image under 20 MB." });
+                  return;
+                }
+                const reader = new FileReader();
+                reader.onload = () => { if (typeof reader.result === "string") { setHeroImageUrl(reader.result); setMessage(null); } };
+                reader.onerror = () => setMessage({ tone: "error", text: "The image couldn't be opened. Choose another image." });
+                reader.readAsDataURL(file);
+              }} />
+            </div>
+            {message?.tone === "error" && <p role="alert" className="font-body text-xs text-destructive">{message.text}</p>}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" disabled={exporting} onClick={() => setCoverOpen(false)}>Cancel</Button>
+            <Button disabled={exporting || !propertyName.trim() || !heroImageUrl} onClick={exportPdf}>
+              {exporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}Export PDF
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={open} onOpenChange={value => { if (!saving) setOpen(value); }}>
         <DialogContent>
