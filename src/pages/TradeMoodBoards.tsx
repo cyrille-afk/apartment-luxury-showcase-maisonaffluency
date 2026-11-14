@@ -485,7 +485,7 @@ export default function TradeMoodBoards() {
                   </p>
                 </div>
               ) : (
-                <div className={`grid gap-2 ${board.length <= 2 ? "grid-cols-3" : board.length <= 6 ? "grid-cols-3" : "grid-cols-4 [@media(min-width:1440px)]:grid-cols-5"}`}>
+                <div className={`grid gap-2 ${board.length <= 3 ? "grid-cols-3" : board.length <= 6 ? "grid-cols-3 lg:grid-cols-4" : "grid-cols-4 [@media(min-width:1440px)]:grid-cols-5"}`}>
                   {board.map((item) => (
                     <div key={item.id} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
                       <img src={item.image_url} alt={item.product_name} className="w-full h-full object-cover" />
