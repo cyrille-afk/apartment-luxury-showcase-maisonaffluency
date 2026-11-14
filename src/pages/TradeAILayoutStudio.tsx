@@ -49,6 +49,10 @@ import LayoutPieceCompare from "@/components/trade/visualiser/LayoutPieceCompare
 import VideoDiffOverlay from "@/components/trade/visualiser/VideoDiffOverlay";
 import { buildFurnishingSchedulePdf, downloadBlob } from "@/lib/furnishingSchedulePdf";
 import ClientSchedulePreview from "@/components/trade/visualiser/ClientSchedulePreview";
+import InteractiveRoomWalkthrough from "@/components/trade/visualiser/InteractiveRoomWalkthrough";
+import RoomWalkthroughControls from "@/components/trade/visualiser/RoomWalkthroughControls";
+import { walkViewpoint, type WalkInput } from "@/lib/roomWalkthrough";
+import { Footprints } from "lucide-react";
 
 const micro = "text-[10px] uppercase tracking-[0.15em] text-muted-foreground";
 
@@ -403,6 +407,11 @@ const TradeAILayoutStudio = () => {
   }, []);
 
   const [walking, setWalking] = useState(false);
+  const [exploring, setExploring] = useState(false);
+  const exploreInput = useRef<WalkInput>({ forward: 0, right: 0, turn: 0 });
+  const [exploreView, setExploreView] = useState<{ id: number; view: "entrance" | "left" | "right" }>({ id: 0, view: "entrance" });
+  const exitExplore = useCallback(() => setExploring(false), []);
+  useEffect(() => { setExploring(false); }, [overviewRevision]);
   const [walkPreferences] = useState(readWalkthroughPreferences);
   const [walkActive, setWalkActive] = useState(false);
   const [walkTime, setWalkTime] = useState(0);
@@ -812,7 +821,7 @@ const TradeAILayoutStudio = () => {
         <meta name="robots" content="noindex" />
       </Helmet>
 
-      <aside className="space-y-6 border border-border bg-card p-6">
+      <aside className={cn("space-y-6 border border-border bg-card p-6", exploring && "hidden")}>
         <div>
           <p className={micro}>AI Ingestion</p>
           <h1 className="mt-1 font-serif text-2xl">Curated Room Layout</h1>
@@ -988,7 +997,7 @@ const TradeAILayoutStudio = () => {
         )}
       </aside>
 
-      <div className="relative h-[70vh] min-h-[520px] min-w-0 border border-border bg-muted/30">
+      <div className={cn("relative min-w-0 border border-border bg-muted/30", exploring ? "h-[60vh] min-h-[440px] sm:h-[70vh] sm:min-h-[520px] lg:col-span-2 xl:col-span-3" : "h-[70vh] min-h-[520px]")}>
         {(loading || aiLoading || curating || catLoading) && (
           <div role="status" aria-live="polite" className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-background/90 text-foreground">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
@@ -1011,7 +1020,13 @@ const TradeAILayoutStudio = () => {
           />
         )}
         {scene && (
-          <div className="absolute inset-x-3 top-3 z-10 flex flex-wrap justify-end gap-2">
+          <div className={cn("absolute inset-x-3 top-3 z-10 flex flex-wrap justify-end gap-2", exploring && "hidden")}>
+            <Button size="sm" variant="outline" disabled={!scene.curatedAssets.length || !!authorMode || dragging || loading || aiLoading || curating || catLoading}
+              onClick={() => {
+                if (!walkViewpoint(scene, "entrance")) { toast.message("There is no clear standing space in this room."); return; }
+                stopWalk(); setSelectedId(null); setCompareOpen(false);
+                setExploreView(v => ({ id: v.id + 1, view: "entrance" })); setExploring(true);
+              }}><Footprints className="mr-1.5 h-3.5 w-3.5" />Explore in 3D</Button>
             <RoomCameraPresets value={cameraView} onChange={setCameraView} disabled={walkActive || !!authorMode || dragging}
               pieces={scene.curatedAssets.map((a, i) => ({ id: `ai-${i}-${a.sku}`, name: byId.get(a.componentId)?.name ?? a.sku }))} />
             <Select value={activeCustomId ? `custom:${activeCustomId}` : walkPreset} onValueChange={(value) => {
@@ -1398,35 +1413,38 @@ const TradeAILayoutStudio = () => {
             <gridHelper args={[10, 10]} scale={[brief.roomDimensions.width / 10, 1, brief.roomDimensions.length / 10]} />
           </Canvas>
         )}
-        {scene && (
+        {scene && !exploring && (
           <div className="absolute bottom-3 left-3 z-10 flex items-center gap-2 border border-border bg-background/95 px-3 py-2">
             <Switch id="curated-show-labels" checked={showLabels} onCheckedChange={setShowLabels} />
             <Label htmlFor="curated-show-labels" className="text-xs">Show Labels</Label>
           </div>
         )}
         {scene && (
-          <Canvas frameloop={walking || dragging ? "always" : "demand"} shadows dpr={[1, 1.5]} gl={{ preserveDrawingBuffer: true }} onPointerMissed={() => setSelectedId(null)}>
+          <Canvas frameloop={walking || dragging || exploring ? "always" : "demand"} shadows dpr={[1, 1.5]} gl={{ preserveDrawingBuffer: true }} onPointerMissed={() => setSelectedId(null)}>
             {authorMode === "draw"
               ? <FloorPlanDrawLayer width={scene.roomDimensions.width} length={scene.roomDimensions.length}
                   onPick={(x, z) => setAuthorNodes((n) => [...n, { position: [x, drawHeight, z], target: clusterCentre(scene) }])} />
               : <PerspectiveCamera makeDefault fov={45} near={0.05} position={[scene.roomDimensions.width * 1.3, scene.roomDimensions.height * 2.2, scene.roomDimensions.length * 1.6]} />}
-            <OrbitControls makeDefault enabled={!dragging && !walkActive} enableRotate={authorMode !== "draw"} maxPolarAngle={Math.PI / 2.05} target={[0, 0.5, 0]} />
+            <OrbitControls makeDefault enabled={!dragging && !walkActive && !exploring} enableRotate={authorMode !== "draw"} maxPolarAngle={Math.PI / 2.05} target={[0, 0.5, 0]} />
             <ambientLight intensity={0.5} />
             <directionalLight position={[5, 10, 5]} intensity={1.1} castShadow />
             <Suspense fallback={null}><Environment preset="apartment" /></Suspense>
             <ContactShadows position={[0, 0.002, 0]} scale={20} opacity={0.3} blur={1.2} far={8} />
-            <AICuratedEnvironment schema={scene} selectedId={selectedId} onSelect={setSelectedId}
-              showLabels={showLabels && !walkActive}
+            <AICuratedEnvironment schema={scene} selectedId={selectedId} onSelect={exploring ? () => {} : setSelectedId}
+              showLabels={showLabels && !walkActive && !exploring}
               pieceNames={new Map([...byId].map(([id, item]) => [id, item.name]))}
-              onAssetTransform={onAssetTransform} onDragStateChange={setDragging} isEditable={!walkActive && !authorMode}>
-              <RoomOverviewCamera revision={overviewRevision} view={cameraView} enabled={!walkActive && !authorMode && !dragging} />
+              onAssetTransform={onAssetTransform} onDragStateChange={setDragging} isEditable={!walkActive && !authorMode && !exploring}>
+              <RoomOverviewCamera revision={overviewRevision} view={cameraView} enabled={!walkActive && !authorMode && !dragging && !exploring} />
             </AICuratedEnvironment>
+            {exploring && <InteractiveRoomWalkthrough scene={scene} input={exploreInput} viewpoint={exploreView} onExit={exitExplore} />}
             <CinematicCameraRig path={cinematic} enabled={walkActive} playing={walking} speed={walkSpeed}
               seek={walkSeek} onTimeChange={setWalkTime} onDone={finishWalk} />
             <CameraSamplerBridge samplerRef={samplerRef} />
             {authorMode && <PathNodesGuide nodes={authorNodes} />}
           </Canvas>
         )}
+        {exploring && <RoomWalkthroughControls input={exploreInput} view={exploreView.view}
+          onView={view => setExploreView(v => ({ id: v.id + 1, view }))} onExit={exitExplore} />}
         {authorMode && scene && (
           <div role="group" aria-label="Custom path builder" className="absolute bottom-3 left-3 z-10 w-[300px] space-y-3 border border-border bg-background/95 p-3 text-xs shadow-sm">
             <p className={micro}>{authorMode === "draw" ? "Draw on floor plan" : "Capture viewpoints"}</p>
@@ -1513,7 +1531,7 @@ const TradeAILayoutStudio = () => {
         )}
       </div>
 
-      <aside className="space-y-5 border border-border bg-card p-6" aria-label="Curation Breakdown">
+      <aside className={cn("space-y-5 border border-border bg-card p-6", exploring && "hidden")} aria-label="Curation Breakdown">
         <div>
           <p className={micro}>Curation matrix</p>
           <h2 className="mt-1 font-serif text-xl">Curation Breakdown</h2>

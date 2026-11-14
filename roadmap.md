@@ -1,5 +1,9 @@
 # Roadmap
 
+## Interactive furnished-room walkthrough
+- [x] Add camera-only exploration, safe viewpoints and keyboard/touch movement to the current Curated Room Layout without replacing its furniture.
+- [x] Nine regressions pass; signed-in real Frenchmen chair verifies camera-relative forward movement, entrance/right viewpoints, return to toolbar and unchanged complete saved scene/budget with no browser errors. Expanded desktop and phone controls inspected; real-device GPU smoothness/touch feel remain unverified.
+
 ## Curated furniture proportions and maker labels
 - [x] Normalize catalogue measurements to metres; share dimensions between placement, loaded geometry and fallback volumes; ground pieces and replace brief-result IDs with makers.
 - [x] 53 regressions and preview checks pass; signed-in €3,000 brief places a visibly small Bond Street Stool (€2,652), with Man of Parts in both result lists and no page errors. Full multi-piece browser inspection stalls on software graphics; exact bounds and non-overlap verified by tests, not live measurement. Restored the original €60,000 brief budget after testing.
