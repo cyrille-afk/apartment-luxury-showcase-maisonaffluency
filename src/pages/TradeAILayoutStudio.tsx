@@ -53,6 +53,7 @@ import InteractiveRoomWalkthrough from "@/components/trade/visualiser/Interactiv
 import RoomWalkthroughControls from "@/components/trade/visualiser/RoomWalkthroughControls";
 import { walkViewpoint, type WalkInput } from "@/lib/roomWalkthrough";
 import { Footprints } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const micro = "text-[10px] uppercase tracking-[0.15em] text-muted-foreground";
 
@@ -69,6 +70,15 @@ function syncTimeAgo(iso: string): string {
 }
 const stockLabel = (s: string | null) => (s ? s.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase()) : "Available");
 const eur = (n: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
+const FurniturePlaceholders = ({ count }: { count: number }) => (
+  <div role="status" aria-label="Loading furniture details" aria-live="polite" className="space-y-3 py-2">
+    <p className="text-xs text-muted-foreground">Loading furniture details…</p>
+    {Array.from({ length: count }, (_, i) => <div key={i} className="flex items-start justify-between gap-3 py-1">
+      <div className="min-w-0 flex-1 space-y-2"><Skeleton className="h-3 w-4/5" /><Skeleton className="h-2 w-1/2" /></div>
+      <Skeleton className="h-3 w-14 shrink-0" />
+    </div>)}
+  </div>
+);
 const ClearanceWarning = ({ conflicts }: { conflicts: ClearanceConflict[] }) => (
   <div role="alert" className="border border-destructive/40 bg-destructive/5 p-2 text-xs text-destructive">
     <p className="font-medium">May pass through {conflicts.length === 1 ? "1 object" : `${conflicts.length} objects`}:</p>
@@ -810,6 +820,8 @@ const TradeAILayoutStudio = () => {
   };
   const exportVideo = () => { if (videoLocked) setUnlockOpen(true); else void runVideo(); };
 
+  const detailsPending = catLoading || !!catError;
+  const roomPending = loading || aiLoading || curating || catLoading;
   const fin = scene?.financialSummary;
   const pct = fin ? Math.min(100, (fin.allocatedSpend / fin.totalBudget) * 100) : 0;
   const dim = setDimension;
@@ -876,18 +888,18 @@ const TradeAILayoutStudio = () => {
             {loading || aiLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
             {loading || aiLoading ? "Generating layout..." : "Generate Room Layout with AI"}
           </Button>
-          <Button variant="outline" className="w-full" onClick={openInVisualiser} disabled={!scene?.curatedAssets.length}>
+          <Button variant="outline" className="w-full" onClick={openInVisualiser} disabled={detailsPending || !scene?.curatedAssets.length}>
             <BoxIcon className="mr-2 h-4 w-4" />Open in Visualiser Sandbox
           </Button>
         </section>
 
         <section className="space-y-2">
           <p className={micro}>Budget status</p>
-          <Progress value={pct} />
+          <Progress value={detailsPending ? 0 : pct} />
           <dl className="grid grid-cols-3 gap-2 text-xs">
             <div><dt className="text-muted-foreground">Budget</dt><dd>{eur(fin?.totalBudget ?? brief.totalBudget)}</dd></div>
-            <div><dt className="text-muted-foreground">Allocated</dt><dd>{eur(fin?.allocatedSpend ?? 0)}</dd></div>
-            <div><dt className="text-muted-foreground">Buffer</dt><dd className={fin && fin.remainingBuffer < 0 ? "text-destructive" : ""}>{eur(fin?.remainingBuffer ?? brief.totalBudget)}</dd></div>
+            <div><dt className="text-muted-foreground">Allocated</dt><dd>{detailsPending ? <Skeleton aria-label="Allocation pending" className="mt-1 h-3 w-14" /> : eur(fin?.allocatedSpend ?? 0)}</dd></div>
+            <div><dt className="text-muted-foreground">Buffer</dt><dd className={fin && fin.remainingBuffer < 0 ? "text-destructive" : ""}>{detailsPending ? <Skeleton aria-label="Buffer pending" className="mt-1 h-3 w-14" /> : eur(fin?.remainingBuffer ?? brief.totalBudget)}</dd></div>
           </dl>
         </section>
 
@@ -943,9 +955,9 @@ const TradeAILayoutStudio = () => {
             <div className="flex items-center justify-between">
               <p className={micro}>Curated pieces ({scene.curatedAssets.length})</p>
               <div className="flex items-center gap-3">
-                <button type="button" disabled={compareIds.length < 2} className="text-xs underline underline-offset-2 text-muted-foreground hover:text-foreground disabled:opacity-50"
+                <button type="button" disabled={detailsPending || compareIds.length < 2} className="text-xs underline underline-offset-2 text-muted-foreground hover:text-foreground disabled:opacity-50"
                   onClick={() => setCompareOpen(true)}>Compare selected ({compareIds.length})</button>
-                <button type="button" disabled={!scene.curatedAssets.length} className="text-xs underline underline-offset-2 text-muted-foreground hover:text-foreground disabled:opacity-50"
+                <button type="button" disabled={detailsPending || !scene.curatedAssets.length} className="text-xs underline underline-offset-2 text-muted-foreground hover:text-foreground disabled:opacity-50"
                   onClick={() => {
                     const rows = scene.curatedAssets.map((a) => {
                       const item = byId.get(a.componentId);
@@ -953,7 +965,7 @@ const TradeAILayoutStudio = () => {
                     });
                     downloadBlob(buildFurnishingSchedulePdf(rows, "Curated Room Layout"), "furnishing-schedule.pdf");
                   }}>Export schedule PDF</button>
-                <button type="button" disabled={!scene.curatedAssets.length} className="text-xs underline underline-offset-2 text-muted-foreground hover:text-foreground disabled:opacity-50"
+                <button type="button" disabled={detailsPending || !scene.curatedAssets.length} className="text-xs underline underline-offset-2 text-muted-foreground hover:text-foreground disabled:opacity-50"
                   onClick={() => {
                     const rows = scene.curatedAssets.map((a) => {
                       const item = byId.get(a.componentId);
@@ -964,10 +976,11 @@ const TradeAILayoutStudio = () => {
                 <ClientSchedulePreview rows={clientPreviewRows} title="Curated Room Layout" open={!!clientPreviewRows} onOpenChange={(v) => { if (!v) setClientPreviewRows(null); }} />
               </div>
             </div>
-            <ul className="divide-y divide-border text-xs">
+            {detailsPending ? <FurniturePlaceholders count={scene.curatedAssets.length} /> : <ul className="divide-y divide-border text-xs">
               {scene.curatedAssets.map((a, i) => {
                 const item = byId.get(a.componentId);
                 const options = catalogue.filter((c) => c.role === item?.role && c.available && c.price != null);
+                if (!item?.name) return <li key={`${a.componentId}-${i}`} className="py-2 text-muted-foreground">Furniture details unavailable</li>;
                 return (
                   <li key={`${a.componentId}-${i}`} className="py-2">
                     <div className="flex items-center gap-2">
@@ -991,22 +1004,22 @@ const TradeAILayoutStudio = () => {
                   </li>
                 );
               })}
-            </ul>
+            </ul>}
             {skipped.length > 0 && <p className="pt-1 text-xs text-muted-foreground">Skipped: {skipped.join(", ")}</p>}
           </section>
         )}
       </aside>
 
       <div className={cn("relative min-w-0 border border-border bg-muted/30", exploring ? "h-[60vh] min-h-[440px] sm:h-[70vh] sm:min-h-[520px] lg:col-span-2 xl:col-span-3" : "h-[70vh] min-h-[520px]")}>
-        {(loading || aiLoading || curating || catLoading) && (
-          <div role="status" aria-live="polite" className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-background/90 text-foreground">
+        {roomPending && (
+          <div role="status" aria-live="polite" className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-background text-foreground">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
             <p className="font-display text-lg">{aiLoading ? "Arranging your room…" : curating ? "Curating your selection…" : loading ? "Preparing your room…" : "Loading your catalogue…"}</p>
           </div>
         )}
         {layoutError && <div role="alert" className="absolute left-4 right-4 top-4 z-30 border border-destructive/40 bg-background p-4 text-sm text-destructive">{layoutError}</div>}
-        {selectedAsset && <SelectedPieceDetails name={selectedPiece?.name ?? selectedAsset.sku} price={selectedPiece?.price ?? null} dimensions={selectedPiece?.dimensions ?? null} manufacturer={selectedPiece?.manufacturer} productUrl={selectedPiece?.productUrl} onClose={() => setSelectedId(null)} />}
-        {compareOpen && scene && (
+        {!detailsPending && selectedAsset && selectedPiece?.name && <SelectedPieceDetails name={selectedPiece?.name ?? selectedAsset.sku} price={selectedPiece?.price ?? null} dimensions={selectedPiece?.dimensions ?? null} manufacturer={selectedPiece?.manufacturer} productUrl={selectedPiece?.productUrl} onClose={() => setSelectedId(null)} />}
+        {!detailsPending && compareOpen && scene && (
           <LayoutPieceCompare
             pieces={compareIds.flatMap((id) => {
               const idx = scene.curatedAssets.findIndex((a, i) => `ai-${i}-${a.sku}` === id);
@@ -1020,7 +1033,7 @@ const TradeAILayoutStudio = () => {
           />
         )}
         {scene && (
-          <div className={cn("absolute inset-x-3 top-3 z-10 flex flex-wrap justify-end gap-2", exploring && "hidden")}>
+          <div className={cn("absolute inset-x-3 top-3 z-10 flex flex-wrap justify-end gap-2", (exploring || roomPending) && "hidden")}>
             <Button size="sm" variant="outline" disabled={!scene.curatedAssets.length || !!authorMode || dragging || loading || aiLoading || curating || catLoading}
               onClick={() => {
                 if (!walkViewpoint(scene, "entrance")) { toast.message("There is no clear standing space in this room."); return; }
@@ -1028,7 +1041,7 @@ const TradeAILayoutStudio = () => {
                 setExploreView(v => ({ id: v.id + 1, view: "entrance" })); setExploring(true);
               }}><Footprints className="mr-1.5 h-3.5 w-3.5" />Explore in 3D</Button>
             <RoomCameraPresets value={cameraView} onChange={setCameraView} disabled={walkActive || !!authorMode || dragging}
-              pieces={scene.curatedAssets.map((a, i) => ({ id: `ai-${i}-${a.sku}`, name: byId.get(a.componentId)?.name ?? a.sku }))} />
+              pieces={scene.curatedAssets.map((a, i) => ({ id: `ai-${i}-${a.sku}`, name: byId.get(a.componentId)?.name ?? "Furniture details unavailable" }))} />
             <Select value={activeCustomId ? `custom:${activeCustomId}` : walkPreset} onValueChange={(value) => {
               if (value.startsWith("custom:")) { setActiveCustomId(value.slice(7)); return; }
               const preset = CINEMATIC_PRESETS.find((p) => p.value === value);
@@ -1413,7 +1426,7 @@ const TradeAILayoutStudio = () => {
             <gridHelper args={[10, 10]} scale={[brief.roomDimensions.width / 10, 1, brief.roomDimensions.length / 10]} />
           </Canvas>
         )}
-        {scene && !exploring && (
+        {scene && !exploring && !roomPending && (
           <div className="absolute bottom-3 left-3 z-10 flex items-center gap-2 border border-border bg-background/95 px-3 py-2">
             <Switch id="curated-show-labels" checked={showLabels} onCheckedChange={setShowLabels} />
             <Label htmlFor="curated-show-labels" className="text-xs">Show Labels</Label>
@@ -1430,10 +1443,10 @@ const TradeAILayoutStudio = () => {
             <directionalLight position={[5, 10, 5]} intensity={1.1} castShadow />
             <Suspense fallback={null}><Environment preset="apartment" /></Suspense>
             <ContactShadows position={[0, 0.002, 0]} scale={20} opacity={0.3} blur={1.2} far={8} />
-            <AICuratedEnvironment schema={scene} selectedId={selectedId} onSelect={exploring ? () => {} : setSelectedId}
-              showLabels={showLabels && !walkActive && !exploring}
-              pieceNames={new Map([...byId].map(([id, item]) => [id, item.name]))}
-              onAssetTransform={onAssetTransform} onDragStateChange={setDragging} isEditable={!walkActive && !authorMode && !exploring}>
+            <AICuratedEnvironment schema={scene} selectedId={selectedId} onSelect={exploring || detailsPending ? () => {} : setSelectedId}
+              showLabels={showLabels && !walkActive && !exploring && !detailsPending}
+              pieceNames={new Map(scene.curatedAssets.map(a => [a.componentId, detailsPending ? "Loading furniture details…" : byId.get(a.componentId)?.name ?? "Furniture details unavailable"]))}
+              onAssetTransform={onAssetTransform} onDragStateChange={setDragging} isEditable={!walkActive && !authorMode && !exploring && !detailsPending}>
               <RoomOverviewCamera revision={overviewRevision} view={cameraView} enabled={!walkActive && !authorMode && !dragging && !exploring} />
             </AICuratedEnvironment>
             {exploring && <InteractiveRoomWalkthrough scene={scene} input={exploreInput} viewpoint={exploreView} onExit={exitExplore} />}
@@ -1539,14 +1552,15 @@ const TradeAILayoutStudio = () => {
         {scene && scene.curatedAssets.length > 0 && (
           <div className="space-y-1">
             <p className={micro}>Placed in room ({scene.curatedAssets.length})</p>
-            <ul className="divide-y divide-border text-xs">
-              {scene.curatedAssets.map((a, i) => (
-                <li key={`${a.componentId}-${i}`} className="flex items-start justify-between gap-3 py-2">
-                  <div className="min-w-0"><p className="truncate font-medium">{byId.get(a.componentId)?.name ?? a.sku}</p><p className="mt-0.5 truncate text-muted-foreground">{byId.get(a.componentId)?.manufacturer}</p></div>
-                  <span className="shrink-0 tabular-nums">{byId.get(a.componentId)?.price == null ? "Price upon Request" : eur(a.priceAtCuration)}</span>
-                </li>
-              ))}
-            </ul>
+            {detailsPending ? <FurniturePlaceholders count={scene.curatedAssets.length} /> : <ul className="divide-y divide-border text-xs">
+              {scene.curatedAssets.map((a, i) => {
+                const item = byId.get(a.componentId);
+                return <li key={`${a.componentId}-${i}`} className="flex items-start justify-between gap-3 py-2">
+                  <div className="min-w-0"><p className="truncate font-medium">{item?.name ?? "Furniture details unavailable"}</p><p className="mt-0.5 truncate text-muted-foreground">{item?.manufacturer}</p></div>
+                  {item?.name && <span className="shrink-0 tabular-nums">{item.price == null ? "Price upon Request" : eur(a.priceAtCuration)}</span>}
+                </li>;
+              })}
+            </ul>}
           </div>
         )}
         <div className="space-y-2">
@@ -1556,7 +1570,7 @@ const TradeAILayoutStudio = () => {
             {curating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />} {curating ? "Curating…" : "Curate from brief"}
           </Button>
         </div>
-        {curation && (() => {
+        {curation && !detailsPending && (() => {
           const util = curation.utilisation * 100;
           return (
             <>

@@ -1,5 +1,9 @@
 # Roadmap
 
+## Clear curated-room loading
+- [x] Cover incomplete room previews with an opaque loading placeholder; replace furniture rows with skeletons until names and prices are ready, without altering saved layouts.
+- [x] Signed-in delayed catalogue reload verified both skeleton lists, no visible UUID/POR/false missing labels, opaque room placeholder and phone layout; releasing requests restores Frenchmen Street Side Chair and €2,372 with unchanged furniture and no page errors. Existing completed-view video history remains unchanged.
+
 ## Interactive furnished-room walkthrough
 - [x] Add camera-only exploration, safe viewpoints and keyboard/touch movement to the current Curated Room Layout without replacing its furniture.
 - [x] Nine regressions pass; signed-in real Frenchmen chair verifies camera-relative forward movement, entrance/right viewpoints, return to toolbar and unchanged complete saved scene/budget with no browser errors. Expanded desktop and phone controls inspected; real-device GPU smoothness/touch feel remain unverified.
