@@ -236,9 +236,12 @@ const TradeAILayoutStudio = ({ embedded = false }: { embedded?: boolean } = {}) 
   // Embedded walkthrough: always mirror the live Sandbox arrangement when the tab opens.
   useEffect(() => {
     if (!embedded) return;
+    let lastSig = "";
+    const sig = (l: SharedRoomLayout) => JSON.stringify([l.room, l.wallFinish, l.floorFinish, l.items.map((i) => [i.productId, i.glbUrl, i.x, i.z, i.rotationY])]);
+    const apply = (l: SharedRoomLayout) => { const s = sig(l); if (s === lastSig) return; lastSig = s; loadSharedLayout(l, true); };
     const initial = readSharedRoomLayout(sharedProjectId);
-    if (initial?.source === "visualiser") loadSharedLayout(initial, true);
-    const onLive = (e: Event) => { const layout = (e as CustomEvent<SharedRoomLayout>).detail; if (layout) loadSharedLayout(layout, true); };
+    if (initial?.source === "visualiser") apply(initial);
+    const onLive = (e: Event) => { const layout = (e as CustomEvent<SharedRoomLayout>).detail; if (layout) apply(layout); };
     window.addEventListener("ma-live-room-layout", onLive);
     return () => window.removeEventListener("ma-live-room-layout", onLive);
     // eslint-disable-next-line react-hooks/exhaustive-deps
