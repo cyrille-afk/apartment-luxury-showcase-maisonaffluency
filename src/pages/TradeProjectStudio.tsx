@@ -32,6 +32,7 @@ import { moodBoardHandoff } from "@/lib/moodBoardHandoff";
 import { readSharedRoomLayout, writeSharedRoomLayout } from "@/lib/sharedRoomLayout";
 import { readStudioRoomContext } from "@/lib/studioRoomContext";
 import { formatPdfMoney } from "@/lib/pdfFormatting";
+import { proposalFinishDetails } from "@/lib/proposalSpecifications";
 
 type StudioItem = {
   id: string;
@@ -700,7 +701,12 @@ export default function TradeProjectStudio() {
         projectName={project.name}
         clientName={project.client_name}
         location={project.location}
-        items={items.map((i) => ({ ...i, rrp_cents: toBase(i.rrp_cents, i.currency) || null }))}
+        items={items.map((i) => ({
+          ...i,
+          rrp_cents: toBase(i.rrp_cents, i.currency) || null,
+          materials: i.catalog.materials,
+          finish_details: proposalFinishDetails(i.catalog, i.selection) || i.original_finish,
+        }))}
         isClientMode={isClientMode}
          tradeDiscount={discountPct}
          markupMultiplier={multiplier}

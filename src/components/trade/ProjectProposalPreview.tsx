@@ -5,6 +5,7 @@ import { formatMoneyIn } from "@/lib/displayMoney";
 import { StudioBrand, type StudioBranding } from "@/components/trade/StudioBrand";
 import { tradePriceCents, clientPriceCents, clientUnitCents } from "@/lib/tradePricing";
 import { formatPdfMoney } from "@/lib/pdfFormatting";
+import { proposalSpecifications, type ProposalSpecificationSource } from "@/lib/proposalSpecifications";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-export type ProposalPreviewItem = {
+export type ProposalPreviewItem = ProposalSpecificationSource & {
   product_id: string;
   name: string;
   designer: string;
@@ -146,8 +147,9 @@ export function ProjectProposalPreview({
                  const trade = tradeUnit != null && tradeUnit > 0 ? tradeUnit * item.quantity : null;
                  const clientUnit = clientUnitCents(item.rrp_cents, tradeDiscount, markupMultiplier);
                  const client = clientUnit != null && clientUnit > 0 ? clientUnit * item.quantity : null;
-                return (
-                  <article key={item.product_id} className="proposal-line-item grid grid-cols-[48px_72px_minmax(0,1fr)_auto] items-center gap-x-5 border-b border-border py-6 break-inside-avoid">
+                 const specifications = proposalSpecifications(item);
+                 return (
+                  <article key={item.product_id} className="proposal-line-item grid grid-cols-[48px_72px_minmax(0,1fr)_auto] items-start gap-x-5 border-b border-border py-6 break-inside-avoid">
                     <span className="pr-3 text-right font-body text-[9px] tracking-[0.15em] text-muted-foreground">
                       {String(index + 1).padStart(2, "0")}
                     </span>
@@ -164,6 +166,18 @@ export function ProjectProposalPreview({
                          {isClientMode ? "Curated Collection" : item.designer}{!isClientMode && item.sku ? ` · ${item.sku}` : ""}{item.quantity > 1 ? ` · Qty ${item.quantity}` : ""}
                       </p>
                        {!isClientMode && <span data-client-placeholder aria-hidden="true" className="h-3 w-24 bg-muted/60 animate-pulse" />}
+                      <dl data-proposal-item-specs className="mt-4 space-y-1.5 border-t border-border pt-3">
+                        {([
+                          ["Dimensions", specifications.dimensions],
+                          ["Materials", specifications.materials],
+                          ["Finish", specifications.finishes],
+                        ] as const).map(([label, value]) => (
+                          <div key={label} className="grid grid-cols-[68px_minmax(0,1fr)] gap-2 font-body text-[9px] leading-relaxed">
+                            <dt className="uppercase tracking-[0.12em] text-muted-foreground">{label}</dt>
+                            <dd className="break-words text-card-foreground">{value}</dd>
+                          </div>
+                        ))}
+                      </dl>
                     </div>
                      <div data-trade-sensitive={!isClientMode ? "" : undefined} className="text-right">
                       <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">

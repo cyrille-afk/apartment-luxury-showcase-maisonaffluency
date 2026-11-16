@@ -1,0 +1,41 @@
+import { describe, expect, it } from "vitest";
+import { proposalFinishDetails, proposalSpecifications } from "./proposalSpecifications";
+import { resolveStudioSelection, type StudioFinishProduct } from "./studioFinishes";
+
+describe("Project proposal specifications", () => {
+  it("includes recorded dimensions, materials and selected finish details", () => {
+    expect(proposalSpecifications({
+      width_mm: 820,
+      depth_mm: 770,
+      height_mm: 730,
+      materials: "Solid oak and wool upholstery",
+      finish_details: "Wood Finish: Natural Oak · Upholstery: Opera Delft",
+    })).toEqual({
+      dimensions: "820 × 770 × 730 mm",
+      materials: "Solid oak and wool upholstery",
+      finishes: "Wood Finish: Natural Oak · Upholstery: Opera Delft",
+    });
+  });
+
+  it("preserves unparseable recorded dimensions and marks missing details on request", () => {
+    expect(proposalSpecifications({ dimensions: "Made to order", materials: " ", selected_finish: null })).toEqual({
+      dimensions: "Made to order",
+      materials: "On request",
+      finishes: "On request",
+    });
+  });
+
+  it("labels each saved catalogue finish with its material axis", () => {
+    const product: StudioFinishProduct = {
+      name: "Chair",
+      baseLabel: "Wood Finish",
+      topLabel: "Upholstery",
+      variants: [{ base: "Natural Oak", top: "Fabric Cat. Opera" }],
+      finishes: [
+        { id: "oak", name: "Natural Oak", category: "Wood", image_url: null, brand_name: "Maker", material_type: null, color_family: null },
+        { id: "fabric", name: "Opera Delft", tier: "Fabric Cat. Opera", category: "Fabric", image_url: null, brand_name: "Maker", material_type: null, color_family: null },
+      ],
+    };
+    expect(proposalFinishDetails(product, resolveStudioSelection(product, null))).toBe("Wood Finish: Natural Oak · Upholstery: Opera Delft");
+  });
+});
