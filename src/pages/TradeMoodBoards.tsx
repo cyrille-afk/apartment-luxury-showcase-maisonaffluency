@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MoodBoardActions } from "@/components/trade/MoodBoardActions";
+import { MoodBoardSavedEntries } from "@/components/trade/MoodBoardSavedEntries";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { filterMoodBoardCatalog, moodBoardCategories, shouldRecommendMoodBoard, type MoodBoardCategory } from "@/lib/moodBoardCatalog";
 import { complementPage, nextComplementPage, COMPLEMENT_PAGE_SIZE } from "@/lib/moodBoardRecommendationPages";
@@ -490,7 +491,7 @@ export default function TradeMoodBoards() {
                     <div key={item.id} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
                       <img src={item.image_url} alt={item.product_name} className="w-full h-full object-cover" />
                       <div className="absolute bottom-0 left-0 right-0 bg-background/55">
-                        <div className="p-3">
+                        <div className={`p-3 ${projectId && !clientSafe ? "pb-11" : ""}`}>
                           <p className="font-display text-xs text-foreground truncate">{item.product_name}</p>
                           <p className="font-body text-[10px] text-muted-foreground">{item.brand_name}</p>
                           <p className="mt-1 font-body text-[11px] leading-snug tabular-nums text-foreground" aria-label={`Price for ${item.product_name}`}>
@@ -514,6 +515,7 @@ export default function TradeMoodBoards() {
                       >
                         <X className="h-3 w-3" />
                       </Button>}
+                      {projectId && !clientSafe && <MoodBoardSavedEntries projectId={projectId} productId={item.id} productName={item.product_name} />}
                     </div>
                   ))}
                 </div>
