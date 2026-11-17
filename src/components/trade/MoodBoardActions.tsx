@@ -21,10 +21,11 @@ interface Props {
   items: { id: string; product_name?: string; brand_name?: string; image_url?: string }[];
   defaultProjectId: string | null;
   pdfContext: MoodBoardPdfContext;
+  anchorId?: string | null;
 }
 
 /** Next steps once pieces are chosen: save to a project, export, and present. */
-export function MoodBoardActions({ items, defaultProjectId, pdfContext }: Props) {
+export function MoodBoardActions({ items, defaultProjectId, pdfContext, anchorId }: Props) {
   const { currentStudio } = useStudio();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -70,7 +71,7 @@ export function MoodBoardActions({ items, defaultProjectId, pdfContext }: Props)
       setMessage({ tone: "ok", text: destination ? "Saved to the project's boards." : "Saved to your boards." });
       setOpen(false);
       if (toStudio && destination) {
-        if (user) saveStudioRoomContext(user.id, destination, { roomType: pdfContext.roomType, currency: pdfContext.currency, targetCents: pdfContext.target });
+        if (user) saveStudioRoomContext(user.id, destination, { roomType: pdfContext.roomType, currency: pdfContext.currency, targetCents: pdfContext.target, anchorId: anchorId ?? null });
         const board = transferProgress.current.boardId;
         navigate(`/trade/projects/${encodeURIComponent(destination)}/studio${board ? `?board=${encodeURIComponent(board)}` : ""}`);
       }

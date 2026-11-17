@@ -41,6 +41,7 @@ import studioAsset from "@/assets/showroom-studio.hdr.asset.json";
 import apartmentAsset from "@/assets/apartment-interior.hdr.asset.json";
 import { ARCHITECTURAL_RENDERING as ARCH_RENDER } from "@/lib/visualiserArchitecturalRendering";
 import { SHOWROOM } from "@/lib/showroomRendering";
+import { spatialDimensionsM } from "@/lib/spatialLayoutEngine";
 import { validateEmptyRoomExr } from "@/lib/emptyRoomExr";
 import { getLocalExr, LOCAL_EXR_EVENT } from "@/lib/localEnvironmentExr";
 import { uploadedEnvironmentPresentation } from "./uploadedEnvironmentPresentation";
@@ -250,9 +251,20 @@ const FurnitureContactShadows = (props: React.ComponentProps<typeof ContactShado
 
 const SceneLoader = () => (
   <Html center>
-    <span className={`${microLabel} text-muted-foreground`}>Loading asset…</span>
+    <span className={`${microLabel} text-muted-foreground`}>Loading anchor…</span>
   </Html>
 );
+
+/** Tearsheet-sized drawing volume shown only while a secondary GLB is queued/fetching. */
+const FurnitureBoundingBox = ({ object }: { object: PlacedObject }) => {
+  const { width, depth, height } = spatialDimensionsM(object);
+  return <group position={object.position} rotation={object.rotation}>
+    <mesh position={[0, height / 2, 0]}>
+      <boxGeometry args={[width, height, depth]} />
+      <meshBasicMaterial color={SHOWROOM.groundFill} wireframe transparent opacity={0.38} depthWrite={false} toneMapped={false} />
+    </mesh>
+  </group>;
+};
 
 interface VisualiserCanvasProps {
   photoCalibration?: PhotoCalibration | null;
@@ -613,7 +625,7 @@ const VisualiserCanvas = ({
     </mesh>}
 
 
-    <SequentialFurniture pieces={objects} fallback={<SceneLoader />} onReady={setObjectsReady} onProgress={onFurnitureProgress} renderPiece={object => (
+    <SequentialFurniture pieces={objects} fallback={<SceneLoader />} renderPlaceholder={object => <FurnitureBoundingBox object={object} />} onReady={setObjectsReady} onProgress={onFurnitureProgress} renderPiece={object => (
         <SceneObject
           key={`${object.instanceId}:${object.restoreKey ?? 0}`}
           object={object}

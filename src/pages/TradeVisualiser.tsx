@@ -15,6 +15,7 @@ import { architecturalDofSettings } from "@/lib/visualiserDepthOfField";
 import AdvancedRenderingOptions from "@/components/trade/visualiser/AdvancedRenderingOptions";
 import { CEILING_CONTROLS, clampCeilingHeight, clampCeilingThickness, clampCeilingOpening, type CeilingSettings } from "@/lib/visualiserCeilingSettings";
 import { parseDimensionString } from "@/lib/productDimensions";
+import { layoutSpatialItems } from "@/lib/spatialLayoutEngine";
 import CuratedAlternativesDrawer, { type PricedVisualiserAlternative } from "@/components/trade/visualiser/CuratedAlternativesDrawer";
 import { curatedVisualiserAlternatives } from "@/lib/visualiserAlternatives";
 import { buildVisualiserSwap, restoreVisualiserSwap, snapshotVisualiserPiece, SWAP_UNDO_DURATION_MS } from "@/lib/visualiserSwap";
@@ -726,10 +727,10 @@ const TradeVisualiser = () => {
         if (!row.product_id || row.procurement_quote_id || row.source_quote_item_id) continue;
         specificationQueues.set(row.product_id, [...(specificationQueues.get(row.product_id) ?? []), row.id]);
       }
-      const placed: PlacedObject[] = hydratedCatalogue.map((product, index) => {
+      const unarranged: PlacedObject[] = hydratedCatalogue.map((product, index) => {
         const next = createPlacedObject(
           { ...product, specItemId: specificationQueues.get(product.id)?.shift() ?? null },
-          [((index % 4) - 1.5) * 1.4, 0, Math.floor(index / 4) * -1.4],
+          [0, 0, 0],
         );
         return {
           ...next,
@@ -739,6 +740,9 @@ const TradeVisualiser = () => {
           upholsteryMaterial: null,
         };
       });
+      const placed: PlacedObject[] = layoutSpatialItems(unarranged).map(({ item, x, z, rotationY, isAnchor }) => ({
+        ...item, position: [x, 0, z], rotation: [0, rotationY, 0], isAnchor,
+      }));
 
       setObjects(placed);
       setSelectedId(null);
@@ -1081,9 +1085,11 @@ const TradeVisualiser = () => {
       projectId: sharedProject, source: "visualiser" as const, updatedAt: Date.now(),
       room: bounds ? { width: bounds.width, length: bounds.depth, height: bounds.height } : { width: 7.2, length: 6, height: 3.2 },
       wallFinish, floorFinish, roomType: prev?.roomType, budgetEur: prev?.budgetEur ?? null,
+      anchorId: objects.find(object => object.isAnchor)?.id ?? prev?.anchorId ?? null,
       items: objects.map((o) => ({
         productId: o.id, name: o.product_name, glbUrl: o.glb_url,
         imageUrl: o.image_url, brandName: o.brand_name, dimensions: o.dimensions,
+        width_mm: o.width_mm, depth_mm: o.depth_mm, height_mm: o.height_mm, size_variants: o.size_variants,
         category: o.category, subcategory: o.subcategory, specItemId: o.specItemId,
         x: o.position[0], z: o.position[2], rotationY: o.rotation[1],
         priceEur: o.retailEurCents == null ? null : o.retailEurCents / 100,
@@ -1221,18 +1227,19 @@ const TradeVisualiser = () => {
         setHandoffStatus("error"); return;
       }
       const rows = new Map(((data ?? []) as Array<{ id: string; product_name: string; brand_name: string; image_url: string | null; dimensions: string | null; width_mm: number | null; depth_mm: number | null; height_mm: number | null; size_variants: PlacedObject["size_variants"]; category: string | null; subcategory: string | null; source_pick_id: string | null; glb_url: string | null }>).map((r) => [r.id, r]));
-      const placed = shared.items.map((item) => {
+      const sharedAnchorIndex = Math.max(0, shared.items.findIndex(item => item.productId === shared.anchorId));
+      const placed = shared.items.map((item, index) => {
         const row = rows.get(item.productId);
         const next = createPlacedObject({
           id: item.productId, product_name: row?.product_name ?? item.name,
           brand_name: row?.brand_name ?? item.brandName ?? "", image_url: row?.image_url ?? item.imageUrl ?? null,
           dimensions: row?.dimensions ?? item.dimensions ?? null, glb_url: row?.glb_url ?? item.glbUrl,
-          width_mm: row?.width_mm, depth_mm: row?.depth_mm, height_mm: row?.height_mm, size_variants: row?.size_variants,
+          width_mm: row?.width_mm ?? item.width_mm, depth_mm: row?.depth_mm ?? item.depth_mm, height_mm: row?.height_mm ?? item.height_mm, size_variants: row?.size_variants ?? item.size_variants,
           category: row?.category ?? item.category, subcategory: row?.subcategory ?? item.subcategory,
           source_pick_id: row?.source_pick_id, specItemId: item.specItemId,
           retailEurCents: item.priceEur == null ? null : Math.round(item.priceEur * 100),
         }, [item.x, 0, item.z]);
-        return { ...next, ...(item.appearance ?? {}), instanceId: `${next.instanceId}-${shared.items.indexOf(item)}`, rotation: [0, item.rotationY, 0] as [number, number, number] };
+        return { ...next, ...(item.appearance ?? {}), instanceId: `${next.instanceId}-${index}`, isAnchor: index === sharedAnchorIndex, rotation: [0, item.rotationY, 0] as [number, number, number] };
       });
       setObjects(placed);
       setHandoffStatus("ready");
@@ -1351,9 +1358,9 @@ const TradeVisualiser = () => {
           }
         }}
       >
-        {!initialRoomReady && !sceneFailed && handoffStatus !== "error" && handoffStatus !== "missing" && <div role="status" data-room-loading className="absolute inset-0 z-50 flex items-center justify-center bg-background px-6 text-center"><div className="fixed inset-x-6 bottom-32 z-50 mx-auto flex max-w-xs flex-col gap-3 bg-background md:static md:w-full"><span className="hidden text-xs text-muted-foreground md:block">{handoffStatus === "loading" ? "Loading the selected board’s pieces and hotspots…" : "Preparing your room and furniture hotspots…"}</span>
+        {!initialRoomReady && !sceneFailed && handoffStatus !== "error" && handoffStatus !== "missing" && <div role="status" data-room-loading className="pointer-events-none absolute inset-x-4 bottom-6 z-50 flex justify-center"><div className="flex w-full max-w-xs flex-col gap-3 border border-border bg-background/95 px-4 py-3 text-left shadow-sm"><span className="text-xs text-muted-foreground">{handoffStatus === "loading" ? "Loading the selected board’s pieces and hotspots…" : "The Anchor loads first; measured outlines show the remaining pieces."}</span>
           {handoffStatus !== "loading" && furnitureProgress && furnitureProgress.total > 0 && <div data-furniture-loading-progress className="flex flex-col gap-2" aria-live="polite" aria-atomic="true">
-            <p className="text-sm text-foreground">{furnitureProgress.remaining > 0 ? `Loading group ${furnitureProgress.group} of ${furnitureProgress.groups}` : "All 3D pieces loaded · Finishing room…"}</p>
+            <p className="text-sm text-foreground">{furnitureProgress.remaining > 0 ? furnitureProgress.group === 1 ? "Loading the Anchor" : `Loading group ${furnitureProgress.group} of ${furnitureProgress.groups}` : "All 3D pieces loaded · Finishing room…"}</p>
             <progress aria-label="3D pieces loaded" max={furnitureProgress.total} value={furnitureProgress.loaded} className="h-1.5 w-full overflow-hidden rounded-none [&::-webkit-progress-bar]:bg-muted [&::-webkit-progress-value]:bg-foreground [&::-moz-progress-bar]:bg-foreground" />
             <p className="text-xs text-muted-foreground">{furnitureProgress.loaded} of {furnitureProgress.total} loaded · {furnitureProgress.remaining} remaining</p>
           </div>}

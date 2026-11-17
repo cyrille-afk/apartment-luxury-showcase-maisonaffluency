@@ -6,9 +6,18 @@ describe("Studio room handoff", () => {
     saveStudioRoomContext("user", "project", { roomType: "dining", currency: "SGD", targetCents: 2000000 });
     expect(readStudioRoomContext("user", "project", [])).toEqual({ roomType: "dining", currency: "SGD", targetCents: 2000000 });
   });
-  it("recovers matching old Mood Board drafts without inventing a target", () => {
-    localStorage.setItem("ma-mood-workspace-v1:user:standalone", JSON.stringify({ items: [{ id: "chair" }], settings: { roomType: "office", totalEur: null } }));
-    expect(readStudioRoomContext("user", "project", ["chair"])?.targetCents).toBeNull();
+  it("recovers a matching Mood Board draft and its pinned Anchor without inventing a target", () => {
+    localStorage.setItem("ma-mood-workspace-v1:user:standalone", JSON.stringify({ items: [{ id: "chair" }], settings: { roomType: "office", totalEur: null, anchors: ["chair"] } }));
+    expect(readStudioRoomContext("user", "project", ["chair"])).toMatchObject({ targetCents: null, anchorId: "chair" });
     expect(readStudioRoomContext("user", "project", ["other"])).toBeNull();
+  });
+  it("retains the exact pinned product through the Project Studio context", () => {
+    saveStudioRoomContext("user", "project", { roomType: "living", currency: "EUR", targetCents: null, anchorId: "sofa" });
+    expect(readStudioRoomContext("user", "project", [])?.anchorId).toBe("sofa");
+  });
+  it("adds an old draft's pinned Anchor to an existing budget context", () => {
+    saveStudioRoomContext("user", "project", { roomType: "living", currency: "EUR", targetCents: 500000 });
+    localStorage.setItem("ma-mood-workspace-v1:user:project", JSON.stringify({ items: [{ id: "sofa" }], settings: { roomType: "dining", totalEur: 10, anchors: ["sofa"] } }));
+    expect(readStudioRoomContext("user", "project", ["sofa"])).toMatchObject({ roomType: "living", targetCents: 500000, anchorId: "sofa" });
   });
 });

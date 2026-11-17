@@ -69,6 +69,8 @@ export type PlacedObject = {
   finishesLocked?: boolean;
   /** Spatial lock only; never prevents applying finishes. */
   positionLocked?: boolean;
+  /** Designated first-load anchor for sequential room assembly. */
+  isAnchor?: boolean;
 };
 
 type Props = {

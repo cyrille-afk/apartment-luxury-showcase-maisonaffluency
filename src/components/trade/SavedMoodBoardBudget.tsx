@@ -81,7 +81,7 @@ export function SavedMoodBoardBudget({ boardId, projectId, items, finishes, edit
     <MoodBoardBudgetBar ledger={ledger} pending={pending} currency={currency} />
     {(notice || isError || finishError || rateError) && <p role="status" className="text-xs text-destructive">{notice ?? "Budget prices couldn’t be confirmed. Please reload to try again."}</p>}
     {projectId && editable && <div className="flex justify-end"><Button size="sm" className="gap-2" onClick={() => {
-      if (user && readyKey === key) saveStudioRoomContext(user.id, projectId, { roomType: settings.roomType, currency, targetCents: ledger.total });
+      if (user && readyKey === key) saveStudioRoomContext(user.id, projectId, { roomType: settings.roomType, currency, targetCents: ledger.total, anchorId: readStudioRoomContext(user.id, projectId, items.flatMap(item => [item.product_id, item.product?.source_pick_id ?? ""]))?.anchorId ?? null });
       navigate(`/trade/projects/${projectId}/studio?board=${encodeURIComponent(boardId)}`);
     }}>Project Studio <ArrowRight className="h-3.5 w-3.5" /></Button></div>}
   </section>;

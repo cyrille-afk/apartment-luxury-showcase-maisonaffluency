@@ -321,7 +321,7 @@ export default function TradeProjectStudio() {
       const placement = item.placements[index];
       return {
         id: item.product_id, product_name: item.name, brand_name: item.designer,
-        image_url: item.image_url, dimensions: item.dimensions, width_mm: item.width_mm, depth_mm: item.depth_mm,
+        image_url: item.image_url, dimensions: item.dimensions, width_mm: item.width_mm, depth_mm: item.depth_mm, height_mm: item.height_mm, size_variants: item.size_variants,
         category: item.category, subcategory: item.subcategory,
         specItemId: placement && !placement.locked ? placement.itemId : null,
         glb_url: item.glb_url,
@@ -330,7 +330,7 @@ export default function TradeProjectStudio() {
       };
     }));
     const previous = readSharedRoomLayout(id);
-    const layout = moodBoardHandoff(pieces, id, roomContext?.roomType ?? previous?.roomType ?? "living", previous, stamp, roomContext?.targetCents == null ? previous?.budgetEur ?? null : convertCents(roomContext.targetCents, roomContext.currency, "EUR", fxRates) / 100);
+    const layout = moodBoardHandoff(pieces, id, roomContext?.roomType ?? previous?.roomType ?? "living", previous, stamp, roomContext?.targetCents == null ? previous?.budgetEur ?? null : convertCents(roomContext.targetCents, roomContext.currency, "EUR", fxRates) / 100, roomContext?.anchorId ?? null);
     layout.source = "project-studio";
     writeSharedRoomLayout(layout);
     window.__lovableEvents?.track?.("project.studio_loading", { phase: "handoff", status: "ok", duration_ms: performance.now() - handoffStarted, piece_count: pieces.length });

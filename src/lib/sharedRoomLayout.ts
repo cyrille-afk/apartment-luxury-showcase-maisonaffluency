@@ -13,6 +13,10 @@ export type SharedRoomItem = {
   imageUrl?: string | null;
   brandName?: string;
   dimensions?: string | null;
+  width_mm?: number | null;
+  depth_mm?: number | null;
+  height_mm?: number | null;
+  size_variants?: Array<{ label?: string | null; base?: string | null; top?: string | null }> | null;
   category?: string | null;
   subcategory?: string | null;
   specItemId?: string | null;
@@ -32,6 +36,8 @@ export type SharedRoomLayout = {
   floorFinish?: string | null;
   items: SharedRoomItem[];
   source: "visualiser" | "curated" | "mood-board" | "project-studio";
+  /** Pinned product Anchor; automatic handoffs place it first in items. */
+  anchorId?: string | null;
   roomType?: "living" | "dining" | "bedroom" | "office";
   /** Mood Board total budget (EUR) carried into the Sandbox walkthrough breakdown. */
   budgetEur?: number | null;
