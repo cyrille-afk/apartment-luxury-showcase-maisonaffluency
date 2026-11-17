@@ -1,5 +1,9 @@
 # Roadmap
 
+## Dynamic Studio folder counts
+- [x] Share exclusion-aware counts between folder selection and sidebar, refreshing after confirmed removal while retaining source board entries.
+- [x] Ten regressions pass; signed-in Cipriani selector/sidebar show six after reload, confirmed test removal updates both to five immediately, and restoring the exact saved selection returns both to six. Screenshots checked; no page errors; preview build OK.
+
 ## Background Visualiser model preparation
 - [x] Move model cloning, geometry smoothing/subdivision, sizing and finish pixel preparation into a serialized browser worker with transferable results and stale-job protection; queue waits for prepared models.
 - [x] Geometry/transport/queue tests pass; actual worker round-trip preserves 2 × 0.8 × 0.5m sizing, grounding and selected bronze, with browser heartbeat continuing. Signed-in eight-piece intake creates the worker, downloads real models, advances loading and opens the plan without page errors. Complete multi-piece GPU appearance/performance remains unverified.

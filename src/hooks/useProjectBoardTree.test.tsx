@@ -2,8 +2,8 @@ import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { projectDefaultUrl, useProjectBoardTree, type ProjectBoardLink } from "./useProjectBoardTree";
 
-const mocks = vi.hoisted(() => ({ order: vi.fn(), scope: vi.fn() }));
-vi.mock("@/integrations/supabase/client", () => ({ supabase: { from: () => ({ select: () => ({ in: mocks.scope }) }) } }));
+const mocks = vi.hoisted(() => ({ order: vi.fn(), scope: vi.fn(), finishes: vi.fn() }));
+vi.mock("@/integrations/supabase/client", () => ({ supabase: { from: (table: string) => ({ select: () => ({ in: table === "project_studio_finishes" ? mocks.finishes : mocks.scope }) }) } }));
 const board = { id: "deleted-folder", project_id: "project", title: "Mood board", updated_at: "2026-11-17" };
 const remaining = { ...board, id: "remaining-folder" };
 type Result = { data: ProjectBoardLink[]; error: null };
@@ -15,6 +15,7 @@ function deferred() {
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.scope.mockReturnValue({ order: mocks.order });
+  mocks.finishes.mockResolvedValue({ data: [], error: null });
   mocks.order.mockResolvedValue({ data: [board, remaining], error: null });
 });
 afterEach(cleanup);
@@ -59,8 +60,20 @@ it("refreshes ordinary artifact changes and removes its listener on unmount", as
 });
 
 it("reads saved item counts without dropping empty folders from the shared tree", async () => {
-  mocks.order.mockResolvedValue({ data: [{ ...board, client_board_items: [{ count: 0 }] }, { ...remaining, client_board_items: [{ count: 8 }] }], error: null });
+  mocks.order.mockResolvedValue({ data: [{ ...board, client_board_items: [] }, { ...remaining, client_board_items: Array.from({ length: 8 }, (_, i) => ({ id: `item-${i}`, product_id: `product-${i}` })) }], error: null });
   const { result } = renderHook(() => useProjectBoardTree(["project"]));
   await waitFor(() => expect(result.current).toHaveLength(2));
   expect(result.current.map(folder => folder.item_count)).toEqual([0, 8]);
+});
+
+it("refreshes eight to six after confirmed Studio exclusions, including remount", async () => {
+  mocks.order.mockResolvedValue({ data: [{ ...board, client_board_items: Array.from({ length: 8 }, (_, i) => ({ id: `item-${i}`, product_id: `product-${i}` })) }], error: null });
+  const { result, unmount } = renderHook(() => useProjectBoardTree(["project"]));
+  await waitFor(() => expect(result.current[0]?.item_count).toBe(8));
+  mocks.finishes.mockResolvedValue({ data: [0, 1].map(i => ({ project_id: "project", item_key: `item-${i}`, selection: { excluded: true } })), error: null });
+  act(() => window.dispatchEvent(new Event("concierge:artifacts-changed")));
+  await waitFor(() => expect(result.current[0]?.item_count).toBe(6));
+  unmount();
+  const restored = renderHook(() => useProjectBoardTree(["project"]));
+  await waitFor(() => expect(restored.result.current[0]?.item_count).toBe(6));
 });

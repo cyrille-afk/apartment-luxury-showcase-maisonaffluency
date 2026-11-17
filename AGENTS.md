@@ -276,3 +276,4 @@
 - Price-list content inspection uses an admin-checked public-storage inventory and revision-keyed private results; server-side byte detection precedes AI inspection, unchecked/failing assets remain unconfirmed — filenames and public covers must never imply safety.
 - Per-product `trade_only` controls visibility independently of maker profiles; new picks default Trade Only. Credits: `public_catalog_designer_credits`.
 - Auth emails send via src/routes/lovable/email/auth/webhook.ts, not the legacy hook.
+- Folder/Studio counts share studioBoardCount and saved Studio exclusions; confirmed removals notify the mounted sidebar without deleting source rows — counts match the curated schedule.

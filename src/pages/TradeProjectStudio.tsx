@@ -36,6 +36,7 @@ import { readStudioRoomContext } from "@/lib/studioRoomContext";
 import { formatPdfMoney } from "@/lib/pdfFormatting";
 import { proposalFinishDetails, proposalFinishSwatches } from "@/lib/proposalSpecifications";
 import { selectedStudioBoard, studioBoardItems } from "@/lib/studioBoardScope";
+import { studioBoardCount } from "@/lib/studioBoardCounts";
 
 type StudioItem = {
   id: string;
@@ -159,11 +160,11 @@ export default function TradeProjectStudio() {
       const productFields =
         "id, product_name, brand_name, image_url, sku, lead_time, dimensions, width_mm, depth_mm, height_mm, size_variants, trade_price_cents, rrp_price_cents, currency, source_pick_id, glb_url, materials, base_axis_label, top_axis_label, category, subcategory";
 
-      const b = await sb.from("client_boards").select("id, title, client_board_items(count)").eq("project_id", id).order("created_at").abortSignal(controller.signal);
+      const b = await sb.from("client_boards").select("id, title, client_board_items(id,product_id,variant_label,wood_label,fabric_label)").eq("project_id", id).order("created_at").abortSignal(controller.signal);
       if (cancelled) return;
       if (b.error) throw new Error("Studio folder read failed");
       window.__lovableEvents?.track?.("project.studio_loading", { phase, status: "ok", duration_ms: performance.now() - phaseStarted, piece_count: 0 });
-      const accessibleBoards = ((b.data ?? []) as Array<{ id: string; title: string; client_board_items?: Array<{ count: number }> }>).map(row => ({ id: row.id, title: row.title, item_count: row.client_board_items?.[0]?.count }));
+      const accessibleBoards: Array<{ id: string; title: string }> = (b.data ?? []).map((row: { id: string; title: string }) => ({ id: row.id, title: row.title }));
       setBoards(accessibleBoards);
       const selectedBoard = selectedStudioBoard(accessibleBoards, selectedBoardId);
       if (!selectedBoard) {
@@ -261,6 +262,7 @@ export default function TradeProjectStudio() {
       if (cancelled) return;
       window.__lovableEvents?.track?.("project.studio_loading", { phase, status: finishError || savedError ? "error" : "ok", duration_ms: performance.now() - phaseStarted, piece_count: pieceCount });
       if (finishError || savedError || pickError || editError || controller.signal.aborted) throw new Error("Studio finishes unavailable");
+      setBoards((b.data ?? []).map((row: { id: string; title: string; client_board_items: Parameters<typeof studioBoardCount>[0] }) => ({ id: row.id, title: row.title, item_count: studioBoardCount(row.client_board_items, saved ?? [], id) })));
       setCanEdit(editable === true && !finishError && !savedError);
       for (const item of list) {
         const pickId = item.source_pick_id || item.product_id;
@@ -313,6 +315,9 @@ export default function TradeProjectStudio() {
       const { error } = await supabase.from("project_studio_finishes").upsert({ project_id: id, item_key: item.id, selection: JSON.parse(JSON.stringify({ ...item.selection, excluded: true })), updated_by: user.id, updated_at: new Date().toISOString() }).select("item_key").single();
       if (error) throw error;
       setItems(current => current.filter(row => row.id !== item.id));
+      setHiddenCount(current => current + item.quantity);
+      setBoards(current => current.map(board => board.id === loadedBoardId && board.item_count !== undefined ? { ...board, item_count: Math.max(0, board.item_count - item.quantity) } : board));
+      window.dispatchEvent(new CustomEvent("concierge:artifacts-changed"));
       if (curatorialInstanceId === item.id || curatorialItem?.id === item.id) {
         setCuratorialInstanceId(null);
         setCuratorialItemId(null);

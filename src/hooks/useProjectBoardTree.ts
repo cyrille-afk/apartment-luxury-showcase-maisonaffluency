@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { studioBoardCount } from "@/lib/studioBoardCounts";
 
 export type ProjectBoardLink = { id: string; project_id: string; title: string; updated_at: string; item_count?: number };
 
@@ -13,10 +14,12 @@ export function useProjectBoardTree(projectIds: string[]) {
     let revision = 0;
     const refresh = () => {
       const requestRevision = ++revision;
-      supabase.from("client_boards").select("id, project_id, title, updated_at, client_board_items(count)")
-        .in("project_id", key.split(",")).order("updated_at", { ascending: false })
-        .then(({ data, error }) => {
-          if (active && requestRevision === revision) setBoards(error ? [] : (data || []).flatMap(board => board.project_id ? [{ id: board.id, project_id: board.project_id, title: board.title, updated_at: board.updated_at, item_count: board.client_board_items?.[0]?.count }] : []));
+      Promise.all([
+        supabase.from("client_boards").select("id, project_id, title, updated_at, client_board_items(id,product_id,variant_label,wood_label,fabric_label)")
+          .in("project_id", key.split(",")).order("updated_at", { ascending: false }),
+        supabase.from("project_studio_finishes").select("project_id,item_key,selection").in("project_id", key.split(",")),
+      ]).then(([{ data, error }, finishes]) => {
+          if (active && requestRevision === revision) setBoards(error ? [] : (data || []).flatMap(board => board.project_id ? [{ id: board.id, project_id: board.project_id, title: board.title, updated_at: board.updated_at, item_count: finishes.error || !board.client_board_items ? undefined : studioBoardCount(board.client_board_items, finishes.data || [], board.project_id) }] : []));
         });
     };
     const onArtifactsChanged = (event: Event) => {
