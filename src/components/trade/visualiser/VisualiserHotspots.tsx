@@ -38,9 +38,10 @@ function readPanelRects(canvas: HTMLCanvasElement): VisualiserHotspotRect[] {
 }
 
 /** Screen-space, panel-aware pins. The 3D furniture and canvas stay mounted. */
-export default function VisualiserHotspots({ objects, onFindAlternatives }: {
+export default function VisualiserHotspots({ objects, onFindAlternatives, onStatus }: {
   objects: PlacedObject[];
   onFindAlternatives: (instanceId: string) => void;
+  onStatus?: (status: "ready" | "error") => void;
 }) {
   const { camera, gl, size, invalidate } = useThree();
   const pinRefs = useRef(new Map<string, HTMLDivElement>());
@@ -51,8 +52,10 @@ export default function VisualiserHotspots({ objects, onFindAlternatives }: {
   const host = gl.domElement.parentElement;
   const frameSample = useRef({ count: 0, total: 0, max: 0, gap: 0, last: 0 });
   const countRef = useRef(objects.length);
+  const reported = useRef(false);
+  const failed = useRef(false);
   countRef.current = objects.length;
-  useEffect(() => { frameSample.current = { count: 0, total: 0, max: 0, gap: 0, last: 0 }; }, [objects.length]);
+  useEffect(() => { reported.current = false; frameSample.current = { count: 0, total: 0, max: 0, gap: 0, last: 0 }; }, [objects]);
 
   useEffect(() => {
     const workspace = gl.domElement.closest(".visualiser-workspace") ?? host;
@@ -78,7 +81,7 @@ export default function VisualiserHotspots({ objects, onFindAlternatives }: {
   }, [gl, host, invalidate]);
 
   useFrame(() => {
-    if (!host) return;
+    if (!host || failed.current) return;
     const started = performance.now();
     try {
     camera.updateMatrixWorld();
@@ -114,10 +117,18 @@ export default function VisualiserHotspots({ objects, onFindAlternatives }: {
       pin.dataset.tooltipSide = placement.tooltipSide;
       pin.dataset.displaced = String(placement.displaced);
     }
+    if (!reported.current && pinRefs.current.size === objects.length) {
+      reported.current = true;
+      onStatus?.("ready");
+    }
     } catch (error) {
       window.__lovableEvents?.track?.("project.studio_loading", { phase: "hotspot_error", status: "error", duration_ms: performance.now() - started, piece_count: objects.length, pin_count: pinRefs.current.size });
       window.__lovableEvents?.captureException?.(error, { source: "visualiser_hotspot_projection", piece_count: objects.length }, { mechanism: "manual", handled: false, severity: "error" });
-      throw error;
+      if (!onStatus) throw error;
+      failed.current = true;
+      overlayElement.style.display = "none";
+      onStatus("error");
+      return;
     }
     const sample = frameSample.current;
     // At most two batches per mount/count change; no per-frame network traffic.
@@ -175,13 +186,15 @@ export default function VisualiserHotspots({ objects, onFindAlternatives }: {
     const root = createRoot(overlayElement, { onUncaughtError: error => {
       window.__lovableEvents?.track?.("project.studio_loading", { phase: "hotspot_error", status: "error", duration_ms: performance.now() - started, piece_count: countRef.current, pin_count: pinRefs.current.size });
       window.__lovableEvents?.captureException?.(error, { source: "visualiser_hotspot_overlay", piece_count: countRef.current }, { mechanism: "react_error_boundary", handled: false, severity: "error" });
+      failed.current = true;
+      onStatus?.("error");
     } });
     overlayRoot.current = root;
     window.__lovableEvents?.track?.("project.studio_loading", { phase: "hotspot_mount", status: "ok", duration_ms: performance.now() - started, piece_count: countRef.current, pin_count: pinRefs.current.size });
     return () => {
       overlayRoot.current = null;
-      root.unmount();
       overlayElement.remove();
+      queueMicrotask(() => root.unmount());
     };
   }, [host, overlayElement]);
 

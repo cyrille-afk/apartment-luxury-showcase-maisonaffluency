@@ -33,3 +33,23 @@ it("reports at most two CPU samples per 120 frames rather than sending every fra
   expect(samples.map(([, properties]) => properties.sample_count)).toEqual([60, 120]);
   expect(samples[0]?.[1]).toMatchObject({ piece_count: 0, pin_count: 0, status: "ok" });
 });
+it("contains a projection failure when recovery is available and does not retry every frame", () => {
+  vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} });
+  const host = document.createElement("div"); state.canvas = document.createElement("canvas"); host.append(state.canvas); document.body.append(host);
+  state.camera = new THREE.PerspectiveCamera(60, 4 / 3, .1, 100);
+  const project = vi.spyOn(state.camera, "updateMatrixWorld").mockImplementation(() => { throw new Error("Projection failed"); });
+  const onStatus = vi.fn();
+  render(<VisualiserHotspots objects={[]} onFindAlternatives={() => {}} onStatus={onStatus} />);
+  act(() => { state.frame?.(); state.frame?.(); });
+  expect(onStatus).toHaveBeenCalledExactlyOnceWith("error");
+  expect(project).toHaveBeenCalledTimes(1);
+});
+it("reports readiness only after a successful projection and not on every frame", () => {
+  vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} });
+  const host = document.createElement("div"); state.canvas = document.createElement("canvas"); host.append(state.canvas); document.body.append(host);
+  state.camera = new THREE.PerspectiveCamera(60, 4 / 3, .1, 100);
+  const onStatus = vi.fn();
+  render(<VisualiserHotspots objects={[]} onFindAlternatives={() => {}} onStatus={onStatus} />);
+  act(() => { state.frame?.(); state.frame?.(); });
+  expect(onStatus).toHaveBeenCalledExactlyOnceWith("ready");
+});

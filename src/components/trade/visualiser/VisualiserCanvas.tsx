@@ -283,6 +283,8 @@ interface VisualiserCanvasProps {
   /** Editorial product pins open the curated alternative drawer without selecting a drag. */
   showHotspots?: boolean;
   onFindAlternatives?: (instanceId: string) => void;
+  onHotspotStatus?: (status: "ready" | "error") => void;
+  hotspotEpoch?: number;
   /** Filled with a getter returning the floor point the camera is looking at. */
   focusRef?: { current: (() => [number, number] | null) | null };
   /** Subtle background blur focused on the selected piece (or orbit target). */
@@ -403,6 +405,8 @@ const VisualiserCanvas = ({
   showLabels = true,
   showHotspots = false,
   onFindAlternatives,
+  onHotspotStatus,
+  hotspotEpoch = 0,
   focusRef,
   depthOfField = true,
   pathTrace = false,
@@ -632,7 +636,7 @@ const VisualiserCanvas = ({
       ))}
       <InitialAssetsCommitted onReady={setObjectsReady} />
     </Suspense>
-    {showHotspots && isEditable && onFindAlternatives && <VisualiserHotspots objects={objects} onFindAlternatives={onFindAlternatives} />}
+    {showHotspots && isEditable && onFindAlternatives && <VisualiserHotspots key={hotspotEpoch} objects={objects} onFindAlternatives={onFindAlternatives} onStatus={onHotspotStatus} />}
     {pathTrace && (
       <PathTracerLayer
         checkpointKey={renderCheckpointKey}

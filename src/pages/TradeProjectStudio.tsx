@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "@/lib/router-compat";
-import { ArrowLeft, FileDown, FileText, Sparkles, Box, Trash2 } from "lucide-react";
+import { ArrowLeft, FileDown, FileText, Sparkles, Box, Trash2, RotateCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProject } from "@/hooks/useProjects";
 import { DotCircleLoader, PageLoader } from "@/components/ui/dot-circle-loader";
@@ -89,6 +89,8 @@ export default function TradeProjectStudio() {
   const { project, loading } = useProject(id);
   const [items, setItems] = useState<StudioItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadPhase, setLoadPhase] = useState("Loading mood boards…");
   const [itemsVersion, setItemsVersion] = useState(0);
   const { showTradePrice, setShowTradePrice } = useTradePriceMode();
   const { discountPct } = useTradeDiscount();
@@ -124,6 +126,8 @@ export default function TradeProjectStudio() {
   useEffect(() => {
     if (!id) return;
     let cancelled = false;
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 30000);
     const started = performance.now();
     let phase: "boards" | "pieces" | "finishes" = "boards";
     let phaseStarted = started;
@@ -131,6 +135,8 @@ export default function TradeProjectStudio() {
     window.__lovableEvents?.track?.("project.studio_loading", { phase: "studio_total", status: "started", duration_ms: 0, piece_count: 0 });
     (async () => {
       setLoadingItems(true);
+      setLoadError(null);
+      setLoadPhase("Loading mood boards…");
       setItems([]);
       setLoadedBoardId(null);
       setCanEdit(false);
@@ -138,24 +144,30 @@ export default function TradeProjectStudio() {
       const productFields =
         "id, product_name, brand_name, image_url, sku, lead_time, dimensions, width_mm, depth_mm, height_mm, size_variants, trade_price_cents, rrp_price_cents, currency, source_pick_id, glb_url, materials, base_axis_label, top_axis_label, category, subcategory";
 
-      const b = await sb.from("client_boards").select("id, title").eq("project_id", id).order("created_at");
+      const b = await sb.from("client_boards").select("id, title").eq("project_id", id).order("created_at").abortSignal(controller.signal);
       if (cancelled) return;
       if (b.error) throw new Error("Studio folder read failed");
       window.__lovableEvents?.track?.("project.studio_loading", { phase, status: "ok", duration_ms: performance.now() - phaseStarted, piece_count: 0 });
       const accessibleBoards = (b.data ?? []) as Array<{ id: string; title: string }>;
       setBoards(accessibleBoards);
       const selectedBoard = selectedStudioBoard(accessibleBoards, selectedBoardId);
-      if (!selectedBoard) { window.__lovableEvents?.track?.("project.studio_loading", { phase: "studio_total", status: "selection_required", duration_ms: performance.now() - started, piece_count: 0 }); setLoadingItems(false); return; }
+      if (!selectedBoard) {
+        if (selectedBoardId) setLoadError("The selected mood board is unavailable. Try again or choose another mood board.");
+        window.__lovableEvents?.track?.("project.studio_loading", { phase: "studio_total", status: "selection_required", duration_ms: performance.now() - started, piece_count: 0 }); setLoadingItems(false); return;
+      }
       phase = "pieces"; phaseStarted = performance.now();
+      setLoadPhase(`Loading pieces from ${selectedBoard.title}…`);
       const folderTitles = new Map([[selectedBoard.id, selectedBoard.title]]);
       const bItems = await sb.from("client_board_items")
         .select(`id, board_id, product_id, variant_label, wood_label, fabric_label, procurement_quote_id, source_quote_item_id, trade_products(${productFields})`)
-        .eq("board_id", selectedBoard.id).order("sort_order");
+        .eq("board_id", selectedBoard.id).order("sort_order").abortSignal(controller.signal);
       if (cancelled) return;
       if (bItems.error) throw new Error("Studio piece read failed");
       pieceCount = bItems.data?.length ?? 0;
       window.__lovableEvents?.track?.("project.studio_loading", { phase, status: "ok", duration_ms: performance.now() - phaseStarted, piece_count: pieceCount });
       phase = "finishes"; phaseStarted = performance.now();
+      setLoadPhase(`Loading finishes for ${pieceCount} piece${pieceCount === 1 ? "" : "s"}…`);
+      if (bItems.data?.some((row: any) => !row.trade_products)) throw new Error("Studio catalogue details unavailable");
 
       const map = new Map<string, StudioItem>();
       const push = (row: any, quantity: number) => {
@@ -212,7 +224,7 @@ export default function TradeProjectStudio() {
         const { data: picks } = await supabase
           .from("designer_curator_picks")
           .select("id, trade_price_cents")
-          .in("id", pickIds);
+          .in("id", pickIds).abortSignal(controller.signal);
         const priceByPick = new Map(
           ((picks as Array<{ id: string; trade_price_cents: number | null }> | null) || []).map(
             (p) => [p.id, p.trade_price_cents],
@@ -225,15 +237,15 @@ export default function TradeProjectStudio() {
       }
 
       const pickIds = [...new Set(list.map(item => item.source_pick_id || item.product_id))];
-      const [{ data: links, error: finishError }, { data: picks }, { data: saved, error: savedError }, { data: editable }] = await Promise.all([
-        pickIds.length ? sb.from("product_fabrics").select("pick_id,sort_order,price_tier_label,image_indices,price_cents_a,fabrics(id,name,supplier,category,image_url,is_active,price_per_lm_cents,currency)").in("pick_id", pickIds).order("sort_order") : Promise.resolve({ data: [] }),
-        pickIds.length ? sb.from("designer_curator_picks").select("id,base_axis_label,top_axis_label,size_variants,materials,com_meters").in("id", pickIds) : Promise.resolve({ data: [] }),
-        supabase.from("project_studio_finishes").select("item_key,selection").eq("project_id", id),
-        user ? supabase.rpc("can_edit_project", { _project_id: id, _user_id: user.id }) : Promise.resolve({ data: false }),
+      const [{ data: links, error: finishError }, { data: picks, error: pickError }, { data: saved, error: savedError }, { data: editable, error: editError }] = await Promise.all([
+        pickIds.length ? sb.from("product_fabrics").select("pick_id,sort_order,price_tier_label,image_indices,price_cents_a,fabrics(id,name,supplier,category,image_url,is_active,price_per_lm_cents,currency)").in("pick_id", pickIds).order("sort_order").abortSignal(controller.signal) : Promise.resolve({ data: [] }),
+        pickIds.length ? sb.from("designer_curator_picks").select("id,base_axis_label,top_axis_label,size_variants,materials,com_meters").in("id", pickIds).abortSignal(controller.signal) : Promise.resolve({ data: [] }),
+        supabase.from("project_studio_finishes").select("item_key,selection").eq("project_id", id).abortSignal(controller.signal),
+        user ? supabase.rpc("can_edit_project", { _project_id: id, _user_id: user.id }).abortSignal(controller.signal) : Promise.resolve({ data: false, error: null }),
       ]);
       if (cancelled) return;
       window.__lovableEvents?.track?.("project.studio_loading", { phase, status: finishError || savedError ? "error" : "ok", duration_ms: performance.now() - phaseStarted, piece_count: pieceCount });
-      if (finishError || savedError) toast.error("Studio finishes couldn't load. Please reopen the project to try again.");
+      if (finishError || savedError || pickError || editError || controller.signal.aborted) throw new Error("Studio finishes unavailable");
       setCanEdit(editable === true && !finishError && !savedError);
       for (const item of list) {
         const pickId = item.source_pick_id || item.product_id;
@@ -257,9 +269,10 @@ export default function TradeProjectStudio() {
     })().catch(() => { if (!cancelled) {
       window.__lovableEvents?.track?.("project.studio_loading", { phase, status: "error", duration_ms: performance.now() - phaseStarted, piece_count: pieceCount });
       window.__lovableEvents?.captureException?.(new Error(`Studio loading failed at ${phase}`), { source: "project_studio", phase }, { mechanism: "manual", handled: true, severity: "error" });
-      setLoadingItems(false); toast.error("This folder couldn't load. Please reopen Project Studio.");
-    } });
-    return () => { cancelled = true; };
+      setLoadingItems(false);
+      setLoadError(controller.signal.aborted ? "Loading took too long. Your saved pieces are unchanged. Please try again." : phase === "finishes" ? "The selected board’s finishes couldn’t load. Your saved pieces are unchanged." : "The selected mood board couldn’t load. Your saved pieces are unchanged.");
+    } }).finally(() => window.clearTimeout(timeout));
+    return () => { cancelled = true; controller.abort(); window.clearTimeout(timeout); };
   }, [id, selectedBoardId, itemsVersion, user?.id]);
 
   const changeFinish = async (item: StudioItem, selection: StudioFinishSelection) => {
@@ -298,7 +311,7 @@ export default function TradeProjectStudio() {
   };
   const finishControls = (item: StudioItem, compact = false) => <StudioFinishControls product={item.catalog} selection={item.selection} compact={compact} disabled={!canEdit || savingFinishes || removingItem || isClientMode} onChange={selection => void changeFinish(item, selection)} />;
   const openInVisualiser = () => {
-    if (!id || !loadedBoardId || loadingItems || !items.length || savingFinishes || removingItem) return;
+    if (!id || !loadedBoardId || loadingItems || loadError || !items.length || savingFinishes || removingItem) return;
     const stamp = Date.now();
     const handoffStarted = performance.now();
     const pieces = items.flatMap(item => Array.from({ length: item.quantity }, (_, index) => {
@@ -409,12 +422,23 @@ export default function TradeProjectStudio() {
             <p className="trade-micro-label text-muted-foreground">Visual canvas</p>
           </div>
           {loadingItems ? (
-            <PageLoader />
+            <div role="status" aria-live="polite" aria-busy="true" data-trade-page-loading className="flex min-h-64 flex-col items-center justify-center gap-4 px-4 text-center">
+              <DotCircleLoader />
+              <p className="font-body text-sm text-muted-foreground">{loadPhase}</p>
+            </div>
+          ) : loadError ? (
+            <div role="alert" className="flex min-h-64 flex-col items-center justify-center gap-4 px-4 text-center md:px-8">
+              <h2 className="font-display text-xl text-foreground">Project Studio couldn’t load</h2>
+              <p className="max-w-md font-body text-sm text-muted-foreground">{loadError}</p>
+              <Button variant="outline" className="cursor-pointer" onClick={() => { setLoadingItems(true); setLoadError(null); setItemsVersion(version => version + 1); }}><RotateCw className="size-4" />Retry selected board</Button>
+            </div>
           ) : items.length === 0 ? (
-            <div className="px-4 pb-16 md:px-8 lg:px-12">
-              <p className="font-body text-sm text-muted-foreground">
-                {loadedBoardId ? "This mood board has no visible pieces." : "Select a mood board."}
+            <div role="status" className="flex min-h-64 flex-col items-center justify-center gap-3 px-4 pb-16 text-center md:px-8 lg:px-12">
+              <h2 className="font-display text-xl text-foreground">{loadedBoardId ? "No pieces to display" : boards.length ? "Select a mood board" : "No mood boards yet"}</h2>
+              <p className="max-w-md font-body text-sm text-muted-foreground">
+                {loadedBoardId ? "This mood board has no visible pieces, so there are no furniture hotspots to load." : boards.length ? "Choose a mood board above to load its pieces and finishes." : "This project has no saved mood boards."}
               </p>
+              {loadedBoardId && <Button variant="outline" className="cursor-pointer" onClick={() => { setLoadingItems(true); setItemsVersion(version => version + 1); }}><RotateCw className="size-4" />Reload selected board</Button>}
             </div>
           ) : (
             <div className={`grid grid-cols-2 items-start pb-10 transition-all duration-300 ease-in-out motion-reduce:transition-none ${isSpecPanelOpen ? "lg:grid-cols-3 gap-6 px-4 md:px-8 lg:px-12" : "lg:grid-cols-4 gap-4 px-4"}`}>

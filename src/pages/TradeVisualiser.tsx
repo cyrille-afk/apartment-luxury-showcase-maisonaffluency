@@ -295,6 +295,8 @@ const TradeVisualiser = () => {
     else if (notice === "reset") toast.warning("A display error occurred again — your scene was kept as is and reloaded.");
   }, []);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [handoffStatus, setHandoffStatus] = useState<"idle" | "loading" | "ready" | "error" | "missing">("idle");
+  const [handoffVersion, setHandoffVersion] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
   const canvasWrapRef = useRef<HTMLDivElement>(null);
   const captureHandle = useRef<SceneCaptureHandle | null>(null);
@@ -332,6 +334,10 @@ const TradeVisualiser = () => {
   const [showGrid, setShowGrid] = useState<boolean>(initial.showGrid ?? true);
   const [showLabels, setShowLabels] = useState<boolean>(initial.showLabels ?? true);
   const [showHotspots, setShowHotspots] = useState<boolean>(initial.showHotspots ?? true);
+  const [hotspotStatus, setHotspotStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [hotspotEpoch, setHotspotEpoch] = useState(0);
+  const handleHotspotStatus = useCallback((status: "ready" | "error") => setHotspotStatus(status), []);
+  useEffect(() => { setHotspotStatus("loading"); }, [showHotspots, objects.length]);
   monitoringCounts.current = { piece_count: objects.length, hotspots_enabled: showHotspots };
   const [alternativesId, setAlternativesId] = useState<string | null>(null);
   const [swappingId, setSwappingId] = useState<string | null>(null);
@@ -346,6 +352,11 @@ const TradeVisualiser = () => {
   }, [swapSnapshot]);
   const [pathTrace, setPathTrace] = useState(false);
   const [initialRoomReady, setInitialRoomReady] = useState(false);
+  useEffect(() => {
+    if (!showHotspots || !objects.length || !initialRoomReady || hotspotStatus !== "loading") return;
+    const timeout = window.setTimeout(() => setHotspotStatus("error"), 30000);
+    return () => window.clearTimeout(timeout);
+  }, [showHotspots, objects.length, initialRoomReady, hotspotStatus, hotspotEpoch]);
   const revealInitialRoom = useCallback(() => {
     setInitialRoomReady(true);
     window.__lovableEvents?.track?.("project.studio_loading", { phase: "room_ready", status: "ok", duration_ms: roomLoadStarted.current === null ? 0 : performance.now() - roomLoadStarted.current, ...monitoringCounts.current });
@@ -1061,7 +1072,7 @@ const TradeVisualiser = () => {
     finishesLocked: o.finishesLocked, finishes: o.finishes,
   });
   useEffect(() => {
-    if (!activeProject) return;
+    if (!activeProject || (searchParams.get("handoff") === "curated" && handoffStatus !== "ready")) return;
     const bounds = activeProject.state.bounds;
     const prev = readSharedRoomLayout(sharedProject);
     const layout = {
@@ -1084,7 +1095,7 @@ const TradeVisualiser = () => {
     }, walkthroughActive ? 0 : 400);
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [walkthroughActive, objects, wallFinish, floorFinish, activeProject?.state.bounds]);
+  }, [walkthroughActive, objects, wallFinish, floorFinish, activeProject?.state.bounds, handoffStatus]);
   const alternativesObject = objects.find(object => object.instanceId === alternativesId) ?? null;
   const alternativesActive = useMemo<PricedVisualiserAlternative | null>(() => {
     if (!alternativesObject) return null;
@@ -1186,19 +1197,26 @@ const TradeVisualiser = () => {
   useEffect(() => {
     if (curatedHandoffDone.current || searchParams.get("handoff") !== "curated") return;
     curatedHandoffDone.current = true;
+    let cancelled = false;
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 30000);
+    setHandoffStatus("loading");
     const handoffStarted = performance.now();
     const rawStamp = Number(searchParams.get("stamp"));
     const shared = readSharedRoomLayout(searchParams.get("project"), Number.isFinite(rawStamp) && rawStamp > 0 ? rawStamp : null);
     if (!shared) {
+      window.clearTimeout(timeout);
+      setHandoffStatus("missing");
       window.__lovableEvents?.track?.("project.studio_loading", { phase: "handoff", status: "error", duration_ms: performance.now() - handoffStarted, piece_count: 0 });
-      toast.error("The curated layout didn't come through — click Open in Visualiser Sandbox again."); return;
+      return;
     }
     void (async () => {
       const ids = [...new Set(shared.items.map((i) => i.productId))];
-      const { data, error } = ids.length ? await (supabase as any).from("trade_products").select("id, product_name, brand_name, image_url, dimensions, width_mm, depth_mm, height_mm, size_variants, category, subcategory, source_pick_id, glb_url").in("id", ids) : { data: [], error: null };
+      const { data, error } = ids.length ? await (supabase as any).from("trade_products").select("id, product_name, brand_name, image_url, dimensions, width_mm, depth_mm, height_mm, size_variants, category, subcategory, source_pick_id, glb_url").in("id", ids).abortSignal(controller.signal) : { data: [], error: null };
+      if (cancelled) return;
       if (error) {
         window.__lovableEvents?.track?.("project.studio_loading", { phase: "handoff", status: "error", duration_ms: performance.now() - handoffStarted, piece_count: shared.items.length });
-        toast.error("Catalogue details couldn't load. Your existing room is unchanged; please try the handoff again."); curatedHandoffDone.current = false; return;
+        setHandoffStatus("error"); return;
       }
       const rows = new Map(((data ?? []) as Array<{ id: string; product_name: string; brand_name: string; image_url: string | null; dimensions: string | null; width_mm: number | null; depth_mm: number | null; height_mm: number | null; size_variants: PlacedObject["size_variants"]; category: string | null; subcategory: string | null; source_pick_id: string | null; glb_url: string | null }>).map((r) => [r.id, r]));
       const placed = shared.items.map((item) => {
@@ -1215,15 +1233,17 @@ const TradeVisualiser = () => {
         return { ...next, ...(item.appearance ?? {}), instanceId: `${next.instanceId}-${shared.items.indexOf(item)}`, rotation: [0, item.rotationY, 0] as [number, number, number] };
       });
       setObjects(placed);
+      setHandoffStatus("ready");
       window.__lovableEvents?.track?.("project.studio_loading", { phase: "handoff", status: "ok", duration_ms: performance.now() - handoffStarted, piece_count: placed.length });
       if (shared.source === "mood-board" || shared.source === "project-studio") activeProject?.setBounds({ width: shared.room.width, depth: shared.room.length, height: shared.room.height });
       setSelectedId(null);
       if (shared.wallFinish) setWallFinish(roomWallFinish(shared.wallFinish));
       if (shared.floorFinish) setFloorFinish(roomFloorFinish(shared.floorFinish));
       toast.success(`${shared.source === "project-studio" ? "Project Studio" : shared.source === "mood-board" ? "Mood board" : "Curated layout"} loaded — ${placed.length} piece${placed.length === 1 ? "" : "s"}${shared.roomType ? ` · ${shared.roomType}` : ""}.`);
-    })();
+    })().catch(() => { if (!cancelled) setHandoffStatus("error"); }).finally(() => window.clearTimeout(timeout));
+    return () => { cancelled = true; controller.abort(); window.clearTimeout(timeout); curatedHandoffDone.current = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  }, [searchParams, handoffVersion]);
 
   // Export a clean PNG mockup: hide the floor grid, let one frame render,
   // capture the WebGL canvas, then restore the grid exactly as it was.
@@ -1329,7 +1349,17 @@ const TradeVisualiser = () => {
           }
         }}
       >
-        {!initialRoomReady && !sceneFailed && <div role="status" data-room-loading className="absolute inset-0 z-20 flex items-center justify-center bg-visualiser-canvas"><span className="text-xs text-muted-foreground">Preparing your room…</span></div>}
+        {!initialRoomReady && !sceneFailed && handoffStatus !== "error" && handoffStatus !== "missing" && <div role="status" data-room-loading className="absolute inset-0 z-20 flex items-center justify-center bg-visualiser-canvas"><span className="text-xs text-muted-foreground">{handoffStatus === "loading" ? "Loading the selected board’s pieces and hotspots…" : "Preparing your room and furniture hotspots…"}</span></div>}
+        {(handoffStatus === "error" || handoffStatus === "missing") && <div role="alert" data-visualiser-hotspot-obstacle className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-background px-6 text-center">
+          <h2 className="font-display text-xl text-foreground">Selected board couldn’t load</h2>
+          <p className="max-w-md text-sm text-muted-foreground">{handoffStatus === "missing" ? "The saved room transfer is unavailable. Reopen the selected board in Project Studio and send it again." : "The selected board’s furniture details couldn’t load. Your saved pieces are unchanged."}</p>
+          {handoffStatus === "error" && <Button variant="outline" className="cursor-pointer" onClick={() => { curatedHandoffDone.current = false; setHandoffStatus("loading"); setHandoffVersion(value => value + 1); }}>Retry selected board</Button>}
+          {searchParams.get("project") && <Button variant="outline" className="cursor-pointer" onClick={() => navigateTo(`/trade/projects/${encodeURIComponent(searchParams.get("project") || "")}/studio${searchParams.get("board") ? `?board=${encodeURIComponent(searchParams.get("board") || "")}` : ""}`)}>Back to Project Studio</Button>}
+        </div>}
+        {showHotspots && !exporting && (initialRoomReady || hotspotStatus === "error") && !sceneFailed && handoffStatus !== "loading" && handoffStatus !== "error" && handoffStatus !== "missing" && (objects.length === 0 || hotspotStatus !== "ready") && <div role={hotspotStatus === "error" ? "alert" : "status"} data-visualiser-hotspot-obstacle className="absolute inset-x-4 bottom-24 z-30 mx-auto flex max-w-md flex-col items-center gap-3 border border-border bg-background/95 px-4 py-3 text-center shadow-sm">
+          <p className="text-sm text-muted-foreground">{objects.length === 0 ? "No pieces in this room — no furniture hotspots to display." : hotspotStatus === "error" ? "Furniture hotspots couldn’t load. Your room and saved pieces are unchanged." : `Loading ${objects.length} furniture hotspots…`}</p>
+          {hotspotStatus === "error" && objects.length > 0 && <Button variant="outline" className="cursor-pointer" onClick={() => { setHotspotStatus("loading"); setHotspotEpoch(value => value + 1); }}>Retry hotspots</Button>}
+        </div>}
         {contextState === "restoring" && !sceneFailed && <div role="status" className="absolute inset-0 z-20 flex items-center justify-center bg-background/90 text-sm text-muted-foreground">Restoring the 3D view… Your furniture layout is unchanged.</div>}
         {(sceneFailed || contextState === "failed") && <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-background/90">
           <p className="text-sm text-muted-foreground">The 3D view stopped. Your furniture layout is unchanged.</p>
@@ -1361,7 +1391,9 @@ const TradeVisualiser = () => {
             snapToGrid={snapToGrid}
             showGrid={showGrid}
             showLabels={showLabels}
-            showHotspots={showHotspots && !exporting}
+            showHotspots={showHotspots && !exporting && hotspotStatus !== "error"}
+            hotspotEpoch={hotspotEpoch}
+            onHotspotStatus={handleHotspotStatus}
             onFindAlternatives={openAlternatives}
             depthOfField={depthOfField}
             pathTrace={!photoMode && pathTrace && (!activeProject || activeProject.view === "sandbox")}

@@ -1,5 +1,9 @@
 # Roadmap
 
+## Selected-board loading recovery
+- [x] Added persistent stage loading, distinct empty/unavailable/failure states and bounded selected-board retries. Failed or pending Sandbox transfers cannot publish an empty room over the incoming composition; hotspot failures stop projection and retry only the overlay.
+- [x] Eleven regressions pass; owner’s real board verified with delayed pieces, controlled piece/finish failures, retry restoring eleven pieces, simulated empty response and phone fit without data deletion. Controlled Sandbox transfer failure retries to eleven pins with no page errors; eight-item board excluded. Preview build and event schema pass; furniture assets were still loading in the captured room, so final GPU rendering is not claimed.
+
 ## Studio loading monitoring
 - [x] Instrumented board/piece/finish reads, handoff, room readiness, canvas and separate hotspot-root errors, context recovery and hotspot toggle; CPU batches stop at 120 frames. Counts/timings carry no names, prices or private IDs; frame gaps are not GPU timing or causal proof.
 - [x] Schema validates (26 events including new studio_loading); eight regressions pass. Owner's real eleven-piece flow emits Studio stage timings and hotspot mount, retains eleven pins after reload/on phone; controlled folder 503 emits boards/error and captured stage context. Published ingestion and a real crash diagnosis require publishing and an actual visit; room readiness/CPU samples correctly remain absent until their conditions occur.
