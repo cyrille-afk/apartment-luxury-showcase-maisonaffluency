@@ -15,7 +15,7 @@ export type ProposalPresentation = {
   highlight: { x: number; y: number; width: number; height: number } | null;
 };
 
-export function ProposalPresentationSettings({ value, onChange }: { value: ProposalPresentation; onChange: (value: ProposalPresentation) => void }) {
+export function ProposalPresentationSettings({ value, onChange, defaultHighlight }: { value: ProposalPresentation; onChange: (value: ProposalPresentation) => void; defaultHighlight?: ProposalPresentation['highlight'] }) {
   const update = (patch: Partial<ProposalPresentation>) => onChange({ ...value, ...patch });
   const imageInput = (key: "heroImage" | "floorPlanImage" | "roomImage", label: string) => (
     <label className="flex cursor-pointer items-center gap-2 border border-border bg-card px-3 py-2 text-xs">
@@ -37,6 +37,7 @@ export function ProposalPresentationSettings({ value, onChange }: { value: Propo
     {imageInput("heroImage", "Cipriani hero image")}{imageInput("floorPlanImage", "Apartment floor plan")}{imageInput("roomImage", "Rendered room vignette")}
     {value.floorPlanImage && <div className="grid gap-2 sm:col-span-3 sm:grid-cols-3">
       {([['x', 'Room centre X', 0, 100], ['y', 'Room centre Y', 0, 100], ['width', 'Room width', 1, 100], ['height', 'Room depth', 1, 100]] as const).map(([key, label, min, max]) => <label key={key} className="text-xs">{label}<input aria-label={label} className="mt-2 block w-full accent-primary" type="range" min={min} max={max} value={value.highlight?.[key] ?? (key === 'x' || key === 'y' ? 50 : 20)} onChange={e => update({ highlight: { x: 50, y: 50, width: 20, height: 20, ...value.highlight, [key]: Number(e.target.value) } })} /></label>)}
+      {defaultHighlight && <button type="button" className="self-end justify-self-start border border-border px-3 py-2 text-xs hover:bg-muted" onClick={() => update({ highlight: { ...defaultHighlight } })}>Reset highlight to room</button>}
     </div>}
   </section>;
 }
