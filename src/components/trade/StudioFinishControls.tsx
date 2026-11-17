@@ -47,7 +47,7 @@ export function StudioFinishControls({ product, selection, onChange, disabled = 
           {selection.locked ? <Lock className="!size-3 shrink-0" /> : <Unlock className="!size-3 shrink-0 text-muted-foreground" />}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" sideOffset={8} aria-label={`Material and finish options for ${product.name}`} className="flex max-h-[min(28rem,70dvh)] w-80 max-w-[calc(100vw-2rem)] flex-col overflow-hidden p-0" onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
+      <PopoverContent align="start" sideOffset={8} collisionPadding={16} sticky="always" aria-label={`Material and finish options for ${product.name}`} className="flex max-h-[min(28rem,70dvh,var(--radix-popover-content-available-height))] w-80 max-w-[calc(100vw-2rem)] flex-col overflow-hidden p-0" onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
         <div className="flex shrink-0 items-center justify-between gap-2 p-4 pb-2">
           <p className="min-w-0 truncate font-body text-xs text-foreground">{product.name}</p>
           <Button variant="ghost" size="icon" className="size-8 shrink-0 cursor-pointer" aria-label="Close finish options" title="Close finish options" onClick={() => setPickerOpen(false)}><X className="size-4" /></Button>
