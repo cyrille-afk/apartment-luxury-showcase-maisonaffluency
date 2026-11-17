@@ -1981,14 +1981,18 @@ export function AIConcierge({
       }
       stampTimelineThread(activeThreadId);
       if (remoteArr.length > 0) {
-        setTimeline(stripDesignDirectorCtasFromTimeline(sanitizeTimelineForAttachments(remoteArr)));
+        const restored = stripDesignDirectorCtasFromTimeline(sanitizeTimelineForAttachments(remoteArr));
+        // Restoring a saved conversation is not new activity. Establish the
+        // normalized payload baseline before the debounced saver sees it.
+        cloudLastPayloadRef.current = JSON.stringify(buildCompactTimeline(restored));
+        setTimeline(restored);
       } else {
         setTimeline(buildInitialTimeline());
       }
       setHydratedThreadId(activeThreadId);
     })();
     return () => { cancelled = true; };
-  }, [user?.id, activeThreadId, buildInitialTimeline, saveActiveThreadNow, stampTimelineThread]);
+  }, [user?.id, activeThreadId, buildInitialTimeline, buildCompactTimeline, saveActiveThreadNow, stampTimelineThread]);
 
 
   // Debounced upsert of the active thread's timeline on every change.
