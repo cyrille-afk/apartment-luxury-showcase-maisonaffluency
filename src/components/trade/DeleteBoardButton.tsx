@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,28 @@ export function DeleteBoardButton({ board, onDeleted }: { board: { id: string; t
   const [open, setOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [itemCount, setItemCount] = useState<number | null>(null);
+  const [checking, setChecking] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    let active = true;
+    setItemCount(null);
+    setChecking(true);
+    supabase.from("client_board_items").select("id", { count: "exact", head: true }).eq("board_id", board.id)
+      .then(({ count, error: readError }) => {
+        if (!active) return;
+        if (readError || count === null) setError("The folder's contents could not be checked. Close this message and try again.");
+        else setItemCount(count);
+        setChecking(false);
+      }, () => {
+        if (!active) return;
+        setError("The folder's contents could not be checked. Close this message and try again.");
+        setChecking(false);
+      });
+    return () => { active = false; };
+  }, [open, board.id]);
   const remove = async () => {
-    if (deleting) return;
+    if (deleting || checking || itemCount === null) return;
     setDeleting(true);
     setError(null);
     try {
@@ -33,12 +53,12 @@ export function DeleteBoardButton({ board, onDeleted }: { board: { id: string; t
       <AlertDialogContent className="max-w-[min(32rem,calc(100vw-2rem))]" onClick={event => event.stopPropagation()}>
         <AlertDialogHeader>
           <AlertDialogTitle>Delete “{board.title}”?</AlertDialogTitle>
-          <AlertDialogDescription>This permanently removes this folder, its items, comments and share links. Your project and other folders remain unchanged.</AlertDialogDescription>
+          <AlertDialogDescription>{checking ? "Checking this folder's contents… " : itemCount !== null ? `This folder contains ${itemCount} ${itemCount === 1 ? "item" : "items"}. ` : ""}This permanently removes this folder, its items, comments and share links. Your project and other folders remain unchanged.</AlertDialogDescription>
         </AlertDialogHeader>
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
         <AlertDialogFooter>
           <Button variant="outline" disabled={deleting} onClick={() => setOpen(false)}>Cancel</Button>
-          <Button variant="destructive" disabled={deleting} onClick={() => void remove()}>{deleting ? "Deleting…" : "Delete folder"}</Button>
+          <Button variant="destructive" disabled={deleting || checking || itemCount === null} onClick={() => void remove()}>{deleting ? "Deleting…" : "Delete folder"}</Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

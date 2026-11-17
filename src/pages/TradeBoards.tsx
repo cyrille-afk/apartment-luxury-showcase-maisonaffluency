@@ -98,7 +98,7 @@ const TradeBoards = ({ embedded = false }: { embedded?: boolean }) => {
     if (data) {
       // Fetch item counts
       const boardIds = data.map((b: any) => b.id);
-      const { data: items } = await supabase
+      const { data: items, error: countError } = await supabase
         .from("client_board_items")
         .select("board_id")
         .in("board_id", boardIds);
@@ -121,7 +121,7 @@ const TradeBoards = ({ embedded = false }: { embedded?: boolean }) => {
 
       setBoards(data.map((b: any) => ({
         ...b,
-        item_count: counts[b.id] || 0,
+        item_count: countError ? undefined : counts[b.id] || 0,
         project_name: b.project_id ? projectMap[b.project_id] || null : null,
       })));
     }
@@ -362,7 +362,7 @@ const TradeBoards = ({ embedded = false }: { embedded?: boolean }) => {
                   </button>
                 )}
                 <p className="font-body text-xs text-muted-foreground mb-4">
-                  {board.item_count} {board.item_count === 1 ? "item" : "items"}
+                  {board.item_count === undefined ? "Item count unavailable" : `${board.item_count} ${board.item_count === 1 ? "item" : "items"}`}
                   {board.status !== "draft" && board.token_expires_at && (
                     <span className={new Date(board.token_expires_at) < new Date() ? "text-destructive ml-2" : " ml-2"}>
                       · {new Date(board.token_expires_at) < new Date() ? "Link expired" : `Expires ${new Date(board.token_expires_at).toLocaleDateString()}`}

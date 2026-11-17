@@ -134,7 +134,7 @@ export function TradeMobileMenu({ open, onOpenChange }: TradeMobileMenuProps) {
                       </div>
                       {expanded && <div className="ml-4 border-l border-border pl-4">
                         <Button variant="ghost" className="block h-11 w-full truncate text-left text-xs font-normal" onClick={() => handleNav(`/trade/projects/${project.id}?tab=boards`)}>Folders & Drafts</Button>
-                        {projectBoards.filter((board) => board.project_id === project.id).map((board) => <Button key={board.id} variant="ghost" className="block h-11 w-full truncate pl-6 text-left text-xs font-normal" onClick={() => handleNav(`/trade/boards/${board.id}?project=${project.id}`)}>{board.title}</Button>)}
+                        {projectBoards.filter((board) => board.project_id === project.id).map((board) => <Button key={board.id} variant="ghost" className="flex h-11 w-full gap-2 pl-6 text-left text-xs font-normal" onClick={() => handleNav(`/trade/boards/${board.id}?project=${project.id}`)}><span className="min-w-0 flex-1 truncate">{board.title}</span><span className="shrink-0 tabular-nums">{board.item_count === undefined ? "…" : `${board.item_count} items`}</span></Button>)}
                         <Button variant="ghost" className="block h-11 w-full text-left text-xs font-normal" onClick={() => handleNav(`/trade/projects/${project.id}?tab=tearsheets`)}>Tearsheets</Button>
                         <Button variant="ghost" className="block h-11 w-full text-left text-xs font-normal" onClick={() => handleNav(`/trade/projects/${project.id}/studio`)}>Project Studio</Button>
                       </div>}

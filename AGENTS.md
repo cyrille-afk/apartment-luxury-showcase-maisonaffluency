@@ -11,6 +11,7 @@
 - Password-setup resends reuse the review drawer and retain attempt keys on retry; never change approval. Verified activation links the account; the queue reads user_id for setup status.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Folder links expose readable item counts on desktop/mobile; failed list counts remain unknown, and deletion waits for an exact live count before enabling confirmation — identical folder names and failed reads must not imply emptiness.
 - Board finish photos resolve through boardPiecePhoto for the mixed-shape Ibo catalogue entry, retaining its approved catalogue image in saved cards, matrix and finish drawer; saved finishes, dimensions and pricing remain unchanged — finish-only gallery mappings cannot establish shape or size.
 - Project board trees consume confirmed deletion IDs from the shared artifacts-change event and refresh with latest-request guards — sidebar/mobile/default links must drop deleted folders immediately without stale reads restoring them.
 - Empty-folder visibility is an account-scoped device preference applied only to desktop/mobile navigation using RLS-readable item counts; unknown counts stay visible and folder-management pages stay unfiltered — hiding never deletes folders or changes access.
