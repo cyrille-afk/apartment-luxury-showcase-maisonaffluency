@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { GlbVariantManager } from "@/components/trade/admin/GlbVariantManager";
 import { GlbBulkUpload } from "@/components/trade/admin/GlbBulkUpload";
+import { CatalogGlbUpload } from "@/components/trade/admin/CatalogGlbUpload";
 
 interface ProductRow {
   id: string;
@@ -29,6 +30,7 @@ const TradeAdminGlbModels: React.FC = () => {
   const [searching, setSearching] = useState(false);
   const [selected, setSelected] = useState<ProductRow | null>(null);
   const [bulkMode, setBulkMode] = useState(false);
+  const [catalogMode, setCatalogMode] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -37,13 +39,22 @@ const TradeAdminGlbModels: React.FC = () => {
     setSearch("");
     setSelected(null);
     setBulkMode(false);
+    setCatalogMode(false);
     setTimeout(() => searchInputRef.current?.focus(), 350);
   };
 
   const startBulkUpload = () => {
     window.scrollTo({ top: 0, behavior: "auto" });
     setSelected(null);
+    setCatalogMode(false);
     setBulkMode(true);
+  };
+
+  const startCatalogUpload = () => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+    setSelected(null);
+    setBulkMode(false);
+    setCatalogMode(true);
   };
 
   // Manager section state
@@ -178,6 +189,16 @@ const TradeAdminGlbModels: React.FC = () => {
               >
                 <Layers size={15} /> Bulk upload
               </button>
+              <button
+                onClick={startCatalogUpload}
+                className={`inline-flex items-center gap-2 font-body text-[12px] uppercase tracking-[0.14em] px-5 py-3 rounded-md transition-colors ${
+                  catalogMode
+                    ? "bg-foreground text-background"
+                    : "border border-foreground text-foreground hover:bg-foreground hover:text-background"
+                }`}
+              >
+                <Box size={15} /> Catalog upload
+              </button>
             </div>
           </div>
           <p className="font-body text-sm text-muted-foreground mb-10 max-w-2xl">
@@ -186,7 +207,8 @@ const TradeAdminGlbModels: React.FC = () => {
             drawer will pick the right model automatically based on the size the user selects.
           </p>
 
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-10">
+          {catalogMode && <CatalogGlbUpload />}
+          <div className={catalogMode ? "hidden" : "grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-10"}>
             {/* LEFT: search + list */}
             <div>
               <div className="flex items-center justify-between mb-2">
@@ -241,7 +263,7 @@ const TradeAdminGlbModels: React.FC = () => {
                 {list.map((row) => (
                   <button
                     key={row.id}
-                    onClick={() => { setSelected(row); setBulkMode(false); }}
+                    onClick={() => { setSelected(row); setBulkMode(false); setCatalogMode(false); }}
                     className={`w-full text-left flex items-center gap-3 px-3 py-2.5 hover:bg-muted/40 transition-colors ${
                       selected?.id === row.id ? "bg-muted/60" : ""
                     }`}
@@ -400,6 +422,7 @@ const TradeAdminGlbModels: React.FC = () => {
                           onClick={() => {
                             setSelected(row);
                             setBulkMode(false);
+                            setCatalogMode(false);
                             window.scrollTo({ top: 0, behavior: "auto" });
                           }}
                           className="block w-full text-left"
