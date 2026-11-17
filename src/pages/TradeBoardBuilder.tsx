@@ -409,6 +409,7 @@ const TradeBoardBuilder = () => {
 
   const removeItem = async (itemId: string) => {
     await supabase.from("client_board_items").delete().eq("id", itemId);
+    window.dispatchEvent(new CustomEvent("concierge:artifacts-changed"));
     fetchBoard();
   };
 

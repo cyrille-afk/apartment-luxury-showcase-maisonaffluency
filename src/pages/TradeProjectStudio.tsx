@@ -78,7 +78,8 @@ export default function TradeProjectStudio() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedBoardId = searchParams.get("board");
-  const [boards, setBoards] = useState<Array<{ id: string; title: string }>>([]);
+  const [boards, setBoards] = useState<Array<{ id: string; title: string; item_count?: number }>>([]);
+  const [hiddenCount, setHiddenCount] = useState(0);
   const [loadedBoardId, setLoadedBoardId] = useState<string | null>(null);
   const { user } = useAuth();
   const [canEdit, setCanEdit] = useState(false);
@@ -138,17 +139,18 @@ export default function TradeProjectStudio() {
       setLoadError(null);
       setLoadPhase("Loading mood boards…");
       setItems([]);
+      setHiddenCount(0);
       setLoadedBoardId(null);
       setCanEdit(false);
       const sb = supabase as any;
       const productFields =
         "id, product_name, brand_name, image_url, sku, lead_time, dimensions, width_mm, depth_mm, height_mm, size_variants, trade_price_cents, rrp_price_cents, currency, source_pick_id, glb_url, materials, base_axis_label, top_axis_label, category, subcategory";
 
-      const b = await sb.from("client_boards").select("id, title").eq("project_id", id).order("created_at").abortSignal(controller.signal);
+      const b = await sb.from("client_boards").select("id, title, client_board_items(count)").eq("project_id", id).order("created_at").abortSignal(controller.signal);
       if (cancelled) return;
       if (b.error) throw new Error("Studio folder read failed");
       window.__lovableEvents?.track?.("project.studio_loading", { phase, status: "ok", duration_ms: performance.now() - phaseStarted, piece_count: 0 });
-      const accessibleBoards = (b.data ?? []) as Array<{ id: string; title: string }>;
+      const accessibleBoards = ((b.data ?? []) as Array<{ id: string; title: string; client_board_items?: Array<{ count: number }> }>).map(row => ({ id: row.id, title: row.title, item_count: row.client_board_items?.[0]?.count }));
       setBoards(accessibleBoards);
       const selectedBoard = selectedStudioBoard(accessibleBoards, selectedBoardId);
       if (!selectedBoard) {
@@ -263,6 +265,7 @@ export default function TradeProjectStudio() {
         item.selected_finish = studioSelectedFinishes(item.catalog, item.selection).map(s => s.finish.name).join(" / ") || item.catalog.materials || "Original catalogue materials";
       }
       setItems(studioVisibleItems(list));
+      setHiddenCount(list.reduce((sum, item) => sum + item.quantity, 0) - studioVisibleItems(list).reduce((sum, item) => sum + item.quantity, 0));
       setLoadedBoardId(selectedBoard.id);
       setLoadingItems(false);
       window.__lovableEvents?.track?.("project.studio_loading", { phase: "studio_total", status: finishError || savedError ? "error" : "ok", duration_ms: performance.now() - started, piece_count: studioVisibleItems(list).reduce((sum, item) => sum + item.quantity, 0) });
@@ -406,9 +409,10 @@ export default function TradeProjectStudio() {
 
       <div className="flex shrink-0 flex-wrap justify-start gap-2 border-b border-border px-4 py-3 md:px-6">
         <Select value={selectedBoardId ?? (boards.length === 1 ? boards[0]?.id : undefined)} onValueChange={board => { setItems([]); setLoadedBoardId(null); setLoadingItems(true); setSearchParams(previous => { previous.set("board", board); return previous; }); }}>
-          <SelectTrigger aria-label="Selected mood board" className="h-10 w-full cursor-pointer sm:w-64"><SelectValue placeholder="Select a mood board" /></SelectTrigger>
-          <SelectContent>{boards.map((board, index) => <SelectItem key={board.id} value={board.id}>{board.title} · Folder {index + 1}</SelectItem>)}</SelectContent>
+          <SelectTrigger aria-label="Selected mood board" className="h-10 w-full cursor-pointer sm:w-80"><SelectValue placeholder="Select a mood board" /></SelectTrigger>
+          <SelectContent>{boards.map((board, index) => <SelectItem key={board.id} value={board.id}>{board.title} · Folder {index + 1}{typeof board.item_count === "number" ? ` · ${board.item_count} item${board.item_count === 1 ? "" : "s"}` : ""}</SelectItem>)}</SelectContent>
         </Select>
+        {hiddenCount > 0 && loadedBoardId && <p className="self-center font-body text-xs text-muted-foreground">{hiddenCount} piece{hiddenCount === 1 ? "" : "s"} removed from Project Studio · still saved in this mood board</p>}
         <Button variant="studio-utility" aria-controls="studio-spec-panel" aria-expanded={isSpecPanelOpen} onClick={() => setIsSpecPanelOpen(!isSpecPanelOpen)} className="h-10 cursor-pointer rounded-none px-4 py-2 font-body text-[10px] uppercase tracking-[0.15em] transition-colors duration-200 motion-reduce:transition-none">Specsheet ({items.length})</Button>
         <Button variant="outline" aria-haspopup="dialog" disabled={!items.length} onClick={openVisualStudio} className="felix-surface h-10 cursor-pointer rounded-none px-4 py-2 font-body text-[10px] uppercase tracking-[0.15em] transition-colors duration-200 motion-reduce:transition-none [&_svg]:size-3.5"><Sparkles aria-hidden="true" strokeWidth={1.5} />AI Co-Designer</Button>
         {!isClientMode && <Button variant="studio-primary" disabled={loadingItems || !items.length || savingFinishes || !canEdit} onClick={openInVisualiser} className="h-10 cursor-pointer rounded-none px-4 font-body text-[10px] uppercase"><Box className="size-3.5" />Open in Visualiser Sandbox</Button>}

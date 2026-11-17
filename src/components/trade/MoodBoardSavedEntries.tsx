@@ -40,6 +40,7 @@ export function MoodBoardSavedEntries({ projectId, productId, productName }: { p
         queryClient.invalidateQueries({ queryKey: ["mood-board-project-items"] }),
       ]);
       window.dispatchEvent(new Event("trade-projects:changed"));
+      window.dispatchEvent(new CustomEvent("concierge:artifacts-changed"));
     } catch {
       setError("This entry couldn't be removed. Please try again; quote-linked pieces cannot be deleted here.");
     } finally { setDeleting(false); }
