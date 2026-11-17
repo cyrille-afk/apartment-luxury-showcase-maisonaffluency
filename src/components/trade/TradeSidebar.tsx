@@ -30,6 +30,7 @@ import { readLastVisitedFolder } from "@/lib/lastVisitedFolder";
 import { resolveTearsheetActiveFolder } from "@/lib/tearsheetActiveFolder";
 import { SortableSidebarList } from "./SortableSidebarList";
 import { useSidebarOrder } from "@/hooks/useSidebarOrder";
+import { sidebarFolderLinks, useSidebarFolderVisibility } from "@/hooks/useSidebarFolderVisibility";
 import { orderedSidebarItems } from "@/lib/sidebarOrder";
 import { sidebarTourId, TOUR_SIDEBAR_REVEAL } from "./tourSidebarTargets";
 
@@ -145,7 +146,9 @@ export function TradeSidebar() {
   const { currentStudio } = useStudio();
   const { count: clientUpgradeCount } = useClientTierUpgrades(currentStudio?.id);
   const { projects: activeProjects } = useProjects({ activeOnly: true });
-  const boards = useProjectBoardTree(activeProjects.map((project) => project.id));
+  const allBoards = useProjectBoardTree(activeProjects.map((project) => project.id));
+  const { showEmptyFolders } = useSidebarFolderVisibility(user?.id);
+  const boards = sidebarFolderLinks(allBoards, showEmptyFolders);
   const [expandedProjects, setExpandedProjects] = useState<string[]>([]);
   useEffect(() => {
     const reveal = (event: Event) => {

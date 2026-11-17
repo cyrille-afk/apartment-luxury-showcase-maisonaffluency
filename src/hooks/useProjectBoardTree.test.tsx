@@ -57,3 +57,10 @@ it("refreshes ordinary artifact changes and removes its listener on unmount", as
   window.dispatchEvent(new Event("concierge:artifacts-changed"));
   expect(mocks.order).toHaveBeenCalledTimes(calls);
 });
+
+it("reads saved item counts without dropping empty folders from the shared tree", async () => {
+  mocks.order.mockResolvedValue({ data: [{ ...board, client_board_items: [{ count: 0 }] }, { ...remaining, client_board_items: [{ count: 8 }] }], error: null });
+  const { result } = renderHook(() => useProjectBoardTree(["project"]));
+  await waitFor(() => expect(result.current).toHaveLength(2));
+  expect(result.current.map(folder => folder.item_count)).toEqual([0, 8]);
+});

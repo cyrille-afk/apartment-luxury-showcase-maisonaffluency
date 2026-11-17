@@ -16,6 +16,7 @@ import { TRADE_SANDBOX_ONLY } from "@/lib/tradeSandboxOnly";
 import { Scan } from "lucide-react";
 import { useProjects, pushRecentProject } from "@/hooks/useProjects";
 import { projectDefaultUrl, useProjectBoardTree } from "@/hooks/useProjectBoardTree";
+import { sidebarFolderLinks, useSidebarFolderVisibility } from "@/hooks/useSidebarFolderVisibility";
 import { SignOutConfirmDialog, useSignOutConfirmation } from "@/components/trade/SignOutConfirmDialog";
 
 const coreItems = [
@@ -45,10 +46,12 @@ export function TradeMobileMenu({ open, onOpenChange }: TradeMobileMenuProps) {
   const guideName = useAIGuideName();
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAdmin, isTradeUser, applicationStatus, signOut, profile } = useAuth();
+  const { isAdmin, isTradeUser, applicationStatus, signOut, profile, user } = useAuth();
   const pendingInquiryCount = usePendingInquiryCount();
   const { projects: activeProjects } = useProjects({ activeOnly: true });
-  const projectBoards = useProjectBoardTree(activeProjects.map((project) => project.id));
+  const allProjectBoards = useProjectBoardTree(activeProjects.map((project) => project.id));
+  const { showEmptyFolders } = useSidebarFolderVisibility(user?.id);
+  const projectBoards = sidebarFolderLinks(allProjectBoards, showEmptyFolders);
   const [expandedProjects, setExpandedProjects] = useState<string[]>([]);
   useEffect(() => {
     const current = activeProjects.find((project) => location.pathname.startsWith(`/trade/projects/${project.id}`) || projectBoards.some((board) => location.pathname === `/trade/boards/${board.id}` && board.project_id === project.id));

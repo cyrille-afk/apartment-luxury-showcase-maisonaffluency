@@ -16,6 +16,8 @@ import { Button } from "@/components/ui/button";
 import { resetSidebarOrder } from "@/lib/sidebarOrder";
 import { clearRemoteSidebarOrder } from "@/lib/sidebarOrderSync";
 import { replayFelixTour } from "@/components/trade/felixTourUtils";
+import { Switch } from "@/components/ui/switch";
+import { useSidebarFolderVisibility } from "@/hooks/useSidebarFolderVisibility";
 
 const COUNTRIES = [
   "Singapore", "Australia", "Canada", "China", "France", "Germany", "Hong Kong",
@@ -44,6 +46,7 @@ const passwordSchema = z.object({
 
 const TradeSettings = () => {
   const { user, profile, refreshRoles } = useAuth();
+  const { showEmptyFolders, setShowEmptyFolders } = useSidebarFolderVisibility(user?.id);
   const { toast } = useToast();
   const navigate = useNavigate();
   const { tier, tierLabel, discountLabel, config: tierConfig } = useTradeDiscount();
@@ -280,6 +283,10 @@ const TradeSettings = () => {
 
       <GoogleIdentityStatusCard />
       <div className="mb-6 border-y border-border py-4">
+        <div className="mb-4 flex items-center justify-between gap-4">
+          <label htmlFor="sidebar-show-empty" className="font-body text-sm text-foreground cursor-pointer">Show empty folders in sidebar</label>
+          <Switch id="sidebar-show-empty" checked={showEmptyFolders} onCheckedChange={setShowEmptyFolders} />
+        </div>
         <Button variant="ghost" size="sm" className="gap-2 font-body text-xs text-muted-foreground" onClick={() => {
           try { resetSidebarOrder(user?.id); if (user?.id) void clearRemoteSidebarOrder(user.id).catch(() => {}); toast({ title: "Sidebar order reset" }); }
           catch { toast({ title: "Could not reset sidebar order", description: "Your browser is blocking saved preferences.", variant: "destructive" }); }
