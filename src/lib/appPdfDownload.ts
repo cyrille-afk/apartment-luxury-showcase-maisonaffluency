@@ -72,8 +72,8 @@ export async function downloadDocumentPdf(input: { html?: string; element?: HTML
       pdf.setProperties({ title: input.filename.replace(/\.pdf$/i, ''), author: 'Maison Affluency', creator: 'Maison Affluency' });
       for (const [index, page] of pages.entries()) {
         if (index) pdf.addPage();
-        const canvas = await html2canvas(page, { scale: 1.5, useCORS: true, logging: false, windowWidth: width });
-        pdf.addImage(canvas.toDataURL('image/jpeg', 0.94), 'JPEG', 0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight());
+        const canvas = await html2canvas(page, { scale: 3, useCORS: true, logging: false, windowWidth: width });
+        pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight());
       }
       pdf.save(input.filename.endsWith('.pdf') ? input.filename : `${input.filename}.pdf`);
       toast.success('PDF ready', { id: notice });
