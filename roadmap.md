@@ -677,7 +677,7 @@
 
 ## Uploaded spatial catalogue
 - [x] Apply catalog_items with its requested spatial/model/pricing fields and safe catalogue access rules.
-- [ ] Confirm migration history; fields, RLS, approved-trade/admin policies and exact grants are verified, with anonymous access blocked.
+- [x] Confirm both migrations in the journal and applied database records; fields, RLS, approved-trade/admin policies and exact grants are verified, with anonymous access blocked.
 
 ## Waiting on the user (existing publishing tasks)
 
