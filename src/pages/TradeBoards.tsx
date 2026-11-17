@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { copyTextToClipboard } from "@/lib/clipboard";
 import ClientPicker, { type PickedClient } from "@/components/trade/ClientPicker";
+import { DeleteBoardButton } from "@/components/trade/DeleteBoardButton";
 import {
   Dialog,
   DialogContent,
@@ -176,15 +177,6 @@ const TradeBoards = ({ embedded = false }: { embedded?: boolean }) => {
       setCreateOpen(false);
       setTitle(""); setClientId(null); setClientName(""); setClientEmail("");
       navigate(`/trade/boards/${data.id}`);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("client_boards").delete().eq("id", id);
-    if (!error) {
-      setBoards(prev => prev.filter(b => b.id !== id));
-      window.dispatchEvent(new Event("concierge:artifacts-changed"));
-      toast({ title: "Board deleted" });
     }
   };
 
@@ -384,9 +376,7 @@ const TradeBoards = ({ embedded = false }: { embedded?: boolean }) => {
                     </Button>
                   )}
                   {board.status !== "converted" && (
-                    <Button variant="ghost" size="sm" className="h-8 text-xs text-destructive hover:text-destructive" onClick={() => handleDelete(board.id)}>
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
+                    <DeleteBoardButton board={board} onDeleted={() => { setBoards(prev => prev.filter(b => b.id !== board.id)); toast({ title: "Folder deleted" }); }} />
                   )}
                 </div>
               </div>

@@ -58,6 +58,7 @@ import ProjectWorkspaceContact from "@/components/trade/ProjectWorkspaceContact"
 import { useProjectWorkspace } from "@/contexts/ProjectWorkspaceContext";
 import { compileBoardDraftQuote } from "@/lib/boardDraftQuote";
 import { formatMoneyIn } from "@/lib/displayMoney";
+import { DeleteBoardButton } from "@/components/trade/DeleteBoardButton";
 
 interface Board {
   id: string;
@@ -612,19 +613,6 @@ const TradeBoardBuilder = () => {
     navigate(`/trade/quotes/${quote.id}`);
   };
 
-  const deleteBoard = async () => {
-    if (!board || !user) return;
-    if (!confirm(`Delete "${board.title}"? This also removes all items, comments, and share links.`)) return;
-    const { error } = await supabase.from("client_boards").delete().eq("id", board.id);
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-      return;
-    }
-    window.dispatchEvent(new Event("concierge:artifacts-changed"));
-    toast({ title: "Folder deleted" });
-    navigate("/trade/boards");
-  };
-
   if (loading) return <PageLoader />;
   if (!board) return <div className="text-center py-20 text-muted-foreground">Board not found</div>;
 
@@ -723,6 +711,7 @@ const TradeBoardBuilder = () => {
           <Button variant="ghost" size="sm" onClick={() => navigate("/trade/boards")} className="gap-1.5">
             <ArrowLeft className="h-3.5 w-3.5" /> Folders
           </Button>
+          {isEditable && !clientSafe && <DeleteBoardButton board={board} onDeleted={() => { toast({ title: "Folder deleted" }); navigate(board.project_id ? `/trade/projects?view=folders&project=${board.project_id}` : "/trade/boards"); }} />}
           {subfolders.length > 0 && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild><Button variant="ghost" size="sm" className="gap-1.5">{focusedSubfolder ?? "Top of board"}<ChevronDown className="h-3.5 w-3.5" /></Button></DropdownMenuTrigger>
@@ -785,15 +774,6 @@ const TradeBoardBuilder = () => {
                     userId={user!.id}
                   />
                 )}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="gap-1.5 text-xs text-destructive hover:text-destructive"
-                  onClick={deleteBoard}
-                  title="Delete folder"
-                >
-                  <Trash2 className="h-3.5 w-3.5" /> Delete
-                </Button>
               </>
             )}
           </div>

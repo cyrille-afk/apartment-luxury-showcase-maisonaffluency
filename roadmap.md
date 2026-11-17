@@ -1,5 +1,9 @@
 # Roadmap
 
+## Accessible folder deletion
+- [ ] Move deletion beside Folders; share in-app confirmation with folder cards and verify saved deletion under existing access policies.
+- [ ] Verify real owner desktop/phone light/dark controls and deletion using a disposable empty folder; leave existing folders untouched.
+
 ## Separate automatic Mood Board suggestions
 - [x] Keep automatic complements and their rationale in a dedicated Mood Board panel, never append them to Felix conversations or open Felix automatically.
 - [x] Eleven tests pass; signed-in real six-piece suggestion panel, refresh and quick-add/remove verified with zero concierge events and all five saved thread timestamps/timeline counts unchanged. Desktop/phone visually checked, no overflow or page errors, preview build OK; saved history preserved.

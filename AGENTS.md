@@ -11,6 +11,7 @@
 - Password-setup resends reuse the review drawer and retain attempt keys on retry; never change approval. Verified activation links the account; the queue reads user_id for setup status.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Board detail/list deletion shares an in-app confirmation and verifies the exact deleted row under existing RLS before refreshing; detail action sits beside Folders — avoids blocked browser prompts and silent denied deletes.
 - Studio finish pickers close on locking; their fixed header X dismisses without selection writes — keeps dismissal available while swatches scroll.
 - Automatic Mood Board complements render only in the page's dedicated suggestions panel and never dispatch concierge stage events or write timelines — keeps user-chosen Felix conversations separate without rewriting saved history.
 - Felix thread activity is derived from existing owner-scoped timelines and saved last_active_at, separating user/Felix messages and cards without inferring automatic-message provenance or physical users — opening history is read-only.
