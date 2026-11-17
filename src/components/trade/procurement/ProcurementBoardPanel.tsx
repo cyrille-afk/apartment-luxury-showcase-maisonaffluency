@@ -20,6 +20,7 @@ import { useStudio } from "@/hooks/useStudio";
 import InviteCollaboratorDialog from "./InviteCollaboratorDialog";
 import BoardInviteEmailPreview from "./BoardInviteEmailPreview";
 import { Product3dBadge } from "@/components/trade/Product3dBadge";
+import { boardMatrixPrice } from "@/lib/boardMatrixPrice";
 
 type Row = {
   id: string;
@@ -29,6 +30,7 @@ type Row = {
   brand_name: string | null;
   image_url: string | null;
   msrp_cents: number | null;
+  price_from: boolean;
   currency: string;
   lead_time: string | null;
   ship_mode: string | null;
@@ -131,7 +133,7 @@ export default function ProcurementBoardPanel({ lockedItemIds = [], boardId, boa
     setPricingReady(false);
     supabase
       .from("trade_products")
-      .select("id, trade_price_cents, currency, lead_time, lead_time_weeks_min, lead_time_weeks_max, default_ship_mode, glb_url")
+      .select("id, trade_price_cents, size_variants, currency, lead_time, lead_time_weeks_min, lead_time_weeks_max, default_ship_mode, glb_url")
       .in("id", ids)
       .then(({ data }) => setPricing(new Map((data || []).map((p: any) => [p.id, p]))));
     supabase.rpc("current_trade_discount_pct" as any).then(({ data, error }) => { if (!error) { setDiscountPct(toDiscountFraction(data)); setPricingReady(true); } });
@@ -220,6 +222,8 @@ export default function ProcurementBoardPanel({ lockedItemIds = [], boardId, boa
     const p = pricing.get(i.product_id) || {};
     const fo = effectiveFinishes[i.id];
     const savedNet = quoteNet.get(i.id);
+    const cataloguePrice = boardMatrixPrice(p.trade_price_cents, p.size_variants, fo);
+    const confirmedNet = savedNet && Number.isFinite(savedNet.net);
     const lead = p.lead_time || (p.lead_time_weeks_min ? `${p.lead_time_weeks_min}–${p.lead_time_weeks_max ?? p.lead_time_weeks_min} wks` : null);
     return {
       id: i.id,
@@ -230,7 +234,8 @@ export default function ProcurementBoardPanel({ lockedItemIds = [], boardId, boa
       image_url: fo?.image_url || i.product?.image_url || null,
       msrp_cents: requests[i.id] ? requestedFinishes[i.id]?.price_cents ?? null : savedNet && Number.isFinite(savedNet.net)
         ? Math.round(savedNet.net / Math.max(0.01, 1 - discountPct))
-        : fo?.price_cents ?? (p.trade_price_cents || null),
+        : cataloguePrice.cents,
+      price_from: !requests[i.id] && !confirmedNet && cataloguePrice.from,
       currency: quoteNet.get(i.id)?.currency || p.currency || "EUR",
       lead_time: lead,
       ship_mode: p.default_ship_mode || null,
@@ -238,7 +243,7 @@ export default function ProcurementBoardPanel({ lockedItemIds = [], boardId, boa
     };
   });
   const draftSources: BoardDraftSource[] = rows.map((row) => ({ ...row, quantity: quoteNet.get(row.id)?.quantity ?? 1,
-    retailCents: row.msrp_cents, netCents: requests[row.id] ? null : Number.isFinite(quoteNet.get(row.id)?.net) ? quoteNet.get(row.id)?.net : null,
+    retailCents: row.price_from ? null : row.msrp_cents, netCents: requests[row.id] ? null : Number.isFinite(quoteNet.get(row.id)?.net) ? quoteNet.get(row.id)?.net : null,
     finish: effectiveFinishes[row.id] ?? null, requested: Boolean(requests[row.id]) }));
   const draftKey = JSON.stringify(draftSources);
   const stableSources = useMemo(() => draftSources, [draftKey]);
@@ -296,7 +301,7 @@ export default function ProcurementBoardPanel({ lockedItemIds = [], boardId, boa
       <AnimatePresence mode="wait">
         {!clientSafe ? (
            <motion.div key="matrix" data-trade-sensitive initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }} className="overflow-x-auto">
-            <table className="w-full table-fixed font-body text-[11px] leading-tight">
+            <table className="w-full min-w-[900px] table-fixed font-body text-[11px] leading-tight">
               <colgroup>
                 <col className="w-11" /><col /><col className="w-[13%]" /><col className="w-[10%]" /><col className="w-[6%]" /><col className="w-[10%]" /><col className="w-[10%]" /><col className="w-[7%]" /><col className="w-[11%]" /><col className="w-12" />
               </colgroup>
@@ -317,9 +322,9 @@ export default function ProcurementBoardPanel({ lockedItemIds = [], boardId, boa
                       <td className="px-2 py-1">{r.image_url ? (onOpenFinishes ? <button type="button" onClick={() => onOpenFinishes(r.id)} aria-label={`Open ${r.product_name}`} className="block cursor-pointer"><img src={r.image_url} alt="" className="h-8 w-8 bg-[hsl(var(--product-canvas))] object-contain" loading="lazy" /></button> : <img src={r.image_url} alt="" className="h-8 w-8 bg-[hsl(var(--product-canvas))] object-contain" loading="lazy" />) : <div className="h-8 w-8 bg-muted" />}</td>
                       <td className="px-2 py-1 text-foreground" title={r.product_name}><span className="block truncate">{r.product_name}</span>{effectiveFinishes[r.id] && <span className="flex flex-wrap items-center gap-1.5"><FinishChips fo={effectiveFinishes[r.id]} size="h-5 w-5" /><span className="min-w-0 text-[10px] text-muted-foreground">{effectiveFinishes[r.id].label}</span>{requests[r.id] && <span className="border-l border-primary/40 pl-1.5 text-[9px] text-primary">Client requested</span>}</span>}</td>
                       <td className="truncate px-2 text-muted-foreground" title={r.brand_name ?? ""}>{r.brand_name ?? "—"}</td>
-                      <td className="px-2 text-right tabular-nums">{formatMoneyIn(trade, r.currency, requests[r.id] ? "Price verification needed" : "On request")}</td>
+                      <td className="px-2 text-right tabular-nums">{r.price_from && "From "}{formatMoneyIn(trade, r.currency, requests[r.id] ? "Price verification needed" : "On request")}</td>
                       <td className="px-2 text-right tabular-nums">{r.msrp_cents ? discountPercentLabel(discountPct) : "—"}</td>
-                      <td className="px-2 text-right tabular-nums">{formatMoneyIn(client, r.currency, "On request")}</td>
+                      <td className="px-2 text-right tabular-nums">{r.price_from && "From "}{formatMoneyIn(client, r.currency, "On request")}</td>
                       <td className="truncate px-2">{r.lead_time ?? "—"}</td>
                       <td className="truncate px-2 capitalize">{r.ship_mode ?? "—"}</td>
                       <td className="px-2">
@@ -368,7 +373,7 @@ export default function ProcurementBoardPanel({ lockedItemIds = [], boardId, boa
                   </div>
                   <div>
                     {r.approval_status === "approved" && <p className="mb-1 flex items-center gap-1 font-body text-[10px] uppercase tracking-[0.18em] text-primary"><Heart className="h-3 w-3 fill-current" /> Approved</p>}
-                     <p className="font-body text-sm text-foreground">{formatMoneyIn(clientUnitCents(r.msrp_cents, discountPct, multiplier), r.currency, "Price upon Request")}</p>
+                     <p className="font-body text-sm text-foreground">{r.price_from && "From "}{formatMoneyIn(clientUnitCents(r.msrp_cents, discountPct, multiplier), r.currency, "Price upon Request")}</p>
                     {r.lead_time && <p className="mt-0.5 font-body text-xs text-muted-foreground">Lead time {r.lead_time}</p>}
                   </div>
                 </div>

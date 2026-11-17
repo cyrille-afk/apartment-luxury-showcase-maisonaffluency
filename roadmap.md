@@ -1,5 +1,9 @@
 # Roadmap
 
+## Kerstens matrix size pricing
+- [x] Show saved size prices for Rift CTS and Yoma Console, labelled From for unresolved sizes; preserve configured prices and keep indicative values out of confirmed procurement drafts.
+- [x] Fourteen regressions pass; both real rows verified under the board owner's session on desktop/phone, light/dark, client presentation and reload. Rift shows From €26,282 trade / €29,202 client; Yoma shows From €100,563 trade / €111,737 client. No page errors; build OK; no saved prices or boards changed.
+
 ## Accessible folder deletion
 - [x] Move deletion beside Folders; share in-app confirmation with folder cards and verify the exact saved deletion under existing access policies, with retry feedback on failure.
 - [x] Three tests pass; all six real folders' detail/list confirmations checked on desktop/phone light/dark. Disposable empty-folder deletion verified from both surfaces, returning to the project-filtered folder list and surviving reload; original six folders and item counts unchanged. Preview build OK.
