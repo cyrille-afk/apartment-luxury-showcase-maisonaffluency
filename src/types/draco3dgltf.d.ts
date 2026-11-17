@@ -1,7 +1,11 @@
 declare module "draco3dgltf" {
+  interface DracoModuleOptions {
+    locateFile?: (filename: string) => string;
+  }
+
   interface DracoBrowserModule {
-    createDecoderModule(): Promise<unknown>;
-    createEncoderModule(): Promise<unknown>;
+    createDecoderModule(options?: DracoModuleOptions): Promise<unknown>;
+    createEncoderModule(options?: DracoModuleOptions): Promise<unknown>;
   }
 
   const draco3d: DracoBrowserModule;

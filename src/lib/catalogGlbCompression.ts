@@ -17,16 +17,25 @@ export async function compressCatalogGlb(file: File): Promise<CompressedCatalogG
     throw new Error("Choose a raw .glb file for catalog compression.");
   }
 
-  const [{ WebIO }, { ALL_EXTENSIONS }, { draco, textureCompress }, draco3dModule] = await Promise.all([
+  const [
+    { WebIO },
+    { ALL_EXTENSIONS },
+    { draco, textureCompress },
+    draco3dModule,
+    { default: decoderWasmUrl },
+    { default: encoderWasmUrl },
+  ] = await Promise.all([
     import("@gltf-transform/core"),
     import("@gltf-transform/extensions"),
     import("@gltf-transform/functions"),
     import("draco3dgltf"),
+    import("draco3dgltf/draco_decoder_gltf.wasm?url"),
+    import("draco3dgltf/draco_encoder.wasm?url"),
   ]);
   const draco3d = draco3dModule.default;
   const [decoder, encoder] = await Promise.all([
-    draco3d.createDecoderModule(),
-    draco3d.createEncoderModule(),
+    draco3d.createDecoderModule({ locateFile: (filename) => filename.endsWith(".wasm") ? decoderWasmUrl : filename }),
+    draco3d.createEncoderModule({ locateFile: (filename) => filename.endsWith(".wasm") ? encoderWasmUrl : filename }),
   ]);
 
   const io = new WebIO()

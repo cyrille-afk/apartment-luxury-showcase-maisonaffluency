@@ -684,9 +684,9 @@
 - [x] Verified all columns, both foreign keys, RLS, restricted grants, and a temporary signed-in CRUD round trip; anonymous reads return 401 and no test rows remain.
 
 ## Admin GLB browser compression
-- [ ] Locate the Admin Catalog Upload flow and existing compressed-URL persistence.
-- [ ] Compress selected GLBs in the browser with Draco, 1024px WebP textures, and upload the optimized buffer.
-- [ ] Add focused regression tests and verify the admin upload flow and saved public URL.
+- [x] Added Catalog upload to the existing admin 3D Models workspace, with new-item creation and existing-item replacement.
+- [x] Compresses raw GLBs in the browser with Draco and 1024px WebP textures, uploads only the optimized buffer, and saves glb_url_compressed.
+- [x] Passed 31 focused tests, TypeScript, and signed-in browser verification: a 2048×1024 PNG became a 1024×512 WebP inside a Draco GLB; URL reload persistence and desktop/phone layouts verified. Temporary catalog/storage data was removed.
 
 ## Waiting on the user (existing publishing tasks)
 

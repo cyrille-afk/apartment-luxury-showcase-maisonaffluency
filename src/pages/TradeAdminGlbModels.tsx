@@ -172,7 +172,7 @@ const TradeAdminGlbModels: React.FC = () => {
             <h1 className="font-display text-3xl flex items-center gap-3">
               <Box size={22} /> 3D Models
             </h1>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={startUpload}
                 className="inline-flex items-center gap-2 bg-foreground text-background font-body text-[12px] uppercase tracking-[0.14em] px-5 py-3 rounded-md hover:opacity-90 transition-opacity"
@@ -202,9 +202,9 @@ const TradeAdminGlbModels: React.FC = () => {
             </div>
           </div>
           <p className="font-body text-sm text-muted-foreground mb-10 max-w-2xl">
-            Attach a 3D model per size variant (e.g. 2-seater vs 3-seater, or W 180 vs W 220).
-            Upload .glb, .gltf, .3ds, or an .obj bundle — the trade product page and concierge tearsheet
-            drawer will pick the right model automatically based on the size the user selects.
+            {catalogMode
+              ? "Create a spatial catalog item or replace its model. Raw GLBs are optimized in your browser before upload."
+              : "Attach a 3D model per size variant (e.g. 2-seater vs 3-seater, or W 180 vs W 220). Upload .glb, .gltf, .3ds, or an .obj bundle — the trade product page and concierge tearsheet drawer will pick the right model automatically based on the size the user selects."}
           </p>
 
           {catalogMode && <CatalogGlbUpload />}
@@ -306,7 +306,7 @@ const TradeAdminGlbModels: React.FC = () => {
           </div>
 
           {/* ============ GLB LIBRARY MANAGER ============ */}
-          <div className="mt-16 border-t border-border pt-10">
+          <div className={catalogMode ? "hidden" : "mt-16 border-t border-border pt-10"}>
             <div className="flex items-baseline justify-between mb-6 flex-wrap gap-3">
               <div>
                 <h2 className="font-display text-2xl flex items-center gap-2">
