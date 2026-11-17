@@ -23,6 +23,7 @@ import { VISUALISER_ORBIT_SETTINGS } from "./visualiserOrbitSettings";
 import type { FinishPart } from "@/lib/visualiserFinishTargets";
 import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/SceneObject";
 import VisualiserHotspots from "./VisualiserHotspots";
+import SequentialFurniture from "./SequentialFurniture";
 import { footprintRadius, floorFocusPoint } from "@/lib/visualiserPlacement";
 import * as THREE from "three";
 import PathTracerLayer from "./PathTracerLayer";
@@ -610,8 +611,7 @@ const VisualiserCanvas = ({
     </mesh>}
 
 
-    <Suspense fallback={<SceneLoader />}>
-      {objects.map((object) => (
+    <SequentialFurniture pieces={objects} fallback={<SceneLoader />} onReady={setObjectsReady} renderPiece={object => (
         <SceneObject
           key={`${object.instanceId}:${object.restoreKey ?? 0}`}
           object={object}
@@ -633,9 +633,7 @@ const VisualiserCanvas = ({
             .concat(projectArchitecture ? columnObstacles(projectArchitecture.columns) : [])}
           roomLimits={projectArchitecture && roomBounds ? roomBounds : undefined}
         />
-      ))}
-      <InitialAssetsCommitted onReady={setObjectsReady} />
-    </Suspense>
+      )} />
     {showHotspots && isEditable && onFindAlternatives && <VisualiserHotspots key={hotspotEpoch} objects={objects} onFindAlternatives={onFindAlternatives} onStatus={onHotspotStatus} />}
     {pathTrace && (
       <PathTracerLayer

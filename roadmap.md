@@ -1,5 +1,9 @@
 # Roadmap
 
+## Sequential 3D furniture loading
+- [x] Up to four pieces load together; above four, groups of three wait for all active pieces to commit, yielding a paint before the next group. Earlier models stay mounted and saved composition/pins stay unchanged.
+- [x] Seven tests pass, including four/five threshold and eleven-piece 3/3/3/2 progression. Real current selected board now contains nine pieces: observed first three GLB requests at 11.6–11.8s, next three at 58.6–61.2s with nine pins and no browser errors. Final assets remained loading at capture, so complete-room rendering is not claimed; preview build OK.
+
 ## Selected-board loading recovery
 - [x] Added persistent stage loading, distinct empty/unavailable/failure states and bounded selected-board retries. Failed or pending Sandbox transfers cannot publish an empty room over the incoming composition; hotspot failures stop projection and retry only the overlay.
 - [x] Eleven regressions pass; owner’s real board verified with delayed pieces, controlled piece/finish failures, retry restoring eleven pieces, simulated empty response and phone fit without data deletion. Controlled Sandbox transfer failure retries to eleven pins with no page errors; eight-item board excluded. Preview build and event schema pass; furniture assets were still loading in the captured room, so final GPU rendering is not claimed.
