@@ -126,8 +126,7 @@ export function ProjectProposalPreview({
             {budget && <p className="mt-3 font-body text-xs text-card-foreground">Allocated: {formatPdfMoney(budget.allocated, currency, pdfLocale)}{budget.unpriced ? " (partial)" : ""} / Target: {formatPdfMoney(budget.target, currency, pdfLocale, "Not set")}{budget.unpriced ? " · Budget incomplete" : ""}</p>}
           </div>
           <header className="flex min-h-[330px] flex-col justify-between border-b border-card-foreground pb-12">
-            <div className="flex items-center justify-between gap-6">
-               <StudioBrand studio={studio} />
+            <div className="flex items-center justify-end gap-6">
               <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
                 Private client document
               </p>
@@ -245,7 +244,7 @@ export function ProjectProposalPreview({
             </footer>
              {!isClientMode && <div data-client-placeholder aria-hidden="true" className="mt-10 h-5 w-32 animate-pulse bg-muted/60" />}
           </section>
-           <div className="mt-12 flex items-center gap-3 border-t border-border pt-4 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground"><StudioBrand studio={studio} /><span>· {projectName}</span></div>
+           <div className="mt-12 border-t border-border pt-4 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">{projectName}</div>
         </main>
       </DialogContent>
     </Dialog>
