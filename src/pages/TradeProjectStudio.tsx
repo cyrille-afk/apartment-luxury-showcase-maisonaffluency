@@ -14,6 +14,7 @@ import { ProjectSpecDrawer } from "@/components/trade/ProjectSpecDrawer";
 import { ProjectCuratorialGuide } from "@/components/trade/ProjectCuratorialGuide";
 import { ProjectProposalPreview } from "@/components/trade/ProjectProposalPreview";
 import { dimensionBadgeLabel } from "@/lib/productDimensions";
+import { visualiserDimensions } from "@/lib/visualiserProductMetadata";
 import { convertCents, useFxRates, type DisplayCurrency } from "@/components/trade/CurrencyToggle";
 import { formatMoneyIn } from "@/lib/displayMoney";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
@@ -241,7 +242,7 @@ export default function TradeProjectStudio() {
       const pickIds = [...new Set(list.map(item => item.source_pick_id || item.product_id))];
       const [{ data: links, error: finishError }, { data: picks, error: pickError }, { data: saved, error: savedError }, { data: editable, error: editError }] = await Promise.all([
         pickIds.length ? sb.from("product_fabrics").select("pick_id,sort_order,price_tier_label,image_indices,price_cents_a,fabrics(id,name,supplier,category,image_url,is_active,price_per_lm_cents,currency)").in("pick_id", pickIds).order("sort_order").abortSignal(controller.signal) : Promise.resolve({ data: [] }),
-        pickIds.length ? sb.from("designer_curator_picks").select("id,base_axis_label,top_axis_label,size_variants,materials,com_meters").in("id", pickIds).abortSignal(controller.signal) : Promise.resolve({ data: [] }),
+        pickIds.length ? sb.from("designer_curator_picks").select("id,dimensions,width_mm,depth_mm,height_mm,base_axis_label,top_axis_label,size_variants,materials,com_meters").in("id", pickIds).abortSignal(controller.signal) : Promise.resolve({ data: [] }),
         supabase.from("project_studio_finishes").select("item_key,selection").eq("project_id", id).abortSignal(controller.signal),
         user ? supabase.rpc("can_edit_project", { _project_id: id, _user_id: user.id }).abortSignal(controller.signal) : Promise.resolve({ data: false, error: null }),
       ]);
@@ -259,6 +260,8 @@ export default function TradeProjectStudio() {
           perMetre: link.fabrics.price_per_lm_cents, currency: link.fabrics.currency || item.currency, pictured: link.image_indices?.includes(1),
         }));
         item.catalog = { ...item.catalog, variants: pick?.size_variants ?? item.catalog.variants, baseLabel: pick?.base_axis_label ?? item.catalog.baseLabel, topLabel: pick?.top_axis_label ?? item.catalog.topLabel, materials: pick?.materials ?? item.catalog.materials, comMetres: pick?.com_meters, finishes };
+        item.dimensions = visualiserDimensions(item, pick) ?? item.dimensions;
+        item.size_variants = pick?.size_variants ?? item.size_variants;
         item.catalogue_rrp = item.rrp_cents;
         item.selection = resolveStudioSelection(item.catalog, item.original_finish, saved?.find(row => row.item_key === item.id)?.selection as StudioFinishSelection | undefined);
         item.rrp_cents = studioFinishPrice(item.catalog, item.selection, item.catalogue_rrp, item.original_finish, (cents, currency) => convertCents(cents, currency || item.currency, item.currency as DisplayCurrency, fxRates));

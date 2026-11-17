@@ -671,9 +671,9 @@
 - [x] Synchronize automatic brief criteria and enforce the active budget ceiling; signed-in custom €50,000 brief retained €30,000 ceiling, €29,874 allocation and €126 buffer with five pieces. Exact Frenchmen rendered appearance remains unchecked.
 
 ## Visualiser Anchor loading and spatial layout
-- [ ] Carry the pinned Anchor into the Sandbox, defaulting to the largest sofa/dining table (first piece only when neither exists), and load it first.
-- [ ] Add dimensioned wireframe placeholders and collision-aware sofa/dining vignette placement.
-- [ ] Run layout/queue regressions and verify the selected-board handoff.
+- [x] Carry the pinned Anchor into the Sandbox, defaulting to the largest sofa/dining table (first piece only when neither exists), and load it first.
+- [x] Add dimensioned wireframe placeholders and collision-aware sofa/dining vignette placement.
+- [x] Verify 23 regressions, typechecking and the signed-in Cipriani handoff: Sandy Cove requested alone, then three secondaries; full headless GPU completion remains unverified.
 
 ## Waiting on the user (existing publishing tasks)
 
