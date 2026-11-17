@@ -103,7 +103,7 @@ export function ProjectProposalPreview({
           </Button>
         </div>
 
-        <main className="proposal-print-sheet mx-auto my-20 min-h-[1123px] w-[min(794px,calc(100vw-32px))] bg-card px-12 py-14 text-card-foreground shadow-elegant md:px-16 md:py-20">
+        <main className="proposal-print-sheet mx-auto my-20 min-h-[1123px] w-[min(794px,calc(100vw-32px))] bg-card px-4 py-14 text-card-foreground shadow-elegant sm:px-12 md:px-16 md:py-20">
           <div data-proposal-page-header className="mb-6 border-b border-border pb-4">
             <div className="flex items-center justify-between gap-4"><StudioBrand studio={studio} /><span className="font-body text-xs text-card-foreground">{roomLabel}</span></div>
             {budget && <p className="mt-3 font-body text-xs text-card-foreground">Allocated: {formatPdfMoney(budget.allocated, currency, pdfLocale)}{budget.unpriced ? " (partial)" : ""} / Target: {formatPdfMoney(budget.target, currency, pdfLocale, "Not set")}{budget.unpriced ? " · Budget incomplete" : ""}</p>}
@@ -149,11 +149,11 @@ export function ProjectProposalPreview({
                  const client = clientUnit != null && clientUnit > 0 ? clientUnit * item.quantity : null;
                  const specifications = proposalSpecifications(item);
                  return (
-                  <article key={item.product_id} className="proposal-line-item grid grid-cols-[48px_72px_minmax(0,1fr)_auto] items-start gap-x-5 border-b border-border py-6 break-inside-avoid">
+                  <article key={item.product_id} className="proposal-line-item grid grid-cols-[20px_48px_minmax(0,1fr)] items-start gap-x-3 border-b border-border py-6 break-inside-avoid sm:grid-cols-[48px_72px_minmax(0,1fr)_auto] sm:gap-x-5">
                     <span className="pr-3 text-right font-body text-[9px] tracking-[0.15em] text-muted-foreground">
                       {String(index + 1).padStart(2, "0")}
                     </span>
-                    <div className="h-16 w-[72px] bg-background">
+                    <div className="h-16 w-12 bg-background sm:w-[72px]">
                       {item.image_url ? (
                         <img src={item.image_url} alt="" className="h-full w-full object-contain mix-blend-multiply" />
                       ) : (
@@ -179,7 +179,7 @@ export function ProjectProposalPreview({
                         ))}
                       </dl>
                     </div>
-                     <div data-trade-sensitive={!isClientMode ? "" : undefined} className="text-right">
+                     <div data-trade-sensitive={!isClientMode ? "" : undefined} className="col-start-3 mt-3 text-left sm:col-auto sm:mt-0 sm:text-right">
                       <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">
                          {isClientMode ? "Client Price" : "Trade / MSRP"}
                       </p>

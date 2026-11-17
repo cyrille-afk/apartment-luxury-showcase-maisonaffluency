@@ -1,5 +1,5 @@
 import { DIMENSIONS_PLACEHOLDER, dimensionBadgeLabel } from "./productDimensions";
-import { studioFinishGroups, type StudioFinishProduct, type StudioFinishSelection } from "./studioFinishes";
+import { studioFinishGroups, studioSelectedFinishes, type StudioFinishProduct, type StudioFinishSelection } from "./studioFinishes";
 
 export type ProposalSpecificationSource = {
   dimensions?: string | null;
@@ -36,4 +36,15 @@ export function proposalFinishDetails(product: StudioFinishProduct, selection: S
     return finish ? [`${group.label}: ${finish.name}`] : [];
   });
   return details.length ? details.join(" · ") : null;
+}
+
+/** Selected supplier records outrank generic catalogue prose; never infer textile composition. */
+export function proposalMaterialDetails(product: StudioFinishProduct, selection: StudioFinishSelection): string | null {
+  const details = studioSelectedFinishes(product, selection).flatMap(({ finish }) => {
+    const name = recorded(finish.name);
+    if (!name) return [];
+    const material = recorded(finish.material_type) ?? recorded(finish.category);
+    return [material ? `${material}: ${name}` : name];
+  });
+  return details.length ? [...new Set(details)].join(" · ") : recorded(product.materials);
 }

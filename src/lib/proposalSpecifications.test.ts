@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { proposalFinishDetails, proposalSpecifications } from "./proposalSpecifications";
+import { proposalFinishDetails, proposalMaterialDetails, proposalSpecifications } from "./proposalSpecifications";
 import { resolveStudioSelection, type StudioFinishProduct } from "./studioFinishes";
 
 describe("Project proposal specifications", () => {
@@ -37,5 +37,31 @@ describe("Project proposal specifications", () => {
       ],
     };
     expect(proposalFinishDetails(product, resolveStudioSelection(product, null))).toBe("Wood Finish: Natural Oak · Upholstery: Opera Delft");
+  });
+
+  it("uses the locked supplier material records even when catalogue materials are empty", () => {
+    const product: StudioFinishProduct = {
+      name: "Rua Leblon", variants: [], materials: null,
+      finishes: [
+        { id: "wood", name: "Natural Walnut", category: "Wood", material_type: "Wood", image_url: null, brand_name: "Maker", color_family: null },
+        { id: "fabric", name: "Zero 001", category: "Fabric", material_type: "Fabric", image_url: null, brand_name: "Maker", color_family: null },
+      ],
+    };
+    const selection = { ids: { base: "wood", upholstery: "fabric" }, locked: true };
+    expect(proposalMaterialDetails(product, selection)).toBe("Wood: Natural Walnut · Fabric: Zero 001");
+  });
+
+  it("prefers the actual selection over conflicting catalogue materials", () => {
+    const product: StudioFinishProduct = {
+      name: "Rift CTS", materials: "White washed oak, brown travertine",
+      variants: [{ base: "Bleached Oak", top: "Brown Travertine Sandblasted — Open Pore" }], finishes: [],
+    };
+    expect(proposalMaterialDetails(product, resolveStudioSelection(product, null)))
+      .toBe("Frame / Base: Bleached Oak · Surface: Brown Travertine Sandblasted — Open Pore");
+  });
+
+  it("retains recorded prose without selections and leaves genuinely missing materials unknown", () => {
+    expect(proposalMaterialDetails({ name: "Piece", variants: [], finishes: [], materials: "Solid oak" }, { ids: {}, locked: true })).toBe("Solid oak");
+    expect(proposalMaterialDetails({ name: "Piece", variants: [], finishes: [], materials: null }, { ids: {}, locked: true })).toBeNull();
   });
 });
