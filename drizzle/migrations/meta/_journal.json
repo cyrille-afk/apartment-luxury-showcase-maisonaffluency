@@ -2087,6 +2087,20 @@
       "when": 1794956854539,
       "tag": "0297_shared_board_size_price_fallback",
       "breakpoints": true
+    },
+    {
+      "idx": 298,
+      "version": "7",
+      "when": 1794957486124,
+      "tag": "0298_developer_viewing_room_hierarchy",
+      "breakpoints": true
+    },
+    {
+      "idx": 299,
+      "version": "7",
+      "when": 1794957618826,
+      "tag": "0299_restrict_viewing_room_privileges",
+      "breakpoints": true
     }
   ]
 }

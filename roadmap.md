@@ -1,5 +1,9 @@
 # Roadmap
 
+## Developer Viewing Room
+- [x] Add private admin-managed developer/project, residence layout and tiered moodboard package hierarchy with same-project validation; revoke inherited anonymous privileges and direct package writes.
+- [x] Add Project Studio Admin tab with developer/layout editing and atomic assignment of 3–5 packages. Six focused tests pass; signed-in UI saves three tiers and restores prices after reload, desktop/phone checked without horizontal overflow. Live RPC rejects 2/6 packages and anonymous reads return 401; temporary test hierarchy/board removed. Cipriani currently has only two existing moodboards, so real package assignment needs a third. Public viewing/token redemption is outside this request.
+
 ## Shared Mood Board retail prices
 - [x] Correct invitation-checked price projection to include saved size prices and exact size matching; mark indicative minimums From without exposing net prices.
 - [x] Ten focused tests pass. Real invitation-checked client cards show Rift From €29,202 and Yoma From €111,737 on desktop/phone under both system themes, retain prices after reload and open the finish drawer. Existing slug-page SSR document warning remains unrelated to prices; client rendering succeeds.

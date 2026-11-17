@@ -4259,6 +4259,44 @@ export type Database = {
         }
         Relationships: []
       }
+      developer_projects: {
+        Row: {
+          access_token: string
+          created_at: string
+          developer_logo_url: string | null
+          developer_name: string
+          hero_image_url: string | null
+          id: string
+          project_id: string
+        }
+        Insert: {
+          access_token?: string
+          created_at?: string
+          developer_logo_url?: string | null
+          developer_name: string
+          hero_image_url?: string | null
+          id?: string
+          project_id: string
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          developer_logo_url?: string | null
+          developer_name?: string
+          hero_image_url?: string | null
+          id?: string
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "developer_projects_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       directory_activity_events: {
         Row: {
           designer_slug: string | null
@@ -4974,6 +5012,57 @@ export type Database = {
           updated_by?: string | null
         }
         Relationships: []
+      }
+      furniture_packages: {
+        Row: {
+          created_at: string
+          currency: string
+          description: string
+          id: string
+          moodboard_id: string
+          package_price: number
+          residence_layout_id: string
+          sort_order: number
+          tier_name: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          description?: string
+          id?: string
+          moodboard_id: string
+          package_price: number
+          residence_layout_id: string
+          sort_order?: number
+          tier_name: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          description?: string
+          id?: string
+          moodboard_id?: string
+          package_price?: number
+          residence_layout_id?: string
+          sort_order?: number
+          tier_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "furniture_packages_moodboard_id_fkey"
+            columns: ["moodboard_id"]
+            isOneToOne: false
+            referencedRelation: "client_boards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "furniture_packages_residence_layout_id_fkey"
+            columns: ["residence_layout_id"]
+            isOneToOne: false
+            referencedRelation: "residence_layouts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       gallery_hotspots: {
         Row: {
@@ -8708,6 +8797,44 @@ export type Database = {
           whatsapp_done?: Json
         }
         Relationships: []
+      }
+      residence_layouts: {
+        Row: {
+          created_at: string
+          developer_project_id: string
+          floorplan_url: string | null
+          id: string
+          name: string
+          room_environment_glb: string | null
+          specs_label: string | null
+        }
+        Insert: {
+          created_at?: string
+          developer_project_id: string
+          floorplan_url?: string | null
+          id?: string
+          name: string
+          room_environment_glb?: string | null
+          specs_label?: string | null
+        }
+        Update: {
+          created_at?: string
+          developer_project_id?: string
+          floorplan_url?: string | null
+          id?: string
+          name?: string
+          room_environment_glb?: string | null
+          specs_label?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "residence_layouts_developer_project_id_fkey"
+            columns: ["developer_project_id"]
+            isOneToOne: false
+            referencedRelation: "developer_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       room_planner_projects: {
         Row: {
@@ -14861,6 +14988,26 @@ export type Database = {
           p_studio_id: string
         }
         Returns: string
+      }
+      save_viewing_room_packages: {
+        Args: { _layout_id: string; _packages: Json }
+        Returns: {
+          created_at: string
+          currency: string
+          description: string
+          id: string
+          moodboard_id: string
+          package_price: number
+          residence_layout_id: string
+          sort_order: number
+          tier_name: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "furniture_packages"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       scan_sec_query: { Args: { _sql: string }; Returns: Json[] }
       settle_product_image_worker: {

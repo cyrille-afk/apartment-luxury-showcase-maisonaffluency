@@ -37,6 +37,8 @@ import { formatPdfMoney } from "@/lib/pdfFormatting";
 import { proposalFinishDetails, proposalFinishSwatches } from "@/lib/proposalSpecifications";
 import { selectedStudioBoard, studioBoardItems } from "@/lib/studioBoardScope";
 import { studioBoardCount } from "@/lib/studioBoardCounts";
+import { DeveloperViewingRoomAdmin } from "@/components/trade/DeveloperViewingRoomAdmin";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type StudioItem = {
   id: string;
@@ -83,7 +85,8 @@ export default function TradeProjectStudio() {
   const [boards, setBoards] = useState<Array<{ id: string; title: string; item_count?: number }>>([]);
   const [hiddenCount, setHiddenCount] = useState(0);
   const [loadedBoardId, setLoadedBoardId] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { user, isAdmin, rolesLoaded } = useAuth();
+  const [studioTab, setStudioTab] = useState("canvas");
   const [canEdit, setCanEdit] = useState(false);
   const [savingFinishes, setSavingFinishes] = useState(false);
   const [removeItem, setRemoveItem] = useState<StudioItem | null>(null);
@@ -427,6 +430,10 @@ export default function TradeProjectStudio() {
         </h1>
       </div>
 
+      {rolesLoaded && isAdmin && !isClientMode && <Tabs value={studioTab} onValueChange={value => { setStudioTab(value); setIsAiPanelOpen(false); setIsSpecPanelOpen(false); }} className="shrink-0 border-b border-border px-4 py-2 md:px-8 lg:px-12">
+        <TabsList><TabsTrigger value="canvas" className="cursor-pointer">Project Studio</TabsTrigger><TabsTrigger value="admin" className="cursor-pointer">Admin</TabsTrigger></TabsList>
+      </Tabs>}
+      {studioTab === "admin" && rolesLoaded && isAdmin && !isClientMode ? <div className="min-h-0 flex-1"><DeveloperViewingRoomAdmin key={project.id} projectId={project.id} /></div> : <>
       <div className="flex shrink-0 flex-wrap justify-start gap-2 border-b border-border px-4 py-3 md:px-6">
         <Select value={selectedBoardId ?? (boards.length === 1 ? boards[0]?.id : undefined)} onValueChange={board => { setItems([]); setLoadedBoardId(null); setLoadingItems(true); setSearchParams(previous => { previous.set("board", board); return previous; }); }}>
           <SelectTrigger aria-label="Selected mood board" className="h-10 w-full cursor-pointer sm:w-80"><SelectValue placeholder="Select a mood board" /></SelectTrigger>
@@ -792,6 +799,7 @@ export default function TradeProjectStudio() {
         heroImage={project.cover_image_url}
         floorPlanImage={proposalFloorPlan}
       />
+      </>}
     </div>
   );
 }
