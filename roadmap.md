@@ -1,5 +1,9 @@
 # Roadmap
 
+## Studio loading monitoring
+- [x] Instrumented board/piece/finish reads, handoff, room readiness, canvas and separate hotspot-root errors, context recovery and hotspot toggle; CPU batches stop at 120 frames. Counts/timings carry no names, prices or private IDs; frame gaps are not GPU timing or causal proof.
+- [x] Schema validates (26 events including new studio_loading); eight regressions pass. Owner's real eleven-piece flow emits Studio stage timings and hotspot mount, retains eleven pins after reload/on phone; controlled folder 503 emits boards/error and captured stage context. Published ingestion and a real crash diagnosis require publishing and an actual visit; room readiness/CPU samples correctly remain absent until their conditions occur.
+
 ## Selected-board Studio and hotspots
 - [x] Saved-board entry carries its board ID; Studio requires one accessible folder, reads only its rows and passes that exact composition to Sandbox without restoring unrelated cached/cloud furniture first. Generic multi-folder Studio entry asks for a folder instead of combining them.
 - [x] Thirteen regressions pass; owner's restored folder verified via its real Project Studio action: Specsheet (11), eleven handoff items, eleven pins and 11 / 15 object header, eleven after reload and on phone, no page errors. Composition query addresses only the restored folder; separate eight-item folder never contributes furniture (global mobile-save notifications remain independent). Preview build OK.

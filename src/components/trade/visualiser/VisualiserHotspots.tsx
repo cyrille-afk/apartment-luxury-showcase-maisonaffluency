@@ -49,6 +49,10 @@ export default function VisualiserHotspots({ objects, onFindAlternatives }: {
   const world = useMemo(() => new THREE.Vector3(), []);
   const cameraSpace = useMemo(() => new THREE.Vector3(), []);
   const host = gl.domElement.parentElement;
+  const frameSample = useRef({ count: 0, total: 0, max: 0, gap: 0, last: 0 });
+  const countRef = useRef(objects.length);
+  countRef.current = objects.length;
+  useEffect(() => { frameSample.current = { count: 0, total: 0, max: 0, gap: 0, last: 0 }; }, [objects.length]);
 
   useEffect(() => {
     const workspace = gl.domElement.closest(".visualiser-workspace") ?? host;
@@ -75,6 +79,8 @@ export default function VisualiserHotspots({ objects, onFindAlternatives }: {
 
   useFrame(() => {
     if (!host) return;
+    const started = performance.now();
+    try {
     camera.updateMatrixWorld();
     const visible = objects.flatMap(object => {
       const height = Math.max(0.45, (resolveDimensions(object)?.h ?? 900) / 1000) * object.scale + 0.18;
@@ -107,6 +113,21 @@ export default function VisualiserHotspots({ objects, onFindAlternatives }: {
       pin.style.transform = `translate3d(${placement.x - VISUALISER_HOTSPOT_HIT_SIZE / 2}px, ${placement.y - VISUALISER_HOTSPOT_HIT_SIZE / 2}px, 0)`;
       pin.dataset.tooltipSide = placement.tooltipSide;
       pin.dataset.displaced = String(placement.displaced);
+    }
+    } catch (error) {
+      window.__lovableEvents?.track?.("project.studio_loading", { phase: "hotspot_error", status: "error", duration_ms: performance.now() - started, piece_count: objects.length, pin_count: pinRefs.current.size });
+      window.__lovableEvents?.captureException?.(error, { source: "visualiser_hotspot_projection", piece_count: objects.length }, { mechanism: "manual", handled: false, severity: "error" });
+      throw error;
+    }
+    const sample = frameSample.current;
+    // At most two batches per mount/count change; no per-frame network traffic.
+    if (sample.count >= 120 || document.visibilityState !== "visible") return;
+    const duration = performance.now() - started;
+    sample.count += 1; sample.total += duration; sample.max = Math.max(sample.max, duration);
+    if (sample.last) sample.gap = Math.max(sample.gap, started - sample.last);
+    sample.last = started;
+    if (sample.count % 60 === 0) {
+      window.__lovableEvents?.track?.("project.studio_loading", { phase: "hotspot_frames", status: "ok", duration_ms: sample.total / sample.count, piece_count: objects.length, pin_count: pinRefs.current.size, sample_count: sample.count, max_cpu_ms: sample.max, frame_gap_ms: sample.gap });
     }
   });
 
@@ -150,8 +171,13 @@ export default function VisualiserHotspots({ objects, onFindAlternatives }: {
   useLayoutEffect(() => {
     if (!host) return;
     host.appendChild(overlayElement);
-    const root = createRoot(overlayElement);
+    const started = performance.now();
+    const root = createRoot(overlayElement, { onUncaughtError: error => {
+      window.__lovableEvents?.track?.("project.studio_loading", { phase: "hotspot_error", status: "error", duration_ms: performance.now() - started, piece_count: countRef.current, pin_count: pinRefs.current.size });
+      window.__lovableEvents?.captureException?.(error, { source: "visualiser_hotspot_overlay", piece_count: countRef.current }, { mechanism: "react_error_boundary", handled: false, severity: "error" });
+    } });
     overlayRoot.current = root;
+    window.__lovableEvents?.track?.("project.studio_loading", { phase: "hotspot_mount", status: "ok", duration_ms: performance.now() - started, piece_count: countRef.current, pin_count: pinRefs.current.size });
     return () => {
       overlayRoot.current = null;
       root.unmount();

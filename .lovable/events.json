@@ -845,6 +845,83 @@
           }
         }
       }
+    },
+    "project.studio_loading": {
+      "event_schema_version": 1,
+      "description": "Studio board reads and finish hydration, Sandbox handoff/readiness/crash/context state, and bounded hotspot CPU-frame samples; same visit links phases, counts never include names, IDs or prices. Timing correlation is not proof of crash cause.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "phase",
+          "status",
+          "duration_ms",
+          "piece_count"
+        ],
+        "properties": {
+          "phase": {
+            "type": "string",
+            "enum": [
+              "boards",
+              "pieces",
+              "finishes",
+              "studio_total",
+              "handoff",
+              "room_ready",
+              "render_error",
+              "context",
+              "hotspot_mount",
+              "hotspot_frames",
+              "hotspot_error",
+              "hotspot_toggle"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "started",
+              "ok",
+              "error",
+              "selection_required",
+              "restoring",
+              "failed",
+              "enabled",
+              "disabled"
+            ]
+          },
+          "duration_ms": {
+            "type": "number",
+            "minimum": 0
+          },
+          "piece_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "pin_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "hotspots_enabled": {
+            "type": "boolean"
+          },
+          "sample_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "max_cpu_ms": {
+            "type": "number",
+            "minimum": 0
+          },
+          "frame_gap_ms": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
     }
   }
 }

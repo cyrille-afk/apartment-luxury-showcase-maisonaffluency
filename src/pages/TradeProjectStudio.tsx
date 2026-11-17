@@ -124,6 +124,11 @@ export default function TradeProjectStudio() {
   useEffect(() => {
     if (!id) return;
     let cancelled = false;
+    const started = performance.now();
+    let phase: "boards" | "pieces" | "finishes" = "boards";
+    let phaseStarted = started;
+    let pieceCount = 0;
+    window.__lovableEvents?.track?.("project.studio_loading", { phase: "studio_total", status: "started", duration_ms: 0, piece_count: 0 });
     (async () => {
       setLoadingItems(true);
       setItems([]);
@@ -135,17 +140,22 @@ export default function TradeProjectStudio() {
 
       const b = await sb.from("client_boards").select("id, title").eq("project_id", id).order("created_at");
       if (cancelled) return;
-      if (b.error) { toast.error("Your folders couldn't load. Please reopen Project Studio."); setLoadingItems(false); return; }
+      if (b.error) throw new Error("Studio folder read failed");
+      window.__lovableEvents?.track?.("project.studio_loading", { phase, status: "ok", duration_ms: performance.now() - phaseStarted, piece_count: 0 });
       const accessibleBoards = (b.data ?? []) as Array<{ id: string; title: string }>;
       setBoards(accessibleBoards);
       const selectedBoard = selectedStudioBoard(accessibleBoards, selectedBoardId);
-      if (!selectedBoard) { setLoadingItems(false); return; }
+      if (!selectedBoard) { window.__lovableEvents?.track?.("project.studio_loading", { phase: "studio_total", status: "selection_required", duration_ms: performance.now() - started, piece_count: 0 }); setLoadingItems(false); return; }
+      phase = "pieces"; phaseStarted = performance.now();
       const folderTitles = new Map([[selectedBoard.id, selectedBoard.title]]);
       const bItems = await sb.from("client_board_items")
         .select(`id, board_id, product_id, variant_label, wood_label, fabric_label, procurement_quote_id, source_quote_item_id, trade_products(${productFields})`)
         .eq("board_id", selectedBoard.id).order("sort_order");
       if (cancelled) return;
-      if (bItems.error) { toast.error("This folder's pieces couldn't load. Please reopen Project Studio."); setLoadingItems(false); return; }
+      if (bItems.error) throw new Error("Studio piece read failed");
+      pieceCount = bItems.data?.length ?? 0;
+      window.__lovableEvents?.track?.("project.studio_loading", { phase, status: "ok", duration_ms: performance.now() - phaseStarted, piece_count: pieceCount });
+      phase = "finishes"; phaseStarted = performance.now();
 
       const map = new Map<string, StudioItem>();
       const push = (row: any, quantity: number) => {
@@ -222,6 +232,7 @@ export default function TradeProjectStudio() {
         user ? supabase.rpc("can_edit_project", { _project_id: id, _user_id: user.id }) : Promise.resolve({ data: false }),
       ]);
       if (cancelled) return;
+      window.__lovableEvents?.track?.("project.studio_loading", { phase, status: finishError || savedError ? "error" : "ok", duration_ms: performance.now() - phaseStarted, piece_count: pieceCount });
       if (finishError || savedError) toast.error("Studio finishes couldn't load. Please reopen the project to try again.");
       setCanEdit(editable === true && !finishError && !savedError);
       for (const item of list) {
@@ -242,7 +253,12 @@ export default function TradeProjectStudio() {
       setItems(studioVisibleItems(list));
       setLoadedBoardId(selectedBoard.id);
       setLoadingItems(false);
-    })().catch(() => { if (!cancelled) { setLoadingItems(false); toast.error("This folder couldn't load. Please reopen Project Studio."); } });
+      window.__lovableEvents?.track?.("project.studio_loading", { phase: "studio_total", status: finishError || savedError ? "error" : "ok", duration_ms: performance.now() - started, piece_count: studioVisibleItems(list).reduce((sum, item) => sum + item.quantity, 0) });
+    })().catch(() => { if (!cancelled) {
+      window.__lovableEvents?.track?.("project.studio_loading", { phase, status: "error", duration_ms: performance.now() - phaseStarted, piece_count: pieceCount });
+      window.__lovableEvents?.captureException?.(new Error(`Studio loading failed at ${phase}`), { source: "project_studio", phase }, { mechanism: "manual", handled: true, severity: "error" });
+      setLoadingItems(false); toast.error("This folder couldn't load. Please reopen Project Studio.");
+    } });
     return () => { cancelled = true; };
   }, [id, selectedBoardId, itemsVersion, user?.id]);
 
@@ -284,6 +300,7 @@ export default function TradeProjectStudio() {
   const openInVisualiser = () => {
     if (!id || !loadedBoardId || loadingItems || !items.length || savingFinishes || removingItem) return;
     const stamp = Date.now();
+    const handoffStarted = performance.now();
     const pieces = items.flatMap(item => Array.from({ length: item.quantity }, (_, index) => {
       const placement = item.placements[index];
       return {
@@ -300,6 +317,7 @@ export default function TradeProjectStudio() {
     const layout = moodBoardHandoff(pieces, id, roomContext?.roomType ?? previous?.roomType ?? "living", previous, stamp, roomContext?.targetCents == null ? previous?.budgetEur ?? null : convertCents(roomContext.targetCents, roomContext.currency, "EUR", fxRates) / 100);
     layout.source = "project-studio";
     writeSharedRoomLayout(layout);
+    window.__lovableEvents?.track?.("project.studio_loading", { phase: "handoff", status: "ok", duration_ms: performance.now() - handoffStarted, piece_count: pieces.length });
     navigate(`/trade/visualiser?project=${encodeURIComponent(id)}&board=${encodeURIComponent(loadedBoardId)}&handoff=curated&stamp=${stamp}`);
   };
 

@@ -277,7 +277,12 @@ const TradeVisualiser = () => {
   const [sceneFailed, setSceneFailed] = useState(false);
   const [canvasEpoch, setCanvasEpoch] = useState(0);
   const [contextState, setContextState] = useState<"ready" | "restoring" | "failed">("ready");
-  const handleSceneCrash = useCallback(() => {
+  const roomLoadStarted = useRef<number | null>(null);
+  const monitoringCounts = useRef({ piece_count: 0, hotspots_enabled: true });
+  useEffect(() => { roomLoadStarted.current = performance.now(); }, []);
+  const handleSceneCrash = useCallback((error: unknown) => {
+    window.__lovableEvents?.track?.("project.studio_loading", { phase: "render_error", status: "error", duration_ms: roomLoadStarted.current === null ? 0 : performance.now() - roomLoadStarted.current, ...monitoringCounts.current });
+    window.__lovableEvents?.captureException?.(error, { source: "visualiser_canvas", ...monitoringCounts.current }, { mechanism: "react_error_boundary", handled: true, severity: "error" });
     // A renderer failure is not permission to edit the designer's composition.
     // Stop automatic retries; an explicit retry remounts only the renderer.
     try { preserveSceneBackup(STORAGE_KEY); } catch { /* composition remains in memory */ }
@@ -327,6 +332,7 @@ const TradeVisualiser = () => {
   const [showGrid, setShowGrid] = useState<boolean>(initial.showGrid ?? true);
   const [showLabels, setShowLabels] = useState<boolean>(initial.showLabels ?? true);
   const [showHotspots, setShowHotspots] = useState<boolean>(initial.showHotspots ?? true);
+  monitoringCounts.current = { piece_count: objects.length, hotspots_enabled: showHotspots };
   const [alternativesId, setAlternativesId] = useState<string | null>(null);
   const [swappingId, setSwappingId] = useState<string | null>(null);
   const [swapSnapshot, setSwapSnapshot] = useState<SwapSnapshot | null>(null);
@@ -340,7 +346,10 @@ const TradeVisualiser = () => {
   }, [swapSnapshot]);
   const [pathTrace, setPathTrace] = useState(false);
   const [initialRoomReady, setInitialRoomReady] = useState(false);
-  const revealInitialRoom = useCallback(() => setInitialRoomReady(true), []);
+  const revealInitialRoom = useCallback(() => {
+    setInitialRoomReady(true);
+    window.__lovableEvents?.track?.("project.studio_loading", { phase: "room_ready", status: "ok", duration_ms: roomLoadStarted.current === null ? 0 : performance.now() - roomLoadStarted.current, ...monitoringCounts.current });
+  }, []);
   const [keepPhotorealGhost, setKeepPhotorealGhost] = useState(loadPhotorealGhostPreference);
   const [photorealGhost, setPhotorealGhost] = useState<string | null>(null);
   const frameCaptureRef = useRef<PhotorealFrameCaptureRef["current"]>(null);
@@ -1177,13 +1186,20 @@ const TradeVisualiser = () => {
   useEffect(() => {
     if (curatedHandoffDone.current || searchParams.get("handoff") !== "curated") return;
     curatedHandoffDone.current = true;
+    const handoffStarted = performance.now();
     const rawStamp = Number(searchParams.get("stamp"));
     const shared = readSharedRoomLayout(searchParams.get("project"), Number.isFinite(rawStamp) && rawStamp > 0 ? rawStamp : null);
-    if (!shared) { toast.error("The curated layout didn't come through — click Open in Visualiser Sandbox again."); return; }
+    if (!shared) {
+      window.__lovableEvents?.track?.("project.studio_loading", { phase: "handoff", status: "error", duration_ms: performance.now() - handoffStarted, piece_count: 0 });
+      toast.error("The curated layout didn't come through — click Open in Visualiser Sandbox again."); return;
+    }
     void (async () => {
       const ids = [...new Set(shared.items.map((i) => i.productId))];
       const { data, error } = ids.length ? await (supabase as any).from("trade_products").select("id, product_name, brand_name, image_url, dimensions, width_mm, depth_mm, height_mm, size_variants, category, subcategory, source_pick_id, glb_url").in("id", ids) : { data: [], error: null };
-      if (error) { toast.error("Catalogue details couldn't load. Your existing room is unchanged; please try the handoff again."); curatedHandoffDone.current = false; return; }
+      if (error) {
+        window.__lovableEvents?.track?.("project.studio_loading", { phase: "handoff", status: "error", duration_ms: performance.now() - handoffStarted, piece_count: shared.items.length });
+        toast.error("Catalogue details couldn't load. Your existing room is unchanged; please try the handoff again."); curatedHandoffDone.current = false; return;
+      }
       const rows = new Map(((data ?? []) as Array<{ id: string; product_name: string; brand_name: string; image_url: string | null; dimensions: string | null; width_mm: number | null; depth_mm: number | null; height_mm: number | null; size_variants: PlacedObject["size_variants"]; category: string | null; subcategory: string | null; source_pick_id: string | null; glb_url: string | null }>).map((r) => [r.id, r]));
       const placed = shared.items.map((item) => {
         const row = rows.get(item.productId);
@@ -1199,6 +1215,7 @@ const TradeVisualiser = () => {
         return { ...next, ...(item.appearance ?? {}), instanceId: `${next.instanceId}-${shared.items.indexOf(item)}`, rotation: [0, item.rotationY, 0] as [number, number, number] };
       });
       setObjects(placed);
+      window.__lovableEvents?.track?.("project.studio_loading", { phase: "handoff", status: "ok", duration_ms: performance.now() - handoffStarted, piece_count: placed.length });
       if (shared.source === "mood-board" || shared.source === "project-studio") activeProject?.setBounds({ width: shared.room.width, depth: shared.room.length, height: shared.room.height });
       setSelectedId(null);
       if (shared.wallFinish) setWallFinish(roomWallFinish(shared.wallFinish));
@@ -1327,7 +1344,10 @@ const TradeVisualiser = () => {
             projectArchitecture={activeProject && activeProject.view !== "plan" ? { floorPlanUrl: activeProject.state.floorPlanUrl, columns: activeProject.state.columns } : null}
             onInitialReady={revealInitialRoom}
             captureHandle={captureHandle}
-            onContextState={setContextState}
+            onContextState={state => {
+              setContextState(state);
+              window.__lovableEvents?.track?.("project.studio_loading", { phase: "context", status: state === "ready" ? "ok" : state, duration_ms: roomLoadStarted.current === null ? 0 : performance.now() - roomLoadStarted.current, ...monitoringCounts.current });
+            }}
             focusRef={focusRef}
             objects={canvasObjects}
             selectedId={selectedId}
@@ -1998,7 +2018,10 @@ const TradeVisualiser = () => {
             </Button>
             <Button variant="ghost"
               className={cn(toolbarButton, showHotspots ? "border-primary text-primary" : "opacity-60")}
-              onClick={() => setShowHotspots(value => !value)}
+              onClick={() => {
+                window.__lovableEvents?.track?.("project.studio_loading", { phase: "hotspot_toggle", status: showHotspots ? "disabled" : "enabled", duration_ms: 0, piece_count: objects.length, hotspots_enabled: !showHotspots });
+                setShowHotspots(value => !value);
+              }}
               aria-pressed={showHotspots}
               aria-label="Hotspots"
               title="Show or hide editorial alternative pins; they are always hidden during mockup export"
