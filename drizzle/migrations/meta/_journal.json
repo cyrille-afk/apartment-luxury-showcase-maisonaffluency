@@ -2059,6 +2059,20 @@
       "when": 1794879765821,
       "tag": "0293_secure_selected_admin_product_functions",
       "breakpoints": true
+    },
+    {
+      "idx": 294,
+      "version": "7",
+      "when": 1794900362154,
+      "tag": "0294_create_spatial_catalog_items",
+      "breakpoints": true
+    },
+    {
+      "idx": 295,
+      "version": "7",
+      "when": 1794900419902,
+      "tag": "0295_restrict_spatial_catalog_item_privileges",
+      "breakpoints": true
     }
   ]
 }

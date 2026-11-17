@@ -1584,6 +1584,54 @@ export type Database = {
           },
         ]
       }
+      catalog_items: {
+        Row: {
+          base_lead_time_weeks: number
+          base_price_sgd: number
+          category_role: string
+          depth_m: number
+          designer: string | null
+          glb_url_compressed: string
+          glb_url_proxy: string | null
+          height_m: number
+          id: string
+          name: string
+          room_type: string[]
+          sku: string
+          width_m: number
+        }
+        Insert: {
+          base_lead_time_weeks: number
+          base_price_sgd: number
+          category_role: string
+          depth_m: number
+          designer?: string | null
+          glb_url_compressed: string
+          glb_url_proxy?: string | null
+          height_m: number
+          id?: string
+          name: string
+          room_type: string[]
+          sku: string
+          width_m: number
+        }
+        Update: {
+          base_lead_time_weeks?: number
+          base_price_sgd?: number
+          category_role?: string
+          depth_m?: number
+          designer?: string | null
+          glb_url_compressed?: string
+          glb_url_proxy?: string | null
+          height_m?: number
+          id?: string
+          name?: string
+          room_type?: string[]
+          sku?: string
+          width_m?: number
+        }
+        Relationships: []
+      }
       client_board_comments: {
         Row: {
           author_name: string

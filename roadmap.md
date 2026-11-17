@@ -675,6 +675,10 @@
 - [x] Add dimensioned wireframe placeholders and collision-aware sofa/dining vignette placement.
 - [ ] Complete every-piece desktop/phone × light/dark and one-step-past verification; 23 regressions, typechecking and Anchor → three-secondary requests already pass.
 
+## Uploaded spatial catalogue
+- [x] Apply catalog_items with its requested spatial/model/pricing fields and safe catalogue access rules.
+- [ ] Confirm migration history; fields, RLS, approved-trade/admin policies and exact grants are verified, with anonymous access blocked.
+
 ## Waiting on the user (existing publishing tasks)
 
 - [ ] Publish the preview so the renamed listings, directory and catalogue files go live
