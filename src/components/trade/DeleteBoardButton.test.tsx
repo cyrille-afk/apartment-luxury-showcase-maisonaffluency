@@ -19,11 +19,16 @@ describe("folder deletion", () => {
   it("refreshes only after the exact folder deletion is confirmed", async () => {
     result.mockResolvedValue({ data: { id: "empty-board" }, error: null });
     const onDeleted = vi.fn();
+    const dispatch = vi.spyOn(window, "dispatchEvent");
     render(<DeleteBoardButton board={board} onDeleted={onDeleted} />);
     fireEvent.click(screen.getByRole("button", { name: "Delete folder Mood board" }));
     fireEvent.click(screen.getByRole("button", { name: /^Delete folder$/ }));
     await waitFor(() => expect(onDeleted).toHaveBeenCalledOnce());
     expect(remove.mock.results[0].value.eq).toHaveBeenCalledWith("id", "empty-board");
+    const event = dispatch.mock.calls.find(([event]) => event.type === "concierge:artifacts-changed")?.[0];
+    expect(event).toBeInstanceOf(CustomEvent);
+    expect((event as CustomEvent).detail).toEqual({ deletedBoardId: "empty-board" });
+    dispatch.mockRestore();
   });
   it("keeps the folder and confirmation when access refuses deletion", async () => {
     result.mockResolvedValue({ data: null, error: { message: "No row returned" } });

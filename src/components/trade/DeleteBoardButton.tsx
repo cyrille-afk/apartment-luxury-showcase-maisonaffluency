@@ -18,7 +18,7 @@ export function DeleteBoardButton({ board, onDeleted }: { board: { id: string; t
         setError("This folder couldn't be deleted. Check that you have permission, then try again.");
         return;
       }
-      window.dispatchEvent(new Event("concierge:artifacts-changed"));
+      window.dispatchEvent(new CustomEvent("concierge:artifacts-changed", { detail: { deletedBoardId: board.id } }));
       setOpen(false);
       onDeleted();
     } catch {

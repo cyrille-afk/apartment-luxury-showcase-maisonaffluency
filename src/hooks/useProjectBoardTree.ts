@@ -10,12 +10,29 @@ export function useProjectBoardTree(projectIds: string[]) {
   useEffect(() => {
     if (!key) { setBoards([]); return; }
     let active = true;
-    supabase.from("client_boards").select("id, project_id, title, updated_at")
-      .in("project_id", projectIds).order("updated_at", { ascending: false })
-      .then(({ data, error }) => {
-        if (active) setBoards(error ? [] : (data || []).filter((b): b is ProjectBoardLink => !!b.project_id));
-      });
-    return () => { active = false; };
+    let revision = 0;
+    const refresh = () => {
+      const requestRevision = ++revision;
+      supabase.from("client_boards").select("id, project_id, title, updated_at")
+        .in("project_id", key.split(",")).order("updated_at", { ascending: false })
+        .then(({ data, error }) => {
+          if (active && requestRevision === revision) setBoards(error ? [] : (data || []).filter((b): b is ProjectBoardLink => !!b.project_id));
+        });
+    };
+    const onArtifactsChanged = (event: Event) => {
+      const detail: unknown = event instanceof CustomEvent ? event.detail : null;
+      if (detail && typeof detail === "object" && "deletedBoardId" in detail && typeof detail.deletedBoardId === "string") {
+        const deletedBoardId = detail.deletedBoardId;
+        setBoards(previous => previous.filter(board => board.id !== deletedBoardId));
+      }
+      refresh();
+    };
+    window.addEventListener("concierge:artifacts-changed", onArtifactsChanged);
+    refresh();
+    return () => {
+      active = false;
+      window.removeEventListener("concierge:artifacts-changed", onArtifactsChanged);
+    };
   }, [key]);
   return boards;
 }
