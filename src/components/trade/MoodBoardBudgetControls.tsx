@@ -44,7 +44,8 @@ export function MoodBoardBudgetBar({ ledger, pending, currency }: { ledger: Retu
       <span className="text-foreground">Allocated · {pending ? "Loading prices…" : fmt(ledger.allocated)} <span className="text-muted-foreground">RRP</span></span>
       <span className={ledger.remaining != null && ledger.remaining < 0 ? "text-destructive" : "text-muted-foreground"}>{pending ? "Confirming budget…" : ledger.unpriced ? "Remaining unconfirmed" : ledger.remaining == null ? "No total ceiling" : `${ledger.remaining < 0 ? "Over budget" : "Remaining"} · ${fmt(Math.abs(ledger.remaining))}`}</span>
     </div>
-    <Progress aria-label="Allocated versus total budget" value={ledger.total ? Math.min(100, ledger.allocated / ledger.total * 100) : 0} className="h-1.5" />
+    {ledger.total != null && <p className="text-[11px] text-muted-foreground">Target · {fmt(ledger.total)}{!pending && ledger.total > 0 ? ` · ${Math.round(ledger.allocated / ledger.total * 100)}% allocated` : ""}</p>}
+    <Progress aria-label="Allocated versus total budget" aria-valuenow={ledger.total ? Math.min(100, ledger.allocated / ledger.total * 100) : 0} value={ledger.total ? Math.min(100, ledger.allocated / ledger.total * 100) : 0} className="h-1.5" />
     {!pending && ledger.unpriced > 0 && <p className="text-[11px] text-muted-foreground">{ledger.unpriced} piece{ledger.unpriced === 1 ? "" : "s"} awaiting pricing · budget incomplete</p>}
   </div>;
 }

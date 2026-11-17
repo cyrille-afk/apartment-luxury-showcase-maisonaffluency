@@ -59,6 +59,7 @@ import { useProjectWorkspace } from "@/contexts/ProjectWorkspaceContext";
 import { compileBoardDraftQuote } from "@/lib/boardDraftQuote";
 import { formatMoneyIn } from "@/lib/displayMoney";
 import { DeleteBoardButton } from "@/components/trade/DeleteBoardButton";
+import { SavedMoodBoardBudget } from "@/components/trade/SavedMoodBoardBudget";
 
 interface Board {
   id: string;
@@ -778,6 +779,8 @@ const TradeBoardBuilder = () => {
             )}
           </div>
         </div>
+
+        <SavedMoodBoardBudget key={board.id} boardId={board.id} projectId={board.project_id} items={items} finishes={finishes} editable={isEditable && !clientSafe} />
 
         {/* Client Overview Card — full width */}
         <div className="mb-8 rounded-md border border-border/60 bg-muted/20 p-4">

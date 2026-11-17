@@ -1,5 +1,9 @@
 # Roadmap
 
+## Saved Mood Board budget controls
+- [x] Saved folders now expose shared room/currency/target/category controls and configured retail allocation with target/percentage/remaining progress; exact eleven rows and finishes retained. Budget settings remain account/folder-scoped on this device; missing previous targets are not invented.
+- [x] Seventeen regressions pass; owner’s real eleven-piece folder verified at €211,818 allocated, temporary €500,000 target / €288,182 remaining / 42%, room/target reload, category input, over-budget warning and phone without overflow or page errors. Verification settings cleared; build OK.
+
 ## Recover deleted Cipriani board
 - [x] Recreated the original board address and eleven pieces in verified order/finish labels from pre-deletion live evidence. Only Ibo's original row ID was independently known and retained; other item IDs are new. Old comments, invitations and unrecorded metadata were not recoverable; existing eight-item board untouched.
 - [x] Folder links now expose item counts on desktop/mobile; deletion waits for a live exact count and fails closed when unavailable. Folder management no longer labels failed count reads as zero. Sidebar previously omitted counts; cannot establish which visual cue the user interpreted as empty.
