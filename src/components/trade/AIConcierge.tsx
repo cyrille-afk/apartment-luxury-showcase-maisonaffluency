@@ -1,4 +1,5 @@
 import { toDiscountFraction } from "@/lib/tradePricing";
+import { felixThreadActivity, felixActivityTimestamp, type FelixThreadActivity } from "@/lib/felixThreadActivity";
 import { shouldOfferArchitecturalIntake } from "@/lib/felixLayoutHandoff";
 import { ProjectPicker } from "./ProjectPicker";
 import { updateFelixProductSelection } from "@/lib/updateFelixProductSelection";
@@ -1634,7 +1635,7 @@ export function AIConcierge({
   // Each conversation is a row in `public.concierge_threads` (RLS-scoped to
   // auth.uid). We keep a lightweight thread list in state for the drawer and
   // upsert the active thread's timeline on every change.
-  type ConciergeThread = { id: string; title: string; last_active_at: string };
+  type ConciergeThread = { id: string; title: string; last_active_at: string; activity?: FelixThreadActivity };
   const [threads, setThreads] = useState<ConciergeThread[]>([]);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   const previousThreadIdRef = useRef<string | null>(null);
@@ -1719,7 +1720,7 @@ export function AIConcierge({
   const refreshThreads = useCallback(async (uid: string) => {
     let q = supabase
       .from("concierge_threads")
-      .select("id,title,last_active_at")
+      .select("id,title,last_active_at,timeline")
       .eq("user_id", uid);
     if (embedded) {
       q = q.eq("workspace", true);
@@ -1728,9 +1729,16 @@ export function AIConcierge({
       q = q.eq("workspace", false);
     }
     const { data } = await q.order("last_active_at", { ascending: false }).limit(50);
-    if (data) setThreads(data as ConciergeThread[]);
-    return (data as ConciergeThread[]) || [];
+    const list = (data || []).map(({ timeline: savedTimeline, ...thread }) => ({
+      ...thread, activity: felixThreadActivity(savedTimeline),
+    }));
+    if (data) setThreads(list);
+    return list;
   }, [embedded, projectId]);
+
+  useEffect(() => {
+    if (threadsOpen && user?.id) void refreshThreads(user.id);
+  }, [threadsOpen, user?.id, refreshThreads]);
 
   const createNewThread = useCallback(async (): Promise<string | null> => {
     if (!user?.id) return null;
@@ -1920,7 +1928,7 @@ export function AIConcierge({
           .eq("user_id", user.id);
       }
       setThreads((prev) => {
-        const next = prev.map((t) => t.id === activeThreadId ? { ...t, title, last_active_at: nowIso } : t);
+        const next = prev.map((t) => t.id === activeThreadId ? { ...t, title, last_active_at: nowIso, activity: felixThreadActivity(compact) } : t);
         next.sort((a, b) => b.last_active_at.localeCompare(a.last_active_at));
         return next;
       });
@@ -6769,17 +6777,26 @@ export function AIConcierge({
             <ul className="flex flex-col">
               {threads.map((t) => {
                 const active = t.id === activeThreadId;
-                const when = (() => { try { return new Date(t.last_active_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }); } catch { return ""; } })();
+                const when = felixActivityTimestamp(t.last_active_at);
+                const activity = t.id === activeThreadId && hydratedThreadId === t.id
+                  ? felixThreadActivity(timeline) : t.activity;
                 return (
                   <li key={t.id} className={cn("group flex items-center gap-2 px-3 py-2 border-b border-border/60 hover:bg-muted/40 transition-colors", active && "bg-muted/50")}>
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
                       onClick={() => selectThread(t.id)}
-                      className="flex-1 min-w-0 text-left"
+                      className="flex-1 min-w-0 h-auto p-0 flex-col items-start whitespace-normal text-left hover:bg-transparent"
                     >
-                      <div className="font-body text-[13px] text-foreground truncate">{t.title || "New conversation"}</div>
-                      <div className="font-body text-[10px] uppercase tracking-[0.1em] text-muted-foreground mt-0.5">{when}</div>
-                    </button>
+                      <div className="font-body text-[13px] text-foreground truncate max-w-full">{t.title || "New conversation"}</div>
+                      <div className="font-body text-[11px] font-normal text-muted-foreground mt-0.5">
+                        Last active: {when ? <time dateTime={t.last_active_at}>{when}</time> : "Not recorded"}
+                      </div>
+                      {activity && <div className="font-body text-[11px] font-normal text-muted-foreground mt-1 leading-relaxed">
+                        {activity.userMessages} user {activity.userMessages === 1 ? "message" : "messages"} · {activity.felixMessages} Felix {activity.felixMessages === 1 ? "message" : "messages"}
+                        <span className="block">Felix includes automatic messages{activity.savedCards > 0 ? ` · ${activity.savedCards} saved ${activity.savedCards === 1 ? "card" : "cards"}` : ""}</span>
+                      </div>}
+                    </Button>
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); if (confirm("Delete this conversation?")) void deleteThread(t.id); }}

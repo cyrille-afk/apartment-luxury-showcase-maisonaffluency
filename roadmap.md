@@ -1,5 +1,8 @@
 # Roadmap
 
+## Felix thread activity
+- [x] Show saved last-active time with timezone and separate user/Felix message and card counts in conversation history. Three tests pass; signed-in existing five-thread history, older timestamps after reload and desktop/phone display verified with no page errors. Felix counts explicitly include automatic messages, which can advance the active timestamp without a user submission.
+
 ## Studio specsheet photos and room-budget context
 - [x] Add compact photos to every specsheet row; carry Mood Board room/target into Studio instead of the fabricated 125% target. Matching old device drafts recover context; otherwise show not set rather than inventing it.
 - [x] Ten regressions pass; signed-in eight-row thumbnails, real Mood Board Dining/€500,000 context recovery and reload verified; two-page proposal repeats logo and €413,990.30 allocation/€500,000 target with unclipped photos. Both pages visually checked; phone has no overflow and preview build OK. No saved projects or customer budgets changed.
