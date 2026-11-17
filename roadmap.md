@@ -1,5 +1,9 @@
 # Roadmap
 
+## Visualiser transfer refresh recovery
+- [x] Consume successful transfer markers with history replacement and a stable mounted-room key; expired transfers use saved session/project restoration instead of a full-screen missing-transfer error.
+- [x] Signed-in eight-piece Cipriani board transfer, refresh and Back return preserve exact object configurations; restored plan screenshots inspected with no page errors. Focused transfer/provider regressions and preview build pass. Full GPU appearance is not part of this recovery check.
+
 ## Catalog GLB upload analytics
 - [x] Track compression success/failure with original/optimized byte counts and persisted upload completion; no filenames, URLs or raw errors.
 - [x] All 29 event schemas validate; 11 focused tests pass. Signed-in real GLB compression emits exact 480/712 byte sizes and completion only after saved URL readback; temporary catalog/storage data removed. Preview build OK; published collector arrival awaits live usage.

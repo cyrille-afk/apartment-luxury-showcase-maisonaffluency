@@ -19,6 +19,7 @@ import { createPlacedObject, inventoryItemToPlaceable, MAX_PLACED_OBJECTS } from
 import { formatGap, tightestGap } from "@/lib/layoutGuides";
 import { resolveDimensions } from "@/lib/productDimensions";
 import { DEFAULT_SLOT_SPACING, footprintRadius, pickFootprintSlot } from "@/lib/visualiserPlacement";
+import { useVisualiserHandoffScope } from "@/lib/visualiserHandoffScope";
 const Sandbox = lazy(() => import("./TradeVisualiser"));
 const Axonometric = lazy(() => import("./TradeAxonometric"));
 const WalkthroughStudio = lazy(() => import("./TradeAILayoutStudio"));
@@ -138,6 +139,6 @@ export default function TradeProjectWorkspace() {
   const [params] = useSearchParams();
   const projectId = params.get("project") || "sandbox";
   const initialView: WorkspaceView = location.pathname.endsWith("axonometric") ? "axonometric" : params.get("view") === "walkthrough" ? "walkthrough" : "sandbox";
-  const handoffStamp = params.get("handoff") === "curated" ? params.get("stamp") : null;
-  return <ActiveProjectProvider key={`${user?.id || "guest"}:${projectId}:${handoffStamp ?? "saved"}`} accountId={user?.id || "guest"} projectId={projectId} initialView={initialView} freshHandoff={params.get("handoff") === "curated"}><WorkspacePanels /></ActiveProjectProvider>;
+  const handoffScope = useVisualiserHandoffScope(user?.id || "guest", projectId, params);
+  return <ActiveProjectProvider key={handoffScope.key} accountId={user?.id || "guest"} projectId={projectId} initialView={initialView} freshHandoff={handoffScope.freshHandoff}><WorkspacePanels /></ActiveProjectProvider>;
 }

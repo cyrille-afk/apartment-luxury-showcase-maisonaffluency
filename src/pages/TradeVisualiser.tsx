@@ -36,6 +36,7 @@ import ProjectLayoutOverview from "@/components/trade/visualiser/ProjectLayoutOv
 import { Helmet } from "react-helmet-async";
 import { useNavigate, useSearchParams } from "@/lib/router-compat";
 import { readSharedRoomLayout, writeSharedRoomLayout } from "@/lib/sharedRoomLayout";
+import { withoutVisualiserHandoff } from "@/lib/visualiserHandoffScope";
 
 import ToolsBreadcrumb from "@/components/trade/ToolsBreadcrumb";
 import { finishTargetsFromParts, getPartMaterial, hasAnyFinish, isNamedFinishTarget, materialFitsTarget, targetLabel, withPartMaterial, type FinishPart, type FinishTarget } from "@/lib/visualiserFinishTargets";
@@ -299,6 +300,13 @@ const TradeVisualiser = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [handoffStatus, setHandoffStatus] = useState<"idle" | "loading" | "ready" | "error" | "missing">("idle");
   const [handoffVersion, setHandoffVersion] = useState(0);
+  // Let the successful composition reach the existing session writers before
+  // consuming the transfer URL. The workspace key stays stable during cleanup.
+  useEffect(() => {
+    if (handoffStatus !== "ready" || searchParams.get("handoff") !== "curated") return;
+    const timer = window.setTimeout(() => setSearchParams(withoutVisualiserHandoff, { replace: true }), 0);
+    return () => window.clearTimeout(timer);
+  }, [handoffStatus, searchParams, setSearchParams]);
   const fileRef = useRef<HTMLInputElement>(null);
   const canvasWrapRef = useRef<HTMLDivElement>(null);
   const captureHandle = useRef<SceneCaptureHandle | null>(null);
@@ -1214,7 +1222,11 @@ const TradeVisualiser = () => {
     const shared = readSharedRoomLayout(searchParams.get("project"), Number.isFinite(rawStamp) && rawStamp > 0 ? rawStamp : null);
     if (!shared) {
       window.clearTimeout(timeout);
-      setHandoffStatus("missing");
+      // Old bookmarks/history entries are no longer fresh transfers. The
+      // provider restores the saved project instead of blanking the room.
+      setHandoffStatus("idle");
+      setSearchParams(withoutVisualiserHandoff, { replace: true });
+      toast.message("That room transfer has expired. Opening your saved room instead.");
       window.__lovableEvents?.track?.("project.studio_loading", { phase: "handoff", status: "error", duration_ms: performance.now() - handoffStarted, piece_count: 0 });
       return;
     }
