@@ -1,5 +1,9 @@
 # Roadmap
 
+## Grouped 3D loading progress
+- [x] Show committed piece counts, current group and pieces remaining during sequential room loading; retain the final room-preparation state until rendering is ready.
+- [x] Six tests pass for thresholds, partial groups, all eleven-piece group transitions, empty rooms and stale completions. Signed-in eight-piece Studio handoff shows group 1/3 and exact remaining counts; real downloads reached partial completion before headless WebGL stalled. Held-download desktop/phone light/dark screenshots verify readable progress without palette overlap; preview build OK. Full real-room completion remains unverified because Chromium stalled.
+
 ## Sequential 3D furniture loading
 - [x] Up to four pieces load together; above four, groups of three wait for all active pieces to commit, yielding a paint before the next group. Earlier models stay mounted and saved composition/pins stay unchanged.
 - [x] Seven tests pass, including four/five threshold and eleven-piece 3/3/3/2 progression. Real current selected board now contains nine pieces: observed first three GLB requests at 11.6–11.8s, next three at 58.6–61.2s with nine pins and no browser errors. Final assets remained loading at capture, so complete-room rendering is not claimed; preview build OK.

@@ -4,6 +4,7 @@ import { adaptiveSummary, type AdaptiveSamplingState } from "@/lib/visualiserAda
 import { loadPhotorealGhostPreference, PHOTOREAL_GHOST_KEY, type PhotorealFrameCaptureRef } from "@/lib/visualiserPhotorealGhost";
 import { VISUALISER_ENVIRONMENTS, clampAdvancedRendering, environmentSourcePref, type AdvancedRenderingSettings, type EnvironmentSourcePref } from "@/lib/visualiserAdvancedRendering";
 import RugLayoutControls from "@/components/trade/visualiser/RugLayoutControls";
+import type { FurnitureLoadingProgress } from "@/components/trade/visualiser/SequentialFurniture";
 import VisualiserClientShare from "@/components/trade/visualiser/VisualiserClientShare";
 import { clampRugRotation } from "@/lib/visualiserRugRotation";
 import FeatureWallControls from "@/components/trade/visualiser/FeatureWallControls";
@@ -352,6 +353,7 @@ const TradeVisualiser = () => {
   }, [swapSnapshot]);
   const [pathTrace, setPathTrace] = useState(false);
   const [initialRoomReady, setInitialRoomReady] = useState(false);
+  const [furnitureProgress, setFurnitureProgress] = useState<FurnitureLoadingProgress | null>(null);
   useEffect(() => {
     if (!showHotspots || !objects.length || !initialRoomReady || hotspotStatus !== "loading") return;
     const timeout = window.setTimeout(() => setHotspotStatus("error"), 30000);
@@ -1349,7 +1351,13 @@ const TradeVisualiser = () => {
           }
         }}
       >
-        {!initialRoomReady && !sceneFailed && handoffStatus !== "error" && handoffStatus !== "missing" && <div role="status" data-room-loading className="absolute inset-0 z-20 flex items-center justify-center bg-visualiser-canvas"><span className="text-xs text-muted-foreground">{handoffStatus === "loading" ? "Loading the selected board’s pieces and hotspots…" : "Preparing your room and furniture hotspots…"}</span></div>}
+        {!initialRoomReady && !sceneFailed && handoffStatus !== "error" && handoffStatus !== "missing" && <div role="status" data-room-loading className="absolute inset-0 z-50 flex items-center justify-center bg-background px-6 text-center"><div className="fixed inset-x-6 bottom-32 z-50 mx-auto flex max-w-xs flex-col gap-3 bg-background md:static md:w-full"><span className="hidden text-xs text-muted-foreground md:block">{handoffStatus === "loading" ? "Loading the selected board’s pieces and hotspots…" : "Preparing your room and furniture hotspots…"}</span>
+          {handoffStatus !== "loading" && furnitureProgress && furnitureProgress.total > 0 && <div data-furniture-loading-progress className="flex flex-col gap-2" aria-live="polite" aria-atomic="true">
+            <p className="text-sm text-foreground">{furnitureProgress.remaining > 0 ? `Loading group ${furnitureProgress.group} of ${furnitureProgress.groups}` : "All 3D pieces loaded · Finishing room…"}</p>
+            <progress aria-label="3D pieces loaded" max={furnitureProgress.total} value={furnitureProgress.loaded} className="h-1.5 w-full overflow-hidden rounded-none [&::-webkit-progress-bar]:bg-muted [&::-webkit-progress-value]:bg-foreground [&::-moz-progress-bar]:bg-foreground" />
+            <p className="text-xs text-muted-foreground">{furnitureProgress.loaded} of {furnitureProgress.total} loaded · {furnitureProgress.remaining} remaining</p>
+          </div>}
+        </div></div>}
         {(handoffStatus === "error" || handoffStatus === "missing") && <div role="alert" data-visualiser-hotspot-obstacle className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-background px-6 text-center">
           <h2 className="font-display text-xl text-foreground">Selected board couldn’t load</h2>
           <p className="max-w-md text-sm text-muted-foreground">{handoffStatus === "missing" ? "The saved room transfer is unavailable. Reopen the selected board in Project Studio and send it again." : "The selected board’s furniture details couldn’t load. Your saved pieces are unchanged."}</p>
@@ -1373,6 +1381,7 @@ const TradeVisualiser = () => {
             roomBounds={activeProject?.state.bounds ?? DEFAULT_LAYOUT_BOUNDS}
             projectArchitecture={activeProject && activeProject.view !== "plan" ? { floorPlanUrl: activeProject.state.floorPlanUrl, columns: activeProject.state.columns } : null}
             onInitialReady={revealInitialRoom}
+            onFurnitureProgress={setFurnitureProgress}
             captureHandle={captureHandle}
             onContextState={state => {
               setContextState(state);

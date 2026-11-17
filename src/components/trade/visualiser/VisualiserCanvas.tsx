@@ -23,7 +23,7 @@ import { VISUALISER_ORBIT_SETTINGS } from "./visualiserOrbitSettings";
 import type { FinishPart } from "@/lib/visualiserFinishTargets";
 import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/SceneObject";
 import VisualiserHotspots from "./VisualiserHotspots";
-import SequentialFurniture from "./SequentialFurniture";
+import SequentialFurniture, { type FurnitureLoadingProgress } from "./SequentialFurniture";
 import { footprintRadius, floorFocusPoint } from "@/lib/visualiserPlacement";
 import * as THREE from "three";
 import PathTracerLayer from "./PathTracerLayer";
@@ -261,6 +261,7 @@ interface VisualiserCanvasProps {
   /** Active-project plan compiled into the room: blueprint floor, walls at bounds, columns. */
   projectArchitecture?: { floorPlanUrl: string | null; columns: PlanColumn[] } | null;
   onInitialReady?: () => void;
+  onFurnitureProgress?: (progress: FurnitureLoadingProgress) => void;
   captureHandle?: { current: SceneCaptureHandle | null };
   onContextState?: (state: CanvasContextState) => void;
   isEditable?: boolean;
@@ -388,6 +389,7 @@ const VisualiserCanvas = ({
   roomBounds,
   projectArchitecture,
   onInitialReady,
+  onFurnitureProgress,
   captureHandle,
   onContextState,
   isEditable = true,
@@ -611,7 +613,7 @@ const VisualiserCanvas = ({
     </mesh>}
 
 
-    <SequentialFurniture pieces={objects} fallback={<SceneLoader />} onReady={setObjectsReady} renderPiece={object => (
+    <SequentialFurniture pieces={objects} fallback={<SceneLoader />} onReady={setObjectsReady} onProgress={onFurnitureProgress} renderPiece={object => (
         <SceneObject
           key={`${object.instanceId}:${object.restoreKey ?? 0}`}
           object={object}
