@@ -42,6 +42,18 @@
   z-index: var(--navigation-backdrop-layer);
 }
 
+.directory-designer-name {
+  display: block;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+  filter: none;
+  text-shadow: none;
+  color: var(--directory-line-light);
+}
+
 @utility studio-action-primary {
   background-color: var(--studio-action-primary);
   color: var(--studio-action-primary-ink);

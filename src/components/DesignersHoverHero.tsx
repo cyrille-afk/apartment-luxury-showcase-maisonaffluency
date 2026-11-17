@@ -294,7 +294,7 @@ function DesignerGridCard({
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/75 via-black/35 to-transparent" />
       {/* Name overlay */}
       <div className="absolute inset-x-0 bottom-0 p-4 z-20">
-        <span className="block font-serif text-sm leading-tight text-white drop-shadow-[0_1px_4px_rgba(0,0,0,1)]">
+        <span className="directory-designer-name font-serif text-sm leading-tight">
           {displayName}
         </span>
         {showDiscoverCta && (
