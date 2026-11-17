@@ -3,6 +3,7 @@
 ## Catalog GLB upload analytics
 - [x] Track compression success/failure with original/optimized byte counts and persisted upload completion; no filenames, URLs or raw errors.
 - [x] All 29 event schemas validate; 11 focused tests pass. Signed-in real GLB compression emits exact 480/712 byte sizes and completion only after saved URL readback; temporary catalog/storage data removed. Preview build OK; published collector arrival awaits live usage.
+- [x] Follow-up signed-in desktop/phone checks under both theme settings verify real malformed-GLB failure, successful create and replace events with exact sizes, and saved URL after reload. All eight screenshots inspected; no overflow or page errors; all temporary rows and both uploaded versions removed.
 
 ## Cipriani luxury client presentation
 - [x] Incorporated supplied Cipriani living-room rendering as full-bleed cover and clearly labelled residence-context vignette, not a render of the selected furniture.
