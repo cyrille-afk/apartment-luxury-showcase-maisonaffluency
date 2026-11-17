@@ -2073,6 +2073,13 @@
       "when": 1794900419902,
       "tag": "0295_restrict_spatial_catalog_item_privileges",
       "breakpoints": true
+    },
+    {
+      "idx": 296,
+      "version": "7",
+      "when": 1794900575586,
+      "tag": "0296_create_project_studio_items",
+      "breakpoints": true
     }
   ]
 }

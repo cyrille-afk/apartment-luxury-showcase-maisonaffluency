@@ -7651,6 +7651,60 @@ export type Database = {
           },
         ]
       }
+      project_studio_items: {
+        Row: {
+          calculated_lead_time_weeks: number
+          calculated_price: number
+          catalog_item_id: string | null
+          created_at: string | null
+          custom_position: Json | null
+          custom_rotation_y: number | null
+          id: string
+          is_anchor: boolean | null
+          locked_finishes: Json
+          project_id: string | null
+        }
+        Insert: {
+          calculated_lead_time_weeks: number
+          calculated_price: number
+          catalog_item_id?: string | null
+          created_at?: string | null
+          custom_position?: Json | null
+          custom_rotation_y?: number | null
+          id?: string
+          is_anchor?: boolean | null
+          locked_finishes: Json
+          project_id?: string | null
+        }
+        Update: {
+          calculated_lead_time_weeks?: number
+          calculated_price?: number
+          catalog_item_id?: string | null
+          created_at?: string | null
+          custom_position?: Json | null
+          custom_rotation_y?: number | null
+          id?: string
+          is_anchor?: boolean | null
+          locked_finishes?: Json
+          project_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_studio_items_catalog_item_id_fkey"
+            columns: ["catalog_item_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_studio_items_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_visualiser_layouts: {
         Row: {
           layout: Json

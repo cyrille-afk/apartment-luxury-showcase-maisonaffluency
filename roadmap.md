@@ -679,6 +679,10 @@
 - [x] Apply catalog_items with its requested spatial/model/pricing fields and safe catalogue access rules.
 - [x] Confirm both migrations in the journal and applied database records; fields, RLS, approved-trade/admin policies and exact grants are verified, with anonymous access blocked.
 
+## Project Studio saved items
+- [x] Applied project_studio_items with catalogue links, finish locks, pricing, lead times, and manual 3D overrides.
+- [x] Verified all columns, both foreign keys, RLS, restricted grants, and a temporary signed-in CRUD round trip; anonymous reads return 401 and no test rows remain.
+
 ## Waiting on the user (existing publishing tasks)
 
 - [ ] Publish the preview so the renamed listings, directory and catalogue files go live
