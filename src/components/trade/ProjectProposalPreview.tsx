@@ -65,11 +65,28 @@ export function ProjectProposalPreview({
   const tradeTotal = items.reduce((sum, item) => sum + (tradePriceCents(item.rrp_cents, tradeDiscount) || 0) * item.quantity, 0);
   const clientTotal = items.reduce((sum, item) => sum + (clientUnitCents(item.rrp_cents, tradeDiscount, markupMultiplier) || 0) * item.quantity, 0);
 
-  const triggerPrint = () => {
+  const triggerPrint = async () => {
     const sheet = document.querySelector<HTMLElement>(".proposal-print-sheet");
     if (!sheet) return;
-
-    void downloadDocumentPdf({ element: sheet, filename: `${projectName} Proposal.pdf`, repeatHeaderSelector: "[data-proposal-page-header]" });
+    const snapshot = sheet.cloneNode(true) as HTMLElement;
+    const images = Array.from(sheet.querySelectorAll<HTMLImageElement>("[data-proposal-finish-swatches] img"));
+    const copies = Array.from(snapshot.querySelectorAll<HTMLImageElement>("[data-proposal-finish-swatches] img"));
+    await Promise.all(images.map(async (image, index) => {
+      const copy = copies[index];
+      if (!copy) return;
+      try {
+        await image.decode();
+        const canvas = document.createElement("canvas");
+        canvas.width = image.naturalWidth;
+        canvas.height = image.naturalHeight;
+        const context = canvas.getContext("2d");
+        if (!context) return;
+        context.drawImage(image, 0, 0);
+        copy.src = canvas.toDataURL("image/png");
+        copy.removeAttribute("crossorigin");
+      } catch { /* Preserve the recorded source if an image is unavailable. */ }
+    }));
+    await downloadDocumentPdf({ element: snapshot, filename: `${projectName} Proposal.pdf`, repeatHeaderSelector: "[data-proposal-page-header]" });
   };
 
   return (
@@ -169,8 +186,6 @@ export function ProjectProposalPreview({
                       <dl data-proposal-item-specs className="mt-4 space-y-1.5 border-t border-border pt-3">
                         {([
                           ["Dimensions", specifications.dimensions],
-                          ["Materials", specifications.materials],
-                          ["Finish", specifications.finishes],
                         ] as const).map(([label, value]) => (
                           <div key={label} className="grid grid-cols-[68px_minmax(0,1fr)] gap-2 font-body text-[9px] leading-relaxed">
                             <dt className="uppercase tracking-[0.12em] text-muted-foreground">{label}</dt>
@@ -178,6 +193,26 @@ export function ProjectProposalPreview({
                           </div>
                         ))}
                       </dl>
+                      {item.finish_swatches?.length ? (
+                        <div data-proposal-finish-swatches className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                          {item.finish_swatches.map(swatch => (
+                            <figure key={swatch.id} className="flex min-w-0 items-start gap-2">
+                              {swatch.image_url ? (
+                                <img src={swatch.image_url} alt={swatch.name} crossOrigin="anonymous" className="size-12 shrink-0 border border-border object-cover" />
+                              ) : (
+                                <div className="flex size-12 shrink-0 items-center justify-center border border-border bg-muted"><FileText className="size-4 text-muted-foreground" /></div>
+                              )}
+                              <figcaption className="min-w-0 break-words font-body text-[9px] leading-relaxed">
+                                <p className="text-muted-foreground">{swatch.axis}</p>
+                                <p className="text-card-foreground">{swatch.name}</p>
+                                {!swatch.image_url && <p className="text-muted-foreground">Sample image unavailable</p>}
+                              </figcaption>
+                            </figure>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="mt-3 break-words font-body text-[9px] leading-relaxed text-card-foreground">{specifications.finishes !== "On request" ? specifications.finishes : specifications.materials}</p>
+                      )}
                     </div>
                      <div data-trade-sensitive={!isClientMode ? "" : undefined} className="col-start-3 mt-3 text-left sm:col-auto sm:mt-0 sm:text-right">
                       <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">

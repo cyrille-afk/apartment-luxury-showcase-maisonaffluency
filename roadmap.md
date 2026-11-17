@@ -1,5 +1,9 @@
 # Roadmap
 
+## Proposal selected finish swatches
+- [x] Replace duplicate material/finish text with exact selected cropped swatch images and axis/name captions in preview and PDF; unpictured supplier selections remain explicitly unpictured.
+- [x] Ten tests pass; all nine pieces and fifteen available images verified on desktop/phone in both themes with no page errors, close returns to Studio, and three-page downloaded PDF visually checked. Linen shade has no recorded sample image; no substitute invented.
+
 ## Grouped 3D loading progress
 - [x] Show committed piece counts, current group and pieces remaining during sequential room loading; retain the final room-preparation state until rendering is ready.
 - [x] Six tests pass for thresholds, partial groups, all eleven-piece group transitions, empty rooms and stale completions. Signed-in eight-piece Studio handoff shows group 1/3 and exact remaining counts; real downloads reached partial completion before headless WebGL stalled. Held-download desktop/phone light/dark screenshots verify readable progress without palette overlap; preview build OK. Full real-room completion remains unverified because Chromium stalled.

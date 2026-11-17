@@ -1,8 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { proposalFinishDetails, proposalMaterialDetails, proposalSpecifications } from "./proposalSpecifications";
+import { proposalFinishDetails, proposalFinishSwatches, proposalMaterialDetails, proposalSpecifications } from "./proposalSpecifications";
 import { resolveStudioSelection, type StudioFinishProduct } from "./studioFinishes";
 
 describe("Project proposal specifications", () => {
+  it("exports only selected cropped images without substituting another finish", () => {
+    const product: StudioFinishProduct = { name: "Chair", variants: [], finishes: [
+      { id: "selected", name: "Opera Calla", category: "Fabric", image_url: "https://example.com/cropped-calla.jpg", brand_name: "Maker", material_type: null, color_family: null },
+      { id: "other", name: "Opera Delft", category: "Fabric", image_url: "https://example.com/cropped-delft.jpg", brand_name: "Maker", material_type: null, color_family: null },
+    ] };
+    expect(proposalFinishSwatches(product, { ids: { upholstery: "selected" }, locked: true })).toEqual([
+      { id: "upholstery:selected", axis: "Upholstery", name: "Opera Calla", image_url: "https://example.com/cropped-calla.jpg" },
+    ]);
+  });
+  it("keeps unpictured selected finishes without inventing a sample image", () => {
+    expect(proposalFinishSwatches({ name: "Lamp", variants: [{ top: "100 % Linen" }], finishes: [] }, { ids: { top: "catalog:top:100 % Linen" }, locked: true })).toEqual([
+      { id: "top:catalog:top:100 % Linen", axis: "Surface", name: "100 % Linen", image_url: null },
+    ]);
+  });
   it("includes recorded dimensions, materials and selected finish details", () => {
     expect(proposalSpecifications({
       width_mm: 820,

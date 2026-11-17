@@ -33,7 +33,7 @@ import { moodBoardHandoff } from "@/lib/moodBoardHandoff";
 import { readSharedRoomLayout, writeSharedRoomLayout } from "@/lib/sharedRoomLayout";
 import { readStudioRoomContext } from "@/lib/studioRoomContext";
 import { formatPdfMoney } from "@/lib/pdfFormatting";
-import { proposalFinishDetails, proposalMaterialDetails } from "@/lib/proposalSpecifications";
+import { proposalFinishDetails, proposalFinishSwatches } from "@/lib/proposalSpecifications";
 import { selectedStudioBoard, studioBoardItems } from "@/lib/studioBoardScope";
 
 type StudioItem = {
@@ -756,7 +756,8 @@ export default function TradeProjectStudio() {
         items={items.map((i) => ({
           ...i,
           rrp_cents: toBase(i.rrp_cents, i.currency) || null,
-          materials: proposalMaterialDetails(i.catalog, i.selection),
+          materials: i.catalog.materials,
+          finish_swatches: proposalFinishSwatches(i.catalog, i.selection),
           finish_details: proposalFinishDetails(i.catalog, i.selection) || i.original_finish,
         }))}
         isClientMode={isClientMode}

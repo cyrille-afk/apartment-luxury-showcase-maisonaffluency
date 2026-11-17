@@ -10,7 +10,18 @@ export type ProposalSpecificationSource = {
   materials?: string | null;
   finish_details?: string | null;
   selected_finish?: string | null;
+  finish_swatches?: ProposalFinishSwatch[];
 };
+
+export type ProposalFinishSwatch = { id: string; axis: string; name: string; image_url: string | null };
+
+/** Preserve the exact selected library crop and axis, including unpictured named selections. */
+export function proposalFinishSwatches(product: StudioFinishProduct, selection: StudioFinishSelection): ProposalFinishSwatch[] {
+  return studioFinishGroups(product).flatMap(group => {
+    const finish = group.options.find(option => option.id === selection.ids[group.key]);
+    return finish ? [{ id: `${group.key}:${finish.id}`, axis: group.label, name: finish.name, image_url: finish.image_url }] : [];
+  });
+}
 
 const recorded = (value?: string | null) => {
   const clean = value?.replace(/\s+/g, " ").trim();
