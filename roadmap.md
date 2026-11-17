@@ -1,5 +1,9 @@
 # Roadmap
 
+## Separate automatic Mood Board suggestions
+- [x] Keep automatic complements and their rationale in a dedicated Mood Board panel, never append them to Felix conversations or open Felix automatically.
+- [x] Eleven tests pass; signed-in real six-piece suggestion panel, refresh and quick-add/remove verified with zero concierge events and all five saved thread timestamps/timeline counts unchanged. Desktop/phone visually checked, no overflow or page errors, preview build OK; saved history preserved.
+
 ## Felix thread activity
 - [x] Show saved last-active time with timezone and separate user/Felix message and card counts in conversation history. Three tests pass; signed-in existing five-thread history, older timestamps after reload and desktop/phone display verified with no page errors. Felix counts explicitly include automatic messages, which can advance the active timestamp without a user submission.
 

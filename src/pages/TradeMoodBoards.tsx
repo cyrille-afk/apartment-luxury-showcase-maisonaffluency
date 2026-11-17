@@ -1,4 +1,4 @@
-import { invokeWithAuthRetry } from "@/lib/invokeWithAuthRetry";
+import { loadMoodBoardSuggestions, type MoodBoardSuggestion } from "@/lib/moodBoardSuggestions";
 import { Helmet } from "react-helmet-async";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useQuery } from "@tanstack/react-query";
@@ -40,16 +40,7 @@ function loadBoardFromStorage(projectId: string | null): any[] {
   }
 }
 
-interface MoodRec {
-  product_id: string;
-  score: number;
-  reason: string;
-  title: string;
-  subtitle: string;
-  image_url: string;
-  category: string;
-  brand: string;
-}
+type MoodRec = MoodBoardSuggestion;
 
 export default function TradeMoodBoards() {
   const { user } = useAuth();
@@ -216,41 +207,12 @@ export default function TradeMoodBoards() {
     setRecLoading(true);
     setRecError(null);
     try {
-      const { data, error } = await invokeWithAuthRetry("board-recommendations", { product_ids: productIds, anchor_ids: budgetSettings.anchors.filter(id => productIds.includes(id)), room_type: budgetSettings.roomType, source: projectId ? "project_tearsheet_mood_board" : "mood_board", project_id: projectId, include_pool: true });
+      const recs = await loadMoodBoardSuggestions(productIds, {
+        anchorIds: budgetSettings.anchors, roomType: budgetSettings.roomType, projectId,
+      });
       if (revision !== requestRevision.current) return;
-      if (error) throw error;
-      if (data?.recommendations) {
-        const recs: MoodRec[] = data.recommendations;
-        setRecommendations(recs);
-        setRefreshPage(0);
-
-        // Concierge steps in to narrate WHY these complements were chosen.
-        // We only fire when there's something meaningful to say.
-        if (recs.length > 0) {
-          const top = recs.slice(0, 6);
-          const bullets = top
-            .map((r) => `- **${r.title}**${r.brand ? ` · ${r.brand}` : ""} — ${r.reason}`)
-            .join("\n");
-          const message =
-            `${projectId ? "I used this project's tearsheet products as the anchors and" : "I've"} pulled ${top.length} complement${top.length === 1 ? "" : "s"} for the mood you're building. ` +
-            `Here's why each was chosen:\n\n${bullets}\n\n` +
-            `Tap any thumbnail to drop it onto the board, or ask me to refine the direction (warmer palette, smaller scale, more sculptural, etc.).`;
-          window.dispatchEvent(
-            new CustomEvent("concierge:stage", {
-              detail: {
-                stage: "Tearsheet",
-                message,
-                  openPanel: !!projectId,
-                actions: [
-                  { label: "Make it warmer", prompt: "Suggest complements with a warmer, earthier palette for my current mood board." },
-                  { label: "More sculptural", prompt: "Replace the current complements with more sculptural, statement pieces." },
-                  { label: "Different scale", prompt: "Suggest complements at a different scale (smaller accent pieces) for my mood board." },
-                ],
-              },
-            }),
-          );
-        }
-      }
+      setRecommendations(recs);
+      setRefreshPage(0);
     } catch (err: any) {
       if (revision !== requestRevision.current) return;
       console.warn("Mood board recommendations unavailable:", err?.message);
@@ -524,11 +486,11 @@ export default function TradeMoodBoards() {
 
             {/* AI Recommendations */}
             {!clientSafe && (
-              <div className="w-full min-w-0 border-t border-border pt-5" aria-label="Suggested complements">
+              <section className="w-full min-w-0 border-t border-border pt-5" aria-label="Mood Board suggestions" aria-busy={recLoading || pricingPending}>
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="font-display text-sm text-foreground flex items-center gap-2">
-                    <Sparkles className="h-3.5 w-3.5 text-primary" />
-                    Suggested complements
+                    <Sparkles className="h-3.5 w-3.5 felix-mark" />
+                    Mood Board suggestions
                   </h2>
                   {shouldRecommendMoodBoard(board.length) && (
                     <Button
@@ -615,7 +577,7 @@ export default function TradeMoodBoards() {
                     </div>
                   </TooltipProvider>
                 )}
-              </div>
+              </section>
             )}
           </div>
 
