@@ -673,7 +673,7 @@
 ## Visualiser Anchor loading and spatial layout
 - [x] Carry the pinned Anchor into the Sandbox, defaulting to the largest sofa/dining table (first piece only when neither exists), and load it first.
 - [x] Add dimensioned wireframe placeholders and collision-aware sofa/dining vignette placement.
-- [x] Verify 23 regressions, typechecking and the signed-in Cipriani handoff: Sandy Cove requested alone, then three secondaries; full headless GPU completion remains unverified.
+- [ ] Complete every-piece desktop/phone × light/dark and one-step-past verification; 23 regressions, typechecking and Anchor → three-secondary requests already pass.
 
 ## Waiting on the user (existing publishing tasks)
 
