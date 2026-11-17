@@ -1,4 +1,7 @@
 import { Fragment, Suspense, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import type { Group } from "three";
 
 type Piece = { instanceId: string; restoreKey?: number; glb_url?: string | null; isAnchor?: boolean };
 const pieceKey = (piece: Piece) => `${piece.instanceId}:${piece.restoreKey ?? 0}:${piece.glb_url ?? ""}`;
@@ -39,13 +42,20 @@ export function useFurnitureAdmission(pieces: Piece[]) {
   return { admitted, completed, commit, keys };
 }
 
-function FurnitureCommitted({ id, onCommit }: { id: string; onCommit: (id: string) => void }) {
-  useEffect(() => {
-    // Yield a paint between decoded groups rather than starting all assets in one render.
-    const frame = requestAnimationFrame(() => onCommit(id));
-    return () => cancelAnimationFrame(frame);
-  }, [id, onCommit]);
-  return null;
+function FurnitureCommitted({ id, onCommit, children, placeholder }: { id: string; onCommit: (id: string) => void; children: ReactNode; placeholder: ReactNode }) {
+  const group = useRef<Group>(null);
+  const committed = useRef(false);
+  const [ready, setReady] = useState(false);
+  useFrame(() => {
+    if (committed.current || !group.current) return;
+    let pending = false;
+    group.current.traverse(node => { if (node.userData.visualiserPreparationPending || node.userData.visualiserInitialReady === false) pending = true; });
+    if (pending) return;
+    committed.current = true;
+    setReady(true);
+    requestAnimationFrame(() => onCommit(id));
+  });
+  return <><group ref={group}>{children}</group>{!ready && placeholder}</>;
 }
 
 export default function SequentialFurniture<T extends Piece>({ pieces, renderPiece, fallback, renderPlaceholder, onReady, onProgress }: {
@@ -63,6 +73,6 @@ export default function SequentialFurniture<T extends Piece>({ pieces, renderPie
     const placeholder = isAnchor ? fallback : renderPlaceholder?.(piece) ?? fallback;
     // Queued secondary pieces still reveal the planned composition as subtle boxes.
     if (!admitted.has(key) || (!isAnchor && anchorKey && !completed.has(anchorKey))) return <Fragment key={key}>{isAnchor ? null : placeholder}</Fragment>;
-    return <Fragment key={key}><Suspense fallback={placeholder}>{renderPiece(piece)}<FurnitureCommitted id={key} onCommit={commit} /></Suspense></Fragment>;
+    return <Fragment key={key}><Suspense fallback={placeholder}><FurnitureCommitted id={key} onCommit={commit} placeholder={placeholder}>{renderPiece(piece)}</FurnitureCommitted></Suspense></Fragment>;
   })}</>;
 }

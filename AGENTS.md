@@ -11,6 +11,7 @@
 - Password-setup resends reuse the review drawer and retain attempt keys on retry; never change approval. Verified activation links the account; the queue reads user_id for setup status.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Visualiser preparation runs in one serialized module worker: copied geometry and transferred texture images preserve shared assets; CPU cloning/smoothing/fitting/finish maps settle before queue admission, while only GPU assembly/rendering remains on the page. Aborted/stale jobs cannot replace saved scene state.
 - Catalog GLB analytics emit size-only compression outcomes and completion directly in the existing upload handler; completion waits for URL persistence, never filenames or diagnostics — avoids false successes and private metadata.
 - Client proposal presentations render discrete A4 pages with proposal-only media/identity overrides and recorded metric/imperial dimensions; exact-page PDF capture avoids splitting covers or leaking wholesale prices.
 - Studio proposalFinishSwatches maps exact selected supplier crops and axis labels into preview/PDF; export embeds decoded crops before cloning, while unpictured selections remain explicit — prevents redirected-image CORS omissions and substituted samples.

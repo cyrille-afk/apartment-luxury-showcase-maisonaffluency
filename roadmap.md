@@ -1,5 +1,9 @@
 # Roadmap
 
+## Background Visualiser model preparation
+- [x] Move model cloning, geometry smoothing/subdivision, sizing and finish pixel preparation into a serialized browser worker with transferable results and stale-job protection; queue waits for prepared models.
+- [x] Geometry/transport/queue tests pass; actual worker round-trip preserves 2 × 0.8 × 0.5m sizing, grounding and selected bronze, with browser heartbeat continuing. Signed-in eight-piece intake creates the worker, downloads real models, advances loading and opens the plan without page errors. Complete multi-piece GPU appearance/performance remains unverified.
+
 ## Visualiser transfer refresh recovery
 - [x] Consume successful transfer markers with history replacement and a stable mounted-room key; expired transfers use saved session/project restoration instead of a full-screen missing-transfer error.
 - [x] Signed-in eight-piece Cipriani board transfer, refresh and Back return preserve exact object configurations; restored plan screenshots inspected with no page errors. Focused transfer/provider regressions and preview build pass. Full GPU appearance is not part of this recovery check.
