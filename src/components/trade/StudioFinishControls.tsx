@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Lock, Unlock, ZoomIn } from "lucide-react";
+import { Lock, Unlock, X, ZoomIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { studioFinishGroups, type StudioFinishProduct, type StudioFinishSelection, type StudioFinish } from "@/lib/studioFinishes";
@@ -17,7 +17,7 @@ export function StudioFinishControls({ product, selection, onChange, disabled = 
   const controls = <div className="min-w-0 space-y-3 text-left" onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
     <div className="flex items-center justify-between gap-2">
       <span className="font-body text-[10px] text-muted-foreground">Material / Finish</span>
-      <Button variant="ghost" size="icon" disabled={disabled || !groups.length} className="h-8 w-8 shrink-0 cursor-pointer" aria-label={selection.locked ? "Unlock finish" : "Lock finish"} title={selection.locked ? "Unlock finish" : "Lock finish for 3D export"} aria-pressed={selection.locked} onClick={() => onChange({ ...selection, locked: !selection.locked })}>
+      <Button variant="ghost" size="icon" disabled={disabled || !groups.length} className="h-8 w-8 shrink-0 cursor-pointer" aria-label={selection.locked ? "Unlock finish" : "Lock finish"} title={selection.locked ? "Unlock finish" : "Lock finish for 3D export"} aria-pressed={selection.locked} onClick={() => { onChange({ ...selection, locked: !selection.locked }); if (!selection.locked) setPickerOpen(false); }}>
         {selection.locked ? <Lock className="size-3.5" /> : <Unlock className="size-3.5 text-muted-foreground" />}
       </Button>
     </div>
@@ -47,9 +47,12 @@ export function StudioFinishControls({ product, selection, onChange, disabled = 
           {selection.locked ? <Lock className="!size-3 shrink-0" /> : <Unlock className="!size-3 shrink-0 text-muted-foreground" />}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" sideOffset={8} aria-label={`Material and finish options for ${product.name}`} className="max-h-[min(28rem,70dvh)] w-80 max-w-[calc(100vw-2rem)] overflow-y-auto p-4" onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
-        <p className="mb-2 truncate font-body text-xs text-foreground">{product.name}</p>
-        {controls}
+      <PopoverContent align="start" sideOffset={8} aria-label={`Material and finish options for ${product.name}`} className="flex max-h-[min(28rem,70dvh)] w-80 max-w-[calc(100vw-2rem)] flex-col overflow-hidden p-0" onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
+        <div className="flex shrink-0 items-center justify-between gap-2 p-4 pb-2">
+          <p className="min-w-0 truncate font-body text-xs text-foreground">{product.name}</p>
+          <Button variant="ghost" size="icon" className="size-8 shrink-0 cursor-pointer" aria-label="Close finish options" title="Close finish options" onClick={() => setPickerOpen(false)}><X className="size-4" /></Button>
+        </div>
+        <div className="min-h-0 overflow-y-auto p-4 pt-0">{controls}</div>
       </PopoverContent>
     </Popover>
     {magnifier}
