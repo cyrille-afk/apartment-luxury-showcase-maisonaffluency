@@ -1,6 +1,97 @@
 {
   "schema_version": 1,
   "events": {
+    "project.catalog_glb_compression_failed": {
+      "event_schema_version": 1,
+      "description": "Browser GLB compression rejected before upload; records original size and elapsed compression time without filenames or error text.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "original_bytes",
+          "duration_ms"
+        ],
+        "properties": {
+          "original_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "duration_ms": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "project.catalog_glb_compression_succeeded": {
+      "event_schema_version": 1,
+      "description": "Browser GLB compression succeeded before storage upload; records actual original and optimized sizes in bytes.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "original_bytes",
+          "optimized_bytes",
+          "duration_ms"
+        ],
+        "properties": {
+          "original_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "optimized_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "duration_ms": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "project.catalog_glb_upload_completed": {
+      "event_schema_version": 1,
+      "description": "Optimized catalog GLB uploaded and its public URL successfully persisted on a new or existing catalog item; never emitted on storage or save failure.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "original_bytes",
+          "optimized_bytes",
+          "mode"
+        ],
+        "properties": {
+          "original_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "optimized_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "create",
+              "replace"
+            ]
+          }
+        }
+      }
+    },
     "project.client_link_copied": {
       "event_schema_version": 1,
       "description": "A quote or guest payment link was successfully written to the clipboard, including automatic copying after creation.",

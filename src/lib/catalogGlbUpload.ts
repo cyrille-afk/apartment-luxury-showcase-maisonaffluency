@@ -67,7 +67,22 @@ export async function uploadCatalogGlb({
 }: UploadCatalogGlbOptions): Promise<UploadedCatalogGlb> {
   validateCatalogItemDetails(details);
   onStage?.("compressing");
-  const compression = await compressCatalogGlb(file);
+  const compressionStarted = performance.now();
+  let compression: CompressedCatalogGlb;
+  try {
+    compression = await compressCatalogGlb(file);
+  } catch (error) {
+    window.__lovableEvents?.track?.("project.catalog_glb_compression_failed", {
+      original_bytes: file.size,
+      duration_ms: performance.now() - compressionStarted,
+    });
+    throw error;
+  }
+  window.__lovableEvents?.track?.("project.catalog_glb_compression_succeeded", {
+    original_bytes: compression.originalBytes,
+    optimized_bytes: compression.compressedBytes,
+    duration_ms: performance.now() - compressionStarted,
+  });
 
   const path = `catalog-items/${safePathSegment(details.sku)}/${Date.now()}-${safePathSegment(compression.file.name.replace(/\.glb$/i, ""))}.glb`;
   onStage?.("uploading");
@@ -92,5 +107,10 @@ export async function uploadCatalogGlb({
     throw error;
   }
 
+  window.__lovableEvents?.track?.("project.catalog_glb_upload_completed", {
+    original_bytes: compression.originalBytes,
+    optimized_bytes: compression.compressedBytes,
+    mode: itemId ? "replace" : "create",
+  });
   return { record: data as CatalogItemRecord, publicUrl, compression };
 }

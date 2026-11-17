@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => {
   const single = vi.fn();
@@ -47,9 +47,11 @@ const details = {
   base_lead_time_weeks: 8,
 };
 const record = { ...details, id: "catalog-id", glb_url_compressed: "https://assets.example/model.glb", glb_url_proxy: null };
+const track = vi.fn();
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.stubGlobal("window", { __lovableEvents: { track } });
   const raw = new File(["raw"], "chair.glb", { type: "model/gltf-binary" });
   const optimized = new File(["optimized"], "chair-compressed.glb", { type: "model/gltf-binary" });
   mocks.compress.mockResolvedValue({ file: optimized, originalBytes: raw.size, compressedBytes: optimized.size, textureCount: 1 });
@@ -57,6 +59,7 @@ beforeEach(() => {
   mocks.remove.mockResolvedValue({ error: null });
   mocks.single.mockResolvedValue({ data: record, error: null });
 });
+afterEach(() => vi.unstubAllGlobals());
 
 describe("catalog GLB upload", () => {
   it("uploads only the browser-compressed GLB and saves its public URL on a new item", async () => {
@@ -71,6 +74,12 @@ describe("catalog GLB upload", () => {
     expect(mocks.insert).toHaveBeenCalledWith({ ...details, glb_url_compressed: result.publicUrl });
     expect(result.publicUrl).toContain("/catalog-items/ma-test-001/");
     expect(stages).toEqual(["compressing", "uploading", "saving"]);
+    expect(track.mock.calls.map(([name]) => name)).toEqual([
+      "project.catalog_glb_compression_succeeded",
+      "project.catalog_glb_upload_completed",
+    ]);
+    expect(track.mock.calls[0][1]).toEqual({ original_bytes: 3, optimized_bytes: 9, duration_ms: expect.any(Number) });
+    expect(track.mock.calls[1][1]).toEqual({ original_bytes: 3, optimized_bytes: 9, mode: "create" });
   });
 
   it("updates only the compressed URL when replacing an existing catalog item model", async () => {
@@ -78,12 +87,36 @@ describe("catalog GLB upload", () => {
     expect(mocks.update).toHaveBeenCalledWith({ glb_url_compressed: expect.stringContaining("https://assets.example/catalog-items/") });
     expect(mocks.eq).toHaveBeenCalledWith("id", "catalog-id");
     expect(mocks.insert).not.toHaveBeenCalled();
+    expect(track).toHaveBeenCalledWith("project.catalog_glb_upload_completed", { original_bytes: 3, optimized_bytes: 9, mode: "replace" });
   });
 
   it("removes an orphaned upload when the database save fails", async () => {
     mocks.single.mockResolvedValue({ data: null, error: new Error("save failed") });
     await expect(uploadCatalogGlb({ file: new File(["raw"], "chair.glb"), details })).rejects.toThrow("save failed");
     expect(mocks.remove).toHaveBeenCalledWith([expect.stringMatching(/^catalog-items\/ma-test-001\//)]);
+    expect(track.mock.calls.map(([name]) => name)).toEqual(["project.catalog_glb_compression_succeeded"]);
+  });
+
+  it("records only compression failure and original size when optimization fails", async () => {
+    mocks.compress.mockRejectedValueOnce(new Error("private filename and diagnostic"));
+    await expect(uploadCatalogGlb({ file: new File(["raw"], "private.glb"), details })).rejects.toThrow("private filename");
+    expect(track.mock.calls).toEqual([["project.catalog_glb_compression_failed", { original_bytes: 3, duration_ms: expect.any(Number) }]]);
+    expect(mocks.upload).not.toHaveBeenCalled();
+  });
+
+  it("does not report completion when storage rejects the upload", async () => {
+    mocks.upload.mockResolvedValueOnce({ error: new Error("upload failed") });
+    await expect(uploadCatalogGlb({ file: new File(["raw"], "chair.glb"), details })).rejects.toThrow("upload failed");
+    expect(track.mock.calls.map(([name]) => name)).toEqual(["project.catalog_glb_compression_succeeded"]);
+    expect(mocks.insert).not.toHaveBeenCalled();
+  });
+
+  it("preserves uploading when the analytics runtime or its track method is absent", async () => {
+    for (const runtime of [undefined, {}]) {
+      vi.stubGlobal("window", { __lovableEvents: runtime });
+      await expect(uploadCatalogGlb({ file: new File(["raw"], "chair.glb"), details })).resolves.toMatchObject({ record });
+    }
+    expect(track).not.toHaveBeenCalled();
   });
 });
 

@@ -1,5 +1,9 @@
 # Roadmap
 
+## Catalog GLB upload analytics
+- [x] Track compression success/failure with original/optimized byte counts and persisted upload completion; no filenames, URLs or raw errors.
+- [x] All 29 event schemas validate; 11 focused tests pass. Signed-in real GLB compression emits exact 480/712 byte sizes and completion only after saved URL readback; temporary catalog/storage data removed. Preview build OK; published collector arrival awaits live usage.
+
 ## Cipriani luxury client presentation
 - [x] Incorporated supplied Cipriani living-room rendering as full-bleed cover and clearly labelled residence-context vignette, not a render of the selected furniture.
 - [x] Incorporated authentic Residence 04 / Levels 62–78 drawing with adjustable living-room highlight; offer the supplied $250K, $500K and $1M packages without converting existing EUR budgets implicitly.
