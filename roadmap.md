@@ -1,5 +1,9 @@
 # Roadmap
 
+## Selected-board Studio and hotspots
+- [x] Saved-board entry carries its board ID; Studio requires one accessible folder, reads only its rows and passes that exact composition to Sandbox without restoring unrelated cached/cloud furniture first. Generic multi-folder Studio entry asks for a folder instead of combining them.
+- [x] Thirteen regressions pass; owner's restored folder verified via its real Project Studio action: Specsheet (11), eleven handoff items, eleven pins and 11 / 15 object header, eleven after reload and on phone, no page errors. Composition query addresses only the restored folder; separate eight-item folder never contributes furniture (global mobile-save notifications remain independent). Preview build OK.
+
 ## Saved Mood Board budget controls
 - [x] Saved folders now expose shared room/currency/target/category controls and configured retail allocation with target/percentage/remaining progress; exact eleven rows and finishes retained. Budget settings remain account/folder-scoped on this device; missing previous targets are not invented.
 - [x] Seventeen regressions pass; owner’s real eleven-piece folder verified at €211,818 allocated, temporary €500,000 target / €288,182 remaining / 42%, room/target reload, category input, over-budget warning and phone without overflow or page errors. Verification settings cleared; build OK.

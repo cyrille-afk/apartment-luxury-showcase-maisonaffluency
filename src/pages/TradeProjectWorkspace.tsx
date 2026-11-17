@@ -138,5 +138,6 @@ export default function TradeProjectWorkspace() {
   const [params] = useSearchParams();
   const projectId = params.get("project") || "sandbox";
   const initialView: WorkspaceView = location.pathname.endsWith("axonometric") ? "axonometric" : params.get("view") === "walkthrough" ? "walkthrough" : "sandbox";
-  return <ActiveProjectProvider key={`${user?.id || "guest"}:${projectId}`} accountId={user?.id || "guest"} projectId={projectId} initialView={initialView}><WorkspacePanels /></ActiveProjectProvider>;
+  const handoffStamp = params.get("handoff") === "curated" ? params.get("stamp") : null;
+  return <ActiveProjectProvider key={`${user?.id || "guest"}:${projectId}:${handoffStamp ?? "saved"}`} accountId={user?.id || "guest"} projectId={projectId} initialView={initialView} freshHandoff={params.get("handoff") === "curated"}><WorkspacePanels /></ActiveProjectProvider>;
 }

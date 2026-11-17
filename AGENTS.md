@@ -11,6 +11,7 @@
 - Password-setup resends reuse the review drawer and retain attempt keys on retry; never change approval. Verified activation links the account; the queue reads user_id for setup status.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Project Studio requires one accessible board (explicit URL selection or sole-board default), queries only its rows and carries that board into the stamped Sandbox handoff; explicit handoffs bypass cached/cloud furniture restoration — unrelated folders and quotes must never contribute pins or race the incoming composition.
 - Saved folder budgets reuse Mood Board controls and retail ledgers with exact row identities and configured finishes; account/folder device targets hydrate before writes — keeps restored folders budget-aware without duplicating pieces.
 - Folder links expose readable item counts on desktop/mobile; failed list counts remain unknown, and deletion waits for an exact live count before enabling confirmation — identical folder names and failed reads must not imply emptiness.
 - Board finish photos resolve through boardPiecePhoto for the mixed-shape Ibo catalogue entry, retaining its approved catalogue image in saved cards, matrix and finish drawer; saved finishes, dimensions and pricing remain unchanged — finish-only gallery mappings cannot establish shape or size.

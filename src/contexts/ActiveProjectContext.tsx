@@ -11,7 +11,7 @@ type ProjectContext = {
 };
 const Context = createContext<ProjectContext | null>(null);
 export const useActiveProject = () => useContext(Context);
-export function ActiveProjectProvider({ children, projectId, accountId, initialView }: { children: ReactNode; projectId: string; accountId: string; initialView: WorkspaceView }) {
+export function ActiveProjectProvider({ children, projectId, accountId, initialView, freshHandoff = false }: { children: ReactNode; projectId: string; accountId: string; initialView: WorkspaceView; freshHandoff?: boolean }) {
   const key = `ma-active-layout-v1:${accountId}:${projectId}`;
   const sandboxStorageKey = `trade-visualiser-sandbox-v3:${accountId}:${projectId}`;
   const initial = useMemo(() => {
@@ -23,7 +23,7 @@ export function ActiveProjectProvider({ children, projectId, accountId, initialV
     } catch { /* Invalid/offline storage leaves the current workspace usable. */ }
     return { objects: [] } as { objects: PlacedObject[]; savedAt?: number; floorPlanUrl?: string; bounds?: RoomBounds; columns?: PlanColumn[]; hasSavedLayout?: boolean };
   }, [key, projectId]);
-  const [objects, setObjects] = useState<PlacedObject[]>(initial.objects);
+  const [objects, setObjects] = useState<PlacedObject[]>(freshHandoff ? [] : initial.objects);
   const [floorPlanUrl, setFloorPlanUrl] = useState<string | null>(initial.floorPlanUrl || null);
   const [bounds, setBounds] = useState<RoomBounds>(initial.bounds || DEFAULT_LAYOUT_BOUNDS);
   const [columns, setColumns] = useState<PlanColumn[]>(Array.isArray(initial.columns) ? initial.columns : []);
@@ -34,7 +34,9 @@ export function ActiveProjectProvider({ children, projectId, accountId, initialV
   const [cloudReady, setCloudReady] = useState(!persistable);
   const [savedAt, setSavedAt] = useState<number>(typeof initial.savedAt === "number" ? initial.savedAt : 0);
   useEffect(() => {
-    if (!persistable) return;
+    // An explicit stamped handoff replaces the composition. Never fetch/restore
+    // the old project-wide objects over the selected board's incoming pieces.
+    if (!persistable || freshHandoff) { setCloudReady(true); return; }
     let cancelled = false;
     void (async () => {
       const { data } = await supabase.from("project_visualiser_layouts").select("layout, updated_at").eq("project_id", projectId).maybeSingle();
@@ -51,7 +53,7 @@ export function ActiveProjectProvider({ children, projectId, accountId, initialV
     })().catch(() => { if (!cancelled) setCloudReady(true); });
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectId]);
+  }, [projectId, freshHandoff]);
   const firstWrite = useRef(true);
   useEffect(() => {
     if (!cloudReady) return;

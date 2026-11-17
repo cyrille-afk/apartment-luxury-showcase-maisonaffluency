@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "@/lib/router-compat";
+import { Link, useNavigate, useParams, useSearchParams } from "@/lib/router-compat";
 import { ArrowLeft, FileDown, FileText, Sparkles, Box, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProject } from "@/hooks/useProjects";
 import { DotCircleLoader, PageLoader } from "@/components/ui/dot-circle-loader";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel } from "@/components/ui/alert-dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
@@ -33,6 +34,7 @@ import { readSharedRoomLayout, writeSharedRoomLayout } from "@/lib/sharedRoomLay
 import { readStudioRoomContext } from "@/lib/studioRoomContext";
 import { formatPdfMoney } from "@/lib/pdfFormatting";
 import { proposalFinishDetails } from "@/lib/proposalSpecifications";
+import { selectedStudioBoard, studioBoardItems } from "@/lib/studioBoardScope";
 
 type StudioItem = {
   id: string;
@@ -74,6 +76,10 @@ function dimsLabel(item: StudioItem) {
 export default function TradeProjectStudio() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedBoardId = searchParams.get("board");
+  const [boards, setBoards] = useState<Array<{ id: string; title: string }>>([]);
+  const [loadedBoardId, setLoadedBoardId] = useState<string | null>(null);
   const { user } = useAuth();
   const [canEdit, setCanEdit] = useState(false);
   const [savingFinishes, setSavingFinishes] = useState(false);
@@ -117,34 +123,29 @@ export default function TradeProjectStudio() {
 
   useEffect(() => {
     if (!id) return;
+    let cancelled = false;
     (async () => {
       setLoadingItems(true);
+      setItems([]);
+      setLoadedBoardId(null);
+      setCanEdit(false);
       const sb = supabase as any;
       const productFields =
         "id, product_name, brand_name, image_url, sku, lead_time, dimensions, width_mm, depth_mm, height_mm, size_variants, trade_price_cents, rrp_price_cents, currency, source_pick_id, glb_url, materials, base_axis_label, top_axis_label, category, subcategory";
 
-      const [q, b] = await Promise.all([
-        sb.from("trade_quotes").select("id").eq("project_id", id),
-        sb.from("client_boards").select("id, title").eq("project_id", id),
-      ]);
-      const quoteIds = ((q.data as any[]) || []).map((r) => r.id);
-      const boardIds = ((b.data as any[]) || []).map((r) => r.id);
-      const folderTitles = new Map<string, string>(((b.data as any[]) || []).map(row => [row.id, row.title]));
-
-      const [qItems, bItems] = await Promise.all([
-        quoteIds.length
-          ? sb
-              .from("trade_quote_items")
-              .select(`id, quantity, product_id, variant_label, trade_products(${productFields})`)
-              .in("quote_id", quoteIds)
-          : Promise.resolve({ data: [] }),
-        boardIds.length
-          ? sb
-              .from("client_board_items")
-              .select(`id, board_id, product_id, variant_label, wood_label, fabric_label, procurement_quote_id, source_quote_item_id, trade_products(${productFields})`)
-              .in("board_id", boardIds)
-          : Promise.resolve({ data: [] }),
-      ]);
+      const b = await sb.from("client_boards").select("id, title").eq("project_id", id).order("created_at");
+      if (cancelled) return;
+      if (b.error) { toast.error("Your folders couldn't load. Please reopen Project Studio."); setLoadingItems(false); return; }
+      const accessibleBoards = (b.data ?? []) as Array<{ id: string; title: string }>;
+      setBoards(accessibleBoards);
+      const selectedBoard = selectedStudioBoard(accessibleBoards, selectedBoardId);
+      if (!selectedBoard) { setLoadingItems(false); return; }
+      const folderTitles = new Map([[selectedBoard.id, selectedBoard.title]]);
+      const bItems = await sb.from("client_board_items")
+        .select(`id, board_id, product_id, variant_label, wood_label, fabric_label, procurement_quote_id, source_quote_item_id, trade_products(${productFields})`)
+        .eq("board_id", selectedBoard.id).order("sort_order");
+      if (cancelled) return;
+      if (bItems.error) { toast.error("This folder's pieces couldn't load. Please reopen Project Studio."); setLoadingItems(false); return; }
 
       const map = new Map<string, StudioItem>();
       const push = (row: any, quantity: number) => {
@@ -188,8 +189,7 @@ export default function TradeProjectStudio() {
         });
       };
 
-      ((qItems.data as any[]) || []).forEach((r) => push(r, r.quantity || 1));
-      ((bItems.data as any[]) || []).forEach((r) => push(r, 1));
+      studioBoardItems((bItems.data as any[]) || [], selectedBoard.id).forEach((r) => push(r, 1));
 
       const list = Array.from(map.values());
 
@@ -221,6 +221,7 @@ export default function TradeProjectStudio() {
         supabase.from("project_studio_finishes").select("item_key,selection").eq("project_id", id),
         user ? supabase.rpc("can_edit_project", { _project_id: id, _user_id: user.id }) : Promise.resolve({ data: false }),
       ]);
+      if (cancelled) return;
       if (finishError || savedError) toast.error("Studio finishes couldn't load. Please reopen the project to try again.");
       setCanEdit(editable === true && !finishError && !savedError);
       for (const item of list) {
@@ -239,9 +240,11 @@ export default function TradeProjectStudio() {
         item.selected_finish = studioSelectedFinishes(item.catalog, item.selection).map(s => s.finish.name).join(" / ") || item.catalog.materials || "Original catalogue materials";
       }
       setItems(studioVisibleItems(list));
+      setLoadedBoardId(selectedBoard.id);
       setLoadingItems(false);
-    })();
-  }, [id, itemsVersion, user?.id]);
+    })().catch(() => { if (!cancelled) { setLoadingItems(false); toast.error("This folder couldn't load. Please reopen Project Studio."); } });
+    return () => { cancelled = true; };
+  }, [id, selectedBoardId, itemsVersion, user?.id]);
 
   const changeFinish = async (item: StudioItem, selection: StudioFinishSelection) => {
     if (!id || !user || !canEdit || savingFinishes || removingItem) return;
@@ -279,7 +282,7 @@ export default function TradeProjectStudio() {
   };
   const finishControls = (item: StudioItem, compact = false) => <StudioFinishControls product={item.catalog} selection={item.selection} compact={compact} disabled={!canEdit || savingFinishes || removingItem || isClientMode} onChange={selection => void changeFinish(item, selection)} />;
   const openInVisualiser = () => {
-    if (!id || !items.length || savingFinishes || removingItem) return;
+    if (!id || !loadedBoardId || loadingItems || !items.length || savingFinishes || removingItem) return;
     const stamp = Date.now();
     const pieces = items.flatMap(item => Array.from({ length: item.quantity }, (_, index) => {
       const placement = item.placements[index];
@@ -297,7 +300,7 @@ export default function TradeProjectStudio() {
     const layout = moodBoardHandoff(pieces, id, roomContext?.roomType ?? previous?.roomType ?? "living", previous, stamp, roomContext?.targetCents == null ? previous?.budgetEur ?? null : convertCents(roomContext.targetCents, roomContext.currency, "EUR", fxRates) / 100);
     layout.source = "project-studio";
     writeSharedRoomLayout(layout);
-    navigate(`/trade/visualiser?project=${encodeURIComponent(id)}&handoff=curated&stamp=${stamp}`);
+    navigate(`/trade/visualiser?project=${encodeURIComponent(id)}&board=${encodeURIComponent(loadedBoardId)}&handoff=curated&stamp=${stamp}`);
   };
 
   // Every ledger figure is expressed in the member's declared base currency.
@@ -371,6 +374,10 @@ export default function TradeProjectStudio() {
       </div>
 
       <div className="flex shrink-0 flex-wrap justify-start gap-2 border-b border-border px-4 py-3 md:px-6">
+        <Select value={selectedBoardId ?? (boards.length === 1 ? boards[0]?.id : undefined)} onValueChange={board => { setItems([]); setLoadedBoardId(null); setLoadingItems(true); setSearchParams(previous => { previous.set("board", board); return previous; }); }}>
+          <SelectTrigger aria-label="Selected mood board" className="h-10 w-full cursor-pointer sm:w-64"><SelectValue placeholder="Select a mood board" /></SelectTrigger>
+          <SelectContent>{boards.map((board, index) => <SelectItem key={board.id} value={board.id}>{board.title} · Folder {index + 1}</SelectItem>)}</SelectContent>
+        </Select>
         <Button variant="studio-utility" aria-controls="studio-spec-panel" aria-expanded={isSpecPanelOpen} onClick={() => setIsSpecPanelOpen(!isSpecPanelOpen)} className="h-10 cursor-pointer rounded-none px-4 py-2 font-body text-[10px] uppercase tracking-[0.15em] transition-colors duration-200 motion-reduce:transition-none">Specsheet ({items.length})</Button>
         <Button variant="outline" aria-haspopup="dialog" disabled={!items.length} onClick={openVisualStudio} className="felix-surface h-10 cursor-pointer rounded-none px-4 py-2 font-body text-[10px] uppercase tracking-[0.15em] transition-colors duration-200 motion-reduce:transition-none [&_svg]:size-3.5"><Sparkles aria-hidden="true" strokeWidth={1.5} />AI Co-Designer</Button>
         {!isClientMode && <Button variant="studio-primary" disabled={loadingItems || !items.length || savingFinishes || !canEdit} onClick={openInVisualiser} className="h-10 cursor-pointer rounded-none px-4 font-body text-[10px] uppercase"><Box className="size-3.5" />Open in Visualiser Sandbox</Button>}
@@ -388,8 +395,7 @@ export default function TradeProjectStudio() {
           ) : items.length === 0 ? (
             <div className="px-4 pb-16 md:px-8 lg:px-12">
               <p className="font-body text-sm text-muted-foreground">
-                No pieces sourced yet. Add products to a board or quote linked to this project and they
-                will compose here.
+                {loadedBoardId ? "This mood board has no visible pieces." : "Select a mood board."}
               </p>
             </div>
           ) : (

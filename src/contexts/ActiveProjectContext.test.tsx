@@ -1,5 +1,6 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { supabase } from "@/integrations/supabase/client";
 import { ActiveProjectProvider, useActiveProject } from "./ActiveProjectContext";
 afterEach(() => { cleanup(); sessionStorage.clear(); });
 function Consumer() {
@@ -8,6 +9,15 @@ function Consumer() {
   return <><output>{JSON.stringify(project.state)}</output><button onClick={() => project.setFloorPlanUrl("https://assets.example/plan.png")}>Plan</button><button onClick={() => project.setView("sandbox")}>Inside</button><button onClick={() => project.setBounds({ width: 11.475, depth: 5.81, height: 3 })}>Bounds</button></>;
 }
 describe("active project state", () => {
+  it("a selected-board handoff never loads nineteen cached or cloud objects", () => {
+    const id = "f6068253-c046-44f6-a29d-2efe2fedfb31";
+    sessionStorage.setItem(`ma-active-layout-v1:owner:${id}`, JSON.stringify({ objects: Array.from({ length: 19 }, (_, i) => ({ instanceId: `old-${i}` })) }));
+    const reads = vi.spyOn(supabase, "from");
+    render(<ActiveProjectProvider accountId="owner" projectId={id} initialView="sandbox" freshHandoff><Consumer /></ActiveProjectProvider>);
+    expect(JSON.parse(screen.getByRole("status").textContent || "{}").placedItems).toHaveLength(0);
+    expect(reads).not.toHaveBeenCalledWith("project_visualiser_layouts");
+    reads.mockRestore();
+  });
   it("retains floor plan and bounds through view changes and refresh restoration", () => {
     const mount = () => render(<ActiveProjectProvider accountId="owner" projectId="project-a" initialView="axonometric"><Consumer /></ActiveProjectProvider>);
     mount();

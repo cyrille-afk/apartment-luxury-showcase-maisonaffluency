@@ -30,7 +30,7 @@ export function MoodBoardActions({ items, defaultProjectId, pdfContext }: Props)
   const navigate = useNavigate();
   const workspace = useProjectWorkspace();
   const [studioIntent, setStudioIntent] = useState(false);
-  const transferProgress = useRef({ key: "", completed: 0 });
+  const transferProgress = useRef({ key: "", completed: 0, boardId: null as string | null });
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("Mood board");
   const [projectId, setProjectId] = useState<string | null>(defaultProjectId);
@@ -50,10 +50,10 @@ export function MoodBoardActions({ items, defaultProjectId, pdfContext }: Props)
     try {
       const configured = toStudio ? await moodBoardStudioItems(items.map(i => i.id)) : items.slice(0, MOOD_BOARD_MAX_SAVE).map(i => ({ product_id: i.id }));
       const key = JSON.stringify([destination, title.trim(), configured]);
-      if (transferProgress.current.key !== key) transferProgress.current = { key, completed: 0 };
+      if (transferProgress.current.key !== key) transferProgress.current = { key, completed: 0, boardId: null };
       for (let start = toStudio ? transferProgress.current.completed : 0; start < configured.length; start += MOOD_BOARD_MAX_SAVE) {
         // Generated RPC types omit SQL-nullable UUID arguments used by board saves.
-        const { error } = await (supabase as any).rpc("create_visualiser_client_board", {
+        const { data, error } = await (supabase as any).rpc("create_visualiser_client_board", {
           _title: title.trim(),
           _client_id: null,
           _project_id: destination,
@@ -64,14 +64,15 @@ export function MoodBoardActions({ items, defaultProjectId, pdfContext }: Props)
           _items: configured.slice(start, start + MOOD_BOARD_MAX_SAVE),
         });
         if (error) throw error;
-        if (toStudio) transferProgress.current.completed = start + MOOD_BOARD_MAX_SAVE;
+        if (toStudio) { transferProgress.current.completed = start + MOOD_BOARD_MAX_SAVE; transferProgress.current.boardId ??= typeof data === "string" ? data : null; }
       }
       window.dispatchEvent(new Event("trade-projects:changed"));
       setMessage({ tone: "ok", text: destination ? "Saved to the project's boards." : "Saved to your boards." });
       setOpen(false);
       if (toStudio && destination) {
         if (user) saveStudioRoomContext(user.id, destination, { roomType: pdfContext.roomType, currency: pdfContext.currency, targetCents: pdfContext.target });
-        navigate(`/trade/projects/${encodeURIComponent(destination)}/studio`);
+        const board = transferProgress.current.boardId;
+        navigate(`/trade/projects/${encodeURIComponent(destination)}/studio${board ? `?board=${encodeURIComponent(board)}` : ""}`);
       }
     } catch (error) {
       const detail = error instanceof Error ? error.message : String((error as { message?: string })?.message || "");
