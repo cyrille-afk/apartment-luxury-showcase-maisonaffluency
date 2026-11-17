@@ -9,6 +9,18 @@ vi.mock("@react-three/fiber", () => ({
   useThree: () => ({ camera: state.camera, gl: { domElement: state.canvas }, size: { width: 800, height: 600 }, invalidate: () => {} }),
 }));
 afterEach(() => { cleanup(); delete window.__lovableEvents; document.body.innerHTML = ""; vi.unstubAllGlobals(); });
+it("identifies a hotspot projection failure separately and preserves the original exception", () => {
+  vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} });
+  const host = document.createElement("div"); state.canvas = document.createElement("canvas"); host.append(state.canvas); document.body.append(host);
+  state.camera = new THREE.PerspectiveCamera(60, 4 / 3, .1, 100);
+  const failure = new Error("Controlled projection failure");
+  vi.spyOn(state.camera, "updateMatrixWorld").mockImplementation(() => { throw failure; });
+  const track = vi.fn(); const captureException = vi.fn(); window.__lovableEvents = { track, captureException };
+  render(<VisualiserHotspots objects={[]} onFindAlternatives={() => {}} />);
+  expect(() => state.frame?.()).toThrow(failure);
+  expect(track).toHaveBeenCalledWith("project.studio_loading", expect.objectContaining({ phase: "hotspot_error", status: "error", piece_count: 0, pin_count: 0 }));
+  expect(captureException).toHaveBeenCalledWith(failure, { source: "visualiser_hotspot_projection", piece_count: 0 }, { mechanism: "manual", handled: false, severity: "error" });
+});
 it("reports at most two CPU samples per 120 frames rather than sending every frame", () => {
   vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} });
   const host = document.createElement("div"); state.canvas = document.createElement("canvas"); host.append(state.canvas); document.body.append(host);
