@@ -2080,6 +2080,13 @@
       "when": 1794900575586,
       "tag": "0296_create_project_studio_items",
       "breakpoints": true
+    },
+    {
+      "idx": 297,
+      "version": "7",
+      "when": 1794956854539,
+      "tag": "0297_shared_board_size_price_fallback",
+      "breakpoints": true
     }
   ]
 }

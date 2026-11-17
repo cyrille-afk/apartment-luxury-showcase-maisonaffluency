@@ -13716,6 +13716,10 @@ export type Database = {
         Args: { _keys: string[]; _value: Json }
         Returns: Json
       }
+      _shared_board_retail_price: {
+        Args: { _base: number; _label: string; _variants: Json }
+        Returns: Json
+      }
       accept_studio_invite: { Args: { _invite_id: string }; Returns: Json }
       acquire_ingestion_lease: {
         Args: { _minutes?: number; _owner: string }

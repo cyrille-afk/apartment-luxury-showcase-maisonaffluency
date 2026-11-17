@@ -19,9 +19,10 @@ import SharedVisualiserScene from "@/components/trade/visualiser/SharedVisualise
 import WorkspacePresentation from "@/components/trade/visualiser/WorkspacePresentation";
 import { parseWorkspacePresentation, type WorkspacePresentation as Presentation } from "@/lib/workspacePresentation";
 import { sharedVisualiserRoom, type SharedVisualiserRoom } from "@/lib/sharedVisualiserRoom";
+import { sharedBoardPrice } from "@/lib/sharedBoardPrice";
 
 type Item = {
-  id: string; product_id: string; product_name: string; image_url: string | null; msrp_cents: number | null; currency: string;
+  id: string; product_id: string; product_name: string; image_url: string | null; msrp_cents: number | null; msrp_from?: boolean; currency: string;
   lead_time: string | null; finish: string | null; approval_status: string; my_reaction: string | null;
   variant_label: string | null; fabric_label: string | null; wood_label: string | null; my_finish: string | null;
   my_comments?: { id: string; comment: string; created_at: string }[];
@@ -263,6 +264,7 @@ export default function SharedProcurementBoard() {
         {data.items.map((item, i) => {
           const credits = productAttribution({ ...item, title: item.product_name, designerName: item.designer_name, brandName: item.brand_name, houseName: item.house_name });
           const fo = resolved[item.id];
+          const price = sharedBoardPrice(item, fo);
           const canOpenDetails = !data.view_only && !!catalog?.[item.product_id]?.variants?.length;
           const openDetails = () => setDrawerFor(item.id);
           return (
@@ -286,7 +288,7 @@ export default function SharedProcurementBoard() {
               </div>
             ) : item.finish && <p className="mt-0.5 font-body text-xs text-muted-foreground">{item.finish}</p>}
             {picks[item.id] && <p className="mt-1 font-body text-[10px] uppercase tracking-[0.16em] text-primary">Your request sent to {data.studio_name}</p>}
-            <p className="mt-1 font-body text-sm text-foreground">{formatMoneyIn(fo?.price_cents ?? item.msrp_cents, item.currency)}</p>
+            <p className="mt-1 font-body text-sm text-foreground">{price.from ? "From " : ""}{formatMoneyIn(price.cents, item.currency)}</p>
             {item.lead_time && <p className="mt-0.5 font-body text-xs text-muted-foreground">Lead time {item.lead_time}</p>}
 
             {!data.view_only && <div className="mt-4 flex items-center gap-1" data-allow-guest={data.role === "client" ? "" : undefined}>

@@ -277,3 +277,4 @@
 - Per-product `trade_only` controls visibility independently of maker profiles; new picks default Trade Only. Credits: `public_catalog_designer_credits`.
 - Auth emails send via src/routes/lovable/email/auth/webhook.ts, not the legacy hook.
 - Folder/Studio counts share studioBoardCount and saved Studio exclusions; confirmed removals notify the mounted sidebar without deleting source rows — counts match the curated schedule.
+- Shared board size-price fallbacks stay retail-only and labelled From — never expose net prices.

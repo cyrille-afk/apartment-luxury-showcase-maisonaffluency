@@ -1,5 +1,9 @@
 # Roadmap
 
+## Shared Mood Board retail prices
+- [x] Correct invitation-checked price projection to include saved size prices and exact size matching; mark indicative minimums From without exposing net prices.
+- [x] Ten focused tests pass. Real invitation-checked client cards show Rift From €29,202 and Yoma From €111,737 on desktop/phone under both system themes, retain prices after reload and open the finish drawer. Existing slug-page SSR document warning remains unrelated to prices; client rendering succeeds.
+
 ## Dynamic Studio folder counts
 - [x] Share exclusion-aware counts between folder selection and sidebar, refreshing after confirmed removal while retaining source board entries.
 - [x] Ten regressions pass; signed-in Cipriani selector/sidebar show six after reload, confirmed test removal updates both to five immediately, and restoring the exact saved selection returns both to six. Screenshots checked; no page errors; preview build OK.
