@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { formatMoneyIn } from "@/lib/displayMoney";
 import Product3DViewer from "@/components/trade/Product3DViewer";
+import { boardPiecePhoto } from "./boardPiecePhoto";
 
 type Glb = { variant_label: string; glb_url: string; is_default: boolean; material_roles: any };
 type Swatch = { name: string; image_url: string | null; category: string | null; price_tier_label?: string | null };
@@ -53,7 +54,8 @@ export async function resolveSavedFinishes(
 ): Promise<Record<string, FinishSelection>> {
   const withSel = items.filter((i) => i.variant_label || i.fabric_label || i.wood_label);
   if (!withSel.length) return {};
-  const { data: tps } = await supabase.from("trade_products").select("id, source_pick_id").in("id", Array.from(new Set(withSel.map((i) => i.product_id))));
+  const { data: tps } = await supabase.from("trade_products").select("id, source_pick_id, image_url").in("id", Array.from(new Set(withSel.map((i) => i.product_id))));
+  const cataloguePhotos = new Map((tps || []).map((t) => [t.id, t.image_url]));
   const pickOf = new Map((tps || []).map((t: any) => [t.id, t.source_pick_id as string | null]));
   const pickIds = Array.from(new Set((tps || []).map((t: any) => t.source_pick_id).filter(Boolean)));
   if (!pickIds.length) return {};
@@ -68,6 +70,7 @@ export async function resolveSavedFinishes(
     const p: any = pid && pickMap.get(pid);
     if (!p) continue;
     out[it.id] = resolveFinishFrom(it, p, (sws || []).filter((x: any) => x.pick_id === pid), strict);
+    out[it.id].image_url = boardPiecePhoto(it.product_id, cataloguePhotos.get(it.product_id), out[it.id].image_url);
   }
   return out;
 }
@@ -230,8 +233,7 @@ export default function FinishesDrawer({
   }, [open, productId, clientMode, preloaded]);
 
   const imageFor = (v: Variant | null) => {
-    if (!v) return null;
-    return variantImage(v, imgMap, gallery);
+    return boardPiecePhoto(productId, baseImage, variantImage(v, imgMap, gallery));
   };
 
   // Resolve a variant's top/base material names to their pre-cropped swatch
