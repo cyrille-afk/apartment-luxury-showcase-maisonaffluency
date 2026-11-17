@@ -7,10 +7,10 @@ import { convertMoodBudget, emptyMoodBudget, moodBudgetLedger, type MoodBudgetSe
 import { boardMatrixPrice } from "@/lib/boardMatrixPrice";
 import { moodRetailEur } from "@/lib/moodBoardDetails";
 import { getFxRate } from "@/lib/fxRates";
-import { readStudioRoomContext } from "@/lib/studioRoomContext";
+import { readStudioRoomContext, saveStudioRoomContext } from "@/lib/studioRoomContext";
 import { initialSavedMoodBudget, savedMoodBudgetKey } from "@/lib/savedMoodBoardBudget";
 import { Button } from "@/components/ui/button";
-import { Link } from "@/lib/router-compat";
+import { useNavigate } from "@/lib/router-compat";
 import { ArrowRight } from "lucide-react";
 
 type Item = { id: string; product_id: string; variant_label: string | null; product?: { product_name: string; source_pick_id?: string | null } };
@@ -20,6 +20,7 @@ export function SavedMoodBoardBudget({ boardId, projectId, items, finishes, edit
   editable: boolean;
 }) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [settings, setSettings] = useState<MoodBudgetSettings>(emptyMoodBudget);
   const [readyKey, setReadyKey] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -79,6 +80,9 @@ export function SavedMoodBoardBudget({ boardId, projectId, items, finishes, edit
     {editable && readyKey === key && <MoodBoardBudgetControls settings={settings} onChange={change} onCurrencyChange={next => void changeCurrency(next)} />}
     <MoodBoardBudgetBar ledger={ledger} pending={pending} currency={currency} />
     {(notice || isError || finishError || rateError) && <p role="status" className="text-xs text-destructive">{notice ?? "Budget prices couldn’t be confirmed. Please reload to try again."}</p>}
-    {projectId && editable && <div className="flex justify-end"><Button asChild size="sm" className="gap-2"><Link to={`/trade/projects/${projectId}/studio`}>Project Studio <ArrowRight className="h-3.5 w-3.5" /></Link></Button></div>}
+    {projectId && editable && <div className="flex justify-end"><Button size="sm" className="gap-2" onClick={() => {
+      if (user && readyKey === key) saveStudioRoomContext(user.id, projectId, { roomType: settings.roomType, currency, targetCents: ledger.total });
+      navigate(`/trade/projects/${projectId}/studio`);
+    }}>Project Studio <ArrowRight className="h-3.5 w-3.5" /></Button></div>}
   </section>;
 }
