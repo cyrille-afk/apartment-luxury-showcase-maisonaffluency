@@ -4,8 +4,22 @@ import { ALL_EXTENSIONS } from "@gltf-transform/extensions";
 import draco3d from "draco3dgltf";
 import { compressCatalogGlb } from "@/lib/catalogGlbCompression";
 
-vi.mock("draco3dgltf/draco_decoder_gltf.wasm?url", () => ({ default: `${process.cwd()}/node_modules/draco3dgltf/draco_decoder_gltf.wasm` }));
-vi.mock("draco3dgltf/draco_encoder.wasm?url", () => ({ default: `${process.cwd()}/node_modules/draco3dgltf/draco_encoder.wasm` }));
+vi.mock("draco3dgltf", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("draco3dgltf")>();
+  type Options = Parameters<typeof actual.default.createDecoderModule>[0];
+  return {
+    default: {
+      createDecoderModule: (options?: Options) => actual.default.createDecoderModule({
+        ...options,
+        locateFile: () => `${process.cwd()}/public/wasm/draco_decoder_gltf.wasm`,
+      }),
+      createEncoderModule: (options?: Options) => actual.default.createEncoderModule({
+        ...options,
+        locateFile: () => `${process.cwd()}/public/wasm/draco_encoder.wasm`,
+      }),
+    },
+  };
+});
 
 async function rawTriangle(): Promise<File> {
   const document = new Document();
