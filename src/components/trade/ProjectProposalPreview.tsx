@@ -1,11 +1,16 @@
 import { downloadDocumentPdf } from "@/lib/appPdfDownload";
+import { useEffect, useState } from "react";
+import { ProposalPresentationSettings, type ProposalPresentation } from "./ProposalPresentationSettings";
+import residencePlan from "@/assets/cipriani-residence-04.asset.json";
+import residenceRender from "@/assets/cipriani-residence-living-render.asset.json";
+import { ciprianiResidencePreset } from "@/lib/proposalPresentation";
 import { FileText, Download, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatMoneyIn } from "@/lib/displayMoney";
 import { StudioBrand, type StudioBranding } from "@/components/trade/StudioBrand";
-import { tradePriceCents, clientPriceCents, clientUnitCents } from "@/lib/tradePricing";
+import { tradePriceCents, clientUnitCents } from "@/lib/tradePricing";
 import { formatPdfMoney } from "@/lib/pdfFormatting";
-import { proposalSpecifications, type ProposalSpecificationSource } from "@/lib/proposalSpecifications";
+import { proposalDimensionRows, proposalLeadTime, proposalSwatchColor, proposalSpecifications, type ProposalSpecificationSource } from "@/lib/proposalSpecifications";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +26,7 @@ export type ProposalPreviewItem = ProposalSpecificationSource & {
   sku: string | null;
   quantity: number;
   rrp_cents: number | null;
+  lead_time?: string | null;
 };
 
 interface ProjectProposalPreviewProps {
@@ -39,6 +45,8 @@ interface ProjectProposalPreviewProps {
   roomLabel?: string;
   budget?: { allocated: number; target: number | null; unpriced: number };
   pdfLocale?: string;
+  heroImage?: string | null;
+  floorPlanImage?: string | null;
 }
 
 function makeMoney(currency: string) {
@@ -60,7 +68,14 @@ export function ProjectProposalPreview({
   roomLabel = "Room type not set",
   budget,
   pdfLocale,
+  heroImage = null,
+  floorPlanImage = null,
 }: ProjectProposalPreviewProps) {
+  const preset = ciprianiResidencePreset(projectName);
+  const [presentation, setPresentation] = useState<ProposalPresentation>({ clientName: clientName || "", residenceName: preset?.residenceName || "", packageName: "", roomLabel: roomLabel === "Room type not set" ? preset?.roomLabel || roomLabel : roomLabel, targetCents: budget?.target ?? null, heroImage: heroImage || (preset ? residenceRender.url : null), floorPlanImage: floorPlanImage || (preset ? residencePlan.url : null), roomImage: preset ? residenceRender.url : null, highlight: preset?.highlight || null });
+  const [downloading, setDownloading] = useState(false);
+  useEffect(() => { setPresentation(previous => ({ ...previous, heroImage: previous.heroImage || heroImage, floorPlanImage: previous.floorPlanImage || floorPlanImage })); }, [heroImage, floorPlanImage]);
+  useEffect(() => { setPresentation(previous => ({ ...previous, roomLabel: roomLabel === "Room type not set" ? ciprianiResidencePreset(projectName)?.roomLabel || roomLabel : roomLabel, targetCents: budget?.target ?? null })); }, [roomLabel, budget?.target, projectName]);
   const money = makeMoney(currency);
   const tradeTotal = items.reduce((sum, item) => sum + (tradePriceCents(item.rrp_cents, tradeDiscount) || 0) * item.quantity, 0);
   const clientTotal = items.reduce((sum, item) => sum + (clientUnitCents(item.rrp_cents, tradeDiscount, markupMultiplier) || 0) * item.quantity, 0);
@@ -68,9 +83,10 @@ export function ProjectProposalPreview({
   const triggerPrint = async () => {
     const sheet = document.querySelector<HTMLElement>(".proposal-print-sheet");
     if (!sheet) return;
+    setDownloading(true);
     const snapshot = sheet.cloneNode(true) as HTMLElement;
-    const images = Array.from(sheet.querySelectorAll<HTMLImageElement>("[data-proposal-finish-swatches] img"));
-    const copies = Array.from(snapshot.querySelectorAll<HTMLImageElement>("[data-proposal-finish-swatches] img"));
+    const images = Array.from(sheet.querySelectorAll<HTMLImageElement>("img"));
+    const copies = Array.from(snapshot.querySelectorAll<HTMLImageElement>("img"));
     await Promise.all(images.map(async (image, index) => {
       const copy = copies[index];
       if (!copy) return;
@@ -86,7 +102,7 @@ export function ProjectProposalPreview({
         copy.removeAttribute("crossorigin");
       } catch { /* Preserve the recorded source if an image is unavailable. */ }
     }));
-    await downloadDocumentPdf({ element: snapshot, filename: `${projectName} Proposal.pdf`, repeatHeaderSelector: "[data-proposal-page-header]" });
+    try { await downloadDocumentPdf({ element: snapshot, filename: `${projectName} Proposal.pdf`, pageSelector: "[data-proposal-page]" }); } finally { setDownloading(false); }
   };
 
   return (
@@ -94,14 +110,14 @@ export function ProjectProposalPreview({
       <DialogContent
         hideClose
         aria-describedby="proposal-preview-description"
-        className="proposal-preview-shell fixed inset-0 left-0 top-0 z-[120] block h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 overflow-y-auto border-0 bg-foreground/40 p-0 backdrop-blur-sm print:!h-auto print:!w-[210mm] print:!overflow-visible print:!bg-card print:!backdrop-blur-none sm:rounded-none"
+        className="proposal-preview-shell fixed inset-0 left-0 top-0 z-[11000] block h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 overflow-y-auto border-0 bg-foreground/40 p-0 backdrop-blur-sm print:!h-auto print:!w-[210mm] print:!overflow-visible print:!bg-card print:!backdrop-blur-none sm:rounded-none"
       >
         <DialogTitle className="sr-only">White-label project proposal preview</DialogTitle>
         <DialogDescription id="proposal-preview-description" className="sr-only">
           Preview the current project proposal before downloading the PDF.
         </DialogDescription>
 
-        <div className="proposal-preview-controls fixed right-5 top-5 z-[122] flex flex-wrap justify-end gap-2 md:right-8 md:top-8">
+        <div className="proposal-preview-controls fixed right-5 top-5 z-[11002] flex flex-wrap justify-end gap-2 md:right-8 md:top-8">
           <Button
             type="button"
             variant="ghost"
@@ -114,139 +130,71 @@ export function ProjectProposalPreview({
             type="button"
             variant="ghost"
             onClick={triggerPrint}
+            disabled={downloading}
             className="h-9 rounded-none bg-card/95 px-3 font-body text-[10px] uppercase tracking-[0.15em] text-card-foreground backdrop-blur-sm hover:bg-card"
           >
             <Download className="mr-2 h-3.5 w-3.5" /> [ Download PDF ]
           </Button>
         </div>
 
-        <main className="proposal-print-sheet mx-auto my-20 min-h-[1123px] w-[min(794px,calc(100vw-32px))] bg-card px-4 py-14 text-card-foreground shadow-elegant sm:px-12 md:px-16 md:py-20">
-          <div data-proposal-page-header className="mb-6 border-b border-border pb-4">
-            <div className="flex items-center justify-between gap-4"><StudioBrand studio={studio} /><span className="font-body text-xs text-card-foreground">{roomLabel}</span></div>
-            {budget && <p className="mt-3 font-body text-xs text-card-foreground">Allocated: {formatPdfMoney(budget.allocated, currency, pdfLocale)}{budget.unpriced ? " (partial)" : ""} / Target: {formatPdfMoney(budget.target, currency, pdfLocale, "Not set")}{budget.unpriced ? " · Budget incomplete" : ""}</p>}
-          </div>
-          <header className="flex min-h-[330px] flex-col justify-between border-b border-card-foreground pb-12">
-            <div className="flex items-center justify-end gap-6">
-              <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                Private client document
-              </p>
-            </div>
-            <div>
-              <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                Project Proposal // {projectName}
-              </p>
-              <h2 className="mt-5 max-w-2xl font-display text-4xl font-normal leading-tight text-card-foreground md:text-5xl">
-                {projectName}
-              </h2>
-              <div className="mt-8 grid grid-cols-2 gap-8 font-body text-[10px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground">
-                <p>Prepared for<br /><span className="text-card-foreground">{clientName || "Private Client"}</span></p>
-                <p>Project location<br /><span className="text-card-foreground">{location || "To be confirmed"}</span></p>
+        <div className="px-4 pb-12 pt-24">
+          <ProposalPresentationSettings value={presentation} onChange={setPresentation} />
+          <main className="proposal-print-sheet luxury-proposal mx-auto w-[min(794px,100%)]">
+            <section data-proposal-page className="proposal-page proposal-cover">
+              {presentation.heroImage && <img className="proposal-cover-image" src={presentation.heroImage} alt="Cipriani Residences Miami" crossOrigin="anonymous" />}
+              <div className="proposal-cover-shade" />
+              <div className="proposal-cover-content">
+                <p className="proposal-eyebrow">Private client presentation</p>
+                <div><p className="proposal-eyebrow">{projectName}</p><h1>{/cipriani/i.test(projectName) ? <>Cipriani<br />Residences Miami</> : projectName}</h1><p className="proposal-cover-subtitle">A considered collection for {presentation.roomLabel === "Room type not set" ? "your residence" : presentation.roomLabel.toLowerCase()}</p></div>
+                <div className="proposal-cover-meta"><div><span>Prepared for</span><p>{presentation.clientName || "Private Client"}</p></div><div><span>Residence</span><p>{presentation.residenceName || "Residence to be confirmed"}</p></div><div><span>Collection</span><p>{presentation.packageName || "Bespoke collection"}</p></div></div>
               </div>
-            </div>
-          </header>
-
-          <section className="pt-12" aria-label="Proposal items">
-            <div className="flex items-end justify-between border-b border-border pb-4">
-              <div>
-                <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Selected collection</p>
-                <p className="mt-2 font-display text-2xl text-card-foreground">Architectural Objects</p>
+            </section>
+            <section data-proposal-page className="proposal-page proposal-spatial">
+              <ProposalRunningHeader studio={studio} projectName={projectName} roomLabel={presentation.roomLabel} />
+              <p className="proposal-eyebrow">01 / Spatial context</p><h2>The residence, considered.</h2>
+              <div className="proposal-spatial-grid">
+                <figure><div className="proposal-plan-frame">{presentation.floorPlanImage ? <><img src={presentation.floorPlanImage} alt="Selected apartment floor plan" crossOrigin="anonymous" />{presentation.highlight && <div className="proposal-room-highlight" style={{ left: `${Math.max(0, Math.min(100 - presentation.highlight.width, presentation.highlight.x - presentation.highlight.width / 2))}%`, top: `${Math.max(0, Math.min(100 - presentation.highlight.height, presentation.highlight.y - presentation.highlight.height / 2))}%`, width: `${presentation.highlight.width}%`, height: `${presentation.highlight.height}%` }} />}</> : <p>Apartment floor plan awaiting selection</p>}</div><figcaption>{presentation.residenceName || "Residence plan"} · {presentation.roomLabel}</figcaption></figure>
+                <figure><div className="proposal-vignette-frame">{presentation.roomImage ? <img src={presentation.roomImage} crossOrigin="anonymous" alt="Rendered 3D room vignette" /> : <p>Room rendering awaiting selection</p>}</div><figcaption>{presentation.roomLabel} / {presentation.roomImage === residenceRender.url ? "Cipriani residence rendering" : "Selected composition"}</figcaption></figure>
               </div>
-              <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                {String(items.length).padStart(2, "0")} pieces
-              </p>
-            </div>
-
-            <div>
-              {items.map((item, index) => {
-                const retail = item.rrp_cents != null && item.rrp_cents > 0 ? item.rrp_cents * item.quantity : null;
-                 const tradeUnit = tradePriceCents(item.rrp_cents, tradeDiscount);
-                 const trade = tradeUnit != null && tradeUnit > 0 ? tradeUnit * item.quantity : null;
-                 const clientUnit = clientUnitCents(item.rrp_cents, tradeDiscount, markupMultiplier);
-                 const client = clientUnit != null && clientUnit > 0 ? clientUnit * item.quantity : null;
-                 const specifications = proposalSpecifications(item);
-                 return (
-                  <article key={item.product_id} className="proposal-line-item grid grid-cols-[20px_48px_minmax(0,1fr)] items-start gap-x-3 border-b border-border py-6 break-inside-avoid sm:grid-cols-[48px_72px_minmax(0,1fr)_auto] sm:gap-x-5">
-                    <span className="pr-3 text-right font-body text-[9px] tracking-[0.15em] text-muted-foreground">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <div className="h-16 w-12 bg-background sm:w-[72px]">
-                      {item.image_url ? (
-                        <img src={item.image_url} alt="" className="h-full w-full object-contain mix-blend-multiply" />
-                      ) : (
-                        <FileText className="m-auto h-full w-4 text-muted-foreground" />
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <h3 className="font-display text-base font-normal leading-snug text-card-foreground">{item.name}</h3>
-                       <p data-trade-sensitive={!isClientMode ? "" : undefined} className="mt-1 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">
-                         {isClientMode ? "Curated Collection" : item.designer}{!isClientMode && item.sku ? ` · ${item.sku}` : ""}{item.quantity > 1 ? ` · Qty ${item.quantity}` : ""}
-                      </p>
-                       {!isClientMode && <span data-client-placeholder aria-hidden="true" className="h-3 w-24 bg-muted/60 animate-pulse" />}
-                      <dl data-proposal-item-specs className="mt-4 space-y-1.5 border-t border-border pt-3">
-                        {([
-                          ["Dimensions", specifications.dimensions],
-                        ] as const).map(([label, value]) => (
-                          <div key={label} className="grid grid-cols-[68px_minmax(0,1fr)] gap-2 font-body text-[9px] leading-relaxed">
-                            <dt className="uppercase tracking-[0.12em] text-muted-foreground">{label}</dt>
-                            <dd className="break-words text-card-foreground">{value}</dd>
-                          </div>
-                        ))}
-                      </dl>
-                      {item.finish_swatches?.length ? (
-                        <div data-proposal-finish-swatches className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                          {item.finish_swatches.map(swatch => (
-                            <figure key={swatch.id} className="flex min-w-0 items-start gap-2">
-                              {swatch.image_url ? (
-                                <img src={swatch.image_url} alt={swatch.name} crossOrigin="anonymous" className="size-12 shrink-0 border border-border object-cover" />
-                              ) : (
-                                <div className="flex size-12 shrink-0 items-center justify-center border border-border bg-muted"><FileText className="size-4 text-muted-foreground" /></div>
-                              )}
-                              <figcaption className="min-w-0 break-words font-body text-[9px] leading-relaxed">
-                                <p className="text-muted-foreground">{swatch.axis}</p>
-                                <p className="text-card-foreground">{swatch.name}</p>
-                                {!swatch.image_url && <p className="text-muted-foreground">Sample image unavailable</p>}
-                              </figcaption>
-                            </figure>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="mt-3 break-words font-body text-[9px] leading-relaxed text-card-foreground">{specifications.finishes !== "On request" ? specifications.finishes : specifications.materials}</p>
-                      )}
-                    </div>
-                     <div data-trade-sensitive={!isClientMode ? "" : undefined} className="col-start-3 mt-3 text-left sm:col-auto sm:mt-0 sm:text-right">
-                      <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">
-                         {isClientMode ? "Client Price" : "Trade / MSRP"}
-                      </p>
-                      <p className="mt-1 font-body text-[11px] tracking-[0.05em] text-card-foreground">
-                          {isClientMode ? (client == null ? "Price upon Request" : money(client)) : (trade == null ? "Price upon Request" : money(trade))}
-                      </p>
-                        {!isClientMode && retail != null && (
-                         <p data-trade-sensitive className="mt-1 font-body text-[9px] tracking-[0.05em] text-muted-foreground line-through">
-                          {money(retail)}
-                        </p>
-                      )}
-                    </div>
-                     {!isClientMode && <span data-client-placeholder aria-hidden="true" className="h-4 w-24 animate-pulse bg-muted/60" />}
-                  </article>
-                );
+              <section className="proposal-budget" aria-label="Executive Budget Summary">
+                <p className="proposal-eyebrow">Executive Budget Summary</p>
+                <div className="proposal-budget-grid"><div><span>Total Package</span><strong>{items.some(item => (item.rrp_cents ?? 0) > 0) ? formatPdfMoney(isClientMode ? clientTotal : tradeTotal, currency, pdfLocale) : "Price upon Request"}</strong>{items.some(item => !item.rrp_cents) && <small>Partial estimate · unpriced pieces</small>}</div><div><span>Target Allocation</span><strong>{formatPdfMoney(presentation.targetCents, currency, pdfLocale, "Not set")}</strong></div><div><span>Lead Time Estimate</span><strong>{proposalLeadTime(items.map(item => item.lead_time))}</strong></div><div><span>Selected Collection</span><strong>{String(items.reduce((total, item) => total + item.quantity, 0)).padStart(2, "0")} pieces</strong></div></div>
+              </section>
+              <p className="proposal-spatial-note">{location || "Cipriani Residences Miami"} · {presentation.packageName || "Bespoke collection"}</p>
+              <ProposalPageFooter number={2} total={2 + Math.ceil(items.length / 3)} />
+            </section>
+            {Array.from({ length: Math.ceil(items.length / 3) }, (_, page) => <section data-proposal-page key={page} className="proposal-page proposal-schedule">
+              <ProposalRunningHeader studio={studio} projectName={projectName} roomLabel={presentation.roomLabel} />
+              <div className="proposal-schedule-heading"><div><p className="proposal-eyebrow">02 / Curated schedule</p><h2>Architectural Objects</h2></div><span>{String(items.length).padStart(2, "0")} selections</span></div>
+              {items.slice(page * 3, page * 3 + 3).map((item, offset) => {
+                const dimensions = proposalDimensionRows(item);
+                const specifications = proposalSpecifications(item);
+                const price = (isClientMode ? clientUnitCents(item.rrp_cents, tradeDiscount, markupMultiplier) : tradePriceCents(item.rrp_cents, tradeDiscount));
+                return <article key={`${item.product_id}:${offset}`} className="proposal-line-item proposal-schedule-row">
+                  <div className="proposal-product-picture"><img src={item.image_url || undefined} alt={item.name} />{!item.image_url && <FileText className="size-5" />}</div>
+                  <div className="proposal-product-detail"><p className="proposal-eyebrow">{String(page * 3 + offset + 1).padStart(2, "0")} / {isClientMode ? "Curated Collection" : item.designer}{item.quantity > 1 ? ` · Qty ${item.quantity}` : ""}</p><h3>{item.name}</h3>
+                    <dl data-proposal-item-specs className="proposal-dimensions"><dt>W × D × H</dt><dd>{dimensions.metric}{dimensions.imperial && <span>{dimensions.imperial}</span>}</dd></dl>
+                    {item.finish_swatches?.length ? <div data-proposal-finish-swatches className="proposal-swatches">{item.finish_swatches.map(swatch => <figure key={swatch.id}><ProposalSwatch image={swatch.image_url} color={swatch.color} name={swatch.name} /><figcaption><span>{swatch.axis}</span><p>{swatch.name}</p></figcaption></figure>)}</div> : <p className="proposal-finish-prose">{specifications.finishes !== "On request" ? specifications.finishes : specifications.materials}</p>}
+                    <div data-trade-sensitive={!isClientMode ? "" : undefined} className="proposal-price"><span>{isClientMode ? "Client Price" : "Trade / MSRP"}</span><strong>{price != null && price > 0 ? money(price * item.quantity) : "Price upon Request"}</strong></div>
+                  </div>
+                </article>;
               })}
-            </div>
-
-             <footer data-trade-sensitive={!isClientMode ? "" : undefined} className="mt-10 flex items-baseline justify-between border-t border-card-foreground pt-5">
-              <p className="font-body text-[10px] uppercase tracking-[0.15em] text-card-foreground">
-                {isClientMode ? "Total Estimate" : "Total Trade"}
-              </p>
-              <p className="font-display text-2xl text-card-foreground">
-                  {items.some((item) => item.rrp_cents != null && item.rrp_cents > 0)
-                    ? money(isClientMode ? clientTotal : tradeTotal)
-                    : "Price upon Request"}
-              </p>
-            </footer>
-             {!isClientMode && <div data-client-placeholder aria-hidden="true" className="mt-10 h-5 w-32 animate-pulse bg-muted/60" />}
-          </section>
-           <div className="mt-12 border-t border-border pt-4 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">{projectName}</div>
-        </main>
+              <ProposalPageFooter number={page + 3} total={2 + Math.ceil(items.length / 3)} />
+            </section>)}
+          </main>
+        </div>
       </DialogContent>
     </Dialog>
   );
+}
+function ProposalRunningHeader({ studio, projectName, roomLabel }: { studio: StudioBranding | null; projectName: string; roomLabel: string }) {
+  return <header data-proposal-page-header className="proposal-running-header"><StudioBrand studio={studio} /><div><p>{projectName}</p><span>{roomLabel}</span></div></header>;
+}
+function ProposalPageFooter({ number, total }: { number: number; total: number }) {
+  return <footer className="proposal-page-footer"><span>Private client document</span><span>{String(number).padStart(2, "0")} / {String(total).padStart(2, "0")}</span></footer>;
+}
+function ProposalSwatch({ image, color, name }: { image: string | null; color?: string; name: string }) {
+  const [failed, setFailed] = useState(false);
+  const hex = proposalSwatchColor(color);
+  return <div className="proposal-swatch" style={hex ? { backgroundColor: hex } : undefined}>{image && !failed ? <img src={image} crossOrigin="anonymous" alt={name} onError={() => setFailed(true)} /> : !hex ? <FileText className="size-3" aria-label="Sample image unavailable" /> : null}</div>;
 }

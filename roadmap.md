@@ -1,5 +1,12 @@
 # Roadmap
 
+## Cipriani luxury client presentation
+- [x] Incorporated supplied Cipriani living-room rendering as full-bleed cover and clearly labelled residence-context vignette, not a render of the selected furniture.
+- [x] Incorporated authentic Residence 04 / Levels 62–78 drawing with adjustable living-room highlight; offer the supplied $250K, $500K and $1M packages without converting existing EUR budgets implicitly.
+- [x] Added discrete cover, spatial/budget overview and three expanded schedule pages for the real nine-piece board; proposal-only identity/media/room/target inputs do not change project records. Client proposal always uses client prices.
+- [x] 22 focused tests pass; five downloaded pages visually checked with exact selected swatches, metric/imperial dimensions and €186,434 client total. Fixed mobile overlay stacking and plan highlight letterboxing found during QA; final preview build OK.
+- [ ] Client name remains unconfirmed; proposal entry is available and defaults to Private Client until supplied.
+
 ## Proposal selected finish swatches
 - [x] Replace duplicate material/finish text with exact selected cropped swatch images and axis/name captions in preview and PDF; unpictured supplier selections remain explicitly unpictured.
 - [x] Ten tests pass; all nine pieces and fifteen available images verified on desktop/phone in both themes with no page errors, close returns to Studio, and three-page downloaded PDF visually checked. Linen shade has no recorded sample image; no substitute invented.

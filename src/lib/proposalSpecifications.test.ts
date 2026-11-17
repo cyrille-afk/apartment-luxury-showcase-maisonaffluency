@@ -1,8 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { proposalFinishDetails, proposalFinishSwatches, proposalMaterialDetails, proposalSpecifications } from "./proposalSpecifications";
+import { proposalDimensionRows, proposalLeadTime, proposalSwatchColor, proposalFinishDetails, proposalFinishSwatches, proposalMaterialDetails, proposalSpecifications } from "./proposalSpecifications";
 import { resolveStudioSelection, type StudioFinishProduct } from "./studioFinishes";
 
 describe("Project proposal specifications", () => {
+  it("converts recorded W × D × H from cm into mm and inches", () => {
+    expect(proposalDimensionRows({ dimensions: "255 × 70 × H 100 cm" })).toEqual({ metric: "2550 × 700 × 1000 mm", imperial: "100.4 × 27.6 × 39.4 in" });
+  });
+  it("converts the recorded chair measurements without guessing missing axes", () => {
+    expect(proposalDimensionRows({ width_mm: 900, depth_mm: 920, height_mm: 760 })).toEqual({ metric: "900 × 920 × 760 mm", imperial: "35.4 × 36.2 × 29.9 in" });
+    expect(proposalDimensionRows({ dimensions: "Made to order" }).imperial).toBeNull();
+  });
+  it("accepts only recorded hex colors for missing sample fallback", () => {
+    expect(proposalSwatchColor("#A1b2C3")).toBe("#A1b2C3");
+    expect(proposalSwatchColor("Natural Walnut")).toBeUndefined();
+  });
+  it("uses the longest recorded lead time and flags incomplete estimates", () => {
+    expect(proposalLeadTime(["8–12 weeks", "16 weeks"])).toBe("16 weeks");
+    expect(proposalLeadTime(["8–12 weeks", null])).toBe("12 weeks · partial estimate");
+    expect(proposalLeadTime([null])).toBe("To be confirmed");
+  });
   it("exports only selected cropped images without substituting another finish", () => {
     const product: StudioFinishProduct = { name: "Chair", variants: [], finishes: [
       { id: "selected", name: "Opera Calla", category: "Fabric", image_url: "https://example.com/cropped-calla.jpg", brand_name: "Maker", material_type: null, color_family: null },

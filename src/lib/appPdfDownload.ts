@@ -27,7 +27,7 @@ export function pdfPageCuts(height: number, pageHeight: number, blocks: { top: n
 
 let exporting = false;
 /** Render only the supplied document, never the browser page URL or print chrome. */
-export async function downloadDocumentPdf(input: { html?: string; element?: HTMLElement; filename: string; landscape?: boolean; marginMm?: number; repeatHeaderSelector?: string }) {
+export async function downloadDocumentPdf(input: { html?: string; element?: HTMLElement; filename: string; landscape?: boolean; marginMm?: number; repeatHeaderSelector?: string; pageSelector?: string }) {
   if (exporting) return;
   exporting = true;
   const notice = toast.loading('Preparing PDF…');
@@ -65,6 +65,20 @@ export async function downloadDocumentPdf(input: { html?: string; element?: HTML
       try { await img.decode(); } catch { /* existing missing-image placeholders remain */ }
     }));
     await new Promise(resolve => setTimeout(resolve, 100));
+    if (input.pageSelector) {
+      const pages = Array.from(doc.querySelectorAll<HTMLElement>(input.pageSelector));
+      if (!pages.length) throw new Error('Presentation pages unavailable');
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: input.landscape ? 'landscape' : 'portrait' });
+      pdf.setProperties({ title: input.filename.replace(/\.pdf$/i, ''), author: 'Maison Affluency', creator: 'Maison Affluency' });
+      for (const [index, page] of pages.entries()) {
+        if (index) pdf.addPage();
+        const canvas = await html2canvas(page, { scale: 1.5, useCORS: true, logging: false, windowWidth: width });
+        pdf.addImage(canvas.toDataURL('image/jpeg', 0.94), 'JPEG', 0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight());
+      }
+      pdf.save(input.filename.endsWith('.pdf') ? input.filename : `${input.filename}.pdf`);
+      toast.success('PDF ready', { id: notice });
+      return;
+    }
     const repeatedHeader = input.repeatHeaderSelector ? doc.querySelector<HTMLElement>(input.repeatHeaderSelector) : null;
     const headerCanvas = repeatedHeader ? await html2canvas(repeatedHeader, { scale: 1.5, useCORS: true, logging: false, windowWidth: width }) : null;
     if (repeatedHeader) repeatedHeader.style.display = 'none';

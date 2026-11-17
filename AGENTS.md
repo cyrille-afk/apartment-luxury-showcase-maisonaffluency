@@ -11,6 +11,7 @@
 - Password-setup resends reuse the review drawer and retain attempt keys on retry; never change approval. Verified activation links the account; the queue reads user_id for setup status.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Client proposal presentations render discrete A4 pages with proposal-only media/identity overrides and recorded metric/imperial dimensions; exact-page PDF capture avoids splitting covers or leaking wholesale prices.
 - Studio proposalFinishSwatches maps exact selected supplier crops and axis labels into preview/PDF; export embeds decoded crops before cloning, while unpictured selections remain explicit — prevents redirected-image CORS omissions and substituted samples.
 - Visualiser automatic intake uses spatialLayoutEngine for measured sofa/dining vignettes; the pinned/largest-suitable Anchor loads alone, then completion-gated groups of three above four pieces, with tearsheet-sized wireframes for queued/fetching secondaries — manual/curated layouts and per-piece Suspense stay intact.
 - Studio read failures remain distinct from empty boards with cancellable bounded reads and selected-board retry; Sandbox handoff retry retains transfer data, while hotspot-only retry remounts the overlay, never furniture — recovery must not erase or combine saved boards.

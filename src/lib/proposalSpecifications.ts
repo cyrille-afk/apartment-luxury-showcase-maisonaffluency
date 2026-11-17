@@ -1,4 +1,4 @@
-import { DIMENSIONS_PLACEHOLDER, dimensionBadgeLabel } from "./productDimensions";
+import { DIMENSIONS_PLACEHOLDER, dimensionBadgeLabel, resolveDimensions } from "./productDimensions";
 import { studioFinishGroups, studioSelectedFinishes, type StudioFinishProduct, type StudioFinishSelection } from "./studioFinishes";
 
 export type ProposalSpecificationSource = {
@@ -13,13 +13,35 @@ export type ProposalSpecificationSource = {
   finish_swatches?: ProposalFinishSwatch[];
 };
 
-export type ProposalFinishSwatch = { id: string; axis: string; name: string; image_url: string | null };
+export type ProposalFinishSwatch = { id: string; axis: string; name: string; image_url: string | null; color?: string };
+
+export function proposalSwatchColor(color?: string | null): string | undefined {
+  return color && /^#(?:[a-f\d]{3}|[a-f\d]{6})$/i.test(color) ? color : undefined;
+}
+
+/** One recorded W/D/H source, converted with exactly 25.4 mm per inch. */
+export function proposalDimensionRows(item: ProposalSpecificationSource) {
+  const dims = resolveDimensions(item);
+  if (!dims || [dims.w, dims.d, dims.h].some(value => value <= 0)) return { metric: proposalSpecifications(item).dimensions, imperial: null };
+  const values = [dims.w, dims.d, dims.h];
+  return { metric: `${values.join(" × ")} mm`, imperial: `${values.map(value => (value / 25.4).toFixed(1)).join(" × ")} in` };
+}
+
+export function proposalLeadTime(values: Array<string | null | undefined>): string {
+  const weeks = values.flatMap(value => {
+    const match = value?.match(/(\d+)(?:\s*[-–]\s*(\d+))?\s*weeks?\b/i);
+    return match ? [Number(match[2] || match[1])] : [];
+  });
+  if (!weeks.length) return "To be confirmed";
+  return `${Math.max(...weeks)} weeks${weeks.length < values.length ? " · partial estimate" : ""}`;
+}
 
 /** Preserve the exact selected library crop and axis, including unpictured named selections. */
 export function proposalFinishSwatches(product: StudioFinishProduct, selection: StudioFinishSelection): ProposalFinishSwatch[] {
   return studioFinishGroups(product).flatMap(group => {
     const finish = group.options.find(option => option.id === selection.ids[group.key]);
-    return finish ? [{ id: `${group.key}:${finish.id}`, axis: group.label, name: finish.name, image_url: finish.image_url }] : [];
+    const color = proposalSwatchColor(finish?.color);
+    return finish ? [{ id: `${group.key}:${finish.id}`, axis: group.label, name: finish.name, image_url: finish.image_url, ...(color ? { color } : {}) }] : [];
   });
 }
 

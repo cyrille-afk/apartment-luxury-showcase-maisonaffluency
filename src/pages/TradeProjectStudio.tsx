@@ -111,6 +111,18 @@ export default function TradeProjectStudio() {
   const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
   const [isSpecPanelOpen, setIsSpecPanelOpen] = useState(false);
   const [isProposalPreviewOpen, setIsProposalPreviewOpen] = useState(false);
+  const [proposalFloorPlan, setProposalFloorPlan] = useState<string | null>(null);
+  useEffect(() => {
+    if (!isProposalPreviewOpen || !id) return;
+    let cancelled = false;
+    setProposalFloorPlan(null);
+    supabase.from("project_visualiser_layouts").select("layout").eq("project_id", id).maybeSingle().then(({ data }) => {
+      if (cancelled) return;
+      const layout = data?.layout;
+      if (layout && typeof layout === "object" && !Array.isArray(layout) && typeof layout.floorPlanUrl === "string") setProposalFloorPlan(layout.floorPlanUrl);
+    });
+    return () => { cancelled = true; };
+  }, [isProposalPreviewOpen, id]);
   const specItem = items.find((i) => i.product_id === specItemId) || null;
   const curatorialItem = items.find(i => i.id === curatorialInstanceId && i.product_id === curatorialItemId) || items.find((i) => i.product_id === curatorialItemId) || items[0] || null;
   const openVisualStudio = () => {
@@ -751,6 +763,7 @@ export default function TradeProjectStudio() {
 
        <ProjectSpecDrawer item={specItem} clientMode={isClientMode} onClose={() => setSpecItemId(null)} />
       <ProjectProposalPreview
+        key={`${id}:${loadedBoardId}`}
         open={isProposalPreviewOpen}
         onOpenChange={setIsProposalPreviewOpen}
         projectName={project.name}
@@ -763,7 +776,7 @@ export default function TradeProjectStudio() {
           finish_swatches: proposalFinishSwatches(i.catalog, i.selection),
           finish_details: proposalFinishDetails(i.catalog, i.selection) || i.original_finish,
         }))}
-        isClientMode={isClientMode}
+        isClientMode={true}
          tradeDiscount={discountPct}
          markupMultiplier={multiplier}
          studio={currentStudio}
@@ -771,6 +784,8 @@ export default function TradeProjectStudio() {
         roomLabel={roomLabel}
         budget={{ allocated: totals.msrp, target: budgetCents, unpriced }}
         pdfLocale={currentStudio?.pdf_locale}
+        heroImage={project.cover_image_url}
+        floorPlanImage={proposalFloorPlan}
       />
     </div>
   );
