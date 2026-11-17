@@ -3,6 +3,7 @@
 ## Dynamic Studio folder counts
 - [x] Share exclusion-aware counts between folder selection and sidebar, refreshing after confirmed removal while retaining source board entries.
 - [x] Ten regressions pass; signed-in Cipriani selector/sidebar show six after reload, confirmed test removal updates both to five immediately, and restoring the exact saved selection returns both to six. Screenshots checked; no page errors; preview build OK.
+- [x] Follow-up desktop/phone checks under light/dark system settings verify all six cards, opened phone/sidebar counts and the next-step Specsheet without horizontal overflow; Trade retains its existing light appearance under either system setting.
 
 ## Background Visualiser model preparation
 - [x] Move model cloning, geometry smoothing/subdivision, sizing and finish pixel preparation into a serialized browser worker with transferable results and stale-job protection; queue waits for prepared models.
