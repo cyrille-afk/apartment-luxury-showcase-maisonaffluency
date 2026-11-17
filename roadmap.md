@@ -683,6 +683,11 @@
 - [x] Applied project_studio_items with catalogue links, finish locks, pricing, lead times, and manual 3D overrides.
 - [x] Verified all columns, both foreign keys, RLS, restricted grants, and a temporary signed-in CRUD round trip; anonymous reads return 401 and no test rows remain.
 
+## Admin GLB browser compression
+- [ ] Locate the Admin Catalog Upload flow and existing compressed-URL persistence.
+- [ ] Compress selected GLBs in the browser with Draco, 1024px WebP textures, and upload the optimized buffer.
+- [ ] Add focused regression tests and verify the admin upload flow and saved public URL.
+
 ## Waiting on the user (existing publishing tasks)
 
 - [ ] Publish the preview so the renamed listings, directory and catalogue files go live
