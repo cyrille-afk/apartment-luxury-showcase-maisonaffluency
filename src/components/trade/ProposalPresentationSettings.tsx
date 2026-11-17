@@ -2,6 +2,7 @@ import { ImagePlus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CIPRIANI_PACKAGE_OPTIONS } from "@/lib/proposalPresentation";
+import { currencySymbol } from "@/lib/pdfFormatting";
 
 export type ProposalPresentation = {
   clientName: string;
@@ -15,7 +16,7 @@ export type ProposalPresentation = {
   highlight: { x: number; y: number; width: number; height: number } | null;
 };
 
-export function ProposalPresentationSettings({ value, onChange, defaultHighlight }: { value: ProposalPresentation; onChange: (value: ProposalPresentation) => void; defaultHighlight?: ProposalPresentation['highlight'] }) {
+export function ProposalPresentationSettings({ value, onChange, defaultHighlight, currency = "EUR" }: { value: ProposalPresentation; onChange: (value: ProposalPresentation) => void; defaultHighlight?: ProposalPresentation['highlight']; currency?: string }) {
   const update = (patch: Partial<ProposalPresentation>) => onChange({ ...value, ...patch });
   const imageInput = (key: "heroImage" | "floorPlanImage" | "roomImage", label: string) => (
     <label className="flex cursor-pointer items-center gap-2 border border-border bg-card px-3 py-2 text-xs">
@@ -33,7 +34,7 @@ export function ProposalPresentationSettings({ value, onChange, defaultHighlight
     {([['clientName', 'Client name'], ['residenceName', 'Residence floor plan']] as const).map(([key, label]) => <label key={key} className="text-xs">{label}<Input className="mt-1" value={value[key]} onChange={e => update({ [key]: e.target.value })} /></label>)}
     <div className="text-xs">Package<Select value={value.packageName || "bespoke"} onValueChange={packageName => update({ packageName: packageName === "bespoke" ? "" : packageName })}><SelectTrigger aria-label="Package" className="mt-1"><SelectValue /></SelectTrigger><SelectContent className="z-[11005]"><SelectItem value="bespoke">Bespoke collection</SelectItem>{CIPRIANI_PACKAGE_OPTIONS.map(option => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select></div>
     <label className="text-xs">Room<Input className="mt-1" value={value.roomLabel} onChange={e => update({ roomLabel: e.target.value })} /></label>
-    <label className="text-xs">Target allocation<Input className="mt-1" type="number" min="0" step="0.01" value={value.targetCents == null ? "" : value.targetCents / 100} onChange={e => update({ targetCents: e.target.value === "" ? null : Math.round(Math.max(0, Number(e.target.value)) * 100) })} /></label>
+    <label className="text-xs">Target allocation ({currency})<span className="relative mt-1 block"><span aria-hidden className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{currencySymbol(currency)}</span><Input aria-label={`Target allocation in ${currency}`} className="pl-8" type="number" min="0" step="0.01" inputMode="decimal" value={value.targetCents == null ? "" : value.targetCents / 100} onChange={e => update({ targetCents: e.target.value === "" ? null : Math.round(Math.max(0, Number(e.target.value)) * 100) })} /></span></label>
     {imageInput("heroImage", "Cipriani hero image")}{imageInput("floorPlanImage", "Apartment floor plan")}{imageInput("roomImage", "Rendered room vignette")}
     {value.floorPlanImage && <div className="grid gap-2 sm:col-span-3 sm:grid-cols-3">
       {([['x', 'Room centre X', 0, 100], ['y', 'Room centre Y', 0, 100], ['width', 'Room width', 1, 100], ['height', 'Room depth', 1, 100]] as const).map(([key, label, min, max]) => <label key={key} className="text-xs">{label}<input aria-label={label} className="mt-2 block w-full accent-primary" type="range" min={min} max={max} value={value.highlight?.[key] ?? (key === 'x' || key === 'y' ? 50 : 20)} onChange={e => update({ highlight: { x: 50, y: 50, width: 20, height: 20, ...value.highlight, [key]: Number(e.target.value) } })} /></label>)}

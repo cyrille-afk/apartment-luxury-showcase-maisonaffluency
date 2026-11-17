@@ -138,7 +138,7 @@ export function ProjectProposalPreview({
         </div>
 
         <div className="px-4 pb-12 pt-24">
-          <ProposalPresentationSettings value={presentation} onChange={setPresentation} defaultHighlight={presentation.floorPlanImage === residencePlan.url ? preset?.highlight ?? null : null} />
+          <ProposalPresentationSettings currency={currency} value={presentation} onChange={setPresentation} defaultHighlight={presentation.floorPlanImage === residencePlan.url ? preset?.highlight ?? null : null} />
           <main className="proposal-print-sheet luxury-proposal mx-auto w-[min(794px,100%)]">
             <section data-proposal-page className="proposal-page proposal-cover">
               {presentation.heroImage && <img className="proposal-cover-image" src={presentation.heroImage} alt="Cipriani Residences Miami" crossOrigin="anonymous" />}
