@@ -1,5 +1,11 @@
 # Roadmap
 
+## Client Developer Viewing Room
+- [x] Seed Cipriani with three marked sample layouts and three package tiers (3/4/6 existing pieces); retain original boards and indicative retail totals.
+- [x] Add token-validated hierarchy/package projections, no public table access, and editable lead times.
+- [x] Build the co-branded residence grid, package selector and eye-level viewer with Living/Terrace presets; seven focused tests and preview build pass.
+- [ ] Final visual approval: every package/layout renders on desktop and phone in light theme, dark desktop checked; some supplied models render distorted and official per-layout plans/environment GLBs are missing. Dark-phone/reload/invalid-link checks remain incomplete after browser time limits.
+
 ## Developer Viewing Room
 - [x] Add private admin-managed developer/project, residence layout and tiered moodboard package hierarchy with same-project validation; revoke inherited anonymous privileges and direct package writes.
 - [x] Add Project Studio Admin tab with developer/layout editing and atomic assignment of 3–5 packages. Six focused tests pass; signed-in UI saves three tiers and restores prices after reload, desktop/phone checked without horizontal overflow. Live RPC rejects 2/6 packages and anonymous reads return 401; temporary test hierarchy/board removed. Cipriani currently has only two existing moodboards, so real package assignment needs a third. Public viewing/token redemption is outside this request.

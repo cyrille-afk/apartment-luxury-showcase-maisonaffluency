@@ -2,6 +2,21 @@
 @import "tailwindcss" source("../src");
 @config "../tailwind.legacy.config.ts";
 
+/* Private viewing rooms keep the requested ivory editorial paper in both system themes. */
+.viewing-room {
+  --viewing-room-paper: oklch(0.975 0.012 85);
+  --viewing-room-ink: oklch(0.22 0.012 85);
+  --background: 45 35% 97%;
+  --foreground: 40 12% 12%;
+  --muted: 45 20% 92%;
+  --muted-foreground: 40 8% 42%;
+  --border: 40 15% 82%;
+  --accent: 45 20% 92%;
+  --accent-foreground: 40 12% 12%;
+  letter-spacing: 0;
+}
+.viewing-room-canvas { background-color: hsl(var(--background)); }
+
 :root {
   --visualiser-palette-paper: oklch(1 0 0 / 0.95);
   --visualiser-palette-ink: oklch(0.22 0 0);

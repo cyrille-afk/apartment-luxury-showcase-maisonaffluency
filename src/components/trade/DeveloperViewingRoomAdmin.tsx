@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { viewingRoomPackageError, type ViewingRoomPackageDraft } from "@/lib/viewingRoomPackages";
+import { absoluteUrl } from "@/config/site";
 
 const emptyDeveloper = { developer_name: "", developer_logo_url: "", hero_image_url: "" };
 const emptyLayout = { name: "", floorplan_url: "", specs_label: "", room_environment_glb: "" };
@@ -54,7 +55,7 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
     Promise.resolve(supabase.from("furniture_packages").select("*").eq("residence_layout_id", layoutId).order("sort_order").abortSignal(controller.signal)).then(({ data, error: readError }) => {
       if (controller.signal.aborted) return;
       if (readError) { setError("Packages couldn’t load. Retry before saving."); return; }
-      setPackages(data.length ? data.map(row => ({ moodboard_id: row.moodboard_id, tier_name: row.tier_name, package_price: String(row.package_price), currency: row.currency, description: row.description })) : [emptyPackage(), emptyPackage(), emptyPackage()]);
+      setPackages(data.length ? data.map(row => ({ moodboard_id: row.moodboard_id, tier_name: row.tier_name, package_price: String(row.package_price), currency: row.currency, description: row.description, lead_time_weeks: row.lead_time_weeks == null ? "" : String(row.lead_time_weeks) })) : [emptyPackage(), emptyPackage(), emptyPackage()]);
     }).catch(() => { if (!controller.signal.aborted) setError("Packages couldn’t load. Retry before saving."); }).finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
   }, [layoutId, revision, rolesLoaded, isAdmin]);
@@ -98,6 +99,7 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
         <div className="space-y-2"><Label htmlFor="developer-hero">Hero image URL</Label><Input id="developer-hero" type="url" value={developer.hero_image_url} disabled={disabled} onChange={event => setDeveloper({ ...developer, hero_image_url: event.target.value })} /></div>
         {developer.hero_image_url && <img src={developer.hero_image_url} alt={developer.developer_name} className="aspect-[16/9] w-full object-cover" />}
         <Button type="submit" variant="studio-primary" disabled={disabled || !developer.developer_name.trim()}><Save className="size-4" />Save developer</Button>
+        {developerId && <Button type="button" variant="outline" className="ml-2" onClick={() => { const saved = developers.find(row => row.id === developerId); if (saved) window.location.assign(absoluteUrl(`/viewing-room/${encodeURIComponent(saved.access_token)}`)); }}>Open client viewing room</Button>}
       </form>
       <form className="space-y-4" onSubmit={event => { event.preventDefault(); if (!developerId) return; void runSave(async () => {
         const values = { developer_project_id: developerId, name: layout.name.trim(), floorplan_url: layout.floorplan_url || null, specs_label: layout.specs_label || null, room_environment_glb: layout.room_environment_glb || null };
@@ -129,6 +131,7 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
           <div className="space-y-2"><Label>Currency</Label><Select value={row.currency} disabled={disabled || !layoutId} onValueChange={value => editPackage(index, { currency: value })}><SelectTrigger aria-label={`Currency for tier ${index + 1}`}><SelectValue /></SelectTrigger><SelectContent>{["EUR", "USD", "SGD", "GBP", "CHF"].map(value => <SelectItem key={value} value={value}>{value}</SelectItem>)}</SelectContent></Select></div>
           <Button type="button" variant="ghost" size="icon" className="self-end" aria-label={`Remove tier ${index + 1}`} disabled={disabled || !layoutId || packages.length <= 3} onClick={() => setPackages(current => current.filter((_, i) => i !== index))}><Trash2 className="size-4" /></Button>
           <div className="space-y-2 md:col-span-2 xl:col-span-5"><Label htmlFor={`description-${index}`}>Description</Label><Textarea id={`description-${index}`} rows={2} value={row.description} onChange={event => editPackage(index, { description: event.target.value })} /></div>
+          <div className="space-y-2"><Label htmlFor={`lead-${index}`}>Lead time · weeks</Label><Input id={`lead-${index}`} type="number" min="1" step="1" value={row.lead_time_weeks ?? ""} onChange={event => editPackage(index, { lead_time_weeks: event.target.value })} /></div>
         </div>)}
       </fieldset>
       <Button type="submit" variant="studio-primary" className="mt-5" disabled={disabled || !layoutId || !!error || boards.length < 3}><Save className="size-4" />{pending ? "Saving…" : "Save packages"}</Button>

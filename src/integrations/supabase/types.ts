@@ -5019,6 +5019,7 @@ export type Database = {
           currency: string
           description: string
           id: string
+          lead_time_weeks: number | null
           moodboard_id: string
           package_price: number
           residence_layout_id: string
@@ -5030,6 +5031,7 @@ export type Database = {
           currency?: string
           description?: string
           id?: string
+          lead_time_weeks?: number | null
           moodboard_id: string
           package_price: number
           residence_layout_id: string
@@ -5041,6 +5043,7 @@ export type Database = {
           currency?: string
           description?: string
           id?: string
+          lead_time_weeks?: number | null
           moodboard_id?: string
           package_price?: number
           residence_layout_id?: string
@@ -14419,6 +14422,7 @@ export type Database = {
           slug: string
         }[]
       }
+      get_developer_viewing_room: { Args: { _token: string }; Returns: Json }
       get_instant_transfer_totals: {
         Args: { _intent: string; _ref: string }
         Returns: {
@@ -14514,6 +14518,10 @@ export type Database = {
       get_user_studio_ids: { Args: { _user_id: string }; Returns: string[] }
       get_verified_quote: {
         Args: { _session: string; _slug: string }
+        Returns: Json
+      }
+      get_viewing_room_package: {
+        Args: { _package_id: string; _token: string }
         Returns: Json
       }
       grant_video_pass: {
@@ -14996,6 +15004,7 @@ export type Database = {
           currency: string
           description: string
           id: string
+          lead_time_weeks: number | null
           moodboard_id: string
           package_price: number
           residence_layout_id: string

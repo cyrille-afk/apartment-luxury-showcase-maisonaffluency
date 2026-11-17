@@ -168,6 +168,7 @@ import { Route as TradeMobileLaunchRouteImport } from './routes/trade_.mobile-la
 import { Route as TradeProcessingRouteImport } from './routes/trade_.processing'
 import { Route as TradeRegisterRouteImport } from './routes/trade_.register'
 import { Route as TradeSpecSheetRouteImport } from './routes/trade_.spec-sheet'
+import { Route as ViewingRoomTokenRouteImport } from './routes/viewing-room.$token'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable_.oauth_.consent'
 import { Route as AdminComplianceSubProcessorsRouteImport } from './routes/admin_.compliance_.sub-processors'
 import { Route as ApiPublicCatalogueImagesRouteImport } from './routes/api/public/catalogue-images'
@@ -1070,6 +1071,11 @@ const TradeSpecSheetRoute = TradeSpecSheetRouteImport.update({
   path: '/trade/spec-sheet',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ViewingRoomTokenRoute = ViewingRoomTokenRouteImport.update({
+  id: '/viewing-room/$token',
+  path: '/viewing-room/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   id: '/.lovable_/oauth_/consent',
   path: '/.lovable/oauth/consent',
@@ -1789,6 +1795,7 @@ export interface FileRoutesByFullPath {
   '/trade/processing': typeof TradeProcessingRoute
   '/trade/register': typeof TradeRegisterRoute
   '/trade/spec-sheet': typeof TradeSpecSheetRoute
+  '/viewing-room/$token': typeof ViewingRoomTokenRoute
   '/trade/': typeof TradeIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/admin/compliance/sub-processors': typeof AdminComplianceSubProcessorsRoute
@@ -2053,6 +2060,7 @@ export interface FileRoutesByTo {
   '/trade/processing': typeof TradeProcessingRoute
   '/trade/register': typeof TradeRegisterRoute
   '/trade/spec-sheet': typeof TradeSpecSheetRoute
+  '/viewing-room/$token': typeof ViewingRoomTokenRoute
   '/trade': typeof TradeIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/admin/compliance/sub-processors': typeof AdminComplianceSubProcessorsRoute
@@ -2319,6 +2327,7 @@ export interface FileRoutesById {
   '/trade_/processing': typeof TradeProcessingRoute
   '/trade_/register': typeof TradeRegisterRoute
   '/trade_/spec-sheet': typeof TradeSpecSheetRoute
+  '/viewing-room/$token': typeof ViewingRoomTokenRoute
   '/trade/': typeof TradeIndexRoute
   '/.lovable_/oauth_/consent': typeof DotlovableOauthConsentRoute
   '/admin_/compliance_/sub-processors': typeof AdminComplianceSubProcessorsRoute
@@ -2586,6 +2595,7 @@ export interface FileRouteTypes {
     | '/trade/processing'
     | '/trade/register'
     | '/trade/spec-sheet'
+    | '/viewing-room/$token'
     | '/trade/'
     | '/.lovable/oauth/consent'
     | '/admin/compliance/sub-processors'
@@ -2850,6 +2860,7 @@ export interface FileRouteTypes {
     | '/trade/processing'
     | '/trade/register'
     | '/trade/spec-sheet'
+    | '/viewing-room/$token'
     | '/trade'
     | '/.lovable/oauth/consent'
     | '/admin/compliance/sub-processors'
@@ -3115,6 +3126,7 @@ export interface FileRouteTypes {
     | '/trade_/processing'
     | '/trade_/register'
     | '/trade_/spec-sheet'
+    | '/viewing-room/$token'
     | '/trade/'
     | '/.lovable_/oauth_/consent'
     | '/admin_/compliance_/sub-processors'
@@ -3315,6 +3327,7 @@ export interface RootRouteChildren {
   TradeProcessingRoute: typeof TradeProcessingRoute
   TradeRegisterRoute: typeof TradeRegisterRoute
   TradeSpecSheetRoute: typeof TradeSpecSheetRoute
+  ViewingRoomTokenRoute: typeof ViewingRoomTokenRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   AdminComplianceSubProcessorsRoute: typeof AdminComplianceSubProcessorsRoute
   ApiPublicCatalogueImagesRoute: typeof ApiPublicCatalogueImagesRoute
@@ -4447,6 +4460,13 @@ declare module '@tanstack/react-router' {
       path: '/trade/spec-sheet'
       fullPath: '/trade/spec-sheet'
       preLoaderRoute: typeof TradeSpecSheetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/viewing-room/$token': {
+      id: '/viewing-room/$token'
+      path: '/viewing-room/$token'
+      fullPath: '/viewing-room/$token'
+      preLoaderRoute: typeof ViewingRoomTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.lovable_/oauth_/consent': {
@@ -5600,6 +5620,7 @@ const rootRouteChildren: RootRouteChildren = {
   TradeProcessingRoute: TradeProcessingRoute,
   TradeRegisterRoute: TradeRegisterRoute,
   TradeSpecSheetRoute: TradeSpecSheetRoute,
+  ViewingRoomTokenRoute: ViewingRoomTokenRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   AdminComplianceSubProcessorsRoute: AdminComplianceSubProcessorsRoute,
   ApiPublicCatalogueImagesRoute: ApiPublicCatalogueImagesRoute,

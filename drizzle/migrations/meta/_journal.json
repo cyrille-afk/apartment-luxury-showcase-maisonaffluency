@@ -2101,6 +2101,20 @@
       "when": 1794957618826,
       "tag": "0299_restrict_viewing_room_privileges",
       "breakpoints": true
+    },
+    {
+      "idx": 300,
+      "version": "7",
+      "when": 1794958260415,
+      "tag": "0300_client_viewing_room_access",
+      "breakpoints": true
+    },
+    {
+      "idx": 301,
+      "version": "7",
+      "when": 1794958742078,
+      "tag": "0301_viewing_room_package_lead_time_save",
+      "breakpoints": true
     }
   ]
 }
