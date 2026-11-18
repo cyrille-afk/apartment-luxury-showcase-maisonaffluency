@@ -7,6 +7,24 @@ import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
 
 const piece: PlacedObject = { id: "test", instanceId: "instance", product_name: "Test cabinet", brand_name: "Maker", image_url: null, glb_url: "test.glb", dimensions: "W 200 D 50 H 80 cm", position: [2, 0, -1], rotation: [0, 0.5, 0], scale: 1 };
 describe("worker model preparation", () => {
+  it("preserves packed GLB vertex coordinates and proportions through both worker transfers", () => {
+    const packed = new THREE.InterleavedBuffer(new Float32Array([
+      -1, 0, -.25, 0, 1, 0,
+      1, 0, -.25, 0, 1, 0,
+      0, .8, .25, 0, 1, 0,
+    ]), 6);
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.InterleavedBufferAttribute(packed, 3, 0));
+    geometry.setAttribute("normal", new THREE.InterleavedBufferAttribute(packed, 3, 3));
+    const source = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial());
+    const encoded = encodeModel(source);
+    const worker = decodeModel(encoded.wire, new Map()) as THREE.Mesh;
+    const returned = decodeModel(encodeModel(worker).wire, new Map()) as THREE.Mesh;
+    expect(Array.from(returned.geometry.attributes.position.array)).toEqual(Array.from(new Float32Array([-1, 0, -.25, 1, 0, -.25, 0, .8, .25])));
+    expect(Array.from(returned.geometry.attributes.normal.array)).toEqual([0, 1, 0, 0, 1, 0, 0, 1, 0]);
+    expect(new THREE.Box3().setFromObject(returned).getSize(new THREE.Vector3()).toArray()).toEqual([2, expect.closeTo(.8), .5]);
+    expect(packed.array.byteLength).toBe(72);
+  });
   it("preserves shared source buffers and authored texture settings across transport", () => {
     const geometry = new THREE.BoxGeometry(2, 0.8, 0.5);
     const original = Array.from(geometry.attributes.position.array);

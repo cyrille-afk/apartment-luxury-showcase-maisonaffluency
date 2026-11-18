@@ -13,7 +13,9 @@ export function encodeModel(root: THREE.Object3D): { wire: ModelWire; transfers:
   const transfers: ArrayBuffer[] = [];
   const metadata = { textures: {} as Record<string, unknown>, images: {} as Record<string, unknown> };
   const attribute = (a: THREE.BufferAttribute | THREE.InterleavedBufferAttribute): AttributeWire => {
-    const copied = a instanceof THREE.InterleavedBufferAttribute ? a.clone({}) : a.clone();
+    // No clone metadata: Three de-interleaves each attribute into its own buffer.
+    // clone({}) preserves stride/offset, which this packed wire format does not carry.
+    const copied = a.clone();
     transfers.push(copied.array.buffer as ArrayBuffer);
     return { array: copied.array, itemSize: copied.itemSize, normalized: copied.normalized };
   };

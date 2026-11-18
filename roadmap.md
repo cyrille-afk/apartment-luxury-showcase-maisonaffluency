@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Client Developer Viewing Room
+- [x] Correct distorted Cipriani geometry: worker transfer now de-interleaves packed GLB vertices before decoding; uniform measured sizing remains unchanged. Six-piece Bespoke renders with intact console/chair geometry at desktop/phone and both camera presets, no page errors; nine regressions pass.
 - [x] Add Stage 3 shared hotspots, inspection with selected swatch toggle, linked-alternative support and live retail-difference total; locked server-validated request generates a PDF. Desktop/phone hotspot→drawer verified, 2.7MB PDF download and 14 tests pass.
 - [ ] Complete exhaustive Stage 3 item/theme checks: all Essential and Signature desktop drawers inspected and return-to-room exercised; phone first piece passes. Bespoke inspection and remaining phone/theme checks stopped on software-renderer click timeouts, so they are not claimed verified.
 - [ ] Populate approved slot alternatives and verify a real swap end-to-end — waiting for the user's pairings; unassigned slots remain explicitly empty.
