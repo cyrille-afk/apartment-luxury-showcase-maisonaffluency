@@ -86,7 +86,7 @@ export default function TradeProjectStudio() {
   const [hiddenCount, setHiddenCount] = useState(0);
   const [loadedBoardId, setLoadedBoardId] = useState<string | null>(null);
   const { user, isAdmin, rolesLoaded } = useAuth();
-  const [studioTab, setStudioTab] = useState("canvas");
+  const studioTab = searchParams.get("tab") === "admin" ? "admin" : "canvas";
   const [canEdit, setCanEdit] = useState(false);
   const [savingFinishes, setSavingFinishes] = useState(false);
   const [removeItem, setRemoveItem] = useState<StudioItem | null>(null);
@@ -430,7 +430,7 @@ export default function TradeProjectStudio() {
         </h1>
       </div>
 
-      {rolesLoaded && isAdmin && !isClientMode && <Tabs value={studioTab} onValueChange={value => { setStudioTab(value); setIsAiPanelOpen(false); setIsSpecPanelOpen(false); }} className="shrink-0 border-b border-border px-4 py-2 md:px-8 lg:px-12">
+      {rolesLoaded && isAdmin && !isClientMode && <Tabs value={studioTab} onValueChange={value => { setSearchParams(previous => { if (value === "admin") previous.set("tab", "admin"); else previous.delete("tab"); return previous; }, { replace: true }); setIsAiPanelOpen(false); setIsSpecPanelOpen(false); }} className="shrink-0 border-b border-border px-4 py-2 md:px-8 lg:px-12">
         <TabsList><TabsTrigger value="canvas" className="cursor-pointer">Project Studio</TabsTrigger><TabsTrigger value="admin" className="cursor-pointer">Admin</TabsTrigger></TabsList>
       </Tabs>}
       {studioTab === "admin" && rolesLoaded && isAdmin && !isClientMode ? <div className="min-h-0 flex-1"><DeveloperViewingRoomAdmin key={project.id} projectId={project.id} /></div> : <>
