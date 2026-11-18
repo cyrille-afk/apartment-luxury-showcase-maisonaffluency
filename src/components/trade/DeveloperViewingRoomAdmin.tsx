@@ -81,7 +81,7 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
 
   useEffect(() => {
     if (!layoutId || !rolesLoaded || !isAdmin) { setPackages([]); setPackageLoading(false); return; }
-    const controller = new AbortController(); setPackageLoading(true); setPackageError(false);
+    const controller = new AbortController(); setPackageLoading(true); setPackageError(false); setSavedPackageIds({}); setHotspotPackage(null);
     Promise.resolve(supabase.from("furniture_packages").select("*").eq("residence_layout_id", layoutId).order("sort_order").abortSignal(controller.signal)).then(({ data, error: readError }) => {
       if (controller.signal.aborted) return;
       if (readError) { setPackageError(true); setError("Packages couldn’t load. Retry before saving."); return; }
@@ -133,8 +133,8 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
             chooseLayout(layouts.find(item => item.developer_project_id === row?.id));
           }}><SelectTrigger aria-label="Developer project"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="new">New developer project</SelectItem>{developers.map(row => <SelectItem key={row.id} value={row.id}>{row.developer_name}</SelectItem>)}</SelectContent></Select>
           <div className="space-y-2"><Label htmlFor="developer-name">Developer name</Label><Input id="developer-name" required value={developer.developer_name} disabled={disabled} onChange={event => setDeveloper({ ...developer, developer_name: event.target.value })} /></div>
-          <div className="space-y-3"><Label htmlFor="developer-logo">Developer logo</Label>{developer.developer_logo_url && <img src={developer.developer_logo_url} alt="Developer logo" className="h-16 max-w-full object-contain object-left" />}<CloudUpload folder={`viewing-room/${projectId}/logos`} accept="image/png,image/jpeg,image/webp,image/svg+xml" label="Upload developer logo" disabled={disabled} onUpload={urls => setDeveloper(current => ({ ...current, developer_logo_url: urls[0] ?? "" }))} /><Input id="developer-logo" type="text" inputMode="url" placeholder="Logo image URL" value={developer.developer_logo_url} disabled={disabled} onChange={event => setDeveloper({ ...developer, developer_logo_url: event.target.value })} /></div>
-          <div className="space-y-3"><Label htmlFor="developer-hero">Hero banner</Label>{developer.hero_image_url && <img src={developer.hero_image_url} alt={developer.developer_name} className="aspect-[16/9] w-full object-cover" />}<CloudUpload folder={`viewing-room/${projectId}/covers`} accept="image/png,image/jpeg,image/webp" label="Upload hero banner" disabled={disabled} onUpload={urls => setDeveloper(current => ({ ...current, hero_image_url: urls[0] ?? "" }))} /><Input id="developer-hero" type="text" inputMode="url" placeholder="Hero image URL" value={developer.hero_image_url} disabled={disabled} onChange={event => setDeveloper({ ...developer, hero_image_url: event.target.value })} /></div>
+          <div className="space-y-3"><Label>Developer logo</Label>{developer.developer_logo_url && <img src={developer.developer_logo_url} alt="Developer logo" className="h-16 max-w-full object-contain object-left" />}<CloudUpload folder={`viewing-room/${projectId}/logos`} accept="image/png,image/jpeg,image/webp,image/svg+xml" label="Replace Image" disabled={disabled} onUpload={urls => setDeveloper(current => ({ ...current, developer_logo_url: urls[0] ?? "" }))} /></div>
+          <div className="space-y-3"><Label>Hero banner</Label>{developer.hero_image_url && <img src={developer.hero_image_url} alt={developer.developer_name} className="aspect-[16/9] w-full object-cover" />}<CloudUpload folder={`viewing-room/${projectId}/covers`} accept="image/png,image/jpeg,image/webp" label="Replace Image" disabled={disabled} onUpload={urls => setDeveloper(current => ({ ...current, hero_image_url: urls[0] ?? "" }))} /></div>
           <Button type="submit" variant="studio-primary" disabled={disabled || !developer.developer_name.trim()}><Save className="size-4" />Save developer</Button>
         </form>
         <div className="space-y-3 border-t border-border pt-5"><Label htmlFor="private-viewing-link">Private client magic link</Label><Input id="private-viewing-link" readOnly value={magicLink} placeholder="Save a developer first" />
@@ -151,7 +151,10 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
         </article>)}
       </div>
       <div className="min-w-0 space-y-4">
-        <div className="flex items-center justify-between gap-2 border-b border-border pb-4"><h3 className="font-display text-xl">03 · Furniture Packages</h3><Button variant="ghost" size="icon" aria-label="Assign Moodboard" disabled={disabled || !layoutId || packageError || packages.length >= 5} onClick={() => { setAssignmentError(""); setAssignment({ index: null, draft: emptyPackage() }); }}><Plus className="size-4" /></Button></div>
+        <div className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-2 border-b border-border bg-background py-4"><h3 className="font-display text-xl">03 · Furniture Packages</h3><div className="flex items-center gap-1"><Button variant="studio-primary" disabled={disabled || !layoutId || packageError || packages.length < 3} onClick={() => {
+          const validation = viewingRoomPackageError(packages, boards.map(row => row.id)); if (validation) { setError(validation); return; }
+          void runSave(async () => { const result = await supabase.rpc("save_viewing_room_packages", { _layout_id: layoutId, _packages: packages.map(row => ({ ...row, tier_name: row.tier_name.trim(), package_price: Number(row.package_price) })) }); if (result.error) throw result.error; }, "Furniture packages saved.");
+        }}><Save className="size-4" />Save packages</Button><Button variant="ghost" size="icon" aria-label="Assign Moodboard" disabled={disabled || !layoutId || packageError || packages.length >= 5} onClick={() => { setAssignmentError(""); setAssignment({ index: null, draft: emptyPackage() }); }}><Plus className="size-4" /></Button></div></div>
         <p className="text-xs text-muted-foreground">{layoutId ? layout.name : "Select a residence"} · {packages.length} / 5 tiers</p>
         {packageLoading && <p role="status" className="py-8 text-sm text-muted-foreground">Loading packages…</p>}
         {!packageLoading && !packages.length && <p className="py-8 text-sm text-muted-foreground">No furniture packages assigned.</p>}
@@ -168,10 +171,7 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
           </article>;
         })}
         <Button variant="outline" disabled={disabled || !layoutId || packageError || packages.length >= 5} onClick={() => { setAssignmentError(""); setAssignment({ index: null, draft: emptyPackage() }); }}><Plus className="size-4" />Assign Moodboard</Button>
-        <div className="border-t border-border pt-4"><Button variant="studio-primary" disabled={disabled || !layoutId || packageError || packages.length < 3} onClick={() => {
-          const validation = viewingRoomPackageError(packages, boards.map(row => row.id)); if (validation) { setError(validation); return; }
-          void runSave(async () => { const result = await supabase.rpc("save_viewing_room_packages", { _layout_id: layoutId, _packages: packages.map(row => ({ ...row, tier_name: row.tier_name.trim(), package_price: Number(row.package_price) })) }); if (result.error) throw result.error; }, "Furniture packages saved.");
-        }}><Save className="size-4" />Save packages</Button>{packages.length < 3 && <p className="mt-3 text-xs text-muted-foreground">Assign 3–5 distinct moodboards before saving.</p>}</div>
+        {packages.length < 3 && <p className="mt-3 text-xs text-muted-foreground">Assign 3–5 distinct moodboards before saving.</p>}
       </div>
     </div>
     <Dialog open={layoutOpen} onOpenChange={setLayoutOpen}><DialogContent className="viewing-room max-h-[90dvh] overflow-y-auto bg-background text-foreground"><DialogHeader><DialogTitle className="font-display text-2xl">{layoutId ? "Edit Residence Layout" : "Add Residence Layout"}</DialogTitle><DialogDescription>{developer.developer_name}</DialogDescription></DialogHeader>
@@ -202,6 +202,6 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
         {assignmentError && <p role="alert" className="text-sm text-destructive">{assignmentError}</p>}<Button type="submit" variant="studio-primary">{assignment.index == null ? "Add to packages" : "Update package"}</Button>
       </form>}
     </DialogContent></Dialog>
-    {hotspotPackage && <PackageHotspotsDrawer projectId={projectId} packageId={hotspotPackage.id} tier={hotspotPackage.tier} onClose={() => setHotspotPackage(null)} />}
+    {hotspotPackage && <PackageHotspotsDrawer key={hotspotPackage.id} projectId={projectId} packageId={hotspotPackage.id} tier={hotspotPackage.tier} onClose={() => setHotspotPackage(null)} />}
   </section>;
 }
