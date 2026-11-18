@@ -9,6 +9,19 @@ export const viewingRoomPackageSchema = z.object({ id: z.string().uuid(), tier_n
 export const viewingRoomSchema = z.object({ name: z.string(), logo: url, hero: url, project_name: z.string(), layouts: z.array(z.object({ id: z.string().uuid(), name: z.string(), floorplan_url: url, specs_label: z.string().nullable(), room_environment_glb: url, packages: z.array(viewingRoomPackageSchema) })) });
 export type ViewingRoom = z.infer<typeof viewingRoomSchema>;
 export type ViewingRoomItem = z.infer<typeof viewingRoomItemSchema>;
+export const viewingRoomChoiceSchema = viewingRoomItemSchema.extend({ retail_price: z.number().nullable() });
+export const viewingRoomSlotSchema = viewingRoomChoiceSchema.extend({ alternatives: z.array(viewingRoomChoiceSchema) });
+export type ViewingRoomChoice = z.infer<typeof viewingRoomChoiceSchema>;
+export type ViewingRoomSlot = z.infer<typeof viewingRoomSlotSchema>;
+export function viewingRoomTotal(base: number, slots: ViewingRoomSlot[], choices: Record<string, ViewingRoomChoice>): number {
+  return slots.reduce((sum, slot) => {
+    const choice = choices[slot.id];
+    if (!choice || choice.id === slot.id) return sum;
+    const approved = slot.alternatives.find(row => row.id === choice.id);
+    if (!approved || approved.retail_price == null || slot.retail_price == null) throw new Error("Unapproved or unpriced choice");
+    return sum + approved.retail_price - slot.retail_price;
+  }, base);
+}
 
 /** Only named visual materials and measured placement enter the client renderer. */
 export function viewingRoomComposition(items: ViewingRoomItem[]) {

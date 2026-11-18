@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { viewingRoomSchema, viewingRoomCamera, viewingRoomLeadTime } from "./viewingRoom";
+import { viewingRoomSchema, viewingRoomCamera, viewingRoomLeadTime, viewingRoomTotal, type ViewingRoomSlot } from "./viewingRoom";
 describe("guest viewing room", () => {
+  const original = { id: "slot", retail_price: 100, alternatives: [{ id: "replacement", retail_price: 150 }] } as ViewingRoomSlot;
+  it("updates the package only by the approved retail difference", () => { expect(viewingRoomTotal(1000, [original], { slot: original.alternatives[0] })).toBe(1050); expect(viewingRoomTotal(1000, [original], {})).toBe(1000); });
+  it("rejects unlinked alternatives rather than trusting submitted prices", () => { expect(() => viewingRoomTotal(1000, [original], { slot: { ...original.alternatives[0], id: "unapproved" } })).toThrow(); });
   it("strips private account fields and token", () => {
     const result = viewingRoomSchema.parse({ name: "Developer", logo: null, hero: null, project_name: "Residence", layouts: [], access_token: "private", user_id: "private", trade_price_cents: 900 });
     expect(result).not.toHaveProperty("access_token"); expect(result).not.toHaveProperty("user_id"); expect(result).not.toHaveProperty("trade_price_cents");

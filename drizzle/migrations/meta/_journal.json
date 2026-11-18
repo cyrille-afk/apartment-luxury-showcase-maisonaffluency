@@ -2115,6 +2115,13 @@
       "when": 1794958742078,
       "tag": "0301_viewing_room_package_lead_time_save",
       "breakpoints": true
+    },
+    {
+      "idx": 302,
+      "version": "7",
+      "when": 1794960007482,
+      "tag": "0302_viewing_room_slot_choices",
+      "breakpoints": true
     }
   ]
 }

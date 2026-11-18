@@ -13444,6 +13444,94 @@ export type Database = {
         }
         Relationships: []
       }
+      viewing_room_proposal_requests: {
+        Row: {
+          created_at: string
+          id: string
+          package_id: string
+          request_key: string
+          snapshot: Json
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          package_id: string
+          request_key: string
+          snapshot: Json
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          package_id?: string
+          request_key?: string
+          snapshot?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "viewing_room_proposal_requests_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "furniture_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      viewing_room_slot_alternatives: {
+        Row: {
+          id: string
+          package_id: string
+          product_id: string
+          retail_price: number
+          slot_id: string
+          sort_order: number
+        }
+        Insert: {
+          id?: string
+          package_id: string
+          product_id: string
+          retail_price: number
+          slot_id: string
+          sort_order?: number
+        }
+        Update: {
+          id?: string
+          package_id?: string
+          product_id?: string
+          retail_price?: number
+          slot_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "viewing_room_slot_alternatives_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "furniture_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "viewing_room_slot_alternatives_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "trade_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "viewing_room_slot_alternatives_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "trade_products_public_rrp"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "viewing_room_slot_alternatives_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "client_board_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       webhook_events: {
         Row: {
           ack_ms: number | null
@@ -14520,6 +14608,10 @@ export type Database = {
         Args: { _session: string; _slug: string }
         Returns: Json
       }
+      get_viewing_room_choices: {
+        Args: { _package_id: string; _token: string }
+        Returns: Json
+      }
       get_viewing_room_package: {
         Args: { _package_id: string; _token: string }
         Returns: Json
@@ -14596,6 +14688,15 @@ export type Database = {
           pick_id: string
           snapshot: Json
         }[]
+      }
+      lock_viewing_room_proposal: {
+        Args: {
+          _choices: Json
+          _package_id: string
+          _request_key: string
+          _token: string
+        }
+        Returns: Json
       }
       log_outreach_click: {
         Args: { _agent: string; _channel: string; _hook: string; _lead: string }

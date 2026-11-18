@@ -1,12 +1,12 @@
 import { createFileRoute, ClientOnly } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useQuery } from "@tanstack/react-query";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState } from "react";
 import { ArrowLeft, ArrowRight, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getViewingRoom, getViewingRoomPackage } from "@/lib/viewingRoom.functions";
 import { viewingRoomLeadTime } from "@/lib/viewingRoom";
 import logo from "@/assets/maison-affluency-cover-logo.png.asset.json";
-const Viewer = lazy(() => import("@/components/trade/visualiser/ViewingRoomCanvas"));
+const Viewer = lazy(() => import("@/components/trade/visualiser/ViewingRoomExperience"));
 const roomQuery = (token: string) => queryOptions({ queryKey: ["developer-viewing-room", token], queryFn: () => getViewingRoom({ data: { token } }), retry: false });
 
 export const Route = createFileRoute("/viewing-room/$token")({
@@ -27,6 +27,7 @@ function ViewingRoomPage() {
   const { token } = Route.useParams();
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
+  const [liveTotals, setLiveTotals] = useState<Record<string, number>>({});
   const { data: room } = useSuspenseQuery(roomQuery(token));
   const layout = room?.layouts.find(row => row.id === search.layout);
   const selected = layout?.packages.find(row => row.id === search.package);
@@ -51,14 +52,14 @@ function ViewingRoomPage() {
         <Button variant="ghost" className="mb-5 h-auto p-0 text-xs text-muted-foreground" onClick={() => void navigate({ search: {}, resetScroll: true })}><ArrowLeft className="size-3" />All residences</Button>
         <h1 className="font-display text-3xl md:text-4xl">{layout.name}</h1><p className="mt-3 text-sm text-muted-foreground">{layout.specs_label}</p>
         <div role="group" aria-label="Furniture packages" className="mt-8 flex gap-4 overflow-x-auto pb-3">{layout.packages.map(row => <Button key={row.id} variant="outline" aria-pressed={selected?.id === row.id} className={`h-auto min-w-56 flex-1 flex-col items-start gap-3 rounded-none p-5 text-left ${selected?.id === row.id ? "border-foreground bg-muted" : "bg-background"}`} onClick={() => void choosePackage(row.id)}>
-          <span className="font-display text-xl">{row.tier_name}</span><span className="text-sm">{new Intl.NumberFormat("en-GB", { style: "currency", currency: row.currency, maximumFractionDigits: 0 }).format(row.package_price)}</span><span className="text-xs text-muted-foreground">Lead time · {viewingRoomLeadTime(row.lead_time_weeks, selected?.id === row.id ? composition?.items : undefined)}</span>
+          <span className="font-display text-xl">{row.tier_name}</span><span className="text-sm">{new Intl.NumberFormat("en-GB", { style: "currency", currency: row.currency, maximumFractionDigits: 0 }).format(liveTotals[row.id] ?? row.package_price)}</span><span className="text-xs text-muted-foreground">Lead time · {viewingRoomLeadTime(row.lead_time_weeks, selected?.id === row.id ? composition?.items : undefined)}</span>
         </Button>)}</div>
         {!layout.packages.length && <p className="py-10 text-muted-foreground">Furniture packages are being prepared.</p>}
         {selected && <p className="mt-5 max-w-2xl text-sm leading-relaxed text-muted-foreground">{selected.description}</p>}
       </>}
     </div>
     {layout && selected && <section aria-label={`${selected.tier_name} room presentation`} className="border-y border-border">
-      {isLoading ? <div role="status" className="flex min-h-96 items-center justify-center text-muted-foreground">Preparing your collection…</div> : isError || !composition ? <div role="alert" className="flex min-h-80 flex-col items-center justify-center gap-5"><p>Your collection couldn’t load.</p><Button variant="outline" onClick={() => void refetch()}><RotateCw className="size-4" />Retry collection</Button></div> : !composition.items.length ? <p className="py-24 text-center text-muted-foreground">This collection is being prepared.</p> : <ClientOnly fallback={<div className="min-h-96" />}><Suspense fallback={<div role="status" className="min-h-96 p-10">Preparing room viewer…</div>}><Viewer key={selected.id} items={composition.items} environmentUrl={layout.room_environment_glb} /></Suspense></ClientOnly>}
+      {isLoading ? <div role="status" className="flex min-h-96 items-center justify-center text-muted-foreground">Preparing your collection…</div> : isError || !composition ? <div role="alert" className="flex min-h-80 flex-col items-center justify-center gap-5"><p>Your collection couldn’t load.</p><Button variant="outline" onClick={() => void refetch()}><RotateCw className="size-4" />Retry collection</Button></div> : !composition.items.length ? <p className="py-24 text-center text-muted-foreground">This collection is being prepared.</p> : <ClientOnly fallback={<div className="min-h-96" />}><Suspense fallback={<div role="status" className="min-h-96 p-10">Preparing room viewer…</div>}><Viewer key={selected.id} token={token} packageId={selected.id} baseTotal={selected.package_price} currency={selected.currency} residence={layout.name} developer={room.name} environmentUrl={layout.room_environment_glb} onTotal={total => setLiveTotals(values => ({ ...values, [selected.id]: total }))} /></Suspense></ClientOnly>}
     </section>}
     <footer className="flex flex-wrap items-center justify-between gap-4 px-6 py-8 text-xs text-muted-foreground md:px-12"><span>{room.name}</span><span>Curated by Maison Affluency</span></footer>
   </main>;

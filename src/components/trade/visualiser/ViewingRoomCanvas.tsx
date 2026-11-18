@@ -9,6 +9,7 @@ import SceneObject, { type PlacedObject } from "./SceneObject";
 import SequentialFurniture, { type FurnitureLoadingProgress } from "./SequentialFurniture";
 import { viewingRoomCamera, viewingRoomComposition, type ViewingRoomItem } from "@/lib/viewingRoom";
 import { withCachedModelLoader } from "@/lib/visualiserModelCache";
+import VisualiserHotspots from "./VisualiserHotspots";
 
 const noop = () => {};
 function CameraView({ view, width, depth }: { view: "living" | "terrace"; width: number; depth: number }) {
@@ -51,8 +52,15 @@ function Placeholder({ object, color }: { object: PlacedObject; color: string })
   const width = (object.width_mm || 800) / 1000, depth = (object.depth_mm || 800) / 1000, height = (object.height_mm || 800) / 1000;
   return <group position={object.position} rotation={object.rotation}><mesh position={[0, height / 2, 0]}><boxGeometry args={[width, height, depth]} /><meshBasicMaterial wireframe color={color} transparent opacity={.18} /></mesh></group>;
 }
-export default function ViewingRoomCanvas({ items, environmentUrl }: { items: ViewingRoomItem[]; environmentUrl: string | null }) {
-  const room = useMemo(() => viewingRoomComposition(items), [items]);
+export default function ViewingRoomCanvas({ items, environmentUrl, onPieceClick }: { items: ViewingRoomItem[]; environmentUrl: string | null; onPieceClick?: (id: string) => void }) {
+  const initialRoom = useRef(viewingRoomComposition(items));
+  const room = useMemo(() => {
+    const latest = viewingRoomComposition(items);
+    return { ...initialRoom.current, objects: latest.objects.map(object => {
+      const slot = initialRoom.current.objects.find(row => row.instanceId === object.instanceId);
+      return slot ? { ...object, position: slot.position, rotation: slot.rotation, isAnchor: slot.isAnchor } : object;
+    }) };
+  }, [items]);
   const root = useRef<HTMLDivElement>(null);
   const [colors, setColors] = useState<{ paper: string; ink: string } | null>(null);
   const [view, setView] = useState<"living" | "terrace">("living");
@@ -81,6 +89,7 @@ export default function ViewingRoomCanvas({ items, environmentUrl }: { items: Vi
         <SequentialFurniture pieces={room.objects} fallback={null} renderPlaceholder={object => <Placeholder object={object} color={colors.ink} />} onReady={setFurnitureReady} onProgress={setProgress} renderPiece={object => <SceneObject object={object} selected={false} isEditable={false} showLabels={false} onSelect={noop} onTransform={noop} onDragStateChange={noop} />} />
         <OrbitControls makeDefault minPolarAngle={Math.PI / 2} maxPolarAngle={Math.PI / 2} minDistance={.6} maxDistance={16} enablePan={false} enableDamping={false} />
         <CameraView view={view} width={room.width} depth={room.depth} />
+        {ready && onPieceClick && <VisualiserHotspots objects={room.objects} onFindAlternatives={onPieceClick} />}
         <ReadyFrame ready={furnitureReady && environmentReady} onReady={frameReady} />
       </Canvas>
     </SceneErrorBoundary>}
