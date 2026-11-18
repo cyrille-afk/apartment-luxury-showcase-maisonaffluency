@@ -15,6 +15,7 @@ import { snapCoordinate, resolveDragPosition, DEFAULT_FOOTPRINT_RADIUS, type Foo
 import { withCachedModelLoader } from "@/lib/visualiserModelCache";
 import { resolveDimensions } from "@/lib/productDimensions";
 import { prepareVisualiserModel } from "@/lib/visualiserPreparationClient";
+import type { ModelDimensionCheck } from "@/lib/viewingRoomDimensionCheck";
 
 export { isStoneMaterial } from "@/lib/visualiserModelPreparation";
 
@@ -91,6 +92,7 @@ type Props = {
   onTextureParts?: (instanceId: string, parts: FinishPart[]) => void;
   /** When false, floating name labels and lock badges unmount for a clean canvas. */
   showLabels?: boolean;
+  onDimensionCheck?: (instanceId: string, url: string, check: ModelDimensionCheck) => void;
 };
 
 /** Geometry and finish work completes in the worker before admitting this piece. */
@@ -130,8 +132,12 @@ function disposePreparedModel(model: THREE.Object3D) {
   for (const texture of textures) { if (typeof ImageBitmap !== "undefined" && texture.image instanceof ImageBitmap) texture.image.close(); texture.dispose(); }
 }
 
-const ModelBody = ({ object, label, showLabels = true, onSelect, onTextureParts }: { object: PlacedObject; label?: string; showLabels?: boolean; onSelect: (id: string) => void; onTextureParts?: Props["onTextureParts"] }) => {
+const ModelBody = ({ object, label, showLabels = true, onSelect, onTextureParts, onDimensionCheck }: { object: PlacedObject; label?: string; showLabels?: boolean; onSelect: (id: string) => void; onTextureParts?: Props["onTextureParts"]; onDimensionCheck?: Props["onDimensionCheck"] }) => {
   const model = useFittedModel(object);
+  const dimensionCheck = model?.userData.viewingRoomDimensionCheck as ModelDimensionCheck | undefined;
+  useEffect(() => {
+    if (dimensionCheck) onDimensionCheck?.(object.instanceId, object.glb_url ?? "", dimensionCheck);
+  }, [dimensionCheck, onDimensionCheck, object.instanceId, object.glb_url]);
   const invalidate = useThree((state) => state.invalidate);
   useLayoutEffect(() => {
     if (!model) return;
@@ -166,6 +172,13 @@ const ModelBody = ({ object, label, showLabels = true, onSelect, onTextureParts 
     return [centre.x, bounds.max.y + (label ? 0.55 : 0.18), centre.z];
   }, [model, label]);
   if (!model) return <group userData={{ visualiserInitialReady: false, visualiserPreparationPending: true }} />;
+  if (onDimensionCheck && dimensionCheck && (dimensionCheck.status === "mismatch" || dimensionCheck.status === "invalid")) {
+    const expected = dimensionCheck.expected;
+    return <mesh position={[0, (expected?.h ?? .8) / 2, 0]} userData={{ visualiserInitialReady: true }}>
+      <boxGeometry args={[expected?.w ?? .8, expected?.h ?? .8, expected?.d ?? .8]} />
+      <meshBasicMaterial wireframe transparent opacity={.18} />
+    </mesh>;
+  }
   return <>
     <primitive object={model} />
     {showLabels && label && <Html position={labelPosition} center zIndexRange={[5, 0]}>
@@ -226,7 +239,7 @@ const clipFloorGizmo = (controls: THREE.Object3D | null) => {
   });
 };
 
-const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChange, isEditable = true, scaleVector, label, showLabels = true, onTextureParts, snapToGrid = false, obstacles, selfRadius, roomLimits }: Props) => {
+const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChange, isEditable = true, scaleVector, label, showLabels = true, onTextureParts, onDimensionCheck, snapToGrid = false, obstacles, selfRadius, roomLimits }: Props) => {
   // Refs so the window-level drag handlers always read the latest obstacles
   // without changing dragMove's identity mid-drag (listener removal depends on it).
   const obstaclesRef = useRef<FootprintObstacle[]>(obstacles ?? []);
@@ -255,7 +268,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
 
 
   const body = object.glb_url
-    ? <ModelBody object={object} label={label} showLabels={showLabels} onSelect={onSelect} onTextureParts={onTextureParts} />
+    ? <ModelBody object={object} label={label} showLabels={showLabels} onSelect={onSelect} onTextureParts={onTextureParts} onDimensionCheck={onDimensionCheck} />
     : object.image_url
       ? <ImageBody url={object.image_url} name={object.product_name} locked={Boolean(object.positionLocked || object.finishesLocked)} showLabels={showLabels} instanceId={object.instanceId} />
       : null;

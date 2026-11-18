@@ -15,6 +15,7 @@ import { stripEmbeddedGroundPlanes } from "./visualiserEmbeddedGround";
 import { FURNITURE_CONTACT_LAYER } from "./visualiserGroundLayers";
 import { resolveDimensions } from "./productDimensions";
 import { physicalCoffeeTableMarble } from "./visualiserMarbleSurface";
+import { checkViewingRoomDimensions } from "./viewingRoomDimensionCheck";
 export type LoadedMaps = {
   diffuse: THREE.Texture | null;
   normal: THREE.Texture | null;
@@ -289,6 +290,12 @@ export function prepareModel(scene: THREE.Object3D, object: PlacedObject, partOv
     });
     const upright = applyModelOrientation(fitUprightModel(clone, object.dimensions, url, resolveDimensions(object)), object.modelOrientation);
     const model = groundModel(object.exactDimensionsM ? fitExactModelDimensions(upright, object.exactDimensionsM) : upright);
+    const measured = new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3());
+    const recorded = resolveDimensions(object);
+    model.userData.viewingRoomDimensionCheck = checkViewingRoomDimensions(
+      { w: measured.x, d: measured.z, h: measured.y },
+      object.exactDimensionsM ?? (recorded ? { w: recorded.w / 1000, d: recorded.d / 1000, h: recorded.h / 1000 } : null),
+    );
     // Project only after import-axis correction: this frame is actually Y-up.
     applyCoffeeTableMarbleProjection(model, object.product_name);
     model.userData.visualiserInitialReady = [holder.material, holder.topMaterial, holder.baseMaterial, holder.upholsteryMaterial, ...Object.values(holder.partMaterials ?? {})].every((finish) => !finish || maps.has(finish.id));

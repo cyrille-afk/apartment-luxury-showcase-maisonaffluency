@@ -51,6 +51,14 @@ describe("worker model preparation", () => {
     expect(piece.position).toEqual([2, 0, -1]);
     expect(piece.rotation).toEqual([0, 0.5, 0]);
     expect(model.userData.visualiserInitialReady).toBe(true);
+    expect(model.userData.viewingRoomDimensionCheck.status).toBe("verified");
+    expect(decodeModel(encodeModel(model).wire, new Map()).userData.viewingRoomDimensionCheck.status).toBe("verified");
+  });
+  it("flags distorted geometry before the worker result can enter the room", () => {
+    const scene = new THREE.Group(); scene.add(new THREE.Mesh(new THREE.BoxGeometry(200, 80, 150), new THREE.MeshStandardMaterial()));
+    const model = prepareModel(scene, piece, {}, new Map(), null);
+    expect(model.userData.viewingRoomDimensionCheck.status).toBe("mismatch");
+    expect(model.userData.viewingRoomDimensionCheck.axes).toContain("d");
   });
   it("prepares the selected finish per part without changing the supplier material", () => {
     const supplier = new THREE.MeshStandardMaterial({ color: "#ffffff" }); supplier.name = "MetalBase";

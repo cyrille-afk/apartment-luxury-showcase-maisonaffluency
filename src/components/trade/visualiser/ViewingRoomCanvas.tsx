@@ -10,6 +10,7 @@ import SequentialFurniture, { type FurnitureLoadingProgress } from "./Sequential
 import { viewingRoomCamera, viewingRoomComposition, type ViewingRoomItem } from "@/lib/viewingRoom";
 import { withCachedModelLoader } from "@/lib/visualiserModelCache";
 import VisualiserHotspots from "./VisualiserHotspots";
+import type { ModelDimensionCheck } from "@/lib/viewingRoomDimensionCheck";
 
 const noop = () => {};
 function CameraView({ view, width, depth }: { view: "living" | "terrace"; width: number; depth: number }) {
@@ -70,6 +71,14 @@ export default function ViewingRoomCanvas({ items, environmentUrl, onPieceClick 
   const [progress, setProgress] = useState<FurnitureLoadingProgress | null>(null);
   const [failed, setFailed] = useState(false);
   const [epoch, setEpoch] = useState(0);
+  const [dimensionChecks, setDimensionChecks] = useState<Record<string, { url: string; check: ModelDimensionCheck }>>({});
+  const reportDimensions = useCallback((id: string, url: string, check: ModelDimensionCheck) => {
+    setDimensionChecks(current => ({ ...current, [id]: { url, check } }));
+  }, []);
+  const flagged = room.objects.filter(object => {
+    const result = dimensionChecks[object.instanceId];
+    return result?.url === object.glb_url && result.check.status !== "verified";
+  });
   useEffect(() => { if (!root.current) return; const css = getComputedStyle(root.current); setColors({ paper: css.backgroundColor, ink: css.color }); }, []);
   const environmentLoaded = useCallback(() => setEnvironmentReady(true), []);
   const frameReady = useCallback(() => setReady(true), []);
@@ -86,15 +95,19 @@ export default function ViewingRoomCanvas({ items, environmentUrl, onPieceClick 
           <mesh position={[0, 3.25, 0]}><boxGeometry args={[room.width + 4, .1, room.depth + 4]} /><meshStandardMaterial color={colors.paper} roughness={.9} /></mesh>
         </>}
         {environmentUrl && <Suspense fallback={null}><EnvironmentModel url={environmentUrl} onReady={environmentLoaded} /></Suspense>}
-        <SequentialFurniture pieces={room.objects} fallback={null} renderPlaceholder={object => <Placeholder object={object} color={colors.ink} />} onReady={setFurnitureReady} onProgress={setProgress} renderPiece={object => <SceneObject object={object} selected={false} isEditable={false} showLabels={false} onSelect={noop} onTransform={noop} onDragStateChange={noop} />} />
+        <SequentialFurniture pieces={room.objects} fallback={null} renderPlaceholder={object => <Placeholder object={object} color={colors.ink} />} onReady={setFurnitureReady} onProgress={setProgress} renderPiece={object => <SceneObject object={object} selected={false} isEditable={false} showLabels={false} onSelect={noop} onTransform={noop} onDragStateChange={noop} onDimensionCheck={reportDimensions} />} />
         <OrbitControls makeDefault minPolarAngle={Math.PI / 2} maxPolarAngle={Math.PI / 2} minDistance={.6} maxDistance={16} enablePan={false} enableDamping={false} />
         <CameraView view={view} width={room.width} depth={room.depth} />
         {ready && onPieceClick && <VisualiserHotspots objects={room.objects} onFindAlternatives={onPieceClick} />}
         <ReadyFrame ready={furnitureReady && environmentReady} onReady={frameReady} />
       </Canvas>
     </SceneErrorBoundary>}
-    {!ready && !failed && <p role="status" className="absolute left-4 top-4 bg-background/90 px-3 py-2 text-xs text-muted-foreground">{progress ? `Loading group ${progress.group} of ${progress.groups} · ${progress.remaining} pieces remaining` : "Preparing room…"}</p>}
-    {ready && !environmentUrl && <p className="absolute left-4 top-4 bg-background/90 px-3 py-2 text-xs text-muted-foreground">Concept room · apartment model pending</p>}
+    {!ready && !failed && <p role="status" className={`absolute left-4 bg-background/90 px-3 py-2 text-xs text-muted-foreground ${flagged.length ? "bottom-20" : "top-4"}`}>{progress ? `Loading group ${progress.group} of ${progress.groups} · ${progress.remaining} pieces remaining` : "Preparing room…"}</p>}
+    {flagged.length > 0 && <div role="alert" className="absolute right-4 top-4 z-20 max-h-48 w-72 max-w-[calc(100%-2rem)] overflow-y-auto border border-border bg-background/95 p-3 text-xs text-foreground" data-visualiser-hotspot-obstacle>
+      <p className="mb-2 font-medium">Furniture dimension checks</p>
+      {flagged.map(object => <p key={object.instanceId} className="mb-2 break-words">{object.product_name}: {dimensionChecks[object.instanceId]?.check.status === "unconfirmed" ? "dimensions not recorded; scale unconfirmed." : "unexpected model dimensions; model withheld."}</p>)}
+    </div>}
+    {ready && !environmentUrl && !flagged.length && <p className="absolute left-4 top-4 bg-background/90 px-3 py-2 text-xs text-muted-foreground">Concept room · apartment model pending</p>}
     {failed && <div role="alert" className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background"><p>The room couldn’t load. Your selection is unchanged.</p><Button variant="outline" onClick={() => { setFailed(false); setReady(false); setFurnitureReady(false); setEnvironmentReady(!environmentUrl); setEpoch(value => value + 1); }}>Retry room view</Button></div>}
     <div className="absolute inset-x-4 bottom-5 flex justify-center gap-2"><Button variant="outline" className={`rounded-full bg-background text-foreground ${view === "living" ? "border-foreground" : ""}`} aria-pressed={view === "living"} onClick={() => setView("living")}>Living View</Button><Button variant="outline" className={`rounded-full bg-background text-foreground ${view === "terrace" ? "border-foreground" : ""}`} aria-pressed={view === "terrace"} onClick={() => setView("terrace")}>Terrace View</Button></div>
   </div>;

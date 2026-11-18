@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Client Developer Viewing Room
+- [x] Added worker audits of fitted upright metre bounds against recorded measurements (25% / 5cm tolerance); invalid/mismatched models remain wireframe without blocking the queue, missing dimensions show unconfirmed. Twelve regressions pass; real three-piece Cipriani package renders on desktop/phone with no errors/overflow, and controlled worker mismatch withholds all three models while loading completes. Other packages/themes remain unverified.
 - [x] Correct distorted Cipriani geometry: worker transfer now de-interleaves packed GLB vertices before decoding; uniform measured sizing remains unchanged. All three packages load 3/4/6 pieces; desktop/phone and light/dark-preference renders and Bespoke refresh pass with no page errors. Nine regressions pass; real-device frame rate remains unmeasured.
 - [x] Add Stage 3 shared hotspots, inspection with selected swatch toggle, linked-alternative support and live retail-difference total; locked server-validated request generates a PDF. Desktop/phone hotspot→drawer verified, 2.7MB PDF download and 14 tests pass.
 - [ ] Complete exhaustive Stage 3 item/theme checks: all Essential and Signature desktop drawers inspected and return-to-room exercised; phone first piece passes. Bespoke inspection and remaining phone/theme checks stopped on software-renderer click timeouts, so they are not claimed verified.
