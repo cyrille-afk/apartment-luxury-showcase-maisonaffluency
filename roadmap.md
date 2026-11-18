@@ -1,5 +1,9 @@
 # Roadmap
 
+## Hotspot catalogue linking and manual overrides
+- [x] Auto-link exact collection IDs/SKUs/unambiguous names and recorded numeric/text/size-option dimensions when a package drawer loads; retain ±15% footprint-safe alternatives.
+- [x] Sixteen eligible 3D collection records now populate the spatial catalogue and linked Studio rows. Seven tests pass; real Essential dimensions auto-fill, a partial override saves/reloads/restores, two real Bespoke alternatives save/reload/disable, and an unlinked floor lamp retains editable controls. Temporary rules were removed; desktop/phone screenshots show no errors or overflow, and the preview build passes.
+
 ## Viewing Room Manager UI refinements
 - [x] Hide developer media paths and retain previews/Replace Image; move Save packages beside + in the sticky column header. Clear stale package identities on residence changes and key the existing footprint-safe drawer by package.
 - [x] Signed-in checks verify all nine package drawers contain their assigned moodboard's 3/4/6 items, replacement controls and successful package save; desktop screenshot reviewed with no page errors.
@@ -9,14 +13,14 @@
 - [x] Refine co-branding, header stage indicator, tier descriptions/lead times/prices and exact ivory surface; missing square footage is explicit.
 - [x] Add three eye-height camera presets, bounded damped orbit and active-rule-only hotspots with alternatives/isolated finish-inspection tabs. Fix StrictMode overlay root reuse; swapped pieces retain slot transforms.
 - [x] Seventeen focused tests pass; real private-link Essential flow loads three models/pins, tabs and swatch toggles work, and lock downloads a four-page 2.7MB proposal with exact selected finishes and undistorted photos. All PDF pages inspected; desktop/phone scene harness has no page/network errors. Phone camera/inspection checks pass in both system themes, with light editorial surfaces retained.
-- [ ] Real pinned swaps await catalogue records and approved options; square footage and official per-residence environment models are absent. Full nine-package GPU inspection remains unverified; real-device frame rate cannot be measured here.
+- [ ] Square footage and official per-residence environment models are absent. Full nine-package GPU and client pinned-swap inspection remains unverified; real-device frame rate cannot be measured here.
 
 ## Configure package hotspots
 - [x] Add a per-package drawer listing every assigned board item with persisted swap/finish toggles and exact package/board scope; guest choices and proposal validation honor saved swap restrictions.
 - [x] Match catalogue alternatives by category role and ±15% width/depth; enforce 2–4 unique compatible pins when swaps are enabled, with thumbnail/dimensions/SGD price differences.
 - [x] Eighteen tests and preview build pass. Signed-in real Essential finish-toggle save/reopen/readback and desktop/mobile drawer visually verified with no page errors; test settings removed. Catalogue and Project Studio item tables are empty, so real approved-option pinning is blocked by missing catalogue records/measurements; no mappings or dimensions invented.
 - [x] Follow-up checked all 39 furniture rows across nine manager packages on desktop/phone under both system themes (156 row checks), including both toggles, scrolling, close and return to Specsheet; screenshots reviewed with no page errors. Editorial surfaces retain their intended light theme.
-- [ ] Complete approved-option pinning and exhaustive client-result checks: real catalogue remains empty, so matching/pinning cannot be exercised with live options. Client desktop drawers passed all three 2-Bedroom packages and Bayfront Essential (16 rows); the next software-rendered check stalled. Remaining client phone/theme/packages are not claimed verified.
+- [ ] Complete exhaustive client-result checks: catalogue linking and real admin pinning are covered by the follow-up above. Client desktop drawers previously passed all three 2-Bedroom packages and Bayfront Essential (16 rows); the next software-rendered check stalled. Remaining client phone/theme/packages are not claimed verified.
 
 ## Developer Viewing Room Manager
 - [x] Build the three-column admin manager with media uploads, private-link copy/email sharing, residence cards and package assignment modal. Email action opens the admin’s email composer; delivery is not claimed.

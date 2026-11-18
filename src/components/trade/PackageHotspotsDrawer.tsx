@@ -7,7 +7,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { packageHotspotsSchema, hotspotPinsError, type PackageHotspot } from "@/lib/packageHotspots";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { packageHotspotsSchema, hotspotConfigurationError, hotspotCategoryOptions, type PackageHotspot } from "@/lib/packageHotspots";
 
 const money = (value: number) => new Intl.NumberFormat("en-SG", { style: "currency", currency: "SGD" }).format(value);
 const dimensions = (item: { width_m: number | null; depth_m: number | null; height_m: number | null }) => `${item.width_m ?? "—"} × ${item.depth_m ?? "—"} × ${item.height_m ?? "—"} m · W × D × H`;
@@ -29,11 +30,15 @@ export default function PackageHotspotsDrawer({ projectId, packageId, tier, onCl
     return () => controller.abort();
   }, [projectId, packageId, revision]);
   const update = (id: string, values: Partial<PackageHotspot>) => { setFeedback(""); setSlots(current => current.map(slot => slot.id === id ? { ...slot, ...values } : slot)); };
+  const updateMeasurement = (slot: PackageHotspot, axis: "width" | "depth" | "height", raw: string) => {
+    const value = raw === "" ? null : Number(raw);
+    update(slot.id, { [`${axis}_m`]: value, [`${axis}_m_override`]: value } as Partial<PackageHotspot>);
+  };
   const save = async () => {
-    const invalid = slots.map(hotspotPinsError).find(Boolean); if (invalid) { setFeedback(invalid); return; }
+    const invalid = slots.map(hotspotConfigurationError).find(Boolean); if (invalid) { setFeedback(invalid); return; }
     setPending(true); setFeedback("");
     try {
-      const result = await supabase.rpc("save_package_hotspot_configuration", { _project_id: projectId, _package_id: packageId, _rules: slots.map(slot => ({ id: slot.id, is_swappable: slot.is_swappable, allow_finish_customization: slot.allow_finish_customization, pinned_alternative_ids: slot.pinned_alternative_ids })) });
+      const result = await supabase.rpc("save_package_hotspot_configuration", { _project_id: projectId, _package_id: packageId, _rules: slots.map(slot => ({ id: slot.id, is_swappable: slot.is_swappable, allow_finish_customization: slot.allow_finish_customization, pinned_alternative_ids: slot.pinned_alternative_ids, category_role_override: slot.category_role_override, width_m_override: slot.width_m_override, depth_m_override: slot.depth_m_override, height_m_override: slot.height_m_override })) });
       if (result.error) throw result.error;
       setSlots(packageHotspotsSchema.parse(result.data)); setFeedback("Hotspot settings saved.");
     } catch { setFeedback("Settings couldn’t save. Your selections are retained; please retry."); }
@@ -47,9 +52,14 @@ export default function PackageHotspotsDrawer({ projectId, packageId, tier, onCl
       {!loading && !failed && !slots.length && <p className="py-8 text-muted-foreground">This assigned moodboard has no furniture items.</p>}
       {!loading && !failed && slots.map(slot => <section key={slot.id} className="space-y-4 border-b border-border py-6" aria-label={slot.name ?? "Furniture item"}>
         <div className="flex items-center gap-4"><div className="flex size-20 shrink-0 items-center justify-center bg-muted">{slot.image ? <img src={slot.image} alt={slot.name ?? "Furniture"} className="h-full w-full object-contain" /> : <ImageIcon className="size-5 text-muted-foreground" />}</div><div className="min-w-0"><h3 className="font-display text-xl">{slot.name ?? "Unnamed furniture"}</h3><p className="mt-1 text-xs text-muted-foreground">{slot.category_role ?? "Category unconfirmed"}</p><p className="mt-1 text-xs text-muted-foreground">{dimensions(slot)}</p></div></div>
-        <div className="flex items-center justify-between gap-4"><Label htmlFor={`hotspot-swap-${slot.id}`}>Enable Hotspot Swap</Label><Switch id={`hotspot-swap-${slot.id}`} disabled={pending || (!slot.is_swappable && slot.alternatives.length < 2)} checked={slot.is_swappable} onCheckedChange={checked => update(slot.id, { is_swappable: checked })} /></div>
+        <div className="space-y-3 border-y border-border py-4">
+          <div><h4 className="text-sm">Category & dimensions</h4><p className="mt-1 text-xs text-muted-foreground">{slot.catalog_id ? "Auto-linked from the collection. Edit only to override this hotspot." : "Custom or unlinked piece. Enter its details to select compatible 3D options."}</p></div>
+          <div className="space-y-2"><Label htmlFor={`hotspot-category-${slot.id}`}>Category</Label><Select value={slot.category_role ?? undefined} disabled={pending} onValueChange={category_role => update(slot.id, { category_role, category_role_override: category_role })}><SelectTrigger id={`hotspot-category-${slot.id}`} aria-label={`Category for ${slot.name}`}><SelectValue placeholder="Select category" /></SelectTrigger><SelectContent>{hotspotCategoryOptions.map(category => <SelectItem key={category} value={category}>{category.replaceAll("_", " ")}</SelectItem>)}</SelectContent></Select></div>
+          <div className="grid grid-cols-3 gap-2">{(["width", "depth", "height"] as const).map(axis => { const key = `${axis}_m` as const; const overrideKey = `${axis}_m_override` as const; return <div key={axis} className="space-y-2"><Label htmlFor={`hotspot-${axis}-${slot.id}`}>{axis.slice(0, 1).toUpperCase()} · m</Label><Input id={`hotspot-${axis}-${slot.id}`} aria-label={`${axis} in metres for ${slot.name}`} type="number" min="0.001" step="0.001" disabled={pending} value={slot[overrideKey] ?? slot[key] ?? ""} onChange={event => updateMeasurement(slot, axis, event.target.value)} /></div>; })}</div>
+        </div>
+        <div className="flex items-center justify-between gap-4"><Label htmlFor={`hotspot-swap-${slot.id}`}>Enable Hotspot Swap</Label><Switch id={`hotspot-swap-${slot.id}`} disabled={pending} checked={slot.is_swappable} onCheckedChange={checked => update(slot.id, { is_swappable: checked })} /></div>
         <div className="flex items-center justify-between gap-4"><Label htmlFor={`hotspot-finish-${slot.id}`}>Allow 3D Finish Change</Label><Switch id={`hotspot-finish-${slot.id}`} disabled={pending} checked={slot.allow_finish_customization} onCheckedChange={checked => update(slot.id, { allow_finish_customization: checked })} /></div>
-        {!slot.catalog_id ? <p className="text-xs text-muted-foreground">No linked catalogue record. Swap compatibility is unconfirmed.</p> : slot.alternatives.length < 2 && <p className="text-xs text-muted-foreground">Fewer than two compatible 3D options are available.</p>}
+        {!slot.catalog_id ? <p className="text-xs text-muted-foreground">Manual details stay with this package hotspot.</p> : slot.alternatives.length < 2 && <p className="text-xs text-muted-foreground">Fewer than two compatible 3D options are available.</p>}
         {slot.is_swappable && <div className="space-y-3"><div className="flex items-center justify-between gap-2"><h4 className="text-sm">Approved swap options</h4><span className="text-xs text-muted-foreground">{slot.pinned_alternative_ids.length} / 4 selected · minimum 2</span></div><Input aria-label={`Search alternatives for ${slot.name}`} placeholder="Search compatible furniture" value={search[slot.id] ?? ""} onChange={event => setSearch(current => ({ ...current, [slot.id]: event.target.value }))} />
           <div className="max-h-80 overflow-y-auto">{slot.alternatives.filter(option => option.name.toLowerCase().includes((search[slot.id] ?? "").toLowerCase())).map(option => {
             const checked = slot.pinned_alternative_ids.includes(option.id); const difference = option.base_price_sgd != null && slot.base_price_sgd != null ? option.base_price_sgd - slot.base_price_sgd : null;

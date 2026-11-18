@@ -5266,35 +5266,47 @@ export type Database = {
         Row: {
           allow_finish_customization: boolean | null
           board_item_id: string | null
+          category_role_override: string | null
+          depth_m_override: number | null
           furniture_package_id: string | null
+          height_m_override: number | null
           id: string
           is_swappable: boolean | null
           max_price_delta_pct: number | null
           pinned_alternative_ids: string[] | null
           project_studio_item_id: string | null
           selection_mode: string | null
+          width_m_override: number | null
         }
         Insert: {
           allow_finish_customization?: boolean | null
           board_item_id?: string | null
+          category_role_override?: string | null
+          depth_m_override?: number | null
           furniture_package_id?: string | null
+          height_m_override?: number | null
           id?: string
           is_swappable?: boolean | null
           max_price_delta_pct?: number | null
           pinned_alternative_ids?: string[] | null
           project_studio_item_id?: string | null
           selection_mode?: string | null
+          width_m_override?: number | null
         }
         Update: {
           allow_finish_customization?: boolean | null
           board_item_id?: string | null
+          category_role_override?: string | null
+          depth_m_override?: number | null
           furniture_package_id?: string | null
+          height_m_override?: number | null
           id?: string
           is_swappable?: boolean | null
           max_price_delta_pct?: number | null
           pinned_alternative_ids?: string[] | null
           project_studio_item_id?: string | null
           selection_mode?: string | null
+          width_m_override?: number | null
         }
         Relationships: [
           {
@@ -14738,6 +14750,36 @@ export type Database = {
         Returns: boolean
       }
       has_verified_access: { Args: { _user_id: string }; Returns: boolean }
+      hotspot_category_role: {
+        Args: { _category: string; _subcategory: string }
+        Returns: string
+      }
+      hotspot_dimension_values: {
+        Args: {
+          _depth_mm: number
+          _dimensions: string
+          _height_mm: number
+          _size_variants: Json
+          _width_mm: number
+        }
+        Returns: {
+          depth_m: number
+          height_m: number
+          width_m: number
+        }[]
+      }
+      hotspot_price_sgd: {
+        Args: {
+          _product: Database["public"]["Tables"]["trade_products"]["Row"]
+        }
+        Returns: number
+      }
+      hotspot_sync_trade_product: {
+        Args: {
+          _product: Database["public"]["Tables"]["trade_products"]["Row"]
+        }
+        Returns: string
+      }
       import_curated_pairing_finishes: {
         Args: { file_name?: string; updates: Json }
         Returns: Json
@@ -14759,6 +14801,10 @@ export type Database = {
       is_studio_owner: {
         Args: { _studio_id: string; _user_id: string }
         Returns: boolean
+      }
+      link_package_hotspot_catalog: {
+        Args: { _package_id: string; _project_id: string }
+        Returns: undefined
       }
       link_quote_project_folder: {
         Args: { _board_id: string; _project_id: string; _quote_id: string }

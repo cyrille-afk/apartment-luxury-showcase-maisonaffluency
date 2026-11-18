@@ -2171,6 +2171,27 @@
       "when": 1794978704162,
       "tag": "0309_viewing_room_personalization",
       "breakpoints": true
+    },
+    {
+      "idx": 310,
+      "version": "7",
+      "when": 1794984463805,
+      "tag": "0310_link_hotspot_catalogue_and_overrides",
+      "breakpoints": true
+    },
+    {
+      "idx": 311,
+      "version": "7",
+      "when": 1794984967363,
+      "tag": "0311_allow_partial_hotspot_dimension_overrides",
+      "breakpoints": true
+    },
+    {
+      "idx": 312,
+      "version": "7",
+      "when": 1794985097387,
+      "tag": "0312_fix_hotspot_pin_validation_alias",
+      "breakpoints": true
     }
   ]
 }
