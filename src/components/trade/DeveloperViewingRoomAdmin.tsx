@@ -15,6 +15,7 @@ import { viewingRoomPackageError, type ViewingRoomPackageDraft } from "@/lib/vie
 import { managerBoardsSchema, managerBoardSummary, type ManagerBoard } from "@/lib/viewingRoomManager";
 import { convertCents, useFxRates, type DisplayCurrency } from "./CurrencyToggle";
 import { absoluteUrl } from "@/config/site";
+import PackageHotspotsDrawer from "./PackageHotspotsDrawer";
 
 const emptyDeveloper = { developer_name: "", developer_logo_url: "", hero_image_url: "" };
 const emptyLayout = { name: "", floorplan_url: "", specs_label: "", room_environment_glb: "" };
@@ -49,6 +50,8 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
   const [layoutOpen, setLayoutOpen] = useState(false);
   const [assignment, setAssignment] = useState<{ index: number | null; draft: ViewingRoomPackageDraft } | null>(null);
   const [assignmentError, setAssignmentError] = useState("");
+  const [savedPackageIds, setSavedPackageIds] = useState<Record<string, string>>({});
+  const [hotspotPackage, setHotspotPackage] = useState<{ id: string; tier: string } | null>(null);
 
   const chooseLayout = (row?: Tables<"residence_layouts">) => {
     setLayoutId(row?.id ?? ""); setLayout(row ? { name: row.name, floorplan_url: row.floorplan_url ?? "", specs_label: row.specs_label ?? "", room_environment_glb: row.room_environment_glb ?? "" } : emptyLayout);
@@ -82,6 +85,7 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
     Promise.resolve(supabase.from("furniture_packages").select("*").eq("residence_layout_id", layoutId).order("sort_order").abortSignal(controller.signal)).then(({ data, error: readError }) => {
       if (controller.signal.aborted) return;
       if (readError) { setPackageError(true); setError("Packages couldn’t load. Retry before saving."); return; }
+      setSavedPackageIds(Object.fromEntries(data.map(row => [row.moodboard_id, row.id])));
       setPackages(data.map(row => ({ moodboard_id: row.moodboard_id, tier_name: row.tier_name, package_price: String(row.package_price), currency: row.currency, description: row.description, lead_time_weeks: row.lead_time_weeks == null ? "" : String(row.lead_time_weeks), allow_alternatives: row.allow_alternatives })));
     }).catch(() => { if (!controller.signal.aborted) { setPackageError(true); setError("Packages couldn’t load. Please retry."); } }).finally(() => { if (!controller.signal.aborted) setPackageLoading(false); });
     return () => controller.abort();
@@ -159,6 +163,8 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
             {summary && <p className="text-xs text-muted-foreground">Furniture total · {summary.from ? "From " : ""}{money(board ? boardPrice(board, row.currency) : 0, row.currency)}{summary.unpriced ? ` · ${summary.unpriced} unpriced` : ""}</p>}
             <p className="text-xs text-muted-foreground">Lead time · {row.lead_time_weeks ? `${row.lead_time_weeks} weeks` : "To be confirmed"}</p>
             <div className="flex items-center justify-between gap-3 border-t border-border pt-3"><Label htmlFor={`swap-${index}`} className="text-xs">Buyer swaps via hotspots</Label><Switch id={`swap-${index}`} disabled={disabled} checked={row.allow_alternatives ?? true} onCheckedChange={checked => setPackages(current => current.map((item, i) => i === index ? { ...item, allow_alternatives: checked } : item))} /></div>
+            <Button variant="outline" disabled={disabled || !savedPackageIds[row.moodboard_id]} onClick={() => { const id = savedPackageIds[row.moodboard_id]; if (id) setHotspotPackage({ id, tier: row.tier_name }); }}>Configure Hotspots</Button>
+            {!savedPackageIds[row.moodboard_id] && <p className="text-xs text-muted-foreground">Save packages before configuring hotspots.</p>}
           </article>;
         })}
         <Button variant="outline" disabled={disabled || !layoutId || packageError || packages.length >= 5} onClick={() => { setAssignmentError(""); setAssignment({ index: null, draft: emptyPackage() }); }}><Plus className="size-4" />Assign Moodboard</Button>
@@ -196,5 +202,6 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
         {assignmentError && <p role="alert" className="text-sm text-destructive">{assignmentError}</p>}<Button type="submit" variant="studio-primary">{assignment.index == null ? "Add to packages" : "Update package"}</Button>
       </form>}
     </DialogContent></Dialog>
+    {hotspotPackage && <PackageHotspotsDrawer projectId={projectId} packageId={hotspotPackage.id} tier={hotspotPackage.tier} onClose={() => setHotspotPackage(null)} />}
   </section>;
 }

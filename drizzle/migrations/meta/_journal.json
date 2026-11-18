@@ -2150,6 +2150,20 @@
       "when": 1794977206261,
       "tag": "0306_restrict_hotspot_slot_rule_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 307,
+      "version": "7",
+      "when": 1794977495313,
+      "tag": "0307_package_hotspot_configuration",
+      "breakpoints": true
+    },
+    {
+      "idx": 308,
+      "version": "7",
+      "when": 1794977918801,
+      "tag": "0308_enforce_package_hotspot_choices",
+      "breakpoints": true
     }
   ]
 }

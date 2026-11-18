@@ -10,7 +10,7 @@ export const viewingRoomSchema = z.object({ name: z.string(), logo: url, hero: u
 export type ViewingRoom = z.infer<typeof viewingRoomSchema>;
 export type ViewingRoomItem = z.infer<typeof viewingRoomItemSchema>;
 export const viewingRoomChoiceSchema = viewingRoomItemSchema.extend({ retail_price: z.number().nullable(), retail_price_from: z.boolean().default(false) });
-export const viewingRoomSlotSchema = viewingRoomChoiceSchema.extend({ alternatives: z.array(viewingRoomChoiceSchema) });
+export const viewingRoomSlotSchema = viewingRoomChoiceSchema.extend({ alternatives: z.array(viewingRoomChoiceSchema), is_swappable: z.boolean().default(true), allow_finish_customization: z.boolean().default(true) });
 export type ViewingRoomChoice = z.infer<typeof viewingRoomChoiceSchema>;
 export type ViewingRoomSlot = z.infer<typeof viewingRoomSlotSchema>;
 export function viewingRoomTotal(base: number, slots: ViewingRoomSlot[], choices: Record<string, ViewingRoomChoice>): number {

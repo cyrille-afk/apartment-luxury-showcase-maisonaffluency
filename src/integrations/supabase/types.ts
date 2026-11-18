@@ -5265,6 +5265,8 @@ export type Database = {
       hotspot_slot_rules: {
         Row: {
           allow_finish_customization: boolean | null
+          board_item_id: string | null
+          furniture_package_id: string | null
           id: string
           is_swappable: boolean | null
           max_price_delta_pct: number | null
@@ -5274,6 +5276,8 @@ export type Database = {
         }
         Insert: {
           allow_finish_customization?: boolean | null
+          board_item_id?: string | null
+          furniture_package_id?: string | null
           id?: string
           is_swappable?: boolean | null
           max_price_delta_pct?: number | null
@@ -5283,6 +5287,8 @@ export type Database = {
         }
         Update: {
           allow_finish_customization?: boolean | null
+          board_item_id?: string | null
+          furniture_package_id?: string | null
           id?: string
           is_swappable?: boolean | null
           max_price_delta_pct?: number | null
@@ -5291,6 +5297,20 @@ export type Database = {
           selection_mode?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "hotspot_slot_rules_board_item_id_fkey"
+            columns: ["board_item_id"]
+            isOneToOne: false
+            referencedRelation: "client_board_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hotspot_slot_rules_furniture_package_id_fkey"
+            columns: ["furniture_package_id"]
+            isOneToOne: false
+            referencedRelation: "furniture_packages"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "hotspot_slot_rules_project_studio_item_id_fkey"
             columns: ["project_studio_item_id"]
@@ -7786,6 +7806,7 @@ export type Database = {
       }
       project_studio_items: {
         Row: {
+          board_item_id: string | null
           calculated_lead_time_weeks: number
           calculated_price: number
           catalog_item_id: string | null
@@ -7798,6 +7819,7 @@ export type Database = {
           project_id: string | null
         }
         Insert: {
+          board_item_id?: string | null
           calculated_lead_time_weeks: number
           calculated_price: number
           catalog_item_id?: string | null
@@ -7810,6 +7832,7 @@ export type Database = {
           project_id?: string | null
         }
         Update: {
+          board_item_id?: string | null
           calculated_lead_time_weeks?: number
           calculated_price?: number
           catalog_item_id?: string | null
@@ -7822,6 +7845,13 @@ export type Database = {
           project_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "project_studio_items_board_item_id_fkey"
+            columns: ["board_item_id"]
+            isOneToOne: false
+            referencedRelation: "client_board_items"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "project_studio_items_catalog_item_id_fkey"
             columns: ["catalog_item_id"]
@@ -14586,6 +14616,10 @@ export type Database = {
         }[]
       }
       get_my_phone: { Args: never; Returns: string }
+      get_package_hotspot_configuration: {
+        Args: { _package_id: string; _project_id: string }
+        Returns: Json
+      }
       get_recent_scrape_failures: {
         Args: { since_minutes?: number }
         Returns: {
@@ -15145,6 +15179,10 @@ export type Database = {
           p_studio_id: string
         }
         Returns: string
+      }
+      save_package_hotspot_configuration: {
+        Args: { _package_id: string; _project_id: string; _rules: Json }
+        Returns: Json
       }
       save_viewing_room_packages: {
         Args: { _layout_id: string; _packages: Json }

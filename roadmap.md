@@ -1,5 +1,10 @@
 # Roadmap
 
+## Configure package hotspots
+- [x] Add a per-package drawer listing every assigned board item with persisted swap/finish toggles and exact package/board scope; guest choices and proposal validation honor saved swap restrictions.
+- [x] Match catalogue alternatives by category role and ±15% width/depth; enforce 2–4 unique compatible pins when swaps are enabled, with thumbnail/dimensions/SGD price differences.
+- [x] Eighteen tests and preview build pass. Signed-in real Essential finish-toggle save/reopen/readback and desktop/mobile drawer visually verified with no page errors; test settings removed. Catalogue and Project Studio item tables are empty, so real approved-option pinning is blocked by missing catalogue records/measurements; no mappings or dimensions invented.
+
 ## Developer Viewing Room Manager
 - [x] Build the three-column admin manager with media uploads, private-link copy/email sharing, residence cards and package assignment modal. Email action opens the admin’s email composer; delivery is not claimed.
 - [x] Add live board retail totals/3D readiness and persisted, server-enforced buyer-swap controls; preserve package identities and all 267 linked alternatives on edits.
