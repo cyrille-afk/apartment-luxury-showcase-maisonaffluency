@@ -113,7 +113,7 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
     editAssignment({ moodboard_id: id, package_price: summary.unpriced ? "" : String(boardPrice(board, assignment.draft.currency) / 100) });
   };
   if (!rolesLoaded || !isAdmin) return null;
-  return <section aria-label="Developer Viewing Room administration" className="viewing-room [&_button]:cursor-pointer [&_[role=combobox]]:cursor-pointer h-full overflow-y-auto bg-background px-4 py-6 text-foreground md:px-8 lg:px-12" data-trade-sensitive>
+  return <section aria-label="Developer Viewing Room administration" className="viewing-room [&_button]:cursor-pointer [&_[role=combobox]]:cursor-pointer h-auto overflow-visible xl:h-full xl:overflow-y-auto bg-background px-4 py-6 text-foreground md:px-8 lg:px-12" data-trade-sensitive>
     <header className="mb-7 flex items-start justify-between gap-4"><div><p className="mb-2 text-[10px] uppercase text-muted-foreground">Private residences · Administration</p><h2 className="font-display text-3xl">Developer Viewing Room Manager</h2></div><Button variant="ghost" size="icon" aria-label="Reload viewing room" disabled={disabled} onClick={() => setRevision(value => value + 1)}><RotateCw className="size-4" /></Button></header>
     {loading && <p role="status" className="mb-4 text-sm text-muted-foreground">Loading viewing room…</p>}
     {error && <div role="alert" className="mb-4 flex flex-wrap items-center gap-3 text-sm text-destructive">{error}<Button variant="outline" disabled={disabled} onClick={() => setRevision(value => value + 1)}>Retry</Button></div>}
@@ -151,7 +151,7 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
         </article>)}
       </div>
       <div className="min-w-0 space-y-4">
-        <div className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-2 border-b border-border bg-background py-4"><h3 className="font-display text-xl">03 · Furniture Packages</h3><div className="flex items-center gap-1"><Button variant="studio-primary" disabled={disabled || !layoutId || packageError || packages.length < 3} onClick={() => {
+        <div className="sticky top-14 xl:top-0 z-20 flex flex-wrap items-center justify-between gap-2 border-b border-border bg-background py-4"><h3 className="font-display text-xl">03 · Furniture Packages</h3><div className="flex items-center gap-1"><Button variant="studio-primary" disabled={disabled || !layoutId || packageError || packages.length < 3} onClick={() => {
           const validation = viewingRoomPackageError(packages, boards.map(row => row.id)); if (validation) { setError(validation); return; }
           void runSave(async () => { const result = await supabase.rpc("save_viewing_room_packages", { _layout_id: layoutId, _packages: packages.map(row => ({ ...row, tier_name: row.tier_name.trim(), package_price: Number(row.package_price) })) }); if (result.error) throw result.error; }, "Furniture packages saved.");
         }}><Save className="size-4" />Save packages</Button><Button variant="ghost" size="icon" aria-label="Assign Moodboard" disabled={disabled || !layoutId || packageError || packages.length >= 5} onClick={() => { setAssignmentError(""); setAssignment({ index: null, draft: emptyPackage() }); }}><Plus className="size-4" /></Button></div></div>

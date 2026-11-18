@@ -3,6 +3,7 @@
 ## Viewing Room Manager UI refinements
 - [x] Hide developer media paths and retain previews/Replace Image; move Save packages beside + in the sticky column header. Clear stale package identities on residence changes and key the existing footprint-safe drawer by package.
 - [x] Signed-in checks verify all nine package drawers contain their assigned moodboard's 3/4/6 items, replacement controls and successful package save; desktop screenshot reviewed with no page errors.
+- [x] Follow-up desktop/phone checks in both system themes cover all nine drawers, file chooser, successful package save and return to Studio. Corrected phone scroll containment so the package header remains visible below navigation; screenshots reviewed with no page errors.
 
 ## Private Viewing Room personalization
 - [x] Refine co-branding, header stage indicator, tier descriptions/lead times/prices and exact ivory surface; missing square footage is explicit.
