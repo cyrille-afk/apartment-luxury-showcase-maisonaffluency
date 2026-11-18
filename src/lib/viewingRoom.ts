@@ -36,9 +36,11 @@ export function viewingRoomComposition(items: ViewingRoomItem[]) {
   return { objects, width: Math.max(7.2, bounds.width + 2), depth: Math.max(6, bounds.depth + 2) };
 }
 
-export function viewingRoomCamera(view: "living" | "terrace", width: number, depth: number): { position: [number, number, number]; target: [number, number, number] } {
-  return view === "living" ? { position: [width * .24, 1.6, depth * .46], target: [0, 1.6, 0] }
-    : { position: [-width * .38, 1.6, -depth * .4], target: [0, 1.6, depth * .2] };
+export type ViewingRoomCameraPreset = "living" | "terrace" | "overview";
+export function viewingRoomCamera(view: ViewingRoomCameraPreset, width: number, depth: number): { position: [number, number, number]; target: [number, number, number] } {
+  if (view === "overview") return { position: [0, 1.6, depth * .8], target: [0, .75, 0] };
+  return view === "living" ? { position: [width * .24, 1.6, depth * .6], target: [0, .75, 0] }
+    : { position: [-width * .38, 1.6, depth * .6], target: [0, .75, 0] };
 }
 
 export function viewingRoomLeadTime(weeks: number | null, items?: ViewingRoomItem[]): string {

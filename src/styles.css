@@ -4,9 +4,9 @@
 
 /* Private viewing rooms keep the requested ivory editorial paper in both system themes. */
 .viewing-room {
-  --viewing-room-paper: oklch(0.975 0.012 85);
+  --viewing-room-paper: #FAF9F6;
   --viewing-room-ink: oklch(0.22 0.012 85);
-  --background: 45 35% 97%;
+  --background: 45 28.571% 97.255%;
   --foreground: 40 12% 12%;
   --muted: 45 20% 92%;
   --muted-foreground: 40 8% 42%;

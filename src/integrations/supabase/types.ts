@@ -14698,6 +14698,10 @@ export type Database = {
         Args: { _package_id: string; _token: string }
         Returns: Json
       }
+      get_viewing_room_personalization: {
+        Args: { _package_id: string; _token: string }
+        Returns: Json
+      }
       grant_video_pass: {
         Args: { _credits: number; _session: string; _user: string }
         Returns: boolean

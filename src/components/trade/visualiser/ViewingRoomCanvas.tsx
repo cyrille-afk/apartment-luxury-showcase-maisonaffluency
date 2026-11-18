@@ -7,20 +7,30 @@ import { Button } from "@/components/ui/button";
 import { SceneErrorBoundary } from "./SceneErrorBoundary";
 import SceneObject, { type PlacedObject } from "./SceneObject";
 import SequentialFurniture, { type FurnitureLoadingProgress } from "./SequentialFurniture";
-import { viewingRoomCamera, viewingRoomComposition, type ViewingRoomItem } from "@/lib/viewingRoom";
+import { viewingRoomCamera, viewingRoomComposition, type ViewingRoomItem, type ViewingRoomCameraPreset } from "@/lib/viewingRoom";
 import { withCachedModelLoader } from "@/lib/visualiserModelCache";
 import VisualiserHotspots from "./VisualiserHotspots";
 import type { ModelDimensionCheck } from "@/lib/viewingRoomDimensionCheck";
 
 const noop = () => {};
-function CameraView({ view, width, depth }: { view: "living" | "terrace"; width: number; depth: number }) {
+function CameraView({ view, width, depth }: { view: ViewingRoomCameraPreset; width: number; depth: number }) {
   const { camera, invalidate } = useThree();
   const controls = useThree(state => state.controls) as OrbitControlsImpl | null;
+  const destination = useRef<{ position: Vector3; target: Vector3 } | null>(null);
   useEffect(() => {
     const pose = viewingRoomCamera(view, width, depth);
-    camera.position.set(...pose.position); camera.lookAt(...pose.target);
-    controls?.target.set(...pose.target); controls?.update(); invalidate();
+    destination.current = { position: new Vector3(...pose.position), target: new Vector3(...pose.target) };
+    invalidate();
   }, [camera, controls, view, width, depth, invalidate]);
+  useFrame((_, delta) => {
+    const pose = destination.current;
+    if (!controls) return;
+    if (!pose) { if (Math.abs(camera.position.y - 1.6) > .001) { camera.position.y = 1.6; camera.lookAt(controls.target); invalidate(); } return; }
+    const alpha = 1 - Math.exp(-7 * Math.min(delta, .05));
+    camera.position.lerp(pose.position, alpha); controls.target.lerp(pose.target, alpha); controls.update();
+    if (camera.position.distanceTo(pose.position) < .015 && controls.target.distanceTo(pose.target) < .015) destination.current = null;
+    else invalidate();
+  });
   return null;
 }
 function ReadyFrame({ ready, onReady }: { ready: boolean; onReady: () => void }) {
@@ -53,7 +63,7 @@ function Placeholder({ object, color }: { object: PlacedObject; color: string })
   const width = (object.width_mm || 800) / 1000, depth = (object.depth_mm || 800) / 1000, height = (object.height_mm || 800) / 1000;
   return <group position={object.position} rotation={object.rotation}><mesh position={[0, height / 2, 0]}><boxGeometry args={[width, height, depth]} /><meshBasicMaterial wireframe color={color} transparent opacity={.18} /></mesh></group>;
 }
-export default function ViewingRoomCanvas({ items, environmentUrl, onPieceClick }: { items: ViewingRoomItem[]; environmentUrl: string | null; onPieceClick?: (id: string) => void }) {
+export default function ViewingRoomCanvas({ items, environmentUrl, activeSlotIds = [], onPieceClick }: { items: ViewingRoomItem[]; environmentUrl: string | null; activeSlotIds?: string[]; onPieceClick?: (id: string) => void }) {
   const initialRoom = useRef(viewingRoomComposition(items));
   const room = useMemo(() => {
     const latest = viewingRoomComposition(items);
@@ -64,7 +74,7 @@ export default function ViewingRoomCanvas({ items, environmentUrl, onPieceClick 
   }, [items]);
   const root = useRef<HTMLDivElement>(null);
   const [colors, setColors] = useState<{ paper: string; ink: string } | null>(null);
-  const [view, setView] = useState<"living" | "terrace">("living");
+  const [view, setView] = useState<ViewingRoomCameraPreset>("living");
   const [ready, setReady] = useState(false);
   const [furnitureReady, setFurnitureReady] = useState(false);
   const [environmentReady, setEnvironmentReady] = useState(!environmentUrl);
@@ -96,9 +106,9 @@ export default function ViewingRoomCanvas({ items, environmentUrl, onPieceClick 
         </>}
         {environmentUrl && <Suspense fallback={null}><EnvironmentModel url={environmentUrl} onReady={environmentLoaded} /></Suspense>}
         <SequentialFurniture pieces={room.objects} fallback={null} renderPlaceholder={object => <Placeholder object={object} color={colors.ink} />} onReady={setFurnitureReady} onProgress={setProgress} renderPiece={object => <SceneObject object={object} selected={false} isEditable={false} showLabels={false} onSelect={noop} onTransform={noop} onDragStateChange={noop} onDimensionCheck={reportDimensions} />} />
-        <OrbitControls makeDefault minPolarAngle={Math.PI / 2} maxPolarAngle={Math.PI / 2} minDistance={.6} maxDistance={16} enablePan={false} enableDamping={false} />
+        <OrbitControls makeDefault minPolarAngle={Math.PI / 2.8} maxPolarAngle={Math.PI / 2} minAzimuthAngle={-Math.PI / 2.4} maxAzimuthAngle={Math.PI / 2.4} minDistance={2.5} maxDistance={Math.max(room.width, room.depth) * 1.2} enablePan={false} enableDamping dampingFactor={.08} rotateSpeed={.45} />
         <CameraView view={view} width={room.width} depth={room.depth} />
-        {ready && onPieceClick && <VisualiserHotspots objects={room.objects} onFindAlternatives={onPieceClick} />}
+        {ready && onPieceClick && <VisualiserHotspots objects={room.objects.filter(object => activeSlotIds.includes(object.instanceId))} onFindAlternatives={onPieceClick} />}
         <ReadyFrame ready={furnitureReady && environmentReady} onReady={frameReady} />
       </Canvas>
     </SceneErrorBoundary>}
@@ -109,6 +119,6 @@ export default function ViewingRoomCanvas({ items, environmentUrl, onPieceClick 
     </div>}
     {ready && !environmentUrl && !flagged.length && <p className="absolute left-4 top-4 bg-background/90 px-3 py-2 text-xs text-muted-foreground">Concept room · apartment model pending</p>}
     {failed && <div role="alert" className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background"><p>The room couldn’t load. Your selection is unchanged.</p><Button variant="outline" onClick={() => { setFailed(false); setReady(false); setFurnitureReady(false); setEnvironmentReady(!environmentUrl); setEpoch(value => value + 1); }}>Retry room view</Button></div>}
-    <div className="absolute inset-x-4 bottom-5 flex justify-center gap-2"><Button variant="outline" className={`rounded-full bg-background text-foreground ${view === "living" ? "border-foreground" : ""}`} aria-pressed={view === "living"} onClick={() => setView("living")}>Living View</Button><Button variant="outline" className={`rounded-full bg-background text-foreground ${view === "terrace" ? "border-foreground" : ""}`} aria-pressed={view === "terrace"} onClick={() => setView("terrace")}>Terrace View</Button></div>
+    <div className="absolute inset-x-4 bottom-5 flex flex-wrap justify-center gap-2" data-visualiser-hotspot-obstacle>{([["living", "Living Room"], ["terrace", "Window View"], ["overview", "Overview"]] as const).map(([preset, label]) => <Button key={preset} variant="outline" className={`rounded-full bg-background text-foreground ${view === preset ? "border-foreground" : ""}`} aria-pressed={view === preset} onClick={() => setView(preset)}>{label}</Button>)}</div>
   </div>;
 }

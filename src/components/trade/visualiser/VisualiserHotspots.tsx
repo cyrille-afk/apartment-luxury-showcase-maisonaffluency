@@ -46,7 +46,7 @@ export default function VisualiserHotspots({ objects, onFindAlternatives, onStat
   const { camera, gl, size, invalidate } = useThree();
   const pinRefs = useRef(new Map<string, HTMLDivElement>());
   const overlayRoot = useRef<Root | null>(null);
-  const [overlayElement] = useState(() => document.createElement("div"));
+  const overlayElement = useRef<HTMLDivElement | null>(null);
   const world = useMemo(() => new THREE.Vector3(), []);
   const cameraSpace = useMemo(() => new THREE.Vector3(), []);
   const host = gl.domElement.parentElement;
@@ -126,7 +126,7 @@ export default function VisualiserHotspots({ objects, onFindAlternatives, onStat
       window.__lovableEvents?.captureException?.(error, { source: "visualiser_hotspot_projection", piece_count: objects.length }, { mechanism: "manual", handled: false, severity: "error" });
       if (!onStatus) throw error;
       failed.current = true;
-      overlayElement.style.display = "none";
+      if (overlayElement.current) overlayElement.current.style.display = "none";
       onStatus("error");
       return;
     }
@@ -181,9 +181,11 @@ export default function VisualiserHotspots({ objects, onFindAlternatives, onStat
   // reconciler treats a plain div as an unknown Three object and crashes.
   useLayoutEffect(() => {
     if (!host) return;
-    host.appendChild(overlayElement);
+    const element = document.createElement("div");
+    overlayElement.current = element;
+    host.appendChild(element);
     const started = performance.now();
-    const root = createRoot(overlayElement, { onUncaughtError: error => {
+    const root = createRoot(element, { onUncaughtError: error => {
       window.__lovableEvents?.track?.("project.studio_loading", { phase: "hotspot_error", status: "error", duration_ms: performance.now() - started, piece_count: countRef.current, pin_count: pinRefs.current.size });
       window.__lovableEvents?.captureException?.(error, { source: "visualiser_hotspot_overlay", piece_count: countRef.current }, { mechanism: "react_error_boundary", handled: false, severity: "error" });
       failed.current = true;
@@ -192,11 +194,12 @@ export default function VisualiserHotspots({ objects, onFindAlternatives, onStat
     overlayRoot.current = root;
     window.__lovableEvents?.track?.("project.studio_loading", { phase: "hotspot_mount", status: "ok", duration_ms: performance.now() - started, piece_count: countRef.current, pin_count: pinRefs.current.size });
     return () => {
-      overlayRoot.current = null;
-      overlayElement.remove();
+      if (overlayRoot.current === root) overlayRoot.current = null;
+      if (overlayElement.current === element) overlayElement.current = null;
+      element.remove();
       queueMicrotask(() => root.unmount());
     };
-  }, [host, overlayElement]);
+  }, [host]);
 
   useLayoutEffect(() => {
     overlayRoot.current?.render(content);

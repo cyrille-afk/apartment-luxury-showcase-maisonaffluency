@@ -1,5 +1,6 @@
 import type { ViewingRoomChoice } from "./viewingRoom";
 import { formatPdfMoney, formatPdfDate } from "./pdfFormatting";
+import { proposalImageFit } from "./viewingRoomPresentation";
 
 export async function downloadViewingRoomProposal(snapshot: { package: string; currency: string; total: number; items: ViewingRoomChoice[] }, residence: string, developer: string) {
   const { jsPDF } = await import("jspdf");
@@ -11,10 +12,12 @@ export async function downloadViewingRoomProposal(snapshot: { package: string; c
   pdf.text("Maison Affluency", 20, 265);
   for (const item of snapshot.items) {
     pdf.addPage(); pdf.setFontSize(20); pdf.text(pdf.splitTextToSize(item.product_name, 170), 20, 30);
-    if (item.image_url) { try { const image = await loadImage(item.image_url); pdf.addImage(image, "JPEG", 20, 48, 100, 90); } catch { /* Specifications remain available if media cannot load. */ } }
-    pdf.setFontSize(11); pdf.text(pdf.splitTextToSize(item.dimensions ?? "Dimensions to be confirmed", 170), 20, 152);
+    if (item.image_url) { try { const image = await loadImage(item.image_url); const properties = pdf.getImageProperties(image); const fit = proposalImageFit(properties.width, properties.height, 100, 90); pdf.addImage(image, "JPEG", 20 + (100 - fit.width) / 2, 48 + (90 - fit.height) / 2, fit.width, fit.height); } catch { /* Specifications remain available if media cannot load. */ } }
+    const dimensions = item.dimensions ?? (item.width_mm && item.depth_mm && item.height_mm ? `${item.width_mm} × ${item.depth_mm} × ${item.height_mm} mm · W × D × H` : "Dimensions to be confirmed");
+    pdf.setFontSize(11); pdf.text(pdf.splitTextToSize(dimensions, 170), 20, 152);
     let y = 173;
     for (const finish of Object.values(item.materials)) {
+      if (y > 240) { pdf.addPage(); pdf.setFontSize(16); pdf.text(pdf.splitTextToSize(`${item.product_name} · Selected finishes`, 170), 20, 30); y = 50; pdf.setFontSize(11); }
       if (finish.image_url) { try { pdf.addImage(await loadImage(finish.image_url), "JPEG", 20, y, 14, 14); } catch { /* Keep recorded finish names. */ } }
       pdf.text(pdf.splitTextToSize(finish.name, 145), 38, y + 7); y += 24;
     }

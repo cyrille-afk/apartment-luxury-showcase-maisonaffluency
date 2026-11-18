@@ -1,5 +1,11 @@
 # Roadmap
 
+## Private Viewing Room personalization
+- [x] Refine co-branding, header stage indicator, tier descriptions/lead times/prices and exact ivory surface; missing square footage is explicit.
+- [x] Add three eye-height camera presets, bounded damped orbit and active-rule-only hotspots with alternatives/isolated finish-inspection tabs. Fix StrictMode overlay root reuse; swapped pieces retain slot transforms.
+- [x] Seventeen focused tests pass; real private-link Essential flow loads three models/pins, tabs and swatch toggles work, and lock downloads a four-page 2.7MB proposal with exact selected finishes and undistorted photos. All PDF pages inspected; desktop/phone scene harness has no page/network errors. Phone camera/inspection checks pass in both system themes, with light editorial surfaces retained.
+- [ ] Real pinned swaps await catalogue records and approved options; square footage and official per-residence environment models are absent. Full nine-package GPU inspection remains unverified; real-device frame rate cannot be measured here.
+
 ## Configure package hotspots
 - [x] Add a per-package drawer listing every assigned board item with persisted swap/finish toggles and exact package/board scope; guest choices and proposal validation honor saved swap restrictions.
 - [x] Match catalogue alternatives by category role and ±15% width/depth; enforce 2–4 unique compatible pins when swaps are enabled, with thumbnail/dimensions/SGD price differences.
