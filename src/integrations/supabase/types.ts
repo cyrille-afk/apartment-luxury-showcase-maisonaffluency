@@ -5262,6 +5262,44 @@ export type Database = {
         }
         Relationships: []
       }
+      hotspot_slot_rules: {
+        Row: {
+          allow_finish_customization: boolean | null
+          id: string
+          is_swappable: boolean | null
+          max_price_delta_pct: number | null
+          pinned_alternative_ids: string[] | null
+          project_studio_item_id: string | null
+          selection_mode: string | null
+        }
+        Insert: {
+          allow_finish_customization?: boolean | null
+          id?: string
+          is_swappable?: boolean | null
+          max_price_delta_pct?: number | null
+          pinned_alternative_ids?: string[] | null
+          project_studio_item_id?: string | null
+          selection_mode?: string | null
+        }
+        Update: {
+          allow_finish_customization?: boolean | null
+          id?: string
+          is_swappable?: boolean | null
+          max_price_delta_pct?: number | null
+          pinned_alternative_ids?: string[] | null
+          project_studio_item_id?: string | null
+          selection_mode?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hotspot_slot_rules_project_studio_item_id_fkey"
+            columns: ["project_studio_item_id"]
+            isOneToOne: false
+            referencedRelation: "project_studio_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ingestion_job_state: {
         Row: {
           created_at: string

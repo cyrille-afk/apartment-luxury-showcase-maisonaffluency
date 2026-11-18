@@ -2136,6 +2136,20 @@
       "when": 1794975920414,
       "tag": "0304_viewing_room_manager_controls",
       "breakpoints": true
+    },
+    {
+      "idx": 305,
+      "version": "7",
+      "when": 1794977147974,
+      "tag": "0305_create_hotspot_slot_rules",
+      "breakpoints": true
+    },
+    {
+      "idx": 306,
+      "version": "7",
+      "when": 1794977206261,
+      "tag": "0306_restrict_hotspot_slot_rule_grants",
+      "breakpoints": true
     }
   ]
 }
