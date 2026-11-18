@@ -4,6 +4,8 @@
 - [x] Add a per-package drawer listing every assigned board item with persisted swap/finish toggles and exact package/board scope; guest choices and proposal validation honor saved swap restrictions.
 - [x] Match catalogue alternatives by category role and ±15% width/depth; enforce 2–4 unique compatible pins when swaps are enabled, with thumbnail/dimensions/SGD price differences.
 - [x] Eighteen tests and preview build pass. Signed-in real Essential finish-toggle save/reopen/readback and desktop/mobile drawer visually verified with no page errors; test settings removed. Catalogue and Project Studio item tables are empty, so real approved-option pinning is blocked by missing catalogue records/measurements; no mappings or dimensions invented.
+- [x] Follow-up checked all 39 furniture rows across nine manager packages on desktop/phone under both system themes (156 row checks), including both toggles, scrolling, close and return to Specsheet; screenshots reviewed with no page errors. Editorial surfaces retain their intended light theme.
+- [ ] Complete approved-option pinning and exhaustive client-result checks: real catalogue remains empty, so matching/pinning cannot be exercised with live options. Client desktop drawers passed all three 2-Bedroom packages and Bayfront Essential (16 rows); the next software-rendered check stalled. Remaining client phone/theme/packages are not claimed verified.
 
 ## Developer Viewing Room Manager
 - [x] Build the three-column admin manager with media uploads, private-link copy/email sharing, residence cards and package assignment modal. Email action opens the admin’s email composer; delivery is not claimed.
