@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { switchedStudioHref } from "@/lib/studioProjectRouting";
 
 /**
  * Compact global project switcher rendered in the trade header.
@@ -54,7 +55,11 @@ export function GlobalProjectSwitcher() {
 
   const choose = (id: string | null) => {
     if (id) {
-      setProjectFilter(id);
+      if (/^\/trade\/projects\/[^/]+\/studio\/?$/.test(path)) {
+        navigate(switchedStudioHref(id, new URLSearchParams(location.search).get("tab")));
+      } else {
+        setProjectFilter(id);
+      }
       pushRecentProject(id);
     } else {
       clearProjectFilter();

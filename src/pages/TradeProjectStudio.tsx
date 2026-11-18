@@ -39,6 +39,7 @@ import { selectedStudioBoard, studioBoardItems } from "@/lib/studioBoardScope";
 import { studioBoardCount } from "@/lib/studioBoardCounts";
 import { DeveloperViewingRoomAdmin } from "@/components/trade/DeveloperViewingRoomAdmin";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { studioTabPreference } from "@/lib/studioProjectRouting";
 
 type StudioItem = {
   id: string;
@@ -87,6 +88,18 @@ export default function TradeProjectStudio() {
   const [loadedBoardId, setLoadedBoardId] = useState<string | null>(null);
   const { user, isAdmin, rolesLoaded } = useAuth();
   const studioTab = searchParams.get("tab") === "admin" ? "admin" : "canvas";
+  useEffect(() => {
+    if (!user || !rolesLoaded || !isAdmin) return;
+    const key = `trade:studio-tab:${user.id}`;
+    const explicit = searchParams.get("tab");
+    let remembered: string | null = null;
+    try { remembered = sessionStorage.getItem(key); } catch {}
+    const tab = studioTabPreference(explicit, remembered);
+    if (explicit !== tab) {
+      setSearchParams(previous => { previous.set("tab", tab); return previous; }, { replace: true });
+    }
+    try { sessionStorage.setItem(key, tab); } catch {}
+  }, [id, user?.id, rolesLoaded, isAdmin, searchParams, setSearchParams]);
   const [canEdit, setCanEdit] = useState(false);
   const [savingFinishes, setSavingFinishes] = useState(false);
   const [removeItem, setRemoveItem] = useState<StudioItem | null>(null);
@@ -430,7 +443,7 @@ export default function TradeProjectStudio() {
         </h1>
       </div>
 
-      {rolesLoaded && isAdmin && !isClientMode && <Tabs value={studioTab} onValueChange={value => { setSearchParams(previous => { if (value === "admin") previous.set("tab", "admin"); else previous.delete("tab"); return previous; }, { replace: true }); setIsAiPanelOpen(false); setIsSpecPanelOpen(false); }} className="shrink-0 border-b border-border px-4 py-2 md:px-8 lg:px-12">
+      {rolesLoaded && isAdmin && !isClientMode && <Tabs value={studioTab} onValueChange={value => { setSearchParams(previous => { previous.set("tab", value); return previous; }, { replace: true }); setIsAiPanelOpen(false); setIsSpecPanelOpen(false); }} className="shrink-0 border-b border-border px-4 py-2 md:px-8 lg:px-12">
         <TabsList><TabsTrigger value="canvas" className="cursor-pointer">Project Studio</TabsTrigger><TabsTrigger value="admin" className="cursor-pointer">Admin</TabsTrigger></TabsList>
       </Tabs>}
       {studioTab === "admin" && rolesLoaded && isAdmin && !isClientMode ? <div className="min-h-0 flex-1"><DeveloperViewingRoomAdmin key={project.id} projectId={project.id} /></div> : <>
