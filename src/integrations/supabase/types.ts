@@ -13482,6 +13482,7 @@ export type Database = {
           package_id: string
           product_id: string
           retail_price: number
+          retail_price_from: boolean
           slot_id: string
           sort_order: number
         }
@@ -13490,6 +13491,7 @@ export type Database = {
           package_id: string
           product_id: string
           retail_price: number
+          retail_price_from?: boolean
           slot_id: string
           sort_order?: number
         }
@@ -13498,6 +13500,7 @@ export type Database = {
           package_id?: string
           product_id?: string
           retail_price?: number
+          retail_price_from?: boolean
           slot_id?: string
           sort_order?: number
         }

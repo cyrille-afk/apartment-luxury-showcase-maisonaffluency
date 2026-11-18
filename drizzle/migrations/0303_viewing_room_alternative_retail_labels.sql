@@ -1,0 +1,11 @@
+ALTER TABLE public.viewing_room_slot_alternatives ADD COLUMN IF NOT EXISTS retail_price_from boolean NOT NULL DEFAULT false;
+CREATE OR REPLACE FUNCTION public.get_viewing_room_choices(_token text,_package_id uuid) RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=public AS $$
+DECLARE data jsonb; p public.furniture_packages; items jsonb;
+BEGIN
+ data:=public.get_viewing_room_package(_token,_package_id); IF data IS NULL THEN RETURN NULL; END IF;
+ SELECT * INTO p FROM public.furniture_packages WHERE id=_package_id;
+ SELECT jsonb_agg(j || jsonb_build_object('retail_price',CASE WHEN p.currency='EUR' THEN (public._shared_board_retail_price(t.rrp_price_cents,t.size_variants,i.variant_label)->>'cents')::numeric/100 ELSE NULL END,'retail_price_from',coalesce((public._shared_board_retail_price(t.rrp_price_cents,t.size_variants,i.variant_label)->>'from')::boolean,false),'alternatives',coalesce((SELECT jsonb_agg(jsonb_build_object('id',a.product_id,'product_name',alt.product_name,'category',alt.category,'subcategory',alt.subcategory,'image_url',alt.image_url,'dimensions',alt.dimensions,'width_mm',alt.width_mm,'depth_mm',alt.depth_mm,'height_mm',alt.height_mm,'glb_url',coalesce((SELECT c.glb_url_compressed FROM public.catalog_items c WHERE c.id=alt.id),alt.glb_url),'lead_time',alt.lead_time,'materials','{}'::jsonb,'retail_price',a.retail_price,'retail_price_from',a.retail_price_from) ORDER BY a.sort_order,alt.product_name) FROM public.viewing_room_slot_alternatives a JOIN public.trade_products alt ON alt.id=a.product_id WHERE a.package_id=p.id AND a.slot_id=i.id AND alt.is_active AND NOT coalesce(alt.is_hidden,false) AND coalesce((SELECT c.glb_url_compressed FROM public.catalog_items c WHERE c.id=alt.id),alt.glb_url) ~* '^https?://[^[:space:]]+\.(glb|gltf|obj)([?#].*)?$'),'[]'::jsonb))) INTO items FROM jsonb_array_elements(data->'items') j JOIN public.client_board_items i ON i.id=(j->>'id')::uuid JOIN public.trade_products t ON t.id=i.product_id;
+ RETURN jsonb_build_object('items',coalesce(items,'[]'::jsonb));
+END; $$;
+REVOKE ALL ON FUNCTION public.get_viewing_room_choices(text,uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.get_viewing_room_choices(text,uuid) TO anon,authenticated;
