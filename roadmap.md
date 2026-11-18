@@ -1,14 +1,14 @@
 # Roadmap
 
 ## Client Developer Viewing Room
-- [x] Correct distorted Cipriani geometry: worker transfer now de-interleaves packed GLB vertices before decoding; uniform measured sizing remains unchanged. Six-piece Bespoke renders with intact console/chair geometry at desktop/phone and both camera presets, no page errors; nine regressions pass.
+- [x] Correct distorted Cipriani geometry: worker transfer now de-interleaves packed GLB vertices before decoding; uniform measured sizing remains unchanged. All three packages load 3/4/6 pieces; desktop/phone and light/dark-preference renders and Bespoke refresh pass with no page errors. Nine regressions pass; real-device frame rate remains unmeasured.
 - [x] Add Stage 3 shared hotspots, inspection with selected swatch toggle, linked-alternative support and live retail-difference total; locked server-validated request generates a PDF. Desktop/phone hotspot→drawer verified, 2.7MB PDF download and 14 tests pass.
 - [ ] Complete exhaustive Stage 3 item/theme checks: all Essential and Signature desktop drawers inspected and return-to-room exercised; phone first piece passes. Bespoke inspection and remaining phone/theme checks stopped on software-renderer click timeouts, so they are not claimed verified.
 - [ ] Populate approved slot alternatives and verify a real swap end-to-end — waiting for the user's pairings; unassigned slots remain explicitly empty.
 - [x] Seed Cipriani with three marked sample layouts and three package tiers (3/4/6 existing pieces); retain original boards and indicative retail totals.
 - [x] Add token-validated hierarchy/package projections, no public table access, and editable lead times.
 - [x] Build the co-branded residence grid, package selector and eye-level viewer with Living/Terrace presets; seven focused tests and preview build pass.
-- [ ] Final visual approval: every package/layout renders on desktop and phone in light theme, dark desktop checked; some supplied models render distorted and official per-layout plans/environment GLBs are missing. Dark-phone/reload/invalid-link checks remain incomplete after browser time limits.
+- [ ] Final apartment context requires official per-layout plans/environment GLBs; invalid-link checks remain incomplete. Furniture distortion is corrected and dark-phone/reload rendering now checked.
 
 ## Developer Viewing Room
 - [x] Add private admin-managed developer/project, residence layout and tiered moodboard package hierarchy with same-project validation; revoke inherited anonymous privileges and direct package writes.
