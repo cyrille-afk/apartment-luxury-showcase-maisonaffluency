@@ -25,7 +25,7 @@ export const getViewingRoomChoices = createServerFn({ method: "POST" }).inputVal
   setResponseHeader("Cache-Control", "private, no-store");
   const result = await publicClient().rpc("get_viewing_room_choices", { _token: data.token, _package_id: data.packageId });
   if (result.error) throw new Error("Collection choices couldn’t load.");
-  return result.data ? z.object({ items: z.array(viewingRoomSlotSchema) }).parse(result.data) : null;
+  return result.data ? z.object({ items: z.array(viewingRoomSlotSchema), allow_alternatives: z.boolean().default(true) }).parse(result.data) : null;
 });
 export const lockViewingRoomProposal = createServerFn({ method: "POST" }).inputValidator(z.object({ token, packageId: z.string().uuid(), requestKey: z.string().uuid(), choices: z.array(z.object({ slot_id: z.string().uuid(), product_id: z.string().uuid() })).max(50) })).handler(async ({ data }) => {
   setResponseHeader("Cache-Control", "private, no-store");

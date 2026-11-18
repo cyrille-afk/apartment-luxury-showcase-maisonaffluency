@@ -5015,6 +5015,7 @@ export type Database = {
       }
       furniture_packages: {
         Row: {
+          allow_alternatives: boolean
           created_at: string
           currency: string
           description: string
@@ -5027,6 +5028,7 @@ export type Database = {
           tier_name: string
         }
         Insert: {
+          allow_alternatives?: boolean
           created_at?: string
           currency?: string
           description?: string
@@ -5039,6 +5041,7 @@ export type Database = {
           tier_name: string
         }
         Update: {
+          allow_alternatives?: boolean
           created_at?: string
           currency?: string
           description?: string
@@ -14611,6 +14614,10 @@ export type Database = {
         Args: { _session: string; _slug: string }
         Returns: Json
       }
+      get_viewing_room_board_summaries: {
+        Args: { _project_id: string }
+        Returns: Json
+      }
       get_viewing_room_choices: {
         Args: { _package_id: string; _token: string }
         Returns: Json
@@ -15104,6 +15111,7 @@ export type Database = {
       save_viewing_room_packages: {
         Args: { _layout_id: string; _packages: Json }
         Returns: {
+          allow_alternatives: boolean
           created_at: string
           currency: string
           description: string

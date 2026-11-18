@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, Save, Trash2, RotateCw } from "lucide-react";
+import { Plus, Save, Trash2, RotateCw, Copy, Send, ExternalLink, Pencil, Box, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,29 +8,51 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
+import CloudUpload from "./CloudUpload";
 import { viewingRoomPackageError, type ViewingRoomPackageDraft } from "@/lib/viewingRoomPackages";
+import { managerBoardsSchema, managerBoardSummary, type ManagerBoard } from "@/lib/viewingRoomManager";
+import { convertCents, useFxRates, type DisplayCurrency } from "./CurrencyToggle";
 import { absoluteUrl } from "@/config/site";
 
 const emptyDeveloper = { developer_name: "", developer_logo_url: "", hero_image_url: "" };
 const emptyLayout = { name: "", floorplan_url: "", specs_label: "", room_environment_glb: "" };
-const emptyPackage = (): ViewingRoomPackageDraft => ({ moodboard_id: "", tier_name: "", package_price: "", currency: "EUR", description: "" });
+const emptyPackage = (): ViewingRoomPackageDraft => ({ moodboard_id: "", tier_name: "", package_price: "", currency: "EUR", description: "", allow_alternatives: true });
+const currencies = ["EUR", "USD", "SGD", "GBP", "CHF"];
+const money = (cents: number, currency = "EUR") => new Intl.NumberFormat("en-GB", { style: "currency", currency, maximumFractionDigits: 2 }).format(cents / 100);
+
+function Readiness({ board }: { board?: ManagerBoard }) {
+  if (!board) return null;
+  const summary = managerBoardSummary(board);
+  return <span className="inline-flex items-center gap-1.5 border border-border px-2 py-1 text-[11px] text-muted-foreground">{summary.isReady ? <Check className="size-3" /> : <Box className="size-3" />}{summary.isReady ? "3D Ready" : "3D incomplete"} · {summary.ready}/{summary.count}</span>;
+}
 
 export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) {
   const { isAdmin, rolesLoaded } = useAuth();
+  const fx = useFxRates();
   const [developers, setDevelopers] = useState<Tables<"developer_projects">[]>([]);
   const [layouts, setLayouts] = useState<Tables<"residence_layouts">[]>([]);
-  const [boards, setBoards] = useState<{ id: string; title: string }[]>([]);
+  const [boards, setBoards] = useState<ManagerBoard[]>([]);
   const [developerId, setDeveloperId] = useState("");
   const [layoutId, setLayoutId] = useState("");
   const [developer, setDeveloper] = useState(emptyDeveloper);
   const [layout, setLayout] = useState(emptyLayout);
-  const [packages, setPackages] = useState<ViewingRoomPackageDraft[]>([emptyPackage(), emptyPackage(), emptyPackage()]);
+  const [packages, setPackages] = useState<ViewingRoomPackageDraft[]>([]);
   const [loading, setLoading] = useState(true);
+  const [packageLoading, setPackageLoading] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [packageError, setPackageError] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [revision, setRevision] = useState(0);
+  const [layoutOpen, setLayoutOpen] = useState(false);
+  const [assignment, setAssignment] = useState<{ index: number | null; draft: ViewingRoomPackageDraft } | null>(null);
+  const [assignmentError, setAssignmentError] = useState("");
 
+  const chooseLayout = (row?: Tables<"residence_layouts">) => {
+    setLayoutId(row?.id ?? ""); setLayout(row ? { name: row.name, floorplan_url: row.floorplan_url ?? "", specs_label: row.specs_label ?? "", room_environment_glb: row.room_environment_glb ?? "" } : emptyLayout);
+  };
   useEffect(() => {
     if (!rolesLoaded || !isAdmin) return;
     const controller = new AbortController();
@@ -38,103 +60,141 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
     (async () => {
       const [d, b] = await Promise.all([
         supabase.from("developer_projects").select("*").eq("project_id", projectId).order("created_at").abortSignal(controller.signal),
-        supabase.from("client_boards").select("id,title").eq("project_id", projectId).order("created_at").abortSignal(controller.signal),
+        supabase.rpc("get_viewing_room_board_summaries", { _project_id: projectId }).abortSignal(controller.signal),
       ]);
       if (d.error || b.error) throw new Error();
       const r = d.data.length ? await supabase.from("residence_layouts").select("*").in("developer_project_id", d.data.map(row => row.id)).order("created_at").abortSignal(controller.signal) : { data: [], error: null };
-      if (r.error) throw new Error();
-      if (!controller.signal.aborted) { setDevelopers(d.data); setBoards(b.data); setLayouts(r.data ?? []); }
+      if (r.error) throw r.error;
+      if (controller.signal.aborted) return;
+      setDevelopers(d.data); setBoards(managerBoardsSchema.parse(b.data)); setLayouts(r.data ?? []);
+      if (!developerId && d.data[0]) {
+        const first = d.data[0]; setDeveloperId(first.id);
+        setDeveloper({ developer_name: first.developer_name, developer_logo_url: first.developer_logo_url ?? "", hero_image_url: first.hero_image_url ?? "" });
+        chooseLayout(r.data?.find(row => row.developer_project_id === first.id));
+      }
     })().catch(() => { if (!controller.signal.aborted) setError("The viewing room couldn’t load. Please retry."); }).finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
   }, [projectId, revision, rolesLoaded, isAdmin]);
 
   useEffect(() => {
-    if (!layoutId || !rolesLoaded || !isAdmin) { setPackages([emptyPackage(), emptyPackage(), emptyPackage()]); return; }
-    const controller = new AbortController();
-    setLoading(true); setError(null);
+    if (!layoutId || !rolesLoaded || !isAdmin) { setPackages([]); setPackageLoading(false); return; }
+    const controller = new AbortController(); setPackageLoading(true); setPackageError(false);
     Promise.resolve(supabase.from("furniture_packages").select("*").eq("residence_layout_id", layoutId).order("sort_order").abortSignal(controller.signal)).then(({ data, error: readError }) => {
       if (controller.signal.aborted) return;
-      if (readError) { setError("Packages couldn’t load. Retry before saving."); return; }
-      setPackages(data.length ? data.map(row => ({ moodboard_id: row.moodboard_id, tier_name: row.tier_name, package_price: String(row.package_price), currency: row.currency, description: row.description, lead_time_weeks: row.lead_time_weeks == null ? "" : String(row.lead_time_weeks) })) : [emptyPackage(), emptyPackage(), emptyPackage()]);
-    }).catch(() => { if (!controller.signal.aborted) setError("Packages couldn’t load. Retry before saving."); }).finally(() => { if (!controller.signal.aborted) setLoading(false); });
+      if (readError) { setPackageError(true); setError("Packages couldn’t load. Retry before saving."); return; }
+      setPackages(data.map(row => ({ moodboard_id: row.moodboard_id, tier_name: row.tier_name, package_price: String(row.package_price), currency: row.currency, description: row.description, lead_time_weeks: row.lead_time_weeks == null ? "" : String(row.lead_time_weeks), allow_alternatives: row.allow_alternatives })));
+    }).catch(() => { if (!controller.signal.aborted) { setPackageError(true); setError("Packages couldn’t load. Please retry."); } }).finally(() => { if (!controller.signal.aborted) setPackageLoading(false); });
     return () => controller.abort();
   }, [layoutId, revision, rolesLoaded, isAdmin]);
 
+  const disabled = pending || loading || packageLoading;
   const runSave = async (operation: () => Promise<void>, message: string) => {
-    if (pending || loading || !rolesLoaded || !isAdmin) return;
+    if (disabled || !rolesLoaded || !isAdmin) return;
     setPending(true); setError(null); setNotice(null);
     try { await operation(); setNotice(message); setRevision(value => value + 1); }
     catch { setError("Changes couldn’t save. Your draft is still here; please retry."); }
     finally { setPending(false); }
   };
-  const selectDeveloper = (value: string) => {
-    setDeveloperId(value === "new" ? "" : value); setLayoutId(""); setLayout(emptyLayout); setNotice(null);
-    const row = developers.find(item => item.id === value);
-    setDeveloper(row ? { developer_name: row.developer_name, developer_logo_url: row.developer_logo_url ?? "", hero_image_url: row.hero_image_url ?? "" } : emptyDeveloper);
+  const savedDeveloper = developers.find(row => row.id === developerId);
+  const magicLink = savedDeveloper ? absoluteUrl(`/viewing-room/${encodeURIComponent(savedDeveloper.access_token)}`) : "";
+  const activeLayouts = layouts.filter(row => row.developer_project_id === developerId);
+  const draftBoard = boards.find(row => row.id === assignment?.draft.moodboard_id);
+  const draftSummary = draftBoard ? managerBoardSummary(draftBoard) : null;
+  const boardPrice = (board: ManagerBoard, currency: string) => convertCents(managerBoardSummary(board).totalCents, "EUR", currency as DisplayCurrency, fx);
+  const editAssignment = (change: Partial<ViewingRoomPackageDraft>) => setAssignment(current => current ? { ...current, draft: { ...current.draft, ...change } } : null);
+  const setAssignmentBoard = (id: string) => {
+    if (!id) return;
+    const board = boards.find(row => row.id === id); if (!board || !assignment) return;
+    const summary = managerBoardSummary(board);
+    editAssignment({ moodboard_id: id, package_price: summary.unpriced ? "" : String(boardPrice(board, assignment.draft.currency) / 100) });
   };
-  const selectLayout = (value: string) => {
-    setLayoutId(value === "new" ? "" : value); setNotice(null);
-    const row = layouts.find(item => item.id === value);
-    setLayout(row ? { name: row.name, floorplan_url: row.floorplan_url ?? "", specs_label: row.specs_label ?? "", room_environment_glb: row.room_environment_glb ?? "" } : emptyLayout);
-  };
-  const editPackage = (index: number, change: Partial<ViewingRoomPackageDraft>) => setPackages(current => current.map((row, i) => i === index ? { ...row, ...change } : row));
-  const disabled = pending || loading;
   if (!rolesLoaded || !isAdmin) return null;
-  return <section aria-label="Developer Viewing Room administration" className="h-full overflow-y-auto px-4 py-6 md:px-8 lg:px-12" data-trade-sensitive>
-    <div className="mb-6 flex items-center justify-between gap-4"><h2 className="font-display text-2xl">Developer Viewing Room</h2><Button variant="ghost" size="icon" aria-label="Reload viewing room" disabled={disabled} onClick={() => setRevision(value => value + 1)}><RotateCw className="size-4" /></Button></div>
+  return <section aria-label="Developer Viewing Room administration" className="viewing-room [&_button]:cursor-pointer [&_[role=combobox]]:cursor-pointer h-full overflow-y-auto bg-background px-4 py-6 text-foreground md:px-8 lg:px-12" data-trade-sensitive>
+    <header className="mb-7 flex items-start justify-between gap-4"><div><p className="mb-2 text-[10px] uppercase text-muted-foreground">Private residences · Administration</p><h2 className="font-display text-3xl">Developer Viewing Room Manager</h2></div><Button variant="ghost" size="icon" aria-label="Reload viewing room" disabled={disabled} onClick={() => setRevision(value => value + 1)}><RotateCw className="size-4" /></Button></header>
     {loading && <p role="status" className="mb-4 text-sm text-muted-foreground">Loading viewing room…</p>}
     {error && <div role="alert" className="mb-4 flex flex-wrap items-center gap-3 text-sm text-destructive">{error}<Button variant="outline" disabled={disabled} onClick={() => setRevision(value => value + 1)}>Retry</Button></div>}
-    {notice && <p role="status" className="mb-4 text-sm text-foreground">{notice}</p>}
-    <div className="grid gap-10 xl:grid-cols-2">
-      <form className="space-y-4" onSubmit={event => { event.preventDefault(); void runSave(async () => {
-        const values = { project_id: projectId, developer_name: developer.developer_name.trim(), developer_logo_url: developer.developer_logo_url || null, hero_image_url: developer.hero_image_url || null };
-        const result = developerId ? await supabase.from("developer_projects").update(values).eq("id", developerId).eq("project_id", projectId).select("id").single() : await supabase.from("developer_projects").insert(values).select("id").single();
-        if (result.error) throw result.error;
-        setDeveloperId(result.data.id);
-      }, "Developer project saved."); }}>
-        <h3 className="trade-micro-label">01 · Developer project</h3>
-        <Select value={developerId || "new"} disabled={disabled} onValueChange={selectDeveloper}><SelectTrigger aria-label="Developer project"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="new">New developer project</SelectItem>{developers.map(row => <SelectItem key={row.id} value={row.id}>{row.developer_name}</SelectItem>)}</SelectContent></Select>
-        <div className="space-y-2"><Label htmlFor="developer-name">Developer name</Label><Input id="developer-name" required value={developer.developer_name} disabled={disabled} onChange={event => setDeveloper({ ...developer, developer_name: event.target.value })} /></div>
-        <div className="space-y-2"><Label htmlFor="developer-logo">Developer logo URL</Label><Input id="developer-logo" type="url" value={developer.developer_logo_url} disabled={disabled} onChange={event => setDeveloper({ ...developer, developer_logo_url: event.target.value })} /></div>
-        <div className="space-y-2"><Label htmlFor="developer-hero">Hero image URL</Label><Input id="developer-hero" type="url" value={developer.hero_image_url} disabled={disabled} onChange={event => setDeveloper({ ...developer, hero_image_url: event.target.value })} /></div>
-        {developer.hero_image_url && <img src={developer.hero_image_url} alt={developer.developer_name} className="aspect-[16/9] w-full object-cover" />}
-        <Button type="submit" variant="studio-primary" disabled={disabled || !developer.developer_name.trim()}><Save className="size-4" />Save developer</Button>
-        {developerId && <Button type="button" variant="outline" className="ml-2" onClick={() => { const saved = developers.find(row => row.id === developerId); if (saved) window.location.assign(absoluteUrl(`/viewing-room/${encodeURIComponent(saved.access_token)}`)); }}>Open client viewing room</Button>}
-      </form>
-      <form className="space-y-4" onSubmit={event => { event.preventDefault(); if (!developerId) return; void runSave(async () => {
-        const values = { developer_project_id: developerId, name: layout.name.trim(), floorplan_url: layout.floorplan_url || null, specs_label: layout.specs_label || null, room_environment_glb: layout.room_environment_glb || null };
-        const result = layoutId ? await supabase.from("residence_layouts").update(values).eq("id", layoutId).eq("developer_project_id", developerId).select("id").single() : await supabase.from("residence_layouts").insert(values).select("id").single();
-        if (result.error) throw result.error;
-        setLayoutId(result.data.id);
-      }, "Residence layout saved."); }}>
-        <h3 className="trade-micro-label">02 · Residence layout</h3>
-        <Select value={layoutId || "new"} disabled={disabled || !developerId} onValueChange={selectLayout}><SelectTrigger aria-label="Residence layout"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="new">New residence layout</SelectItem>{layouts.filter(row => row.developer_project_id === developerId).map(row => <SelectItem key={row.id} value={row.id}>{row.name}</SelectItem>)}</SelectContent></Select>
-        <div className="space-y-2"><Label htmlFor="residence-name">Layout name</Label><Input id="residence-name" required disabled={disabled || !developerId} value={layout.name} onChange={event => setLayout({ ...layout, name: event.target.value })} /></div>
-        <div className="space-y-2"><Label htmlFor="residence-specs">Specifications</Label><Input id="residence-specs" placeholder="3 Bed · 2,400 sq ft" disabled={disabled || !developerId} value={layout.specs_label} onChange={event => setLayout({ ...layout, specs_label: event.target.value })} /></div>
-        <div className="space-y-2"><Label htmlFor="residence-plan">Floor plan URL</Label><Input id="residence-plan" type="url" disabled={disabled || !developerId} value={layout.floorplan_url} onChange={event => setLayout({ ...layout, floorplan_url: event.target.value })} /></div>
-        <div className="space-y-2"><Label htmlFor="residence-glb">Room environment GLB URL</Label><Input id="residence-glb" type="url" disabled={disabled || !developerId} value={layout.room_environment_glb} onChange={event => setLayout({ ...layout, room_environment_glb: event.target.value })} /></div>
-        {layout.floorplan_url && <img src={layout.floorplan_url} alt={layout.name} className="aspect-[16/9] w-full object-contain" />}
-        <Button type="submit" variant="studio-primary" disabled={disabled || !developerId || !layout.name.trim()}><Save className="size-4" />Save layout</Button>
-      </form>
+    {notice && <p role="status" className="mb-4 text-sm">{notice}</p>}
+    <div className="grid min-w-0 gap-8 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1fr)_minmax(0,1.15fr)]">
+      <div className="min-w-0 space-y-6 xl:border-r xl:border-border xl:pr-7">
+        <h3 className="border-b border-border pb-4 font-display text-xl">01 · Developer Settings</h3>
+        <form className="space-y-4" onSubmit={event => { event.preventDefault(); void runSave(async () => {
+          const values = { project_id: projectId, developer_name: developer.developer_name.trim(), developer_logo_url: developer.developer_logo_url || null, hero_image_url: developer.hero_image_url || null };
+          const result = developerId ? await supabase.from("developer_projects").update(values).eq("id", developerId).eq("project_id", projectId).select("id").single() : await supabase.from("developer_projects").insert(values).select("id").single();
+          if (result.error) throw result.error; setDeveloperId(result.data.id);
+        }, "Developer project saved."); }}>
+          <Select value={developerId || "new"} disabled={disabled} onValueChange={value => {
+            if (!value) return;
+            const row = developers.find(item => item.id === value); setDeveloperId(row?.id ?? "");
+            setDeveloper(row ? { developer_name: row.developer_name, developer_logo_url: row.developer_logo_url ?? "", hero_image_url: row.hero_image_url ?? "" } : emptyDeveloper);
+            chooseLayout(layouts.find(item => item.developer_project_id === row?.id));
+          }}><SelectTrigger aria-label="Developer project"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="new">New developer project</SelectItem>{developers.map(row => <SelectItem key={row.id} value={row.id}>{row.developer_name}</SelectItem>)}</SelectContent></Select>
+          <div className="space-y-2"><Label htmlFor="developer-name">Developer name</Label><Input id="developer-name" required value={developer.developer_name} disabled={disabled} onChange={event => setDeveloper({ ...developer, developer_name: event.target.value })} /></div>
+          <div className="space-y-3"><Label htmlFor="developer-logo">Developer logo</Label>{developer.developer_logo_url && <img src={developer.developer_logo_url} alt="Developer logo" className="h-16 max-w-full object-contain object-left" />}<CloudUpload folder={`viewing-room/${projectId}/logos`} accept="image/png,image/jpeg,image/webp,image/svg+xml" label="Upload developer logo" disabled={disabled} onUpload={urls => setDeveloper(current => ({ ...current, developer_logo_url: urls[0] ?? "" }))} /><Input id="developer-logo" type="text" inputMode="url" placeholder="Logo image URL" value={developer.developer_logo_url} disabled={disabled} onChange={event => setDeveloper({ ...developer, developer_logo_url: event.target.value })} /></div>
+          <div className="space-y-3"><Label htmlFor="developer-hero">Hero banner</Label>{developer.hero_image_url && <img src={developer.hero_image_url} alt={developer.developer_name} className="aspect-[16/9] w-full object-cover" />}<CloudUpload folder={`viewing-room/${projectId}/covers`} accept="image/png,image/jpeg,image/webp" label="Upload hero banner" disabled={disabled} onUpload={urls => setDeveloper(current => ({ ...current, hero_image_url: urls[0] ?? "" }))} /><Input id="developer-hero" type="text" inputMode="url" placeholder="Hero image URL" value={developer.hero_image_url} disabled={disabled} onChange={event => setDeveloper({ ...developer, hero_image_url: event.target.value })} /></div>
+          <Button type="submit" variant="studio-primary" disabled={disabled || !developer.developer_name.trim()}><Save className="size-4" />Save developer</Button>
+        </form>
+        <div className="space-y-3 border-t border-border pt-5"><Label htmlFor="private-viewing-link">Private client magic link</Label><Input id="private-viewing-link" readOnly value={magicLink} placeholder="Save a developer first" />
+          <div className="flex flex-wrap gap-2"><Button variant="outline" disabled={!magicLink} onClick={() => void navigator.clipboard.writeText(magicLink).then(() => setNotice("Private viewing room link copied.")).catch(() => setError("The link couldn’t be copied. Select it above and copy again."))}><Copy className="size-4" />Copy</Button><Button variant="outline" disabled={!magicLink} onClick={() => { window.location.href = `mailto:?subject=${encodeURIComponent(`${developer.developer_name} · Private Viewing Room`)}&body=${encodeURIComponent(`Your private viewing room:\n\n${magicLink}`)}`; }}><Send className="size-4" />Send by email</Button><Button variant="ghost" disabled={!magicLink} aria-label="Open client viewing room" onClick={() => window.location.assign(magicLink)}><ExternalLink className="size-4" />Open</Button></div>
+        </div>
+      </div>
+      <div className="min-w-0 space-y-4 xl:border-r xl:border-border xl:pr-7">
+        <div className="flex items-center justify-between gap-2 border-b border-border pb-4"><h3 className="font-display text-xl">02 · Apartment Layouts</h3><Button variant="ghost" size="icon" aria-label="Add residence layout" disabled={disabled || !developerId || activeLayouts.length >= 5} onClick={() => { chooseLayout(); setLayoutOpen(true); }}><Plus className="size-4" /></Button></div>
+        <p className="text-xs text-muted-foreground">{activeLayouts.length} / 5 residences</p>
+        {!activeLayouts.length && !loading && <p className="py-8 text-sm text-muted-foreground">No residence layouts assigned.</p>}
+        {activeLayouts.map(row => <article key={row.id} className={`overflow-hidden border ${layoutId === row.id ? "border-foreground" : "border-border"}`}>
+          <Button variant="ghost" aria-label={`Select ${row.name}`} aria-pressed={layoutId === row.id} disabled={disabled} className="h-auto w-full flex-col items-stretch gap-0 whitespace-normal rounded-none p-0 text-left" onClick={() => chooseLayout(row)}><div className="flex aspect-[16/9] items-center justify-center border-b border-border bg-background p-4">{row.floorplan_url ? <img src={row.floorplan_url} alt={`${row.name} floor plan`} className="h-full w-full object-contain" /> : <span className="text-xs text-muted-foreground">Floor plan pending</span>}</div><div className="p-4"><h4 className="font-display text-lg">{row.name}</h4><p className="mt-2 text-xs text-muted-foreground">{row.specs_label}</p></div></Button>
+          <div className="flex items-center justify-between px-4 pb-3"><span className="text-[10px] uppercase text-muted-foreground">{layoutId === row.id ? "Active layout" : "Residence"}</span><Button variant="ghost" size="sm" disabled={disabled} onClick={() => { chooseLayout(row); setLayoutOpen(true); }}><Pencil className="size-3" />Edit</Button></div>
+        </article>)}
+      </div>
+      <div className="min-w-0 space-y-4">
+        <div className="flex items-center justify-between gap-2 border-b border-border pb-4"><h3 className="font-display text-xl">03 · Furniture Packages</h3><Button variant="ghost" size="icon" aria-label="Assign Moodboard" disabled={disabled || !layoutId || packageError || packages.length >= 5} onClick={() => { setAssignmentError(""); setAssignment({ index: null, draft: emptyPackage() }); }}><Plus className="size-4" /></Button></div>
+        <p className="text-xs text-muted-foreground">{layoutId ? layout.name : "Select a residence"} · {packages.length} / 5 tiers</p>
+        {packageLoading && <p role="status" className="py-8 text-sm text-muted-foreground">Loading packages…</p>}
+        {!packageLoading && !packages.length && <p className="py-8 text-sm text-muted-foreground">No furniture packages assigned.</p>}
+        {!packageLoading && packages.map((row, index) => { const board = boards.find(item => item.id === row.moodboard_id); const summary = board ? managerBoardSummary(board) : null;
+          return <article key={row.moodboard_id} className="space-y-4 border border-border p-5">
+            <div className="flex items-start justify-between gap-2"><div><h4 className="font-display text-2xl">{row.tier_name}</h4><p className="mt-2 text-xs text-muted-foreground">{board?.title ?? "Moodboard unavailable"} · {summary?.count ?? "—"} pieces</p></div><div className="flex"><Button variant="ghost" size="icon" aria-label={`Edit ${row.tier_name}`} disabled={disabled} onClick={() => { setAssignmentError(""); setAssignment({ index, draft: { ...row } }); }}><Pencil className="size-3.5" /></Button><Button variant="ghost" size="icon" aria-label={`Remove ${row.tier_name}`} disabled={disabled || packages.length <= 3} onClick={() => setPackages(current => current.filter((_, i) => i !== index))}><Trash2 className="size-3.5" /></Button></div></div>
+            {board && <div className="grid grid-cols-3 gap-2">{board.items.slice(0, 3).map(item => <div key={item.id} className="flex aspect-square items-center justify-center bg-background">{item.image && <img src={item.image} alt={item.name ?? "Furniture"} className="h-full w-full object-contain" />}</div>)}</div>}
+            <div className="flex flex-wrap items-center justify-between gap-2"><span className="font-display text-xl">{money(Math.round(Number(row.package_price) * 100), row.currency)}</span><Readiness board={board} /></div>
+            {summary && <p className="text-xs text-muted-foreground">Furniture total · {summary.from ? "From " : ""}{money(board ? boardPrice(board, row.currency) : 0, row.currency)}{summary.unpriced ? ` · ${summary.unpriced} unpriced` : ""}</p>}
+            <p className="text-xs text-muted-foreground">Lead time · {row.lead_time_weeks ? `${row.lead_time_weeks} weeks` : "To be confirmed"}</p>
+            <div className="flex items-center justify-between gap-3 border-t border-border pt-3"><Label htmlFor={`swap-${index}`} className="text-xs">Buyer swaps via hotspots</Label><Switch id={`swap-${index}`} disabled={disabled} checked={row.allow_alternatives ?? true} onCheckedChange={checked => setPackages(current => current.map((item, i) => i === index ? { ...item, allow_alternatives: checked } : item))} /></div>
+          </article>;
+        })}
+        <Button variant="outline" disabled={disabled || !layoutId || packageError || packages.length >= 5} onClick={() => { setAssignmentError(""); setAssignment({ index: null, draft: emptyPackage() }); }}><Plus className="size-4" />Assign Moodboard</Button>
+        <div className="border-t border-border pt-4"><Button variant="studio-primary" disabled={disabled || !layoutId || packageError || packages.length < 3} onClick={() => {
+          const validation = viewingRoomPackageError(packages, boards.map(row => row.id)); if (validation) { setError(validation); return; }
+          void runSave(async () => { const result = await supabase.rpc("save_viewing_room_packages", { _layout_id: layoutId, _packages: packages.map(row => ({ ...row, tier_name: row.tier_name.trim(), package_price: Number(row.package_price) })) }); if (result.error) throw result.error; }, "Furniture packages saved.");
+        }}><Save className="size-4" />Save packages</Button>{packages.length < 3 && <p className="mt-3 text-xs text-muted-foreground">Assign 3–5 distinct moodboards before saving.</p>}</div>
+      </div>
     </div>
-    <form className="mt-10 border-t border-border pt-6" onSubmit={event => { event.preventDefault(); if (!layoutId || error) return; const validation = viewingRoomPackageError(packages, boards.map(row => row.id)); if (validation) { setError(validation); return; } void runSave(async () => {
-      const { error: saveError } = await supabase.rpc("save_viewing_room_packages", { _layout_id: layoutId, _packages: packages.map(row => ({ ...row, tier_name: row.tier_name.trim(), package_price: Number(row.package_price) })) });
-      if (saveError) throw saveError;
-    }, `${packages.length} packages saved.`); }}>
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><h3 className="trade-micro-label">03 · Tiered packages · {packages.length} / 5</h3><Button type="button" variant="outline" disabled={disabled || !layoutId || packages.length >= 5} onClick={() => setPackages(current => [...current, emptyPackage()])}><Plus className="size-4" />Add tier</Button></div>
-      {boards.length < 3 && <p className="mb-5 text-sm text-muted-foreground">This project has {boards.length} mood boards. At least 3 distinct mood boards are required to save packages.</p>}
-      <fieldset disabled={disabled || !layoutId} className="space-y-5">
-        {packages.map((row, index) => <div key={index} className="grid gap-4 border-b border-border pb-5 md:grid-cols-2 xl:grid-cols-[1fr_1.4fr_1fr_100px_40px]">
-          <div className="space-y-2"><Label htmlFor={`tier-${index}`}>Tier {index + 1}</Label><Input id={`tier-${index}`} required value={row.tier_name} onChange={event => { setError(null); editPackage(index, { tier_name: event.target.value }); }} /></div>
-          <div className="space-y-2"><Label>Mood board</Label><Select value={row.moodboard_id || undefined} disabled={disabled || !layoutId} onValueChange={value => { setError(null); editPackage(index, { moodboard_id: value }); }}><SelectTrigger aria-label={`Mood board for tier ${index + 1}`}><SelectValue placeholder="Select mood board" /></SelectTrigger><SelectContent>{boards.map((board, boardIndex) => <SelectItem key={board.id} value={board.id} disabled={packages.some((other, i) => i !== index && other.moodboard_id === board.id)}>{board.title} · Folder {boardIndex + 1}</SelectItem>)}</SelectContent></Select></div>
-          <div className="space-y-2"><Label htmlFor={`price-${index}`}>Package price · {row.currency}</Label><Input id={`price-${index}`} type="number" min="0" step="0.01" required value={row.package_price} onChange={event => { setError(null); editPackage(index, { package_price: event.target.value }); }} /></div>
-          <div className="space-y-2"><Label>Currency</Label><Select value={row.currency} disabled={disabled || !layoutId} onValueChange={value => editPackage(index, { currency: value })}><SelectTrigger aria-label={`Currency for tier ${index + 1}`}><SelectValue /></SelectTrigger><SelectContent>{["EUR", "USD", "SGD", "GBP", "CHF"].map(value => <SelectItem key={value} value={value}>{value}</SelectItem>)}</SelectContent></Select></div>
-          <Button type="button" variant="ghost" size="icon" className="self-end" aria-label={`Remove tier ${index + 1}`} disabled={disabled || !layoutId || packages.length <= 3} onClick={() => setPackages(current => current.filter((_, i) => i !== index))}><Trash2 className="size-4" /></Button>
-          <div className="space-y-2 md:col-span-2 xl:col-span-5"><Label htmlFor={`description-${index}`}>Description</Label><Textarea id={`description-${index}`} rows={2} value={row.description} onChange={event => editPackage(index, { description: event.target.value })} /></div>
-          <div className="space-y-2"><Label htmlFor={`lead-${index}`}>Lead time · weeks</Label><Input id={`lead-${index}`} type="number" min="1" step="1" value={row.lead_time_weeks ?? ""} onChange={event => editPackage(index, { lead_time_weeks: event.target.value })} /></div>
-        </div>)}
-      </fieldset>
-      <Button type="submit" variant="studio-primary" className="mt-5" disabled={disabled || !layoutId || !!error || boards.length < 3}><Save className="size-4" />{pending ? "Saving…" : "Save packages"}</Button>
-    </form>
+    <Dialog open={layoutOpen} onOpenChange={setLayoutOpen}><DialogContent className="viewing-room max-h-[90dvh] overflow-y-auto bg-background text-foreground"><DialogHeader><DialogTitle className="font-display text-2xl">{layoutId ? "Edit Residence Layout" : "Add Residence Layout"}</DialogTitle><DialogDescription>{developer.developer_name}</DialogDescription></DialogHeader>
+      <form className="space-y-4" onSubmit={event => { event.preventDefault(); void runSave(async () => {
+        const values = { developer_project_id: developerId, name: layout.name.trim(), floorplan_url: layout.floorplan_url || null, specs_label: layout.specs_label || null, room_environment_glb: layout.room_environment_glb || null };
+        const result = layoutId ? await supabase.from("residence_layouts").update(values).eq("id", layoutId).eq("developer_project_id", developerId).select("id").single() : await supabase.from("residence_layouts").insert(values).select("id").single(); if (result.error) throw result.error; setLayoutId(result.data.id); setLayoutOpen(false);
+      }, "Residence layout saved."); }}>
+        <div className="space-y-2"><Label htmlFor="residence-name">Layout name</Label><Input id="residence-name" required value={layout.name} disabled={disabled} onChange={event => setLayout({ ...layout, name: event.target.value })} /></div>
+        <div className="space-y-2"><Label htmlFor="residence-specs">Room specifications</Label><Input id="residence-specs" placeholder="3 Bed · 2,400 sq ft" value={layout.specs_label} disabled={disabled} onChange={event => setLayout({ ...layout, specs_label: event.target.value })} /></div>
+        <div className="space-y-3"><Label htmlFor="residence-plan">Floor plan</Label>{layout.floorplan_url && <img src={layout.floorplan_url} alt="Residence floor plan" className="max-h-48 w-full object-contain" />}<CloudUpload folder={`viewing-room/${projectId}/plans`} accept="image/png,image/jpeg,image/webp" label="Upload floor plan" disabled={disabled} onUpload={urls => setLayout(current => ({ ...current, floorplan_url: urls[0] ?? "" }))} /><Input id="residence-plan" type="text" inputMode="url" value={layout.floorplan_url} disabled={disabled} onChange={event => setLayout({ ...layout, floorplan_url: event.target.value })} /></div>
+        <div className="space-y-2"><Label htmlFor="residence-glb">Room environment GLB URL</Label><Input id="residence-glb" type="text" inputMode="url" value={layout.room_environment_glb} disabled={disabled} onChange={event => setLayout({ ...layout, room_environment_glb: event.target.value })} /></div>
+        <Button type="submit" variant="studio-primary" disabled={disabled || !developerId || !layout.name.trim()}><Save className="size-4" />Save layout</Button>{error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+      </form>
+    </DialogContent></Dialog>
+    <Dialog open={!!assignment} onOpenChange={open => { if (!open) setAssignment(null); }}><DialogContent className="viewing-room max-h-[90dvh] overflow-y-auto bg-background text-foreground"><DialogHeader><DialogTitle className="font-display text-2xl">Assign Moodboard</DialogTitle><DialogDescription>{layout.name}</DialogDescription></DialogHeader>
+      {assignment && <form className="space-y-4" onSubmit={event => { event.preventDefault(); const row = assignment.draft;
+        if (!row.moodboard_id || !row.tier_name.trim() || !row.package_price.trim() || Number(row.package_price) < 0) { setAssignmentError("Choose a moodboard, name the tier and confirm its package price."); return; }
+        if (packages.some((item, i) => i !== assignment.index && item.tier_name.trim() === row.tier_name.trim())) { setAssignmentError("Choose a unique tier name."); return; }
+        setPackages(current => assignment.index == null ? [...current, row] : current.map((item, i) => i === assignment.index ? row : item)); setAssignment(null); setNotice("Tier added to draft. Save packages to publish the changes.");
+      }}>
+        <div className="space-y-2"><Label>Project Studio moodboard</Label><Select value={assignment.draft.moodboard_id || undefined} onValueChange={setAssignmentBoard}><SelectTrigger aria-label="Assign moodboard selection"><SelectValue placeholder="Select moodboard" /></SelectTrigger><SelectContent>{boards.map((board, index) => <SelectItem key={board.id} value={board.id} disabled={packages.some((row, i) => i !== assignment.index && row.moodboard_id === board.id)}>{board.title} · Folder {index + 1} · {board.items.length} pieces</SelectItem>)}</SelectContent></Select></div>
+        {draftBoard && draftSummary && <div className="space-y-3 border-y border-border py-4"><div className="grid grid-cols-4 gap-2">{draftBoard.items.slice(0, 4).map(item => <div key={item.id} className="aspect-square">{item.image && <img src={item.image} alt={item.name ?? "Furniture"} className="h-full w-full object-contain" />}</div>)}</div><Readiness board={draftBoard} /><p className="font-display text-xl">Furniture total · {draftSummary.from ? "From " : ""}{money(boardPrice(draftBoard, assignment.draft.currency), assignment.draft.currency)}</p>{draftSummary.unpriced > 0 && <p className="text-xs text-destructive">{draftSummary.unpriced} item prices unconfirmed. Confirm the package price before assigning.</p>}</div>}
+        <div className="space-y-2"><Label htmlFor="assignment-tier">Tier name</Label><Input id="assignment-tier" required placeholder="Essential, Signature or Bespoke" value={assignment.draft.tier_name} onChange={event => editAssignment({ tier_name: event.target.value })} /></div>
+        <div className="grid grid-cols-[1fr_100px] gap-3"><div className="space-y-2"><Label htmlFor="assignment-price">Package price · {assignment.draft.currency}</Label><Input id="assignment-price" required type="number" min="0" step="0.01" value={assignment.draft.package_price} onChange={event => editAssignment({ package_price: event.target.value })} /></div><div className="space-y-2"><Label>Currency</Label><Select value={assignment.draft.currency} onValueChange={currency => { if (currency) editAssignment({ currency, package_price: draftBoard && !draftSummary?.unpriced ? String(boardPrice(draftBoard, currency) / 100) : "" }); }}><SelectTrigger aria-label="Package currency"><SelectValue /></SelectTrigger><SelectContent>{currencies.map(value => <SelectItem key={value} value={value}>{value}</SelectItem>)}</SelectContent></Select></div></div>
+        <div className="space-y-2"><Label htmlFor="assignment-lead">Lead time · weeks</Label><Input id="assignment-lead" type="number" min="1" step="1" value={assignment.draft.lead_time_weeks ?? ""} onChange={event => editAssignment({ lead_time_weeks: event.target.value })} /></div>
+        <div className="space-y-2"><Label htmlFor="assignment-description">Description</Label><Textarea id="assignment-description" rows={2} value={assignment.draft.description} onChange={event => editAssignment({ description: event.target.value })} /></div>
+        <div className="flex items-center justify-between gap-3"><Label htmlFor="assignment-swaps">Buyer swaps via hotspots</Label><Switch id="assignment-swaps" checked={assignment.draft.allow_alternatives ?? true} onCheckedChange={checked => editAssignment({ allow_alternatives: checked })} /></div>
+        {assignmentError && <p role="alert" className="text-sm text-destructive">{assignmentError}</p>}<Button type="submit" variant="studio-primary">{assignment.index == null ? "Add to packages" : "Update package"}</Button>
+      </form>}
+    </DialogContent></Dialog>
   </section>;
 }

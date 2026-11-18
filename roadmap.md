@@ -1,5 +1,10 @@
 # Roadmap
 
+## Developer Viewing Room Manager
+- [x] Build the three-column admin manager with media uploads, private-link copy/email sharing, residence cards and package assignment modal. Email action opens the admin’s email composer; delivery is not claimed.
+- [x] Add live board retail totals/3D readiness and persisted, server-enforced buyer-swap controls; preserve package identities and all 267 linked alternatives on edits.
+- [x] Thirteen focused tests and preview build pass. Signed-in real Cipriani package edit/toggle survives reload, disabled swaps return zero alternatives, assignment total/readiness and desktop/phone fit visually verified. Real logo upload/save/readback passed and original logo/package settings restored; floorplan save check interrupted by preview navigation, so not claimed verified.
+
 ## Client Developer Viewing Room
 - [x] Added worker audits of fitted upright metre bounds against recorded measurements (25% / 5cm tolerance); invalid/mismatched models remain wireframe without blocking the queue, missing dimensions show unconfirmed. Twelve regressions pass; real three-piece Cipriani package renders on desktop/phone with no errors/overflow, and controlled worker mismatch withholds all three models while loading completes. Other packages/themes remain unverified.
 - [x] Correct distorted Cipriani geometry: worker transfer now de-interleaves packed GLB vertices before decoding; uniform measured sizing remains unchanged. All three packages load 3/4/6 pieces; desktop/phone and light/dark-preference renders and Bespoke refresh pass with no page errors. Nine regressions pass; real-device frame rate remains unmeasured.

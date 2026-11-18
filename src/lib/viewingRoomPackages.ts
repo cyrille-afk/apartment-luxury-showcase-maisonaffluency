@@ -5,6 +5,7 @@ export type ViewingRoomPackageDraft = {
   currency: string;
   description: string;
   lead_time_weeks?: string;
+  allow_alternatives?: boolean;
 };
 
 export function viewingRoomPackageError(rows: ViewingRoomPackageDraft[], boardIds: string[]): string | null {

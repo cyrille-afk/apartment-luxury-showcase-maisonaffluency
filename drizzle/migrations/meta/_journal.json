@@ -2129,6 +2129,13 @@
       "when": 1794962104514,
       "tag": "0303_viewing_room_alternative_retail_labels",
       "breakpoints": true
+    },
+    {
+      "idx": 304,
+      "version": "7",
+      "when": 1794975920414,
+      "tag": "0304_viewing_room_manager_controls",
+      "breakpoints": true
     }
   ]
 }
