@@ -2,6 +2,7 @@
 
 ## Client Developer Viewing Room
 - [x] Add Stage 3 shared hotspots, inspection with selected swatch toggle, linked-alternative support and live retail-difference total; locked server-validated request generates a PDF. Desktop/phone hotspot→drawer verified, 2.7MB PDF download and 14 tests pass.
+- [ ] Complete exhaustive Stage 3 item/theme checks: all Essential and Signature desktop drawers inspected and return-to-room exercised; phone first piece passes. Bespoke inspection and remaining phone/theme checks stopped on software-renderer click timeouts, so they are not claimed verified.
 - [ ] Populate approved slot alternatives and verify a real swap end-to-end — waiting for the user's pairings; unassigned slots remain explicitly empty.
 - [x] Seed Cipriani with three marked sample layouts and three package tiers (3/4/6 existing pieces); retain original boards and indicative retail totals.
 - [x] Add token-validated hierarchy/package projections, no public table access, and editable lead times.
