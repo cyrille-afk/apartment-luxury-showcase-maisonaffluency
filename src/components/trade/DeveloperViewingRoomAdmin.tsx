@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Plus, Save, Trash2, RotateCw, Copy, Send, ExternalLink, Pencil, Box, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
@@ -16,6 +16,7 @@ import { managerBoardsSchema, managerBoardSummary, type ManagerBoard } from "@/l
 import { convertCents, useFxRates, type DisplayCurrency } from "./CurrencyToggle";
 import { absoluteUrl } from "@/config/site";
 import PackageHotspotsDrawer from "./PackageHotspotsDrawer";
+import { developerDraftDirty, layoutDraftDirty, packagesDraftDirty, registerUnsavedAdminDraft, type SavedPackageRow } from "@/lib/unsavedAdminDraft";
 
 const emptyDeveloper = { developer_name: "", developer_logo_url: "", hero_image_url: "" };
 const emptyLayout = { name: "", floorplan_url: "", specs_label: "", room_environment_glb: "" };
@@ -40,6 +41,7 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
   const [developer, setDeveloper] = useState(emptyDeveloper);
   const [layout, setLayout] = useState(emptyLayout);
   const [packages, setPackages] = useState<ViewingRoomPackageDraft[]>([]);
+  const [savedPackages, setSavedPackages] = useState<SavedPackageRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [packageLoading, setPackageLoading] = useState(false);
   const [pending, setPending] = useState(false);
@@ -80,12 +82,13 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
   }, [projectId, revision, rolesLoaded, isAdmin]);
 
   useEffect(() => {
-    if (!layoutId || !rolesLoaded || !isAdmin) { setPackages([]); setPackageLoading(false); return; }
+    if (!layoutId || !rolesLoaded || !isAdmin) { setPackages([]); setSavedPackages([]); setPackageLoading(false); return; }
     const controller = new AbortController(); setPackageLoading(true); setPackageError(false); setSavedPackageIds({}); setHotspotPackage(null);
     Promise.resolve(supabase.from("furniture_packages").select("*").eq("residence_layout_id", layoutId).order("sort_order").abortSignal(controller.signal)).then(({ data, error: readError }) => {
       if (controller.signal.aborted) return;
       if (readError) { setPackageError(true); setError("Packages couldn’t load. Retry before saving."); return; }
       setSavedPackageIds(Object.fromEntries(data.map(row => [row.moodboard_id, row.id])));
+      setSavedPackages(data);
       setPackages(data.map(row => ({ moodboard_id: row.moodboard_id, tier_name: row.tier_name, package_price: String(row.package_price), currency: row.currency, description: row.description, lead_time_weeks: row.lead_time_weeks == null ? "" : String(row.lead_time_weeks), allow_alternatives: row.allow_alternatives })));
     }).catch(() => { if (!controller.signal.aborted) { setPackageError(true); setError("Packages couldn’t load. Please retry."); } }).finally(() => { if (!controller.signal.aborted) setPackageLoading(false); });
     return () => controller.abort();
@@ -100,6 +103,18 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
     finally { setPending(false); }
   };
   const savedDeveloper = developers.find(row => row.id === developerId);
+  const savedLayout = layouts.find(row => row.id === layoutId) ?? null;
+  const draftIsUnsaved = useMemo(
+    () =>
+      developerDraftDirty(developer, savedDeveloper ?? null) ||
+      layoutDraftDirty(layout, savedLayout) ||
+      packagesDraftDirty(packages, savedPackages),
+    [developer, savedDeveloper, layout, savedLayout, packages, savedPackages],
+  );
+  // The navigation guard reads this at click time, so the newest render wins.
+  const draftIsUnsavedRef = useRef(draftIsUnsaved);
+  draftIsUnsavedRef.current = draftIsUnsaved;
+  useEffect(() => registerUnsavedAdminDraft(() => draftIsUnsavedRef.current), []);
   const magicLink = savedDeveloper ? absoluteUrl(`/viewing-room/${encodeURIComponent(savedDeveloper.access_token)}`) : "";
   const activeLayouts = layouts.filter(row => row.developer_project_id === developerId);
   const draftBoard = boards.find(row => row.id === assignment?.draft.moodboard_id);

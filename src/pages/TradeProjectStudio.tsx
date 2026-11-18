@@ -7,7 +7,7 @@ import { DotCircleLoader, PageLoader } from "@/components/ui/dot-circle-loader";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel } from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { ProjectSpecDrawer } from "@/components/trade/ProjectSpecDrawer";
@@ -39,7 +39,9 @@ import { selectedStudioBoard, studioBoardItems } from "@/lib/studioBoardScope";
 import { studioBoardCount } from "@/lib/studioBoardCounts";
 import { DeveloperViewingRoomAdmin } from "@/components/trade/DeveloperViewingRoomAdmin";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { studioTabPreference } from "@/lib/studioProjectRouting";
+import { useBlocker } from "@tanstack/react-router";
+import { studioTabPreference, projectSwitchesAway } from "@/lib/studioProjectRouting";
+import { hasUnsavedAdminDraft } from "@/lib/unsavedAdminDraft";
 
 type StudioItem = {
   id: string;
@@ -409,6 +411,21 @@ export default function TradeProjectStudio() {
   const unpriced = items.filter(item => item.rrp_cents == null).length;
   const budgetPct = budgetCents ? Math.min(100, Math.round((totals.msrp / budgetCents) * 100)) : 0;
 
+  // Unsaved Developer Viewing Room edits may only be dropped by an explicit
+  // choice, so hold a project switch and ask. Never a beforeunload prompt —
+  // that freezes the embedded preview on reloads.
+  const adminTabActive = studioTab === "admin" && rolesLoaded && isAdmin && !isClientMode;
+  const shouldBlockProjectSwitch = useCallback(
+    ({ next }: { next: { pathname: string; search?: unknown } }) =>
+      adminTabActive && hasUnsavedAdminDraft() && projectSwitchesAway(id, next),
+    [adminTabActive, id],
+  );
+  const unsavedAdminBlocker = useBlocker({
+    shouldBlockFn: shouldBlockProjectSwitch,
+    enableBeforeUnload: false,
+    withResolver: true,
+  });
+
   if (loading) {
     return (
       <PageLoader />
@@ -446,6 +463,18 @@ export default function TradeProjectStudio() {
       {rolesLoaded && isAdmin && !isClientMode && <Tabs value={studioTab} onValueChange={value => { setSearchParams(previous => { previous.set("tab", value); return previous; }, { replace: true }); setIsAiPanelOpen(false); setIsSpecPanelOpen(false); }} className="shrink-0 border-b border-border px-4 py-2 md:px-8 lg:px-12">
         <TabsList><TabsTrigger value="canvas" className="cursor-pointer">Project Studio</TabsTrigger><TabsTrigger value="admin" className="cursor-pointer">Admin</TabsTrigger></TabsList>
       </Tabs>}
+      <AlertDialog open={unsavedAdminBlocker.status === "blocked"} onOpenChange={open => { if (!open) unsavedAdminBlocker.reset?.(); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved viewing room changes</AlertDialogTitle>
+            <AlertDialogDescription>You have changes in the Developer Viewing Room Manager that haven’t been saved. Switching to another project will discard them.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep editing</AlertDialogCancel>
+            <AlertDialogAction onClick={() => unsavedAdminBlocker.proceed?.()}>Discard and switch</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       {studioTab === "admin" && rolesLoaded && isAdmin && !isClientMode ? <div className="min-h-0 flex-1"><DeveloperViewingRoomAdmin key={project.id} projectId={project.id} /></div> : <>
       <div className="flex shrink-0 flex-wrap justify-start gap-2 border-b border-border px-4 py-3 md:px-6">
         <Select value={selectedBoardId ?? (boards.length === 1 ? boards[0]?.id : undefined)} onValueChange={board => { setItems([]); setLoadedBoardId(null); setLoadingItems(true); setSearchParams(previous => { previous.set("board", board); return previous; }); }}>
