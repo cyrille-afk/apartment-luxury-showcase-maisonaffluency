@@ -104,13 +104,13 @@
 .pitch-invitation-layout { display: grid; grid-template-columns: 0.9fr auto 1.45fr auto 0.75fr; gap: 18px; align-items: stretch; height: 585px; }
 .pitch-col { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
 .pitch-col-shot { min-height: 0; flex: 1 1 0; position: relative; }
-.pitch-col-shot>img { position: absolute; inset: 0; }
+.pitch-col-shot>img { position: absolute; inset: 16px; }
 .pitch-col>figure { flex: 1 1 auto; }
 .pitch-col-label { color: var(--pitch-muted); font-size: 18px; letter-spacing: .08em; padding-bottom: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--pitch-border); }
 .pitch-col>figure, .pitch-col-shot, .pitch-tier-stack { flex: 1; }
 .pitch-col-arrow { align-self: center; width: 26px; height: 26px; color: var(--pitch-muted); }
 .pitch-col-shot { border: 1px solid var(--pitch-border); display: flex; align-items: center; justify-content: center; overflow: hidden; }
-.pitch-col-shot>img { width: 100%; height: 100%; object-fit: contain; object-position: center; }
+.pitch-col-shot>img { width: calc(100% - 32px); height: calc(100% - 32px); object-fit: contain; object-position: left center; }
 .pitch-tier-stack { display: flex; flex-direction: column; gap: 16px; }
 .pitch-tier-stack>div { flex: 1; border: 1px solid var(--pitch-border); padding: 22px 26px; display: flex; flex-direction: column; justify-content: center; }
 .pitch-tier-stack span { font-family: Georgia,serif; font-size: 32px; }
