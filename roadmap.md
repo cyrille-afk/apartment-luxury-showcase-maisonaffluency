@@ -2,6 +2,7 @@
 
 ## Readable private viewing-room links
 - [x] Generate saved-developer-name addresses while retaining full private tokens and previous links. Four tests pass; signed-in Admin produces cipriani-residences-miami on the production domain, guest residence/package navigation and refresh work, and the previous link still opens the same room with no page errors.
+- [x] Follow-up checks verify all three residences and nine package entries on phone and desktop under light/dark appearance preferences; named-link refresh and legacy links pass without page errors. Viewing Room retains its editorial light surface.
 
 ## Connected folder curation
 - [x] Add Furniture catalogue slide-over and Open in Mood Board on folder detail; paginated catalogue reads and duplicate-safe insertion target that folder.
