@@ -1,5 +1,10 @@
 # Roadmap
 
+## Connected folder curation
+- [x] Add Furniture catalogue slide-over and Open in Mood Board on folder detail; paginated catalogue reads and duplicate-safe insertion target that folder.
+- [x] Load a selected project/folder in Mood Board and save exact-row additions/removals without creating another folder; locked procurement rows remain protected.
+- [x] Add package Edit Items shortcuts. Five tests pass; signed-in Essential folder drawer insertion, Mood Board addition, save/reload and exact removal restored the original two items. All nine package shortcuts, Open folder and Studio handoff pass on desktop/phone in both themes with no page errors.
+
 ## Local Admin draft recovery
 - [x] Save account/project-scoped dirty Admin forms and unfinished package edits locally, with explicit Restore/Discard after refresh, saved-section reconciliation and explicit project-switch discard cleanup.
 - [x] Twenty-four regressions pass; signed-in developer/open-package recovery and discard/reload verified on desktop, developer recovery/discard on phone, without page errors or changing published settings.

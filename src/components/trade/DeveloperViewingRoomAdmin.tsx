@@ -18,6 +18,8 @@ import { absoluteUrl } from "@/config/site";
 import PackageHotspotsDrawer from "./PackageHotspotsDrawer";
 import { developerDraftDirty, layoutDraftDirty, packagesDraftDirty, registerUnsavedAdminDraft, type SavedPackageRow } from "@/lib/unsavedAdminDraft";
 import { adminRecoveryKey, hasRecoveryChanges, parseAdminRecovery, type AdminRecoveryDraft } from "@/lib/adminDraftRecovery";
+import { Link } from "@/lib/router-compat";
+import { moodFolderUrl } from "@/lib/moodFolderEditing";
 
 const emptyDeveloper = { developer_name: "", developer_logo_url: "", hero_image_url: "" };
 const emptyLayout = { name: "", floorplan_url: "", specs_label: "", room_environment_glb: "" };
@@ -241,6 +243,7 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
             <p className="text-xs text-muted-foreground">Lead time · {row.lead_time_weeks ? `${row.lead_time_weeks} weeks` : "To be confirmed"}</p>
             <div className="flex items-center justify-between gap-3 border-t border-border pt-3"><Label htmlFor={`swap-${index}`} className="text-xs">Buyer swaps via hotspots</Label><Switch id={`swap-${index}`} disabled={disabled} checked={row.allow_alternatives ?? true} onCheckedChange={checked => setPackages(current => current.map((item, i) => i === index ? { ...item, allow_alternatives: checked } : item))} /></div>
             <Button variant="outline" disabled={disabled || !savedPackageIds[row.moodboard_id]} onClick={() => { const id = savedPackageIds[row.moodboard_id]; if (id) setHotspotPackage({ id, tier: row.tier_name }); }}>Configure Hotspots</Button>
+            {board && <Button asChild variant="ghost" className="h-auto gap-1.5 px-0"><Link to={moodFolderUrl(projectId, row.moodboard_id)}><Pencil className="size-3.5" />Edit Items</Link></Button>}
             {!savedPackageIds[row.moodboard_id] && <p className="text-xs text-muted-foreground">Save packages before configuring hotspots.</p>}
           </article>;
         })}

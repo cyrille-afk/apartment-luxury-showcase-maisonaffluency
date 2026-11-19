@@ -60,6 +60,8 @@ import { compileBoardDraftQuote } from "@/lib/boardDraftQuote";
 import { formatMoneyIn } from "@/lib/displayMoney";
 import { DeleteBoardButton } from "@/components/trade/DeleteBoardButton";
 import { SavedMoodBoardBudget } from "@/components/trade/SavedMoodBoardBudget";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { moodFolderUrl } from "@/lib/moodFolderEditing";
 
 interface Board {
   id: string;
@@ -328,6 +330,8 @@ const TradeBoardBuilder = () => {
   }, [items, subfolders]);
 
   const [catalogLoaded, setCatalogLoaded] = useState(false);
+  const [catalogError, setCatalogError] = useState(false);
+  const [addingProduct, setAddingProduct] = useState(false);
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [letterFilter, setLetterFilter] = useState<string | null>(null);
 
@@ -335,13 +339,14 @@ const TradeBoardBuilder = () => {
   // directory and drill-down views are derived client-side from this list.
   const loadCatalog = useCallback(async () => {
     if (!user || catalogLoaded) return;
-    const { data } = await supabase
-      .from("trade_products")
-      .select("id, product_name, brand_name, image_url, category")
-      .neq("is_active", false)
-      .order("brand_name")
-      .order("product_name");
-    const unique = (data || []) as Product[];
+    setCatalogError(false);
+    const unique: Product[] = [];
+    for (let start = 0; ; start += 500) {
+      const { data, error } = await supabase.from("trade_products").select("id, product_name, brand_name, image_url, category").neq("is_active", false).eq("is_hidden", false).order("brand_name").order("product_name").range(start, start + 499);
+      if (error) { setCatalogError(true); return; }
+      unique.push(...(data ?? []));
+      if (!data || data.length < 500) break;
+    }
     await fillTradeProductImageFallbacks(unique);
     await fillHotspotImages(unique.filter(p => !p.image_url));
     setProducts(unique);
@@ -396,15 +401,18 @@ const TradeBoardBuilder = () => {
   [groupedProducts, selectedBrand]);
 
   const addProduct = async (productId: string) => {
-    if (!id) return;
+    if (!id || addingProduct || addedIds.has(productId) || clientSafe) return;
+    setAddingProduct(true);
     const { error } = await supabase
       .from("client_board_items")
       .insert({ board_id: id, product_id: productId, sort_order: items.length, subfolder: addToSubfolder });
     if (!error) {
       setAddedIds(prev => new Set(prev).add(productId));
       fetchBoard();
+      window.dispatchEvent(new CustomEvent("concierge:artifacts-changed"));
       toast({ title: "Product added" });
-    }
+    } else toast({ title: "Furniture couldn’t be added. Please retry.", variant: "destructive" });
+    setAddingProduct(false);
   };
 
   const removeItem = async (itemId: string) => {
@@ -709,11 +717,12 @@ const TradeBoardBuilder = () => {
       <Helmet><title>{board.title} — Project Folder — Maison Affluency</title></Helmet>
       <div className="md:-mx-2 lg:-mx-6">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex flex-wrap items-center gap-3 mb-6">
           <Button variant="ghost" size="sm" onClick={() => navigate("/trade/boards")} className="gap-1.5">
             <ArrowLeft className="h-3.5 w-3.5" /> Folders
           </Button>
           {isEditable && !clientSafe && <DeleteBoardButton board={board} onDeleted={() => { toast({ title: "Folder deleted" }); navigate(board.project_id ? `/trade/projects?view=folders&project=${board.project_id}` : "/trade/boards"); }} />}
+          {isEditable && !clientSafe && <><Button variant="studio-primary" size="sm" onClick={() => { setAddToSubfolder(null); setAddOpen(true); }}><Plus className="size-3.5" />Add Furniture</Button><Button asChild variant="outline" size="sm"><Link to={moodFolderUrl(board.project_id, board.id)}>Open in Mood Board</Link></Button></>}
           {subfolders.length > 0 && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild><Button variant="ghost" size="sm" className="gap-1.5">{focusedSubfolder ?? "Top of board"}<ChevronDown className="h-3.5 w-3.5" /></Button></DropdownMenuTrigger>
@@ -1224,17 +1233,18 @@ const TradeBoardBuilder = () => {
       </Dialog>
 
       {/* Add products dialog */}
-      <Dialog open={addOpen} onOpenChange={setAddOpen}>
-        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="font-display">
-              Add Products
+      <Sheet open={addOpen} onOpenChange={setAddOpen}>
+        <SheetContent className="w-full sm:max-w-2xl h-dvh flex flex-col [&_button]:cursor-pointer">
+          <SheetHeader>
+            <SheetTitle className="font-display pr-10">
+              Source Catalog · {board.title}
               {addToSubfolder && (
                 <span className="text-sm font-body text-muted-foreground font-normal ml-2">→ {addToSubfolder}</span>
               )}
-            </DialogTitle>
-          </DialogHeader>
+            </SheetTitle>
+          </SheetHeader>
           <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search products…" className="mb-3" />
+          {catalogError && <div role="alert" className="flex items-center gap-2 text-sm text-destructive">Catalogue couldn’t load.<Button variant="outline" onClick={() => void loadCatalog()}>Retry</Button></div>}
           <div className="flex-1 overflow-y-auto min-h-0">
             {search.trim() ? (
               /* Global search bypasses the directory entirely */
@@ -1242,7 +1252,7 @@ const TradeBoardBuilder = () => {
                 {searchResults.map(p => (
                   <button
                     key={p.id}
-                    disabled={addedIds.has(p.id)}
+                    disabled={addingProduct || addedIds.has(p.id)}
                     onClick={() => addProduct(p.id)}
                     className="w-full flex items-center gap-3 p-2.5 rounded-md hover:bg-muted/50 transition-colors text-left disabled:opacity-40"
                   >
@@ -1281,7 +1291,7 @@ const TradeBoardBuilder = () => {
                   {selectedBrandProducts.map(p => (
                     <button
                       key={p.id}
-                      disabled={addedIds.has(p.id)}
+                      disabled={addingProduct || addedIds.has(p.id)}
                       onClick={() => addProduct(p.id)}
                       className="group rounded-md border border-border/60 overflow-hidden text-left hover:border-foreground/30 transition-colors disabled:opacity-40"
                     >
@@ -1358,8 +1368,8 @@ const TradeBoardBuilder = () => {
               <p className="text-center text-muted-foreground text-sm py-8">Loading catalog…</p>
             )}
           </div>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
     </>
   );
 };

@@ -22,10 +22,13 @@ interface Props {
   defaultProjectId: string | null;
   pdfContext: MoodBoardPdfContext;
   anchorId?: string | null;
+  targetFolderId?: string | null;
+  onSaveFolder?: () => Promise<boolean>;
+  folderSaveDisabled?: boolean;
 }
 
 /** Next steps once pieces are chosen: save to a project, export, and present. */
-export function MoodBoardActions({ items, defaultProjectId, pdfContext, anchorId }: Props) {
+export function MoodBoardActions({ items, defaultProjectId, pdfContext, anchorId, targetFolderId, onSaveFolder, folderSaveDisabled }: Props) {
   const { currentStudio } = useStudio();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -89,6 +92,10 @@ export function MoodBoardActions({ items, defaultProjectId, pdfContext, anchorId
     } finally { setSaving(false); }
   };
   const openStudio = () => {
+    if (targetFolderId && defaultProjectId && onSaveFolder) {
+      void onSaveFolder().then(saved => { if (saved) navigate(`/trade/projects/${defaultProjectId}/studio?board=${targetFolderId}&tab=canvas`); });
+      return;
+    }
     setStudioIntent(true);
     setMessage(null);
     const destination = defaultProjectId || workspace?.activeFolder?.projectId || getActiveProjectId();
@@ -143,11 +150,11 @@ export function MoodBoardActions({ items, defaultProjectId, pdfContext, anchorId
           Export PDF
         </Button>
         <div className="flex flex-wrap items-center gap-2">
-        <Button size="sm" disabled={disabled || saving} onClick={() => { setStudioIntent(false); setMessage(null); setOpen(true); }} className="h-9 cursor-pointer text-[11px] uppercase tracking-[0.12em]">
+        <Button size="sm" disabled={targetFolderId ? folderSaveDisabled : disabled || saving} onClick={() => { if (targetFolderId && onSaveFolder) { void onSaveFolder(); return; } setStudioIntent(false); setMessage(null); setOpen(true); }} className="h-9 cursor-pointer text-[11px] uppercase tracking-[0.12em]">
           <FolderPlus className="mr-1.5 h-3.5 w-3.5" />
-          Save to project
+          {targetFolderId ? "Save folder updates" : "Save to project"}
         </Button>
-        <Button variant="studio-primary" size="sm" title="Select finishes & AI pairings" disabled={disabled || saving} onClick={openStudio} className="h-9 cursor-pointer gap-1.5 px-4 text-[11px] uppercase tracking-[0.12em]">
+        <Button variant="studio-primary" size="sm" title="Select finishes & AI pairings" disabled={disabled || saving || (targetFolderId ? folderSaveDisabled : false)} onClick={openStudio} className="h-9 cursor-pointer gap-1.5 px-4 text-[11px] uppercase tracking-[0.12em]">
           {saving && studioIntent ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <LayoutTemplate className="h-3.5 w-3.5" />}Open in Project Studio
         </Button>
         </div>

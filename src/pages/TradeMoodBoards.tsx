@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { useSearchParams } from "@/lib/router-compat";
+import { Link, useSearchParams } from "@/lib/router-compat";
 import { Search, Loader2, Plus, X, Heart, FolderOpen, LayoutGrid, Sparkles, RefreshCw, Pin } from "lucide-react";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { MakerAZPicker } from "@/components/trade/MakerAZPicker";
@@ -24,6 +24,11 @@ import { filterMoodBoardCatalog, moodBoardCategories, shouldRecommendMoodBoard, 
 import { complementPage, nextComplementPage, COMPLEMENT_PAGE_SIZE } from "@/lib/moodBoardRecommendationPages";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { ProjectPicker } from "@/components/trade/ProjectPicker";
+import { folderChanges } from "@/lib/moodFolderEditing";
+import { moodBoardStudioItems } from "@/lib/moodBoardStudioTransfer";
+import { savedMoodBudgetKey, initialSavedMoodBudget } from "@/lib/savedMoodBoardBudget";
+import { readStudioRoomContext } from "@/lib/studioRoomContext";
 
 type PickerFilter = "all" | "favourites" | "board";
 
@@ -45,8 +50,21 @@ type MoodRec = MoodBoardSuggestion;
 export default function TradeMoodBoards() {
   const { user } = useAuth();
   const { discountPct } = useTradeDiscount();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const projectId = searchParams.get("project");
+  const folderId = searchParams.get("board");
+  const [folderTitle, setFolderTitle] = useState("");
+  const [folderLoading, setFolderLoading] = useState(false);
+  const [folderError, setFolderError] = useState<string | null>(null);
+  const [folderRevision, setFolderRevision] = useState(0);
+  const [folderSaving, setFolderSaving] = useState(false);
+  const [folderEditable, setFolderEditable] = useState(false);
+  const folderSaveLock = useRef(false);
+  const originalFolder = useRef<any[]>([]);
+  const { data: targetFolders = [], isFetching: foldersLoading } = useQuery({
+    queryKey: ["mood-target-folders", user?.id, projectId], enabled: !!user && !!projectId,
+    queryFn: async () => { const { data, error } = await supabase.from("client_boards").select("id,title,status").eq("project_id", projectId ?? "").order("created_at"); if (error) throw error; return data ?? []; },
+  });
   const { clientSafe } = useClientSafeMode();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<MoodBoardCategory>("All");
@@ -56,7 +74,7 @@ export default function TradeMoodBoards() {
   const [board, setBoard] = useState<any[]>([]);
   const [budgetSettings, setBudgetSettings] = useState<MoodBudgetSettings>(emptyMoodBudget);
   const [draftReady, setDraftReady] = useState(false);
-  const draftKey = `ma-mood-workspace-v1:${user?.id ?? "pending"}:${projectId ?? "standalone"}`;
+  const draftKey = `ma-mood-workspace-v1:${user?.id ?? "pending"}:${projectId ?? "standalone"}${folderId ? `:${folderId}` : ""}`;
   const restoredProjectRef = useRef(false);
   const [filter, setFilter] = useState<PickerFilter>(projectId ? "board" : "all");
   const [recommendations, setRecommendations] = useState<MoodRec[]>([]);
@@ -173,6 +191,7 @@ export default function TradeMoodBoards() {
   // Project mood boards are seeded from that project's tearsheet products, not legacy local storage.
   useEffect(() => {
     if (!user) return;
+    if (folderId) return;
     setDraftReady(false);
     let saved: { items?: any[]; settings?: MoodBudgetSettings } | null = null;
     try { saved = JSON.parse(localStorage.getItem(draftKey) || "null"); } catch { /* unavailable */ }
@@ -184,22 +203,75 @@ export default function TradeMoodBoards() {
     seededProjectRef.current = null;
     setRecommendations([]);
     setRecError(null);
-  }, [projectId, user?.id, draftKey]);
+  }, [projectId, user?.id, draftKey, folderId]);
 
   useEffect(() => {
-    if (!projectId || !draftReady || restoredProjectRef.current || loadingProjectTearsheetProducts) return;
+    if (!folderId || !user) return;
+    let cancelled = false;
+    setFolderLoading(true); setFolderError(null); setDraftReady(false); setBoard([]); setRecommendations([]); setFolderEditable(false);
+    void (async () => {
+      let query = supabase.from("client_boards").select("id,title,status,project_id").eq("id", folderId);
+      if (projectId) query = query.eq("project_id", projectId);
+      const folder = await query.single();
+      if (folder.error || !folder.data) throw new Error();
+      const result = await supabase.from("client_board_items").select("id,product_id,procurement_quote_id,source_quote_item_id,sort_order,trade_products(id,product_name,brand_name,image_url,category,subcategory)").eq("board_id", folderId).order("sort_order");
+      if (result.error || result.data.some(row => !row.trade_products)) throw new Error();
+      if (cancelled) return;
+      const rows = result.data.map(row => ({ ...row.trade_products, folderItemId: row.id, locked: !!(row.procurement_quote_id || row.source_quote_item_id) }));
+      originalFolder.current = rows;
+      setBoard(rows); setFolderTitle(folder.data.title); setFolderEditable(folder.data.status !== "converted");
+      restoredProjectRef.current = true;
+      let savedBudget: MoodBudgetSettings | null = null;
+      try { savedBudget = JSON.parse(localStorage.getItem(savedMoodBudgetKey(user.id, folderId)) ?? "null"); } catch {}
+      const room = projectId ? readStudioRoomContext(user.id, projectId, rows.map(row => row.id)) : null;
+      setBudgetSettings(initialSavedMoodBudget(savedBudget, room)); setDraftReady(true); setFilter("all");
+    })().catch(() => { if (!cancelled) setFolderError("This folder couldn’t load. Your saved items are unchanged. Please retry."); }).finally(() => { if (!cancelled) setFolderLoading(false); });
+    return () => { cancelled = true; };
+  }, [folderId, projectId, user?.id, folderRevision]);
+
+  const saveFolder = async () => {
+    if (!folderId || folderSaveLock.current || folderSaving || folderLoading || folderError || !folderEditable || clientSafe) return false;
+    folderSaveLock.current = true;
+    setFolderSaving(true);
+    try {
+      const target = await supabase.from("client_boards").select("id,project_id,status").eq("id", folderId).single();
+      if (target.error || target.data.status === "converted" || (projectId && target.data.project_id !== projectId)) throw new Error();
+      const changes = folderChanges(originalFolder.current, board);
+      const configured = await moodBoardStudioItems(changes.added.map(item => item.id));
+      if (configured.length) {
+        const { data, error } = await supabase.from("client_board_items").insert(configured.map((item, index) => ({ ...item, board_id: folderId, sort_order: originalFolder.current.length + index }))).select("id,product_id");
+        if (error || data?.length !== configured.length) throw new Error();
+        // Keep successful inserts on retries; never duplicate additions after a later removal failure.
+        const added = board.map(item => item.folderItemId ? item : { ...item, folderItemId: data.find(row => row.product_id === item.id)?.id });
+        setBoard(added); originalFolder.current = [...originalFolder.current, ...added.filter(item => changes.added.some(newItem => newItem.id === item.id))];
+      }
+      for (const item of changes.removed) {
+        const { data, error } = await supabase.from("client_board_items").delete().eq("board_id", folderId).eq("id", item.folderItemId ?? "").is("procurement_quote_id", null).is("source_quote_item_id", null).select("id");
+        if (error || data?.length !== 1) throw new Error();
+        originalFolder.current = originalFolder.current.filter(row => row.folderItemId !== item.folderItemId);
+      }
+      window.dispatchEvent(new CustomEvent("concierge:artifacts-changed"));
+      try { if (user) localStorage.setItem(savedMoodBudgetKey(user.id, folderId), JSON.stringify(budgetSettings)); } catch { toast.error("Items saved, but this device couldn’t keep the budget settings."); }
+      toast.success("Folder items updated.");
+      return true;
+    } catch { toast.error("Folder updates couldn’t finish. Your changes are still here; please retry."); return false; }
+    finally { folderSaveLock.current = false; setFolderSaving(false); }
+  };
+
+  useEffect(() => {
+    if (folderId || !projectId || !draftReady || restoredProjectRef.current || loadingProjectTearsheetProducts) return;
     const seedKey = `${projectId}:${projectTearsheetProducts.map((p: any) => p.id).sort().join(",")}`;
     if (seededProjectRef.current === seedKey) return;
     seededProjectRef.current = seedKey;
     setBoard(projectTearsheetProducts);
-  }, [projectId, draftReady, loadingProjectTearsheetProducts, projectTearsheetProducts]);
+  }, [folderId, projectId, draftReady, loadingProjectTearsheetProducts, projectTearsheetProducts]);
 
   // Persist the free-form builder only; project mode should always reflect project tearsheets.
   useEffect(() => {
-    if (!draftReady || !user || (projectId && !restoredProjectRef.current && loadingProjectTearsheetProducts)) return;
+    if (folderId || !draftReady || !user || (projectId && !restoredProjectRef.current && loadingProjectTearsheetProducts)) return;
     try { localStorage.setItem(draftKey, JSON.stringify({ items: board, settings: budgetSettings })); }
     catch { toast.error("This browser couldn't save the mood board draft. Save to project to keep your pieces."); }
-  }, [board, budgetSettings, draftReady, draftKey, user?.id, projectId, loadingProjectTearsheetProducts]);
+  }, [folderId, board, budgetSettings, draftReady, draftKey, user?.id, projectId, loadingProjectTearsheetProducts]);
 
   const fetchRecommendations = useCallback(async (productIds: string[]) => {
     if (!shouldRecommendMoodBoard(productIds.length)) return;
@@ -378,11 +450,13 @@ export default function TradeMoodBoards() {
   useEffect(() => { setVisibleCount(40); }, [search, category, maker, filter]);
 
   const addToBoard = (product: any) => {
+    if (folderId && (!folderEditable || folderLoading || folderError || folderSaving)) return;
     if (board.find((b) => b.id === product.id)) return;
     setBoard((prev) => [...prev, product]);
   };
 
   const addRecToBoard = (rec: MoodRec) => {
+    if (folderId && (!folderEditable || folderLoading || folderError || folderSaving)) return;
     if (board.find((b) => b.id === rec.product_id)) return;
     setBoard((prev) => [...prev, {
       id: rec.product_id,
@@ -396,7 +470,8 @@ export default function TradeMoodBoards() {
   };
 
   const removeFromBoard = (id: string) => {
-    setBoard((prev) => prev.filter((p) => p.id !== id));
+    if (folderSaving) return;
+    setBoard((prev) => prev.filter((p) => (p.folderItemId ?? p.id) !== id || p.locked));
   };
 
   const filterOptions: { key: PickerFilter; label: string; icon: React.ReactNode }[] = [
@@ -418,8 +493,13 @@ export default function TradeMoodBoards() {
               Curate product imagery into collages for early-stage concept pitches.
             </p>
           </div>
-          <MoodBoardActions items={board} defaultProjectId={projectId} anchorId={budgetSettings.anchors[0] ?? null} pdfContext={{ roomType: budgetSettings.roomType, currency: boardCurrency, allocated: ledger.allocated, target: ledger.total, unpriced: ledger.unpriced, pending: pricingPending || pricingFailed || ratePending }} />
+          <MoodBoardActions items={board} defaultProjectId={projectId} targetFolderId={folderId} onSaveFolder={saveFolder} folderSaveDisabled={folderSaving || folderLoading || !!folderError || !folderEditable} anchorId={budgetSettings.anchors[0] ?? null} pdfContext={{ roomType: budgetSettings.roomType, currency: boardCurrency, allocated: ledger.allocated, target: ledger.total, unpriced: ledger.unpriced, pending: pricingPending || pricingFailed || ratePending }} />
         </div>
+
+        {!clientSafe && <div className="flex flex-wrap items-end gap-3 border-y border-border py-4"><div className="min-w-0 w-full sm:w-64"><p className="mb-2 text-xs text-muted-foreground">Target Project &amp; Folder</p><ProjectPicker value={projectId} onChange={project => setSearchParams(previous => { if (project) previous.set("project", project); else previous.delete("project"); previous.delete("board"); return previous; })} /></div><Select value={folderId ?? "draft"} disabled={!projectId || foldersLoading || folderSaving} onValueChange={value => setSearchParams(previous => { if (value === "draft") previous.delete("board"); else previous.set("board", value); return previous; })}><SelectTrigger className="w-full sm:w-80" aria-label="Target folder"><SelectValue placeholder="Choose folder" /></SelectTrigger><SelectContent><SelectItem value="draft">New Mood Board draft</SelectItem>{targetFolders.map(folder => <SelectItem key={folder.id} value={folder.id}>{folder.title}</SelectItem>)}</SelectContent></Select>{folderId && <Button asChild variant="ghost"><Link to={`/trade/boards/${folderId}${projectId ? `?project=${projectId}` : ""}`}>Open folder</Link></Button>}</div>}
+        {folderLoading && <p role="status">Loading folder items…</p>}
+        {folderError && <div role="alert" className="flex flex-wrap items-center gap-3 text-sm text-destructive">{folderError}<Button variant="outline" onClick={() => setFolderRevision(value => value + 1)}>Retry folder</Button></div>}
+        {folderId && !folderLoading && !folderError && <h2 className="font-display text-lg">{folderTitle}</h2>}
 
         {!clientSafe && <MoodBoardBudgetControls settings={budgetSettings} onChange={setBudgetSettings} onCurrencyChange={c => void changeBoardCurrency(c)} />}
 
@@ -450,7 +530,7 @@ export default function TradeMoodBoards() {
               ) : (
                 <div className={`grid gap-2 ${board.length <= 3 ? "grid-cols-3" : "grid-cols-3 lg:grid-cols-4"}`}>
                   {board.map((item) => (
-                    <div key={item.id} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
+                    <div key={item.folderItemId ?? item.id} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
                       <img src={item.image_url} alt={item.product_name} className="w-full h-full object-cover" />
                       <div className="absolute bottom-0 left-0 right-0 bg-background/55">
                         <div className={`p-3 ${projectId && !clientSafe ? "pb-11" : ""}`}>
@@ -470,14 +550,14 @@ export default function TradeMoodBoards() {
                         className="absolute left-2 top-2 h-7 gap-1 bg-background/90 text-foreground px-2 text-[10px] data-[state=on]:border-primary" data-state={budgetSettings.anchors.includes(item.id) ? "on" : "off"}>
                         <Pin className="h-3 w-3" />{budgetSettings.anchors.includes(item.id) ? "Anchor" : "Pin as Anchor"}
                       </Button>}
-                      {!clientSafe && <Button variant="ghost" size="icon"
+                      {!clientSafe && (!folderId || folderEditable) && !item.locked && <Button variant="ghost" size="icon"
                         aria-label={`Remove ${item.product_name} from board`}
-                        onClick={() => removeFromBoard(item.id)}
+                        onClick={() => removeFromBoard(item.folderItemId ?? item.id)}
                         className="absolute top-2 right-2 w-6 h-6 rounded-full bg-background/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="h-3 w-3" />
                       </Button>}
-                      {projectId && !clientSafe && <MoodBoardSavedEntries projectId={projectId} productId={item.id} productName={item.product_name} />}
+                      {projectId && !folderId && !clientSafe && <MoodBoardSavedEntries projectId={projectId} productId={item.id} productName={item.product_name} />}
                     </div>
                   ))}
                 </div>
