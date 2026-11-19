@@ -1,12 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getCookie, setCookie, getRequestUrl, setResponseHeader } from "@tanstack/react-start/server";
+import { getCookie, setCookie, getRequestUrl, getRequestHeader, setResponseHeader } from "@tanstack/react-start/server";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import type { Database } from "@/integrations/supabase/types";
 import { viewingRoomSchema, viewingRoomItemSchema, viewingRoomSlotSchema, viewingRoomChoiceSchema } from "./viewingRoom";
-import { viewingRoomPath, viewingRoomCookieName } from "./viewingRoomLink";
+import { viewingRoomPath, viewingRoomCookieName, isShortViewingRoomCode } from "./viewingRoomLink";
 
-const token = z.string().min(20).max(128).regex(/^[a-zA-Z0-9_-]+(?:-[a-zA-Z0-9_-]+)*$/);
+const token = z.string().min(8).max(128).regex(/^[a-zA-Z0-9_-]+(?:-[a-zA-Z0-9_-]+)*$/);
 const locator = z.string().min(1).max(180).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 function publicClient() {
   const key = process.env["SUPABASE_PUBLISHABLE_KEY"];
@@ -17,16 +17,28 @@ function publicClient() {
     return fetch(input, { ...init, headers });
   } } });
 }
+async function resolveCredential(value: string, allowEnded = false): Promise<string | null> {
+  if (!isShortViewingRoomCode(value)) return value.length >= 20 ? value : null;
+  const ip = getRequestHeader("cf-connecting-ip") ?? getRequestHeader("x-real-ip") ?? "unknown";
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`viewing-room:${ip}`));
+  const attemptKey = Array.from(new Uint8Array(digest), n => n.toString(16).padStart(2, "0")).join("");
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const result = await supabaseAdmin.rpc("resolve_viewing_room_short_code", { _code: value.toUpperCase(), _attempt_key: attemptKey, _allow_ended: allowEnded });
+  if (result.error) throw new Error("Viewing room is temporarily unavailable.");
+  return result.data ?? null;
+}
 export const redeemViewingRoomAccess = createServerFn({ method: "POST" }).inputValidator(z.object({ token, locator: locator.optional() })).handler(async ({ data }) => {
   setResponseHeader("Cache-Control", "private, no-store");
-  const { data: room, error } = await publicClient().rpc("get_developer_viewing_room", { _token: data.token });
+  const credential = await resolveCredential(data.token);
+  if (!credential) return null;
+  const { data: room, error } = await publicClient().rpc("get_developer_viewing_room", { _token: credential });
   if (error) throw new Error("Viewing room is temporarily unavailable.");
   if (!room) return null;
   const parsed = viewingRoomSchema.parse(room);
   const path = viewingRoomPath(parsed.name);
   const slug = path.split("/").pop() ?? "";
   if (data.locator && data.locator !== slug) return null;
-  setCookie(viewingRoomCookieName(slug), data.token, { httpOnly: true, secure: getRequestUrl().protocol === "https:", sameSite: "strict", path: "/", maxAge: 604800 });
+  setCookie(viewingRoomCookieName(slug), credential, { httpOnly: true, secure: getRequestUrl().protocol === "https:", sameSite: "strict", path: "/", maxAge: 604800 });
   return { path };
 });
 async function verifiedRoom(slug: string) {
@@ -43,7 +55,9 @@ export const getViewingRoom = createServerFn({ method: "POST" }).inputValidator(
 });
 export const checkViewingRoomAccess = createServerFn({ method: "POST" }).inputValidator(z.object({ token })).handler(async ({ data }) => {
   setResponseHeader("Cache-Control", "private, no-store");
-  const { data: status, error } = await publicClient().rpc("get_viewing_room_access_status", { _token: data.token });
+  const credential = await resolveCredential(data.token, true);
+  if (!credential) return null;
+  const { data: status, error } = await publicClient().rpc("get_viewing_room_access_status", { _token: credential });
   if (error) throw new Error("Viewing room is temporarily unavailable.");
   return status === "expired" || status === "revoked" ? status : null;
 });

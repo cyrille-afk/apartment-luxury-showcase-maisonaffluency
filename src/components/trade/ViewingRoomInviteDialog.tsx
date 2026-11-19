@@ -59,7 +59,7 @@ export default function ViewingRoomInviteDialog({ open, onOpenChange, developerI
         <span className="mt-6 inline-block bg-primary px-6 py-3 font-sans text-xs tracking-wide text-primary-foreground">Enter the viewing room</span>
         <div className="mt-8 space-y-2 border-t border-border pt-5 font-sans text-[11px] leading-relaxed text-muted-foreground">
           <p>Private access code: <span className="text-foreground">{code}</span></p>
-          <p className="break-all">Button not working? Open this link: <span className="underline">{link}</span></p>
+          <p>Button not working? <a href={link} className="underline">Open your private invitation link.</a></p>
           <p>This invitation is personal. Please do not forward it. · Maison Affluency Singapore</p>
         </div>
       </div>

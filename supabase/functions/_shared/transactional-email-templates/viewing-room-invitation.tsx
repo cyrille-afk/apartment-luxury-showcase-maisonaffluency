@@ -44,7 +44,7 @@ const Email = ({ developerName = 'Private Residences', developerLogoUrl = null, 
           </td></tr>
           <tr><td style={{ borderTop: HAIRLINE, padding: '22px 40px 26px', fontFamily: SANS, fontSize: '11px', lineHeight: '18px', color: MUTED, textAlign: 'center' }}>
             {code && <p style={{ margin: '0 0 8px' }}>Private access code: <span style={{ color: INK, letterSpacing: '1px' }}>{code}</span></p>}
-            <p style={{ margin: '0 0 8px', wordBreak: 'break-all' }}>Button not working? Open this link: <a href={href} style={{ color: MUTED, textDecoration: 'underline' }}>{href}</a></p>
+            <p style={{ margin: '0 0 8px' }}>Button not working? <a href={href} style={{ color: MUTED, textDecoration: 'underline' }}>Open your private invitation link.</a></p>
             <p style={{ margin: 0 }}>This invitation is personal. Please do not forward it. · Maison Affluency Singapore</p>
           </td></tr>
         </tbody></table>
@@ -57,5 +57,5 @@ export const template = {
   component: Email,
   subject: (d: Record<string, any>) => `${d.developerName ?? 'Private Residences'} × Maison Affluency · Private Viewing Room`,
   displayName: 'Viewing room invitation',
-  previewData: { developerName: 'Cipriani Residences Miami', developerLogoUrl: 'https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/viewing-room/f6068253-c046-44f6-a29d-2efe2fedfb31/logos/cipriani-residences-logo.png', heroImageUrl: 'https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/viewing-room/f6068253-c046-44f6-a29d-2efe2fedfb31/covers/cipriani-residence-living-render.jpg', link: 'https://www.maisonaffluency.com/viewing-room/cipriani-residences-miami?code=preview', code: 'preview-code' },
+  previewData: { developerName: 'Cipriani Residences Miami', developerLogoUrl: 'https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/viewing-room/f6068253-c046-44f6-a29d-2efe2fedfb31/logos/cipriani-residences-logo.png', heroImageUrl: 'https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/viewing-room/f6068253-c046-44f6-a29d-2efe2fedfb31/covers/cipriani-residence-living-render.jpg', link: 'https://www.maisonaffluency.com/r/CPR-8492', code: 'CPR-8492' },
 } satisfies TemplateEntry

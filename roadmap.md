@@ -1,5 +1,9 @@
 # Roadmap
 
+## Short viewing-room invitations
+- [x] Add unique generated eight-character codes with legacy access retained and rate-limited service-only redemption; 19 regression tests pass.
+- [x] Wire Admin, short invitation route and email footer; desktop/phone short alias/query entry and invalid rejection verified. Both appearance preferences checked for Admin email previews; updated sender deployed and live boot checked. Public app route awaits publishing; residence-selection click does not change the URL in a separate check and is not claimed fixed.
+
 ## Pitch-page partnership inquiry
 - [x] Add a prominent Partnership Inquiry control on the pitch page plus a slide-8 call to action; form validates client and server side, stores each inquiry in partnership_inquiries and emails concierge@maisonaffluency.com.
 - [ ] Verify end to end: desktop/phone light/dark dialog, invalid and valid submissions, stored row, owner email send event, admin inbox list, PDF export unaffected; then delete only the test row.

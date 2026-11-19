@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { viewingRoomAccessToken, viewingRoomPath, isLegacyViewingRoomLink, viewingRoomCookieName } from "./viewingRoomLink";
+import { viewingRoomAccessToken, viewingRoomPath, isLegacyViewingRoomLink, viewingRoomCookieName, isShortViewingRoomCode, shortViewingRoomPath } from "./viewingRoomLink";
 
 const token = "09320ae7-37f8-47e8-88a8-4910f0c8bb53";
 describe("private viewing room addresses", () => {
+  it("accepts eight-character codes and builds the clean alias", () => {
+    expect(isShortViewingRoomCode("CPR-8492")).toBe(true);
+    expect(isShortViewingRoomCode("CPR-84922")).toBe(false);
+    expect(shortViewingRoomPath("cpr-8492")).toBe("/r/CPR-8492");
+  });
   it("brands the address without exposing its credential", () => {
     expect(viewingRoomPath("Cipriani Residences Miami")).toBe("/viewing-room/cipriani-residences-miami");
     expect(viewingRoomPath("Cipriani Residences")).toBe("/viewing-room/cipriani-residences-apartments");

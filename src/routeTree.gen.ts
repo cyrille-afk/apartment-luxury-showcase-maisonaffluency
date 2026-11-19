@@ -86,6 +86,7 @@ import { Route as ProductIdRouteImport } from './routes/product_.$id'
 import { Route as ProductsCategoryCategorySlugRouteImport } from './routes/products-category_.$categorySlug'
 import { Route as ProductsProductSlugRouteImport } from './routes/products_.$productSlug'
 import { Route as QuoteTokenRouteImport } from './routes/quote_.$token'
+import { Route as RShortCodeRouteImport } from './routes/r.$shortCode'
 import { Route as SettingsStudioRouteImport } from './routes/settings.studio'
 import { Route as ShopSplatRouteImport } from './routes/shop_.$'
 import { Route as ShortlistTokenRouteImport } from './routes/shortlist_.$token'
@@ -661,6 +662,11 @@ const ProductsProductSlugRoute = ProductsProductSlugRouteImport.update({
 const QuoteTokenRoute = QuoteTokenRouteImport.update({
   id: '/quote_/$token',
   path: '/quote/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RShortCodeRoute = RShortCodeRouteImport.update({
+  id: '/r/$shortCode',
+  path: '/r/$shortCode',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsStudioRoute = SettingsStudioRouteImport.update({
@@ -1734,6 +1740,7 @@ export interface FileRoutesByFullPath {
   '/products-category/$categorySlug': typeof ProductsCategoryCategorySlugRoute
   '/products/$productSlug': typeof ProductsProductSlugRoute
   '/quote/$token': typeof QuoteTokenRoute
+  '/r/$shortCode': typeof RShortCodeRoute
   '/settings/studio': typeof SettingsStudioRoute
   '/shop/$': typeof ShopSplatRoute
   '/shortlist/$token': typeof ShortlistTokenRoute
@@ -2002,6 +2009,7 @@ export interface FileRoutesByTo {
   '/products-category/$categorySlug': typeof ProductsCategoryCategorySlugRoute
   '/products/$productSlug': typeof ProductsProductSlugRoute
   '/quote/$token': typeof QuoteTokenRoute
+  '/r/$shortCode': typeof RShortCodeRoute
   '/settings/studio': typeof SettingsStudioRoute
   '/shop/$': typeof ShopSplatRoute
   '/shortlist/$token': typeof ShortlistTokenRoute
@@ -2272,6 +2280,7 @@ export interface FileRoutesById {
   '/products-category_/$categorySlug': typeof ProductsCategoryCategorySlugRoute
   '/products_/$productSlug': typeof ProductsProductSlugRoute
   '/quote_/$token': typeof QuoteTokenRoute
+  '/r/$shortCode': typeof RShortCodeRoute
   '/settings/studio': typeof SettingsStudioRoute
   '/shop_/$': typeof ShopSplatRoute
   '/shortlist_/$token': typeof ShortlistTokenRoute
@@ -2543,6 +2552,7 @@ export interface FileRouteTypes {
     | '/products-category/$categorySlug'
     | '/products/$productSlug'
     | '/quote/$token'
+    | '/r/$shortCode'
     | '/settings/studio'
     | '/shop/$'
     | '/shortlist/$token'
@@ -2811,6 +2821,7 @@ export interface FileRouteTypes {
     | '/products-category/$categorySlug'
     | '/products/$productSlug'
     | '/quote/$token'
+    | '/r/$shortCode'
     | '/settings/studio'
     | '/shop/$'
     | '/shortlist/$token'
@@ -3080,6 +3091,7 @@ export interface FileRouteTypes {
     | '/products-category_/$categorySlug'
     | '/products_/$productSlug'
     | '/quote_/$token'
+    | '/r/$shortCode'
     | '/settings/studio'
     | '/shop_/$'
     | '/shortlist_/$token'
@@ -3350,6 +3362,7 @@ export interface RootRouteChildren {
   ProductsCategoryCategorySlugRoute: typeof ProductsCategoryCategorySlugRoute
   ProductsProductSlugRoute: typeof ProductsProductSlugRoute
   QuoteTokenRoute: typeof QuoteTokenRoute
+  RShortCodeRoute: typeof RShortCodeRoute
   ShopSplatRoute: typeof ShopSplatRoute
   ShortlistTokenRoute: typeof ShortlistTokenRoute
   SpecSheetsSlugRoute: typeof SpecSheetsSlugRoute
@@ -3926,6 +3939,13 @@ declare module '@tanstack/react-router' {
       path: '/quote/$token'
       fullPath: '/quote/$token'
       preLoaderRoute: typeof QuoteTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/r/$shortCode': {
+      id: '/r/$shortCode'
+      path: '/r/$shortCode'
+      fullPath: '/r/$shortCode'
+      preLoaderRoute: typeof RShortCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings/studio': {
@@ -5668,6 +5688,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProductsCategoryCategorySlugRoute: ProductsCategoryCategorySlugRoute,
   ProductsProductSlugRoute: ProductsProductSlugRoute,
   QuoteTokenRoute: QuoteTokenRoute,
+  RShortCodeRoute: RShortCodeRoute,
   ShopSplatRoute: ShopSplatRoute,
   ShortlistTokenRoute: ShortlistTokenRoute,
   SpecSheetsSlugRoute: SpecSheetsSlugRoute,

@@ -4271,6 +4271,7 @@ export type Database = {
           hero_image_url: string | null
           id: string
           project_id: string
+          short_code: string | null
         }
         Insert: {
           access_expires_at?: string | null
@@ -4283,6 +4284,7 @@ export type Database = {
           hero_image_url?: string | null
           id?: string
           project_id: string
+          short_code?: string | null
         }
         Update: {
           access_expires_at?: string | null
@@ -4295,6 +4297,7 @@ export type Database = {
           hero_image_url?: string | null
           id?: string
           project_id?: string
+          short_code?: string | null
         }
         Relationships: [
           {
@@ -14562,6 +14565,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      generate_viewing_room_short_code: { Args: never; Returns: string }
       get_admin_user_ids: {
         Args: never
         Returns: {
@@ -15297,6 +15301,10 @@ export type Database = {
         Returns: Json
       }
       resolve_trade_email: { Args: { p_identifier: string }; Returns: string }
+      resolve_viewing_room_short_code: {
+        Args: { _allow_ended?: boolean; _attempt_key: string; _code: string }
+        Returns: string
+      }
       restore_curator_pick_version: {
         Args: { _audit_id: string }
         Returns: string

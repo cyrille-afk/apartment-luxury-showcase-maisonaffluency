@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { viewingRoomLeadTime } from "@/lib/viewingRoom";
 import { residenceArea } from "@/lib/viewingRoomPresentation";
-import { viewingRoomAccessToken, isLegacyViewingRoomLink } from "@/lib/viewingRoomLink";
+import { viewingRoomAccessToken, isLegacyViewingRoomLink, isShortViewingRoomCode } from "@/lib/viewingRoomLink";
 import affluencyLogo from "@/assets/affluency-logo-full.jpeg";
 import { readViewingRoomReturn } from "@/lib/viewingRoomLink";
 const Viewer = lazy(() => import("@/components/trade/visualiser/ViewingRoomExperience"));
@@ -53,7 +53,7 @@ function ViewingRoomPage() {
   const enteredKey = `ma_viewing_room_entered_${locator}`;
   const [storedAccess, setStoredAccess] = useState<string | null>(null);
   useEffect(() => { try { setStoredAccess(window.localStorage.getItem(enteredKey)); } catch { setStoredAccess(null); } }, [enteredKey]);
-  const { data: accessStatus } = useQuery({ queryKey: ["viewing-room-access-status", storedAccess], queryFn: () => checkViewingRoomAccess({ data: { token: storedAccess! } }), enabled: !!storedAccess, retry: false, staleTime: 0 });
+  const { data: accessStatus } = useQuery({ queryKey: ["viewing-room-access-status", storedAccess], queryFn: () => checkViewingRoomAccess({ data: { token: storedAccess ?? "" } }), enabled: !!storedAccess, retry: false, staleTime: 0 });
   const clearStoredAccess = () => { try { window.localStorage.removeItem(enteredKey); } catch { /* storage unavailable */ } setStoredAccess(null); };
   const [liveTotals, setLiveTotals] = useState<Record<string, number>>({});
   const { data: room } = useSuspenseQuery(roomQuery(token));
@@ -77,7 +77,7 @@ function ViewingRoomPage() {
     void (async () => {
       let ok = false;
       try {
-        if (/^[a-zA-Z0-9_-]{20,128}$/.test(magicCode)) {
+        if (isShortViewingRoomCode(magicCode) || /^[a-zA-Z0-9_-]{20,128}$/.test(magicCode)) {
           const access = await redeemViewingRoomAccess({ data: { token: magicCode, locator } });
           if (access) { ok = true; window.__lovableEvents?.track?.("project.viewing_room_unlocked", { method: "magic_link" }); try { window.localStorage.setItem(enteredKey, magicCode); } catch { /* storage unavailable */ } setStoredAccess(magicCode); await queryClient.invalidateQueries({ queryKey: ["developer-viewing-room", locator] }); }
         }
