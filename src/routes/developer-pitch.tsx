@@ -29,8 +29,10 @@ function DeveloperPitch() {
   const [inquiryOpen, setInquiryOpen] = useState(false);
   const touch = useRef<number | null>(null);
   const initial = useRef(false);
+  const lastGo = useRef(0);
   const go = (index: number) => {
     const next = Math.max(0, Math.min(7, index));
+    lastGo.current = Date.now();
     setActive(next);
     void navigate({ search: { slide: next + 1 }, replace: true, resetScroll: false });
     document.getElementById(`pitch-${next + 1}`)?.scrollIntoView({ behavior: 'instant', block: 'start' });
@@ -42,6 +44,7 @@ function DeveloperPitch() {
   }, [slide]);
   useEffect(() => {
     const observer = new IntersectionObserver(entries => {
+      if (Date.now() - lastGo.current < 600) return;
       const visible = entries.filter(entry => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
       if (!visible) return;
       const next = Number(visible.target.id.replace('pitch-', '')) - 1;
