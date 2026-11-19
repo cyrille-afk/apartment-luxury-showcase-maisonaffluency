@@ -1013,6 +1013,69 @@
           }
         }
       }
+    },
+    "project.viewing_room_invite_attempted": {
+      "event_schema_version": 1,
+      "description": "Admin clicked Send by email for a viewing-room invitation.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "has_recipient"
+        ],
+        "properties": {
+          "has_recipient": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "project.viewing_room_invite_email_opened": {
+      "event_schema_version": 1,
+      "description": "The email app was triggered with the viewing-room invitation after validation passed.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "has_recipient"
+        ],
+        "properties": {
+          "has_recipient": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "project.viewing_room_invite_validation_error": {
+      "event_schema_version": 1,
+      "description": "A viewing-room invitation was blocked by a validation error.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "type": "string",
+            "enum": [
+              "invalid_email"
+            ]
+          }
+        }
+      }
     }
   }
 }
