@@ -3,6 +3,7 @@
 ## Local Admin draft recovery
 - [x] Save account/project-scoped dirty Admin forms and unfinished package edits locally, with explicit Restore/Discard after refresh, saved-section reconciliation and explicit project-switch discard cleanup.
 - [x] Twenty-four regressions pass; signed-in developer/open-package recovery and discard/reload verified on desktop, developer recovery/discard on phone, without page errors or changing published settings.
+- [x] Extended signed-in checks cover every tier across all three residences at desktop/phone widths under both system themes: developer, layout and package edits restore, discard survives reload, and returning to Studio opens Specsheet. All twelve flows pass without page errors; screenshots reviewed and no saved records changed.
 
 ## Hotspot catalogue linking and manual overrides
 - [x] Auto-link exact collection IDs/SKUs/unambiguous names and recorded numeric/text/size-option dimensions when a package drawer loads; retain ±15% footprint-safe alternatives.
