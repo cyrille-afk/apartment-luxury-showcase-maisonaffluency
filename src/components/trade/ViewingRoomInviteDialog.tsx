@@ -9,8 +9,8 @@ import affluencyLogo from "@/assets/affluency-logo-full.jpeg";
 
 const validEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
-export default function ViewingRoomInviteDialog({ open, onOpenChange, developerId, projectId, developerName, logoUrl, heroUrl, link, code, savedEmail, onEmailSaved }: {
-  open: boolean; onOpenChange: (open: boolean) => void; developerId: string; projectId: string; developerName: string; logoUrl: string | null; heroUrl: string | null; link: string; code: string; savedEmail: string; onEmailSaved: (email: string) => void;
+export default function ViewingRoomInviteDialog({ open, onOpenChange, developerId, projectId, developerName, logoUrl, heroUrl, link, code, savedEmail, onEmailSaved, onActivity }: {
+  open: boolean; onOpenChange: (open: boolean) => void; developerId: string; projectId: string; developerName: string; logoUrl: string | null; heroUrl: string | null; link: string; code: string; savedEmail: string; onEmailSaved: (email: string) => void; onActivity?: () => void;
 }) {
   const [recipient, setRecipient] = useState(savedEmail);
   const [sending, setSending] = useState(false);
@@ -18,10 +18,11 @@ export default function ViewingRoomInviteDialog({ open, onOpenChange, developerI
   const attempt = useRef<string | null>(null);
   useEffect(() => { if (open) { setRecipient(savedEmail); setFeedback(null); attempt.current = null; } }, [open, savedEmail]);
 
+  const log = (kind: "attempt" | "sent" | "validation_error" | "send_failed") => { void supabase.from("viewing_room_invite_activity").insert({ developer_project_id: developerId, kind }).then(() => onActivity?.()); };
   const send = async () => {
     const email = recipient.trim().toLowerCase();
-    window.__lovableEvents?.track?.("project.viewing_room_invite_attempted", { has_recipient: !!email });
-    if (!validEmail(email)) { window.__lovableEvents?.track?.("project.viewing_room_invite_validation_error", { reason: "invalid_email" }); setFeedback({ ok: false, text: "Enter a valid client email address." }); return; }
+    window.__lovableEvents?.track?.("project.viewing_room_invite_attempted", { has_recipient: !!email }); log("attempt");
+    if (!validEmail(email)) { window.__lovableEvents?.track?.("project.viewing_room_invite_validation_error", { reason: "invalid_email" }); log("validation_error"); setFeedback({ ok: false, text: "Enter a valid client email address." }); return; }
     setSending(true); setFeedback(null);
     attempt.current ??= crypto.randomUUID();
     try {
@@ -33,8 +34,8 @@ export default function ViewingRoomInviteDialog({ open, onOpenChange, developerI
         templateName: "viewing-room-invitation", recipientEmail: email, idempotencyKey: `viewing-room-invite-${developerId}-${attempt.current}`,
         templateData: { developerName, developerLogoUrl: logoUrl, heroImageUrl: heroUrl, link, code },
       } });
-      if (error) { setFeedback({ ok: false, text: "The invitation couldn’t be sent. Please try again." }); return; }
-      window.__lovableEvents?.track?.("project.viewing_room_invite_email_opened", { has_recipient: true });
+      if (error) { log("send_failed"); setFeedback({ ok: false, text: "The invitation couldn’t be sent. Please try again." }); return; }
+      window.__lovableEvents?.track?.("project.viewing_room_invite_email_opened", { has_recipient: true }); log("sent");
       attempt.current = null;
       setFeedback({ ok: true, text: `Invitation sent to ${email}.` });
     } catch { setFeedback({ ok: false, text: "Sending couldn’t be confirmed. Please try again." }); }

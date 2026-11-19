@@ -13536,6 +13536,38 @@ export type Database = {
         }
         Relationships: []
       }
+      viewing_room_invite_activity: {
+        Row: {
+          actor_id: string
+          created_at: string
+          developer_project_id: string
+          id: string
+          kind: string
+        }
+        Insert: {
+          actor_id?: string
+          created_at?: string
+          developer_project_id: string
+          id?: string
+          kind: string
+        }
+        Update: {
+          actor_id?: string
+          created_at?: string
+          developer_project_id?: string
+          id?: string
+          kind?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "viewing_room_invite_activity_developer_project_id_fkey"
+            columns: ["developer_project_id"]
+            isOneToOne: false
+            referencedRelation: "developer_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       viewing_room_proposal_requests: {
         Row: {
           created_at: string

@@ -2213,6 +2213,13 @@
       "when": 1795073823626,
       "tag": "0315_viewing_room_client_email",
       "breakpoints": true
+    },
+    {
+      "idx": 316,
+      "version": "7",
+      "when": 1795075068104,
+      "tag": "0316_viewing_room_invite_activity",
+      "breakpoints": true
     }
   ]
 }
