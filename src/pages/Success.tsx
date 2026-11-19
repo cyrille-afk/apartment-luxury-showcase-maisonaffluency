@@ -44,6 +44,12 @@ function formatOrderDate(iso: string) {
   });
 }
 
+function trackPaidOnce(sessionId: string, props: Record<string, unknown>) {
+  const key = `ma_order_paid_tracked_${sessionId}`;
+  try { if (window.localStorage.getItem(key)) return; window.localStorage.setItem(key, "1"); } catch { /* storage unavailable */ }
+  window.__lovableEvents?.track?.("project.order_paid", props);
+}
+
 export default function Success() {
   const [params] = useSearchParams();
   const sessionId = params.get("session_id");
@@ -87,6 +93,7 @@ export default function Success() {
         const v = verify as (AdhocPayment & { card_id?: string | null }) | null;
         if (!cancelled && v?.paid && v.card_id) {
           setAdhoc(v);
+          trackPaidOnce(sessionId!, { order_value_cents: v.amount_cents ?? 0, charged_cents: v.amount_cents ?? 0, currency: String(v.currency || "EUR").toUpperCase(), method: "card", is_deposit: false, payment_status: "succeeded", source: "payment_link" });
           setLoading(false);
           // Instant funnel sync: drop any cached Sales Funnel data.
           queryClient.invalidateQueries({ queryKey: ["sales-funnel"] });
@@ -108,7 +115,9 @@ export default function Success() {
         if ((data as any)?.error) throw new Error((data as any).error);
         if (!(data as any)?.order) throw new Error("Order details could not be loaded.");
 
-        setOrder((data as any).order as OrderDetails);
+        const paidOrder = (data as any).order as OrderDetails;
+        setOrder(paidOrder);
+        if (paidOrder.status === "paid") trackPaidOnce(sessionId!, { order_value_cents: paidOrder.amount_total ?? 0, charged_cents: paidOrder.amount_total ?? 0, currency: String(paidOrder.currency || "EUR").toUpperCase(), method: "card", is_deposit: false, payment_status: "succeeded", source: "hosted_checkout" });
         setNeedsEmail(false);
       } catch (err: any) {
         if (cancelled) return;

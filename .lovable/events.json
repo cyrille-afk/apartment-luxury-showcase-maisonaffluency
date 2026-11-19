@@ -702,7 +702,7 @@
     },
     "project.order_paid": {
       "event_schema_version": 2,
-      "description": "An order was paid: Stripe confirmed a card/PayNow/wallet checkout, or an admin marked a bank-transfer order paid (source=admin_marked).",
+      "description": "An order was paid: Stripe confirmed a card/PayNow/wallet checkout, or an admin marked a bank-transfer order paid (source=admin_marked). Also fires on the post-payment Success page for hosted Stripe checkouts (source=hosted_checkout) and Sales Funnel payment links (source=payment_link), once per Stripe session.",
       "privacy": {
         "contains_pii": false,
         "purpose": "product_analytics"
@@ -751,7 +751,9 @@
             "type": "string",
             "enum": [
               "checkout",
-              "admin_marked"
+              "admin_marked",
+              "hosted_checkout",
+              "payment_link"
             ]
           }
         }
