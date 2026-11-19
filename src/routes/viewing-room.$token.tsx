@@ -6,13 +6,14 @@ import { Button } from "@/components/ui/button";
 import { getViewingRoom, getViewingRoomPackage } from "@/lib/viewingRoom.functions";
 import { viewingRoomLeadTime } from "@/lib/viewingRoom";
 import { residenceArea } from "@/lib/viewingRoomPresentation";
+import { viewingRoomAccessToken } from "@/lib/viewingRoomLink";
 import logo from "@/assets/maison-affluency-cover-logo.png.asset.json";
 const Viewer = lazy(() => import("@/components/trade/visualiser/ViewingRoomExperience"));
 const roomQuery = (token: string) => queryOptions({ queryKey: ["developer-viewing-room", token], queryFn: () => getViewingRoom({ data: { token } }), retry: false });
 
 export const Route = createFileRoute("/viewing-room/$token")({
   validateSearch: (search: Record<string, unknown>): { layout?: string; package?: string } => ({ layout: typeof search.layout === "string" ? search.layout : undefined, package: typeof search.package === "string" ? search.package : undefined }),
-  loader: ({ context, params }) => context.queryClient.ensureQueryData(roomQuery(params.token)),
+  loader: ({ context, params }) => context.queryClient.ensureQueryData(roomQuery(viewingRoomAccessToken(params.token))),
   head: ({ loaderData }) => ({ meta: [
     { title: `${loaderData?.project_name ?? "Private Viewing Room"} | Maison Affluency` },
     { name: "description", content: "A private selection of residences and curated furniture packages, presented by Maison Affluency." },
@@ -25,7 +26,8 @@ export const Route = createFileRoute("/viewing-room/$token")({
   component: ViewingRoomPage,
 });
 function ViewingRoomPage() {
-  const { token } = Route.useParams();
+  const { token: locator } = Route.useParams();
+  const token = viewingRoomAccessToken(locator);
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
   const [liveTotals, setLiveTotals] = useState<Record<string, number>>({});

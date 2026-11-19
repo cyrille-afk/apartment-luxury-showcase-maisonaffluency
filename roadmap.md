@@ -1,5 +1,8 @@
 # Roadmap
 
+## Readable private viewing-room links
+- [x] Generate saved-developer-name addresses while retaining full private tokens and previous links. Four tests pass; signed-in Admin produces cipriani-residences-miami on the production domain, guest residence/package navigation and refresh work, and the previous link still opens the same room with no page errors.
+
 ## Connected folder curation
 - [x] Add Furniture catalogue slide-over and Open in Mood Board on folder detail; paginated catalogue reads and duplicate-safe insertion target that folder.
 - [x] Load a selected project/folder in Mood Board and save exact-row additions/removals without creating another folder; locked procurement rows remain protected.

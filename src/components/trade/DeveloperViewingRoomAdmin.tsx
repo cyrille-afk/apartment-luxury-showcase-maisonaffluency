@@ -20,6 +20,7 @@ import { developerDraftDirty, layoutDraftDirty, packagesDraftDirty, registerUnsa
 import { adminRecoveryKey, hasRecoveryChanges, parseAdminRecovery, type AdminRecoveryDraft } from "@/lib/adminDraftRecovery";
 import { Link } from "@/lib/router-compat";
 import { moodFolderUrl } from "@/lib/moodFolderEditing";
+import { viewingRoomPath } from "@/lib/viewingRoomLink";
 
 const emptyDeveloper = { developer_name: "", developer_logo_url: "", hero_image_url: "" };
 const emptyLayout = { name: "", floorplan_url: "", specs_label: "", room_environment_glb: "" };
@@ -174,7 +175,7 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
     if (recovery.assignment) setAssignment(recovery.assignment);
     setRecovery(null); setNotice("Local draft restored. Changes remain unsaved.");
   };
-  const magicLink = savedDeveloper ? absoluteUrl(`/viewing-room/${encodeURIComponent(savedDeveloper.access_token)}`) : "";
+  const magicLink = savedDeveloper ? absoluteUrl(viewingRoomPath(savedDeveloper.developer_name, savedDeveloper.access_token)) : "";
   const activeLayouts = layouts.filter(row => row.developer_project_id === developerId);
   const draftBoard = boards.find(row => row.id === assignment?.draft.moodboard_id);
   const draftSummary = draftBoard ? managerBoardSummary(draftBoard) : null;
