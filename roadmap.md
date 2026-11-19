@@ -3,6 +3,8 @@
 ## Secure branded viewing-room addresses
 - [x] Replace exposed-key addresses with branded URLs, separate private code entry and HttpOnly access, and retain legacy link redemption. All reads and proposal actions revalidate the existing parent credential and matching room name.
 - [x] Fourteen tests pass; desktop/phone verify unauthorized and invalid-code rejection, clean Admin Open, HttpOnly cookie, refresh, fresh guest code entry, residence/package navigation, legacy redirect and Back to admin. No page errors; preview build passes. Published site awaits publishing.
+- [x] Expanded desktop-light check opens all nine packages and verifies private item reads, refresh and no guest Admin link; desktop-dark checks six packages and the residence screen. Screenshots reviewed. The second run withheld the heavy 3D renderer to isolate link/access checks.
+- [ ] Exhaustive nine-package phone/dark movement checks remain unverified: extended browser runs exceeded their time limits; initial desktop/phone access flows above passed.
 
 ## Finish-preview camera movement
 - [x] Replace polling with immediate bidirectional camera synchronization, retain current pose on late loading/retry, and prevent feedback loops.
