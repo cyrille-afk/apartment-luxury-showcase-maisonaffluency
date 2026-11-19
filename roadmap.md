@@ -1,5 +1,9 @@
 # Roadmap
 
+## Finish-change furniture continuity
+- [x] Confirmed configuration mismatch hid the model and job cleanup disposed it immediately. Retain the committed same-piece model until replacement; product/geometry changes remain loading, cancelled results are disposed, and retired models are disposed after detachment.
+- [x] Eleven lifecycle/queue/readiness tests pass, including fabric/wood/marble, stale responses, product swaps and StrictMode. Actual-worker WebGL harness sampled 71 pending-update frames with zero missing/disposed visible models and three retired replacements; preview build passes. Full signed-in catalogue finish-picker flow was not exercised.
+
 ## Readable private viewing-room links
 - [x] Generate saved-developer-name addresses while retaining full private tokens and previous links. Four tests pass; signed-in Admin produces cipriani-residences-miami on the production domain, guest residence/package navigation and refresh work, and the previous link still opens the same room with no page errors.
 - [x] Follow-up checks verify all three residences and nine package entries on phone and desktop under light/dark appearance preferences; named-link refresh and legacy links pass without page errors. Viewing Room retains its editorial light surface.

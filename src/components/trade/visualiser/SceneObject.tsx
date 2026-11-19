@@ -16,6 +16,7 @@ import { withCachedModelLoader } from "@/lib/visualiserModelCache";
 import { resolveDimensions } from "@/lib/productDimensions";
 import { prepareVisualiserModel } from "@/lib/visualiserPreparationClient";
 import type { ModelDimensionCheck } from "@/lib/viewingRoomDimensionCheck";
+import { usePreparedModel } from "./usePreparedModel";
 
 export { isStoneMaterial } from "@/lib/visualiserModelPreparation";
 
@@ -101,22 +102,13 @@ function useFittedModel(object: PlacedObject): THREE.Object3D | null {
   const { gl, invalidate } = useThree();
   const overrides = usePartOverrides(object.id);
   const configuration = JSON.stringify({ id: object.id, product_name: object.product_name, glb_url: object.glb_url, dimensions: object.dimensions, width_mm: object.width_mm, depth_mm: object.depth_mm, height_mm: object.height_mm, size_variants: object.size_variants, exactDimensionsM: object.exactDimensionsM, modelOrientation: object.modelOrientation, material: object.material, topMaterial: object.topMaterial, baseMaterial: object.baseMaterial, upholsteryMaterial: object.upholsteryMaterial, partMaterials: object.partMaterials });
-  const [prepared, setPrepared] = useState<{ configuration: string; model: THREE.Object3D } | null>(null);
-  const [error, setError] = useState<Error | null>(null);
+  const identity = JSON.stringify({ id: object.id, glb_url: object.glb_url, dimensions: object.dimensions, width_mm: object.width_mm, depth_mm: object.depth_mm, height_mm: object.height_mm, exactDimensionsM: object.exactDimensionsM, modelOrientation: object.modelOrientation });
+  const prepare = useCallback((signal: AbortSignal) => prepareVisualiserModel(scene, JSON.parse(configuration), overrides, gl.capabilities.getMaxAnisotropy(), signal), [scene, configuration, overrides, gl]);
+  const model = usePreparedModel(identity, configuration, prepare, disposePreparedModel);
   useEffect(() => {
-    const controller = new AbortController();
-    let owned: THREE.Object3D | null = null;
-    setError(null);
-    void prepareVisualiserModel(scene, JSON.parse(configuration), overrides, gl.capabilities.getMaxAnisotropy(), controller.signal).then(model => {
-      if (controller.signal.aborted) { disposePreparedModel(model); return; }
-      owned = model;
-      setPrepared({ configuration, model });
-      invalidate();
-    }).catch(reason => { if (!controller.signal.aborted) setError(reason instanceof Error ? reason : new Error("The furniture could not be prepared.")); });
-    return () => { controller.abort(); const previous = owned; if (previous) queueMicrotask(() => disposePreparedModel(previous)); };
-  }, [scene, configuration, overrides, gl, invalidate]);
-  if (error) throw error;
-  return prepared && prepared.configuration === configuration ? prepared.model : null;
+    if (model) invalidate();
+  }, [model, invalidate]);
+  return model;
 }
 
 function disposePreparedModel(model: THREE.Object3D) {
