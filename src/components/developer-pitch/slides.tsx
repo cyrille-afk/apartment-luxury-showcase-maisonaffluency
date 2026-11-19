@@ -5,7 +5,7 @@ import plan from '@/assets/cipriani-residence-04.asset.json';
 import logo from '@/assets/cipriani-residences-logo.asset.json';
 import manager from '@/assets/developer-pitch/manager.asset.json';
 import residences from '@/assets/developer-pitch/residences.asset.json';
-import room from '@/assets/developer-pitch/room.asset.json';
+import room from '@/assets/developer-pitch/room-ref1.asset.json';
 import sandy from '@/assets/curators-picks/man-of-parts-sandy-cove-sofa.png';
 import rua from '@/assets/curators-picks/man-of-parts-rua-leblon.png';
 import yoma from '@/assets/curators-picks/kerstens-console.jpg';
