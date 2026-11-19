@@ -56,6 +56,7 @@ import type { RoomBounds, layoutCamera } from "@/lib/activeProjectLayout";
 import PhotoMatchedCamera from "./PhotoMatchedCamera";
 import type { PhotoCalibration } from "@/lib/photoPerspective";
 import SandboxCameraBounds from "./SandboxCameraBounds";
+import ComparisonCameraSync, { type ComparisonCameraLink } from "./ComparisonCameraSync";
 
 export type VisualiserEnvironmentSource = EnvironmentSourcePref | "local";
 export type VisualiserEnvironmentStatus = { source: VisualiserEnvironmentSource; exr?: "missing" | "unreadable" };
@@ -273,6 +274,7 @@ interface VisualiserCanvasProps {
   /** Active-project plan compiled into the room: blueprint floor, walls at bounds, columns. */
   projectArchitecture?: { floorPlanUrl: string | null; columns: PlanColumn[] } | null;
   onInitialReady?: () => void;
+  comparisonCamera?: ComparisonCameraLink;
   onFurnitureProgress?: (progress: FurnitureLoadingProgress) => void;
   captureHandle?: { current: SceneCaptureHandle | null };
   onContextState?: (state: CanvasContextState) => void;
@@ -401,6 +403,7 @@ const VisualiserCanvas = ({
   roomBounds,
   projectArchitecture,
   onInitialReady,
+  comparisonCamera,
   onFurnitureProgress,
   captureHandle,
   onContextState,
@@ -543,6 +546,7 @@ const VisualiserCanvas = ({
       maxAzimuthAngle={Infinity}
       target={workspaceCamera?.target ?? (photoStage ? LUXURY_BACKDROP.cameraTarget : SHOWROOM.cameraTarget)}
     />
+    {comparisonCamera && <ComparisonCameraSync {...comparisonCamera} />}
     {roomBounds && !photoCalibration && (!workspaceCamera || workspaceCamera.polar === Math.PI / 2) && <SandboxCameraBounds bounds={roomBounds} frontRetreat={floorExtension} />}
     {roomBounds && !photoCalibration && !projectArchitecture && <group name="Active project bounds">{[
       { position: [0, 0.01, -roomBounds.depth / 2], size: [roomBounds.width, 0.01, 0.025] },

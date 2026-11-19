@@ -1,5 +1,9 @@
 # Roadmap
 
+## Side-by-side finish previews
+- [x] Add two synchronized room previews with independent A/B finish choices for the selected piece; keep previews separate from saved room state and honor finish locks on explicit application.
+- [x] Fourteen focused tests pass. Signed-in real Frenchmen Street chair renders saved/Black Pepper Oak finishes side by side on desktop and phone; Use B reads back BLACK PEPPER OAK, with no page errors or phone overflow. Close/application tested; preview build passes. Headless checks required direct activation after pointer waits stalled; synchronized orbit motion and exhaustive finish types remain unverified.
+
 ## Finish-change furniture continuity
 - [x] Confirmed configuration mismatch hid the model and job cleanup disposed it immediately. Retain the committed same-piece model until replacement; product/geometry changes remain loading, cancelled results are disposed, and retired models are disposed after detachment.
 - [x] Eleven lifecycle/queue/readiness tests pass, including fabric/wood/marble, stale responses, product swaps and StrictMode. Actual-worker WebGL harness sampled 71 pending-update frames with zero missing/disposed visible models and three retired replacements; preview build passes. Full signed-in catalogue finish-picker flow was not exercised.

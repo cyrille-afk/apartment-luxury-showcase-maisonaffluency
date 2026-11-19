@@ -73,6 +73,8 @@ import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
 import { VisualiserSelectionProvider } from "@/components/trade/visualiser/VisualiserSelectionContext";
 import VisualiserInspector from "@/components/trade/visualiser/VisualiserInspector";
+import FinishComparison from "@/components/trade/visualiser/FinishComparison";
+import { applyComparedFinish } from "@/lib/visualiserFinishComparison";
 import ProjectSnapshots from "@/components/trade/visualiser/ProjectSnapshots";
 import CatalogDrawer from "@/components/trade/visualiser/CatalogDrawer";
 import ProjectAssetsDrawer, { PROJECT_ASSET_DRAG_TYPE } from "@/components/trade/visualiser/ProjectAssetsDrawer";
@@ -1486,6 +1488,33 @@ const TradeVisualiser = () => {
       {/* Inspector sidebar — reads the shared selection context */}
       <VisualiserInspector sidebarActions={(!activeProject || activeProject.view === "sandbox") && <><input ref={roomPhotoRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" aria-label="Empty room photo" onChange={e => { uploadBackdrop(e.target.files?.[0] ?? null, true); e.target.value = ""; }} /><Button variant="outline" size="sm" className="w-full gap-2" onClick={() => roomPhotoRef.current?.click()}><ImageUp className="h-4 w-4" />Upload Empty Room Photo</Button></>} onToggleLock={togglePositionLock} onFindAlternatives={openAlternatives} onRemove={removeObject} onScale={scaleObject} onRestore={restoreObject} nearestClearance={selectedClearance}>
         {selected && (<>
+          <FinishComparison
+            key={`${selected.instanceId}:${effectiveTarget}`}
+            objects={objects} object={selected} target={effectiveTarget}
+            targetName={targetLabel(effectiveTarget, partGroupLabels)}
+            materials={isBondStreetStool(selected.id) ? (effectiveTarget === "upholstery" ? BOND_STREET_UPHOLSTERY_FINISHES : BOND_STREET_BASE_FINISHES) : filteredMaterials}
+            onApply={material => { setPreviewMaterial(null); setObjects(current => applyComparedFinish(current, selected.instanceId, effectiveTarget, material)); }}
+            renderRoom={(comparisonObjects, comparisonCamera, onReady) => <div className="relative h-full w-full">
+              {backdropSrc && <img src={backdropSrc} alt="" className="pointer-events-none absolute inset-0 h-full w-full object-contain" />}
+              <Suspense fallback={<CanvasLoader />}><VisualiserCanvas
+                objects={comparisonObjects} comparisonCamera={comparisonCamera} onInitialReady={onReady}
+                onFurnitureProgress={progress => { if (progress.total > 0 && progress.remaining === 0) onReady(); }}
+                workspaceCamera={workspaceCamera} photoCalibration={photoMode ? photoCalibration : null}
+                roomBounds={activeProject?.state.bounds ?? DEFAULT_LAYOUT_BOUNDS}
+                projectArchitecture={activeProject && activeProject.view !== "plan" ? { floorPlanUrl: activeProject.state.floorPlanUrl, columns: activeProject.state.columns } : null}
+                isEditable={false} selectedId={null} orbitEnabled={!photoMode} hasBackdrop={Boolean(backdropSrc)}
+                onSelect={() => {}} onTransform={() => {}} onDragStateChange={() => {}}
+                showGrid={false} showLabels={false} showHotspots={false} depthOfField={false}
+                environmentSource={environmentSource} advancedRendering={advancedRendering}
+                featureWallFinish={featureWallFinishKey} floorFinish={floorFinish} floorExtension={floorExtension} floorPatternScale={floorPatternScale}
+                showRearWall={showRearWall} wallHeight={wallHeight} ceilingHeight={ceilingHeight} ceilingThickness={ceilingThickness} ceilingOpening={ceilingOpening}
+                floorGlare={floorGlare} wallColor={wallColor} wallFinish={wallFinish} wallCustomHex={wallCustomHex} wallFinishIntensity={wallFinishIntensity}
+                rugColor={rugColorKey} rugBorderColor={rugBorderColorKey} rugBorderThicknessMm={rugBorderThicknessMm} rugBorderTwistMm={rugBorderTwistMm}
+                rugBorderRoughness={rugBorderRoughness} rugWeave={rugWeaveKey} rugPile={rugPile} rugLayout={rugLayout} showRug={showRug}
+                backdropColor={backdropColor} backdropBrightness={backdropBrightness}
+              /></Suspense>
+            </div>}
+          />
           {activeProject && activeProject.view !== "plan" && <div className="mt-3 grid grid-cols-2 gap-2">{(["x", "y", "rotation"] as const).map(axis => <label key={axis} className="text-xs text-muted-foreground">{axis === "rotation" ? "Rotation (°)" : `${axis === "x" ? "X" : "Y"} (m)`}<input aria-label={`Layout ${axis}`} type="number" step={axis === "rotation" ? 5 : 0.1} disabled={selected.positionLocked} value={axis === "rotation" ? Math.round(selected.rotation[1] * 180 / Math.PI) : Math.round(selected.position[axis === "x" ? 0 : 2] * 100) / 100} className="mt-1 w-full rounded-sm border border-border bg-background px-2 py-1 text-foreground" onChange={event => { const value = Number(event.target.value); if (Number.isFinite(value)) setObjects(current => patchLayoutItem(current, selected.instanceId, { [axis]: axis === "rotation" ? value * Math.PI / 180 : value }, activeProject.state.bounds)); }} /></label>)}</div>}
           <Button variant="ghost" size="sm" onClick={togglePositionLock} aria-pressed={Boolean(selected.positionLocked)} aria-label="Lock object position" className="mt-3 h-8 gap-2 px-0 text-[10px] uppercase text-muted-foreground">
             {selected.positionLocked ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3" />}
