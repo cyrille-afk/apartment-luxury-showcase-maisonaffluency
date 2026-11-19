@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useRef, useState } from 'react';
-import { Download, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Download, Loader2, ChevronLeft, ChevronRight, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PartnershipInquiryDialog } from '@/components/developer-pitch/PartnershipInquiryDialog';
 import { PitchSlide, slideTitles } from '@/components/developer-pitch/slides';
 import { exportPitchPdf } from '@/components/developer-pitch/exportPitch';
 
@@ -25,6 +26,7 @@ function DeveloperPitch() {
   const [active, setActive] = useState((slide ?? 1) - 1);
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState('');
+  const [inquiryOpen, setInquiryOpen] = useState(false);
   const touch = useRef<number | null>(null);
   const initial = useRef(false);
   const go = (index: number) => {
@@ -62,8 +64,9 @@ function DeveloperPitch() {
     if (touch.current != null && end != null && Math.abs(end - touch.current) > 65) go(active + (end < touch.current ? 1 : -1));
     touch.current = null;
   }}>
-    <nav className="pitch-toolbar" aria-label="Presentation controls"><div><span className="pitch-toolbar-brand">Maison Affluency</span><span className="pitch-toolbar-label">Developer partnerships</span></div><div className="pitch-controls"><Button variant="ghost" size="icon-sm" aria-label="Previous slide" title="Previous slide" disabled={active === 0} onClick={() => go(active - 1)}><ChevronLeft /></Button><span className="pitch-counter">{String(active + 1).padStart(2, '0')} / 08</span><Button variant="ghost" size="icon-sm" aria-label="Next slide" title="Next slide" disabled={active === 7} onClick={() => go(active + 1)}><ChevronRight /></Button></div><Button className="pitch-download" disabled={exporting} onClick={() => void download()}>{exporting ? <Loader2 className="animate-spin" /> : <Download />}{exporting ? 'Preparing PDF…' : 'Download Partnership PDF'}</Button></nav>
+    <nav className="pitch-toolbar" aria-label="Presentation controls"><div><span className="pitch-toolbar-brand">Maison Affluency</span><span className="pitch-toolbar-label">Developer partnerships</span></div><div className="pitch-controls"><Button variant="ghost" size="icon-sm" aria-label="Previous slide" title="Previous slide" disabled={active === 0} onClick={() => go(active - 1)}><ChevronLeft /></Button><span className="pitch-counter">{String(active + 1).padStart(2, '0')} / 08</span><Button variant="ghost" size="icon-sm" aria-label="Next slide" title="Next slide" disabled={active === 7} onClick={() => go(active + 1)}><ChevronRight /></Button></div><Button className="pitch-download" disabled={exporting} onClick={() => void download()}>{exporting ? <Loader2 className="animate-spin" /> : <Download />}{exporting ? 'Preparing PDF…' : 'Download Partnership PDF'}</Button><Button className="pitch-inquiry" onClick={() => setInquiryOpen(true)}><Mail />Partnership Inquiry</Button></nav>
     {error && <p role="alert" className="pitch-export-error">{error}</p>}
-    <div ref={deck} className="pitch-deck">{slideTitles.map((title, index) => <PitchSlide key={title} index={index} />)}</div>
+    <div ref={deck} className="pitch-deck">{slideTitles.map((title, index) => <PitchSlide key={title} index={index} onInquire={() => setInquiryOpen(true)} />)}</div>
+    <PartnershipInquiryDialog open={inquiryOpen} onOpenChange={setInquiryOpen} />
   </main>;
 }

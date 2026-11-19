@@ -10,6 +10,7 @@ import sandy from '@/assets/curators-picks/man-of-parts-sandy-cove-sofa.png';
 import rua from '@/assets/curators-picks/man-of-parts-rua-leblon.png';
 import yoma from '@/assets/curators-picks/kerstens-console.jpg';
 import { SlideFrame } from './SlideFrame';
+import { PARTNERSHIP_INQUIRY_EMAIL } from '@/lib/partnershipInquiry';
 
 export const slideTitles = [
   'Turnkey Collectible Interiors', 'The Developer’s Vested Interest', 'The 4-Stage Partnership Workflow',
@@ -30,7 +31,7 @@ function Image({ src, alt, className = '' }: { src: string; alt: string; classNa
   return <img src={src} alt={alt} crossOrigin="anonymous" className={className} />;
 }
 
-export function PitchSlide({ index }: { index: number }) {
+export function PitchSlide({ index, onInquire }: { index: number; onInquire?: () => void }) {
   const title = slideTitles[index];
   if (!title) return null;
   return <SlideFrame index={index} title={title}>
@@ -62,6 +63,6 @@ export function PitchSlide({ index }: { index: number }) {
       ['DAYS 04–07','Curate & map','Build the collection, verify metre-scale models and approve footprint-safe options.'],
       ['DAYS 08–11','Brand & validate','Prepare invitations, residence selection, personalization and proposal quality checks.'],
       ['DAYS 12–14','Private pilot launch','Brief the sales team and invite the agreed first buyer group.'],
-    ].map(([d,h,p]) => <div key={d}><span>{d}</span><h3>{h}</h3><p>{p}</p></div>)}</div><aside><p className="pitch-kicker">TO BEGIN</p><h3>One flagship.<br />One shared brief.</h3><p>Provide approved plans, developer branding and your preferred pilot residence. Agree the collection direction and launch owners.</p><div className="pitch-pilot-contact"><span>MAISON AFFLUENCY</span><p>Developer Partnerships<br />Singapore · Global Projects</p><span>www.maisonaffluency.com</span></div></aside></div><p className="pitch-note">Proposed 14-day launch schedule, subject to timely approved assets, model availability and developer sign-off.</p><Footer index={index} /></>}
+    ].map(([d,h,p]) => <div key={d}><span>{d}</span><h3>{h}</h3><p>{p}</p></div>)}</div><aside><p className="pitch-kicker">TO BEGIN</p><h3>One flagship.<br />One shared brief.</h3><p>Provide approved plans, developer branding and your preferred pilot residence. Agree the collection direction and launch owners.</p><div className="pitch-pilot-contact"><span>MAISON AFFLUENCY</span><p>Developer Partnerships<br />Singapore · Global Projects</p><span>www.maisonaffluency.com</span><span>{PARTNERSHIP_INQUIRY_EMAIL}</span></div>{onInquire && <button type="button" className="pitch-cta" onClick={onInquire}>Start a partnership conversation</button>}</aside></div><p className="pitch-note">Proposed 14-day launch schedule, subject to timely approved assets, model availability and developer sign-off.</p><Footer index={index} /></>}
   </SlideFrame>;
 }

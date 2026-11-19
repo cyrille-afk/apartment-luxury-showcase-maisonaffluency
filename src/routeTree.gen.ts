@@ -173,6 +173,7 @@ import { Route as ViewingRoomTokenRouteImport } from './routes/viewing-room.$tok
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable_.oauth_.consent'
 import { Route as AdminComplianceSubProcessorsRouteImport } from './routes/admin_.compliance_.sub-processors'
 import { Route as ApiPublicCatalogueImagesRouteImport } from './routes/api/public/catalogue-images'
+import { Route as ApiPublicPartnershipInquiriesRouteImport } from './routes/api/public/partnership-inquiries'
 import { Route as ApiPublicWebsiteSmsRouteImport } from './routes/api/public/website-sms'
 import { Route as DesignersSlugProductSlugRouteImport } from './routes/designers_.$slug_.$productSlug'
 import { Route as DesignersSlugBiographyRouteImport } from './routes/designers_.$slug_.biography'
@@ -215,6 +216,7 @@ import { Route as TradeAdminOgPipelineRouteImport } from './routes/trade.admin_.
 import { Route as TradeAdminOnboardingRouteImport } from './routes/trade.admin_.onboarding'
 import { Route as TradeAdminOnboardingFunnelRouteImport } from './routes/trade.admin_.onboarding-funnel'
 import { Route as TradeAdminOutboundRouteImport } from './routes/trade.admin_.outbound'
+import { Route as TradeAdminPartnershipInquiriesRouteImport } from './routes/trade.admin_.partnership-inquiries'
 import { Route as TradeAdminPaymentSettingsRouteImport } from './routes/trade.admin_.payment-settings'
 import { Route as TradeAdminPortalInvitesRouteImport } from './routes/trade.admin_.portal-invites'
 import { Route as TradeAdminPriceDriftRouteImport } from './routes/trade.admin_.price-drift'
@@ -1099,6 +1101,12 @@ const ApiPublicCatalogueImagesRoute =
     path: '/api/public/catalogue-images',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicPartnershipInquiriesRoute =
+  ApiPublicPartnershipInquiriesRouteImport.update({
+    id: '/api/public/partnership-inquiries',
+    path: '/api/public/partnership-inquiries',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicWebsiteSmsRoute = ApiPublicWebsiteSmsRouteImport.update({
   id: '/api/public/website-sms',
   path: '/api/public/website-sms',
@@ -1328,6 +1336,12 @@ const TradeAdminOutboundRoute = TradeAdminOutboundRouteImport.update({
   path: '/admin/outbound',
   getParentRoute: () => TradeRoute,
 } as any)
+const TradeAdminPartnershipInquiriesRoute =
+  TradeAdminPartnershipInquiriesRouteImport.update({
+    id: '/admin_/partnership-inquiries',
+    path: '/admin/partnership-inquiries',
+    getParentRoute: () => TradeRoute,
+  } as any)
 const TradeAdminPaymentSettingsRoute =
   TradeAdminPaymentSettingsRouteImport.update({
     id: '/admin_/payment-settings',
@@ -1807,6 +1821,7 @@ export interface FileRoutesByFullPath {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/admin/compliance/sub-processors': typeof AdminComplianceSubProcessorsRoute
   '/api/public/catalogue-images': typeof ApiPublicCatalogueImagesRoute
+  '/api/public/partnership-inquiries': typeof ApiPublicPartnershipInquiriesRoute
   '/api/public/website-sms': typeof ApiPublicWebsiteSmsRoute
   '/designers/$slug/$productSlug': typeof DesignersSlugProductSlugRoute
   '/designers/$slug/biography': typeof DesignersSlugBiographyRoute
@@ -1849,6 +1864,7 @@ export interface FileRoutesByFullPath {
   '/trade/admin/onboarding': typeof TradeAdminOnboardingRoute
   '/trade/admin/onboarding-funnel': typeof TradeAdminOnboardingFunnelRoute
   '/trade/admin/outbound': typeof TradeAdminOutboundRoute
+  '/trade/admin/partnership-inquiries': typeof TradeAdminPartnershipInquiriesRoute
   '/trade/admin/payment-settings': typeof TradeAdminPaymentSettingsRoute
   '/trade/admin/portal-invites': typeof TradeAdminPortalInvitesRoute
   '/trade/admin/price-drift': typeof TradeAdminPriceDriftRoute
@@ -2073,6 +2089,7 @@ export interface FileRoutesByTo {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/admin/compliance/sub-processors': typeof AdminComplianceSubProcessorsRoute
   '/api/public/catalogue-images': typeof ApiPublicCatalogueImagesRoute
+  '/api/public/partnership-inquiries': typeof ApiPublicPartnershipInquiriesRoute
   '/api/public/website-sms': typeof ApiPublicWebsiteSmsRoute
   '/designers/$slug/$productSlug': typeof DesignersSlugProductSlugRoute
   '/designers/$slug/biography': typeof DesignersSlugBiographyRoute
@@ -2115,6 +2132,7 @@ export interface FileRoutesByTo {
   '/trade/admin/onboarding': typeof TradeAdminOnboardingRoute
   '/trade/admin/onboarding-funnel': typeof TradeAdminOnboardingFunnelRoute
   '/trade/admin/outbound': typeof TradeAdminOutboundRoute
+  '/trade/admin/partnership-inquiries': typeof TradeAdminPartnershipInquiriesRoute
   '/trade/admin/payment-settings': typeof TradeAdminPaymentSettingsRoute
   '/trade/admin/portal-invites': typeof TradeAdminPortalInvitesRoute
   '/trade/admin/price-drift': typeof TradeAdminPriceDriftRoute
@@ -2341,6 +2359,7 @@ export interface FileRoutesById {
   '/.lovable_/oauth_/consent': typeof DotlovableOauthConsentRoute
   '/admin_/compliance_/sub-processors': typeof AdminComplianceSubProcessorsRoute
   '/api/public/catalogue-images': typeof ApiPublicCatalogueImagesRoute
+  '/api/public/partnership-inquiries': typeof ApiPublicPartnershipInquiriesRoute
   '/api/public/website-sms': typeof ApiPublicWebsiteSmsRoute
   '/designers_/$slug_/$productSlug': typeof DesignersSlugProductSlugRoute
   '/designers_/$slug_/biography': typeof DesignersSlugBiographyRoute
@@ -2383,6 +2402,7 @@ export interface FileRoutesById {
   '/trade/admin_/onboarding': typeof TradeAdminOnboardingRoute
   '/trade/admin_/onboarding-funnel': typeof TradeAdminOnboardingFunnelRoute
   '/trade/admin_/outbound': typeof TradeAdminOutboundRoute
+  '/trade/admin_/partnership-inquiries': typeof TradeAdminPartnershipInquiriesRoute
   '/trade/admin_/payment-settings': typeof TradeAdminPaymentSettingsRoute
   '/trade/admin_/portal-invites': typeof TradeAdminPortalInvitesRoute
   '/trade/admin_/price-drift': typeof TradeAdminPriceDriftRoute
@@ -2610,6 +2630,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/admin/compliance/sub-processors'
     | '/api/public/catalogue-images'
+    | '/api/public/partnership-inquiries'
     | '/api/public/website-sms'
     | '/designers/$slug/$productSlug'
     | '/designers/$slug/biography'
@@ -2652,6 +2673,7 @@ export interface FileRouteTypes {
     | '/trade/admin/onboarding'
     | '/trade/admin/onboarding-funnel'
     | '/trade/admin/outbound'
+    | '/trade/admin/partnership-inquiries'
     | '/trade/admin/payment-settings'
     | '/trade/admin/portal-invites'
     | '/trade/admin/price-drift'
@@ -2876,6 +2898,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/admin/compliance/sub-processors'
     | '/api/public/catalogue-images'
+    | '/api/public/partnership-inquiries'
     | '/api/public/website-sms'
     | '/designers/$slug/$productSlug'
     | '/designers/$slug/biography'
@@ -2918,6 +2941,7 @@ export interface FileRouteTypes {
     | '/trade/admin/onboarding'
     | '/trade/admin/onboarding-funnel'
     | '/trade/admin/outbound'
+    | '/trade/admin/partnership-inquiries'
     | '/trade/admin/payment-settings'
     | '/trade/admin/portal-invites'
     | '/trade/admin/price-drift'
@@ -3143,6 +3167,7 @@ export interface FileRouteTypes {
     | '/.lovable_/oauth_/consent'
     | '/admin_/compliance_/sub-processors'
     | '/api/public/catalogue-images'
+    | '/api/public/partnership-inquiries'
     | '/api/public/website-sms'
     | '/designers_/$slug_/$productSlug'
     | '/designers_/$slug_/biography'
@@ -3185,6 +3210,7 @@ export interface FileRouteTypes {
     | '/trade/admin_/onboarding'
     | '/trade/admin_/onboarding-funnel'
     | '/trade/admin_/outbound'
+    | '/trade/admin_/partnership-inquiries'
     | '/trade/admin_/payment-settings'
     | '/trade/admin_/portal-invites'
     | '/trade/admin_/price-drift'
@@ -3344,6 +3370,7 @@ export interface RootRouteChildren {
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   AdminComplianceSubProcessorsRoute: typeof AdminComplianceSubProcessorsRoute
   ApiPublicCatalogueImagesRoute: typeof ApiPublicCatalogueImagesRoute
+  ApiPublicPartnershipInquiriesRoute: typeof ApiPublicPartnershipInquiriesRoute
   ApiPublicWebsiteSmsRoute: typeof ApiPublicWebsiteSmsRoute
   DesignersSlugProductSlugRoute: typeof DesignersSlugProductSlugRoute
   DesignersSlugBiographyRoute: typeof DesignersSlugBiographyRoute
@@ -4510,6 +4537,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicCatalogueImagesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/partnership-inquiries': {
+      id: '/api/public/partnership-inquiries'
+      path: '/api/public/partnership-inquiries'
+      fullPath: '/api/public/partnership-inquiries'
+      preLoaderRoute: typeof ApiPublicPartnershipInquiriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/website-sms': {
       id: '/api/public/website-sms'
       path: '/api/public/website-sms'
@@ -4802,6 +4836,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/outbound'
       fullPath: '/trade/admin/outbound'
       preLoaderRoute: typeof TradeAdminOutboundRouteImport
+      parentRoute: typeof TradeRoute
+    }
+    '/trade/admin_/partnership-inquiries': {
+      id: '/trade/admin_/partnership-inquiries'
+      path: '/admin/partnership-inquiries'
+      fullPath: '/trade/admin/partnership-inquiries'
+      preLoaderRoute: typeof TradeAdminPartnershipInquiriesRouteImport
       parentRoute: typeof TradeRoute
     }
     '/trade/admin_/payment-settings': {
@@ -5333,6 +5374,7 @@ interface TradeRouteChildren {
   TradeAdminOnboardingRoute: typeof TradeAdminOnboardingRoute
   TradeAdminOnboardingFunnelRoute: typeof TradeAdminOnboardingFunnelRoute
   TradeAdminOutboundRoute: typeof TradeAdminOutboundRoute
+  TradeAdminPartnershipInquiriesRoute: typeof TradeAdminPartnershipInquiriesRoute
   TradeAdminPaymentSettingsRoute: typeof TradeAdminPaymentSettingsRoute
   TradeAdminPortalInvitesRoute: typeof TradeAdminPortalInvitesRoute
   TradeAdminPriceDriftRoute: typeof TradeAdminPriceDriftRoute
@@ -5489,6 +5531,7 @@ const TradeRouteChildren: TradeRouteChildren = {
   TradeAdminOnboardingRoute: TradeAdminOnboardingRoute,
   TradeAdminOnboardingFunnelRoute: TradeAdminOnboardingFunnelRoute,
   TradeAdminOutboundRoute: TradeAdminOutboundRoute,
+  TradeAdminPartnershipInquiriesRoute: TradeAdminPartnershipInquiriesRoute,
   TradeAdminPaymentSettingsRoute: TradeAdminPaymentSettingsRoute,
   TradeAdminPortalInvitesRoute: TradeAdminPortalInvitesRoute,
   TradeAdminPriceDriftRoute: TradeAdminPriceDriftRoute,
@@ -5645,6 +5688,7 @@ const rootRouteChildren: RootRouteChildren = {
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   AdminComplianceSubProcessorsRoute: AdminComplianceSubProcessorsRoute,
   ApiPublicCatalogueImagesRoute: ApiPublicCatalogueImagesRoute,
+  ApiPublicPartnershipInquiriesRoute: ApiPublicPartnershipInquiriesRoute,
   ApiPublicWebsiteSmsRoute: ApiPublicWebsiteSmsRoute,
   DesignersSlugProductSlugRoute: DesignersSlugProductSlugRoute,
   DesignersSlugBiographyRoute: DesignersSlugBiographyRoute,

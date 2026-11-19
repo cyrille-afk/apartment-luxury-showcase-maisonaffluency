@@ -112,8 +112,39 @@
 .pitch-mini-schedule { display: grid; grid-template-columns: 80px 1fr; gap: 18px; margin-top: 35px; }.pitch-mini-schedule img { width: 80px; height: 75px; object-fit: contain; }.pitch-mini-schedule p { font-size: 19px; margin: 0; color: var(--pitch-ink); }.pitch-mini-schedule p span { font-size: 14px; color: var(--pitch-muted); }
 .pitch-fulfillment { display: flex; align-items: center; justify-content: space-between; padding-top: 38px; margin-top: 35px; border-top: 1px solid var(--pitch-border); font-size: 24px; }.pitch-fulfillment svg { width: 26px; height: 26px; color: var(--pitch-emerald); }
 .pitch-pilot-layout { display: grid; grid-template-columns: 1.6fr 1fr; gap: 70px; }.pitch-pilot-timeline { display: grid; grid-template-columns: 1fr 1fr; gap: 32px 45px; }.pitch-pilot-timeline>div { border-top: 1px solid var(--pitch-border); padding-top: 18px; }.pitch-pilot-timeline span { font-size: 20px; color: var(--pitch-emerald); }.pitch-pilot-timeline h3 { font-size: 34px; margin: 14px 0; }.pitch-pilot-timeline p { font-size: 24px; color: var(--pitch-muted); }
-.pitch-pilot-layout aside { border-left: 1px solid var(--pitch-border); padding-left: 45px; }.pitch-pilot-layout aside h3 { font-size: 42px; }.pitch-pilot-layout aside p { font-size: 25px; color: var(--pitch-muted); margin-top: 18px; }.pitch-pilot-contact { border-top: 1px solid var(--pitch-border); margin-top: 27px; padding-top: 22px; }.pitch-pilot-contact span { font-size: 19px; }.pitch-pilot-contact p { font-size: 23px!important; margin: 8px 0 14px!important; }
-@media(max-width: 600px) { .pitch-toolbar { padding: 10px 12px; gap: 10px; flex-wrap: wrap; }.pitch-toolbar-label { display:none; }.pitch-toolbar-brand { font-size:18px; }.pitch-controls { gap:3px; }.pitch-download { width:100%; min-width:0; font-size:15px; padding:12px 18px; height:48px; }.pitch-deck { padding:0 8px; margin-top:12px; }.pitch-slide-viewport { margin-bottom:14px; scroll-margin-top:120px; }.pitch-counter { font-size:11px; min-width:40px; } }
+.pitch-pilot-layout aside { border-left: 1px solid var(--pitch-border); padding-left: 45px; }.pitch-pilot-layout aside h3 { font-size: 34px; }.pitch-pilot-layout aside p { font-size: 21px; color: var(--pitch-muted); margin-top: 14px; }.pitch-pilot-contact { border-top: 1px solid var(--pitch-border); margin-top: 16px; padding-top: 14px; }.pitch-pilot-contact span { font-size: 19px; display: block; }.pitch-pilot-contact p { font-size: 23px!important; margin: 8px 0 14px!important; }
+.pitch-inquiry { background: var(--pitch-ink); color: var(--pitch-light); border-radius: 2px; height: 52px; min-width: 220px; padding: 0 26px; font-size: 16px; }
+.pitch-inquiry svg { width: 20px; height: 20px; }
+.pitch-inquiry:hover { background: var(--pitch-emerald); }
+.pitch-cta { display: inline-block; margin-top: 16px; background: var(--pitch-emerald); color: var(--pitch-light); border: 0; font-family: Georgia, serif; font-size: 21px; line-height: 1.2; padding: 13px 26px; cursor: pointer; }
+.pitch-cta:hover { background: var(--pitch-ink); }
+/* Inquiry dialog is portalled to body, so the pitch palette is redeclared here. */
+.pitch-dialog { --pitch-paper: #FAF9F6; --pitch-ink: #1C1C1C; --pitch-muted: #79766E; --pitch-border: #E5E0D8; --pitch-emerald: #1F4E46; --pitch-light: #FFFFFF;
+  max-width: 640px; background: var(--pitch-paper); color: var(--pitch-ink); border: 1px solid var(--pitch-border); border-radius: 0; padding: 34px 36px; font-family: Arial, Helvetica, sans-serif; max-height: 88vh; overflow-y: auto; }
+.pitch-dialog-title { font-family: Georgia, serif; font-weight: 400; font-size: 34px; color: var(--pitch-ink); }
+.pitch-dialog-subtitle { color: var(--pitch-muted); font-size: 16px; margin-top: 6px; }
+.pitch-form { display: grid; gap: 4px; margin-top: 14px; }
+.pitch-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.pitch-label { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--pitch-muted); font-weight: 400; }
+.pitch-input { background: var(--pitch-light); border: 1px solid var(--pitch-border); border-radius: 0; color: var(--pitch-ink); font-size: 16px; height: 44px; }
+.pitch-input:focus-visible { border-color: var(--pitch-emerald); box-shadow: 0 0 0 1px var(--pitch-emerald); outline: none; }
+.pitch-textarea { height: auto; padding: 12px 14px; line-height: 1.5; }
+.pitch-field-error { font-size: 12px; color: #8C2F2F; min-height: 16px; margin: 4px 0 0; }
+.pitch-honeypot { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.pitch-form-notice { font-size: 13px; color: #8C2F2F; margin: 0 0 6px; }
+.pitch-submit { display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: var(--pitch-emerald); color: var(--pitch-light); border: 0; border-radius: 2px; height: 50px; font-size: 16px; cursor: pointer; margin-top: 8px; }
+.pitch-submit:hover { background: var(--pitch-ink); }
+.pitch-submit:disabled { opacity: 0.7; cursor: default; }
+.pitch-submit svg { width: 18px; height: 18px; }
+.pitch-form-foot { font-size: 13px; color: var(--pitch-muted); margin: 12px 0 0; text-align: center; }
+.pitch-dialog-link { color: var(--pitch-emerald); text-decoration: underline; text-underline-offset: 3px; }
+.pitch-dialog-sent { padding: 10px 0 4px; }
+.pitch-dialog-sent-heading { font-family: Georgia, serif; font-size: 26px; margin: 0 0 10px; color: var(--pitch-ink); }
+.pitch-dialog-sent p { font-size: 16px; color: var(--pitch-muted); margin: 0 0 12px; line-height: 1.55; }
+.pitch-dialog-close-button { background: var(--pitch-ink); color: var(--pitch-light); border: 0; border-radius: 2px; height: 44px; padding: 0 24px; font-size: 15px; cursor: pointer; margin-top: 6px; }
+.pitch-dialog-close-button:hover { background: var(--pitch-emerald); }
+@media (max-width: 600px) { .pitch-dialog { padding: 22px 18px; max-height: 92vh; } .pitch-dialog-title { font-size: 26px; } .pitch-field-row { grid-template-columns: 1fr; gap: 0; } .pitch-submit { width: 100%; } }
+@media(max-width: 600px) { .pitch-toolbar { padding: 10px 12px; gap: 10px; flex-wrap: wrap; }.pitch-toolbar-label { display:none; }.pitch-toolbar-brand { font-size:18px; }.pitch-controls { gap:3px; }.pitch-download { width:100%; min-width:0; font-size:15px; padding:12px 18px; height:48px; }.pitch-inquiry { width:100%; min-width:0; font-size:15px; padding:12px 18px; height:48px; }.pitch-deck { padding:0 8px; margin-top:12px; }.pitch-slide-viewport { margin-bottom:14px; scroll-margin-top:120px; }.pitch-counter { font-size:11px; min-width:40px; } }
 @media print {
   @page { size: 338.6667mm 190.5mm; margin: 0; }
   body:has(.developer-pitch) { margin:0!important; }

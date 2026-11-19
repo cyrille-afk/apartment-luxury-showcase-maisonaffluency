@@ -1,5 +1,9 @@
 # Roadmap
 
+## Pitch-page partnership inquiry
+- [x] Add a prominent Partnership Inquiry control on the pitch page plus a slide-8 call to action; form validates client and server side, stores each inquiry in partnership_inquiries and emails concierge@maisonaffluency.com.
+- [ ] Verify end to end: desktop/phone light/dark dialog, invalid and valid submissions, stored row, owner email send event, admin inbox list, PDF export unaffected; then delete only the test row.
+
 ## Developer partnership presentation
 - [x] Build eight editorial 16:9 slides at /developer-pitch using Cipriani case-study media and privacy-safe tool captures; concept room and proposal-format previews explicitly labelled.
 - [x] Use freshly verified live Cipriani USD tiers (US$75,000 / US$150,000 / US$300,000), as confirmed by the user; no saved prices changed.

@@ -2220,6 +2220,13 @@
       "when": 1795075068104,
       "tag": "0316_viewing_room_invite_activity",
       "breakpoints": true
+    },
+    {
+      "idx": 317,
+      "version": "7",
+      "when": 1795080579405,
+      "tag": "0317_create_partnership_inquiries",
+      "breakpoints": true
     }
   ]
 }

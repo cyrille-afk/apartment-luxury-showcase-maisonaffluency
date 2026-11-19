@@ -6554,6 +6554,42 @@ export type Database = {
         }
         Relationships: []
       }
+      partnership_inquiries: {
+        Row: {
+          company: string
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          phone: string
+          project: string
+          source: string
+        }
+        Insert: {
+          company?: string
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          phone?: string
+          project?: string
+          source?: string
+        }
+        Update: {
+          company?: string
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          phone?: string
+          project?: string
+          source?: string
+        }
+        Relationships: []
+      }
       payment_credentials: {
         Row: {
           id: string
