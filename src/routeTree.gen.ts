@@ -26,6 +26,7 @@ import { Route as CuratorsPicksDemoRouteImport } from './routes/curators-picks-d
 import { Route as DesignersRouteImport } from './routes/designers'
 import { Route as DesignersHeroLockRouteImport } from './routes/designers-hero-lock'
 import { Route as DevCheckoutTestRouteImport } from './routes/dev-checkout-test'
+import { Route as DeveloperPitchRouteImport } from './routes/developer-pitch'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as GalleryRouteImport } from './routes/gallery'
 import { Route as HomeRouteImport } from './routes/home'
@@ -357,6 +358,11 @@ const DesignersHeroLockRoute = DesignersHeroLockRouteImport.update({
 const DevCheckoutTestRoute = DevCheckoutTestRouteImport.update({
   id: '/dev-checkout-test',
   path: '/dev-checkout-test',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DeveloperPitchRoute = DeveloperPitchRouteImport.update({
+  id: '/developer-pitch',
+  path: '/developer-pitch',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FavoritesRoute = FavoritesRouteImport.update({
@@ -1654,6 +1660,7 @@ export interface FileRoutesByFullPath {
   '/designers': typeof DesignersRoute
   '/designers-hero-lock': typeof DesignersHeroLockRoute
   '/dev-checkout-test': typeof DevCheckoutTestRoute
+  '/developer-pitch': typeof DeveloperPitchRoute
   '/favorites': typeof FavoritesRoute
   '/gallery': typeof GalleryRoute
   '/home': typeof HomeRoute
@@ -1920,6 +1927,7 @@ export interface FileRoutesByTo {
   '/designers': typeof DesignersRoute
   '/designers-hero-lock': typeof DesignersHeroLockRoute
   '/dev-checkout-test': typeof DevCheckoutTestRoute
+  '/developer-pitch': typeof DeveloperPitchRoute
   '/favorites': typeof FavoritesRoute
   '/gallery': typeof GalleryRoute
   '/home': typeof HomeRoute
@@ -2186,6 +2194,7 @@ export interface FileRoutesById {
   '/designers': typeof DesignersRoute
   '/designers-hero-lock': typeof DesignersHeroLockRoute
   '/dev-checkout-test': typeof DevCheckoutTestRoute
+  '/developer-pitch': typeof DeveloperPitchRoute
   '/favorites': typeof FavoritesRoute
   '/gallery': typeof GalleryRoute
   '/home': typeof HomeRoute
@@ -2454,6 +2463,7 @@ export interface FileRouteTypes {
     | '/designers'
     | '/designers-hero-lock'
     | '/dev-checkout-test'
+    | '/developer-pitch'
     | '/favorites'
     | '/gallery'
     | '/home'
@@ -2720,6 +2730,7 @@ export interface FileRouteTypes {
     | '/designers'
     | '/designers-hero-lock'
     | '/dev-checkout-test'
+    | '/developer-pitch'
     | '/favorites'
     | '/gallery'
     | '/home'
@@ -2985,6 +2996,7 @@ export interface FileRouteTypes {
     | '/designers'
     | '/designers-hero-lock'
     | '/dev-checkout-test'
+    | '/developer-pitch'
     | '/favorites'
     | '/gallery'
     | '/home'
@@ -3252,6 +3264,7 @@ export interface RootRouteChildren {
   DesignersRoute: typeof DesignersRoute
   DesignersHeroLockRoute: typeof DesignersHeroLockRoute
   DevCheckoutTestRoute: typeof DevCheckoutTestRoute
+  DeveloperPitchRoute: typeof DeveloperPitchRoute
   FavoritesRoute: typeof FavoritesRoute
   GalleryRoute: typeof GalleryRoute
   HomeRoute: typeof HomeRoute
@@ -3466,6 +3479,13 @@ declare module '@tanstack/react-router' {
       path: '/dev-checkout-test'
       fullPath: '/dev-checkout-test'
       preLoaderRoute: typeof DevCheckoutTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/developer-pitch': {
+      id: '/developer-pitch'
+      path: '/developer-pitch'
+      fullPath: '/developer-pitch'
+      preLoaderRoute: typeof DeveloperPitchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/favorites': {
@@ -5545,6 +5565,7 @@ const rootRouteChildren: RootRouteChildren = {
   DesignersRoute: DesignersRoute,
   DesignersHeroLockRoute: DesignersHeroLockRoute,
   DevCheckoutTestRoute: DevCheckoutTestRoute,
+  DeveloperPitchRoute: DeveloperPitchRoute,
   FavoritesRoute: FavoritesRoute,
   GalleryRoute: GalleryRoute,
   HomeRoute: HomeRoute,

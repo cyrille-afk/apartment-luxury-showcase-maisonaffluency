@@ -1,5 +1,10 @@
 # Roadmap
 
+## Developer partnership presentation
+- [x] Build eight editorial 16:9 slides at /developer-pitch using Cipriani case-study media and privacy-safe tool captures; concept room and proposal-format previews explicitly labelled.
+- [x] Use freshly verified live Cipriani USD tiers (US$75,000 / US$150,000 / US$300,000), as confirmed by the user; no saved prices changed.
+- [x] Desktop/phone layout, image loading, navigation, clean footers and print breaks verified with no page errors. PDF download verified (eight 16:9 pages, 3.8MB); six existing PDF tests pass. Not published.
+
 ## Private viewing-room access ending
 - [x] Add Admin scheduled expiry and confirmed permanent revocation without changing saved packages or drafts.
 - [x] Enforce expiry/revocation on every public viewing-room read and proposal operation.

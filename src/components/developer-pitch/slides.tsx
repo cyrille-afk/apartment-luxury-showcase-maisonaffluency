@@ -1,0 +1,67 @@
+import type { ReactNode } from 'react';
+import { ArrowRight, Box, Check, ShieldCheck, Layers, Sparkles, Plus } from 'lucide-react';
+import hero from '@/assets/cipriani-residence-living-render.asset.json';
+import plan from '@/assets/cipriani-residence-04.asset.json';
+import logo from '@/assets/cipriani-residences-logo.asset.json';
+import manager from '@/assets/developer-pitch/manager.asset.json';
+import residences from '@/assets/developer-pitch/residences.asset.json';
+import room from '@/assets/developer-pitch/room.asset.json';
+import sandy from '@/assets/curators-picks/man-of-parts-sandy-cove-sofa.png';
+import rua from '@/assets/curators-picks/man-of-parts-rua-leblon.png';
+import yoma from '@/assets/curators-picks/kerstens-console.jpg';
+import { SlideFrame } from './SlideFrame';
+
+export const slideTitles = [
+  'Turnkey Collectible Interiors', 'The Developer’s Vested Interest', 'The 4-Stage Partnership Workflow',
+  'The Organigram Engine', 'The Private Invitation', 'Eye-Level Personalization',
+  'From Proposal to Placement', 'Your 14-Day Pilot',
+];
+
+function Brand({ light = false }: { light?: boolean }) {
+  return <div className={`pitch-brand ${light ? 'pitch-brand-light' : ''}`}><img src={logo.url} alt="Cipriani Residences Miami" crossOrigin="anonymous" /><span>×</span><span className="pitch-wordmark">MAISON<br /><strong>AFFLUENCY</strong></span></div>;
+}
+function Footer({ index, note }: { index: number; note?: string }) {
+  return <footer className="pitch-footer"><span>MAISON AFFLUENCY / DEVELOPER PARTNERSHIPS</span><span>{note || 'CIPRIANI RESIDENCES MIAMI — CASE STUDY'}</span><span>{String(index + 1).padStart(2, '0')} / 08</span></footer>;
+}
+function Heading({ kicker, children, subtitle }: { kicker: string; children: ReactNode; subtitle?: string }) {
+  return <header className="pitch-heading"><p className="pitch-kicker">{kicker}</p><h2>{children}</h2>{subtitle && <p className="pitch-subtitle">{subtitle}</p>}</header>;
+}
+function Image({ src, alt, className = '' }: { src: string; alt: string; className?: string }) {
+  return <img src={src} alt={alt} crossOrigin="anonymous" className={className} />;
+}
+
+export function PitchSlide({ index }: { index: number }) {
+  const title = slideTitles[index];
+  if (!title) return null;
+  return <SlideFrame index={index} title={title}>
+    {index === 0 && <><Image src={hero.url} alt="Cipriani Residences Miami living room with curved glazing and bay views" className="pitch-cover-image" /><div className="pitch-cover-scrim" /><div className="pitch-cover-copy"><Brand light /><p className="pitch-kicker">DEVELOPER PARTNERSHIP PRESENTATION</p><h1>Turnkey Collectible<br />Interiors for Luxury<br /><em>Developments.</em></h1><p className="pitch-cover-subtitle">Case Study: Cipriani Residences Miami<br />× Maison Affluency</p><p className="pitch-cover-bottom">A private, curated journey from floor plan to furnished residence.</p></div><Footer index={index} note="CIPRIANI RESIDENCE RENDERING" /></>}
+
+    {index === 1 && <><Heading kicker="01 / THE DEVELOPER’S VESTED INTEREST" subtitle="An interiors partnership designed around the commercial life of your development.">Make the residence tangible.<br /><em>Protect its distinction.</em></Heading><div className="pitch-pillars">{[
+      ['01','Faster off-plan absorption','From an empty curved-glass floor plan to an eye-level furnished space. Buyers can picture living there before the keys are handed over.','A more compelling sales conversation', <Layers />],
+      ['02','Turnkey ancillary revenue','Offer a furnished-residence package as an additional purchase or a considered closing incentive. Maison Affluency manages the interiors work, not the broker.','Zero broker procurement workload', <Sparkles />],
+      ['03','Architectural brand protection','Collectible pieces, approved finishes and footprint-safe alternatives preserve a coherent aesthetic while allowing personal choice.','Curation without compromise', <ShieldCheck />],
+    ].map(([n,h,p,b,icon]) => <div className="pitch-pillar" key={String(n)}><div className="pitch-pillar-top"><span>{n}</span>{icon}</div><h3>{h}</h3><p>{p}</p><div className="pitch-pillar-note">{b}</div></div>)}</div><p className="pitch-note">Commercial objectives of the partnership; no sales uplift or revenue outcome is asserted.</p><Footer index={index} /></>}
+
+    {index === 2 && <><Heading kicker="02 / THE 4-STAGE PARTNERSHIP WORKFLOW" subtitle="One controlled system. A seamless buyer experience.">From your architecture<br /><em>to their personal collection.</em></Heading><div className="pitch-workflow">{[
+      ['01','Developer onboarding','Floor plans & branding','Residence drawings, developer logo, hero imagery and agreed collection direction.'],
+      ['02','Back-end curation','Developer Viewing Room Manager','Map residences to curated tiers. Verify 3D readiness and approve hotspot alternatives.'],
+      ['03','Co-branded invitation','Private magic link','A Cipriani × Maison Affluency invitation opens a private, branded residence journey.'],
+      ['04','Buyer personalization','3D room & automated proposal','Explore at eye level, select approved alternatives and finishes, then lock and download the proposal.'],
+    ].map(([n,h,s,p],i) => <div className="pitch-workflow-step" key={n}><span className="pitch-step-number">{n}</span><h3>{h}</h3><span className="pitch-step-module">{s}</span><p>{p}</p>{i < 3 && <ArrowRight className="pitch-flow-arrow" />}</div>)}</div><div className="pitch-workflow-owner"><span>DEVELOPER</span><span>MAISON AFFLUENCY CURATION & OPERATIONS</span><span>PRIVATE BUYER</span></div><Footer index={index} /></>}
+
+    {index === 3 && <><Heading kicker="03 / BACK-END ARCHITECTURE" subtitle="The Developer Viewing Room Manager connects brand, residence and collection.">The organigram engine.</Heading><div className="pitch-manager-layout"><figure><Image src={manager.url} alt="Actual Cipriani Developer Viewing Room Manager: developer settings, apartment layouts and furniture packages" /><figcaption>Existing three-column manager • case-study capture</figcaption></figure><div className="pitch-organigram"><div><span>01 / DEVELOPER SETTINGS</span><h3>Cipriani Residences Miami</h3><p>Co-branding · hero imagery · private access</p></div><ArrowRight /><div><span>02 / APARTMENT LAYOUTS</span><p>2BR Residence<br />3BR Bayfront<br />Canaletto Penthouse</p></div><ArrowRight /><div><span>03 / TIERED PACKAGES</span><p>Essential <strong>US$75,000</strong><br />Signature <strong>US$150,000</strong><br />Bespoke <strong>US$300,000</strong></p></div></div></div><div className="pitch-proof-strip"><span><Box />Mapped in metres</span><span><Check />3D Ready verification</span><span><ShieldCheck />±15% width & depth rules</span><span>Admin-approved swaps only</span></div><p className="pitch-note">Live Cipriani tier budgets, verified 19 November 2026. Final configured proposals remain subject to confirmation. Residence plans are labelled sample references.</p><Footer index={index} /></>}
+
+    {index === 4 && <><Heading kicker="04 / FRONT-END — INVITATION & SELECTION" subtitle="A private introduction, followed by two simple decisions.">Your brand. Their residence.<br /><em>A considered starting point.</em></Heading><div className="pitch-invitation-layout"><figure className="pitch-invitation"><Brand /><Image src={hero.url} alt="Cipriani invitation hero image" /><p className="pitch-kicker">PRIVATE VIEWING ROOM</p><h3>Cipriani Residences Miami</h3><p>You are invited to explore the residence layouts and curated furniture collections prepared for you by Maison Affluency.</p><span className="pitch-email-cta">Enter the viewing room</span><small>Personal invitation · secure private access</small></figure><div className="pitch-selection"><div className="pitch-selection-label"><span>01 / SELECT THE RESIDENCE</span><span>02 / SELECT THE COLLECTION</span></div><Image src={residences.url} alt="Actual Cipriani private viewing room with 2-bedroom, Bayfront and Canaletto residence options" /><div className="pitch-tier-row"><div>Essential<strong>US$75,000</strong></div><div>Signature<strong>US$150,000</strong></div><div>Bespoke<strong>US$300,000</strong></div></div></div></div><Footer index={index} note="INVITATION PRESENTATION / ACTUAL RESIDENCE SELECTION" /></>}
+
+    {index === 5 && <><Heading kicker="05 / FRONT-END — EYE-LEVEL 3D & PERSONALIZATION" subtitle="Freedom to choose, within the architectural and curatorial brief.">Personal by design.<br /><em>Controlled by curation.</em></Heading><div className="pitch-personalization"><figure><Image src={room.url} alt="Actual Cipriani Bespoke eye-level concept room showing loaded collectible furniture and proposal action" /><figcaption>Live Stage 3 concept room • official apartment environment model pending</figcaption></figure><div className="pitch-personalization-copy"><div><span className="pitch-round-symbol"><Plus /></span><h3>Explore. Inspect. Swap.</h3><p>Eye-level exploration and + hotspots connect each piece to its approved, footprint-safe alternatives.</p></div><div><span className="pitch-kicker">CURATED COLLECTIBLE PIECES</span><p className="pitch-piece-names">Sandy Cove Sofa · Rua Leblon<br />Rift CTS · Yoma Console</p></div><div><span className="pitch-kicker">MATERIAL PERSONALIZATION</span><p className="pitch-piece-names">Opera Calla<br />Brown Travertine · Pakistani Onyx</p><p>Available linked finishes and retail prices update with the configured selection. Choices depend on the selected piece and its saved permissions.</p></div></div></div><Footer index={index} /></>}
+
+    {index === 6 && <><Heading kicker="06 / AUTOMATED PROPOSAL & WHITE-GLOVE FULFILLMENT" subtitle="A clear specification becomes a fully managed interiors journey.">From a chosen collection<br /><em>to a finished residence.</em></Heading><div className="pitch-proposal-pages"><div className="pitch-mini-page pitch-mini-cover"><Image src={hero.url} alt="Cipriani proposal cover rendering" /><span>PRIVATE CLIENT PRESENTATION</span><h3>Cipriani<br />Residences Miami</h3><small>01 / HERO COVER</small></div><div className="pitch-mini-page"><span>SPATIAL CONTEXT</span><h3>The residence,<br />considered.</h3><div className="pitch-plan-preview"><Image src={plan.url} alt="Authentic Residence 04 floor plan used in the proposal" /><span /></div><small>02 / HIGHLIGHTED FLOOR PLAN</small></div><div className="pitch-mini-page"><span>MATERIALITY & COLLECTION</span><h3>A tactile<br />point of view.</h3><div className="pitch-mini-products"><Image src={sandy} alt="Sandy Cove Sofa" /><Image src={yoma} alt="Kerstens console" /></div><p>Selected finishes<br />Supplier swatches & material names</p><small>03 / MATERIALITY BOARD</small></div><div className="pitch-mini-page"><span>ITEMIZED SCHEDULE</span><h3>Every detail,<br />specified.</h3><div className="pitch-mini-schedule"><Image src={sandy} alt="Sandy Cove Sofa schedule example" /><p>Sandy Cove Sofa<br /><span>Configuration · dimensions · quantity</span></p><Image src={rua} alt="Rua Leblon schedule example" /><p>Rua Leblon<br /><span>Finish · retail price · lead time</span></p></div><small>04 / ITEMIZED SCHEDULE</small></div></div><div className="pitch-fulfillment"><span>Lock & download proposal</span><ArrowRight /><span>Procurement coordination</span><ArrowRight /><span>Lead-time tracking</span><ArrowRight /><span>Delivery & installation</span></div><p className="pitch-note">Proposal format preview using existing Cipriani assets; no client identity, order or invented price schedule. Fulfillment scope is agreed for each development.</p><Footer index={index} /></>}
+
+    {index === 7 && <><Heading kicker="07 / A 14-DAY PILOT FOR YOUR DEVELOPMENT" subtitle="Replicate the Cipriani private viewing-room journey for your flagship tower.">Your architecture.<br />Our collectible world.<br /><em>Ready for a private launch.</em></Heading><div className="pitch-pilot-layout"><div className="pitch-pilot-timeline">{[
+      ['DAYS 01–03','Define the flagship','Confirm floor plans, brand assets, priority residence and target tiers.'],
+      ['DAYS 04–07','Curate & map','Build the collection, verify metre-scale models and approve footprint-safe options.'],
+      ['DAYS 08–11','Brand & validate','Prepare invitations, residence selection, personalization and proposal quality checks.'],
+      ['DAYS 12–14','Private pilot launch','Brief the sales team and invite the agreed first buyer group.'],
+    ].map(([d,h,p]) => <div key={d}><span>{d}</span><h3>{h}</h3><p>{p}</p></div>)}</div><aside><p className="pitch-kicker">TO BEGIN</p><h3>One flagship.<br />One shared brief.</h3><p>Provide approved plans, developer branding and your preferred pilot residence. Agree the collection direction and launch owners.</p><div className="pitch-pilot-contact"><span>MAISON AFFLUENCY</span><p>Developer Partnerships<br />Singapore · Global Projects</p><span>www.maisonaffluency.com</span></div></aside></div><p className="pitch-note">Proposed 14-day launch schedule, subject to timely approved assets, model availability and developer sign-off.</p><Footer index={index} /></>}
+  </SlideFrame>;
+}
