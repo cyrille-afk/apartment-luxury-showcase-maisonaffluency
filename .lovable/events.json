@@ -1076,6 +1076,58 @@
           }
         }
       }
+    },
+    "project.viewing_room_section_viewed": {
+      "event_schema_version": 1,
+      "description": "A viewing room visitor moved to a section: residence list, collection selection, or personalize (package viewer).",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "section"
+        ],
+        "properties": {
+          "section": {
+            "type": "string",
+            "enum": [
+              "residence",
+              "collection",
+              "personalize"
+            ]
+          },
+          "package_tier": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "project.viewing_room_unlocked": {
+      "event_schema_version": 1,
+      "description": "A visitor successfully unlocked a private viewing room via magic link or access code.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "method"
+        ],
+        "properties": {
+          "method": {
+            "type": "string",
+            "enum": [
+              "magic_link",
+              "access_code"
+            ]
+          }
+        }
+      }
     }
   }
 }

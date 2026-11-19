@@ -78,15 +78,15 @@ function ViewingRoomPage() {
       try {
         if (/^[a-zA-Z0-9_-]{20,128}$/.test(magicCode)) {
           const access = await redeemViewingRoomAccess({ data: { token: magicCode, locator } });
-          if (access) { ok = true; try { window.localStorage.setItem(enteredKey, magicCode); } catch { /* storage unavailable */ } setStoredAccess(magicCode); await queryClient.invalidateQueries({ queryKey: ["developer-viewing-room", locator] }); }
+          if (access) { ok = true; window.__lovableEvents?.track?.("project.viewing_room_unlocked", { method: "magic_link" }); try { window.localStorage.setItem(enteredKey, magicCode); } catch { /* storage unavailable */ } setStoredAccess(magicCode); await queryClient.invalidateQueries({ queryKey: ["developer-viewing-room", locator] }); }
         }
       } catch { /* falls back to the code card */ }
       setMagicState(ok ? "idle" : "failed");
       void navigate({ search: ({ code: _code, ...rest }) => rest, replace: true, resetScroll: false });
     })();
   }, [search.code, locator, enteredKey, queryClient, navigate]);
-  const chooseLayout = (id: string) => navigate({ search: { layout: id }, resetScroll: true });
-  const choosePackage = (id: string) => navigate({ search: { layout: layout?.id, package: id }, resetScroll: false });
+  const chooseLayout = (id: string) => { window.__lovableEvents?.track?.("project.viewing_room_section_viewed", { section: "collection" }); return navigate({ search: { layout: id }, resetScroll: true }); };
+  const choosePackage = (id: string) => { window.__lovableEvents?.track?.("project.viewing_room_section_viewed", { section: "personalize", package_tier: layout?.packages.find(row => row.id === id)?.tier_name ?? "unknown" }); return navigate({ search: { layout: layout?.id, package: id }, resetScroll: false }); };
   if (!room && magicState === "opening") return <main className="viewing-room flex min-h-screen flex-col items-center justify-center gap-6 bg-background px-6 text-center"><img src={affluencyLogo} alt="Affluency" className="h-9 w-auto mix-blend-multiply" /><p role="status" className="font-display text-xl text-muted-foreground">Opening your private viewing room…</p></main>;
   if (!room) {
     if (storedAccess && accessStatus) return <ViewingRoomAccessEnded status={accessStatus} onNewCode={clearStoredAccess} />;
@@ -95,6 +95,7 @@ function ViewingRoomPage() {
     try {
       const access = await redeemViewingRoomAccess({ data: { token: code.trim(), locator } });
       if (!access) { setAccessError("Please check your private access code or request a current invitation."); return; }
+      window.__lovableEvents?.track?.("project.viewing_room_unlocked", { method: "access_code" });
       try { window.localStorage.setItem(enteredKey, code.trim()); } catch { /* storage unavailable */ }
       setCode(""); await queryClient.invalidateQueries({ queryKey: ["developer-viewing-room", locator] });
     } catch { setAccessError("Please check your private access code or request a current invitation."); }
@@ -114,7 +115,7 @@ function ViewingRoomPage() {
             <div className="flex aspect-[4/3] w-full items-center justify-center overflow-hidden border-b border-border p-5">{row.floorplan_url ? <img src={row.floorplan_url} alt={`${row.name} floor plan`} className="h-full w-full object-contain" /> : <span className="text-sm text-muted-foreground">Floor plan pending</span>}</div>
             <div className="w-full p-5"><h2 className="font-display text-xl">{row.name}</h2><p className="mt-3 text-sm">{residenceArea(row.specs_label) ?? "Square footage to be confirmed"}</p><p className="mt-3 text-xs text-muted-foreground">{row.specs_label}</p><span className="mt-6 flex items-center justify-between text-xs">Explore residence<ArrowRight className="size-4" /></span></div>
           </Button></article>)}</div>}</> : <>
-        <Button variant="ghost" className="mb-5 h-auto p-0 text-xs text-muted-foreground" onClick={() => void navigate({ search: {}, resetScroll: true })}><ArrowLeft className="size-3" />All residences</Button>
+        <Button variant="ghost" className="mb-5 h-auto p-0 text-xs text-muted-foreground" onClick={() => { window.__lovableEvents?.track?.("project.viewing_room_section_viewed", { section: "residence" }); void navigate({ search: {}, resetScroll: true }); }}><ArrowLeft className="size-3" />All residences</Button>
         <h1 className="font-display text-3xl md:text-4xl">{layout.name}</h1><p className="mt-3 text-sm text-muted-foreground">{layout.specs_label}</p>
         <div role="group" aria-label="Furniture packages" className="mt-8 flex gap-4 overflow-x-auto pb-3">{layout.packages.map(row => <Button key={row.id} variant="outline" aria-pressed={selected?.id === row.id} className={`h-auto min-w-56 flex-1 flex-col items-start gap-3 rounded-none p-5 text-left ${selected?.id === row.id ? "border-foreground bg-muted" : "bg-background"}`} onClick={() => void choosePackage(row.id)}>
           <span className="font-display text-2xl">{row.tier_name}</span><span className="whitespace-normal text-sm leading-relaxed text-muted-foreground">{row.description}</span><span className="font-display text-xl">{new Intl.NumberFormat("en-GB", { style: "currency", currency: row.currency, maximumFractionDigits: 0 }).format(liveTotals[row.id] ?? row.package_price)}</span><span className="text-xs text-muted-foreground">Estimated lead time · {viewingRoomLeadTime(row.lead_time_weeks, selected?.id === row.id ? composition?.items : undefined)}</span>
