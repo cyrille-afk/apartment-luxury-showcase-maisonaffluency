@@ -328,7 +328,7 @@ export default function TradeTools() {
               >
                 <Link
                   to={toolHref(tool.url)}
-                  className="flex items-center gap-2.5 flex-1 min-w-0 text-left"
+                  className="flex items-center gap-2.5 flex-1 min-w-0 text-left before:absolute before:inset-0 before:rounded-xl before:content-[''] focus-visible:outline-none focus-visible:before:ring-2 focus-visible:before:ring-ring"
                 >
                   <div className="w-8 h-8 rounded-md bg-muted flex items-center justify-center shrink-0 group-hover:bg-foreground/10 transition-colors">
                     <tool.icon className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
@@ -342,7 +342,7 @@ export default function TradeTools() {
                 </Link>
                 <Button variant="ghost" size="icon"
                   onClick={(e) => { e.stopPropagation(); toggleFavorite(tool.url); }}
-                  className="shrink-0 p-1 rounded hover:bg-muted text-accent"
+                  className="relative z-10 shrink-0 p-1 rounded hover:bg-muted text-accent"
                   aria-label={`Remove ${tool.title} from favorites`}
                   title="Remove from favorites"
                 >
@@ -454,7 +454,7 @@ export default function TradeTools() {
                 >
                   <Link
                     to={toolHref(tool.url)}
-                    className="flex items-start gap-3 flex-1 min-w-0 text-left"
+                    className="flex items-start gap-3 flex-1 min-w-0 text-left before:absolute before:inset-0 before:rounded-xl before:content-[''] focus-visible:outline-none focus-visible:before:ring-2 focus-visible:before:ring-ring"
                   >
                     <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0 group-hover:bg-foreground/10 transition-colors">
                       <tool.icon className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
@@ -469,7 +469,7 @@ export default function TradeTools() {
                   <Button variant="ghost" size="icon"
                     onClick={(e) => { e.stopPropagation(); toggleFavorite(tool.url); }}
                     className={cn(
-                      "absolute top-2.5 right-2.5 p-1.5 rounded-md transition-colors",
+                      "absolute z-10 top-2.5 right-2.5 p-1.5 rounded-md transition-colors",
                       isFav
                         ? "text-accent hover:bg-muted"
                         : "text-muted-foreground/40 hover:text-accent hover:bg-muted opacity-0 group-hover:opacity-100 focus:opacity-100",
@@ -480,7 +480,7 @@ export default function TradeTools() {
                     <Star className={cn("h-3.5 w-3.5", isFav && "fill-accent")} />
                   </Button>
                   {stage && (
-                    <div className="w-full space-y-3 border-t border-border pt-3 mt-auto">
+                    <div className="relative z-10 w-full space-y-3 border-t border-border pt-3 mt-auto">
                     <div className="flex items-center gap-2">
                       <Checkbox id={`workflow-${stage.id}`} aria-label={`Mark ${tool.title} complete`} checked={progressReady && isComplete}
                         disabled={!progressReady || editQuery.data !== true || completion.isPending}
