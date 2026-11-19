@@ -41,6 +41,12 @@ export const getViewingRoom = createServerFn({ method: "POST" }).inputValidator(
   setResponseHeader("Cache-Control", "private, no-store");
   return (await verifiedRoom(data.token))?.room ?? null;
 });
+export const checkViewingRoomAccess = createServerFn({ method: "POST" }).inputValidator(z.object({ token })).handler(async ({ data }) => {
+  setResponseHeader("Cache-Control", "private, no-store");
+  const { data: status, error } = await publicClient().rpc("get_viewing_room_access_status", { _token: data.token });
+  if (error) throw new Error("Viewing room is temporarily unavailable.");
+  return status === "expired" || status === "revoked" ? status : null;
+});
 export const getViewingRoomChoices = createServerFn({ method: "POST" }).inputValidator(z.object({ token: locator, packageId: z.string().uuid() })).handler(async ({ data }) => {
   setResponseHeader("Cache-Control", "private, no-store");
   const access = await verifiedRoom(data.token);

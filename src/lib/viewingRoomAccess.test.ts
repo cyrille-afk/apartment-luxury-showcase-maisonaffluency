@@ -3,7 +3,7 @@ const mocks = vi.hoisted(() => ({ rpc: vi.fn(), getCookie: vi.fn(), setCookie: v
 vi.mock("@tanstack/react-start", () => ({ createServerFn: () => ({ inputValidator: () => ({ handler: (fn: unknown) => fn }) }) }));
 vi.mock("@tanstack/react-start/server", () => ({ getCookie: mocks.getCookie, setCookie: mocks.setCookie, setResponseHeader: vi.fn(), getRequestUrl: () => new URL("https://www.maisonaffluency.com") }));
 vi.mock("@supabase/supabase-js", () => ({ createClient: () => ({ rpc: mocks.rpc }) }));
-import { getViewingRoom, getViewingRoomPackage, getViewingRoomChoices, lockViewingRoomProposal, redeemViewingRoomAccess } from "./viewingRoom.functions";
+import { checkViewingRoomAccess, getViewingRoom, getViewingRoomPackage, getViewingRoomChoices, lockViewingRoomProposal, redeemViewingRoomAccess } from "./viewingRoom.functions";
 type Handler = (args: { data: Record<string, unknown> }) => Promise<unknown>;
 const call = (fn: unknown, data: Record<string, unknown>) => (fn as Handler)({ data });
 const room = { name: "Cipriani Residences Miami", project_name: "Cipriani Miami", logo: null, hero: null, layouts: [] };
@@ -42,4 +42,14 @@ it.each(["expired", "revoked"])("%s codes reject redemption and all already-open
   for (const fn of [getViewingRoom, getViewingRoomPackage, getViewingRoomChoices]) expect(await call(fn, data)).toBeNull();
   await expect(call(lockViewingRoomProposal, data)).rejects.toThrow("private access code");
   expect(mocks.rpc.mock.calls.every(([name]) => name === "get_developer_viewing_room")).toBe(true);
+});
+it.each(["expired", "revoked"])("access status reports %s codes so clients see the ended-access page", async status => {
+  mocks.rpc.mockResolvedValue({ data: status, error: null });
+  expect(await call(checkViewingRoomAccess, { token: "ended-private-credential" })).toBe(status);
+  expect(mocks.rpc).toHaveBeenCalledWith("get_viewing_room_access_status", { _token: "ended-private-credential" });
+});
+it("access status stays silent for valid, unknown or malformed lookups", async () => {
+  mocks.rpc.mockResolvedValueOnce({ data: "invalid", error: null }).mockResolvedValueOnce({ data: null, error: null });
+  expect(await call(checkViewingRoomAccess, { token: "active-private-credential" })).toBeNull();
+  expect(await call(checkViewingRoomAccess, { token: "unknown-private-credential" })).toBeNull();
 });

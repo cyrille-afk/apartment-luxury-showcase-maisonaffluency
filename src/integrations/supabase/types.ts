@@ -14713,6 +14713,10 @@ export type Database = {
         Args: { _session: string; _slug: string }
         Returns: Json
       }
+      get_viewing_room_access_status: {
+        Args: { _token: string }
+        Returns: string
+      }
       get_viewing_room_board_summaries: {
         Args: { _project_id: string }
         Returns: Json

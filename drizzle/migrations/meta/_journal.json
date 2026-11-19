@@ -2199,6 +2199,13 @@
       "when": 1795070168897,
       "tag": "0313_viewing_room_access_lifecycle",
       "breakpoints": true
+    },
+    {
+      "idx": 314,
+      "version": "7",
+      "when": 1795073238379,
+      "tag": "0314_viewing_room_access_status",
+      "breakpoints": true
     }
   ]
 }
