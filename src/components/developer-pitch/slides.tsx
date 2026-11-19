@@ -26,7 +26,7 @@ function Footer({ index, note }: { index: number; note?: string }) {
   return <><div className="pitch-watermark" aria-hidden="true"><span>MAISON AFFLUENCY · CONFIDENTIAL</span></div><footer className="pitch-footer"><span>MAISON AFFLUENCY / DEVELOPER PARTNERSHIPS</span><span>{note || 'CIPRIANI RESIDENCES MIAMI — CASE STUDY'}</span><span>{String(index + 1).padStart(2, '0')} / 09</span></footer></>;
 }
 function Heading({ kicker, children, subtitle, act }: { kicker: string; children: ReactNode; subtitle?: string; act?: 'back' | 'front' }) {
-  return <header className="pitch-heading">{act && <span className={`pitch-act pitch-act-${act}`}>{act === 'back' ? 'PART I · BACK-END ENGINE (DEVELOPER & CURATION WORKSPACE)' : 'PART II · FRONT-END EXPERIENCE (THE PRIVATE BUYER JOURNEY)'}</span>}<p className="pitch-kicker">{kicker}</p><h2>{children}</h2>{subtitle && <p className="pitch-subtitle">{subtitle}</p>}</header>;
+  return <header className="pitch-heading">{act && <span className="pitch-act">{act === 'back' ? 'ACT I · CURATORIAL ARCHITECTURE — DEVELOPER STUDIO' : 'ACT II · THE PRIVATE CLIENT JOURNEY — BUYER EXPERIENCE'}</span>}<p className="pitch-kicker">{kicker}</p><h2>{children}</h2>{subtitle && <p className="pitch-subtitle">{subtitle}</p>}</header>;
 }
 function Image({ src, alt, className = '' }: { src: string; alt: string; className?: string }) {
   return <img src={src} alt={alt} crossOrigin="anonymous" className={className} />;
