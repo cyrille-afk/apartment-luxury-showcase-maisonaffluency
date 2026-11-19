@@ -1,6 +1,6 @@
 import { createFileRoute, ClientOnly, redirect } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useQuery, useQueryClient } from "@tanstack/react-query";
-import { lazy, Suspense, useState, useEffect } from "react";
+import { lazy, Suspense, useState, useEffect, useRef } from "react";
 import { ArrowLeft, ArrowRight, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { checkViewingRoomAccess, getViewingRoom, getViewingRoomPackage, redeemViewingRoomAccess } from "@/lib/viewingRoom.functions";
@@ -16,7 +16,7 @@ const Viewer = lazy(() => import("@/components/trade/visualiser/ViewingRoomExper
 const roomQuery = (token: string) => queryOptions({ queryKey: ["developer-viewing-room", token], queryFn: () => getViewingRoom({ data: { token } }), retry: false, staleTime: 0, refetchInterval: 15000, refetchIntervalInBackground: true, refetchOnWindowFocus: "always" });
 
 export const Route = createFileRoute("/viewing-room/$token")({
-  validateSearch: (search: Record<string, unknown>): { layout?: string; package?: string } => ({ layout: typeof search.layout === "string" ? search.layout : undefined, package: typeof search.package === "string" ? search.package : undefined }),
+  validateSearch: (search: Record<string, unknown>): { layout?: string; package?: string; code?: string } => ({ layout: typeof search.layout === "string" ? search.layout : undefined, package: typeof search.package === "string" ? search.package : undefined, code: typeof search.code === "string" ? search.code : undefined }),
   beforeLoad: async ({ params, search }) => {
     if (!isLegacyViewingRoomLink(params.token)) return;
     const access = await redeemViewingRoomAccess({ data: { token: viewingRoomAccessToken(params.token) } });
@@ -67,11 +67,30 @@ function ViewingRoomPage() {
   const layout = room?.layouts.find(row => row.id === search.layout);
   const selected = layout?.packages.find(row => row.id === search.package);
   const { data: composition, isLoading, isError, refetch } = useQuery({ queryKey: ["viewing-room-package", token, selected?.id], queryFn: () => selected ? getViewingRoomPackage({ data: { token, packageId: selected.id } }) : null, enabled: !!selected, retry: false });
+  const [magicState, setMagicState] = useState<"idle" | "opening" | "failed">(search.code ? "opening" : "idle");
+  const magicRan = useRef(false);
+  useEffect(() => {
+    const magicCode = search.code?.trim();
+    if (!magicCode || magicRan.current) return;
+    magicRan.current = true;
+    void (async () => {
+      let ok = false;
+      try {
+        if (/^[a-zA-Z0-9_-]{20,128}$/.test(magicCode)) {
+          const access = await redeemViewingRoomAccess({ data: { token: magicCode, locator } });
+          if (access) { ok = true; try { window.localStorage.setItem(enteredKey, magicCode); } catch { /* storage unavailable */ } setStoredAccess(magicCode); await queryClient.invalidateQueries({ queryKey: ["developer-viewing-room", locator] }); }
+        }
+      } catch { /* falls back to the code card */ }
+      setMagicState(ok ? "idle" : "failed");
+      void navigate({ search: ({ code: _code, ...rest }) => rest, replace: true, resetScroll: false });
+    })();
+  }, [search.code, locator, enteredKey, queryClient, navigate]);
   const chooseLayout = (id: string) => navigate({ search: { layout: id }, resetScroll: true });
   const choosePackage = (id: string) => navigate({ search: { layout: layout?.id, package: id }, resetScroll: false });
+  if (!room && magicState === "opening") return <main className="viewing-room flex min-h-screen flex-col items-center justify-center gap-6 bg-background px-6 text-center"><img src={affluencyLogo} alt="Affluency" className="h-9 w-auto mix-blend-multiply" /><p role="status" className="font-display text-xl text-muted-foreground">Opening your private viewing room…</p></main>;
   if (!room) {
     if (storedAccess && accessStatus) return <ViewingRoomAccessEnded status={accessStatus} onNewCode={clearStoredAccess} />;
-    return <main className="viewing-room min-h-screen bg-background px-6 py-20 text-center"><img src={affluencyLogo} alt="Affluency" className="mx-auto mb-12 h-9 w-auto mix-blend-multiply" />{returnTo && <a href={returnTo} className="mb-8 inline-flex items-center gap-2 text-xs text-muted-foreground underline-offset-4 hover:underline"><ArrowLeft className="size-3" />Back to admin</a>}<h1 className="font-display text-3xl">Private Viewing Room</h1><form className="mx-auto mt-8 max-w-sm space-y-4 text-left" onSubmit={async event => {
+    return <main className="viewing-room min-h-screen bg-background px-6 py-20 text-center"><img src={affluencyLogo} alt="Affluency" className="mx-auto mb-12 h-9 w-auto mix-blend-multiply" />{returnTo && <a href={returnTo} className="mb-8 inline-flex items-center gap-2 text-xs text-muted-foreground underline-offset-4 hover:underline"><ArrowLeft className="size-3" />Back to admin</a>}<h1 className="font-display text-3xl">Private Viewing Room</h1>{magicState === "failed" && <p role="alert" className="mx-auto mt-4 max-w-sm text-sm text-destructive">This invitation link is no longer valid. Enter your private access code below or request a current invitation.</p>}<form className="mx-auto mt-8 max-w-sm space-y-4 text-left" onSubmit={async event => {
     event.preventDefault(); setAccessBusy(true); setAccessError("");
     try {
       const access = await redeemViewingRoomAccess({ data: { token: code.trim(), locator } });
