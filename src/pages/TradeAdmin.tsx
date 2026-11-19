@@ -13,7 +13,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Link } from "@/lib/router-compat";
-import { Inbox, AlertTriangle, ShieldCheck, Mail } from "lucide-react";
+import { Inbox, AlertTriangle, ShieldCheck, Mail, Presentation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AdminPriceHistory from "@/components/admin/AdminPriceHistory";
 import AdminPaidOrders from "@/components/admin/AdminPaidOrders";
@@ -383,6 +383,18 @@ const TradeAdmin = () => {
         <div className="flex-1">
           <span className="font-display text-sm text-foreground">Partnership Inquiries</span>
           <p className="font-body text-[10px] text-muted-foreground">Developer-partnership messages sent from the pitch page, newest first.</p>
+        </div>
+        <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+      </Link>
+
+      <Link
+        to="/developer-pitch"
+        className="flex items-center gap-2 px-4 py-3 rounded-lg border border-border hover:border-foreground/30 transition-all group"
+      >
+        <Presentation className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+        <div className="flex-1">
+          <span className="font-display text-sm text-foreground">Developer Pitch</span>
+          <p className="font-body text-[10px] text-muted-foreground">Open the eight-slide partnership presentation and download the PDF to share with prospective developers.</p>
         </div>
         <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
       </Link>

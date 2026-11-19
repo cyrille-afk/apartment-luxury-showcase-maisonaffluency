@@ -31,6 +31,7 @@ const contentGroup: AdminCard[] = [
   { title: "Documents", description: "Upload and manage trade catalogues and spec sheets", url: "/trade/documents-admin", icon: Upload },
   { title: "Media Library", description: "Browse and manage uploaded assets", url: "/trade/media", icon: FolderArchive },
   { title: "Presentations", description: "Create and share client presentations", url: "/trade/presentations", icon: Presentation },
+  { title: "Developer Pitch", description: "Eight-slide partnership presentation — open it and download the PDF to share with prospective developers", url: "/developer-pitch", icon: Presentation },
 ];
 
 const commerceGroup: AdminCard[] = [
