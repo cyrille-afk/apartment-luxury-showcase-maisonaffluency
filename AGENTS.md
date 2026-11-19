@@ -11,6 +11,7 @@
 - Password-setup resends reuse the review drawer and retain attempt keys on retry; never change approval. Verified activation links the account; the queue reads user_id for setup status.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Viewing-room expiry/revocation is parent-row enforced across every public RPC; the admin-only project-scoped row-locking action never reactivates ended codes, and the guest page rechecks every 15s/focus — cached sessions cannot keep loading private data.
 - Finish comparison uses ephemeral A/B room projections and synchronized camera poses through the shared live renderer; only explicit application changes the selected unlocked piece, never placements or saved locked finishes — previews must not enter autosave or share snapshots.
 - Mood Board folder editing carries exact project/board IDs and preserves saved row identities/finishes/locked procurement rows; only confirmed additions and removals update the selected board, with retry snapshots and shared artifact notifications — package item edits must never create another folder or touch sibling boards.
 - Package hotspot RPCs validate admin/project scope, category/footprint and pins; token-scoped choices enforce saved rules. Legacy standalone rules retain linked Studio access — configuration never grants catalogue access.

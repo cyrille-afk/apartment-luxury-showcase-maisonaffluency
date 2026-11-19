@@ -33,3 +33,13 @@ it("every cookie read revalidates revocation and exact room scope", async () => 
   expect(await call(getViewingRoomPackage, { token: "other-residence", packageId: "package" })).toBeNull();
   expect(mocks.rpc).toHaveBeenCalledTimes(2);
 });
+it.each(["expired", "revoked"])("%s codes reject redemption and all already-open session operations", async () => {
+  mocks.getCookie.mockReturnValue("ended-private-credential");
+  mocks.rpc.mockResolvedValue({ data: null, error: null });
+  expect(await call(redeemViewingRoomAccess, { token: "ended-private-credential" })).toBeNull();
+  expect(mocks.setCookie).not.toHaveBeenCalled();
+  const data = { token: "cipriani-residences-miami", packageId: "package", requestKey: "request", choices: [] };
+  for (const fn of [getViewingRoom, getViewingRoomPackage, getViewingRoomChoices]) expect(await call(fn, data)).toBeNull();
+  await expect(call(lockViewingRoomProposal, data)).rejects.toThrow("private access code");
+  expect(mocks.rpc.mock.calls.every(([name]) => name === "get_developer_viewing_room")).toBe(true);
+});

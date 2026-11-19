@@ -1,5 +1,10 @@
 # Roadmap
 
+## Private viewing-room access ending
+- [x] Add Admin scheduled expiry and confirmed permanent revocation without changing saved packages or drafts.
+- [x] Enforce expiry/revocation on every public viewing-room read and proposal operation.
+- [x] Six access regression tests pass; signed-in expiry/revocation, reload persistence, mobile layout, and already-open guest-session rejection verified on a temporary room. Cipriani’s original access state verified unchanged after cleanup.
+
 ## Finish-preview camera link toggle
 - [x] Add default-linked camera control, independent movement and relink to the last moved view without remounting or saving finishes.
 - [x] Eight regression tests pass, including real OrbitControls unlink/relink and UI toggle propagation; preview build passes.

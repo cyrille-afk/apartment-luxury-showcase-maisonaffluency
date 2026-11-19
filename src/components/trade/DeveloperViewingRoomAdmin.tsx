@@ -22,6 +22,7 @@ import { Link } from "@/lib/router-compat";
 import { moodFolderUrl } from "@/lib/moodFolderEditing";
 import { viewingRoomPath, rememberViewingRoomReturn } from "@/lib/viewingRoomLink";
 import { redeemViewingRoomAccess } from "@/lib/viewingRoom.functions";
+import ViewingRoomAccessControls from "./ViewingRoomAccessControls";
 
 const emptyDeveloper = { developer_name: "", developer_logo_url: "", hero_image_url: "" };
 const emptyLayout = { name: "", floorplan_url: "", specs_label: "", room_environment_glb: "" };
@@ -217,6 +218,7 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
         </form>
         <div className="space-y-3 border-t border-border pt-5"><Label htmlFor="private-viewing-link">Private viewing room address</Label><Input id="private-viewing-link" readOnly value={magicLink} placeholder="Save a developer first" />
           <div className="flex flex-wrap gap-2"><Button variant="outline" disabled={!magicLink} onClick={() => void navigator.clipboard.writeText(magicLink).then(() => setNotice("Viewing room address copied.")).catch(() => setError("The address couldn’t be copied. Select it above and copy again."))}><Copy className="size-4" />Copy address</Button><Button variant="outline" disabled={!savedDeveloper} onClick={() => { if (!savedDeveloper) return; void navigator.clipboard.writeText(savedDeveloper.access_token).then(() => setNotice("Private access code copied. Share it only with your invited client.")).catch(() => setError("The code couldn’t be copied. Please try again.")); }}><Copy className="size-4" />Copy access code</Button><Button variant="outline" disabled={!magicLink} onClick={() => { if (!savedDeveloper) return; window.location.href = `mailto:?subject=${encodeURIComponent(`${developer.developer_name} · Private Viewing Room`)}&body=${encodeURIComponent(`Your private viewing room:\n\n${magicLink}\n\nPrivate access code: ${savedDeveloper.access_token}`)}`; }}><Send className="size-4" />Send by email</Button><Button variant="ghost" disabled={!magicLink} aria-label="Open client viewing room" onClick={async () => { if (!savedDeveloper) return; try { const access = await redeemViewingRoomAccess({ data: { token: savedDeveloper.access_token } }); if (!access) { setError("This invitation is no longer available."); return; } rememberViewingRoomReturn(window.location.pathname + window.location.search); window.location.assign(access.path); } catch { setError("The viewing room couldn’t open. Please try again."); } }}><ExternalLink className="size-4" />Open</Button></div>
+          {savedDeveloper && <ViewingRoomAccessControls key={savedDeveloper.id} developer={savedDeveloper} projectId={projectId} disabled={disabled} onChanged={updated => setDevelopers(rows => rows.map(row => row.id === updated.id ? updated : row))} />}
         </div>
       </div>
       <div className="min-w-0 space-y-4 xl:border-r xl:border-border xl:pr-7">

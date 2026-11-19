@@ -12,7 +12,7 @@ import { viewingRoomAccessToken, isLegacyViewingRoomLink } from "@/lib/viewingRo
 import affluencyLogo from "@/assets/affluency-logo-full.jpeg";
 import { readViewingRoomReturn } from "@/lib/viewingRoomLink";
 const Viewer = lazy(() => import("@/components/trade/visualiser/ViewingRoomExperience"));
-const roomQuery = (token: string) => queryOptions({ queryKey: ["developer-viewing-room", token], queryFn: () => getViewingRoom({ data: { token } }), retry: false });
+const roomQuery = (token: string) => queryOptions({ queryKey: ["developer-viewing-room", token], queryFn: () => getViewingRoom({ data: { token } }), retry: false, staleTime: 0, refetchInterval: 15000, refetchIntervalInBackground: true, refetchOnWindowFocus: "always" });
 
 export const Route = createFileRoute("/viewing-room/$token")({
   validateSearch: (search: Record<string, unknown>): { layout?: string; package?: string } => ({ layout: typeof search.layout === "string" ? search.layout : undefined, package: typeof search.package === "string" ? search.package : undefined }),
@@ -51,6 +51,13 @@ function ViewingRoomPage() {
   useEffect(() => setReturnTo(readViewingRoomReturn()), []);
   const [liveTotals, setLiveTotals] = useState<Record<string, number>>({});
   const { data: room } = useSuspenseQuery(roomQuery(token));
+  useEffect(() => {
+    if (!room) {
+      queryClient.removeQueries({ queryKey: ["viewing-room-package", token] });
+      queryClient.removeQueries({ queryKey: ["viewing-room-choices", token] });
+      setLiveTotals({});
+    }
+  }, [room, token, queryClient]);
   const layout = room?.layouts.find(row => row.id === search.layout);
   const selected = layout?.packages.find(row => row.id === search.package);
   const { data: composition, isLoading, isError, refetch } = useQuery({ queryKey: ["viewing-room-package", token, selected?.id], queryFn: () => selected ? getViewingRoomPackage({ data: { token, packageId: selected.id } }) : null, enabled: !!selected, retry: false });

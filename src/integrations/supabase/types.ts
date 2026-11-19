@@ -4261,6 +4261,8 @@ export type Database = {
       }
       developer_projects: {
         Row: {
+          access_expires_at: string | null
+          access_revoked_at: string | null
           access_token: string
           created_at: string
           developer_logo_url: string | null
@@ -4270,6 +4272,8 @@ export type Database = {
           project_id: string
         }
         Insert: {
+          access_expires_at?: string | null
+          access_revoked_at?: string | null
           access_token?: string
           created_at?: string
           developer_logo_url?: string | null
@@ -4279,6 +4283,8 @@ export type Database = {
           project_id: string
         }
         Update: {
+          access_expires_at?: string | null
+          access_revoked_at?: string | null
           access_token?: string
           created_at?: string
           developer_logo_url?: string | null
@@ -14066,6 +14072,15 @@ export type Database = {
       admin_directory_activity: {
         Args: { _days?: number; _environment?: string; _surface?: string }
         Returns: Json
+      }
+      admin_end_viewing_room_access: {
+        Args: {
+          _action: string
+          _developer_id: string
+          _expires_at?: string
+          _project_id: string
+        }
+        Returns: undefined
       }
       admin_manage_studio_member: {
         Args: {

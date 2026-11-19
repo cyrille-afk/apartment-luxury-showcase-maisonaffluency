@@ -2192,6 +2192,13 @@
       "when": 1794985097387,
       "tag": "0312_fix_hotspot_pin_validation_alias",
       "breakpoints": true
+    },
+    {
+      "idx": 313,
+      "version": "7",
+      "when": 1795070168897,
+      "tag": "0313_viewing_room_access_lifecycle",
+      "breakpoints": true
     }
   ]
 }
