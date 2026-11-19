@@ -22,7 +22,7 @@ function Brand({ light = false }: { light?: boolean }) {
   return <div className={`pitch-brand ${light ? 'pitch-brand-light' : ''}`}><img src={logo.url} alt="Cipriani Residences Miami" crossOrigin="anonymous" /><span>×</span><span className="pitch-wordmark">MAISON<br /><strong>AFFLUENCY</strong></span></div>;
 }
 function Footer({ index, note }: { index: number; note?: string }) {
-  return <footer className="pitch-footer"><span>MAISON AFFLUENCY / DEVELOPER PARTNERSHIPS</span><span>{note || 'CIPRIANI RESIDENCES MIAMI — CASE STUDY'}</span><span>{String(index + 1).padStart(2, '0')} / 08</span></footer>;
+  return <><div className="pitch-watermark" aria-hidden="true"><span>MAISON AFFLUENCY · CONFIDENTIAL</span></div><footer className="pitch-footer"><span>MAISON AFFLUENCY / DEVELOPER PARTNERSHIPS</span><span>{note || 'CIPRIANI RESIDENCES MIAMI — CASE STUDY'}</span><span>{String(index + 1).padStart(2, '0')} / 08</span></footer></>;
 }
 function Heading({ kicker, children, subtitle }: { kicker: string; children: ReactNode; subtitle?: string }) {
   return <header className="pitch-heading"><p className="pitch-kicker">{kicker}</p><h2>{children}</h2>{subtitle && <p className="pitch-subtitle">{subtitle}</p>}</header>;

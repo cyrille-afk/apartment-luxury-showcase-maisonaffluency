@@ -2079,3 +2079,6 @@ html[data-felix-sheet-open] .gallery-details-floating-nav {
 @media (prefers-reduced-motion: reduce) { .sidebar-sortable, .sidebar-drag-handle { transition: none !important; } }
 @media (min-width: 768px) {
 }
+
+.pitch-watermark { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:30; overflow:hidden; }
+.pitch-watermark span { transform:rotate(-28deg); font-family:var(--font-display, Georgia), serif; font-size:96px; letter-spacing:0.1em; white-space:nowrap; color:var(--pitch-muted); opacity:0.13; mix-blend-mode:multiply; }
