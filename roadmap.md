@@ -821,3 +821,8 @@
       (designer profile pages already read the database live).
 - [ ] Sync the project to GitHub — the rename is not in the repository yet.
 - [ ] Publish the technical SEO corrections; the live website still serves the previous page tags and sitemap.
+
+## Developer pitch tier prices
+
+- [x] Page 06 tiers set to US$150,000 / US$350,000 / Bespoke US$700,000.
+- [x] Page 05 tier list and the price inside its manager screenshot matched to the same figures.
