@@ -174,7 +174,7 @@
 .pitch-dialog-close-button { background: var(--pitch-ink); color: var(--pitch-light); border: 0; border-radius: 2px; height: 44px; padding: 0 24px; font-size: 15px; cursor: pointer; margin-top: 6px; }
 .pitch-dialog-close-button:hover { background: var(--pitch-emerald); }
 @media (max-width: 600px) { .pitch-dialog { padding: 22px 18px; max-height: 92vh; } .pitch-dialog-title { font-size: 26px; } .pitch-field-row { grid-template-columns: 1fr; gap: 0; } .pitch-submit { width: 100%; } }
-@media(max-width: 600px) { .pitch-toolbar { padding: 10px 12px; gap: 10px; flex-wrap: wrap; }.pitch-toolbar-label { display:none; }.pitch-toolbar-brand { font-size:18px; }.pitch-controls { gap:3px; }.pitch-download { width:100%; min-width:0; font-size:15px; padding:12px 18px; height:48px; }.pitch-inquiry { width:100%; min-width:0; font-size:15px; padding:12px 18px; height:48px; }.pitch-deck { padding:0 8px; margin-top:12px; }.pitch-slide-viewport { margin-bottom:14px; scroll-margin-top:120px; }.pitch-counter { font-size:11px; min-width:40px; } }
+@media(max-width: 600px) { .pitch-toolbar { padding: 10px 12px; gap: 10px; flex-wrap: wrap; }.pitch-toolbar-label { display:none; }.pitch-toolbar-brand { font-size:18px; }.pitch-controls { gap:3px; }.pitch-download { width:100%; min-width:0; font-size:15px; padding:12px 18px; height:48px; }.pitch-inquiry { width:100%; min-width:0; font-size:15px; padding:12px 18px; height:48px; }.pitch-deck { padding:0 8px; margin-top:12px; }.pitch-slide-viewport { margin-bottom:14px; scroll-margin-top:182px; }.pitch-counter { font-size:11px; min-width:40px; } }
 @media print {
   @page { size: 338.6667mm 190.5mm; margin: 0; }
   body:has(.developer-pitch) { margin:0!important; }
