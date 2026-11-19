@@ -12,7 +12,7 @@ export const Route = createFileRoute('/developer-pitch')({
     { title: 'Developer Partnership — Cipriani × Maison Affluency' },
     { name: 'description', content: 'An eight-slide developer partnership presentation: Cipriani Residences Miami, collectible interiors, private viewing rooms and a proposed 14-day pilot.' },
     { property: 'og:title', content: 'Developer Partnership — Cipriani × Maison Affluency' },
-    { property: 'og:description', content: 'From residence plans to curated 3D personalization and a fully managed interiors proposal.' },
+    { property: 'og:description', content: 'From residence plans to true-to-scale personalization and a fully managed interiors proposal.' },
     { property: 'og:type', content: 'website' },
     { name: 'twitter:card', content: 'summary_large_image' },
   ] }),
