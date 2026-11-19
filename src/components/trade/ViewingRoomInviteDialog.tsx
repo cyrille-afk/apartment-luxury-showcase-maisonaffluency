@@ -57,8 +57,11 @@ export default function ViewingRoomInviteDialog({ open, onOpenChange, developerI
         <p className="mt-2 text-2xl">{developerName}</p>
         <p className="mx-auto mt-4 max-w-md font-sans text-sm leading-relaxed text-muted-foreground">You are invited to explore the residence layouts and curated furniture collections prepared for you by Maison Affluency.</p>
         <span className="mt-6 inline-block bg-primary px-6 py-3 font-sans text-xs tracking-wide text-primary-foreground">Enter the viewing room</span>
-        <p className="mt-4 break-all font-sans text-xs text-muted-foreground">If the button doesn’t work, copy this link: {link}</p>
-        <p className="mt-3 font-sans text-xs text-muted-foreground">Private access code: <span className="text-foreground">{code}</span></p>
+        <div className="mt-8 space-y-2 border-t border-border pt-5 font-sans text-[11px] leading-relaxed text-muted-foreground">
+          <p>Private access code: <span className="text-foreground">{code}</span></p>
+          <p className="break-all">Button not working? Open this link: <span className="underline">{link}</span></p>
+          <p>This invitation is personal. Please do not forward it. · Maison Affluency Singapore</p>
+        </div>
       </div>
       <div className="space-y-2"><Label htmlFor="viewing-room-invite-recipient">Recipient email</Label><Input id="viewing-room-invite-recipient" type="email" autoComplete="off" placeholder="client@example.com" value={recipient} disabled={sending} onChange={event => { setRecipient(event.target.value); setFeedback(null); }} /></div>
       <p role={feedback?.ok ? "status" : "alert"} className={`min-h-5 text-sm ${feedback?.ok ? "text-muted-foreground" : "text-destructive"}`}>{feedback?.text}</p>
