@@ -1,5 +1,10 @@
 # Roadmap
 
+## Finish-preview camera movement
+- [x] Replace polling with immediate bidirectional camera synchronization, retain current pose on late loading/retry, and prevent feedback loops.
+- [x] Six focused tests pass using real OrbitControls for bidirectional orbit/pan/zoom, echo prevention and retry cleanup; signed-in Frenchmen Street saved/Black Pepper Oak previews render side by side and screenshot inspected. Preview build passes.
+- [ ] Live pointer-driven camera measurement remains blocked by headless WebGL stalls; no complete end-to-end movement claim.
+
 ## Side-by-side finish previews
 - [x] Add two synchronized room previews with independent A/B finish choices for the selected piece; keep previews separate from saved room state and honor finish locks on explicit application.
 - [x] Fourteen focused tests pass. Signed-in real Frenchmen Street chair renders saved/Black Pepper Oak finishes side by side on desktop and phone; Use B reads back BLACK PEPPER OAK, with no page errors or phone overflow. Close/application tested; preview build passes. Headless checks required direct activation after pointer waits stalled; synchronized orbit motion and exhaustive finish types remain unverified.
