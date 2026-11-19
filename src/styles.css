@@ -2111,3 +2111,8 @@ html[data-felix-sheet-open] .gallery-details-floating-nav {
 
 .pitch-watermark { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:30; overflow:hidden; }
 .pitch-watermark span { transform:rotate(-28deg); font-family:var(--font-display, Georgia), serif; font-size:96px; letter-spacing:0.1em; white-space:nowrap; color:var(--pitch-muted); opacity:0.03; }
+
+.pitch-brand-mark { height: 64px; width: auto; mix-blend-mode: multiply; }
+.pitch-summary-logo { display: flex; align-items: center; gap: 14px; height: 64px; margin-bottom: 18px; }
+.pitch-summary-logo img { height: 100%; width: auto; max-width: 320px; object-fit: contain; mix-blend-mode: multiply; }
+.pitch-summary-logo .pitch-wordmark { color: var(--pitch-ink); }
