@@ -3,6 +3,7 @@
 ## Finish-preview camera link toggle
 - [x] Add default-linked camera control, independent movement and relink to the last moved view without remounting or saving finishes.
 - [x] Eight regression tests pass, including real OrbitControls unlink/relink and UI toggle propagation; preview build passes.
+- [x] Actual comparison dialog in an isolated lightweight browser harness passes link/unlink, both-preview propagation, apply availability and closing on desktop/phone in light/dark; screenshots inspected without overlap. This checks the real control, not the furnished room.
 - [ ] Live desktop/phone toggle checks are blocked by headless graphics stalls before the comparison opens, including with GLB downloads withheld; not claimed verified.
 
 ## Secure branded viewing-room addresses
