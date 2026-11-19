@@ -17,6 +17,7 @@ import { convertCents, useFxRates, type DisplayCurrency } from "./CurrencyToggle
 import { absoluteUrl } from "@/config/site";
 import PackageHotspotsDrawer from "./PackageHotspotsDrawer";
 import { developerDraftDirty, layoutDraftDirty, packagesDraftDirty, registerUnsavedAdminDraft, type SavedPackageRow } from "@/lib/unsavedAdminDraft";
+import { adminRecoveryKey, hasRecoveryChanges, parseAdminRecovery, type AdminRecoveryDraft } from "@/lib/adminDraftRecovery";
 
 const emptyDeveloper = { developer_name: "", developer_logo_url: "", hero_image_url: "" };
 const emptyLayout = { name: "", floorplan_url: "", specs_label: "", room_environment_glb: "" };
@@ -31,7 +32,7 @@ function Readiness({ board }: { board?: ManagerBoard }) {
 }
 
 export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) {
-  const { isAdmin, rolesLoaded } = useAuth();
+  const { user, isAdmin, rolesLoaded } = useAuth();
   const fx = useFxRates();
   const [developers, setDevelopers] = useState<Tables<"developer_projects">[]>([]);
   const [layouts, setLayouts] = useState<Tables<"residence_layouts">[]>([]);
@@ -54,8 +55,22 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
   const [assignmentError, setAssignmentError] = useState("");
   const [savedPackageIds, setSavedPackageIds] = useState<Record<string, string>>({});
   const [hotspotPackage, setHotspotPackage] = useState<{ id: string; tier: string } | null>(null);
+  const [recovery, setRecovery] = useState<AdminRecoveryDraft | null>(null);
+  const [recoveryReady, setRecoveryReady] = useState(false);
+  const [storageFailed, setStorageFailed] = useState(false);
+  const restorePackages = useRef<AdminRecoveryDraft | null>(null);
+  const packageState = useRef({ layoutId, packages, savedPackages });
+  packageState.current = { layoutId, packages, savedPackages };
+  const storageKey = user ? adminRecoveryKey(user.id, projectId) : null;
+  useEffect(() => {
+    if (!storageKey || !rolesLoaded || !isAdmin) return;
+    try { setRecovery(parseAdminRecovery(localStorage.getItem(storageKey))); }
+    catch { setStorageFailed(true); }
+    setRecoveryReady(true);
+  }, [storageKey, rolesLoaded, isAdmin]);
 
   const chooseLayout = (row?: Tables<"residence_layouts">) => {
+    if ((row?.id ?? "") !== layoutId) { setPackages([]); setSavedPackages([]); }
     setLayoutId(row?.id ?? ""); setLayout(row ? { name: row.name, floorplan_url: row.floorplan_url ?? "", specs_label: row.specs_label ?? "", room_environment_glb: row.room_environment_glb ?? "" } : emptyLayout);
   };
   useEffect(() => {
@@ -89,7 +104,14 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
       if (readError) { setPackageError(true); setError("Packages couldn’t load. Retry before saving."); return; }
       setSavedPackageIds(Object.fromEntries(data.map(row => [row.moodboard_id, row.id])));
       setSavedPackages(data);
-      setPackages(data.map(row => ({ moodboard_id: row.moodboard_id, tier_name: row.tier_name, package_price: String(row.package_price), currency: row.currency, description: row.description, lead_time_weeks: row.lead_time_weeks == null ? "" : String(row.lead_time_weeks), allow_alternatives: row.allow_alternatives })));
+      const restored = restorePackages.current;
+      if (restored?.layoutId === layoutId) {
+        if (restored.packages) setPackages(restored.packages);
+        else setPackages(data.map(row => ({ moodboard_id: row.moodboard_id, tier_name: row.tier_name, package_price: String(row.package_price), currency: row.currency, description: row.description, lead_time_weeks: row.lead_time_weeks == null ? "" : String(row.lead_time_weeks), allow_alternatives: row.allow_alternatives })));
+        restorePackages.current = null;
+      } else if (packageState.current.layoutId !== layoutId || !packagesDraftDirty(packageState.current.packages, packageState.current.savedPackages)) {
+        setPackages(data.map(row => ({ moodboard_id: row.moodboard_id, tier_name: row.tier_name, package_price: String(row.package_price), currency: row.currency, description: row.description, lead_time_weeks: row.lead_time_weeks == null ? "" : String(row.lead_time_weeks), allow_alternatives: row.allow_alternatives })));
+      }
     }).catch(() => { if (!controller.signal.aborted) { setPackageError(true); setError("Packages couldn’t load. Please retry."); } }).finally(() => { if (!controller.signal.aborted) setPackageLoading(false); });
     return () => controller.abort();
   }, [layoutId, revision, rolesLoaded, isAdmin]);
@@ -108,13 +130,48 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
     () =>
       developerDraftDirty(developer, savedDeveloper ?? null) ||
       layoutDraftDirty(layout, savedLayout) ||
-      packagesDraftDirty(packages, savedPackages),
-    [developer, savedDeveloper, layout, savedLayout, packages, savedPackages],
+      packagesDraftDirty(packages, savedPackages) || !!assignment,
+    [developer, savedDeveloper, layout, savedLayout, packages, savedPackages, assignment],
   );
   // The navigation guard reads this at click time, so the newest render wins.
   const draftIsUnsavedRef = useRef(draftIsUnsaved);
   draftIsUnsavedRef.current = draftIsUnsaved;
   useEffect(() => registerUnsavedAdminDraft(() => draftIsUnsavedRef.current), []);
+  useEffect(() => {
+    if (!storageKey || !recoveryReady || recovery || disabled || error || packageError || restorePackages.current) return;
+    const draft: AdminRecoveryDraft = {
+      version: 1, updatedAt: Date.now(), developerId, layoutId,
+      ...(developerDraftDirty(developer, savedDeveloper ?? null) ? { developer } : {}),
+      ...(layoutDraftDirty(layout, savedLayout) ? { layout } : {}),
+      ...(packagesDraftDirty(packages, savedPackages) ? { packages } : {}),
+      ...(assignment ? { assignment } : {}),
+    };
+    try {
+      if (hasRecoveryChanges(draft)) localStorage.setItem(storageKey, JSON.stringify(draft));
+      else localStorage.removeItem(storageKey);
+      setStorageFailed(false);
+    } catch { setStorageFailed(true); }
+  }, [storageKey, recoveryReady, recovery, disabled, error, packageError, developerId, layoutId, developer, savedDeveloper, layout, savedLayout, packages, savedPackages, assignment]);
+  const discardRecovery = () => {
+    try { if (storageKey) localStorage.removeItem(storageKey); setRecovery(null); }
+    catch { setStorageFailed(true); }
+  };
+  const restoreRecovery = () => {
+    if (!recovery) return;
+    const targetDeveloper = developers.find(row => row.id === recovery.developerId);
+    const targetLayout = layouts.find(row => row.id === recovery.layoutId && row.developer_project_id === recovery.developerId);
+    if ((recovery.developerId && !targetDeveloper) || (recovery.layoutId && !targetLayout)) {
+      setError("This draft’s developer or residence is no longer available. Discard the draft to continue."); return;
+    }
+    setDeveloperId(recovery.developerId);
+    setDeveloper(recovery.developer ?? (targetDeveloper ? { developer_name: targetDeveloper.developer_name, developer_logo_url: targetDeveloper.developer_logo_url ?? "", hero_image_url: targetDeveloper.hero_image_url ?? "" } : emptyDeveloper));
+    chooseLayout(targetLayout);
+    if (recovery.layout) { setLayout(recovery.layout); setLayoutOpen(true); }
+    if (recovery.layoutId === layoutId) { if (recovery.packages) setPackages(recovery.packages); }
+    else if (recovery.layoutId) restorePackages.current = recovery;
+    if (recovery.assignment) setAssignment(recovery.assignment);
+    setRecovery(null); setNotice("Local draft restored. Changes remain unsaved.");
+  };
   const magicLink = savedDeveloper ? absoluteUrl(`/viewing-room/${encodeURIComponent(savedDeveloper.access_token)}`) : "";
   const activeLayouts = layouts.filter(row => row.developer_project_id === developerId);
   const draftBoard = boards.find(row => row.id === assignment?.draft.moodboard_id);
@@ -133,6 +190,8 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
     {loading && <p role="status" className="mb-4 text-sm text-muted-foreground">Loading viewing room…</p>}
     {error && <div role="alert" className="mb-4 flex flex-wrap items-center gap-3 text-sm text-destructive">{error}<Button variant="outline" disabled={disabled} onClick={() => setRevision(value => value + 1)}>Retry</Button></div>}
     {notice && <p role="status" className="mb-4 text-sm">{notice}</p>}
+    {storageFailed && <p role="alert" className="mb-4 text-sm text-destructive">Draft recovery is unavailable on this device. Save your changes before refreshing.</p>}
+    {recovery && <div role="status" className="mb-6 flex flex-wrap items-center justify-between gap-3 border-y border-border py-4"><div><p className="text-sm">Unsaved Admin draft found</p><p className="mt-1 text-xs text-muted-foreground">Saved on this device · {new Date(recovery.updatedAt).toLocaleString()}</p></div><div className="flex gap-2"><Button variant="outline" disabled={disabled} onClick={discardRecovery}>Discard draft</Button><Button variant="studio-primary" disabled={disabled} onClick={restoreRecovery}>Restore draft</Button></div></div>}
     <div className="grid min-w-0 gap-8 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1fr)_minmax(0,1.15fr)]">
       <div className="min-w-0 space-y-6 xl:border-r xl:border-border xl:pr-7">
         <h3 className="border-b border-border pb-4 font-display text-xl">01 · Developer Settings</h3>

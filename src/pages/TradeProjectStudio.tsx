@@ -42,6 +42,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBlocker } from "@tanstack/react-router";
 import { studioTabPreference, projectSwitchesAway } from "@/lib/studioProjectRouting";
 import { hasUnsavedAdminDraft } from "@/lib/unsavedAdminDraft";
+import { adminRecoveryKey } from "@/lib/adminDraftRecovery";
 
 type StudioItem = {
   id: string;
@@ -471,7 +472,7 @@ export default function TradeProjectStudio() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Keep editing</AlertDialogCancel>
-            <AlertDialogAction onClick={() => unsavedAdminBlocker.proceed?.()}>Discard and switch</AlertDialogAction>
+            <AlertDialogAction onClick={() => { try { if (user && id) localStorage.removeItem(adminRecoveryKey(user.id, id)); } catch {} unsavedAdminBlocker.proceed?.(); }}>Discard and switch</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

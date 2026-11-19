@@ -1,5 +1,9 @@
 # Roadmap
 
+## Local Admin draft recovery
+- [x] Save account/project-scoped dirty Admin forms and unfinished package edits locally, with explicit Restore/Discard after refresh, saved-section reconciliation and explicit project-switch discard cleanup.
+- [x] Twenty-four regressions pass; signed-in developer/open-package recovery and discard/reload verified on desktop, developer recovery/discard on phone, without page errors or changing published settings.
+
 ## Hotspot catalogue linking and manual overrides
 - [x] Auto-link exact collection IDs/SKUs/unambiguous names and recorded numeric/text/size-option dimensions when a package drawer loads; retain ±15% footprint-safe alternatives.
 - [x] Sixteen eligible 3D collection records now populate the spatial catalogue and linked Studio rows. Seven tests pass; real Essential dimensions auto-fill, a partial override saves/reloads/restores, two real Bespoke alternatives save/reload/disable, and an unlinked floor lamp retains editable controls. Temporary rules were removed; desktop/phone screenshots show no errors or overflow, and the preview build passes.
