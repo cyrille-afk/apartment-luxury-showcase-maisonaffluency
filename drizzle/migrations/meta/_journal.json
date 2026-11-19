@@ -2206,6 +2206,13 @@
       "when": 1795073238379,
       "tag": "0314_viewing_room_access_status",
       "breakpoints": true
+    },
+    {
+      "idx": 315,
+      "version": "7",
+      "when": 1795073823626,
+      "tag": "0315_viewing_room_client_email",
+      "breakpoints": true
     }
   ]
 }

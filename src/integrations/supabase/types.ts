@@ -4264,6 +4264,7 @@ export type Database = {
           access_expires_at: string | null
           access_revoked_at: string | null
           access_token: string
+          client_email: string | null
           created_at: string
           developer_logo_url: string | null
           developer_name: string
@@ -4275,6 +4276,7 @@ export type Database = {
           access_expires_at?: string | null
           access_revoked_at?: string | null
           access_token?: string
+          client_email?: string | null
           created_at?: string
           developer_logo_url?: string | null
           developer_name: string
@@ -4286,6 +4288,7 @@ export type Database = {
           access_expires_at?: string | null
           access_revoked_at?: string | null
           access_token?: string
+          client_email?: string | null
           created_at?: string
           developer_logo_url?: string | null
           developer_name?: string

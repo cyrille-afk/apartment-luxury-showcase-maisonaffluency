@@ -1,0 +1,1 @@
+ALTER TABLE public.developer_projects ADD COLUMN IF NOT EXISTS client_email text CHECK (client_email IS NULL OR client_email ~ '^[^\s@]+@[^\s@]+\.[^\s@]+$');
