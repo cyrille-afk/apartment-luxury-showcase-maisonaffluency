@@ -7,7 +7,7 @@ import { checkViewingRoomAccess, getViewingRoom, getViewingRoomPackage, redeemVi
 import { ViewingRoomAccessEnded } from "@/components/trade/ViewingRoomAccessEnded";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { viewingRoomLeadTime } from "@/lib/viewingRoom";
+import ViewingRoomCollectionCard from "@/components/trade/ViewingRoomCollectionCard";
 import { residenceArea } from "@/lib/viewingRoomPresentation";
 import { viewingRoomAccessToken, isLegacyViewingRoomLink, isShortViewingRoomCode } from "@/lib/viewingRoomLink";
 import affluencyLogo from "@/assets/affluency-logo-full.jpeg";
@@ -104,31 +104,32 @@ function ViewingRoomPage() {
     finally { setAccessBusy(false); }
   }}><Label htmlFor="viewing-room-access">Private access code</Label><Input id="viewing-room-access" type="password" autoComplete="off" value={code} onChange={event => setCode(event.target.value)} required disabled={accessBusy} /><p role="alert" className="min-h-10 text-sm text-destructive">{accessError}</p><Button type="submit" className="w-full" disabled={accessBusy || !code.trim()}>{accessBusy ? "Opening…" : "Enter viewing room"}</Button></form></main>;
   }
-  return <main className="viewing-room min-h-screen bg-background text-foreground">
-    <header className="flex flex-wrap items-center justify-between gap-6 border-b border-border px-6 py-6 md:px-12">
-      <div className="flex min-w-0 flex-wrap items-center gap-5">{room.logo ? <img src={room.logo} alt={room.name} className="h-14 max-w-44 object-contain" /> : <span className="max-w-60 font-display text-lg leading-snug">{room.name}</span>}<span aria-hidden="true" className="hidden h-8 border-l border-border sm:block" /><img src={affluencyLogo} alt="Affluency" className="h-7 w-auto mix-blend-multiply" /></div>
-      <div className="space-y-3">{returnTo && <a href={returnTo} className="flex items-center gap-2 text-xs text-muted-foreground underline-offset-4 hover:underline"><ArrowLeft className="size-3" />Back to admin</a>}<p className="text-[10px] uppercase">Private Viewing Room</p><nav aria-label="Viewing room stages" className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground"><span className={!layout ? "text-foreground" : ""}>01 Residence</span><ArrowRight className="size-3" /><span className={layout && !selected ? "text-foreground" : ""}>02 Collection</span><ArrowRight className="size-3" /><span className={selected ? "text-foreground" : ""}>03 Personalize</span></nav></div>
+  return <main className={`viewing-room bg-background text-foreground ${layout ? "" : "min-h-screen"}`}>
+    <header className="grid grid-cols-1 items-center gap-3 border-b border-border px-4 py-3 sm:flex sm:justify-between md:px-12">
+      <div className="flex min-w-0 items-center gap-3">{room.logo ? <img src={room.logo} alt={room.name} className="h-9 max-w-32 object-contain" /> : <span className="max-w-60 font-display text-lg leading-snug">{room.name}</span>}<span aria-hidden="true" className="hidden h-8 border-l border-border sm:block" /><img src={affluencyLogo} alt="Affluency" className="h-5 max-w-28 object-contain mix-blend-multiply" /></div>
+      <div className="min-w-0 space-y-2 sm:text-right">{returnTo && <a href={returnTo} className="flex items-center gap-2 text-xs text-muted-foreground underline-offset-4 hover:underline"><ArrowLeft className="size-3" />Back to admin</a>}<p className="text-[10px] uppercase">Private Viewing Room</p><nav aria-label="Viewing room stages" className="flex flex-wrap items-center gap-1 text-[10px] text-muted-foreground"><span className={!layout ? "text-foreground" : ""}>01 Residence</span><ArrowRight className="size-3" /><span className={layout && !selected ? "text-foreground" : ""}>02 Collection</span><ArrowRight className="size-3" /><span className={selected ? "text-foreground" : ""}>03 Personalize</span></nav></div>
     </header>
     {room.hero && !layout && <div className="relative h-[34dvh] min-h-60 max-h-96"><img src={room.hero} alt={room.project_name} className="h-full w-full object-cover" /></div>}
-    <div className="mx-auto max-w-[1500px] px-6 py-10 md:px-12">
+    <div className={`mx-auto max-w-[1500px] px-6 md:px-12 ${selected ? "py-3" : "py-6"}`}>
       {!layout ? <><h1 className="font-display text-4xl md:text-5xl">{room.name}</h1><p className="mt-4 text-sm text-muted-foreground">Select your residence</p>
         {!room.layouts.length ? <p className="py-14 text-muted-foreground">Residence layouts are being prepared.</p> : <div className="mt-8 grid gap-7 md:grid-cols-3">{room.layouts.map(row => <article key={row.id} className="min-w-0 border border-border">
           <Button variant="ghost" className="h-auto w-full flex-col items-stretch whitespace-normal rounded-none p-0 text-left hover:bg-muted/40" onClick={() => void chooseLayout(row.id)} aria-label={`Select ${row.name}`}>
             <div className="flex aspect-[4/3] w-full items-center justify-center overflow-hidden border-b border-border p-5">{row.floorplan_url ? <img src={row.floorplan_url} alt={`${row.name} floor plan`} className="h-full w-full object-contain" /> : <span className="text-sm text-muted-foreground">Floor plan pending</span>}</div>
             <div className="w-full p-5"><h2 className="font-display text-xl">{row.name}</h2><p className="mt-3 text-sm">{residenceArea(row.specs_label) ?? "Square footage to be confirmed"}</p><p className="mt-3 text-xs text-muted-foreground">{row.specs_label}</p><span className="mt-6 flex items-center justify-between text-xs">Explore residence<ArrowRight className="size-4" /></span></div>
           </Button></article>)}</div>}</> : <>
-        <Button variant="ghost" className="mb-5 h-auto p-0 text-xs text-muted-foreground" onClick={() => { window.__lovableEvents?.track?.("project.viewing_room_section_viewed", { section: "residence" }); void navigate({ search: {}, resetScroll: true }); }}><ArrowLeft className="size-3" />All residences</Button>
-        <h1 className="font-display text-3xl md:text-4xl">{layout.name}</h1><p className="mt-3 text-sm text-muted-foreground">{layout.specs_label}</p>
-        <div role="group" aria-label="Furniture packages" className="mt-8 flex gap-4 overflow-x-auto pb-3">{layout.packages.map(row => <Button key={row.id} variant="outline" aria-pressed={selected?.id === row.id} className={`h-auto min-w-56 flex-1 flex-col items-start gap-3 rounded-none p-5 text-left ${selected?.id === row.id ? "border-foreground bg-muted" : "bg-background"}`} onClick={() => void choosePackage(row.id)}>
-          <span className="font-display text-2xl">{row.tier_name}</span><span className="whitespace-normal text-sm leading-relaxed text-muted-foreground">{row.description}</span><span className="font-display text-xl">{new Intl.NumberFormat("en-GB", { style: "currency", currency: row.currency, maximumFractionDigits: 0 }).format(liveTotals[row.id] ?? row.package_price)}</span><span className="text-xs text-muted-foreground">Estimated lead time · {viewingRoomLeadTime(row.lead_time_weeks, selected?.id === row.id ? composition?.items : undefined)}</span>
-        </Button>)}</div>
+        <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 border-b border-border pb-3">
+          {layout.floorplan_url && <img src={layout.floorplan_url} alt={`${layout.name} floor plan`} className="h-16 w-20 shrink-0 object-contain" />}
+          <div className="min-w-0"><h1 className="font-display text-xl md:text-2xl">{layout.name}</h1><p className="mt-1 text-xs text-muted-foreground">{residenceArea(layout.specs_label) ?? layout.specs_label}</p></div>
+          <Button variant="ghost" className="shrink-0 px-2 text-xs" aria-label="All residences" onClick={() => void navigate({ search: {}, resetScroll: true })}><ArrowLeft className="size-4" /><span className="hidden sm:inline">All residences</span></Button>
+        </div>
+        {selected ? <div role="group" aria-label="Furniture packages" className="mt-3 grid grid-cols-3 gap-2">{layout.packages.map(row => <Button key={row.id} variant="outline" aria-pressed={selected.id === row.id} className={`h-auto min-w-0 flex-col gap-1 px-2 py-2 whitespace-normal ${selected.id === row.id ? "border-foreground bg-muted" : ""}`} onClick={() => void choosePackage(row.id)}><span className="font-display text-base">{row.tier_name}</span><span className="text-[10px] sm:text-xs">{new Intl.NumberFormat("en-GB", { style: "currency", currency: row.currency, maximumFractionDigits: 0 }).format(liveTotals[row.id] ?? row.package_price)}</span></Button>)}</div>
+          : <div role="group" aria-label="Furniture packages" className="mt-5 grid gap-4 md:grid-cols-3">{layout.packages.map(row => <ViewingRoomCollectionCard key={row.id} token={token} collection={row} onSelect={() => void choosePackage(row.id)} />)}</div>}
         {!layout.packages.length && <p className="py-10 text-muted-foreground">Furniture packages are being prepared.</p>}
-        {selected && <p className="mt-5 max-w-2xl text-sm leading-relaxed text-muted-foreground">{selected.description}</p>}
       </>}
     </div>
     {layout && selected && <section aria-label={`${selected.tier_name} room presentation`} className="border-y border-border">
       {isLoading ? <div role="status" className="flex min-h-96 items-center justify-center text-muted-foreground">Preparing your collection…</div> : isError || !composition ? <div role="alert" className="flex min-h-80 flex-col items-center justify-center gap-5"><p>Your collection couldn’t load.</p><Button variant="outline" onClick={() => void refetch()}><RotateCw className="size-4" />Retry collection</Button></div> : !composition.items.length ? <p className="py-24 text-center text-muted-foreground">This collection is being prepared.</p> : <ClientOnly fallback={<div className="min-h-96" />}><Suspense fallback={<div role="status" className="min-h-96 p-10">Preparing room viewer…</div>}><Viewer key={selected.id} token={token} packageId={selected.id} baseTotal={selected.package_price} currency={selected.currency} residence={layout.name} developer={room.name} environmentUrl={layout.room_environment_glb} onTotal={total => setLiveTotals(values => ({ ...values, [selected.id]: total }))} /></Suspense></ClientOnly>}
     </section>}
-    <footer className="flex flex-wrap items-center justify-between gap-4 px-6 py-8 text-xs text-muted-foreground md:px-12"><span>{room.name}</span><span>Curated by Maison Affluency</span></footer>
+    <footer className={`${selected ? "hidden" : "flex"} flex-wrap items-center justify-between gap-4 px-6 py-8 text-xs text-muted-foreground md:px-12`}><span>{room.name}</span><span>Curated by Maison Affluency</span></footer>
   </main>;
 }

@@ -8,7 +8,8 @@ describe("guest viewing room", () => {
     const result = viewingRoomSchema.parse({ name: "Developer", logo: null, hero: null, project_name: "Residence", layouts: [], access_token: "private", user_id: "private", trade_price_cents: 900 });
     expect(result).not.toHaveProperty("access_token"); expect(result).not.toHaveProperty("user_id"); expect(result).not.toHaveProperty("trade_price_cents");
   });
-  it("keeps both preset cameras at eye-level", () => { expect(viewingRoomCamera("living", 8, 6).position[1]).toBe(1.6); expect(viewingRoomCamera("terrace", 8, 6).position[1]).toBe(1.6); expect(viewingRoomCamera("living", 8, 6)).not.toEqual(viewingRoomCamera("terrace", 8, 6)); });
-  it("keeps Overview at eye level with a wider retreat", () => { const pose = viewingRoomCamera("overview", 8, 6); expect(pose.position).toEqual([0, 1.6, 4.800000000000001]); expect(pose.target).toEqual([0, .75, 0]); });
+  it.each(["living", "terrace", "overview"] as const)("keeps %s horizontal at the requested 1.35m eye height", view => { const pose = viewingRoomCamera(view, 8, 6); expect(pose.position[1]).toBe(1.35); expect(pose.target[1]).toBe(1.35); });
+  it("retreats further on a phone to keep the whole composition in frame", () => { expect(viewingRoomCamera("living", 8, 6, .6).position[2]).toBeGreaterThan(viewingRoomCamera("living", 8, 6, 1.8).position[2]); });
+  it("keeps Overview wider than Living Room", () => { expect(viewingRoomCamera("overview", 8, 6).position[2]).toBeGreaterThan(viewingRoomCamera("living", 8, 6).position[2]); });
   it("shows recorded lead times without inventing missing estimates", () => { expect(viewingRoomLeadTime(16)).toBe("16 weeks"); expect(viewingRoomLeadTime(null)).toBe("To be confirmed"); });
 });

@@ -37,10 +37,12 @@ export function viewingRoomComposition(items: ViewingRoomItem[]) {
 }
 
 export type ViewingRoomCameraPreset = "living" | "terrace" | "overview";
-export function viewingRoomCamera(view: ViewingRoomCameraPreset, width: number, depth: number): { position: [number, number, number]; target: [number, number, number] } {
-  if (view === "overview") return { position: [0, 1.6, depth * .8], target: [0, .75, 0] };
-  return view === "living" ? { position: [width * .24, 1.6, depth * .6], target: [0, .75, 0] }
-    : { position: [-width * .38, 1.6, depth * .6], target: [0, .75, 0] };
+export function viewingRoomCamera(view: ViewingRoomCameraPreset, width: number, depth: number, aspect = 1.8): { position: [number, number, number]; target: [number, number, number] } {
+  // Retreat outside the open front; fit horizontal bounds and the nearest floor edge.
+  const tangent = Math.tan(48 * Math.PI / 360);
+  const retreat = depth / 2 + Math.max(1.65 / tangent, width / (2 * tangent * Math.max(.35, aspect)));
+  const x = view === "living" ? width * .12 : view === "terrace" ? -width * .18 : 0;
+  return { position: [x, 1.35, retreat * (view === "overview" ? 1.12 : 1)], target: [0, 1.35, 0] };
 }
 
 export function viewingRoomLeadTime(weeks: number | null, items?: ViewingRoomItem[]): string {

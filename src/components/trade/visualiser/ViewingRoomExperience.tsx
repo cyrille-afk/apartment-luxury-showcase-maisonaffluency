@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Box, Lock } from "lucide-react";
@@ -27,6 +27,8 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
   const [busy, setBusy] = useState(false);
   const [locked, setLocked] = useState(false);
   const [feedback, setFeedback] = useState("");
+  const experience = useRef<HTMLDivElement>(null);
+  useEffect(() => { if (query.data) experience.current?.scrollIntoView({ behavior: "instant", block: "start" }); }, [query.data]);
   const key = useRef<string | null>(null);
   const snapshot = useRef<Awaited<ReturnType<typeof lockViewingRoomProposal>> | null>(null);
   const lock = useServerFn(lockViewingRoomProposal);
@@ -49,12 +51,12 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
   }
   if (query.isPending) return <p role="status" className="p-12 text-muted-foreground">Preparing your collection…</p>;
   if (query.isError || !query.data) return <div role="alert" className="p-12"><p>Your collection choices couldn’t load.</p><Button variant="outline" onClick={() => void query.refetch()}>Try again</Button></div>;
-  const proposalButton = <Button disabled={busy || !slots.length} onClick={() => void requestProposal()}><Lock className="size-4" />{busy ? "Preparing proposal…" : locked ? "Download Locked Proposal" : "Lock & Download Proposal"}</Button>;
-  return <div className="viewing-room bg-background text-foreground">
+  const proposalButton = <Button className="max-w-48 whitespace-normal text-xs sm:max-w-none sm:text-sm" disabled={busy || !slots.length} onClick={() => void requestProposal()}><Lock className="size-4 shrink-0" />{busy ? "Preparing proposal…" : locked ? "Download Locked Proposal" : "Lock & Download Proposal"}</Button>;
+  return <div ref={experience} className="viewing-room bg-background pb-24 text-foreground">
     <ViewingRoomCanvas items={items} environmentUrl={environmentUrl} activeSlotIds={slots.filter(slot => slot.is_swappable || slot.allow_finish_customization).map(slot => slot.id)} onPieceClick={id => { const slot = slots.find(row => row.id === id); if (!slot) return; setActive(id); setInspect(false); setSwatches(true); setDrawerTab(slot.is_swappable ? "alternatives" : "finishes"); }} />
-    <div className="flex flex-wrap gap-2 px-6 py-4" aria-label="Collection pieces">{slots.map(slot => <Button key={slot.id} variant="ghost" className="h-auto whitespace-normal text-left text-xs" onClick={() => { setActive(slot.id); setInspect(false); setSwatches(true); setDrawerTab(slot.is_swappable ? "alternatives" : "finishes"); }}>{(choices[slot.id] ?? slot).product_name}</Button>)}</div>
-    <div className="sticky bottom-0 z-40 flex flex-wrap items-center justify-between gap-4 border-t border-border bg-background px-6 py-5" data-visualiser-hotspot-obstacle>
-      <div><p className="text-xs text-muted-foreground">Package Total</p><p className="font-display text-2xl" aria-live="polite">{money(total)}</p></div>{proposalButton}
+    <div className="sr-only" aria-label="Collection pieces">{slots.map(slot => <Button key={slot.id} variant="ghost" className="h-auto whitespace-normal text-left text-xs" onClick={() => { setActive(slot.id); setInspect(false); setSwatches(true); setDrawerTab(slot.is_swappable ? "alternatives" : "finishes"); }}>{(choices[slot.id] ?? slot).product_name}</Button>)}</div>
+    <div className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-t border-border bg-background px-4 py-3 sm:flex sm:justify-between sm:px-6" data-visualiser-hotspot-obstacle>
+      <div><p className="text-xs text-muted-foreground">Package Total</p><p className="font-display text-lg sm:text-2xl" aria-live="polite">{money(total)}</p></div>{proposalButton}
       {feedback && <p role="status" className="w-full text-sm">{feedback}</p>}
     </div>
     <Sheet open={!!piece} onOpenChange={open => { if (!open) setActive(null); }}>

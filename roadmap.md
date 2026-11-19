@@ -1,5 +1,11 @@
 # Roadmap
 
+## Viewing-room collection and personalization stages
+- [x] Compact residence header and catalogue-backed collection previews; refined prose and content-height selection. All nine cards checked across desktop/phone and both appearance preferences.
+- [x] Compact tier tabs above a 75vh horizontal 1.35m room with shared travertine/oak surfaces, ambient occlusion, tone mapping and three camera presets; phone header and bottom-bar overlap corrected.
+- [x] 28 camera/access regressions pass; real Essential/Bespoke rooms rendered on desktop and Bespoke on phone, all phone camera buttons respond. Saved dimensions still withhold the mismatched Essential lounge chair; no fabricated measurements or changes to source data.
+- [ ] Live hotspot-to-alternatives flow blocked: all nine Cipriani packages have zero enabled hotspot rules. Existing token-projected slot permissions retained; no alternatives/finish permissions invented. Exhaustive nine-package room rendering and real-device GPU performance remain unverified.
+
 ## Short viewing-room invitations
 - [x] Add unique generated eight-character codes with legacy access retained and rate-limited service-only redemption; 19 regression tests pass.
 - [x] Wire Admin, short invitation route and email footer; desktop/phone short alias/query entry and invalid rejection verified. Both appearance preferences checked for Admin email previews; updated sender deployed and live boot checked. Public app route awaits publishing; residence-selection click does not change the URL in a separate check and is not claimed fixed.
