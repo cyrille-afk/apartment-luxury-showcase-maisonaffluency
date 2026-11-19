@@ -73,6 +73,7 @@ function ViewingRoomPage() {
     const magicCode = search.code?.trim();
     if (!magicCode || magicRan.current) return;
     magicRan.current = true;
+    window.__lovableEvents?.track?.("project.viewing_room_invite_link_opened", {});
     void (async () => {
       let ok = false;
       try {
@@ -81,6 +82,7 @@ function ViewingRoomPage() {
           if (access) { ok = true; window.__lovableEvents?.track?.("project.viewing_room_unlocked", { method: "magic_link" }); try { window.localStorage.setItem(enteredKey, magicCode); } catch { /* storage unavailable */ } setStoredAccess(magicCode); await queryClient.invalidateQueries({ queryKey: ["developer-viewing-room", locator] }); }
         }
       } catch { /* falls back to the code card */ }
+      if (!ok) window.__lovableEvents?.track?.("project.viewing_room_invite_link_failed", {});
       setMagicState(ok ? "idle" : "failed");
       void navigate({ search: ({ code: _code, ...rest }) => rest, replace: true, resetScroll: false });
     })();

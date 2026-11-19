@@ -1054,6 +1054,32 @@
         }
       }
     },
+    "project.viewing_room_invite_link_failed": {
+      "event_schema_version": 1,
+      "description": "An opened viewing-room invitation link did not grant access (invalid, expired or revoked code).",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      }
+    },
+    "project.viewing_room_invite_link_opened": {
+      "event_schema_version": 1,
+      "description": "A recipient opened a viewing-room invitation link (URL carried an access code), before the code is checked.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      }
+    },
     "project.viewing_room_invite_validation_error": {
       "event_schema_version": 1,
       "description": "A viewing-room invitation was blocked by a validation error.",
