@@ -826,3 +826,6 @@
 
 - [x] Page 06 tiers set to US$150,000 / US$350,000 / Bespoke US$700,000.
 - [x] Page 05 tier list and the price inside its manager screenshot matched to the same figures.
+
+## Page 06 residence screenshot
+- [x] Preserve the complete left edge and enlarge/darken the residence subtitle; desktop/phone preview and fresh PDF page 06 visually verified with no page errors.

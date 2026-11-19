@@ -4,7 +4,7 @@ import hero from '@/assets/cipriani-residence-living-render.asset.json';
 import plan from '@/assets/cipriani-residence-04.asset.json';
 import logo from '@/assets/developer-pitch/cipriani-logo-raster.asset.json';
 import manager from '@/assets/developer-pitch/manager-specs-usd150.asset.json';
-import residences from '@/assets/developer-pitch/residences-specs-v2.asset.json';
+import residences from '@/assets/developer-pitch/residences-readable.asset.json';
 import mark from '@/assets/developer-pitch/affluency-mark.asset.json';
 import room from '@/assets/developer-pitch/room-ref1.asset.json';
 import sandy from '@/assets/curators-picks/man-of-parts-sandy-cove-sofa.png';

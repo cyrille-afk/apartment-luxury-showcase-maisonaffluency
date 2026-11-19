@@ -110,7 +110,7 @@
 .pitch-col>figure, .pitch-col-shot, .pitch-tier-stack { flex: 1; }
 .pitch-col-arrow { align-self: center; width: 26px; height: 26px; color: var(--pitch-muted); }
 .pitch-col-shot { border: 1px solid var(--pitch-border); display: flex; align-items: center; justify-content: center; overflow: hidden; }
-.pitch-col-shot>img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 82%; transform: scale(1.12); transform-origin: 50% 85%; }
+.pitch-col-shot>img { width: 100%; height: 100%; object-fit: contain; object-position: center; }
 .pitch-tier-stack { display: flex; flex-direction: column; gap: 16px; }
 .pitch-tier-stack>div { flex: 1; border: 1px solid var(--pitch-border); padding: 22px 26px; display: flex; flex-direction: column; justify-content: center; }
 .pitch-tier-stack span { font-family: Georgia,serif; font-size: 32px; }
