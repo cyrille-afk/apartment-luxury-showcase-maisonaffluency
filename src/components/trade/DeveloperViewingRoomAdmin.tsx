@@ -20,7 +20,7 @@ import { developerDraftDirty, layoutDraftDirty, packagesDraftDirty, registerUnsa
 import { adminRecoveryKey, hasRecoveryChanges, parseAdminRecovery, type AdminRecoveryDraft } from "@/lib/adminDraftRecovery";
 import { Link } from "@/lib/router-compat";
 import { moodFolderUrl } from "@/lib/moodFolderEditing";
-import { viewingRoomPath } from "@/lib/viewingRoomLink";
+import { viewingRoomPath, rememberViewingRoomReturn } from "@/lib/viewingRoomLink";
 
 const emptyDeveloper = { developer_name: "", developer_logo_url: "", hero_image_url: "" };
 const emptyLayout = { name: "", floorplan_url: "", specs_label: "", room_environment_glb: "" };
@@ -215,7 +215,7 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
           <Button type="submit" variant="studio-primary" disabled={disabled || !developer.developer_name.trim()}><Save className="size-4" />Save developer</Button>
         </form>
         <div className="space-y-3 border-t border-border pt-5"><Label htmlFor="private-viewing-link">Private client magic link</Label><Input id="private-viewing-link" readOnly value={magicLink} placeholder="Save a developer first" />
-          <div className="flex flex-wrap gap-2"><Button variant="outline" disabled={!magicLink} onClick={() => void navigator.clipboard.writeText(magicLink).then(() => setNotice("Private viewing room link copied.")).catch(() => setError("The link couldn’t be copied. Select it above and copy again."))}><Copy className="size-4" />Copy</Button><Button variant="outline" disabled={!magicLink} onClick={() => { window.location.href = `mailto:?subject=${encodeURIComponent(`${developer.developer_name} · Private Viewing Room`)}&body=${encodeURIComponent(`Your private viewing room:\n\n${magicLink}`)}`; }}><Send className="size-4" />Send by email</Button><Button variant="ghost" disabled={!magicLink} aria-label="Open client viewing room" onClick={() => window.location.assign(magicLink)}><ExternalLink className="size-4" />Open</Button></div>
+          <div className="flex flex-wrap gap-2"><Button variant="outline" disabled={!magicLink} onClick={() => void navigator.clipboard.writeText(magicLink).then(() => setNotice("Private viewing room link copied.")).catch(() => setError("The link couldn’t be copied. Select it above and copy again."))}><Copy className="size-4" />Copy</Button><Button variant="outline" disabled={!magicLink} onClick={() => { window.location.href = `mailto:?subject=${encodeURIComponent(`${developer.developer_name} · Private Viewing Room`)}&body=${encodeURIComponent(`Your private viewing room:\n\n${magicLink}`)}`; }}><Send className="size-4" />Send by email</Button><Button variant="ghost" disabled={!magicLink} aria-label="Open client viewing room" onClick={() => { if (!savedDeveloper) return; rememberViewingRoomReturn(window.location.pathname + window.location.search); window.location.assign(viewingRoomPath(savedDeveloper.developer_name, savedDeveloper.access_token)); }}><ExternalLink className="size-4" />Open</Button></div>
         </div>
       </div>
       <div className="min-w-0 space-y-4 xl:border-r xl:border-border xl:pr-7">

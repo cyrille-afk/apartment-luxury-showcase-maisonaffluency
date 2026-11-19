@@ -1,13 +1,14 @@
 import { createFileRoute, ClientOnly } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useQuery } from "@tanstack/react-query";
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 import { ArrowLeft, ArrowRight, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getViewingRoom, getViewingRoomPackage } from "@/lib/viewingRoom.functions";
 import { viewingRoomLeadTime } from "@/lib/viewingRoom";
 import { residenceArea } from "@/lib/viewingRoomPresentation";
 import { viewingRoomAccessToken } from "@/lib/viewingRoomLink";
-import logo from "@/assets/maison-affluency-cover-logo.png.asset.json";
+import affluencyLogo from "@/assets/affluency-logo-full.jpeg";
+import { readViewingRoomReturn } from "@/lib/viewingRoomLink";
 const Viewer = lazy(() => import("@/components/trade/visualiser/ViewingRoomExperience"));
 const roomQuery = (token: string) => queryOptions({ queryKey: ["developer-viewing-room", token], queryFn: () => getViewingRoom({ data: { token } }), retry: false });
 
@@ -30,6 +31,8 @@ function ViewingRoomPage() {
   const token = viewingRoomAccessToken(locator);
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
+  const [returnTo, setReturnTo] = useState<string | null>(null);
+  useEffect(() => setReturnTo(readViewingRoomReturn()), []);
   const [liveTotals, setLiveTotals] = useState<Record<string, number>>({});
   const { data: room } = useSuspenseQuery(roomQuery(token));
   const layout = room?.layouts.find(row => row.id === search.layout);
@@ -37,11 +40,11 @@ function ViewingRoomPage() {
   const { data: composition, isLoading, isError, refetch } = useQuery({ queryKey: ["viewing-room-package", token, selected?.id], queryFn: () => selected ? getViewingRoomPackage({ data: { token, packageId: selected.id } }) : null, enabled: !!selected, retry: false });
   const chooseLayout = (id: string) => navigate({ search: { layout: id }, resetScroll: true });
   const choosePackage = (id: string) => navigate({ search: { layout: layout?.id, package: id }, resetScroll: false });
-  if (!room) return <main className="viewing-room min-h-screen bg-background px-6 py-20 text-center"><img src={logo.url} alt="Maison Affluency" className="mx-auto mb-12 h-12 w-56 object-contain" /><h1 className="font-display text-3xl">This private viewing room is unavailable</h1><p className="mt-5 text-muted-foreground">Please request a current link from your Maison Affluency contact.</p></main>;
+  if (!room) return <main className="viewing-room min-h-screen bg-background px-6 py-20 text-center"><img src={affluencyLogo} alt="Affluency" className="mx-auto mb-12 h-9 w-auto mix-blend-multiply" />{returnTo && <a href={returnTo} className="mb-8 inline-flex items-center gap-2 text-xs text-muted-foreground underline-offset-4 hover:underline"><ArrowLeft className="size-3" />Back to admin</a>}<h1 className="font-display text-3xl">This private viewing room is unavailable</h1><p className="mt-5 text-muted-foreground">Please request a current link from your Maison Affluency contact.</p></main>;
   return <main className="viewing-room min-h-screen bg-background text-foreground">
     <header className="flex flex-wrap items-center justify-between gap-6 border-b border-border px-6 py-6 md:px-12">
-      <div className="flex min-w-0 flex-wrap items-center gap-5">{room.logo ? <img src={room.logo} alt={room.name} className="h-14 max-w-44 object-contain" /> : <span className="max-w-60 font-display text-lg leading-snug">{room.name}</span>}<span aria-hidden="true" className="h-8 border-l border-border" /><div className="flex items-center gap-2"><img src={logo.url} alt="" className="h-10 w-9 object-contain" /><span className="font-display text-lg">Maison Affluency</span></div></div>
-      <div className="space-y-3"><p className="text-[10px] uppercase">Private Viewing Room</p><nav aria-label="Viewing room stages" className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground"><span className={!layout ? "text-foreground" : ""}>01 Residence</span><ArrowRight className="size-3" /><span className={layout && !selected ? "text-foreground" : ""}>02 Collection</span><ArrowRight className="size-3" /><span className={selected ? "text-foreground" : ""}>03 Personalize</span></nav></div>
+      <div className="flex min-w-0 flex-wrap items-center gap-5">{room.logo ? <img src={room.logo} alt={room.name} className="h-14 max-w-44 object-contain" /> : <span className="max-w-60 font-display text-lg leading-snug">{room.name}</span>}<span aria-hidden="true" className="h-8 border-l border-border" /><img src={affluencyLogo} alt="Affluency" className="h-7 w-auto mix-blend-multiply" /></div>
+      <div className="space-y-3">{returnTo && <a href={returnTo} className="flex items-center gap-2 text-xs text-muted-foreground underline-offset-4 hover:underline"><ArrowLeft className="size-3" />Back to admin</a>}<p className="text-[10px] uppercase">Private Viewing Room</p><nav aria-label="Viewing room stages" className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground"><span className={!layout ? "text-foreground" : ""}>01 Residence</span><ArrowRight className="size-3" /><span className={layout && !selected ? "text-foreground" : ""}>02 Collection</span><ArrowRight className="size-3" /><span className={selected ? "text-foreground" : ""}>03 Personalize</span></nav></div>
     </header>
     {room.hero && !layout && <div className="relative h-[34dvh] min-h-60 max-h-96"><img src={room.hero} alt={room.project_name} className="h-full w-full object-cover" /></div>}
     <div className="mx-auto max-w-[1500px] px-6 py-10 md:px-12">
