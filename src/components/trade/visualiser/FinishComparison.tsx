@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState, type ReactNode } from "react";
-import { Columns2, Lock, X } from "lucide-react";
+import { Columns2, Link2, Unlink, Lock, X } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,6 +9,7 @@ import { finishComparisonObjects } from "@/lib/visualiserFinishComparison";
 import { getPartMaterial, type FinishTarget } from "@/lib/visualiserFinishTargets";
 import type { ComparisonCameraLink, ComparisonCameraState } from "./ComparisonCameraSync";
 import { SceneErrorBoundary } from "./SceneErrorBoundary";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 
 type Props = {
   objects: PlacedObject[];
@@ -47,10 +48,18 @@ function ComparisonPanels({ objects, object, target, materials, renderRoom, onAp
   const [ready, setReady] = useState<[boolean, boolean]>([false, false]);
   const [failed, setFailed] = useState<[boolean, boolean]>([false, false]);
   const [attempt, setAttempt] = useState<[number, number]>([0, 0]);
+  const [camerasLinked, setCamerasLinked] = useState(true);
   const shared = useRef<ComparisonCameraState | null>(null);
   const options = useMemo(() => current && !materials.some(material => material.id === current.id) ? [current, ...materials] : materials, [current, materials]);
   const previews = useMemo(() => choices.map(choice => finishComparisonObjects(objects, object.instanceId, target, options.find(material => material.id === choice) ?? null)), [objects, object.instanceId, target, options, choices]);
-  return <div className="grid min-h-0 flex-1 grid-cols-2 gap-2 sm:gap-4">
+  return <>
+    <div className="flex shrink-0 items-center justify-end gap-2">
+      <span className="text-xs text-muted-foreground">{camerasLinked ? "Cameras linked" : "Cameras independent"}</span>
+      <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="outline" size="icon" aria-label="Link camera movement" aria-pressed={camerasLinked} onClick={() => setCamerasLinked(value => !value)}>
+        {camerasLinked ? <Link2 className="h-4 w-4" /> : <Unlink className="h-4 w-4" />}
+      </Button></TooltipTrigger><TooltipContent className="z-[110]">{camerasLinked ? "Unlink cameras" : "Link cameras"}</TooltipContent></Tooltip></TooltipProvider>
+    </div>
+    <div className="grid min-h-0 flex-1 grid-cols-2 gap-2 sm:gap-4">
     {choices.map((choice, index) => {
       const material = options.find(option => option.id === choice);
       const side = index === 0 ? "A" : "B";
@@ -63,7 +72,7 @@ function ComparisonPanels({ objects, object, target, materials, renderRoom, onAp
           </Select>
         </div>
         <div className="relative min-h-0 flex-1 overflow-hidden border border-border bg-background">
-          <SceneErrorBoundary key={attempt[index]} onError={() => { setFailed(previous => index === 0 ? [true, previous[1]] : [previous[0], true]); setReady(previous => index === 0 ? [false, previous[1]] : [previous[0], false]); }}>{renderRoom(previews[index], { id: side, shared }, () => setReady(previous => previous[index] ? previous : index === 0 ? [true, previous[1]] : [previous[0], true]))}</SceneErrorBoundary>
+          <SceneErrorBoundary key={attempt[index]} onError={() => { setFailed(previous => index === 0 ? [true, previous[1]] : [previous[0], true]); setReady(previous => index === 0 ? [false, previous[1]] : [previous[0], false]); }}>{renderRoom(previews[index], { id: side, shared, enabled: camerasLinked }, () => setReady(previous => previous[index] ? previous : index === 0 ? [true, previous[1]] : [previous[0], true]))}</SceneErrorBoundary>
           {failed[index] ? <div role="alert" className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-background p-2 text-center text-xs text-muted-foreground"><p>Room {side} couldn’t load.</p><Button variant="outline" size="sm" onClick={() => { setFailed(previous => index === 0 ? [false, previous[1]] : [previous[0], false]); setAttempt(previous => index === 0 ? [previous[0] + 1, previous[1]] : [previous[0], previous[1] + 1]); }}>Retry</Button></div> : !ready[index] && <p role="status" className="pointer-events-none absolute inset-x-2 bottom-3 bg-background/90 p-2 text-center text-xs text-muted-foreground">Loading room {side}…</p>}
         </div>
         <Button variant="outline" size="sm" className="h-auto min-h-9 shrink-0 whitespace-normal text-xs" disabled={!material || object.finishesLocked || !ready[index]} onClick={() => { if (material) { onApply(material); onClose(); } }}>
@@ -71,5 +80,5 @@ function ComparisonPanels({ objects, object, target, materials, renderRoom, onAp
         </Button>
       </section>;
     })}
-  </div>;
+  </div></>;
 }

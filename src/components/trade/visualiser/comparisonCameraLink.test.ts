@@ -18,6 +18,28 @@ function expectSame(a: ReturnType<typeof room>, b: ReturnType<typeof room>) {
   expect(a.camera.zoom).toBe(b.camera.zoom);
 }
 describe("finish preview cameras", () => {
+  it("unlinks without moving either camera and relinks to the last moved preview", () => {
+    const shared = { current: null as ComparisonCameraState | null };
+    const a = room(), b = room();
+    let stopA = bindComparisonCamera({ id: "A", shared }, a.camera, a.controls, a.invalidate);
+    let stopB = bindComparisonCamera({ id: "B", shared }, b.camera, b.controls, b.invalidate);
+    stopA(); stopB();
+    stopA = bindComparisonCamera({ id: "A", shared, enabled: false }, a.camera, a.controls, a.invalidate);
+    stopB = bindComparisonCamera({ id: "B", shared, enabled: false }, b.camera, b.controls, b.invalidate);
+    a.camera.position.set(3, 2, 4); a.controls.update();
+    expect(b.camera.position.toArray()).toEqual([0, 2, 6]);
+    b.camera.position.set(-4, 3, 5); b.controls.target.set(1, 1, 0); b.controls.update();
+    expect(a.camera.position.toArray()).toEqual([3, 2, 4]);
+    stopA(); stopB();
+    stopA = bindComparisonCamera({ id: "A", shared }, a.camera, a.controls, a.invalidate);
+    stopB = bindComparisonCamera({ id: "B", shared }, b.camera, b.controls, b.invalidate);
+    expectSame(a, b);
+    expect(a.camera.position.x).toBeCloseTo(-4, 9);
+    expect(a.camera.position.y).toBeCloseTo(3, 9);
+    expect(a.camera.position.z).toBeCloseTo(5, 9);
+    a.camera.position.set(2, 2, 7); a.controls.update(); expectSame(a, b);
+    stopA(); stopB(); a.controls.dispose(); b.controls.dispose();
+  });
   it("synchronizes orbit, pan and zoom immediately from either side without echo", () => {
     const shared = { current: null as ComparisonCameraState | null };
     const a = room(), b = room();

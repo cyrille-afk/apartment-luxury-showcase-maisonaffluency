@@ -11,13 +11,13 @@ export type ComparisonCameraState = {
   zoom: number;
   version: number;
 };
-export type ComparisonCameraLink = { id: string; shared: MutableRefObject<ComparisonCameraState | null> };
+export type ComparisonCameraLink = { id: string; shared: MutableRefObject<ComparisonCameraState | null>; enabled?: boolean };
 
 // Each dialog owns a ref; WeakMap avoids retaining closed rooms or polling idle canvases.
 const subscribers = new WeakMap<ComparisonCameraLink["shared"], Set<() => void>>();
 
 export function bindComparisonCamera(
-  { id, shared }: ComparisonCameraLink,
+  { id, shared, enabled = true }: ComparisonCameraLink,
   camera: PerspectiveCamera,
   controls: OrbitControls,
   invalidate: () => void,
@@ -28,6 +28,7 @@ export function bindComparisonCamera(
   subscribers.set(shared, listeners);
 
   const receive = () => {
+    if (!enabled) return;
     const pose = shared.current;
     if (!pose || pose.version === version) return;
     applying = true;
@@ -60,8 +61,10 @@ export function bindComparisonCamera(
     invalidate();
   };
   listeners.add(receive);
-  if (shared.current) receive();
-  else publish();
+  if (enabled) {
+    if (shared.current) receive();
+    else publish();
+  }
   controls.addEventListener("change", publish);
   return () => {
     controls.removeEventListener("change", publish);

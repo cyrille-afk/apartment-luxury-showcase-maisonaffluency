@@ -5,13 +5,13 @@ import type { PerspectiveCamera } from "three";
 import { bindComparisonCamera, type ComparisonCameraLink } from "./comparisonCameraLink";
 export type { ComparisonCameraState, ComparisonCameraLink } from "./comparisonCameraLink";
 
-export default function ComparisonCameraSync({ id, shared }: ComparisonCameraLink) {
+export default function ComparisonCameraSync({ id, shared, enabled = true }: ComparisonCameraLink) {
   const controls = useThree(state => state.controls) as OrbitControls | null;
   const camera = useThree(state => state.camera) as PerspectiveCamera;
   const invalidate = useThree(state => state.invalidate);
   useEffect(() => {
     if (!controls) return;
-    return bindComparisonCamera({ id, shared }, camera, controls, invalidate);
-  }, [controls, camera, id, shared, invalidate]);
+    return bindComparisonCamera({ id, shared, enabled }, camera, controls, invalidate);
+  }, [controls, camera, id, shared, enabled, invalidate]);
   return null;
 }

@@ -1,5 +1,10 @@
 # Roadmap
 
+## Finish-preview camera link toggle
+- [x] Add default-linked camera control, independent movement and relink to the last moved view without remounting or saving finishes.
+- [x] Eight regression tests pass, including real OrbitControls unlink/relink and UI toggle propagation; preview build passes.
+- [ ] Live desktop/phone toggle checks are blocked by headless graphics stalls before the comparison opens, including with GLB downloads withheld; not claimed verified.
+
 ## Secure branded viewing-room addresses
 - [x] Replace exposed-key addresses with branded URLs, separate private code entry and HttpOnly access, and retain legacy link redemption. All reads and proposal actions revalidate the existing parent credential and matching room name.
 - [x] Fourteen tests pass; desktop/phone verify unauthorized and invalid-code rejection, clean Admin Open, HttpOnly cookie, refresh, fresh guest code entry, residence/package navigation, legacy redirect and Back to admin. No page errors; preview build passes. Published site awaits publishing.
