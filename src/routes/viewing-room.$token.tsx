@@ -1,12 +1,14 @@
-import { createFileRoute, ClientOnly } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery, useQuery } from "@tanstack/react-query";
+import { createFileRoute, ClientOnly, redirect } from "@tanstack/react-router";
+import { queryOptions, useSuspenseQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { lazy, Suspense, useState, useEffect } from "react";
 import { ArrowLeft, ArrowRight, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getViewingRoom, getViewingRoomPackage } from "@/lib/viewingRoom.functions";
+import { getViewingRoom, getViewingRoomPackage, redeemViewingRoomAccess } from "@/lib/viewingRoom.functions";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { viewingRoomLeadTime } from "@/lib/viewingRoom";
 import { residenceArea } from "@/lib/viewingRoomPresentation";
-import { viewingRoomAccessToken } from "@/lib/viewingRoomLink";
+import { viewingRoomAccessToken, isLegacyViewingRoomLink } from "@/lib/viewingRoomLink";
 import affluencyLogo from "@/assets/affluency-logo-full.jpeg";
 import { readViewingRoomReturn } from "@/lib/viewingRoomLink";
 const Viewer = lazy(() => import("@/components/trade/visualiser/ViewingRoomExperience"));
@@ -14,7 +16,17 @@ const roomQuery = (token: string) => queryOptions({ queryKey: ["developer-viewin
 
 export const Route = createFileRoute("/viewing-room/$token")({
   validateSearch: (search: Record<string, unknown>): { layout?: string; package?: string } => ({ layout: typeof search.layout === "string" ? search.layout : undefined, package: typeof search.package === "string" ? search.package : undefined }),
-  loader: ({ context, params }) => context.queryClient.ensureQueryData(roomQuery(viewingRoomAccessToken(params.token))),
+  beforeLoad: async ({ params, search }) => {
+    if (!isLegacyViewingRoomLink(params.token)) return;
+    const access = await redeemViewingRoomAccess({ data: { token: viewingRoomAccessToken(params.token) } });
+    if (access) {
+      const query = new URLSearchParams();
+      if (search.layout) query.set("layout", search.layout);
+      if (search.package) query.set("package", search.package);
+      throw redirect({ href: access.path + (query.size ? `?${query}` : ""), replace: true });
+    }
+  },
+  loader: ({ context, params }) => isLegacyViewingRoomLink(params.token) ? null : context.queryClient.ensureQueryData(roomQuery(params.token)),
   head: ({ loaderData }) => ({ meta: [
     { title: `${loaderData?.project_name ?? "Private Viewing Room"} | Maison Affluency` },
     { name: "description", content: "A private selection of residences and curated furniture packages, presented by Maison Affluency." },
@@ -28,7 +40,11 @@ export const Route = createFileRoute("/viewing-room/$token")({
 });
 function ViewingRoomPage() {
   const { token: locator } = Route.useParams();
-  const token = viewingRoomAccessToken(locator);
+  const token = locator;
+  const queryClient = useQueryClient();
+  const [code, setCode] = useState("");
+  const [accessBusy, setAccessBusy] = useState(false);
+  const [accessError, setAccessError] = useState("");
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
   const [returnTo, setReturnTo] = useState<string | null>(null);
@@ -40,7 +56,15 @@ function ViewingRoomPage() {
   const { data: composition, isLoading, isError, refetch } = useQuery({ queryKey: ["viewing-room-package", token, selected?.id], queryFn: () => selected ? getViewingRoomPackage({ data: { token, packageId: selected.id } }) : null, enabled: !!selected, retry: false });
   const chooseLayout = (id: string) => navigate({ search: { layout: id }, resetScroll: true });
   const choosePackage = (id: string) => navigate({ search: { layout: layout?.id, package: id }, resetScroll: false });
-  if (!room) return <main className="viewing-room min-h-screen bg-background px-6 py-20 text-center"><img src={affluencyLogo} alt="Affluency" className="mx-auto mb-12 h-9 w-auto mix-blend-multiply" />{returnTo && <a href={returnTo} className="mb-8 inline-flex items-center gap-2 text-xs text-muted-foreground underline-offset-4 hover:underline"><ArrowLeft className="size-3" />Back to admin</a>}<h1 className="font-display text-3xl">This private viewing room is unavailable</h1><p className="mt-5 text-muted-foreground">Please request a current link from your Maison Affluency contact.</p></main>;
+  if (!room) return <main className="viewing-room min-h-screen bg-background px-6 py-20 text-center"><img src={affluencyLogo} alt="Affluency" className="mx-auto mb-12 h-9 w-auto mix-blend-multiply" />{returnTo && <a href={returnTo} className="mb-8 inline-flex items-center gap-2 text-xs text-muted-foreground underline-offset-4 hover:underline"><ArrowLeft className="size-3" />Back to admin</a>}<h1 className="font-display text-3xl">Private Viewing Room</h1><form className="mx-auto mt-8 max-w-sm space-y-4 text-left" onSubmit={async event => {
+    event.preventDefault(); setAccessBusy(true); setAccessError("");
+    try {
+      const access = await redeemViewingRoomAccess({ data: { token: code.trim(), locator } });
+      if (!access) { setAccessError("Please check your private access code or request a current invitation."); return; }
+      setCode(""); await queryClient.invalidateQueries({ queryKey: ["developer-viewing-room", locator] });
+    } catch { setAccessError("Please check your private access code or request a current invitation."); }
+    finally { setAccessBusy(false); }
+  }}><Label htmlFor="viewing-room-access">Private access code</Label><Input id="viewing-room-access" type="password" autoComplete="off" value={code} onChange={event => setCode(event.target.value)} required disabled={accessBusy} /><p role="alert" className="min-h-10 text-sm text-destructive">{accessError}</p><Button type="submit" className="w-full" disabled={accessBusy || !code.trim()}>{accessBusy ? "Opening…" : "Enter viewing room"}</Button></form></main>;
   return <main className="viewing-room min-h-screen bg-background text-foreground">
     <header className="flex flex-wrap items-center justify-between gap-6 border-b border-border px-6 py-6 md:px-12">
       <div className="flex min-w-0 flex-wrap items-center gap-5">{room.logo ? <img src={room.logo} alt={room.name} className="h-14 max-w-44 object-contain" /> : <span className="max-w-60 font-display text-lg leading-snug">{room.name}</span>}<span aria-hidden="true" className="hidden h-8 border-l border-border sm:block" /><img src={affluencyLogo} alt="Affluency" className="h-7 w-auto mix-blend-multiply" /></div>

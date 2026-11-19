@@ -1,9 +1,16 @@
-/** Names describe the room; the unchanged access token remains its credential. */
-export function viewingRoomPath(name: string, token: string): string {
+/** Branded locators describe rooms, never authorize them. */
+export function viewingRoomPath(name: string): string {
   const slug = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
     .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "private-residences";
   const label = /residences$/.test(slug) ? `${slug}-apartments` : slug;
-  return `/viewing-room/${label}--${encodeURIComponent(token)}`;
+  return `/viewing-room/${label}`;
+}
+
+export function isLegacyViewingRoomLink(locator: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(viewingRoomAccessToken(locator));
+}
+export function viewingRoomCookieName(locator: string): string {
+  return `ma_viewing_room_${locator}`;
 }
 
 export function viewingRoomAccessToken(locator: string): string {

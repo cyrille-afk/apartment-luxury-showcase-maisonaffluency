@@ -21,6 +21,7 @@ import { adminRecoveryKey, hasRecoveryChanges, parseAdminRecovery, type AdminRec
 import { Link } from "@/lib/router-compat";
 import { moodFolderUrl } from "@/lib/moodFolderEditing";
 import { viewingRoomPath, rememberViewingRoomReturn } from "@/lib/viewingRoomLink";
+import { redeemViewingRoomAccess } from "@/lib/viewingRoom.functions";
 
 const emptyDeveloper = { developer_name: "", developer_logo_url: "", hero_image_url: "" };
 const emptyLayout = { name: "", floorplan_url: "", specs_label: "", room_environment_glb: "" };
@@ -175,7 +176,7 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
     if (recovery.assignment) setAssignment(recovery.assignment);
     setRecovery(null); setNotice("Local draft restored. Changes remain unsaved.");
   };
-  const magicLink = savedDeveloper ? absoluteUrl(viewingRoomPath(savedDeveloper.developer_name, savedDeveloper.access_token)) : "";
+  const magicLink = savedDeveloper ? absoluteUrl(viewingRoomPath(savedDeveloper.developer_name)) : "";
   const activeLayouts = layouts.filter(row => row.developer_project_id === developerId);
   const draftBoard = boards.find(row => row.id === assignment?.draft.moodboard_id);
   const draftSummary = draftBoard ? managerBoardSummary(draftBoard) : null;
@@ -214,8 +215,8 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
           <div className="space-y-3"><Label>Hero banner</Label>{developer.hero_image_url && <img src={developer.hero_image_url} alt={developer.developer_name} className="aspect-[16/9] w-full object-cover" />}<CloudUpload folder={`viewing-room/${projectId}/covers`} accept="image/png,image/jpeg,image/webp" label="Replace Image" disabled={disabled} onUpload={urls => setDeveloper(current => ({ ...current, hero_image_url: urls[0] ?? "" }))} /></div>
           <Button type="submit" variant="studio-primary" disabled={disabled || !developer.developer_name.trim()}><Save className="size-4" />Save developer</Button>
         </form>
-        <div className="space-y-3 border-t border-border pt-5"><Label htmlFor="private-viewing-link">Private client magic link</Label><Input id="private-viewing-link" readOnly value={magicLink} placeholder="Save a developer first" />
-          <div className="flex flex-wrap gap-2"><Button variant="outline" disabled={!magicLink} onClick={() => void navigator.clipboard.writeText(magicLink).then(() => setNotice("Private viewing room link copied.")).catch(() => setError("The link couldn’t be copied. Select it above and copy again."))}><Copy className="size-4" />Copy</Button><Button variant="outline" disabled={!magicLink} onClick={() => { window.location.href = `mailto:?subject=${encodeURIComponent(`${developer.developer_name} · Private Viewing Room`)}&body=${encodeURIComponent(`Your private viewing room:\n\n${magicLink}`)}`; }}><Send className="size-4" />Send by email</Button><Button variant="ghost" disabled={!magicLink} aria-label="Open client viewing room" onClick={() => { if (!savedDeveloper) return; rememberViewingRoomReturn(window.location.pathname + window.location.search); window.location.assign(viewingRoomPath(savedDeveloper.developer_name, savedDeveloper.access_token)); }}><ExternalLink className="size-4" />Open</Button></div>
+        <div className="space-y-3 border-t border-border pt-5"><Label htmlFor="private-viewing-link">Private viewing room address</Label><Input id="private-viewing-link" readOnly value={magicLink} placeholder="Save a developer first" />
+          <div className="flex flex-wrap gap-2"><Button variant="outline" disabled={!magicLink} onClick={() => void navigator.clipboard.writeText(magicLink).then(() => setNotice("Viewing room address copied.")).catch(() => setError("The address couldn’t be copied. Select it above and copy again."))}><Copy className="size-4" />Copy address</Button><Button variant="outline" disabled={!savedDeveloper} onClick={() => { if (!savedDeveloper) return; void navigator.clipboard.writeText(savedDeveloper.access_token).then(() => setNotice("Private access code copied. Share it only with your invited client.")).catch(() => setError("The code couldn’t be copied. Please try again.")); }}><Copy className="size-4" />Copy access code</Button><Button variant="outline" disabled={!magicLink} onClick={() => { if (!savedDeveloper) return; window.location.href = `mailto:?subject=${encodeURIComponent(`${developer.developer_name} · Private Viewing Room`)}&body=${encodeURIComponent(`Your private viewing room:\n\n${magicLink}\n\nPrivate access code: ${savedDeveloper.access_token}`)}`; }}><Send className="size-4" />Send by email</Button><Button variant="ghost" disabled={!magicLink} aria-label="Open client viewing room" onClick={async () => { if (!savedDeveloper) return; try { const access = await redeemViewingRoomAccess({ data: { token: savedDeveloper.access_token } }); if (!access) { setError("This invitation is no longer available."); return; } rememberViewingRoomReturn(window.location.pathname + window.location.search); window.location.assign(access.path); } catch { setError("The viewing room couldn’t open. Please try again."); } }}><ExternalLink className="size-4" />Open</Button></div>
         </div>
       </div>
       <div className="min-w-0 space-y-4 xl:border-r xl:border-border xl:pr-7">

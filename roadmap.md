@@ -1,5 +1,9 @@
 # Roadmap
 
+## Secure branded viewing-room addresses
+- [x] Replace exposed-key addresses with branded URLs, separate private code entry and HttpOnly access, and retain legacy link redemption. All reads and proposal actions revalidate the existing parent credential and matching room name.
+- [x] Fourteen tests pass; desktop/phone verify unauthorized and invalid-code rejection, clean Admin Open, HttpOnly cookie, refresh, fresh guest code entry, residence/package navigation, legacy redirect and Back to admin. No page errors; preview build passes. Published site awaits publishing.
+
 ## Finish-preview camera movement
 - [x] Replace polling with immediate bidirectional camera synchronization, retain current pose on late loading/retry, and prevent feedback loops.
 - [x] Six focused tests pass using real OrbitControls for bidirectional orbit/pan/zoom, echo prevention and retry cleanup; signed-in Frenchmen Street saved/Black Pepper Oak previews render side by side and screenshot inspected. Preview build passes.
