@@ -3,7 +3,7 @@ import { ArrowRight, Box, Check, ShieldCheck, Layers, Sparkles, Plus } from 'luc
 import hero from '@/assets/cipriani-residence-living-render.asset.json';
 import plan from '@/assets/cipriani-residence-04.asset.json';
 import logo from '@/assets/developer-pitch/cipriani-logo-raster.asset.json';
-import manager from '@/assets/developer-pitch/manager.asset.json';
+import manager from '@/assets/developer-pitch/manager-specs.asset.json';
 import residences from '@/assets/developer-pitch/residences-specs.asset.json';
 import room from '@/assets/developer-pitch/room-ref1.asset.json';
 import sandy from '@/assets/curators-picks/man-of-parts-sandy-cove-sofa.png';
