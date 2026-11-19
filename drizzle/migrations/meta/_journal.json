@@ -2234,6 +2234,20 @@
       "when": 1795098167703,
       "tag": "0318_viewing_room_short_codes",
       "breakpoints": true
+    },
+    {
+      "idx": 319,
+      "version": "7",
+      "when": 1795131568382,
+      "tag": "0319_viewing_room_package_default_swatches",
+      "breakpoints": true
+    },
+    {
+      "idx": 320,
+      "version": "7",
+      "when": 1795131697920,
+      "tag": "0320_viewing_room_package_swatches_from_fabrics",
+      "breakpoints": true
     }
   ]
 }

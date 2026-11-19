@@ -21,7 +21,7 @@ export default function ViewingRoomCollectionCard({ token, collection, onSelect 
         {!pictures.length && <span className="text-xs text-muted-foreground">{isPending ? "Preparing collection…" : isError ? "Preview unavailable" : "Collection imagery being prepared"}</span>}
       </div>
       <div className="flex w-full flex-1 flex-col gap-4 p-5"><h2 className="font-display text-2xl">{collection.tier_name}</h2><p className="min-h-16 text-sm font-normal leading-relaxed text-muted-foreground">{descriptions[collection.tier_name] ?? collection.description}</p>
-        <div className="flex h-9 gap-2" aria-label="Selected materials">{materials.map(material => <img key={material.id} src={material.image_url ?? undefined} alt={material.name} title={material.name} className="size-9 rounded-full border border-border object-cover" />)}</div>
+        <div className="flex h-6 gap-2" aria-label="Selected materials">{materials.map(material => <span key={material.id} className="size-6 shrink-0 overflow-hidden rounded-full border border-black/15"><img src={material.image_url ?? undefined} alt={material.name} title={material.name} className="size-full object-cover" /></span>)}</div>
         <p className="font-display text-2xl">{new Intl.NumberFormat("en-GB", { style: "currency", currency: collection.currency, maximumFractionDigits: 0 }).format(collection.package_price)}</p>
         <p className="text-xs font-normal text-muted-foreground">Estimated lead time · {viewingRoomLeadTime(collection.lead_time_weeks, data?.items)}</p><span className="mt-2 flex items-center justify-between text-xs">Explore collection<ArrowRight className="size-4" /></span>
       </div>
