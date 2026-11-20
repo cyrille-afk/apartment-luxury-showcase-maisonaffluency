@@ -133,7 +133,7 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
             {current.is_swappable && (choices[current.id]?.id ?? current.id) !== current.id && <Button variant="ghost" disabled={busy || locked} onClick={() => selectAlternative(current, current.id)}>Restore original piece</Button>}
           </TabsContent>
           </Tabs>
-          {query.data && <div className="sticky bottom-0 mt-auto border-t border-border bg-background py-4">{undoButton(current)}{drawerTab === "finishes" && <Button className="w-full" disabled={busy || locked} onClick={() => { setChoices(values => ({ ...values, [current.id]: viewingRoomSelection(current, draft.id, draft.finish_key, draft.size_key) })); setActive(null); setDraft(null); }}>UPDATE SELECTION</Button>}</div>}
+          {query.data && <div className="sticky bottom-0 mt-auto border-t border-border bg-background py-4">{undoButton(current)}{drawerTab === "finishes" && <Button className="w-full" disabled={busy || locked || current.retail_price == null || draft.retail_price == null} onClick={() => { if (current.retail_price == null || draft.retail_price == null) return; setChoices(values => ({ ...values, [current.id]: viewingRoomSelection(current, draft.id, draft.finish_key, draft.size_key) })); setActive(null); setDraft(null); }}>UPDATE SELECTION</Button>}</div>}
         </>}
       </SheetContent>
     </Sheet>

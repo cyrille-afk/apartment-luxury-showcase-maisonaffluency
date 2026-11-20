@@ -1,0 +1,23 @@
+import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { afterEach, expect, it, vi } from "vitest";
+import ViewingRoomExperience from "./ViewingRoomExperience";
+const { readChoices, lock } = vi.hoisted(() => ({ readChoices: vi.fn(), lock: vi.fn() }));
+vi.mock("@/lib/viewingRoom.functions", () => ({ getViewingRoomChoices: readChoices, lockViewingRoomProposal: lock }));
+vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
+vi.mock("../Product3DViewer", () => ({ default: () => null }));
+vi.mock("@/lib/viewingRoomProposal", () => ({ downloadViewingRoomProposal: vi.fn() }));
+const unpriced = { id: "console", product_name: "Unpriced Console", category: null, subcategory: null, image_url: null, dimensions: "W 140 cm", width_mm: 1400, depth_mm: 400, height_mm: 800, glb_url: null, lead_time: null, materials: {}, retail_price: null, retail_price_from: false, size_options: [], finish_options: [] };
+const slot = { ...unpriced, alternatives: [], is_swappable: false, allow_finish_customization: true };
+afterEach(() => { cleanup(); vi.resetAllMocks(); });
+it("keeps UPDATE SELECTION disabled for a piece whose price is to be confirmed", async () => {
+  readChoices.mockResolvedValue({ items: [slot], allow_alternatives: true });
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  render(<QueryClientProvider client={client}><ViewingRoomExperience token="room" packageId="package" baseTotal={150000} currency="USD" residence="Residence" developer="Developer" onTotal={() => {}} /></QueryClientProvider>);
+  fireEvent.click(await screen.findByRole("button", { name: "Materials and finishes for Unpriced Console" }));
+  const update = screen.getByRole("button", { name: "UPDATE SELECTION" });
+  expect(update).toBeDisabled();
+  fireEvent.click(update);
+  expect(screen.getByRole("dialog")).toBeInTheDocument();
+  expect(screen.getAllByText("Price to be confirmed").length).toBeGreaterThan(0);
+});
