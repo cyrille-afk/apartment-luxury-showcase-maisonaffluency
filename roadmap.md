@@ -1,5 +1,10 @@
 # Roadmap
 
+## Footprint-safe editorial swaps
+- [x] Matching 3D VIEW / SWAP PIECE badges open the corresponding drawer tab; alternative selection commits immediately and switches to its still-model finish workspace.
+- [x] Private projection prioritizes admin pins, otherwise up to twelve same-role ±15% width/depth candidates; proposal locking uses the same projection and fixed-piece permissions.
+- [x] Real desktop/phone GUM→Frenchmen Street swap passes for pinned and unpinned fallback lists: US$3,204.38 reduction, immediate card/allocation/remaining changes, replacement model/finish controls, restore-original and both tab entry paths. 39 regressions pass; no page errors or overflow. Temporary permission restored to fixed, with finish customization retained; Cipriani swap badges remain hidden until enabled in Admin.
+
 ## Client editorial viewing-room selection
 - [x] Replace Stage 3 room sandbox with client-only editorial cards and live allocation bar.
 - [x] Stage token-approved finish/alternative edits in a still-model drawer; explicit commit updates retail cards and budget together. Server proposal validation uses the same finish keys.

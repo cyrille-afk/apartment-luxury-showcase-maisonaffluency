@@ -2262,6 +2262,13 @@
       "when": 1795133004880,
       "tag": "0322_correct_editorial_finish_projection",
       "breakpoints": true
+    },
+    {
+      "idx": 323,
+      "version": "7",
+      "when": 1795133405593,
+      "tag": "0323_viewing_room_footprint_alternatives",
+      "breakpoints": true
     }
   ]
 }

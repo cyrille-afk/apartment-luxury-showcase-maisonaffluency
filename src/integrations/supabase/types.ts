@@ -14113,6 +14113,10 @@ export type Database = {
         }
         Returns: Json
       }
+      _viewing_room_footprint_alternatives: {
+        Args: { _package_id: string; _slot_id: string }
+        Returns: Json
+      }
       accept_studio_invite: { Args: { _invite_id: string }; Returns: Json }
       acquire_ingestion_lease: {
         Args: { _minutes?: number; _owner: string }

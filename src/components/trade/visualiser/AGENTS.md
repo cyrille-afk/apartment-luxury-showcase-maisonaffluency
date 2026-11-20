@@ -1,5 +1,5 @@
 - Finish updates retain the piece until replacement; dispose after detachment, not cancellation. Swaps never retain the old product — avoids blinking.
-- Viewing-room cards/budget commit scoped retail finish keys; proposals revalidate, never source boards. Inspectors stay still — client safety.
+- Viewing-room swaps commit immediately; scoped pins/±15% choices revalidate at lock. Finishes commit explicitly; inspectors stay still.
 - Finish comparison cameras link by default; unlink preserves independent poses, relink adopts the last moved preview without remounting. Event-driven updates suppress echo and idle polling — no saved-room camera writes.
 - Private viewing rooms mount hotspots only for token-projected active rules; camera presets retain eye height and slot transforms across swaps, and isolated swatch inspection never rewrites locked proposal materials — preserves guest scope and exact finish records.
 - Angling a piece = placement yaw via PieceAngleControls (object.rotation[1]); visible ModelOrientationControls repairs import tilt independently, and its reset clears only modelOrientation — keeps manual repair separate from intentional placement and size.

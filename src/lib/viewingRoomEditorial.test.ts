@@ -16,6 +16,9 @@ describe("client editorial selection", () => {
     const choice = viewingRoomSelection(slot, "chair");
     expect(choice.retail_price).toBe(9000);
     expect(viewingRoomTotal(150000, [slot], { sofa: { ...choice, retail_price: 1 } })).toBe(149000);
+    const ledger = moodBudgetLedger([{ id: slot.id }], new Map([[slot.id, { retail: Number(choice.retail_price) * 100, trade: null }]]), { roomType: "living", totalEur: 150000, caps: {}, anchors: [] });
+    expect(ledger.allocated).toBe(900000); expect(ledger.remaining).toBe(14100000);
+    expect(ledger.allocated / Number(ledger.total) * 100).toBe(6);
   });
   it("does not allow fixed finishes to change", () => { expect(() => viewingRoomSelection({ ...slot, allow_finish_customization: false }, "sofa", "velvet")).toThrow("Unapproved finish"); });
   it("does not allow fixed pieces to swap", () => { expect(() => viewingRoomSelection({ ...slot, is_swappable: false }, "chair")).toThrow("Unapproved choice"); });

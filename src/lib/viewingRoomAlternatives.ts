@@ -10,3 +10,10 @@ export function isApprovedViewingRoomAlternative(slot: Taxonomy, candidate: Cand
   return terms(slot.category).some(term => terms(candidate.category).includes(term))
     || terms(slot.subcategory).some(term => terms(candidate.subcategory).includes(term));
 }
+
+export function viewingRoomFootprintFits(slot: { width_mm: number | null; depth_mm: number | null }, candidate: { width_mm: number | null; depth_mm: number | null }): boolean {
+  const { width_mm: w, depth_mm: d } = slot;
+  const { width_mm: cw, depth_mm: cd } = candidate;
+  return w != null && d != null && cw != null && cd != null && w > 0 && d > 0
+    && cw * 100 >= w * 85 && cw * 100 <= w * 115 && cd * 100 >= d * 85 && cd * 100 <= d * 115;
+}
