@@ -3,6 +3,7 @@
 ## Viewing-room recommendation recovery
 - [x] Keep the approved collection visible when recommendation reads fail, with a retry and a return to finishes; missing prices remain unconfirmed.
 - [x] 24 regressions pass, including committed-finish/total preservation. Real private-room desktop/phone outage → inspection → retry restores all three pieces and confirmed totals, with zero page errors or overflow; screenshots reviewed and preview build OK.
+- [x] Expanded checks cover all nine packages × desktop/phone × light/dark settings (36 flows), inspecting every piece during failure and updating unchanged selections after recovery; all 72 screenshots reviewed, zero page errors/overflow. The viewing room retains its editorial light appearance; model rendering was excluded from these recommendation-recovery checks.
 
 ## Viewing-room alternatives and collection total
 - [x] Enable all 27 Cipriani item swaps; both item and existing package buyer-swap switch (`allow_alternatives`, not a duplicate flag) gate badges/choices. Auto-match up to four same-role ±20% pieces; proposal validation reuses projection.
