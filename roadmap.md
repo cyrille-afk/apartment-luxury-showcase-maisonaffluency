@@ -1,5 +1,9 @@
 # Roadmap
 
+## Upright drawer furniture previews
+- [x] Correct editorial model orientation, contact-floor grounding and front three-quarter camera without changing other product viewers; recorded low-table proportions and verified exports prevent false rotations.
+- [x] Eight framing/material regressions pass. All nine distinct package models rendered in Canaletto's three tiers on desktop/phone in both appearance settings, including duplicate configured entries (72 previews), followed by Update Selection; screenshots reviewed, zero page errors and preview build OK. Other residences reuse these models; real-device GPU performance remains unmeasured.
+
 ## Buyer swap undo
 - [x] Add per-piece and drawer Undo Swap restoring the previous configured piece and live totals without changing source collections.
 - [x] 15 regressions pass, including successive swaps, exact finish/size restoration and locked-proposal protection. All nine packages checked at desktop/phone widths in light/dark settings: 60 available swaps undo through card/drawer and reopen with exact original totals; 48 item checks have no compatible alternatives. All 120 screenshots reviewed, zero page errors/overflow; model rendering excluded and preview build OK.

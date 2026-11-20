@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AlertTriangle, Box, Lock, LockOpen } from "lucide-react";
+import { editorialModelCamera, editorialUprightRotation } from "@/lib/editorialModelFraming";
 
 declare module "react" {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -120,6 +121,8 @@ interface Props {
   autoOpen?: boolean;
   autoRotate?: boolean;
   clientEditorial?: boolean;
+  furnitureCategory?: string;
+  furnitureDimensions?: { width: number; depth: number; height: number };
   /**
    * When true, renders a small collapsible panel showing which material
    * names were detected on the GLB and which ones the upholstery filter
@@ -195,6 +198,8 @@ const Product3DViewer: React.FC<Props> = ({
   autoOpen = false,
   autoRotate = true,
   clientEditorial = false,
+  furnitureCategory = "",
+  furnitureDimensions,
   debug = false,
   scale,
   onOpenedChange,
@@ -222,11 +227,49 @@ const Product3DViewer: React.FC<Props> = ({
   // rotate/zoom/pan are disabled so the composition can't be nudged.
   const [locked, setLocked] = useState(false);
 
+  useEffect(() => {
+    if (!clientEditorial || !opened || !ready) return;
+    const mv = mvRef.current as any;
+    if (!mv) return;
+    let cancelled = false;
+    const frame = async () => {
+      mv.removeAttribute("data-scene-ready");
+      mv.orientation = "0deg 0deg 0deg";
+      await mv.updateComplete;
+      if (cancelled || !mv.getDimensions) return;
+      const initial = mv.getDimensions();
+      const rotation = editorialUprightRotation(initial, `${furnitureCategory} ${alt}`, url, furnitureDimensions);
+      // model-viewer orientation is roll / pitch / yaw; pitch rotates around X.
+      mv.orientation = rotation ? "0deg -90deg 0deg" : "0deg 0deg 0deg";
+      await mv.updateComplete;
+      if (cancelled) return;
+      const size = mv.getDimensions();
+      const center = mv.getBoundingBoxCenter();
+      const camera = editorialModelCamera(size, center, mv.clientWidth / Math.max(1, mv.clientHeight));
+      // The renderer centers X/Z around this target and grounds its contact
+      // shadow on boundingBox.min.y after the orientation is recomputed.
+      mv.setAttribute("camera-target", `${camera.target.x}m ${camera.target.y}m ${camera.target.z}m`);
+      mv.setAttribute("camera-orbit", `${camera.theta}rad ${camera.phi}rad ${camera.distance}m`);
+      mv.setAttribute("min-camera-orbit", `auto 35deg ${camera.distance * .6}m`);
+      mv.setAttribute("max-camera-orbit", `auto 88deg ${camera.distance * 2.5}m`);
+      mv.setAttribute("shadow-intensity", "0.35");
+      mv.setAttribute("shadow-softness", "0.8");
+      mv.removeAttribute("auto-rotate");
+      await mv.updateComplete;
+      if (cancelled) return;
+      mv.jumpCameraToGoal?.();
+      mv.setAttribute("data-scene-ready", "true");
+    };
+    mv.addEventListener("load", frame);
+    if (mv.loaded) void frame();
+    return () => { cancelled = true; mv.removeEventListener("load", frame); };
+  }, [clientEditorial, furnitureCategory, furnitureDimensions?.width, furnitureDimensions?.depth, furnitureDimensions?.height, alt, url, opened, ready]);
+
   // Clamp scroll-zoom to a band around the auto-framed radius so the piece
   // can never be zoomed out of sight or into the camera. model-viewer
   // already swallows wheel events over the canvas, so the page never scrolls.
   useEffect(() => {
-    if (!opened || !ready) return;
+    if (!opened || !ready || clientEditorial) return;
     const mv = mvRef.current as any;
     if (!mv) return;
     const clamp = () => {
@@ -241,7 +284,7 @@ const Product3DViewer: React.FC<Props> = ({
     if (mv.model) clamp();
     else mv.addEventListener("load", clamp, { once: true });
     return () => mv.removeEventListener("load", clamp);
-  }, [opened, ready, url]);
+  }, [opened, ready, url, clientEditorial]);
 
   // Only load the ~1MB model-viewer script once the user has opted in.
   useEffect(() => {
@@ -563,7 +606,7 @@ const Product3DViewer: React.FC<Props> = ({
             {...(!locked
               ? {
                   "camera-controls": true,
-                  ...(autoRotate ? { "auto-rotate": true } : {}),
+                  ...(autoRotate && !clientEditorial ? { "auto-rotate": true } : {}),
                   // Touch: one finger orbits (in any direction), pinch zooms,
                   // two-finger drag pans. Lock hands the gesture back to page scroll.
                   "touch-action": "none",
