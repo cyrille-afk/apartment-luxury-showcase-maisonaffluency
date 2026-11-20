@@ -1,5 +1,10 @@
 # Roadmap
 
+## Viewing-room alternatives and collection total
+- [x] Enable all 27 Cipriani item swaps; both item and existing package buyer-swap switch (`allow_alternatives`, not a duplicate flag) gate badges/choices. Auto-match up to four same-role ±20% pieces; proposal validation reuses projection.
+- [x] Bottom Collection Total equals selected-item allocated sum with two decimals; Stage 1 uses requested sample specs only when recorded area is absent.
+- [x] 42 regressions pass. All nine packages × desktop/phone × light/dark (36 runs) check all three slot drawers, permitted swaps and exact item-sum totals. Actual GUM→Frenchmen model and restore pass; no runtime errors or overflow.
+
 ## Buyer sofa sizes
 - [x] Project recorded sofa sizes and size-specific retail finish prices through existing private choices; no catalogue/source-board changes.
 - [x] Add drawer size selection, explicit updates and matching card/budget/proposal validation.

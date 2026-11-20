@@ -14,6 +14,7 @@ import { viewingRoomTotal, viewingRoomSelection, viewingRoomSizeSelection, type 
 import { moodBudgetLedger, isMoodCurrency } from "@/lib/moodBoardBudget";
 import { downloadViewingRoomProposal } from "@/lib/viewingRoomProposal";
 import { formatPdfMoney } from "@/lib/pdfFormatting";
+import { viewingRoomSwapsEnabled } from "@/lib/viewingRoomAlternatives";
 
 export default function ViewingRoomExperience({ token, packageId, baseTotal, currency, residence, developer, onTotal }: {
   token: string; packageId: string; baseTotal: number; currency: string; residence: string; developer: string; onTotal: (total: number) => void;
@@ -29,7 +30,7 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
   const key = useRef<string | null>(null);
   const snapshot = useRef<Awaited<ReturnType<typeof lockViewingRoomProposal>> | null>(null);
   const lock = useServerFn(lockViewingRoomProposal);
-  const slots = query.data?.items ?? [];
+  const slots = useMemo(() => (query.data?.items ?? []).map(slot => ({ ...slot, is_swappable: viewingRoomSwapsEnabled(slot.is_swappable, query.data?.allow_alternatives ?? false) })), [query.data]);
   const current = slots.find(slot => slot.id === active);
   // Server validates each candidate against the slot's saved footprint overrides.
   const alternatives = current?.alternatives ?? [];
@@ -78,7 +79,7 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
       </div>
     </div>
     <div className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-t border-border bg-background px-4 py-3 sm:flex sm:justify-between sm:px-6">
-      <div><p className="text-xs text-muted-foreground">Selection Total</p><p className="font-display text-lg sm:text-2xl" aria-live="polite">{money(total)}</p></div>{proposalButton}
+      <div><p className="text-xs text-muted-foreground">Collection Total</p><p className="font-display text-lg sm:text-2xl" aria-label="Collection Total" aria-live="polite">{money(ledger.allocated / 100)}</p></div>{proposalButton}
       {feedback && <p role="status" className="col-span-2 text-sm">{feedback}</p>}
     </div>
     <Sheet open={!!current && !!draft} onOpenChange={open => { if (!open) { setActive(null); setDraft(null); } }}>

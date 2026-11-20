@@ -8,7 +8,7 @@ import { ViewingRoomAccessEnded } from "@/components/trade/ViewingRoomAccessEnde
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import ViewingRoomCollectionCard from "@/components/trade/ViewingRoomCollectionCard";
-import { residenceArea } from "@/lib/viewingRoomPresentation";
+import { residenceArea, residenceDisplaySpecs } from "@/lib/viewingRoomPresentation";
 import { viewingRoomAccessToken, isLegacyViewingRoomLink, isShortViewingRoomCode } from "@/lib/viewingRoomLink";
 import affluencyLogo from "@/assets/affluency-logo-full.jpeg";
 import { readViewingRoomReturn } from "@/lib/viewingRoomLink";
@@ -115,7 +115,7 @@ function ViewingRoomPage() {
         {!room.layouts.length ? <p className="py-14 text-muted-foreground">Residence layouts are being prepared.</p> : <div className="mt-8 grid gap-7 md:grid-cols-3">{room.layouts.map(row => <article key={row.id} className="min-w-0 border border-border">
           <Button variant="ghost" className="h-auto w-full flex-col items-stretch whitespace-normal rounded-none p-0 text-left hover:bg-muted/40" onClick={() => void chooseLayout(row.id)} aria-label={`Select ${row.name}`}>
             <div className="flex aspect-[4/3] w-full items-center justify-center overflow-hidden border-b border-border p-5">{row.floorplan_url ? <img src={row.floorplan_url} alt={`${row.name} floor plan`} className="h-full w-full object-contain" /> : <span className="text-sm text-muted-foreground">Floor plan pending</span>}</div>
-            <div className="w-full p-5"><h2 className="font-display text-xl">{row.name}</h2><p className="mt-3 text-sm">{residenceArea(row.specs_label) ?? "Square footage to be confirmed"}</p><p className="mt-3 text-xs text-muted-foreground">{row.specs_label}</p><span className="mt-6 flex items-center justify-between text-xs">Explore residence<ArrowRight className="size-4" /></span></div>
+            <div className="w-full p-5"><h2 className="font-display text-xl">{row.name}</h2><p className="mt-3 text-sm">{residenceDisplaySpecs(row.name, row.specs_label)}</p><span className="mt-6 flex items-center justify-between text-xs">Explore residence<ArrowRight className="size-4" /></span></div>
           </Button></article>)}</div>}</> : <>
         <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 border-b border-border pb-3">
           {layout.floorplan_url && <img src={layout.floorplan_url} alt={`${layout.name} floor plan`} className="h-16 w-20 shrink-0 object-contain" />}
