@@ -36,6 +36,7 @@ interface ProductInsight extends ProductContextInput {
   roomTags: string[];
   materialTokens: string[];
   normalizedBrand: string;
+  designTraits: string[];
 }
 
 const MATERIAL_KEYWORDS = [
@@ -101,6 +102,10 @@ const ROLE_RULES: Array<{ role: string; keywords: string[] }> = [
   { role: "bed", keywords: [" bed ", "bed"] },
   { role: "stool", keywords: ["stool"] },
 ];
+
+const MATERIAL_PATTERNS = MATERIAL_KEYWORDS.map(token => ({ token, pattern: new RegExp(`\\b${token}\\b`) }));
+const ROLE_PATTERNS = ROLE_RULES.map(rule => ({ role: rule.role, patterns: rule.keywords.map(keyword => new RegExp(`\\b${keyword.trim()}s?\\b`)) }));
+const DESIGN_TRAITS = ["art deco", "mid-century", "modernist", "contemporary", "sculptural", "black", "white", "ivory", "warm", "patinated", "polished"];
 
 const ROLE_ROOMS: Record<string, string[]> = {
   dining_table: ["dining"],
@@ -318,7 +323,7 @@ function extractMaterialTokens(input: ProductContextInput): string[] {
     [input.materials, input.description, tagText].filter(Boolean).join(" "),
   );
 
-  return unique(MATERIAL_KEYWORDS.filter((token) => new RegExp(`\\b${token}\\b`).test(haystack)));
+  return MATERIAL_PATTERNS.filter(({ pattern }) => pattern.test(haystack)).map(({ token }) => token);
 }
 
 export function inferRole(input: ProductContextInput): string {
@@ -338,8 +343,8 @@ export function inferRole(input: ProductContextInput): string {
   // A multi-type department list is not a specific typology (e.g. Yoma Console).
   const broadSubtype = /[,/&]|\band\b/.test(subtype);
   for (const text of broadSubtype ? [title, metadata, haystack] : [metadata, haystack]) {
-    for (const rule of ROLE_RULES) {
-      if (rule.keywords.some((keyword) => new RegExp(`\\b${keyword.trim()}s?\\b`).test(text))) {
+    for (const rule of ROLE_PATTERNS) {
+      if (rule.patterns.some(pattern => pattern.test(text))) {
       return rule.role;
       }
     }
@@ -358,8 +363,8 @@ export function isOverheadLighting(input: ProductContextInput): boolean {
 }
 
 function functionalType(input: ProductContextInput): string {
-  if (isOverheadLighting(input)) return "overhead_lighting";
   const role = inferRole(input);
+  if (["pendant", "chandelier", "ceiling_light"].includes(role)) return "overhead_lighting";
   if (["sideboard", "credenza"].includes(role)) return "sideboard";
   if (role !== "unknown" && role !== "table") return role;
   // Preserve specific typologies not yet represented in the role vocabulary.
@@ -399,6 +404,7 @@ function toInsight(input: ProductContextInput): ProductInsight {
     roomTags: inferRooms(role, input),
     materialTokens: extractMaterialTokens(input),
     normalizedBrand: normalizeText(input.brand),
+    designTraits: extractDesignTraits(input),
   };
 }
 
@@ -514,9 +520,13 @@ function materialFamilyOverlap(a: string[], b: string[]): string[] {
   return Object.entries(MATERIAL_FAMILIES).filter(([, tokens]) => tokens.some(token => a.includes(token)) && tokens.some(token => b.includes(token))).map(([family]) => family);
 }
 
-function sharedDesignTraits(a: ProductContextInput, b: ProductContextInput): string[] {
-  const text = (item: ProductContextInput) => normalizeText([item.materials, item.description, ...(item.tags || [])].join(" "));
-  return ["art deco", "mid-century", "modernist", "contemporary", "sculptural", "black", "white", "ivory", "warm", "patinated", "polished"].filter(trait => text(a).includes(trait) && text(b).includes(trait));
+function extractDesignTraits(item: ProductContextInput): string[] {
+  const text = normalizeText([item.materials, item.description, ...(item.tags || [])].join(" "));
+  return DESIGN_TRAITS.filter(trait => text.includes(trait));
+}
+
+function sharedDesignTraits(a: ProductInsight, b: ProductInsight): string[] {
+  return a.designTraits.filter(trait => b.designTraits.includes(trait));
 }
 
 function buildBoardProfile(boardItems: ProductInsight[]) {
@@ -578,7 +588,8 @@ export function summarizeBoardIntent(boardInputs: ProductContextInput[]): BoardI
 export function rankCatalogCandidates(boardInputs: ProductContextInput[], catalogInputs: ProductContextInput[]): RankedCatalogCandidate[] {
   const boardItems = boardInputs.map(toInsight);
   const anchors = selectPairingReferences(boardItems);
-  const catalog = catalogInputs.filter(candidate => isFunctionalComplement(boardInputs, candidate)).map(toInsight);
+  const occupiedTypes = new Set(boardInputs.map(functionalType));
+  const catalog = catalogInputs.filter(candidate => { const type = functionalType(candidate); return Boolean(type) && !occupiedTypes.has(type); }).map(toInsight);
   const boardProfile = buildBoardProfile(boardItems);
 
   return catalog
