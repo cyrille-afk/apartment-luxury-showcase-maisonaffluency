@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Lock, ArrowLeftRight } from "lucide-react";
+import { Lock, ArrowLeftRight, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -10,14 +10,14 @@ import Product3DViewer from "../Product3DViewer";
 import { Product3dBadge } from "../Product3dBadge";
 import { MoodBoardBudgetBar } from "../MoodBoardBudgetControls";
 import { getViewingRoomChoices, lockViewingRoomProposal } from "@/lib/viewingRoom.functions";
-import { viewingRoomTotal, viewingRoomSelection, viewingRoomSizeSelection, type ViewingRoomChoice, type ViewingRoomSlot } from "@/lib/viewingRoom";
+import { viewingRoomTotal, viewingRoomSelection, viewingRoomSizeSelection, type ViewingRoomChoice, type ViewingRoomSlot, type ViewingRoomItem } from "@/lib/viewingRoom";
 import { moodBudgetLedger, isMoodCurrency } from "@/lib/moodBoardBudget";
 import { downloadViewingRoomProposal } from "@/lib/viewingRoomProposal";
 import { formatPdfMoney } from "@/lib/pdfFormatting";
 import { viewingRoomSwapsEnabled } from "@/lib/viewingRoomAlternatives";
 
-export default function ViewingRoomExperience({ token, packageId, baseTotal, currency, residence, developer, onTotal }: {
-  token: string; packageId: string; baseTotal: number; currency: string; residence: string; developer: string; onTotal: (total: number) => void;
+export default function ViewingRoomExperience({ token, packageId, baseTotal, currency, residence, developer, onTotal, fallbackItems = [] }: {
+  token: string; packageId: string; baseTotal: number; currency: string; residence: string; developer: string; onTotal: (total: number) => void; fallbackItems?: ViewingRoomItem[];
 }) {
   const query = useQuery({ queryKey: ["viewing-room-choices", token, packageId], queryFn: () => getViewingRoomChoices({ data: { token, packageId } }), retry: false });
   const [choices, setChoices] = useState<Record<string, ViewingRoomChoice>>({});
@@ -30,11 +30,14 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
   const key = useRef<string | null>(null);
   const snapshot = useRef<Awaited<ReturnType<typeof lockViewingRoomProposal>> | null>(null);
   const lock = useServerFn(lockViewingRoomProposal);
-  const slots = useMemo(() => (query.data?.items ?? []).map(slot => ({ ...slot, is_swappable: viewingRoomSwapsEnabled(slot.is_swappable, query.data?.allow_alternatives ?? false) })), [query.data]);
+  const slots = useMemo<ViewingRoomSlot[]>(() => query.data
+    ? query.data.items.map(slot => ({ ...slot, is_swappable: viewingRoomSwapsEnabled(slot.is_swappable, query.data?.allow_alternatives ?? false) }))
+    : fallbackItems.map(item => ({ ...item, retail_price: null, retail_price_from: false, finish_options: [], size_options: [], alternatives: [], is_swappable: false, allow_finish_customization: false })), [query.data, fallbackItems]);
+  const recommendationsUnavailable = query.isError || (!query.isPending && !query.data);
   const current = slots.find(slot => slot.id === active);
   // Server validates each candidate against the slot's saved footprint overrides.
   const alternatives = current?.alternatives ?? [];
-  const items = useMemo(() => (query.data?.items ?? []).map(slot => ({ ...(choices[slot.id] ?? slot), id: slot.id })), [query.data, choices]);
+  const items = useMemo(() => slots.map(slot => ({ ...(choices[slot.id] ?? slot), id: slot.id })), [slots, choices]);
   const total = viewingRoomTotal(baseTotal, slots, choices);
   const ledger = moodBudgetLedger(items.map(item => ({ id: item.id, product_name: item.product_name })), new Map(items.map(item => [item.id, { retail: item.retail_price == null ? null : Math.round(item.retail_price * 100), trade: null }])), { roomType: "living", totalEur: baseTotal, caps: {}, anchors: [] });
   const money = (value: number) => formatPdfMoney(Math.round(value * 100), currency);
@@ -56,12 +59,13 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
     } catch { setFeedback(snapshot.current ? "Selection locked. PDF download failed; please retry." : "Your proposal couldn’t be locked. Please try again."); }
     finally { setBusy(false); }
   }
-  if (query.isPending) return <p role="status" className="p-12 text-muted-foreground">Preparing your collection…</p>;
-  if (query.isError || !query.data) return <div role="alert" className="p-12"><p>Your collection choices couldn’t load.</p><Button variant="outline" onClick={() => void query.refetch()}>Try again</Button></div>;
-  const proposalButton = <Button className="max-w-48 whitespace-normal text-xs sm:max-w-none sm:text-sm" disabled={busy || !slots.length} onClick={() => void requestProposal()}><Lock className="size-4 shrink-0" />{busy ? "Preparing proposal…" : locked ? "Download Locked Proposal" : "Lock & Download Proposal"}</Button>;
+  if (query.isPending && !slots.length) return <p role="status" className="p-12 text-muted-foreground">Preparing your collection…</p>;
+  const retryButton = <Button variant="outline" disabled={query.isFetching} onClick={() => void query.refetch()}><RotateCw className={`size-4 ${query.isFetching ? "animate-spin" : ""}`} />{query.isFetching ? "Retrying…" : "Retry recommendations"}</Button>;
+  const proposalButton = <Button className="max-w-48 whitespace-normal text-xs sm:max-w-none sm:text-sm" disabled={busy || !slots.length || !query.data} onClick={() => void requestProposal()}><Lock className="size-4 shrink-0" />{busy ? "Preparing proposal…" : locked ? "Download Locked Proposal" : "Lock & Download Proposal"}</Button>;
   return <div className="viewing-room bg-background pb-28 text-foreground">
     <div className="mx-auto max-w-[1500px] px-6 pt-6 md:px-12">
-      {isMoodCurrency(currency) && <section aria-label="Budget Allocation"><MoodBoardBudgetBar ledger={ledger} pending={false} currency={currency} /></section>}
+      {recommendationsUnavailable && <div role="status" className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-6"><div className="max-w-xl"><p className="font-display text-xl">Recommendations are temporarily unavailable</p><p className="mt-2 text-sm text-muted-foreground">Your collection is still here. You can inspect its pieces and selected materials while we reconnect.{!query.data && " Finish changes and confirmed totals will return when recommendations load."}</p></div>{retryButton}</div>}
+      {query.data && isMoodCurrency(currency) && <section aria-label="Budget Allocation"><MoodBoardBudgetBar ledger={ledger} pending={false} currency={currency} /></section>}
       <div aria-label="Client editorial collection" className="grid grid-cols-1 gap-x-8 gap-y-12 py-8 sm:grid-cols-2 lg:grid-cols-3">
         {slots.map(slot => { const piece = choices[slot.id] ?? slot; return <article key={slot.id} className="flex min-w-0 flex-col" aria-label={piece.product_name}>
           <div className="relative aspect-[4/5] bg-muted/40">
@@ -79,7 +83,7 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
       </div>
     </div>
     <div className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-t border-border bg-background px-4 py-3 sm:flex sm:justify-between sm:px-6">
-      <div><p className="text-xs text-muted-foreground">Collection Total</p><p className="font-display text-lg sm:text-2xl" aria-label="Collection Total" aria-live="polite">{money(ledger.allocated / 100)}</p></div>{proposalButton}
+      <div><p className="text-xs text-muted-foreground">Collection Total</p><p className="font-display text-lg sm:text-2xl" aria-label="Collection Total" aria-live="polite">{query.data ? money(ledger.allocated / 100) : "Awaiting confirmed prices"}</p></div>{proposalButton}
       {feedback && <p role="status" className="col-span-2 text-sm">{feedback}</p>}
     </div>
     <Sheet open={!!current && !!draft} onOpenChange={open => { if (!open) { setActive(null); setDraft(null); } }}>
@@ -100,7 +104,7 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
           </div>
           </TabsContent>
           <TabsContent value="alternatives" className="space-y-4 pt-4">
-            {!current.is_swappable ? <p className="text-sm text-muted-foreground">This piece is part of the fixed collection.</p> : !alternatives.length ? <p className="text-sm text-muted-foreground">No footprint-compatible alternatives are currently available.</p> : alternatives.map(option => {
+            {recommendationsUnavailable ? <div className="space-y-4"><p className="text-sm text-muted-foreground">We couldn’t refresh recommendations. Your current piece and selections are unchanged.</p>{retryButton}<Button variant="ghost" onClick={() => setDrawerTab("finishes")}>Return to materials &amp; finishes</Button></div> : !current.is_swappable ? <p className="text-sm text-muted-foreground">This piece is part of the fixed collection.</p> : !alternatives.length ? <div className="space-y-4"><p className="text-sm text-muted-foreground">No footprint-compatible alternatives are currently available. You can keep this piece and explore its selected materials.</p><Button variant="ghost" onClick={() => setDrawerTab("finishes")}>Return to materials &amp; finishes</Button></div> : alternatives.map(option => {
               const selectedPiece = choices[current.id] ?? current;
               const delta = option.retail_price != null && selectedPiece.retail_price != null ? option.retail_price - selectedPiece.retail_price : null;
               return <article key={option.id} className="grid grid-cols-[5rem_minmax(0,1fr)] gap-4 border-b border-border py-4">
@@ -111,7 +115,7 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
             {current.is_swappable && (choices[current.id]?.id ?? current.id) !== current.id && <Button variant="ghost" disabled={busy || locked} onClick={() => selectAlternative(current, current.id)}>Restore original piece</Button>}
           </TabsContent>
           </Tabs>
-          {drawerTab === "finishes" && <div className="sticky bottom-0 mt-auto border-t border-border bg-background py-4"><Button className="w-full" disabled={busy || locked} onClick={() => { setChoices(values => ({ ...values, [current.id]: viewingRoomSelection(current, draft.id, draft.finish_key, draft.size_key) })); setActive(null); setDraft(null); }}>UPDATE SELECTION</Button></div>}
+          {drawerTab === "finishes" && query.data && <div className="sticky bottom-0 mt-auto border-t border-border bg-background py-4"><Button className="w-full" disabled={busy || locked} onClick={() => { setChoices(values => ({ ...values, [current.id]: viewingRoomSelection(current, draft.id, draft.finish_key, draft.size_key) })); setActive(null); setDraft(null); }}>UPDATE SELECTION</Button></div>}
         </>}
       </SheetContent>
     </Sheet>

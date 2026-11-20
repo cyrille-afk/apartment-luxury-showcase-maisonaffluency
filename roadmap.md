@@ -1,5 +1,9 @@
 # Roadmap
 
+## Viewing-room recommendation recovery
+- [x] Keep the approved collection visible when recommendation reads fail, with a retry and a return to finishes; missing prices remain unconfirmed.
+- [x] 24 regressions pass, including committed-finish/total preservation. Real private-room desktop/phone outage → inspection → retry restores all three pieces and confirmed totals, with zero page errors or overflow; screenshots reviewed and preview build OK.
+
 ## Viewing-room alternatives and collection total
 - [x] Enable all 27 Cipriani item swaps; both item and existing package buyer-swap switch (`allow_alternatives`, not a duplicate flag) gate badges/choices. Auto-match up to four same-role ±20% pieces; proposal validation reuses projection.
 - [x] Bottom Collection Total equals selected-item allocated sum with two decimals; Stage 1 uses requested sample specs only when recorded area is absent.
