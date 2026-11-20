@@ -1,5 +1,9 @@
 # Roadmap
 
+## Editorial buyer experience in developer pitch
+- [x] Update Slide 04 workflow and Slide 07 copy/composite with catalogue-backed lookbook cards, allocation bar and finish/alternatives drawer; presentation only.
+- [x] Desktop/phone navigation and image loading verified with zero page errors/overflow; nine-page PDF downloaded and pages 04/07 visually checked. Corrected workflow/footer overlap, inherited image cropping and clipped mockup controls; six existing PDF tests pass and preview build OK.
+
 ## Upright drawer furniture previews
 - [x] Correct editorial model orientation, contact-floor grounding and front three-quarter camera without changing other product viewers; recorded low-table proportions and verified exports prevent false rotations.
 - [x] Eight framing/material regressions pass. All nine distinct package models rendered in Canaletto's three tiers on desktop/phone in both appearance settings, including duplicate configured entries (72 previews), followed by Update Selection; screenshots reviewed, zero page errors and preview build OK. Other residences reuse these models; real-device GPU performance remains unmeasured.

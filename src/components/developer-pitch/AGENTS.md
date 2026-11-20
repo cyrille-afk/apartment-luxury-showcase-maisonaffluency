@@ -1,0 +1,1 @@
+- Pitch interface composites are presentation-only and use catalogue photography with explicit composite captions; no guest sessions or private credentials enter the public deck.

@@ -1,0 +1,12 @@
+import { Box, ArrowLeftRight, ChevronDown, X, Check } from 'lucide-react';
+import sandy from '@/assets/curators-picks/man-of-parts-sandy-cove-sofa.png';
+import rua from '@/assets/curators-picks/man-of-parts-rua-leblon.png';
+
+/** Presentation-only composite: catalogue photography, not a live guest session. */
+export function EditorialLookbookMockup() {
+  return <div className="pitch-lookbook" role="img" aria-label="Editorial collection interface composite: allocated versus target budget, catalogue cards with 3D View and Swap Piece badges, and an open 3D and Curated Alternatives drawer">
+    <div className="pitch-lookbook-budget"><div><span>BUDGET ALLOCATION</span><strong>Allocated <em>Live collection total</em></strong></div><div><span>ESSENTIAL COLLECTION</span><strong>Target <em>US$150,000</em></strong></div></div>
+    <div className="pitch-lookbook-body"><div className="pitch-lookbook-gallery"><span className="pitch-lookbook-eyebrow">03 / PERSONALIZE</span><h3>Your editorial collection.</h3><div className="pitch-lookbook-cards">{[{ name: 'Sandy Cove', image: sandy }, { name: 'Rua Leblon', image: rua }].map(piece => <div className="pitch-lookbook-card" key={piece.name}><img src={piece.image} alt="" crossOrigin="anonymous" /><div className="pitch-lookbook-badges"><span><Box />3D VIEW</span><span><ArrowLeftRight />SWAP PIECE</span></div><span className="pitch-lookbook-maker">MAN OF PARTS</span><h4>{piece.name}</h4><span className="pitch-lookbook-detail">Selected finishes · confirmed retail pricing</span></div>)}</div><div className="pitch-lookbook-total"><span>COLLECTION TOTAL</span><strong>Updated with every selection</strong></div></div>
+    <div className="pitch-lookbook-drawer"><div className="pitch-lookbook-drawer-heading"><span>PIECE PERSONALIZATION</span><X /></div><h3>Rua Leblon</h3><div className="pitch-lookbook-tabs"><span className="pitch-lookbook-tab-active">3D & Finishes</span><span>Curated Alternatives</span></div><div className="pitch-lookbook-model"><img src={rua} alt="" crossOrigin="anonymous" /><span><Box />On-demand piece inspection</span></div><div className="pitch-lookbook-finish"><span>MATERIALS & FINISHES</span><div><strong>Selected catalogue finishes</strong><ChevronDown /></div></div><div className="pitch-lookbook-compatible"><ArrowLeftRight /><span>Footprint-safe alternatives<br /><small>Curated to the residence</small></span><Check /></div><span className="pitch-lookbook-update">UPDATE SELECTION</span></div></div>
+  </div>;
+}

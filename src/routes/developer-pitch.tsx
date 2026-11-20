@@ -11,9 +11,9 @@ export const Route = createFileRoute('/developer-pitch')({
   validateSearch: (search: Record<string, unknown>): { slide?: number } => ({ slide: Number.isInteger(Number(search.slide)) ? Math.max(1, Math.min(9, Number(search.slide))) : undefined }),
   head: () => ({ meta: [
     { title: 'Developer Partnership — Cipriani × Maison Affluency' },
-    { name: 'description', content: 'An eight-slide developer partnership presentation: Cipriani Residences Miami, collectible interiors, private viewing rooms and a proposed 14-day pilot.' },
+    { name: 'description', content: 'A nine-slide developer partnership presentation: Cipriani Residences Miami, editorial collection lookbooks, interactive piece personalization and a proposed 14-day pilot.' },
     { property: 'og:title', content: 'Developer Partnership — Cipriani × Maison Affluency' },
-    { property: 'og:description', content: 'From residence plans to true-to-scale personalization and a fully managed interiors proposal.' },
+    { property: 'og:description', content: 'From residence plans to editorial collection lookbooks, interactive piece inspection and a fully managed interiors proposal.' },
     { property: 'og:type', content: 'website' },
     { name: 'twitter:card', content: 'summary_large_image' },
   ] }),
