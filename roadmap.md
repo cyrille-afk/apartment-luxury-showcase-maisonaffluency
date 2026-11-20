@@ -1,5 +1,9 @@
 # Roadmap
 
+## Buyer swap undo
+- [x] Add per-piece and drawer Undo Swap restoring the previous configured piece and live totals without changing source collections.
+- [x] 15 regressions pass, including successive swaps, exact finish/size restoration and locked-proposal protection. All nine packages checked at desktop/phone widths in light/dark settings: 60 available swaps undo through card/drawer and reopen with exact original totals; 48 item checks have no compatible alternatives. All 120 screenshots reviewed, zero page errors/overflow; model rendering excluded and preview build OK.
+
 ## Viewing-room recommendation recovery
 - [x] Keep the approved collection visible when recommendation reads fail, with a retry and a return to finishes; missing prices remain unconfirmed.
 - [x] 24 regressions pass, including committed-finish/total preservation. Real private-room desktop/phone outage → inspection → retry restores all three pieces and confirmed totals, with zero page errors or overflow; screenshots reviewed and preview build OK.

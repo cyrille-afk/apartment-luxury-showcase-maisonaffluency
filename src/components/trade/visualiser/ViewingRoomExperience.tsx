@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Lock, ArrowLeftRight, RotateCw } from "lucide-react";
+import { Lock, ArrowLeftRight, RotateCw, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -21,6 +21,7 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
 }) {
   const query = useQuery({ queryKey: ["viewing-room-choices", token, packageId], queryFn: () => getViewingRoomChoices({ data: { token, packageId } }), retry: false });
   const [choices, setChoices] = useState<Record<string, ViewingRoomChoice>>({});
+  const [previousPieces, setPreviousPieces] = useState<Record<string, ViewingRoomChoice>>({});
   const [active, setActive] = useState<string | null>(null);
   const [draft, setDraft] = useState<ViewingRoomChoice | null>(null);
   const [drawerTab, setDrawerTab] = useState("finishes");
@@ -43,10 +44,26 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
   const money = (value: number) => formatPdfMoney(Math.round(value * 100), currency);
   const openPiece = (slot: ViewingRoomSlot, tab = "finishes") => { setActive(slot.id); setDraft(choices[slot.id] ?? slot); setDrawerTab(tab); };
   const selectAlternative = (slot: ViewingRoomSlot, productId: string) => {
+    if (busy || locked) return;
+    const previous = choices[slot.id] ?? slot;
+    if (previous.id === productId) return;
     const selection = viewingRoomSelection(slot, productId);
+    setPreviousPieces(values => ({ ...values, [slot.id]: structuredClone(previous) }));
     setChoices(values => ({ ...values, [slot.id]: selection }));
     setDraft(selection); setDrawerTab("finishes");
   };
+  const undoSwap = (slot: ViewingRoomSlot) => {
+    const previous = previousPieces[slot.id];
+    if (!previous || busy || locked || !query.data) return;
+    try {
+      const restored = viewingRoomSelection(slot, previous.id, previous.finish_key, previous.size_key);
+      setChoices(values => ({ ...values, [slot.id]: restored }));
+      setPreviousPieces(({ [slot.id]: _previous, ...rest }) => rest);
+      if (active === slot.id) { setDraft(restored); setDrawerTab("finishes"); }
+      setFeedback(`Restored ${restored.product_name}.`);
+    } catch { setFeedback("This previous selection is no longer available. Your current piece is unchanged."); }
+  };
+  const undoButton = (slot: ViewingRoomSlot) => previousPieces[slot.id] && !locked ? <Button variant="ghost" disabled={busy || !query.data} className="h-auto justify-start gap-2 self-start px-0 py-2 text-xs" aria-label={`Undo swap — restore ${previousPieces[slot.id].product_name}`} onClick={() => undoSwap(slot)}><Undo2 className="size-4" />Undo Swap</Button> : null;
   useEffect(() => { onTotal(total); }, [total]);
   async function requestProposal() {
     setBusy(true); setFeedback("");
@@ -78,6 +95,7 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
             {piece.finish_key && <p className="text-xs text-muted-foreground">{piece.finish_options.find(finish => finish.key === piece.finish_key)?.label}</p>}
             {piece.size_key && <p className="text-xs text-muted-foreground">{piece.dimensions}</p>}
             <div className="mt-auto"><p aria-label="Item price" className="text-sm">{piece.retail_price == null ? "Price to be confirmed" : `${piece.retail_price_from ? "From " : ""}${money(piece.retail_price)}`}</p><p className="mt-1 text-xs text-muted-foreground">Lead time · {piece.lead_time ?? "To be confirmed"}</p></div>
+            {undoButton(slot)}
           </div>
         </article>; })}
       </div>
@@ -115,7 +133,7 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
             {current.is_swappable && (choices[current.id]?.id ?? current.id) !== current.id && <Button variant="ghost" disabled={busy || locked} onClick={() => selectAlternative(current, current.id)}>Restore original piece</Button>}
           </TabsContent>
           </Tabs>
-          {drawerTab === "finishes" && query.data && <div className="sticky bottom-0 mt-auto border-t border-border bg-background py-4"><Button className="w-full" disabled={busy || locked} onClick={() => { setChoices(values => ({ ...values, [current.id]: viewingRoomSelection(current, draft.id, draft.finish_key, draft.size_key) })); setActive(null); setDraft(null); }}>UPDATE SELECTION</Button></div>}
+          {query.data && <div className="sticky bottom-0 mt-auto border-t border-border bg-background py-4">{undoButton(current)}{drawerTab === "finishes" && <Button className="w-full" disabled={busy || locked} onClick={() => { setChoices(values => ({ ...values, [current.id]: viewingRoomSelection(current, draft.id, draft.finish_key, draft.size_key) })); setActive(null); setDraft(null); }}>UPDATE SELECTION</Button>}</div>}
         </>}
       </SheetContent>
     </Sheet>
