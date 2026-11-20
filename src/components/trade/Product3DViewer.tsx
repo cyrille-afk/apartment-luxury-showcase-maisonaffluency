@@ -118,6 +118,8 @@ interface Props {
    * bytes off the critical path of the product page.
    */
   autoOpen?: boolean;
+  autoRotate?: boolean;
+  clientEditorial?: boolean;
   /**
    * When true, renders a small collapsible panel showing which material
    * names were detected on the GLB and which ones the upholstery filter
@@ -191,6 +193,8 @@ const Product3DViewer: React.FC<Props> = ({
   materialRoles,
   onMaterialsDiscovered,
   autoOpen = false,
+  autoRotate = true,
+  clientEditorial = false,
   debug = false,
   scale,
   onOpenedChange,
@@ -559,7 +563,7 @@ const Product3DViewer: React.FC<Props> = ({
             {...(!locked
               ? {
                   "camera-controls": true,
-                  "auto-rotate": true,
+                  ...(autoRotate ? { "auto-rotate": true } : {}),
                   // Touch: one finger orbits (in any direction), pinch zooms,
                   // two-finger drag pans. Lock hands the gesture back to page scroll.
                   "touch-action": "none",
@@ -596,7 +600,7 @@ const Product3DViewer: React.FC<Props> = ({
             </>)}
       </p>
 
-      {opened && !hasExplicitRoles && noTargets && (
+      {opened && !clientEditorial && !hasExplicitRoles && noTargets && (
         <div className="px-3 py-2 border-t border-border bg-[hsl(var(--warning)/0.08)]">
           <div className="flex items-start gap-2">
             <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[hsl(var(--warning))]" />
@@ -608,7 +612,7 @@ const Product3DViewer: React.FC<Props> = ({
           </div>
         </div>
       )}
-      {opened && !hasExplicitRoles && autoTagged && (
+      {opened && !clientEditorial && !hasExplicitRoles && autoTagged && (
         <div className="px-3 py-2 border-t border-border bg-muted/40">
           <p className="font-body text-[10px] leading-snug text-muted-foreground">
             Material roles auto-detected from texture names / base colours.

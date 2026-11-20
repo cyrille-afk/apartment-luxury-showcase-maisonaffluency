@@ -2248,6 +2248,20 @@
       "when": 1795131697920,
       "tag": "0320_viewing_room_package_swatches_from_fabrics",
       "breakpoints": true
+    },
+    {
+      "idx": 321,
+      "version": "7",
+      "when": 1795132424330,
+      "tag": "0321_viewing_room_editorial_finishes",
+      "breakpoints": true
+    },
+    {
+      "idx": 322,
+      "version": "7",
+      "when": 1795133004880,
+      "tag": "0322_correct_editorial_finish_projection",
+      "breakpoints": true
     }
   ]
 }

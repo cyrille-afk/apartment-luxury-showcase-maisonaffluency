@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { viewingRoomSchema, viewingRoomCamera, viewingRoomLeadTime, viewingRoomTotal, type ViewingRoomSlot } from "./viewingRoom";
 describe("guest viewing room", () => {
-  const original = { id: "slot", retail_price: 100, alternatives: [{ id: "replacement", retail_price: 150 }] } as ViewingRoomSlot;
+  const original = { id: "slot", retail_price: 100, is_swappable: true, finish_options: [], alternatives: [{ id: "replacement", retail_price: 150, finish_options: [] }] } as unknown as ViewingRoomSlot;
   it("updates the package only by the approved retail difference", () => { expect(viewingRoomTotal(1000, [original], { slot: original.alternatives[0] })).toBe(1050); expect(viewingRoomTotal(1000, [original], {})).toBe(1000); });
   it("rejects unlinked alternatives rather than trusting submitted prices", () => { expect(() => viewingRoomTotal(1000, [original], { slot: { ...original.alternatives[0], id: "unapproved" } })).toThrow(); });
   it("strips private account fields and token", () => {

@@ -1,5 +1,11 @@
 # Roadmap
 
+## Client editorial viewing-room selection
+- [x] Replace Stage 3 room sandbox with client-only editorial cards and live allocation bar.
+- [x] Stage token-approved finish/alternative edits in a still-model drawer; explicit commit updates retail cards and budget together. Server proposal validation uses the same finish keys.
+- [x] Real guest desktop/phone flows reach Essential editorial cards; Rua Leblon finish commit changes US$4,949.23 to US$5,184.08 and allocation/remaining immediately, with no page errors or overflow. Swap UI remains unavailable because no alternatives are approved; sofa finish options stay unavailable until its exact size is recorded.
+- [x] Enable finish changes for all 27 Cipriani package slots across nine packages; preserve swap restrictions. Live permissions read back 9 editable slots per tier.
+
 ## Viewing-room collection and personalization stages
 - [x] Compact residence header and catalogue-backed collection previews; refined prose and content-height selection. All nine cards checked across desktop/phone and both appearance preferences.
 - [x] Compact tier tabs above a 75vh horizontal 1.35m room with shared travertine/oak surfaces, ambient occlusion, tone mapping and three camera presets; phone header and bottom-bar overlap corrected.

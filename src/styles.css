@@ -196,6 +196,8 @@
   --border: 40 15% 82%;
   --accent: 45 20% 92%;
   --accent-foreground: 40 12% 12%;
+  --secondary: 45 20% 92%;
+  --secondary-foreground: 40 12% 12%;
   letter-spacing: 0;
 }
 .viewing-room-canvas { background-color: hsl(var(--background)); }

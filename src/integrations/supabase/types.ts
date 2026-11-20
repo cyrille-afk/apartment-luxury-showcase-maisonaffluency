@@ -14104,6 +14104,15 @@ export type Database = {
         Args: { _base: number; _label: string; _variants: Json }
         Returns: Json
       }
+      _viewing_room_editorial_product: {
+        Args: {
+          _currency: string
+          _item: Json
+          _product: string
+          _variant: string
+        }
+        Returns: Json
+      }
       accept_studio_invite: { Args: { _invite_id: string }; Returns: Json }
       acquire_ingestion_lease: {
         Args: { _minutes?: number; _owner: string }

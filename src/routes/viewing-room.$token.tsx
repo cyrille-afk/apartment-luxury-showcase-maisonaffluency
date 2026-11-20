@@ -32,7 +32,7 @@ export const Route = createFileRoute("/viewing-room/$token")({
     { title: `${loaderData?.project_name ?? "Private Viewing Room"} | Maison Affluency` },
     { name: "description", content: "A private selection of residences and curated furniture packages, presented by Maison Affluency." },
     { property: "og:title", content: `${loaderData?.project_name ?? "Private Viewing Room"} | Maison Affluency` },
-    { property: "og:description", content: "Explore residence layouts and curated furniture packages in an eye-level room presentation." },
+    { property: "og:description", content: "Explore residence layouts and personalize a private editorial collection of furnishings." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }, { name: "robots", content: "noindex, nofollow" },
     ...(loaderData?.hero?.startsWith("https://") ? [{ property: "og:image", content: loaderData.hero }, { name: "twitter:image", content: loaderData.hero }] : []),
   ] }),
@@ -87,8 +87,8 @@ function ViewingRoomPage() {
       void navigate({ search: ({ code: _code, ...rest }) => rest, replace: true, resetScroll: false });
     })();
   }, [search.code, locator, enteredKey, queryClient, navigate]);
-  const chooseLayout = (id: string) => { window.__lovableEvents?.track?.("project.viewing_room_section_viewed", { section: "collection" }); return navigate({ search: { layout: id }, resetScroll: true }); };
-  const choosePackage = (id: string) => { window.__lovableEvents?.track?.("project.viewing_room_section_viewed", { section: "personalize", package_tier: layout?.packages.find(row => row.id === id)?.tier_name ?? "unknown" }); return navigate({ search: { layout: layout?.id, package: id }, resetScroll: false }); };
+  const chooseLayout = (id: string) => { window.__lovableEvents?.track?.("project.viewing_room_section_viewed", { section: "collection" }); return navigate({ to: "/viewing-room/$token", params: { token }, search: { layout: id }, resetScroll: true }); };
+  const choosePackage = (id: string) => { window.__lovableEvents?.track?.("project.viewing_room_section_viewed", { section: "personalize", package_tier: layout?.packages.find(row => row.id === id)?.tier_name ?? "unknown" }); return navigate({ to: "/viewing-room/$token", params: { token }, search: { layout: layout?.id, package: id }, resetScroll: true }); };
   if (!room && magicState === "opening") return <main className="viewing-room flex min-h-screen flex-col items-center justify-center gap-6 bg-background px-6 text-center"><img src={affluencyLogo} alt="Affluency" className="h-9 w-auto mix-blend-multiply" /><p role="status" className="font-display text-xl text-muted-foreground">Opening your private viewing room…</p></main>;
   if (!room) {
     if (storedAccess && accessStatus) return <ViewingRoomAccessEnded status={accessStatus} onNewCode={clearStoredAccess} />;
@@ -127,8 +127,8 @@ function ViewingRoomPage() {
         {!layout.packages.length && <p className="py-10 text-muted-foreground">Furniture packages are being prepared.</p>}
       </>}
     </div>
-    {layout && selected && <section aria-label={`${selected.tier_name} room presentation`} className="border-y border-border">
-      {isLoading ? <div role="status" className="flex min-h-96 items-center justify-center text-muted-foreground">Preparing your collection…</div> : isError || !composition ? <div role="alert" className="flex min-h-80 flex-col items-center justify-center gap-5"><p>Your collection couldn’t load.</p><Button variant="outline" onClick={() => void refetch()}><RotateCw className="size-4" />Retry collection</Button></div> : !composition.items.length ? <p className="py-24 text-center text-muted-foreground">This collection is being prepared.</p> : <ClientOnly fallback={<div className="min-h-96" />}><Suspense fallback={<div role="status" className="min-h-96 p-10">Preparing room viewer…</div>}><Viewer key={selected.id} token={token} packageId={selected.id} baseTotal={selected.package_price} currency={selected.currency} residence={layout.name} developer={room.name} environmentUrl={layout.room_environment_glb} onTotal={total => setLiveTotals(values => ({ ...values, [selected.id]: total }))} /></Suspense></ClientOnly>}
+    {layout && selected && <section aria-label={`${selected.tier_name} editorial collection`} className="border-y border-border">
+      {isLoading ? <div role="status" className="flex min-h-96 items-center justify-center text-muted-foreground">Preparing your collection…</div> : isError || !composition ? <div role="alert" className="flex min-h-80 flex-col items-center justify-center gap-5"><p>Your collection couldn’t load.</p><Button variant="outline" onClick={() => void refetch()}><RotateCw className="size-4" />Retry collection</Button></div> : !composition.items.length ? <p className="py-24 text-center text-muted-foreground">This collection is being prepared.</p> : <ClientOnly fallback={<div className="min-h-96" />}><Suspense fallback={<div role="status" className="min-h-96 p-10">Preparing your collection…</div>}><Viewer key={selected.id} token={token} packageId={selected.id} baseTotal={selected.package_price} currency={selected.currency} residence={layout.name} developer={room.name} onTotal={total => setLiveTotals(values => ({ ...values, [selected.id]: total }))} /></Suspense></ClientOnly>}
     </section>}
     <footer className={`${selected ? "hidden" : "flex"} flex-wrap items-center justify-between gap-4 px-6 py-8 text-xs text-muted-foreground md:px-12`}><span>{room.name}</span><span>Curated by Maison Affluency</span></footer>
   </main>;
