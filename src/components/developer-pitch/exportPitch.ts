@@ -1,5 +1,10 @@
 export const PITCH_WIDTH = 1920;
 export const PITCH_HEIGHT = 1080;
+/** Bump on every content change so recipients can confirm they hold the latest export. */
+export const PITCH_VERSION = 'v5';
+
+const pitchGeneratedLabel = () =>
+  new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 
 /** Isolated, exact-ratio slide capture: no browser chrome or private workspace. */
 export async function exportPitchPdf(element: HTMLElement) {
@@ -27,12 +32,21 @@ export async function exportPitchPdf(element: HTMLElement) {
     await doc.fonts.ready;
     await Promise.all([...doc.images].map(async image => { image.loading = 'eager'; try { await image.decode(); } catch { throw new Error('A presentation image could not load'); } }));
     const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [338.6667, 190.5], compress: true });
-    pdf.setProperties({ title: 'Developer Partnership — Cipriani Residences Miami × Maison Affluency', author: 'Maison Affluency' });
+    const stamp = `${PITCH_VERSION} · Generated ${pitchGeneratedLabel()}`;
+    pdf.setProperties({
+      title: 'Developer Partnership — Cipriani Residences Miami × Maison Affluency',
+      author: 'Maison Affluency',
+      subject: `Version ${PITCH_VERSION}, generated ${pitchGeneratedLabel()}`,
+    });
     for (const [index, slide] of [...doc.querySelectorAll<HTMLElement>('.pitch-slide')].entries()) {
       if (index) pdf.addPage([338.6667, 190.5], 'landscape');
       const canvas = await html2canvas(slide, { scale: 1.5, useCORS: true, logging: false, windowWidth: PITCH_WIDTH, width: PITCH_WIDTH, height: PITCH_HEIGHT });
       pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, 338.6667, 190.5);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(6.5);
+      pdf.setTextColor(120, 116, 110);
+      pdf.text(`Maison Affluency · Confidential · ${stamp}`, 338.6667 - 4, 190.5 - 3, { align: 'right' });
     }
-    pdf.save('Maison-Affluency-Developer-Partnership-Cipriani.pdf');
+    pdf.save(`Maison-Affluency-Developer-Partnership-Cipriani_${PITCH_VERSION}.pdf`);
   } finally { frame.remove(); }
 }
