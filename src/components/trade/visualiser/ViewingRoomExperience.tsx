@@ -10,7 +10,7 @@ import Product3DViewer from "../Product3DViewer";
 import { Product3dBadge } from "../Product3dBadge";
 import { MoodBoardBudgetBar } from "../MoodBoardBudgetControls";
 import { getViewingRoomChoices, lockViewingRoomProposal } from "@/lib/viewingRoom.functions";
-import { viewingRoomTotal, viewingRoomSelection, type ViewingRoomChoice, type ViewingRoomSlot } from "@/lib/viewingRoom";
+import { viewingRoomTotal, viewingRoomSelection, viewingRoomSizeSelection, type ViewingRoomChoice, type ViewingRoomSlot } from "@/lib/viewingRoom";
 import { moodBudgetLedger, isMoodCurrency } from "@/lib/moodBoardBudget";
 import { downloadViewingRoomProposal } from "@/lib/viewingRoomProposal";
 import { formatPdfMoney } from "@/lib/pdfFormatting";
@@ -48,7 +48,7 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
     setBusy(true); setFeedback("");
     try {
       key.current ??= crypto.randomUUID();
-      const final = snapshot.current ?? await lock({ data: { token, packageId, requestKey: key.current, choices: slots.map(slot => ({ slot_id: slot.id, product_id: choices[slot.id]?.id ?? slot.id, finish_key: choices[slot.id]?.finish_key })) } });
+      const final = snapshot.current ?? await lock({ data: { token, packageId, requestKey: key.current, choices: slots.map(slot => ({ slot_id: slot.id, product_id: choices[slot.id]?.id ?? slot.id, finish_key: choices[slot.id]?.finish_key, size_key: choices[slot.id]?.size_key })) } });
       snapshot.current = final; setLocked(true);
       await downloadViewingRoomProposal(final, residence, developer);
       setFeedback("Selection locked · proposal requested and PDF downloaded.");
@@ -71,6 +71,7 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
           <div className="mt-4 flex flex-1 flex-col gap-3"><h2 className="font-display text-xl">{piece.product_name}</h2>
             <div className="flex min-h-6 flex-wrap gap-2">{Object.values(piece.materials).map(material => <span key={material.id} title={material.name} className="size-6 shrink-0 overflow-hidden rounded-full border border-border">{material.image_url && <img src={material.image_url} alt={material.name} className="size-full object-cover" />}</span>)}</div>
             {piece.finish_key && <p className="text-xs text-muted-foreground">{piece.finish_options.find(finish => finish.key === piece.finish_key)?.label}</p>}
+            {piece.size_key && <p className="text-xs text-muted-foreground">{piece.dimensions}</p>}
             <div className="mt-auto"><p aria-label="Item price" className="text-sm">{piece.retail_price == null ? "Price to be confirmed" : `${piece.retail_price_from ? "From " : ""}${money(piece.retail_price)}`}</p><p className="mt-1 text-xs text-muted-foreground">Lead time · {piece.lead_time ?? "To be confirmed"}</p></div>
           </div>
         </article>; })}
@@ -90,7 +91,8 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
           <TabsContent value="finishes" className="pt-4">
           {draft.glb_url ? <Product3DViewer key={draft.id} url={draft.glb_url} alt={draft.product_name} poster={draft.image_url} autoOpen autoRotate={false} clientEditorial baseTextureUrl={draft.materials.base?.image_url} topTextureUrl={draft.materials.top?.image_url} fabricTextureUrl={draft.materials.upholstery?.image_url} /> : draft.image_url && <img src={draft.image_url} alt={draft.product_name} className="aspect-[4/3] w-full object-contain" />}
           <div className="space-y-4 py-4">
-            {current.allow_finish_customization && draft.finish_options.length ? <div className="space-y-2"><p className="text-xs text-muted-foreground">Upholstery &amp; frame finish</p><Select value={draft.finish_key ?? "original"} disabled={busy || locked || current.retail_price == null} onValueChange={value => setDraft(viewingRoomSelection(current, draft.id, value === "original" ? undefined : value))}><SelectTrigger aria-label="Finish selection" className="h-auto min-h-10 whitespace-normal"><SelectValue placeholder="Selected finishes" /></SelectTrigger><SelectContent><SelectItem value="original">Selected finishes</SelectItem>{draft.finish_options.map(finish => <SelectItem key={finish.key} value={finish.key}>{finish.label} · {money(finish.retail_price)}</SelectItem>)}</SelectContent></Select></div> : <p className="text-sm text-muted-foreground">{current.allow_finish_customization ? "Additional finishes are being curated for this piece." : "This piece is presented in its selected finishes."}</p>}
+            {current.allow_finish_customization && draft.size_options.length > 0 && <div className="space-y-2"><p className="text-xs text-muted-foreground">Sofa size</p><Select value={draft.size_key ?? "original"} disabled={busy || locked || current.retail_price == null} onValueChange={value => setDraft(value === "original" ? viewingRoomSelection(current, draft.id) : viewingRoomSizeSelection(current, draft, value))}><SelectTrigger aria-label="Sofa size" className="h-auto min-h-10 whitespace-normal"><SelectValue placeholder="Choose exact size" /></SelectTrigger><SelectContent><SelectItem value="original">Original selection</SelectItem>{draft.size_options.map(size => <SelectItem key={size.key} value={size.key}>{size.label}</SelectItem>)}</SelectContent></Select></div>}
+            {current.allow_finish_customization && draft.finish_options.length ? <div className="space-y-2"><p className="text-xs text-muted-foreground">Upholstery &amp; frame finish</p><Select value={draft.finish_key ?? "original"} disabled={busy || locked || current.retail_price == null || (draft.size_options.length > 0 && !draft.size_key)} onValueChange={value => setDraft(viewingRoomSelection(current, draft.id, value === "original" ? undefined : value, value === "original" ? undefined : draft.size_key))}><SelectTrigger aria-label="Finish selection" className="h-auto min-h-10 whitespace-normal"><SelectValue placeholder={draft.size_options.length > 0 && !draft.size_key ? "Choose exact size first" : "Selected finishes"} /></SelectTrigger><SelectContent>{!draft.size_key && <SelectItem value="original">Selected finishes</SelectItem>}{draft.finish_options.filter(finish => finish.size_key === draft.size_key).map(finish => <SelectItem key={finish.key} value={finish.key}>{finish.label} · {money(finish.retail_price)}</SelectItem>)}</SelectContent></Select></div> : <p className="text-sm text-muted-foreground">{current.allow_finish_customization ? "Additional finishes are being curated for this piece." : "This piece is presented in its selected finishes."}</p>}
             <div className="flex flex-wrap gap-3">{Object.values(draft.materials).map(material => <figure key={material.id} className="max-w-28">{material.image_url && <img src={material.image_url} alt={material.name} className="size-10 rounded-full object-cover" />}<figcaption className="mt-2 text-xs">{material.name}</figcaption></figure>)}</div>
             <p className="font-display text-xl">{draft.retail_price == null ? "Price to be confirmed" : `${draft.retail_price_from ? "From " : ""}${money(draft.retail_price)}`}</p>
             <p className="text-xs text-muted-foreground">Lead time · {draft.lead_time ?? "To be confirmed"}</p>
@@ -108,7 +110,7 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
             {current.is_swappable && (choices[current.id]?.id ?? current.id) !== current.id && <Button variant="ghost" disabled={busy || locked} onClick={() => selectAlternative(current, current.id)}>Restore original piece</Button>}
           </TabsContent>
           </Tabs>
-          {drawerTab === "finishes" && <div className="sticky bottom-0 mt-auto border-t border-border bg-background py-4"><Button className="w-full" disabled={busy || locked} onClick={() => { setChoices(values => ({ ...values, [current.id]: viewingRoomSelection(current, draft.id, draft.finish_key) })); setActive(null); setDraft(null); }}>UPDATE SELECTION</Button></div>}
+          {drawerTab === "finishes" && <div className="sticky bottom-0 mt-auto border-t border-border bg-background py-4"><Button className="w-full" disabled={busy || locked} onClick={() => { setChoices(values => ({ ...values, [current.id]: viewingRoomSelection(current, draft.id, draft.finish_key, draft.size_key) })); setActive(null); setDraft(null); }}>UPDATE SELECTION</Button></div>}
         </>}
       </SheetContent>
     </Sheet>

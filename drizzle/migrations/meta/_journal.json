@@ -2269,6 +2269,13 @@
       "when": 1795133405593,
       "tag": "0323_viewing_room_footprint_alternatives",
       "breakpoints": true
+    },
+    {
+      "idx": 324,
+      "version": "7",
+      "when": 1795134900775,
+      "tag": "0324_viewing_room_sofa_sizes",
+      "breakpoints": true
     }
   ]
 }

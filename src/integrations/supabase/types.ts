@@ -14113,6 +14113,15 @@ export type Database = {
         }
         Returns: Json
       }
+      _viewing_room_editorial_product_without_sizes: {
+        Args: {
+          _currency: string
+          _item: Json
+          _product: string
+          _variant: string
+        }
+        Returns: Json
+      }
       _viewing_room_footprint_alternatives: {
         Args: { _package_id: string; _slot_id: string }
         Returns: Json

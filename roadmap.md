@@ -1,5 +1,10 @@
 # Roadmap
 
+## Buyer sofa sizes
+- [x] Project recorded sofa sizes and size-specific retail finish prices through existing private choices; no catalogue/source-board changes.
+- [x] Add drawer size selection, explicit updates and matching card/budget/proposal validation.
+- [x] 44 regressions pass. Real desktop/phone Sandy Cove 190→250 cm retains Opera finish: US$8,548.68→US$10,447.16; allocation US$23,320→US$25,218, remaining US$126,680→US$124,782. No runtime errors/overflow; preview build passes.
+
 ## Footprint-safe editorial swaps
 - [x] Matching 3D VIEW / SWAP PIECE badges open the corresponding drawer tab; alternative selection commits immediately and switches to its still-model finish workspace.
 - [x] Private projection prioritizes admin pins, otherwise up to twelve same-role ±15% width/depth candidates; proposal locking uses the same projection and fixed-piece permissions.

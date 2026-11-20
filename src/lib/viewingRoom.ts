@@ -9,8 +9,8 @@ export const viewingRoomPackageSchema = z.object({ id: z.string().uuid(), tier_n
 export const viewingRoomSchema = z.object({ name: z.string(), logo: url, hero: url, project_name: z.string(), layouts: z.array(z.object({ id: z.string().uuid(), name: z.string(), floorplan_url: url, specs_label: z.string().nullable(), room_environment_glb: url, packages: z.array(viewingRoomPackageSchema) })) });
 export type ViewingRoom = z.infer<typeof viewingRoomSchema>;
 export type ViewingRoomItem = z.infer<typeof viewingRoomItemSchema>;
-export const viewingRoomFinishSchema = z.object({ key: z.string(), label: z.string(), retail_price: z.number().nonnegative(), materials: z.record(z.string(), material), image_url: url, lead_time: z.string().nullable() });
-export const viewingRoomChoiceSchema = viewingRoomItemSchema.extend({ retail_price: z.number().nullable(), retail_price_from: z.boolean().default(false), finish_options: z.array(viewingRoomFinishSchema).default([]), finish_key: z.string().optional() });
+export const viewingRoomFinishSchema = z.object({ key: z.string(), label: z.string(), retail_price: z.number().nonnegative(), materials: z.record(z.string(), material), image_url: url, lead_time: z.string().nullable(), size_key: z.string().optional(), dimensions: z.string().optional() });
+export const viewingRoomChoiceSchema = viewingRoomItemSchema.extend({ retail_price: z.number().nullable(), retail_price_from: z.boolean().default(false), finish_options: z.array(viewingRoomFinishSchema).default([]), finish_key: z.string().optional(), size_key: z.string().optional(), size_options: z.array(z.object({ key: z.string(), label: z.string() })).default([]) });
 export const viewingRoomSlotSchema = viewingRoomChoiceSchema.extend({ alternatives: z.array(viewingRoomChoiceSchema), is_swappable: z.boolean().default(true), allow_finish_customization: z.boolean().default(true) });
 export type ViewingRoomChoice = z.infer<typeof viewingRoomChoiceSchema>;
 export type ViewingRoomSlot = z.infer<typeof viewingRoomSlotSchema>;
@@ -20,18 +20,28 @@ export function viewingRoomTotal(base: number, slots: ViewingRoomSlot[], choices
     if (!choice) return sum;
     const approved = choice.id === slot.id ? slot : slot.is_swappable ? slot.alternatives.find(row => row.id === choice.id) : null;
     if (!approved || approved.retail_price == null || slot.retail_price == null) throw new Error("Unapproved or unpriced choice");
-    const finish = choice.finish_key ? approved.finish_options.find(row => row.key === choice.finish_key) : null;
-    if (choice.finish_key && (!slot.allow_finish_customization || !finish)) throw new Error("Unapproved finish");
-    return sum + (finish?.retail_price ?? approved.retail_price) - slot.retail_price;
+    const selected = viewingRoomSelection(slot, choice.id, choice.finish_key, choice.size_key);
+    return sum + Number(selected.retail_price) - slot.retail_price;
   }, base);
 }
 
-export function viewingRoomSelection(slot: ViewingRoomSlot, productId: string, finishKey?: string): ViewingRoomChoice {
+export function viewingRoomSelection(slot: ViewingRoomSlot, productId: string, finishKey?: string, sizeKey?: string): ViewingRoomChoice {
   const product = productId === slot.id ? slot : slot.is_swappable ? slot.alternatives.find(row => row.id === productId) : null;
   if (!product) throw new Error("Unapproved choice");
   const finish = finishKey && slot.allow_finish_customization ? product.finish_options.find(row => row.key === finishKey) : null;
   if (finishKey && !finish) throw new Error("Unapproved finish");
+  if ((finish && finish.size_key !== sizeKey) || (sizeKey && !finish)) throw new Error("Unapproved size");
   return finish ? { ...product, ...finish, id: product.id, finish_key: finish.key, retail_price_from: false } : product;
+}
+
+export function viewingRoomSizeSelection(slot: ViewingRoomSlot, draft: ViewingRoomChoice, sizeKey: string): ViewingRoomChoice {
+  const product = draft.id === slot.id ? slot : slot.alternatives.find(row => row.id === draft.id);
+  if (!product?.size_options?.some(size => size.key === sizeKey)) throw new Error("Unapproved size");
+  const previous = product.finish_options.find(finish => finish.key === draft.finish_key);
+  const available = product.finish_options.filter(finish => finish.size_key === sizeKey);
+  const finish = available.find(option => option.label === previous?.label) ?? available[0];
+  if (!finish) throw new Error("Unapproved size");
+  return viewingRoomSelection(slot, draft.id, finish.key, sizeKey);
 }
 
 /** Only named visual materials and measured placement enter the client renderer. */
