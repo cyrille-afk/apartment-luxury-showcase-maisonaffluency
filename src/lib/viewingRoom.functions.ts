@@ -69,7 +69,7 @@ export const getViewingRoomChoices = createServerFn({ method: "POST" }).inputVal
   if (result.error) throw new Error("Collection choices couldn’t load.");
   return result.data ? z.object({ items: z.array(viewingRoomSlotSchema), allow_alternatives: z.boolean().default(true) }).parse(result.data) : null;
 });
-export const lockViewingRoomProposal = createServerFn({ method: "POST" }).inputValidator(z.object({ token: locator, packageId: z.string().uuid(), requestKey: z.string().uuid(), choices: z.array(z.object({ slot_id: z.string().uuid(), product_id: z.string().uuid(), finish_key: z.string().max(20).optional(), size_key: z.string().max(300).optional() })).max(50) })).handler(async ({ data }) => {
+export const lockViewingRoomProposal = createServerFn({ method: "POST" }).inputValidator(z.object({ token: locator, packageId: z.string().uuid(), requestKey: z.string().uuid(), choices: z.array(z.object({ slot_id: z.string().uuid(), product_id: z.string().uuid(), finish_key: z.string().max(20).optional(), size_key: z.string().max(300).optional(), colourway_id: z.string().max(80).optional() })).max(50) })).handler(async ({ data }) => {
   setResponseHeader("Cache-Control", "private, no-store");
   const access = await verifiedRoom(data.token);
   if (!access) throw new Error("Please enter your private access code again.");

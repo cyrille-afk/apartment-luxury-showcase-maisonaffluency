@@ -883,3 +883,6 @@
 
 ## Page 06 residence screenshot
 - [x] Preserve the complete left edge and enlarge/darken the residence subtitle; desktop/phone preview and fresh PDF page 06 visually verified with no page errors.
+
+- [ ] Designer pages: mobile scroll freeze
+- [x] Viewing room drawer: split finish pickers, fabric colours on 3D

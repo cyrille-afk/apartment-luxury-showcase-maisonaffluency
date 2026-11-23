@@ -2290,6 +2290,13 @@
       "when": 1795415803179,
       "tag": "0326_public_customer_saved_collections",
       "breakpoints": true
+    },
+    {
+      "idx": 327,
+      "version": "7",
+      "when": 1795429112983,
+      "tag": "0327_viewing_room_fabric_colourways",
+      "breakpoints": true
     }
   ]
 }
