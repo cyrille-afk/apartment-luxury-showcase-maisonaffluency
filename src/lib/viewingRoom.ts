@@ -47,7 +47,8 @@ export function viewingRoomSizeSelection(slot: ViewingRoomSlot, draft: ViewingRo
   const available = product.finish_options.filter(finish => finish.size_key === sizeKey);
   const finish = available.find(option => option.label === previous?.label) ?? available[0];
   if (!finish) throw new Error("Unapproved size");
-  return viewingRoomSelection(slot, draft.id, finish.key, sizeKey);
+  const colourway = draft.colourway_id && finish.colourways.some(row => row.id === draft.colourway_id) ? draft.colourway_id : undefined;
+  return viewingRoomSelection(slot, draft.id, finish.key, sizeKey, colourway);
 }
 
 /** Only named visual materials and measured placement enter the client renderer. */
