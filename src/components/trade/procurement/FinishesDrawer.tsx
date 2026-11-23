@@ -184,7 +184,7 @@ export default function FinishesDrawer({
       setVariants((preloaded.variants || []).filter((v: Variant) => v.top || v.base));
       setImgMap(preloaded.variant_image_map || {}); setGallery(preloaded.gallery_images || []);
       const find = (n?: string | null, role?: string) => n ? (list.find((x) => roleOf(x.category) === role && norm(x.name) === norm(n)) || null) : null;
-      const t0 = find(initialTop, "fabric"), b0 = find(initialBase, "base");
+      const t0 = find(initialTop, "fabric") || find(initialTop, "top"), b0 = find(initialBase, "base");
       setPicked({ ...(t0 ? { top: t0 } : {}), ...(b0 ? { base: b0 } : {}) });
       setLoading(false);
       return;
@@ -214,7 +214,7 @@ export default function FinishesDrawer({
           const list = (sw as Swatch[]) || [];
           setGlbs((g as Glb[]) || []); setSwatches(list);
           const find = (n?: string | null, role?: string) => n ? (list.find((x) => roleOf(x.category) === role && norm(x.name) === norm(n)) || null) : null;
-          const t0 = find(initialTop, "fabric"), b0 = find(initialBase, "base");
+          const t0 = find(initialTop, "fabric") || find(initialTop, "top"), b0 = find(initialBase, "base");
           if (t0 || b0) setPicked({ ...(t0 ? { top: t0 } : {}), ...(b0 ? { base: b0 } : {}) });
         }
         const p: any = pick || {};
@@ -273,7 +273,8 @@ export default function FinishesDrawer({
       (out as any)[r] = sw.image_url;
     });
     // Explicitly picked swatches win over variant-derived textures.
-    if (picked.top?.image_url) out.fabric = picked.top.image_url;
+    // A picked top may be upholstery (sofas) or a stone/wood surface (tables) — route it by its category.
+    if (picked.top?.image_url) out[roleOf(picked.top.category) === "fabric" ? "fabric" : "top"] = picked.top.image_url;
     if (picked.base?.image_url) out.base = picked.base.image_url;
     return out;
   }, [activeVariant, swatches, picked]);
@@ -326,11 +327,11 @@ export default function FinishesDrawer({
                 sheet (product_fabric_swatches_public), one dropdown per axis.
                 Falls back to variant-axis names when no swatches are linked. */}
             <div className="border-b border-border/60 px-6 py-5 space-y-4">
-              {([
-                { key: "top" as const, title: "Upholstery" },
-                { key: "base" as const, title: "Frame Finish" },
-              ]).map(({ key, title }) => {
-                const linked = swatches.filter((s) => (key === "top" ? roleOf(s.category) === "fabric" : roleOf(s.category) === "base"));
+              {(() => { const upholstered = swatches.some((s) => roleOf(s.category) === "fabric"); return ([
+                { key: "top" as const, title: upholstered ? "Upholstery" : "Top Finish", role: upholstered ? "fabric" : "top" },
+                { key: "base" as const, title: upholstered ? "Frame Finish" : "Base Finish", role: "base" },
+              ]); })().map(({ key, title, role }) => {
+                const linked = swatches.filter((s) => roleOf(s.category) === role);
                 const axisOpts = Array.from(new Map(variants.filter((v) => v[key]).map((v) => [norm(v[key]), v[key] as string])).values());
                 const opts: Swatch[] = linked.length ? linked : axisOpts.map((name) => ({ name, image_url: swatchFor(name)?.image_url || null, category: null }));
                 if (!opts.length) return null;

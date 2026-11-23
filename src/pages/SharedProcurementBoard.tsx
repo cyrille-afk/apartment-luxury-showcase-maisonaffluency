@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { trimLogoUrl } from "@/lib/cloudinaryLogo";
 import { productAttribution } from "@/lib/productAttribution";
-import { useParams } from "@/lib/router-compat";
+import { useNavigate, useParams } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
 import { AnimatePresence, motion } from "framer-motion";
 import { Box, Heart, MessageSquare, ThumbsDown, ThumbsUp, Plus, X } from "lucide-react";
@@ -48,6 +48,7 @@ export default function SharedProcurementBoard() {
   const isLegacy = !second && /^[0-9a-f]{48}$/.test(first);
   const [token, setToken] = useState<string>(() => (isLegacy ? first : readSession(param)));
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [data, setData] = useState<Shared | null | undefined>(undefined);
   const [loadError, setLoadError] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false);
@@ -98,10 +99,12 @@ export default function SharedProcurementBoard() {
     if (d && isLegacy) {
       const sh = d as Shared;
       const slug = sh.project_name ? `${slugify(sh.project_name)}/${slugify(sh.board_title)}` : `board/${slugify(sh.board_title)}`;
-      writeSession(slug, token); window.history.replaceState(null, "", `/shared/board/${slug}`);
+      // Router navigation (not raw history.replaceState): a raw URL swap made the router
+      // re-match mid-render and crashed React, freezing every control on the client board.
+      writeSession(slug, token); navigate(`/shared/board/${slug}`, { replace: true });
     }
     setData((d as Shared) ?? null);
-  }, [token, isLegacy, param]);
+  }, [token, isLegacy, param, navigate]);
 
   useEffect(() => { load(); }, [load]);
 

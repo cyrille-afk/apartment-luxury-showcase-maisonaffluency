@@ -14766,6 +14766,7 @@ export type Database = {
         }[]
       }
       get_developer_viewing_room: { Args: { _token: string }; Returns: Json }
+      get_glb_material_roles: { Args: { _glb_url: string }; Returns: Json }
       get_instant_transfer_totals: {
         Args: { _intent: string; _ref: string }
         Returns: {

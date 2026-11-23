@@ -3,7 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({ rpc: vi.fn(), comments: [] as { id: string; comment: string; created_at: string }[] }));
 vi.mock("@/integrations/supabase/client", () => ({ supabase: { rpc: mocks.rpc } }));
-vi.mock("@/lib/router-compat", () => ({ useParams: () => ({ token: "a".repeat(48) }) }));
+const navigateMock = vi.fn();
+vi.mock("@/lib/router-compat", () => ({ useParams: () => ({ token: "a".repeat(48) }), useNavigate: () => navigateMock }));
 vi.mock("@/hooks/useAuth", () => ({ useAuth: () => ({ user: { id: "client" } }) }));
 vi.mock("react-helmet-async", () => ({ Helmet: () => null }));
 vi.mock("@/hooks/use-toast", () => ({ toast: vi.fn() }));
@@ -48,5 +49,13 @@ describe("saved client board feedback", () => {
     await screen.findByRole("heading", { name: "Madison Avenue Side Table" });
     expect(screen.getByRole("button", { name: "Like" }).getAttribute("aria-pressed")).toBe("true");
     expect(screen.getByRole("status").textContent).toBe("Approved");
+  });
+  it("tidies a client link address through app navigation, never a raw history swap", async () => {
+    const raw = vi.spyOn(window.history, "replaceState");
+    render(<SharedProcurementBoard />);
+    await screen.findByRole("heading", { name: "Madison Avenue Side Table" });
+    expect(navigateMock).toHaveBeenCalledWith("/shared/board/board/man-of-parts", { replace: true });
+    expect(raw).not.toHaveBeenCalled();
+    raw.mockRestore();
   });
 });

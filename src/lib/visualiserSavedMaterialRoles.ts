@@ -28,8 +28,10 @@ export function useSavedMaterialRoles(glbUrl: string | null | undefined) {
     enabled: !!glbUrl,
     staleTime: 5 * 60_000,
     queryFn: async () => {
-      const { data } = await supabase.from("trade_product_glb_variants").select("material_roles").eq("glb_url", glbUrl!).not("material_roles", "is", null).limit(1).maybeSingle();
-      return toVisualiserRoles(data?.material_roles as Record<string, SavedMaterialRole> | null);
+      // Security-definer read so client share links (guests) get the same mapping as collaborators.
+      const { data, error } = await supabase.rpc("get_glb_material_roles", { _glb_url: glbUrl! });
+      if (error) throw error;
+      return toVisualiserRoles(data as Record<string, SavedMaterialRole> | null);
     },
   });
 }
