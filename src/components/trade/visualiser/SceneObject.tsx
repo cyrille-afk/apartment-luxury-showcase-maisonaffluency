@@ -1,3 +1,4 @@
+import { useSavedMaterialRoles, type VisualiserSavedRoles } from "@/lib/visualiserSavedMaterialRoles";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { applyMarbleSurface } from "@/lib/visualiserMarbleSurface";
 import type { MarbleSurfaceSettings } from "@/lib/visualiserMarbleSettings";
@@ -21,6 +22,8 @@ import { usePreparedModel } from "./usePreparedModel";
 export { isStoneMaterial } from "@/lib/visualiserModelPreparation";
 
 export type PlacedObject = {
+  /** Saved fabric/frame mapping for this GLB (3D model admin page). */
+  savedMaterialRoles?: VisualiserSavedRoles;
   instanceId: string;
   /** Configured Project Assets entry that spawned this placement. */
   inventoryInstanceId?: string;
@@ -101,7 +104,8 @@ function useFittedModel(object: PlacedObject): THREE.Object3D | null {
   const { scene } = useGLTF(object.glb_url ?? "", "/draco/", undefined, withCachedModelLoader);
   const { gl, invalidate } = useThree();
   const overrides = usePartOverrides(object.id);
-  const configuration = JSON.stringify({ id: object.id, product_name: object.product_name, glb_url: object.glb_url, dimensions: object.dimensions, width_mm: object.width_mm, depth_mm: object.depth_mm, height_mm: object.height_mm, size_variants: object.size_variants, exactDimensionsM: object.exactDimensionsM, modelOrientation: object.modelOrientation, material: object.material, topMaterial: object.topMaterial, baseMaterial: object.baseMaterial, upholsteryMaterial: object.upholsteryMaterial, partMaterials: object.partMaterials });
+  const savedRoles = useSavedMaterialRoles(object.glb_url).data;
+  const configuration = JSON.stringify({ savedMaterialRoles: savedRoles, id: object.id, product_name: object.product_name, glb_url: object.glb_url, dimensions: object.dimensions, width_mm: object.width_mm, depth_mm: object.depth_mm, height_mm: object.height_mm, size_variants: object.size_variants, exactDimensionsM: object.exactDimensionsM, modelOrientation: object.modelOrientation, material: object.material, topMaterial: object.topMaterial, baseMaterial: object.baseMaterial, upholsteryMaterial: object.upholsteryMaterial, partMaterials: object.partMaterials });
   const identity = JSON.stringify({ id: object.id, glb_url: object.glb_url, dimensions: object.dimensions, width_mm: object.width_mm, depth_mm: object.depth_mm, height_mm: object.height_mm, exactDimensionsM: object.exactDimensionsM, modelOrientation: object.modelOrientation });
   const prepare = useCallback((signal: AbortSignal) => prepareVisualiserModel(scene, JSON.parse(configuration), overrides, gl.capabilities.getMaxAnisotropy(), signal), [scene, configuration, overrides, gl]);
   const model = usePreparedModel(identity, configuration, prepare, disposePreparedModel);

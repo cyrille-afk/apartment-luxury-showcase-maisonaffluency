@@ -3,6 +3,7 @@ import type { VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
 import { findProductSchema } from "./visualiserProductSchema";
 import { BOND_STREET_BASE_FINISH, isBondStreetStool } from "./visualiserProductFinishes";
+import { savedRolePart, type VisualiserSavedRoles } from "./visualiserSavedMaterialRoles";
 import { classifyMeshPart, humanizePartName, meshPartMaterial, type FinishPart } from "./visualiserFinishTargets";
 import type { PartOverrides } from "./visualiserPartMapping";
 import { applyModelOrientation, fitExactModelDimensions, fitUprightModel } from "./modelOrientation";
@@ -190,7 +191,7 @@ function clonePbrMaterial(source: THREE.Material, finish: VisualiserMaterial | n
   return material;
 }
 
-function assignParts(root: THREE.Object3D, overrides: PartOverrides, materialRoles: Record<string, FinishPart> = {}) {
+function assignParts(root: THREE.Object3D, overrides: PartOverrides, materialRoles: Record<string, FinishPart> = {}, savedRoles?: VisualiserSavedRoles) {
   const meshes: THREE.Mesh[] = [];
   root.traverse((c) => { if ((c as THREE.Mesh).isMesh) meshes.push(c as THREE.Mesh); });
   const matName = (m: THREE.Mesh) => {
@@ -211,10 +212,13 @@ function assignParts(root: THREE.Object3D, overrides: PartOverrides, materialRol
     // Unnamed meshes are still classifiable by their material name
     // (e.g. Man of Parts "WoodFinish" → frame, "Glides" → base).
     // Declared material roles beat name guessing for coded models (e.g. "VIFS01").
-    const named = materialRoles[matName(mesh)] ?? classifyMeshPart(nodeName, matName(mesh));
+    const guessed = materialRoles[matName(mesh)] ?? classifyMeshPart(nodeName, matName(mesh));
+    // The mapping saved on the 3D model admin page wins, so fabric never covers the frame.
+    const saved = savedRolePart(savedRoles, matName(mesh), guessed);
+    const named = saved === undefined ? guessed : saved;
     // Unnamed parts that carry their own GLB material are independently finishable.
     let auto: FinishPart | null = named;
-    if (!auto && distinct > 1) {
+    if (!auto && saved === undefined && distinct > 1) {
       const g = `part:${matName(mesh)}`;
       if (!groupLabels.has(g)) {
         // Name the tab after what it textures ("Wood Finish"), never "Part 3".
@@ -248,7 +252,7 @@ export function prepareModel(scene: THREE.Object3D, object: PlacedObject, partOv
   const holder = { ...object, baseMaterial: object.baseMaterial ?? (isBondStreetStool(productId) ? BOND_STREET_BASE_FINISH : null) };
     const clone = scene.clone(true);
     stripEmbeddedGroundPlanes(clone);
-    const groupLabels = assignParts(clone, partOverrides, findProductSchema(object.product_name)?.materialRoles ?? {});
+    const groupLabels = assignParts(clone, partOverrides, findProductSchema(object.product_name)?.materialRoles ?? {}, object.savedMaterialRoles);
     clone.userData.groupLabels = Object.fromEntries(groupLabels);
     clone.traverse((child) => {
       const mesh = child as THREE.Mesh;
