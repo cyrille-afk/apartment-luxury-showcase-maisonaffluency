@@ -3365,6 +3365,38 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_saved_collections: {
+        Row: {
+          assignments: Json
+          favorites: Json
+          folders: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assignments?: Json
+          favorites?: Json
+          folders?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assignments?: Json
+          favorites?: Json
+          folders?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_saved_collections_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       data_subject_requests: {
         Row: {
           admin_notes: string | null
@@ -14329,6 +14361,22 @@ export type Database = {
         Returns: {
           term: string
         }[]
+      }
+      change_customer_saved_collection: {
+        Args: { _changes: Json }
+        Returns: {
+          assignments: Json
+          favorites: Json
+          folders: Json
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "customer_saved_collections"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       claim_acquisition_reply: {
         Args: { _lead_id: string; _sender: string; _thread_message_id: string }

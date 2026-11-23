@@ -3,7 +3,7 @@
  *
  * Eligibility comes from real backend state — never from client storage:
  *   - `user_roles` → admin / super_admin / trade_user (via `useAuth`)
- *   - `trade_applications` status === "approved" (via `useAuth().tradeStatus`)
+ *   - Customer profile confirmation alone never grants Trade privileges.
  * The rate itself comes from `profiles.trade_tier` × `trade_tier_config`
  * (see `useTradeDiscount`), so admins can edit tiers without a code change.
  *
@@ -29,13 +29,14 @@ export interface AccountDiscount {
 }
 
 export function useAccountDiscount(): AccountDiscount {
-  const { user, isTradeUser, isAdmin, isSuperAdmin, tradeStatus } = useAuth();
+  const { user, isTradeUser, isAdmin, isSuperAdmin, rolesLoaded } = useAuth();
   const { discountPct, tierLabel, discountLabel } = useTradeDiscount();
 
   const eligible =
     !!user &&
+    rolesLoaded &&
     discountPct > 0 &&
-    (isTradeUser || isAdmin || isSuperAdmin || tradeStatus === "approved");
+    (isTradeUser || isAdmin || isSuperAdmin);
 
   const pct = eligible ? discountPct : 0;
   const isAdminAccount = isAdmin || isSuperAdmin;

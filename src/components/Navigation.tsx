@@ -509,6 +509,13 @@ const Navigation = (_props: NavigationProps) => {
   const { user, isTradeUser, rolesLoaded, signOut } = useAuth();
   const tradePartner = Boolean(user && rolesLoaded && isTradeUser);
   const queryClient = useQueryClient();
+  const handlePublicSignOut = async () => {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await signOut();
+    setAccountMenuOpen(false);
+    navigate("/favorites", { replace: true });
+  };
   const handleTradeSignOut = async () => {
     setTradeMenuOpen(false);
     await queryClient.cancelQueries();
@@ -1033,6 +1040,15 @@ const Navigation = (_props: NavigationProps) => {
                     <DropdownMenuItem onClick={() => void handleTradeSignOut()} className="font-body cursor-pointer text-destructive">Sign Out</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+              ) : user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label="My account"><User className="size-5" strokeWidth={1.5} /></Button></DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => navigate("/favorites")}>My Favorites & Folders</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => void handlePublicSignOut()}>Sign Out</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : <button
                 type="button"
                 onClick={() => {
@@ -1465,7 +1481,7 @@ const Navigation = (_props: NavigationProps) => {
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        onClick={async () => { const { supabase } = await import("@/integrations/supabase/client"); await supabase.auth.signOut(); window.location.reload(); }}
+                        onClick={() => void handlePublicSignOut()}
                         className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors text-destructive"
                       >
                         <LogOut className="h-4 w-4" />

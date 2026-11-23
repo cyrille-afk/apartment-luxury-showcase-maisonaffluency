@@ -2283,6 +2283,13 @@
       "when": 1795136017961,
       "tag": "0325_viewing_room_four_compatible_swaps",
       "breakpoints": true
+    },
+    {
+      "idx": 326,
+      "version": "7",
+      "when": 1795415803179,
+      "tag": "0326_public_customer_saved_collections",
+      "breakpoints": true
     }
   ]
 }

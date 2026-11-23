@@ -1,5 +1,10 @@
 # Roadmap
 
+## Public customer account verification and cross-device saving
+- [x] Clarissa's email confirmation/sign-in and single customer alert verified; zero Trade roles/applications. Corporate confirmation can set legacy profile status approved, but checkout eligibility now requires actual roles on screen and all seven server pricing consumers.
+- [x] Private account-owned atomic favorites/folder changes, one-time legacy adoption, account-scoped retry cache and sign-out clearing implemented; fresh-device and concurrency/regression tests pass.
+- [x] Real customer-only product save/folder creation, desktop reload, fresh phone photo/membership, sign-out clearing, actual password sign-in restoring saves and owner-only reads/writes verified. Ordinary Trade entry returns customers to public favorites; exact studio invitations/settings preserved. No page errors or phone overflow; published frontend awaits publishing. Google's restricted staff sign-in unchanged, not independently exercised.
+
 ## Editorial buyer experience in developer pitch
 - [x] Update Slide 04 workflow and Slide 07 copy/composite with catalogue-backed lookbook cards, allocation bar and finish/alternatives drawer; presentation only.
 - [x] Desktop/phone navigation and image loading verified with zero page errors/overflow; nine-page PDF downloaded and pages 04/07 visually checked. Corrected workflow/footer overlap, inherited image cropping and clipped mockup controls; six existing PDF tests pass and preview build OK.

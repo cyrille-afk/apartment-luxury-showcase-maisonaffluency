@@ -1,4 +1,5 @@
 # src/lib rules
+- Customer saves: owner deltas; clear on logout.
 - Editorial drawer framing uses model-viewer's recomputed bounds and public orientation/target API with category-scoped Z-up detection and known exporter corrections — keeps shared material handling and other viewers unchanged.
 - Viewing-room invitations use unique short-code aliases; service-only, rate-limited resolution sets a scoped HttpOnly legacy credential cookie, and every read/proposal revalidates the parent credential and matching name. Legacy links remain valid — readable names alone are not credentials.
 - Deployment pairing compares the document build stamp to its own client before hydration, never to the newest release; server HTML is no-store and Vite assets use release-specific hashed paths. Mismatch/startup failure offers manual recovery without auto-reloads — prevents mixed trees and protects edits.

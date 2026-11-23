@@ -33,6 +33,7 @@ import { useStudio } from "@/hooks/useStudio";
 import { StudioBrand } from "@/components/trade/StudioBrand";
 import { StudioSetupNavigationGate } from "@/components/trade/StudioSetupNavigationGate";
 import { isTradeLoginPath, tradeLoginHref } from "@/lib/tradeLoginReturn";
+import { isStudioInvitationPath } from "@/lib/studioInvitationLink";
 
 
 import { MobilePreviewHeaderButton } from "@/components/trade/MobilePreviewHeaderButton";
@@ -533,13 +534,11 @@ const TradeLayout = () => {
     );
   }
 
-  // Public registered users (no trade role, no admin, no application) are confined
-  // to their own dashboard at /trade/me. Block all other /trade/* routes.
+  // Customers save publicly; preserve the existing exact studio-invitation and settings flows.
   if (rolesLoaded && !isAdmin && !isTradeUser && applicationStatus === "none") {
     const path = location.pathname.replace(/\/$/, "");
-    const PUBLIC_ALLOWED = ["/trade/me", "/trade/settings"];
-    if (!PUBLIC_ALLOWED.includes(path)) {
-      return <Navigate to="/trade/me?restricted=1" replace />;
+    if (path !== "/trade/settings" && !isStudioInvitationPath(path, location.search)) {
+      return <Navigate to="/favorites" replace />;
     }
   }
 

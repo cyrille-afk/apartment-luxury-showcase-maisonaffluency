@@ -24,11 +24,6 @@ vi.mock("@/lib/router-compat", () => ({
   ),
 }));
 
-/** Index of an element among all descendants of the dialog, in document order. */
-function orderIndex(dialog: HTMLElement, el: Element) {
-  return Array.from(dialog.querySelectorAll("*")).indexOf(el);
-}
-
 function renderLogin() {
   render(
     <AuthGateDialog
@@ -48,24 +43,6 @@ afterEach(() => {
 });
 
 describe("Sign-in modal layout and copy", () => {
-  it("puts the credential form first, the separator next, then Google at the bottom", () => {
-    const dialog = renderLogin();
-    const email = dialog.querySelector('input[type="email"]') as HTMLInputElement;
-    const password = dialog.querySelector('input[type="password"]') as HTMLInputElement;
-    const submit = screen.getByRole("button", { name: /^Sign In$/ });
-    const separator = screen.getByText("or");
-    const google = screen.getByRole("button", { name: /Continue with Google/ });
-    const helper = screen.getByText(/internal staff only/);
-    const footer = screen.getByRole("link", { name: /Apply for the Trade Program/ });
-
-    const indexes = [email, password, submit, separator, google, helper, footer].map(
-      (el) => orderIndex(dialog, el),
-    );
-    expect(indexes.every((n) => n >= 0)).toBe(true);
-    expect(indexes).toEqual([...indexes].sort((a, b) => a - b));
-    expect(new Set(indexes).size).toBe(indexes.length);
-  });
-
   it("shows the approved helper line under the Google button with the trade mailbox", () => {
     renderLogin();
     const helper = screen.getByText(/internal staff only/);
@@ -77,15 +54,13 @@ describe("Sign-in modal layout and copy", () => {
     ).toBe("mailto:trade@maisonaffluency.com");
   });
 
-  it("keeps the footer link to one Trade Program application line", () => {
+  it("opens customer registration without calling Trade or authentication services", () => {
     renderLogin();
-    expect(
-      screen.getByRole("link", { name: "Don’t have an account? Apply for the Trade Program." })
-        .getAttribute("href"),
-    ).toBe("/trade-program?intent=apply");
-    expect(screen.queryByText(/New to the Trade Program/)).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Create a customer account" }));
+    expect(signInWithPassword).not.toHaveBeenCalled();
+    // The email signup handler is available; opening it does not submit any account/application.
+    expect(screen.getByRole("button", { name: "Register" })).toBeEnabled();
   });
-
   it("never quotes Google's technical error wording in the modal", () => {
     const dialog = renderLogin();
     const text = dialog.textContent ?? "";

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef, createContext, useContext } from "react";
 import type { User, Session } from "@supabase/supabase-js";
+import { customerSavedSync } from "@/lib/customerSavedSync";
 
 interface AuthContextType {
   user: User | null;
@@ -408,7 +409,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, [sbClient, fetchUserData]);
 
+  useEffect(() => {
+    if (!sbClient || loading) return;
+    void customerSavedSync.start(user?.id ?? null, {
+      read: async (id) => {
+        const { data, error } = await sbClient.from("customer_saved_collections").select("favorites, folders, assignments").eq("user_id", id).maybeSingle();
+        if (error) throw error;
+        return data;
+      },
+      change: async (changes) => {
+        const { data, error } = await sbClient.rpc("change_customer_saved_collection", { _changes: changes });
+        if (error) throw error;
+        return data;
+      },
+    }, window.localStorage, window);
+  }, [sbClient, loading, user?.id]);
+
   const signOut = async () => {
+    await customerSavedSync.flush();
+    customerSavedSync.clearProjection();
     explicitSignOutRef.current = true;
     if (sbClient) await sbClient.auth.signOut();
   };

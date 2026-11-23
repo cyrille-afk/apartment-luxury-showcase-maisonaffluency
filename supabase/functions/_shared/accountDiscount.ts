@@ -22,9 +22,10 @@ export async function resolveAccountDiscount(
     supabaseAdmin.from("profiles").select("trade_tier, trade_status").eq("id", userId).maybeSingle(),
   ]);
 
+  if (rolesRes.error || profileRes.error) return { pct: 0, label: null };
   const roles: string[] = (rolesRes.data || []).map((r: any) => String(r.role));
   const isAdmin = roles.includes("admin") || roles.includes("super_admin");
-  const eligible = isAdmin || roles.includes("trade_user") || profileRes.data?.trade_status === "approved";
+  const eligible = isAdmin || roles.includes("trade_user");
   if (!eligible) return { pct: 0, label: null };
 
   const rawTier = String(profileRes.data?.trade_tier || "silver");

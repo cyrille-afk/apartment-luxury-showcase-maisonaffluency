@@ -243,8 +243,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
               </div>
               <h2 className="font-display text-lg text-foreground">Create an Account</h2>
               <p className="font-body text-xs text-muted-foreground mt-1.5 leading-relaxed">
-                Sign in or request a trade account to unlock full specification sheets, CAD files,
-                and our AI design workspace.
+                Sign in or create a customer account to {action}. Trade access requires a separate application.
               </p>
             </div>
 
@@ -263,7 +262,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
                 onClick={() => setMode("login")}
                 className="w-full py-2.5 font-body text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
-                Existing Trade Member? <span className="underline underline-offset-2">Sign in</span>
+                Already have an account? <span className="underline underline-offset-2">Sign in</span>
               </button>
             </div>
 
@@ -391,19 +390,19 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
           <>
             <h2 className="font-display text-lg text-foreground">Sign In</h2>
             <p className="font-body text-xs text-muted-foreground mt-1 mb-5">
-              Trade members: sign in with the email and password for your approved account.
+              Sign in to your Maison Affluency account. Saving favorites and folders does not require Trade approval.
             </p>
 
             <form onSubmit={handleLogin} className="space-y-4">
               <label className="block">
                 <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Email</span>
-                <input type="email" placeholder="you@studio.com" value={email} onChange={(e) => { setEmail(e.target.value); setFormError(null); }} disabled={loading || googleLoading || loginSucceeded} required autoComplete="off"
+                <input type="email" placeholder="you@studio.com" value={email} onChange={(e) => { setEmail(e.target.value); setFormError(null); }} disabled={loading || googleLoading || loginSucceeded} required autoComplete="email"
                   className="mt-1.5 w-full rounded-md border border-border bg-background px-4 py-3 font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors placeholder:text-muted-foreground/60 text-[16px]" />
               </label>
               <div>
                 <label htmlFor="modal-signin-password" className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Password</label>
                 <div className="relative mt-1.5">
-                  <input id="modal-signin-password" type={showPassword ? "text" : "password"} placeholder="Your password" value={password} onChange={(e) => { setPassword(e.target.value); setFormError(null); }} disabled={loading || googleLoading || loginSucceeded} required autoComplete="new-password"
+                  <input id="modal-signin-password" type={showPassword ? "text" : "password"} placeholder="Your password" value={password} onChange={(e) => { setPassword(e.target.value); setFormError(null); }} disabled={loading || googleLoading || loginSucceeded} required autoComplete="current-password"
                     className="w-full rounded-md border border-border bg-background pl-4 pr-12 py-3 font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors placeholder:text-muted-foreground/60 text-[16px]" />
                   <Button type="button" variant="ghost" size="icon" tabIndex={-1} aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword} disabled={loading || googleLoading || loginSucceeded} onClick={() => setShowPassword((value) => !value)} className="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground">
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -426,7 +425,8 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
             </div>
 
             {googleButton}
-            <GoogleAccessNotice />
+            <GoogleAccessNotice showApplyLink={false} />
+            <Button variant="link" className="mt-3 w-full" disabled={loading || googleLoading || loginSucceeded} onClick={() => { setMode("signup"); setFormError(null); }}>Create a customer account</Button>
           </>
         )}
       </div>

@@ -11,30 +11,22 @@ import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { cn } from "@/lib/utils";
 import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
+import { useAuth } from "@/hooks/useAuth";
+import { useCustomerSavedSync } from "@/hooks/useCustomerSavedSync";
+import { customerSavedSync } from "@/lib/customerSavedSync";
+import { Button } from "@/components/ui/button";
 import {
   FOLDERS_EVENT,
   FAV_EVENT,
   readFolders,
   readAssignments,
+  readFavorites,
+  removeFavorite as removeSavedFavorite,
   type Folder,
 } from "@/lib/favoriteFolders";
 
 
 const LS_KEY = "public_favorites";
-
-function readLocalFavorites(): string[] {
-  try {
-    const raw = localStorage.getItem(LS_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-function writeLocalFavorites(ids: string[]) {
-  localStorage.setItem(LS_KEY, JSON.stringify(ids));
-  window.dispatchEvent(new Event("public_favorites_changed"));
-}
 
 interface FavPick {
   id: string;
@@ -64,13 +56,17 @@ interface FavPick {
 }
 
 const PublicFavorites = () => {
-  const [favIds, setFavIds] = useState<string[]>(() => readLocalFavorites());
+  const { user, loading: authLoading } = useAuth();
+  const savedSync = useCustomerSavedSync();
+  const syncLoading = authLoading || savedSync.status === "loading" || savedSync.userId !== (user?.id ?? null);
+  const syncError = savedSync.status === "error";
+  const [favIds, setFavIds] = useState<string[]>([]);
   const [picks, setPicks] = useState<FavPick[]>([]);
   const [loading, setLoading] = useState(true);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
 
-  const [folders, setFolders] = useState<Folder[]>(() => readFolders());
-  const [assignments, setAssignments] = useState<Record<string, string[]>>(() => readAssignments());
+  const [folders, setFolders] = useState<Folder[]>([]);
+  const [assignments, setAssignments] = useState<Record<string, string[]>>({});
   const [activeFolder, setActiveFolder] = useState<string | null>(null); // null = All
 
   // Keep folders/assignments in sync with localStorage changes
@@ -83,6 +79,7 @@ const PublicFavorites = () => {
         setFavIds(raw ? JSON.parse(raw) : []);
       } catch { /* noop */ }
     };
+    sync();
     window.addEventListener(FOLDERS_EVENT, sync);
     window.addEventListener(FAV_EVENT, sync);
     window.addEventListener("storage", sync);
@@ -166,14 +163,15 @@ const PublicFavorites = () => {
   }, [favIds]);
 
   const removeFavorite = (id: string) => {
-    const next = favIds.filter((fid) => fid !== id);
-    setFavIds(next);
-    writeLocalFavorites(next);
+    if (syncLoading || syncError) return;
+    removeSavedFavorite(id);
+    setFavIds(readFavorites());
   };
 
   const clearAll = () => {
+    if (syncLoading || syncError) return;
+    for (const id of favIds) removeSavedFavorite(id);
     setFavIds([]);
-    writeLocalFavorites([]);
   };
 
   const lightboxItems: PublicLightboxItem[] = useMemo(
@@ -236,12 +234,16 @@ const PublicFavorites = () => {
             {picks.length > 0 && (
               <button
                 onClick={clearAll}
+                disabled={syncLoading || syncError}
                 className="text-xs text-muted-foreground hover:text-destructive transition-colors tracking-wide uppercase"
               >
                 Clear All
               </button>
             )}
           </div>
+
+          {syncError && <div role="alert" className="mb-6 flex flex-wrap items-center gap-3 border-b border-border pb-4 text-sm text-destructive"><span>We couldn’t reconnect your saved collection. Your existing saves are safe.</span><Button variant="outline" size="sm" onClick={() => void customerSavedSync.retry()}>Retry</Button></div>}
+          {savedSync.status === "saving" && <p role="status" className="mb-4 text-sm text-muted-foreground">Saving your collection…</p>}
 
           {/* Folder tabs (Artemest-style) */}
           {(folders.length > 0 || picks.length > 0) && (
@@ -282,7 +284,7 @@ const PublicFavorites = () => {
             const visiblePicks = activeFolder
               ? picks.filter((p) => (assignments[p.id] ?? []).includes(activeFolder))
               : picks;
-            if (loading) {
+            if (loading || syncLoading) {
               return (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {Array.from({ length: 4 }).map((_, i) => (
@@ -358,6 +360,7 @@ const PublicFavorites = () => {
                       }}
                       className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
                       title="Remove from favorites"
+                      disabled={syncLoading || syncError}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>

@@ -1,4 +1,4 @@
-// Public favorites + Artemest-style folders, all in localStorage.
+// Public favorites projection; customerSavedSync owns private account persistence.
 // Folders are optional: a favorite can exist without belonging to any folder
 // (it lives in the implicit "All saved" bucket).
 
@@ -19,10 +19,14 @@ type Assignments = Record<string, string[]>; // pickId -> folderId[]
 function safeParse<T>(raw: string | null, fallback: T): T {
   try { return raw ? (JSON.parse(raw) as T) : fallback; } catch { return fallback; }
 }
+function readStorage(key: string): string | null {
+  if (typeof window === "undefined") return null;
+  try { return window.localStorage.getItem(key); } catch { return null; }
+}
 
 /* ---------------- Favorites set ---------------- */
 export function readFavorites(): string[] {
-  return safeParse<string[]>(localStorage.getItem(FAVS_KEY), []);
+  return safeParse<string[]>(readStorage(FAVS_KEY), []);
 }
 function writeFavorites(ids: string[]) {
   localStorage.setItem(FAVS_KEY, JSON.stringify(ids));
@@ -48,7 +52,7 @@ export function removeFavorite(id: string) {
 
 /* ---------------- Folders ---------------- */
 export function readFolders(): Folder[] {
-  return safeParse<Folder[]>(localStorage.getItem(FOLDERS_KEY), []);
+  return safeParse<Folder[]>(readStorage(FOLDERS_KEY), []);
 }
 function writeFolders(folders: Folder[]) {
   localStorage.setItem(FOLDERS_KEY, JSON.stringify(folders));
@@ -83,7 +87,7 @@ export function deleteFolder(id: string) {
 
 /* ---------------- Assignments ---------------- */
 export function readAssignments(): Assignments {
-  return safeParse<Assignments>(localStorage.getItem(ASSIGN_KEY), {});
+  return safeParse<Assignments>(readStorage(ASSIGN_KEY), {});
 }
 function writeAssignments(a: Assignments) {
   localStorage.setItem(ASSIGN_KEY, JSON.stringify(a));
