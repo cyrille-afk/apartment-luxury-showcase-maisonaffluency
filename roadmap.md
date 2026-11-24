@@ -1,5 +1,8 @@
 # Roadmap
 
+## Mobile AR controls
+- [x] Added capability-gated slotted View in Your Space button, fixed AR scale and collapsed mobile guide. Real Cipriani GUM desktop/phone viewer verified; simulated native capability checks button and all three scrolled guide steps. Seven viewer tests pass, build OK, no page errors. Physical iPhone Quick Look launch, lighting and scale remain device-only checks; no model dimensions or saved selections changed.
+
 ## Private viewing-room editorial proposal
 - [x] Replace plain PDF with exact A4 cover, selected residence overview and two-item editorial schedule; use validated selected retail totals and resolved selected swatches only.
 - [x] Real Canaletto Bespoke lock/download verified before and after Rift Ebonized Oak + GUM Edson Charbon/Tundra 603/Smooth Oak selections: US$163,447.34, four exact 210×297mm pages, all pages inspected. Fixed missing Rift photo after finish selection. 95 regressions plus 11 final focused tests pass; build OK, no browser errors. Removed all four test requests; source boards unchanged. Yoma has no recorded selected materials, and the residence plan remains the existing explicitly labelled sample reference; neither is invented.

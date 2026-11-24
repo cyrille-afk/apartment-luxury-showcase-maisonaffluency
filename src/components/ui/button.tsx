@@ -17,6 +17,7 @@ const buttonVariants = cva(
         "collection-active": "collection-capsule-active",
         "studio-primary": "studio-action-primary",
         "studio-utility": "studio-action-utility",
+        "space-preview": "space-preview-action",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {

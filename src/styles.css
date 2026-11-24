@@ -228,6 +228,16 @@
 }
 
 /* Private viewing rooms keep the requested ivory editorial paper in both system themes. */
+.space-preview-action {
+  --space-preview-ink: #1F4E46;
+  --space-preview-paper: #FAF9F6;
+  background: var(--space-preview-ink);
+  color: var(--space-preview-paper);
+  border: 1px solid var(--space-preview-paper);
+  letter-spacing: 0;
+}
+.space-preview-action:hover { background: var(--space-preview-ink); opacity: .94; }
+
 .viewing-room {
   --viewing-room-paper: #FAF9F6;
   --viewing-room-ink: oklch(0.22 0.012 85);

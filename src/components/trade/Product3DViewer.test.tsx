@@ -1,12 +1,41 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import Product3DViewer from "./Product3DViewer";
 
 class TestModelViewer extends HTMLElement {
+  canActivateAR = false;
   model: { materials: any[] } = { materials: [] };
   createTexture = vi.fn(async (url: string) => ({ name: url, source: { uri: url } }));
 }
 if (!customElements.get("model-viewer")) customElements.define("model-viewer", TestModelViewer);
+
+function mobileCapability(matches: boolean) {
+  vi.stubGlobal("matchMedia", vi.fn(() => ({ matches, addEventListener: vi.fn(), removeEventListener: vi.fn() })));
+}
+beforeEach(() => mobileCapability(false));
+
+describe("mobile AR availability", () => {
+  it("never enables AR on desktop even when the model supports it", async () => {
+    const { container } = render(<Product3DViewer url="/chair.glb" alt="Chair" autoOpen />);
+    const viewer = container.querySelector("model-viewer") as TestModelViewer;
+    await act(async () => { viewer.canActivateAR = true; viewer.dispatchEvent(new Event("load")); });
+    expect(viewer.hasAttribute("ar")).toBe(false);
+    expect(screen.queryByRole("button", { name: "View in Your Space" })).toBeNull();
+  });
+
+  it("only offers mobile AR when the native viewer confirms capability and fixes its scale", async () => {
+    mobileCapability(true);
+    const { container } = render(<Product3DViewer url="/chair.glb" alt="Chair" autoOpen scale="0.9 0.77 0.75" />);
+    const viewer = container.querySelector("model-viewer") as TestModelViewer;
+    expect(screen.queryByRole("button", { name: "View in Your Space" })).toBeNull();
+    await act(async () => { viewer.canActivateAR = true; viewer.dispatchEvent(new Event("load")); });
+    await waitFor(() => expect(screen.getByRole("button", { name: "View in Your Space" })).toBeVisible());
+    expect(viewer.getAttribute("ar-scale")).toBe("fixed");
+    expect(viewer.getAttribute("scale")).toBe("0.9 0.77 0.75");
+    expect(viewer.getAttribute("ar-modes")).toBe("webxr quick-look");
+    expect(viewer.hasAttribute("ios-src")).toBe(false);
+  });
+});
 
 function material(name: string, textureName: string, factor: number[]) {
   const pbr: any = {

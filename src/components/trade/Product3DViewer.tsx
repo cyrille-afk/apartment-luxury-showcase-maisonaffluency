@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { AlertTriangle, Box, Lock, LockOpen } from "lucide-react";
+import { AlertTriangle, Box, Camera, Lock, LockOpen, Move, Smartphone } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { editorialModelCamera, editorialUprightRotation } from "@/lib/editorialModelFraming";
 import { editorialUnnamedMaterialRole } from "@/lib/editorialModelMaterials";
 
@@ -14,6 +16,8 @@ declare module "react" {
           alt?: string;
           poster?: string;
           ar?: boolean;
+          "ar-scale"?: "fixed" | "auto";
+          "ar-modes"?: string;
           "auto-rotate"?: boolean;
           "camera-controls"?: boolean;
           "shadow-intensity"?: string | number;
@@ -230,6 +234,36 @@ const Product3DViewer: React.FC<Props> = ({
   // Camera lock — mirrors the Visualiser Sandbox position locks: when on,
   // rotate/zoom/pan are disabled so the composition can't be nudged.
   const [locked, setLocked] = useState(false);
+  const [mobileAr, setMobileAr] = useState(false);
+  const [arAvailable, setArAvailable] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 767px) and (pointer: coarse)");
+    const update = () => setMobileAr(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    setArAvailable(false);
+    if (!mobileAr || !opened || !ready) return;
+    const viewer = mvRef.current as (HTMLElement & { canActivateAR?: boolean; updateComplete?: Promise<unknown> }) | null;
+    if (!viewer) return;
+    let cancelled = false;
+    const update = async () => {
+      await viewer.updateComplete;
+      if (!cancelled) setArAvailable(viewer.canActivateAR === true);
+    };
+    void update();
+    viewer.addEventListener("load", update);
+    viewer.addEventListener("ar-status", update);
+    return () => {
+      cancelled = true;
+      viewer.removeEventListener("load", update);
+      viewer.removeEventListener("ar-status", update);
+    };
+  }, [mobileAr, opened, ready, url]);
 
   useEffect(() => {
     if (!clientEditorial || !opened || !ready) return;
@@ -560,7 +594,7 @@ const Product3DViewer: React.FC<Props> = ({
   );
 
   return (
-    <div className="border border-border rounded-md overflow-hidden bg-muted/30">
+    <div className="shrink-0 border border-border rounded-md overflow-hidden bg-muted/30">
       <div className="flex items-center gap-2 px-3 py-2 border-b border-border bg-background/50">
         <Box size={13} className="text-muted-foreground" />
         <span className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
@@ -624,7 +658,9 @@ const Product3DViewer: React.FC<Props> = ({
                   "interaction-prompt": "none",
                 }
               : {})}
-            ar
+            ar={mobileAr}
+            ar-scale="fixed"
+            ar-modes="webxr quick-look"
             scale={scale || "1 1 1"}
             shadow-intensity="1"
             exposure="1"
@@ -632,7 +668,14 @@ const Product3DViewer: React.FC<Props> = ({
             loading="eager"
             reveal="auto"
             style={{ width: "100%", height: "100%", backgroundColor: "transparent" }}
-          />
+          >
+            {arAvailable && (
+              <Button slot="ar-button" type="button" variant="space-preview" className="absolute bottom-4 right-4 max-w-[calc(100%-2rem)] rounded-full px-4 font-display text-sm md:hidden">
+                <Box strokeWidth={1.25} aria-hidden="true" />
+                View in Your Space
+              </Button>
+            )}
+          </model-viewer>
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
             <span className="font-body text-[11px] uppercase tracking-[0.12em]">Loading 3D…</span>
@@ -645,13 +688,28 @@ const Product3DViewer: React.FC<Props> = ({
               ? "Camera locked — unlock above to rotate or zoom"
               : (<>
                   <span className="hidden md:inline">Drag to rotate · scroll to zoom (bounded)</span>
-                  <span className="md:hidden">Tap the AR cube icon in the bottom right to view this piece to scale in your room.</span>
+                  <span className="md:hidden">{arAvailable ? "Tap View in Your Space to view this piece to scale in your room." : "Drag to rotate · pinch to zoom"}</span>
                 </>))
           : (<>
               <span className="block">Tap to load the interactive 3D model (downloads on demand)</span>
               <span className="block">Pick a fabric or wood finish on the right — the 3D preview updates live.</span>
             </>)}
       </p>
+
+      {arAvailable && (
+        <Accordion type="single" collapsible className="md:hidden border-t border-border bg-background px-3">
+          <AccordionItem value="ar-guide" className="border-b-0">
+            <AccordionTrigger className="gap-3 py-3 text-left font-display text-sm text-muted-foreground hover:no-underline [&>svg]:size-4">
+              First time using AR? View quick guide
+            </AccordionTrigger>
+            <AccordionContent className="space-y-4 font-body text-xs leading-relaxed text-muted-foreground">
+              <div className="flex gap-3"><Smartphone className="mt-0.5 size-4 shrink-0" strokeWidth={1.25} /><div><h4 className="font-display text-sm text-foreground">1. Scan Your Floor</h4><p>Tap View in Your Space and slowly pan your phone over an open floor area.</p></div></div>
+              <div className="flex gap-3"><Move className="mt-0.5 size-4 shrink-0" strokeWidth={1.25} /><div><h4 className="font-display text-sm text-foreground">2. Place & Rotate</h4><p>Drag with one finger to position the piece, or twist with two fingers to turn it.</p></div></div>
+              <div className="flex gap-3"><Camera className="mt-0.5 size-4 shrink-0" strokeWidth={1.25} /><div><h4 className="font-display text-sm text-foreground">3. Capture & Share</h4><p>Tap the shutter button to save a true-to-scale photo to share with your partner or designer.</p></div></div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      )}
 
       {opened && !clientEditorial && !hasExplicitRoles && noTargets && (
         <div className="px-3 py-2 border-t border-border bg-[hsl(var(--warning)/0.08)]">
