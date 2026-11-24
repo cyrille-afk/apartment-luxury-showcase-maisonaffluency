@@ -1,5 +1,8 @@
 # Roadmap
 
+## Private viewing-room finish parity
+- [x] Match GUM-style and Rift CTS dropdowns to the moodboard without repeated swatches; independent seat/Tundra/frame and oak/travertine changes verified on real Bespoke models, Update Selection/reopen restores exact choices and totals. Desktop/phone inspected; 87 tests pass. Existing Signature packages have no saved finish-permission rows and remain fixed; no permissions or catalogue data changed.
+
 ## Client board independent upholstery finishes
 - [x] Restore separate seat, backrest and frame controls using invitation-scoped recorded catalogue combinations, real colour crops and saved model roles; two-axis pieces remain unchanged.
 - [x] Real owner-board → temporary guest invitation → GUM Edson Charbon seat / Gris Clair backrest / Smooth Oak frame → submit → reload restores all three colours and €8,256 retail price. Desktop and phone screenshots inspected, no overflow or page errors; eleven regressions pass. Removed temporary invitation/comments; existing board finishes unchanged. Fixed white-label metadata deletion freeze and moved saved-cookie restoration after hydration; public frontend awaits publishing.

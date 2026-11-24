@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AlertTriangle, Box, Lock, LockOpen } from "lucide-react";
 import { editorialModelCamera, editorialUprightRotation } from "@/lib/editorialModelFraming";
+import { editorialUnnamedMaterialRole } from "@/lib/editorialModelMaterials";
 
 declare module "react" {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -384,6 +385,7 @@ const Product3DViewer: React.FC<Props> = ({
         if (materialRoles && Object.prototype.hasOwnProperty.call(materialRoles, name)) {
           return materialRoles[name];
         }
+        if (clientEditorial && !hasExplicitRoles) return editorialUnnamedMaterialRole(url, materials.indexOf(m), materials.length);
         return null;
       };
 
@@ -409,7 +411,7 @@ const Product3DViewer: React.FC<Props> = ({
       let ignored: any[];
       let backrestMatched: any[] = [];
 
-      if (hasExplicitRoles) {
+      if (hasExplicitRoles || (clientEditorial && materials.some(m => roleOf(m) !== null))) {
         // Explicit map wins. Unmapped materials default to "ignore".
         fabricMatched = materials.filter((m) => roleOf(m) === "fabric" || (roleOf(m) === "backrest" && !backrestTextureUrl));
         backrestMatched = backrestTextureUrl ? materials.filter((m) => roleOf(m) === "backrest") : [];
@@ -536,7 +538,7 @@ const Product3DViewer: React.FC<Props> = ({
     };
     mv.addEventListener("load", onModelLoad);
     return () => { cancelled = true; mv.removeEventListener("load", onModelLoad); };
-  }, [opened, ready, fabricTextureUrl, baseTextureUrl, topTextureUrl, backrestTextureUrl, fabricMaterialNameIncludes, baseMaterialNameIncludes, topMaterialNameIncludes, materialRoles, hasExplicitRoles, onMaterialsDiscovered, url]);
+  }, [opened, ready, fabricTextureUrl, baseTextureUrl, topTextureUrl, backrestTextureUrl, fabricMaterialNameIncludes, baseMaterialNameIncludes, topMaterialNameIncludes, materialRoles, hasExplicitRoles, onMaterialsDiscovered, url, clientEditorial]);
 
   // Reset cached originals whenever the model URL changes.
   useEffect(() => {
