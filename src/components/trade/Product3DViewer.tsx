@@ -639,13 +639,13 @@ const Product3DViewer: React.FC<Props> = ({
           </div>
         )}
       </div>
-      <p className="px-3 py-2 font-body text-[10px] leading-snug text-muted-foreground/70 border-t border-border">
+      <p className="px-3 py-2 font-display text-[10px] leading-snug text-muted-foreground/70 border-t border-border">
         {opened
           ? (locked
               ? "Camera locked — unlock above to rotate or zoom"
               : (<>
-                  <span className="hidden md:inline">Drag to rotate · scroll to zoom (bounded) · tap the cube to view in your room (AR)</span>
-                  <span className="md:hidden">Drag to rotate · pinch to zoom · two fingers to move · Lock to scroll the page</span>
+                  <span className="hidden md:inline">Drag to rotate · scroll to zoom (bounded)</span>
+                  <span className="md:hidden">Tap the AR cube icon in the bottom right to view this piece to scale in your room.</span>
                 </>))
           : (<>
               <span className="block">Tap to load the interactive 3D model (downloads on demand)</span>
