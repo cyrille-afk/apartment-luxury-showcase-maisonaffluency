@@ -452,7 +452,7 @@ const Product3DViewer: React.FC<Props> = ({
         } catch { /* noop */ }
       };
 
-      const applyOne = async (targets: any[], textureUrl: string) => {
+      const applyOne = async (targets: any[], textureUrl: string, matte = false) => {
         if (!targets.length || !mv.createTexture || cancelled) return;
         const texture = await mv.createTexture(textureUrl);
         if (cancelled || mv.model !== model || !texture) return;
@@ -460,6 +460,8 @@ const Product3DViewer: React.FC<Props> = ({
           try {
             m.pbrMetallicRoughness.baseColorTexture.setTexture(texture);
             m.pbrMetallicRoughness.setBaseColorFactor?.([1, 1, 1, 1]);
+            // Textiles are never metallic: some exports ship 0.5 metal on upholstery, which made fabric read as satin plastic.
+            if (matte) { m.pbrMetallicRoughness.setMetallicFactor?.(0); m.pbrMetallicRoughness.setRoughnessFactor?.(0.95); }
           } catch { /* noop */ }
         }
       };
@@ -496,7 +498,7 @@ const Product3DViewer: React.FC<Props> = ({
       try {
         // Fabric layer
         if (fabricTextureUrl) {
-          await applyOne(fabricTargets, fabricTextureUrl);
+          await applyOne(fabricTargets, fabricTextureUrl, true);
         } else {
           for (const m of fabricTargets) restoreOne(m);
         }

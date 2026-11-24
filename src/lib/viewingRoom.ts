@@ -79,3 +79,9 @@ export function viewingRoomLeadTime(weeks: number | null, items?: ViewingRoomIte
   if (!times?.length || times.some(time => !time.length)) return "To be confirmed";
   return `${Math.max(...times.flat())} weeks`;
 }
+/** Finishes the 3D viewer should paint. An unconfigured piece borrows the materials of the finish option priced as presented, so it never opens bare. */
+export function viewingRoomViewerMaterials(choice: ViewingRoomChoice): ViewingRoomChoice["materials"] {
+  if (choice.finish_key || choice.materials.upholstery || choice.materials.base || choice.materials.top) return choice.materials;
+  const match = choice.finish_options.find(option => option.size_key === choice.size_key && option.retail_price === choice.retail_price && Object.keys(option.materials).length > 0);
+  return match ? { ...match.materials, ...(match.colourways[0] && !match.materials["upholstery"] ? { upholstery: match.colourways[0] } : {}) } : choice.materials;
+}
