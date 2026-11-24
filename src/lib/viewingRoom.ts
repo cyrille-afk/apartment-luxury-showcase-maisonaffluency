@@ -37,7 +37,12 @@ export function viewingRoomSelection(slot: ViewingRoomSlot, productId: string, f
   const colourway = colourwayId ? finish.colourways.find(row => row.id === colourwayId) : undefined;
   if (colourwayId && !colourway) throw new Error("Unapproved colourway");
   const { colourways: _colourways, ...rest } = finish;
-  const selected: ViewingRoomChoice = { ...product, ...rest, id: product.id, finish_key: finish.key, retail_price_from: false, materials: colourway ? { ...finish.materials, upholstery: colourway } : finish.materials };
+  const materials = !colourway
+    ? finish.materials
+    : !/fabric|leather|upholster/i.test(colourway.category) && !finish.materials["upholstery"] && (finish.materials["top"] || finish.materials["base"])
+      ? { ...finish.materials, ...(finish.materials["top"] ? { top: colourway } : {}), ...(finish.materials["base"] ? { base: colourway } : {}) }
+      : { ...finish.materials, upholstery: colourway };
+  const selected: ViewingRoomChoice = { ...product, ...rest, id: product.id, finish_key: finish.key, retail_price_from: false, materials };
   if (colourway) selected.colourway_id = colourway.id; else delete selected.colourway_id;
   const picked: Partial<Record<ViewingRoomAxisRole, string>> = {};
   for (const [role, id] of Object.entries(axisColours ?? {}) as [ViewingRoomAxisRole, string][]) {
@@ -92,8 +97,10 @@ export function viewingRoomLeadTime(weeks: number | null, items?: ViewingRoomIte
 /** Finishes the 3D viewer should paint. An unconfigured piece borrows the materials of the finish option priced as presented, so it never opens bare. */
 export function viewingRoomViewerMaterials(choice: ViewingRoomChoice): ViewingRoomChoice["materials"] {
   if (choice.finish_key || choice.materials.upholstery || choice.materials.base || choice.materials.top) return choice.materials;
-  const match = choice.finish_options.find(option => option.size_key === choice.size_key && option.retail_price === choice.retail_price && Object.keys(option.materials).length > 0);
-  return match ? { ...match.materials, ...(match.colourways[0] && !match.materials["upholstery"] ? { upholstery: match.colourways[0] } : {}) } : choice.materials;
+  const sizeKey = choice.size_key ?? choice.size_options[0]?.key;
+  const match = choice.finish_options.find(option => option.size_key === sizeKey && option.retail_price === choice.retail_price && Object.keys(option.materials).length > 0);
+  const first = match?.colourways[0];
+  return match ? { ...match.materials, ...(first && !match.materials["upholstery"] && /fabric|leather|upholster/i.test(first.category) ? { upholstery: first } : {}) } : choice.materials;
 }
 
 /** Keep per-axis colour picks that are still approved on the newly chosen finish. */

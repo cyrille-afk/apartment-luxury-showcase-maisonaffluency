@@ -2360,6 +2360,13 @@
       "when": 1795509958526,
       "tag": "0336_viewing_room_proposal_display_metadata",
       "breakpoints": true
+    },
+    {
+      "idx": 337,
+      "version": "7",
+      "when": 1795521723774,
+      "tag": "0337_enable_signature_finishes_ibo_sizes_and_delcourt_wood_swatches",
+      "breakpoints": true
     }
   ]
 }

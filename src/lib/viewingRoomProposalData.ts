@@ -14,12 +14,15 @@ export function proposalConfiguredTotal(snapshot: ViewingRoomProposalSnapshot): 
 
 export function proposalSelectedFinishes(item: ViewingRoomChoice) {
   const seen = new Set<string>();
-  return Object.entries(viewingRoomViewerMaterials(item)).flatMap(([axis, material]) => {
+  const materials = viewingRoomViewerMaterials(item);
+  const shared = Boolean(materials["top"] && materials["base"] && materials["top"].id === materials["base"].id);
+  return Object.entries(materials).flatMap(([axis, material]) => {
     if (axis.startsWith("default-")) return [];
+    if (shared && axis === "base") return [];
     const identity = `${axis}:${material.id}`;
     if (seen.has(identity)) return [];
     seen.add(identity);
-    const label = axis === "upholstery" ? (item.materials["backrest"] ? "Seat upholstery" : "Upholstery") : axis === "backrest" ? "Backrest leather" : axis === "base" ? "Frame / base" : axis === "top" ? "Tabletop" : material.category || "Selected finish";
+    const label = shared && axis === "top" ? "Finish" : axis === "upholstery" ? (materials["backrest"] ? "Seat upholstery" : "Upholstery") : axis === "backrest" ? "Backrest leather" : axis === "base" ? "Frame / base" : axis === "top" ? "Tabletop" : material.category || "Selected finish";
     return [{ ...material, axis, label, name: /^\d+$/.test(material.name.trim()) ? `Selected ${material.category || "material"} — name to be confirmed` : material.name }];
   });
 }

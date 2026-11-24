@@ -8,5 +8,9 @@ describe("private proposal selected data", () => {
   it("refuses an unconfirmed selected price", () => expect(() => proposalConfiguredTotal({ package: "Bespoke", currency: "USD", total: 700000, items: [{ ...item, retail_price: null }] })).toThrow());
   it("includes only the selected oak and travertine, never supplier defaults", () => expect(proposalSelectedFinishes(item).map(f => f.name)).toEqual(["Ebonized Oak", "Brown Travertine"]));
   it("never displays a raw numeric finish ID", () => expect(proposalSelectedFinishes({ ...item, materials: { base: material("143", "143") } })[0]?.name).toBe("Selected Wood — name to be confirmed"));
+  it("combines a monolithic wood finish shared by top and base into one Finish row", () => {
+    const elm = material("elm", "Brushed Elm-ORG.517.005.B.HY");
+    expect(proposalSelectedFinishes({ ...item, materials: { top: elm, base: elm } }).map(f => `${f.label}: ${f.name}`)).toEqual(["Finish: Brushed Elm-ORG.517.005.B.HY"]);
+  });
   it("groups the schedule as two complete items per page", () => expect(proposalSchedulePages([item, item, item, item, item]).map(page => page.length)).toEqual([2, 2, 1]));
 });
