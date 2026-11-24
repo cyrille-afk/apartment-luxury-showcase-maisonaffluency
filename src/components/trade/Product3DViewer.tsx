@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { arViewerUrl, type ArViewerHandoff } from "@/lib/arViewerHandoff";
+import { arModelTransform } from "@/lib/arModelTransform";
 import { editorialModelCamera, editorialUprightRotation } from "@/lib/editorialModelFraming";
 import { editorialUnnamedMaterialRole } from "@/lib/editorialModelMaterials";
 
@@ -30,6 +31,7 @@ declare module "react" {
           loading?: "auto" | "lazy" | "eager";
           reveal?: "auto" | "manual";
           scale?: string;
+          orientation?: string;
         },
         HTMLElement
       >;
@@ -223,6 +225,7 @@ const Product3DViewer: React.FC<Props> = ({
   arHandoff,
 }) => {
   const hasExplicitRoles = !!materialRoles && Object.keys(materialRoles).length > 0;
+  const modelTransform = arModelTransform(url, scale);
 
   const [opened, setOpened] = useState(autoOpen);
   useEffect(() => { if (autoOpen) setOpened(true); }, [autoOpen]);
@@ -729,7 +732,8 @@ const Product3DViewer: React.FC<Props> = ({
             ar={mobileAr}
             ar-scale="fixed"
             ar-modes="webxr quick-look"
-            scale={scale || "1 1 1"}
+            scale={modelTransform.scale}
+            orientation={modelTransform.orientation}
             shadow-intensity="1"
             exposure="1"
             tone-mapping="neutral"

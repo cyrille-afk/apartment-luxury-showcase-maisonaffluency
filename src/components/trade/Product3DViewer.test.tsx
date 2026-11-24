@@ -31,6 +31,25 @@ describe("desktop AR phone handoff", () => {
 });
 
 describe("mobile AR availability", () => {
+  it.each([
+    ["f72b4185-9eeb-4ec0-b862-0972abc93a9f/default-1791609555869.glb", "0.001 0.001 0.001"],
+    ["fd8c2682-d8a1-48fe-b110-d22209cbcce7/default-1791611289330.glb", "0.01 0.01 0.01"],
+  ])("launches the corrected upright source %s with the selected upholstery", async (file, expectedScale) => {
+    mobileCapability(true);
+    const seat = material("seat", "default.jpg", [1, 1, 1, 1]);
+    const { container } = render(<Product3DViewer url={`/glb-models/${file}`} alt="Delcourt" autoOpen fabricTextureUrl="selected.jpg" materialRoles={{ seat: "fabric" }} />);
+    const viewer = container.querySelector("model-viewer") as TestModelViewer;
+    await act(async () => { viewer.model = { materials: [seat] }; viewer.canActivateAR = true; viewer.dispatchEvent(new Event("load")); });
+    const ar = await screen.findByRole("button", { name: "View in Your Space" });
+    await waitFor(() => expect(ar).toBeEnabled());
+    viewer.activateAR = vi.fn(async () => {
+      expect(viewer.getAttribute("scale")).toBe(expectedScale);
+      expect(viewer.getAttribute("orientation")).toBe("0deg -90deg 0deg");
+      expect(seat.pbrMetallicRoughness.baseColorTexture.texture.name).toBe("selected.jpg");
+    });
+    fireEvent.click(ar);
+    expect(viewer.activateAR).toHaveBeenCalledOnce();
+  });
   it("counts attempts separately from confirmed opens and deduplicates native signals and fallback displays", async () => {
     mobileCapability(true);
     const track = vi.fn(() => null);

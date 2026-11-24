@@ -1,5 +1,10 @@
 # Roadmap
 
+## Delcourt AR scale and upright placement
+- [x] Apply audited GUM millimetre / IBO centimetre conversion and positive-Z upright correction in the shared viewer, preserving selected finishes and size previews.
+- [x] Real signed-in board renders GUM and IBO upright on desktop/phone with saved textures intact and zero page errors. Actual AR button under simulated iOS capability generates genuine native USDZ files; USD geometry validates Y-up, centered X/Z, nonempty geometry and metre bounds: GUM 0.900506×0.749894×0.770469, IBO 1.699710×0.410000×0.949867. All 27 focused tests and preview build pass.
+- [ ] Physical iPhone camera placement remains unverified: requires a real device, unavailable in the sandbox.
+
 ## AR analytics dashboard
 - [x] Added admin-only dated published-activity snapshot, daily launch/open/fallback-rate charts, surface filters and explicit rate/Quick Look limitations. Real admin shortcut, reload-preserved filter, desktop/phone and signed-out privacy verified; 21 tests and build pass, 39 event schemas compatible. The queried 17–24 Nov snapshot has zero recorded AR events. Automatic live refresh is unavailable through the existing collector connection; no credentials or parallel tracking store added. Orders paid each month remains covered by project.order_paid.
 
