@@ -1,0 +1,1 @@
+- Client board three-axis finishes use the invitation-projected catalogue axes and colour lists; seat, backrest and frame are serialized as labelled values in existing finish-request feedback and routed to distinct saved model roles — preserves independent upholstery, exact retail tiers and refresh restoration without widening catalogue access.

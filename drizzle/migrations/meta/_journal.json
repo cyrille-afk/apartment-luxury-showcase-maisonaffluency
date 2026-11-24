@@ -2325,6 +2325,13 @@
       "when": 1795496701511,
       "tag": "0331_viewing_room_axis_materials_fix",
       "breakpoints": true
+    },
+    {
+      "idx": 332,
+      "version": "7",
+      "when": 1795497942588,
+      "tag": "0332_shared_board_three_axis_finishes",
+      "breakpoints": true
     }
   ]
 }

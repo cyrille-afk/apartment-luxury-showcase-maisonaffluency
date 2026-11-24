@@ -46,7 +46,12 @@ export default function SharedProcurementBoard() {
   const second = boardSlug;
   const param = second ? `${projectSlug}/${second}` : first;
   const isLegacy = !second && /^[0-9a-f]{48}$/.test(first);
-  const [token, setToken] = useState<string>(() => (isLegacy ? first : readSession(param)));
+  const [token, setToken] = useState<string>(() => (isLegacy ? first : ""));
+  const [sessionReady, setSessionReady] = useState(isLegacy);
+  useEffect(() => {
+    if (!isLegacy) setToken(readSession(param) ?? "");
+    setSessionReady(true);
+  }, [isLegacy, param]);
   const { user } = useAuth();
   const navigate = useNavigate();
   const [data, setData] = useState<Shared | null | undefined>(undefined);
@@ -118,27 +123,18 @@ export default function SharedProcurementBoard() {
     });
   }, [user, data, token, load]);
 
-  // White-label: strip every platform-branded node (static head metadata,
-  // JSON-LD, canonical, static hero, noscript fallback) and keep stripping
-  // anything re-injected later; swap the favicon for the studio logo.
+  // White-label branding is rendered conditionally above/below. Never remove
+  // React-owned head nodes: the next route/metadata commit would crash.
   const whiteLabel = !!data && data.role === "client" && data.hide_maison_branding;
   useEffect(() => {
     if (!whiteLabel || !data) return;
-    const brand = /affluency/i;
-    const scrub = () => {
-      document.querySelectorAll("#static-hero, #static-designers-hero, noscript").forEach((n) => n.remove());
-      document.head.querySelectorAll("meta, link:not([rel='stylesheet']):not([rel='modulepreload']), script[type='application/ld+json']")
-        .forEach((n) => { if (brand.test(n.outerHTML)) n.remove(); });
-    };
-    scrub();
+    let icon: HTMLLinkElement | null = null;
     if (data.studio_logo_url) {
-      const icon = document.createElement("link");
+      icon = document.createElement("link");
       icon.rel = "icon"; icon.href = data.studio_logo_url;
       document.head.appendChild(icon);
     }
-    const obs = new MutationObserver(scrub);
-    obs.observe(document.documentElement, { childList: true, subtree: true });
-    return () => obs.disconnect();
+    return () => { icon?.remove(); };
   }, [whiteLabel, data]);
 
   const react = async (item: Item, reaction: "up" | "down" | "heart") => {
@@ -177,8 +173,7 @@ export default function SharedProcurementBoard() {
       const c = catalog[it.product_id];
       if (!c) continue;
       if (picks[it.id]) { out[it.id] = picks[it.id]; continue; }
-      const [mt, mb] = (it.my_finish || "").split(" / ");
-      const src = it.my_finish ? { fabric_label: mt || null, wood_label: mb || null } : it;
+      const src = it.my_finish ? { variant_label: it.my_finish, fabric_label: null, wood_label: null } : it;
       if (!(src.fabric_label || src.wood_label || (src as any).variant_label)) continue;
       out[it.id] = resolveFinishFrom(src, c, c.swatches || []);
     }
@@ -189,13 +184,13 @@ export default function SharedProcurementBoard() {
   const [drawerPicks, setDrawerPicks] = useState<Record<string, FinishSelection>>({});
   const chooseFinish = (item: Item, sel: FinishSelection) => {
     const base = resolved[item.id];
-    const same = base && (base.top ?? null) === (sel.top ?? null) && (base.base ?? null) === (sel.base ?? null);
+    const same = base && (base.top ?? null) === (sel.top ?? null) && (base.base ?? null) === (sel.base ?? null) && JSON.stringify(base.extra ?? []) === JSON.stringify(sel.extra ?? []);
     setDrawerPicks((p) => { const n = { ...p }; if (same) delete n[item.id]; else n[item.id] = sel; return n; });
   };
   const submitDecision = async (item: Item, changed: boolean) => {
     const sel = drawerPicks[item.id];
     if (changed && sel) {
-      const text = `Finish request: ${[sel.top, sel.base].filter(Boolean).join(" / ") || sel.label}`;
+      const text = `Finish request: ${sel.label}`;
       const { error } = await supabase.rpc("submit_board_feedback" as any, { _token: token, _item_id: item.id, _reaction: null, _comment: text });
       if (error) { toast({ title: "Could not send your proposal", variant: "destructive" }); return; }
       setPicks((p) => ({ ...p, [item.id]: sel }));
@@ -214,6 +209,7 @@ export default function SharedProcurementBoard() {
   const drawerItem = data?.items.find((i) => i.id === drawerFor) ?? null;
   const contractorLocked = data?.role === "contractor" && !(user && data.claimed);
 
+  if (!sessionReady) return <div className="min-h-screen bg-background" />;
   if (!token) return <AccessGate slug={param} onVerified={(t) => { writeSession(param, t); setToken(t); }} />;
   if (presentationLoading) return <div className="min-h-screen bg-background" />;
   if (presentation) return <WorkspacePresentation data={presentation} />;
@@ -341,6 +337,7 @@ export default function SharedProcurementBoard() {
             clientMode
             initialTop={resolved[drawerItem.id]?.top}
             initialBase={resolved[drawerItem.id]?.base}
+            initialSelection={resolved[drawerItem.id] ?? null}
             preloaded={catalog[drawerItem.product_id]}
             onSelect={(sel) => chooseFinish(drawerItem, sel)}
             footer={(() => {

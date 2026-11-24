@@ -24,7 +24,7 @@ describe("saved client board feedback", () => {
         return { error: null };
       }
       if (name === "get_shared_board") return { data: {
-        board_title: "Man of Parts", studio_name: "Studio", project_name: null, role: "client", claimed: true,
+        board_title: "Man of Parts", studio_name: "Studio", project_name: null, role: "client", claimed: true, hide_maison_branding: true,
         items: [{ id: "madison", product_id: "table", product_name: "Madison Avenue Side Table", currency: "EUR", approval_status: "approved", my_reaction: "up", my_comments: [...mocks.comments] }],
       } };
       return { data: null };
@@ -57,5 +57,16 @@ describe("saved client board feedback", () => {
     expect(navigateMock).toHaveBeenCalledWith("/shared/board/board/man-of-parts", { replace: true });
     expect(raw).not.toHaveBeenCalled();
     raw.mockRestore();
+  });
+  it("keeps React-owned metadata attached when a white-label board opens and updates", async () => {
+    const meta = document.createElement("meta");
+    meta.name = "description"; meta.content = "Maison Affluency private board";
+    document.head.appendChild(meta);
+    render(<SharedProcurementBoard />);
+    await screen.findByRole("heading", { name: "Madison Avenue Side Table" });
+    fireEvent.click(screen.getByRole("button", { name: "Like" }));
+    await waitFor(() => expect(mocks.rpc).toHaveBeenCalledWith("submit_board_feedback", expect.anything()));
+    expect(document.head.contains(meta)).toBe(true);
+    meta.remove();
   });
 });

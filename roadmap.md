@@ -1,5 +1,9 @@
 # Roadmap
 
+## Client board independent upholstery finishes
+- [x] Restore separate seat, backrest and frame controls using invitation-scoped recorded catalogue combinations, real colour crops and saved model roles; two-axis pieces remain unchanged.
+- [x] Real owner-board → temporary guest invitation → GUM Edson Charbon seat / Gris Clair backrest / Smooth Oak frame → submit → reload restores all three colours and €8,256 retail price. Desktop and phone screenshots inspected, no overflow or page errors; eleven regressions pass. Removed temporary invitation/comments; existing board finishes unchanged. Fixed white-label metadata deletion freeze and moved saved-cookie restoration after hydration; public frontend awaits publishing.
+
 ## Public customer account verification and cross-device saving
 - [x] Clarissa's email confirmation/sign-in and single customer alert verified; zero Trade roles/applications. Corporate confirmation can set legacy profile status approved, but checkout eligibility now requires actual roles on screen and all seven server pricing consumers.
 - [x] Private account-owned atomic favorites/folder changes, one-time legacy adoption, account-scoped retry cache and sign-out clearing implemented; fresh-device and concurrency/regression tests pass.

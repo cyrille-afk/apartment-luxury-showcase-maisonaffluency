@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import { formatMoneyIn } from "@/lib/displayMoney";
 import Product3DViewer from "@/components/trade/Product3DViewer";
 import { boardPiecePhoto } from "./boardPiecePhoto";
+import BoardAxisFinishes, { boardAxisSelection, resolveBoardAxisSelection, type BoardAxisVariant } from "./BoardAxisFinishes";
 
 type Glb = { variant_label: string; glb_url: string; is_default: boolean; material_roles: any };
 type Swatch = { name: string; image_url: string | null; category: string | null; price_tier_label?: string | null };
@@ -85,6 +86,8 @@ export function resolveFinishFrom(
   const raw = p.variants ?? p.size_variants;
   const variants: any[] = Array.isArray(raw) ? raw.filter((v: any) => v.top || v.base) : [];
   const lbl = it.variant_label || "";
+  const threeAxis = resolveBoardAxisSelection(lbl, variants);
+  if (threeAxis) return threeAxis;
   // Quote-synced labels: "Wood Finish: X · Metal Finish: Y · Stone Finish: Z · size".
   const axisValues = lbl.split(" · ").map((s) => s.match(/^[^:]{1,40}:\s*(.+)$/)?.[1]?.trim()).filter((v): v is string => Boolean(v));
   if (axisValues.length >= 2) {
@@ -134,14 +137,14 @@ export function resolveFinishFrom(
 export type PreloadedFinishes = { variants: any[]; variant_image_map: any; gallery_images: string[]; swatches: Swatch[]; glbs: Glb[]; currency: string; lead: string | null };
 
 
-type Variant = { top?: string; base?: string; label?: string; price_cents?: number; lead_time?: string };
+type Variant = BoardAxisVariant & { lead_time?: string };
 
 const norm = (s?: string) => (s || "").toLowerCase().normalize("NFD").replace(/[^a-z0-9]/g, "");
 export const finishLabel = (v: Variant) =>
   [v.top, v.base].filter(Boolean).join(" / ") + (v.label ? ` · ${v.label}` : "");
 
 export default function FinishesDrawer({
-  open, onOpenChange, productId, productName, baseImage, clientMode, current, initialTop, initialBase, onSelect, preloaded, footer,
+  open, onOpenChange, productId, productName, baseImage, clientMode, current, initialTop, initialBase, initialSelection, onSelect, preloaded, footer,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
@@ -152,6 +155,7 @@ export default function FinishesDrawer({
   current?: string | null;
   initialTop?: string | null;
   initialBase?: string | null;
+  initialSelection?: FinishSelection | null;
   onSelect: (sel: FinishSelection) => void;
   /** Guest boards: catalogue data fetched through the invite token instead of direct table reads. */
   preloaded?: PreloadedFinishes | null;
@@ -168,6 +172,7 @@ export default function FinishesDrawer({
   const [glbs, setGlbs] = useState<Glb[]>([]);
   const [swatches, setSwatches] = useState<Swatch[]>([]);
   const [preview, setPreview] = useState<Variant | null>(null);
+  const [axisPreview, setAxisPreview] = useState<FinishSelection | null>(null);
   // User-picked swatches per axis (real fabric/finish names from the product
   // sheet's swatch list, which need not match variant axis labels).
   const [picked, setPicked] = useState<{ top?: Swatch; base?: Swatch }>({});
@@ -176,6 +181,7 @@ export default function FinishesDrawer({
   useEffect(() => {
     if (!open) return;
     setPreview(null);
+    setAxisPreview(null);
     setPicked({});
     if (preloaded) {
       const list = preloaded.swatches || [];
@@ -257,14 +263,18 @@ export default function FinishesDrawer({
       return hit ? { ...hit, top: t || hit.top, base: b || hit.base } : null;
     })()
     ?? variants[0] ?? null;
-  const trade = tradePriceCents(activeVariant?.price_cents, discount);
+  const axisVariants = variants.filter(v => (v.axes?.length ?? 0) === 3);
+  const initialAxes = initialSelection?.label ? resolveBoardAxisSelection(initialSelection.label, axisVariants, baseImage) : null;
+  const defaultAxisVariant = axisVariants.find(v => resolveBoardAxisSelection(initialAxes?.label ?? "", [v])) ?? axisVariants[0];
+  const shownAxes = axisPreview ?? initialAxes ?? (defaultAxisVariant ? boardAxisSelection(defaultAxisVariant, Object.fromEntries((defaultAxisVariant.axes ?? []).flatMap(axis => axis.colours[0] ? [[axis.role, axis.colours[0]]] : [])), baseImage) : null);
+  const trade = tradePriceCents(shownAxes?.price_cents ?? activeVariant?.price_cents, discount);
   const glb = useMemo(() => {
     if (!glbs.length) return null;
     const lbl = norm(activeVariant?.label);
     return (lbl && glbs.find((g) => norm(g.variant_label) === lbl)) || glbs.find((g) => g.is_default) || glbs[0];
   }, [glbs, activeVariant]);
   const textures = useMemo(() => {
-    const out: { fabric?: string; base?: string; top?: string } = {};
+    const out: { fabric?: string; base?: string; top?: string; backrest?: string } = {};
     [activeVariant?.top, activeVariant?.base].forEach((m, i) => {
       if (!m) return;
       const sw = swatches.find((s) => norm(s.name) === norm(m)) || swatches.find((s) => norm(m).includes(norm(s.name)) || norm(s.name).includes(norm(m)));
@@ -276,8 +286,15 @@ export default function FinishesDrawer({
     // A picked top may be upholstery (sofas) or a stone/wood surface (tables) — route it by its category.
     if (picked.top?.image_url) out[roleOf(picked.top.category) === "fabric" ? "fabric" : "top"] = picked.top.image_url;
     if (picked.base?.image_url) out.base = picked.base.image_url;
+    if (shownAxes) {
+      const axes: typeof out = {};
+      if (shownAxes.top_image) axes.fabric = shownAxes.top_image;
+      if (shownAxes.extra?.[0]?.img) axes.backrest = shownAxes.extra[0].img;
+      if (shownAxes.base_image) axes.base = shownAxes.base_image;
+      return axes;
+    }
     return out;
-  }, [activeVariant, swatches, picked]);
+  }, [activeVariant, swatches, picked, shownAxes]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -301,6 +318,7 @@ export default function FinishesDrawer({
               fabricTextureUrl={textures.fabric ?? null}
               baseTextureUrl={textures.base ?? null}
               topTextureUrl={textures.top ?? null}
+              backrestTextureUrl={"backrest" in textures ? textures.backrest ?? null : null}
               materialRoles={glb.material_roles || undefined}
               autoOpen
             />
@@ -327,7 +345,10 @@ export default function FinishesDrawer({
                 sheet (product_fabric_swatches_public), one dropdown per axis.
                 Falls back to variant-axis names when no swatches are linked. */}
             <div className="border-b border-border/60 px-6 py-5 space-y-4">
-              {(() => { const upholstered = swatches.some((s) => roleOf(s.category) === "fabric"); return ([
+              {axisVariants.length > 0 ? <BoardAxisFinishes key={productId} variants={axisVariants} initial={shownAxes} onChange={(variant, colours) => {
+                const selection = boardAxisSelection(variant, colours, imageFor(variant));
+                setPreview(variant); setAxisPreview(selection); onSelect(selection);
+              }} /> : (() => { const upholstered = swatches.some((s) => roleOf(s.category) === "fabric"); return ([
                 { key: "top" as const, title: upholstered ? "Upholstery" : "Top Finish", role: upholstered ? "fabric" : "top" },
                 { key: "base" as const, title: upholstered ? "Frame Finish" : "Base Finish", role: "base" },
               ]); })().map(({ key, title, role }) => {
@@ -426,7 +447,7 @@ export default function FinishesDrawer({
                   </div>
                   <div className="min-w-0">
                     <p className="font-display text-sm font-semibold text-foreground leading-tight">
-                      {[activeVariant.top, activeVariant.base].filter(Boolean).join(" / ")}
+                      {shownAxes ? [shownAxes.top, shownAxes.extra?.[0]?.name, shownAxes.base].filter(Boolean).join(" / ") : [activeVariant.top, activeVariant.base].filter(Boolean).join(" / ")}
                     </p>
                     {activeVariant.label && (
                       <p className="mt-0.5 font-body text-[11px] text-muted-foreground">{activeVariant.label}</p>
@@ -439,7 +460,7 @@ export default function FinishesDrawer({
                   <div>
                     <p className="font-body text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Client Price</p>
                     <p className="font-display text-base tabular-nums text-primary">
-                      {formatMoneyIn(activeVariant.price_cents ?? null, currency, "Price upon Request")}
+                      {formatMoneyIn(shownAxes?.price_cents ?? activeVariant.price_cents ?? null, currency, "Price upon Request")}
                     </p>
                   </div>
                   {!clientMode && (
