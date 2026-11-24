@@ -4,9 +4,13 @@ const CORRECTIONS = [
   { path: "/glb-models/fd8c2682-d8a1-48fe-b110-d22209cbcce7/default-1791611289330.glb", metresPerUnit: .01 },
 ] as const;
 
-export function arModelTransform(url: string, scale?: string | null) {
+export function auditedModelCorrection(url: string) {
   const path = url.split(/[?#]/)[0] ?? "";
-  const correction = CORRECTIONS.find(entry => path.endsWith(entry.path));
+  return CORRECTIONS.find(entry => path.endsWith(entry.path));
+}
+
+export function arModelTransform(url: string, scale?: string | null) {
+  const correction = auditedModelCorrection(url);
   const multiplier = correction?.metresPerUnit ?? 1;
   const axes = (scale || "1 1 1").trim().split(/\s+/).map(Number);
   const valid = axes.length === 3 && axes.every(value => Number.isFinite(value) && value > 0);

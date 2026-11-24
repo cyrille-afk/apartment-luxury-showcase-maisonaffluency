@@ -1,5 +1,10 @@
 # Roadmap
 
+## Delcourt correction flow sweep
+- [x] Read product/fullscreen/compact, board/guest, private-room, admin and Felix viewer paths; all use the corrected shared viewer.
+- [x] Correct dimensionless room/worker fitting; video/document captures inherit the rendered room. Read guest database projections and uploads/conversion paths: no additional AR exporter or database-scale conversion. Preserve placements, prices, permissions, source uploads and settled records.
+- [x] All 76 model/viewer/material/room/cinematic regressions and preview build pass. Real signed-in phone board opens both pieces with selected textures; actual AR button under simulated iOS capability exports nonempty, Y-up, centred, metre-scale native USDZ files. Actual room worker prepares the original GUM/IBO files at the same measured dimensions, with floor grounding and unchanged placement/yaw; zero page errors. Physical iPhone placement and external provider output are not claimed verified.
+
 ## Delcourt AR scale and upright placement
 - [x] Apply audited GUM millimetre / IBO centimetre conversion and positive-Z upright correction in the shared viewer, preserving selected finishes and size previews.
 - [x] Real signed-in board renders GUM and IBO upright on desktop/phone with saved textures intact and zero page errors. Actual AR button under simulated iOS capability generates genuine native USDZ files; USD geometry validates Y-up, centered X/Z, nonempty geometry and metre bounds: GUM 0.900506×0.749894×0.770469, IBO 1.699710×0.410000×0.949867. All 27 focused tests and preview build pass.

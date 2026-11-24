@@ -1,5 +1,6 @@
 import { Box3, Euler, Group, MathUtils, Mesh, Object3D, Quaternion, Vector3 } from "three";
 import { parseDimensionString, type ProductDimensions } from "./productDimensions";
+import { auditedModelCorrection } from "./arModelTransform";
 
 const Y_UP = new Vector3(0, 1, 0);
 /** Curated rooms fit all three catalogue axes after upright import correction. */
@@ -141,7 +142,10 @@ export function fitUprightModel(model: Object3D, dimensions?: string | null, url
   // Recorded dimensions are millimetres; geometry units are irrelevant once
   // measured. Preserve proportions rather than stretching individual axes.
   const targetMetres = expected ? Math.max(expected.w, expected.d, expected.h) / 1000 : 1.0;
-  frame.scale.setScalar(targetMetres / (Math.max(extent.x, extent.y, extent.z) || 1));
+  // Audited CAD units retain real-world scale even when catalogue dimensions
+  // are absent; generic one-metre normalization shrank IBO in shared rooms.
+  const audited = auditedModelCorrection(url);
+  frame.scale.setScalar(!expected && audited ? audited.metresPerUnit : targetMetres / (Math.max(extent.x, extent.y, extent.z) || 1));
   frame.updateWorldMatrix(true, true);
   const fitted = new Box3().setFromObject(frame);
   if (!fitted.isEmpty()) {

@@ -159,6 +159,27 @@ describe("model import frame", () => {
 });
 
 describe("verified low-table import frames", () => {
+  it("keeps the audited IBO at 170 × 95 × 41cm and grounds its offset CAD origin without dimensions", () => {
+    const source = piece(170, 95, 41);
+    source.position.set(220, 0, 20.5);
+    const box = bounds(fitUprightModel(source, null, "/glb-models/fd8c2682-d8a1-48fe-b110-d22209cbcce7/default-1791611289330.glb"));
+    const size = box.getSize(new Vector3());
+    expect(size.x).toBeCloseTo(1.7);
+    expect(size.y).toBeCloseTo(.41);
+    expect(size.z).toBeCloseTo(.95);
+    expect(box.min.y).toBeCloseTo(0);
+    expect(box.getCenter(new Vector3()).x).toBeCloseTo(0);
+    expect(box.getCenter(new Vector3()).z).toBeCloseTo(0);
+  });
+  it("keeps audited GUM at 90 × 77 × 75cm when its dimensions are not projected", () => {
+    const source = piece(900, 770, 750);
+    const box = bounds(fitUprightModel(source, null, "/glb-models/f72b4185-9eeb-4ec0-b862-0972abc93a9f/default-1791609555869.glb"));
+    const size = box.getSize(new Vector3());
+    expect(size.x).toBeCloseTo(.9);
+    expect(size.y).toBeCloseTo(.75);
+    expect(size.z).toBeCloseTo(.77);
+    expect(box.min.y).toBeCloseTo(0);
+  });
   it("lays the DUP coffee table flat (Z-up export, no recorded dimensions)", async () => {
     const { Group: G, Mesh: M, BoxGeometry: B, MeshBasicMaterial: Mat, Box3: Bx, Vector3: V } = await import("three");
     const { fitUprightModel: fit } = await import("./modelOrientation");
