@@ -2339,6 +2339,20 @@
       "when": 1795501573336,
       "tag": "0333_gum_backrest_tundra_leather",
       "breakpoints": true
+    },
+    {
+      "idx": 334,
+      "version": "7",
+      "when": 1795502226105,
+      "tag": "0334_viewing_room_stone_wood_matrix",
+      "breakpoints": true
+    },
+    {
+      "idx": 335,
+      "version": "7",
+      "when": 1795502440199,
+      "tag": "0335_viewing_room_stone_wood_matrix_image",
+      "breakpoints": true
     }
   ]
 }
