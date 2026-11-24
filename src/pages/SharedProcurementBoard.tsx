@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { readArViewerHandoff } from "@/lib/arViewerHandoff";
 import { trimLogoUrl } from "@/lib/cloudinaryLogo";
 import { productAttribution } from "@/lib/productAttribution";
 import { useNavigate, useParams } from "@/lib/router-compat";
@@ -63,6 +64,17 @@ export default function SharedProcurementBoard() {
   const [catalog, setCatalog] = useState<Record<string, PreloadedFinishes> | null>(null);
   const [picks, setPicks] = useState<Record<string, FinishSelection>>({});
   const [drawerFor, setDrawerFor] = useState<string | null>(null);
+  const arOpened = useRef<string | null>(null);
+  useEffect(() => {
+    if (!data || !catalog) return;
+    const handoff = readArViewerHandoff(window.location.href);
+    if (!handoff || handoff.kind !== "board") return;
+    const key = `${param}:${JSON.stringify(handoff)}`;
+    if (arOpened.current === key) return;
+    const item = data.items.find(row => row.id === handoff.id && row.product_id === handoff.product);
+    if (!item || !catalog[item.product_id]) return;
+    arOpened.current = key; setDrawerFor(item.id);
+  }, [data, catalog, param]);
   const [room, setRoom] = useState<SharedVisualiserRoom | null>(null);
   const [presentation, setPresentation] = useState<Presentation | null>(null);
   const [presentationLoading, setPresentationLoading] = useState(true);
@@ -106,7 +118,7 @@ export default function SharedProcurementBoard() {
       const slug = sh.project_name ? `${slugify(sh.project_name)}/${slugify(sh.board_title)}` : `board/${slugify(sh.board_title)}`;
       // Router navigation (not raw history.replaceState): a raw URL swap made the router
       // re-match mid-render and crashed React, freezing every control on the client board.
-      writeSession(slug, token); navigate(`/shared/board/${slug}`, { replace: true });
+      writeSession(slug, token); navigate(`/shared/board/${slug}${window.location.search}`, { replace: true });
     }
     setData((d as Shared) ?? null);
   }, [token, isLegacy, param, navigate]);
@@ -332,6 +344,7 @@ export default function SharedProcurementBoard() {
             open={!!drawerFor}
             onOpenChange={(o) => { if (!o) { setDrawerPicks((p) => { const n = { ...p }; delete n[drawerItem.id]; return n; }); setDrawerFor(null); } }}
             productId={drawerItem.product_id}
+            arItemId={drawerItem.id}
             productName={drawerItem.product_name}
             baseImage={drawerItem.image_url}
             clientMode

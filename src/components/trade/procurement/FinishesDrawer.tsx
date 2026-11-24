@@ -1,13 +1,14 @@
 import { toDiscountFraction, tradePriceCents, discountPercentLabel } from "@/lib/tradePricing";
 import type * as React from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { formatMoneyIn } from "@/lib/displayMoney";
 import Product3DViewer from "@/components/trade/Product3DViewer";
 import { boardPiecePhoto } from "./boardPiecePhoto";
-import BoardAxisFinishes, { boardAxisSelection, resolveBoardAxisSelection, type BoardAxisVariant } from "./BoardAxisFinishes";
+import BoardAxisFinishes, { boardAxisSelection, readBoardAxisNames, resolveBoardAxisSelection, type BoardAxisVariant } from "./BoardAxisFinishes";
+import { readArViewerHandoff, type ArViewerHandoff } from "@/lib/arViewerHandoff";
 
 type Glb = { variant_label: string; glb_url: string; is_default: boolean; material_roles: any };
 type Swatch = { name: string; image_url: string | null; category: string | null; price_tier_label?: string | null };
@@ -158,12 +159,38 @@ const norm = (s?: string) => (s || "").toLowerCase().normalize("NFD").replace(/[
 export const finishLabel = (v: Variant) =>
   [v.top, v.base].filter(Boolean).join(" / ") + (v.label ? ` · ${v.label}` : "");
 
+/** Resolve display-only QR names against this piece's accessible catalogue; never trust URL prices/images. */
+export function resolveArBoardPreview(handoff: ArViewerHandoff, productId: string, variants: Variant[], swatches: Swatch[], image: string | null) {
+  if (handoff.kind !== "board" || (handoff.product ?? handoff.id) !== productId) return null;
+  const names = readBoardAxisNames(handoff.finish);
+  if (names.seat && names.backrest && names.frame) {
+    const variant = variants.find(v => v.axes?.length === 3 && v.axes.every(axis => {
+      const wanted = names[axis.role];
+      return wanted && (norm(axis.value ?? "") === norm(wanted) || axis.colours.some(colour => norm(colour.name) === norm(wanted)));
+    }));
+    if (!variant) return null;
+    const selection = resolveBoardAxisSelection(handoff.finish ?? "", [variant], image);
+    return selection ? { variant, selection, picked: {} } : null;
+  }
+  const top = handoff.top, base = handoff.base;
+  const topSwatch = swatches.find(sw => norm(sw.name) === norm(top)), baseSwatch = swatches.find(sw => norm(sw.name) === norm(base));
+  if (top && !topSwatch && !variants.some(v => norm(v.top) === norm(top))) return null;
+  if (base && !baseSwatch && !variants.some(v => norm(v.base) === norm(base))) return null;
+  const pool = variants.filter(v => (!base || norm(v.base) === norm(base)) && (!handoff.size || norm(v.label) === norm(handoff.size)));
+  const matched = pool.find(v => norm(v.top) === norm(top)) ?? matchTopVariant(pool, top, base, topSwatch?.price_tier_label);
+  if (!matched) return null;
+  const variant = { ...matched, ...(top ? { top } : {}), ...(base ? { base } : {}) };
+  const selection: FinishSelection = { label: finishLabel(variant), price_cents: matched.price_cents ?? null, image_url: image, top: variant.top ?? null, base: variant.base ?? null, top_image: topSwatch?.image_url ?? null, base_image: baseSwatch?.image_url ?? null };
+  return { variant, selection, picked: { ...(topSwatch ? { top: topSwatch } : {}), ...(baseSwatch ? { base: baseSwatch } : {}) } };
+}
+
 export default function FinishesDrawer({
-  open, onOpenChange, productId, productName, baseImage, clientMode, current, initialTop, initialBase, initialSelection, onSelect, preloaded, footer,
+  open, onOpenChange, productId, productName, baseImage, clientMode, current, initialTop, initialBase, initialSelection, onSelect, preloaded, footer, arItemId,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   productId: string;
+  arItemId?: string;
   productName: string;
   baseImage: string | null;
   clientMode: boolean;
@@ -192,12 +219,16 @@ export default function FinishesDrawer({
   // sheet's swatch list, which need not match variant axis labels).
   const [picked, setPicked] = useState<{ top?: Swatch; base?: Swatch }>({});
   const [openAxis, setOpenAxis] = useState<"top" | "base" | null>(null);
+  const arRestored = useRef<string | null>(null);
+  const [arRestoreError, setArRestoreError] = useState("");
 
   useEffect(() => {
     if (!open) return;
     setPreview(null);
     setAxisPreview(null);
     setPicked({});
+    arRestored.current = null;
+    setArRestoreError("");
     if (preloaded) {
       const list = preloaded.swatches || [];
       setCurrency(preloaded.currency || "EUR"); setLead(preloaded.lead);
@@ -252,6 +283,18 @@ export default function FinishesDrawer({
     })();
     return () => { alive = false; };
   }, [open, productId, clientMode, preloaded]);
+
+  useEffect(() => {
+    if (!open || loading || !variants.length || arRestored.current) return;
+    const handoff = readArViewerHandoff(window.location.href);
+    if (!handoff || handoff.kind !== "board" || handoff.id !== (arItemId ?? productId)) return;
+    arRestored.current = JSON.stringify(handoff);
+    const restored = resolveArBoardPreview(handoff, productId, variants, swatches, baseImage);
+    if (!restored) { setArRestoreError("This shared finish is no longer available. Your saved selection is unchanged."); return; }
+    setPreview(restored.variant); setPicked(restored.picked);
+    if (restored.variant.axes?.length === 3) setAxisPreview(restored.selection);
+    // Restoration is a preview only: no onSelect, board writes or client approval.
+  }, [open, loading, variants, swatches, productId, arItemId, baseImage]);
 
   const imageFor = (v: Variant | null) => {
     return boardPiecePhoto(productId, baseImage, variantImage(v, imgMap, gallery));
@@ -336,6 +379,7 @@ export default function FinishesDrawer({
               backrestTextureUrl={"backrest" in textures ? textures.backrest ?? null : null}
               materialRoles={glb.material_roles || undefined}
               autoOpen
+              arHandoff={{ kind: "board", id: arItemId ?? productId, product: productId, finish: shownAxes?.label ?? (activeVariant ? finishLabel(activeVariant) : ""), ...(activeVariant?.label ? { size: activeVariant.label } : {}), ...(shownAxes?.top || picked.top?.name || activeVariant?.top ? { top: shownAxes?.top ?? picked.top?.name ?? activeVariant?.top ?? "" } : {}), ...(shownAxes?.base || picked.base?.name || activeVariant?.base ? { base: shownAxes?.base ?? picked.base?.name ?? activeVariant?.base ?? "" } : {}) }}
             />
           </div>
         ) : (
@@ -350,6 +394,8 @@ export default function FinishesDrawer({
           </div>
         )}
 
+        {arRestoreError && <p role="status" className="px-6 py-3 font-body text-xs text-muted-foreground">{arRestoreError}</p>}
+
         {loading ? (
           <p className="px-6 py-10 font-body text-xs text-muted-foreground">Loading finishes…</p>
         ) : variants.length === 0 ? (
@@ -360,7 +406,7 @@ export default function FinishesDrawer({
                 sheet (product_fabric_swatches_public), one dropdown per axis.
                 Falls back to variant-axis names when no swatches are linked. */}
             <div className="border-b border-border/60 px-6 py-5 space-y-4">
-              {axisVariants.length > 0 ? <BoardAxisFinishes key={productId} variants={axisVariants} initial={shownAxes} onChange={(variant, colours) => {
+              {axisVariants.length > 0 ? <BoardAxisFinishes key={`${productId}:${arRestored.current ?? ""}`} variants={axisVariants} initial={shownAxes} onChange={(variant, colours) => {
                 const selection = boardAxisSelection(variant, colours, imageFor(variant));
                 setPreview(variant); setAxisPreview(selection); onSelect(selection);
               }} /> : (() => { const upholstered = swatches.some((s) => roleOf(s.category) === "fabric"); return ([

@@ -4,7 +4,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { absoluteUrl } from "@/config/site";
+import { arViewerUrl, type ArViewerHandoff } from "@/lib/arViewerHandoff";
 import { editorialModelCamera, editorialUprightRotation } from "@/lib/editorialModelFraming";
 import { editorialUnnamedMaterialRole } from "@/lib/editorialModelMaterials";
 
@@ -143,6 +143,8 @@ interface Props {
   scale?: string | null;
   /** Reports when the user opens the interactive model. */
   onOpenedChange?: (opened: boolean) => void;
+  /** Catalogue identifiers only, restored as an unsaved preview on the receiving page. */
+  arHandoff?: ArViewerHandoff;
 }
 
 
@@ -214,6 +216,7 @@ const Product3DViewer: React.FC<Props> = ({
   debug = false,
   scale,
   onOpenedChange,
+  arHandoff,
 }) => {
   const hasExplicitRoles = !!materialRoles && Object.keys(materialRoles).length > 0;
 
@@ -226,6 +229,8 @@ const Product3DViewer: React.FC<Props> = ({
   const mvRef = useRef<HTMLElement & {
     model?: any;
     createTexture?: (url: string) => Promise<any>;
+    activateAR?: () => Promise<void>;
+    updateComplete?: Promise<unknown>;
   } | null>(null);
   const originalTexturesRef = useRef<Map<any, any> | null>(null);
   const originalFactorsRef = useRef<Map<any, any>>(new Map());
@@ -240,6 +245,10 @@ const Product3DViewer: React.FC<Props> = ({
   const [mobileAr, setMobileAr] = useState(false);
   const [arAvailable, setArAvailable] = useState(false);
   const [qrUrl, setQrUrl] = useState("");
+  const [appliedAppearance, setAppliedAppearance] = useState<string | null>(null);
+  const [arError, setArError] = useState("");
+  const appearanceKey = JSON.stringify([url, fabricTextureUrl, baseTextureUrl, topTextureUrl, backrestTextureUrl, materialRoles, scale]);
+  const appearanceReady = appliedAppearance === appearanceKey;
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 767px) and (pointer: coarse)");
@@ -347,9 +356,12 @@ const Product3DViewer: React.FC<Props> = ({
     const mv = mvRef.current;
     if (!mv) return;
     let cancelled = false;
-
+    let textureRun = 0;
+    setAppliedAppearance(null);
+    setArError("");
 
     const applyTextures = async () => {
+      const run = ++textureRun;
       const model = mv.model;
       if (!model) {
         const onLoad = () => {
@@ -497,17 +509,20 @@ const Product3DViewer: React.FC<Props> = ({
         } catch { /* noop */ }
       };
 
+      let textureFailed = false;
       const applyOne = async (targets: any[], textureUrl: string, matte = false) => {
-        if (!targets.length || !mv.createTexture || cancelled) return;
+        if (cancelled || run !== textureRun) return;
+        if (!targets.length || !mv.createTexture) { textureFailed = true; return; }
         const texture = await mv.createTexture(textureUrl);
-        if (cancelled || mv.model !== model || !texture) return;
+        if (cancelled || run !== textureRun || mv.model !== model) return;
+        if (!texture) { textureFailed = true; return; }
         for (const m of targets) {
           try {
             m.pbrMetallicRoughness.baseColorTexture.setTexture(texture);
             m.pbrMetallicRoughness.setBaseColorFactor?.([1, 1, 1, 1]);
             // Textiles are never metallic: some exports ship 0.5 metal on upholstery, which made fabric read as satin plastic.
             if (matte) { m.pbrMetallicRoughness.setMetallicFactor?.(0); m.pbrMetallicRoughness.setRoughnessFactor?.(0.95); }
-          } catch { /* noop */ }
+          } catch { textureFailed = true; }
         }
       };
 
@@ -560,7 +575,13 @@ const Product3DViewer: React.FC<Props> = ({
         } else {
           for (const m of topTargets) restoreOne(m);
         }
+        await mv.updateComplete;
+        if (!cancelled && run === textureRun && mv.model === model) {
+          setAppliedAppearance(textureFailed ? null : appearanceKey);
+          if (textureFailed) setArError("This finish couldn’t be prepared for AR. Please select it again.");
+        }
       } catch (err) {
+        if (!cancelled && run === textureRun) setArError("This finish couldn’t be prepared for AR. Please select it again.");
         // eslint-disable-next-line no-console
         console.warn("[Product3DViewer] Failed to apply texture", err);
       }
@@ -576,7 +597,7 @@ const Product3DViewer: React.FC<Props> = ({
     };
     mv.addEventListener("load", onModelLoad);
     return () => { cancelled = true; mv.removeEventListener("load", onModelLoad); };
-  }, [opened, ready, fabricTextureUrl, baseTextureUrl, topTextureUrl, backrestTextureUrl, fabricMaterialNameIncludes, baseMaterialNameIncludes, topMaterialNameIncludes, materialRoles, hasExplicitRoles, onMaterialsDiscovered, url, clientEditorial]);
+  }, [opened, ready, fabricTextureUrl, baseTextureUrl, topTextureUrl, backrestTextureUrl, fabricMaterialNameIncludes, baseMaterialNameIncludes, topMaterialNameIncludes, materialRoles, hasExplicitRoles, onMaterialsDiscovered, url, clientEditorial, appearanceKey]);
 
   // Reset cached originals whenever the model URL changes.
   useEffect(() => {
@@ -671,10 +692,16 @@ const Product3DViewer: React.FC<Props> = ({
             tone-mapping="neutral"
             loading="eager"
             reveal="auto"
+            data-appearance-ready={appearanceReady ? "true" : "false"}
             style={{ width: "100%", height: "100%", backgroundColor: "transparent" }}
           >
             {arAvailable && (
-              <Button slot="ar-button" type="button" variant="space-preview" className="absolute bottom-4 right-4 max-w-[calc(100%-2rem)] rounded-full px-4 font-display text-sm md:hidden">
+              <Button slot="ar-button" type="button" variant="space-preview" disabled={!appearanceReady} title={appearanceReady ? "View your selected finishes in AR" : "Preparing selected finishes…"} className="absolute bottom-4 right-4 max-w-[calc(100%-2rem)] rounded-full px-4 font-display text-sm md:hidden" onClick={event => {
+                event.preventDefault(); event.stopPropagation();
+                if (!appearanceReady || !mvRef.current?.activateAR) return;
+                // Call synchronously from the tap; Quick Look exports the freshly textured scene.
+                void mvRef.current.activateAR().catch(() => setArError("AR couldn’t open. Please try again."));
+              }}>
                 <Box strokeWidth={1.25} aria-hidden="true" />
                 View in Your Space
               </Button>
@@ -687,9 +714,7 @@ const Product3DViewer: React.FC<Props> = ({
         )}
         {opened && ready && (
           <Button type="button" variant="space-preview" className="absolute bottom-4 right-4 hidden max-w-[calc(100%-2rem)] rounded-full px-4 font-display text-sm md:flex" onClick={() => {
-            const current = new URL(window.location.href);
-            // A phone cannot open a sandbox host; retain the exact page/query on the public origin.
-            setQrUrl(absoluteUrl(`${current.pathname}${current.search}${current.hash}`));
+            setQrUrl(arViewerUrl(window.location.href, arHandoff));
           }}>
             <QrCode strokeWidth={1.25} aria-hidden="true" />
             View in Your Room (AR)
@@ -717,6 +742,7 @@ const Product3DViewer: React.FC<Props> = ({
               <span className="block">Pick a fabric or wood finish on the right — the 3D preview updates live.</span>
             </>)}
       </p>
+      {arError && <p role="status" className="px-3 pb-2 font-display text-xs text-muted-foreground">{arError}</p>}
 
       {arAvailable && (
         <Accordion type="single" collapsible className="md:hidden border-t border-border bg-background px-3">

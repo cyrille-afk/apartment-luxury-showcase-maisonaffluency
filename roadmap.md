@@ -1,5 +1,10 @@
 # Roadmap
 
+## Selected upholstery in AR
+- [x] Wait for the latest material textures before native AR export; block stale or failed upholstery launches.
+- [x] Carry selected finish identifiers in desktop QR links and restore only catalogue-approved preview choices on the receiving board/private room; never save or alter access.
+- [x] Real signed-in Sandy Cove Opera Delft → QR → fresh phone restores identical material factors/textures with zero receiving-page writes/errors. Downloaded genuine 17.5MB Quick Look USDZ contains the selected blue woven upholstery and its live material bindings; desktop/phone and exported texture inspected. Focused readiness, failed-texture, board/private-room handoff tests pass; physical iPhone camera placement remains unverified.
+
 ## Desktop AR QR handoff
 - [x] Installed qrcode.react and added desktop-only viewer QR button/editorial modal. Signed-in current board → GUM viewer → modal opens, QR image decodes to exact board path/project query on the public website, close returns to unchanged 3D viewer; phone button hidden. Cream/green modal inspected; 78 tests pass, build OK, no page errors. Existing URL parameters are preserved; unencoded in-memory selections and authentication are not transferred. Previous Cipriani short code returned unavailable, so verification used the user's active board without changing access.
 

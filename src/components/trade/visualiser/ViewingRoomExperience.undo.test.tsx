@@ -11,12 +11,12 @@ const base = { id: "sofa", product_name: "Original Sofa", category: null, subcat
 const alternative = { ...base, id: "alternative", product_name: "Alternative Sofa", retail_price: 9000, size_options: [], finish_options: [] };
 const second = { ...alternative, id: "second", product_name: "Second Sofa", retail_price: 8000 };
 const slot = { ...base, alternatives: [alternative, second], is_swappable: true, allow_finish_customization: true };
-afterEach(() => { cleanup(); vi.resetAllMocks(); });
+afterEach(() => { cleanup(); vi.resetAllMocks(); window.history.replaceState({}, "", "/"); });
 async function mount() {
   readChoices.mockResolvedValue({ items: [slot], allow_alternatives: true });
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(<QueryClientProvider client={client}><ViewingRoomExperience token="room" packageId="package" baseTotal={150000} currency="USD" residence="Residence" developer="Developer" onTotal={() => {}} /></QueryClientProvider>);
-  await screen.findByRole("button", { name: "Swap piece — Original Sofa" });
+  await screen.findByRole("button", { name: "Swap piece — Original Sofa", hidden: true });
 }
 async function selectAlternative(name: string) {
   const tab = screen.getByRole("tab", { name: "Curated Alternatives" });
@@ -27,6 +27,15 @@ async function selectAlternative(name: string) {
   if (!article) throw new Error("Alternative absent");
   fireEvent.click(within(article).getByRole("button", { name: "Select Alternative" }));
 }
+it("restores the QR upholstery and size as a private-room preview without changing the collection or locking", async () => {
+  const handoff = { kind: "viewing-room", id: "sofa", context: "package", product: "sofa", size: "250", finish: "velvet-250" };
+  window.history.replaceState({}, "", `/?arPreview=${encodeURIComponent(JSON.stringify(handoff))}`);
+  await mount();
+  await waitFor(() => expect(screen.getByRole("combobox", { name: "Upholstery" })).toHaveTextContent("Velvet"));
+  expect(screen.getByRole("combobox", { name: "Sofa size" })).toHaveTextContent("W 250 cm");
+  expect(screen.getByLabelText("Collection Total")).toHaveTextContent("10,000.00");
+  expect(lock).not.toHaveBeenCalled();
+});
 it("restores the previous sofa's exact size, finish and retail total", async () => {
   await mount();
   fireEvent.click(screen.getByRole("button", { name: "Materials and finishes for Original Sofa" }));

@@ -7,6 +7,7 @@ vi.mock("qrcode.react", () => ({ QRCodeSVG: qrRenderer }));
 
 class TestModelViewer extends HTMLElement {
   canActivateAR = false;
+  activateAR = vi.fn(async () => {});
   model: { materials: any[] } = { materials: [] };
   createTexture = vi.fn(async (url: string) => ({ name: url, source: { uri: url } }));
 }
@@ -30,6 +31,42 @@ describe("desktop AR phone handoff", () => {
 });
 
 describe("mobile AR availability", () => {
+  it("waits for the newly selected upholstery before exporting the live scene to AR", async () => {
+    mobileCapability(true);
+    const seat = material("seat", "default.jpg", [1, 1, 1, 1]);
+    const props = { url: "/chair.glb", alt: "Chair", autoOpen: true, materialRoles: { seat: "fabric" as const } };
+    const { container, rerender } = render(<Product3DViewer {...props} fabricTextureUrl="cream.jpg" />);
+    const viewer = container.querySelector("model-viewer") as TestModelViewer;
+    await act(async () => { viewer.model = { materials: [seat] }; viewer.canActivateAR = true; viewer.dispatchEvent(new Event("load")); });
+    const ar = await screen.findByRole("button", { name: "View in Your Space" });
+    await waitFor(() => expect(ar).toBeEnabled());
+    let complete: ((texture: { name: string; source: { uri: string } }) => void) | undefined;
+    viewer.createTexture = vi.fn(() => new Promise(resolve => { complete = resolve; }));
+    rerender(<Product3DViewer {...props} fabricTextureUrl="EDSON-008-Charbon.jpg" />);
+    expect(ar).toBeDisabled();
+    fireEvent.click(ar);
+    expect(viewer.activateAR).not.toHaveBeenCalled();
+    await act(async () => { complete?.({ name: "EDSON-008-Charbon.jpg", source: { uri: "EDSON-008-Charbon.jpg" } }); });
+    await waitFor(() => expect(ar).toBeEnabled());
+    viewer.activateAR = vi.fn(async () => { expect(seat.pbrMetallicRoughness.baseColorTexture.texture.name).toBe("EDSON-008-Charbon.jpg"); });
+    fireEvent.click(ar);
+    expect(viewer.activateAR).toHaveBeenCalledOnce();
+  });
+
+  it("does not launch the default fabric when the selected upholstery fails to load", async () => {
+    mobileCapability(true);
+    const seat = material("seat", "default.jpg", [1, 1, 1, 1]);
+    const { container } = render(<Product3DViewer url="/chair.glb" alt="Chair" autoOpen fabricTextureUrl="unavailable.jpg" materialRoles={{ seat: "fabric" }} />);
+    const viewer = container.querySelector("model-viewer") as TestModelViewer;
+    viewer.createTexture = vi.fn(async () => { throw new Error("Texture unavailable"); });
+    await act(async () => { viewer.model = { materials: [seat] }; viewer.canActivateAR = true; viewer.dispatchEvent(new Event("load")); });
+    const ar = await screen.findByRole("button", { name: "View in Your Space" });
+    expect(ar).toBeDisabled();
+    fireEvent.click(ar);
+    expect(viewer.activateAR).not.toHaveBeenCalled();
+    expect(seat.pbrMetallicRoughness.baseColorTexture.texture.name).toBe("default.jpg");
+  });
+
   it("never enables AR on desktop even when the model supports it", async () => {
     const { container } = render(<Product3DViewer url="/chair.glb" alt="Chair" autoOpen />);
     const viewer = container.querySelector("model-viewer") as TestModelViewer;

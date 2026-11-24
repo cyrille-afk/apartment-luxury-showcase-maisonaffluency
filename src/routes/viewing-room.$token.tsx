@@ -16,7 +16,7 @@ const Viewer = lazy(() => import("@/components/trade/visualiser/ViewingRoomExper
 const roomQuery = (token: string) => queryOptions({ queryKey: ["developer-viewing-room", token], queryFn: () => getViewingRoom({ data: { token } }), retry: false, staleTime: 0, refetchInterval: 15000, refetchIntervalInBackground: true, refetchOnWindowFocus: "always" });
 
 export const Route = createFileRoute("/viewing-room/$token")({
-  validateSearch: (search: Record<string, unknown>): { layout?: string; package?: string; code?: string } => ({ layout: typeof search.layout === "string" ? search.layout : undefined, package: typeof search.package === "string" ? search.package : undefined, code: typeof search.code === "string" ? search.code : undefined }),
+  validateSearch: (search: Record<string, unknown>): { layout?: string; package?: string; code?: string; arPreview?: string } => ({ layout: typeof search.layout === "string" ? search.layout : undefined, package: typeof search.package === "string" ? search.package : undefined, code: typeof search.code === "string" ? search.code : undefined, arPreview: typeof search.arPreview === "string" && search.arPreview.length <= 2500 ? search.arPreview : undefined }),
   beforeLoad: async ({ params, search }) => {
     if (!isLegacyViewingRoomLink(params.token)) return;
     const access = await redeemViewingRoomAccess({ data: { token: viewingRoomAccessToken(params.token) } });
@@ -24,6 +24,7 @@ export const Route = createFileRoute("/viewing-room/$token")({
       const query = new URLSearchParams();
       if (search.layout) query.set("layout", search.layout);
       if (search.package) query.set("package", search.package);
+      if (search.arPreview) query.set("arPreview", search.arPreview);
       throw redirect({ href: access.path + (query.size ? `?${query}` : ""), replace: true });
     }
   },

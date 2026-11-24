@@ -1,4 +1,5 @@
 import { writeLastVisitedFolder } from "@/lib/lastVisitedFolder";
+import { readArViewerHandoff } from "@/lib/arViewerHandoff";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useProcurementStatus } from "@/hooks/useProcurementStatus";
 import { ProcurementStatusBadge } from "@/components/trade/ProcurementStatusBadge";
@@ -179,6 +180,17 @@ const TradeBoardBuilder = () => {
   const [items, setItems] = useState<BoardItem[]>([]);
   const [finishes, setFinishes] = useState<Record<string, FinishSelection>>({});
   const [finishItem, setFinishItem] = useState<BoardItem | null>(null);
+  const arOpened = useRef<string | null>(null);
+  useEffect(() => {
+    if (!board || board.id !== id || !items.length) return;
+    const handoff = readArViewerHandoff(window.location.href);
+    if (!handoff || handoff.kind !== "board") return;
+    const key = `${board.id}:${JSON.stringify(handoff)}`;
+    if (arOpened.current === key) return;
+    const item = items.find(row => row.id === handoff.id && row.product_id === handoff.product);
+    if (!item) return;
+    arOpened.current = key; setFinishItem(item);
+  }, [board?.id, id, items]);
   const [requestedFinishes, setRequestedFinishes] = useState<Record<string, FinishSelection>>({});
   const [compiledDraft, setCompiledDraft] = useState<ReturnType<typeof compileBoardDraftQuote> | null>(null);
   const [draftReviewOpen, setDraftReviewOpen] = useState(false);
@@ -1099,6 +1111,7 @@ const TradeBoardBuilder = () => {
             open={!!finishItem}
             onOpenChange={(o) => !o && setFinishItem(null)}
             productId={finishItem.product_id}
+            arItemId={finishItem.id}
             productName={finishItem.product?.product_name ?? "Selected piece"}
             baseImage={finishItem.product?.image_url ?? null}
             clientMode={clientSafe}

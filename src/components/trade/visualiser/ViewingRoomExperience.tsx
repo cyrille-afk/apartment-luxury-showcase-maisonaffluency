@@ -17,6 +17,7 @@ import { downloadViewingRoomProposal } from "@/lib/viewingRoomProposal";
 import { formatPdfMoney } from "@/lib/pdfFormatting";
 import { viewingRoomSwapsEnabled } from "@/lib/viewingRoomAlternatives";
 import type { ViewingRoomProposalContext } from "@/lib/viewingRoomProposalData";
+import { readArViewerHandoff } from "@/lib/arViewerHandoff";
 
 export default function ViewingRoomExperience({ token, packageId, baseTotal, currency, residence, developer, onTotal, fallbackItems = [], proposalContext = {} }: {
   token: string; packageId: string; baseTotal: number; currency: string; residence: string; developer: string; onTotal: (total: number) => void; fallbackItems?: ViewingRoomItem[]; proposalContext?: ViewingRoomProposalContext;
@@ -32,6 +33,7 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
   const [feedback, setFeedback] = useState("");
   const key = useRef<string | null>(null);
   const snapshot = useRef<Awaited<ReturnType<typeof lockViewingRoomProposal>> | null>(null);
+  const arRestored = useRef<string | null>(null);
   const lock = useServerFn(lockViewingRoomProposal);
   const slots = useMemo<ViewingRoomSlot[]>(() => query.data
     ? query.data.items.map(slot => ({ ...slot, is_swappable: viewingRoomSwapsEnabled(slot.is_swappable, query.data?.allow_alternatives ?? false) }))
@@ -47,6 +49,20 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
   // A drawer opened before choices loaded holds the read-only fallback piece; adopt the loaded slot once it arrives.
   useEffect(() => { if (query.data && current && draft && draft.id === current.id && !choices[current.id] && draft.finish_options.length === 0 && current.finish_options.length > 0) setDraft(current); }, [query.data, current, draft, choices]);
   const openPiece = (slot: ViewingRoomSlot, tab = "finishes") => { setActive(slot.id); setDraft(choices[slot.id] ?? slot); setDrawerTab(tab); };
+  useEffect(() => {
+    if (!query.data) return;
+    const handoff = readArViewerHandoff(window.location.href);
+    if (!handoff || handoff.kind !== "viewing-room" || handoff.context !== packageId) return;
+    const key = JSON.stringify(handoff);
+    if (arRestored.current === key) return;
+    const slot = slots.find(row => row.id === handoff.id);
+    if (!slot) return;
+    arRestored.current = key;
+    try {
+      const restored = viewingRoomSelection(slot, handoff.product ?? slot.id, handoff.finish, handoff.size, handoff.colour, handoff.axes);
+      setActive(slot.id); setDraft(restored); setDrawerTab("finishes");
+    } catch { setFeedback("This shared finish is no longer available. Your collection is unchanged."); }
+  }, [query.data, slots, packageId]);
   const selectAlternative = (slot: ViewingRoomSlot, productId: string) => {
     if (busy || locked) return;
     const previous = choices[slot.id] ?? slot;
@@ -121,7 +137,7 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
           <Tabs value={drawerTab} onValueChange={setDrawerTab} className="min-w-0 shrink-0">
           <TabsList className="grid h-auto w-full grid-cols-2 rounded-none border-b border-border bg-transparent p-0"><TabsTrigger value="finishes" className="whitespace-normal rounded-none px-2 py-3 text-xs">3D &amp; Finishes</TabsTrigger><TabsTrigger value="alternatives" className="whitespace-normal rounded-none px-2 py-3 text-xs">Curated Alternatives</TabsTrigger></TabsList>
           <TabsContent value="finishes" className="pt-4">
-          {draft.glb_url ? <Product3DViewer key={draft.id} url={draft.glb_url} alt={draft.product_name} furnitureCategory={`${draft.category ?? ""} ${draft.subcategory ?? ""}`} furnitureDimensions={draft.width_mm && draft.depth_mm && draft.height_mm ? { width: draft.width_mm, depth: draft.depth_mm, height: draft.height_mm } : undefined} poster={draft.image_url} autoOpen autoRotate={false} clientEditorial {...(() => { const shown = viewingRoomViewerMaterials(draft); return { baseTextureUrl: shown.base?.image_url, topTextureUrl: shown.top?.image_url, fabricTextureUrl: shown.upholstery?.image_url, backrestTextureUrl: shown["backrest"]?.image_url }; })()} {...(draft.material_roles ? { materialRoles: draft.material_roles } : {})} /> : draft.image_url && <img src={draft.image_url} alt={draft.product_name} className="aspect-[4/3] w-full object-contain" />}
+          {draft.glb_url ? <Product3DViewer key={draft.id} url={draft.glb_url} alt={draft.product_name} arHandoff={{ kind: "viewing-room", id: current.id, context: packageId, product: draft.id, ...(draft.finish_key ? { finish: draft.finish_key } : {}), ...(draft.size_key ? { size: draft.size_key } : {}), ...(draft.colourway_id ? { colour: draft.colourway_id } : {}), ...(draft.axis_colours ? { axes: draft.axis_colours } : {}) }} furnitureCategory={`${draft.category ?? ""} ${draft.subcategory ?? ""}`} furnitureDimensions={draft.width_mm && draft.depth_mm && draft.height_mm ? { width: draft.width_mm, depth: draft.depth_mm, height: draft.height_mm } : undefined} poster={draft.image_url} autoOpen autoRotate={false} clientEditorial {...(() => { const shown = viewingRoomViewerMaterials(draft); return { baseTextureUrl: shown.base?.image_url, topTextureUrl: shown.top?.image_url, fabricTextureUrl: shown.upholstery?.image_url, backrestTextureUrl: shown["backrest"]?.image_url }; })()} {...(draft.material_roles ? { materialRoles: draft.material_roles } : {})} /> : draft.image_url && <img src={draft.image_url} alt={draft.product_name} className="aspect-[4/3] w-full object-contain" />}
           <div className="space-y-4 py-4">
             {current.allow_finish_customization && draft.size_options.length > 0 && <div className="space-y-2"><p className="text-xs text-muted-foreground">Size</p><Select value={draft.size_key ?? "original"} disabled={busy || locked || current.retail_price == null} onValueChange={value => setDraft(value === "original" ? viewingRoomSelection(current, draft.id) : viewingRoomSizeSelection(current, draft, value))}><SelectTrigger aria-label="Sofa size" className="h-auto min-h-10 whitespace-normal"><SelectValue placeholder="Choose exact size" /></SelectTrigger><SelectContent><SelectItem value="original">Original selection</SelectItem>{draft.size_options.map(size => <SelectItem key={size.key} value={size.key}>{size.label}</SelectItem>)}</SelectContent></Select></div>}
             {(() => { const finishDisabled = busy || locked || current.retail_price == null || (draft.size_options.length > 0 && !draft.size_key); const available = draft.finish_options.filter(finish => finish.size_key === draft.size_key); const split = available.map(finish => finish.label.split(" / ")); const paired = available.length > 1 && split.every(parts => parts.length === 2); const choose = (value: string) => setDraft(viewingRoomSelection(current, draft.id, value === "original" ? undefined : value, value === "original" ? undefined : draft.size_key));
