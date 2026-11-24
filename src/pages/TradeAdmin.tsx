@@ -362,6 +362,11 @@ const TradeAdmin = () => {
     <div className="max-w-5xl space-y-6">
       <AdminPaidOrders />
       <AdminPriceHistory />
+      <Link to="/trade/admin/ar-analytics" className="flex items-center gap-3 px-4 py-3 rounded-md border border-border group">
+        <Presentation className="h-4 w-4 text-muted-foreground" />
+        <span className="font-display text-sm flex-1">AR Experience</span>
+        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+      </Link>
       {/* Inquiries Inbox — Price upon Request + concierge + contact form */}
       <Link
         to="/trade/admin/inquiries"

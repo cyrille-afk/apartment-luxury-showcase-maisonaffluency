@@ -1,5 +1,8 @@
 # Roadmap
 
+## AR analytics dashboard
+- [x] Added admin-only dated published-activity snapshot, daily launch/open/fallback-rate charts, surface filters and explicit rate/Quick Look limitations. Real admin shortcut, reload-preserved filter, desktop/phone and signed-out privacy verified; 21 tests and build pass, 39 event schemas compatible. The queried 17–24 Nov snapshot has zero recorded AR events. Automatic live refresh is unavailable through the existing collector connection; no credentials or parallel tracking store added. Orders paid each month remains covered by project.order_paid.
+
 ## AR experience analytics
 - [x] Track launch attempts, evidence-confirmed opens and deduplicated fallback displays using existing visitor analytics. Three schemas registered (39 total), compatibility check passes; fifteen tests cover exact counts and duplicate signals. Real signed-in phone Opera Delft fallback recording verified with a local tracking spy; scene/finishes unchanged. Quick Look lacks a session-open callback: only native banner interaction is counted as confirmed, never a resolved launch promise. Collector arrival awaits actual preview/published usage; physical native launch remains untested. Orders paid each month already has project.order_paid coverage.
 

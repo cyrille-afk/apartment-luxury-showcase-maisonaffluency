@@ -12,7 +12,7 @@ import {
   FolderArchive, PenLine, Box, Presentation, Sparkles, History,
   AlertCircle, ChevronRight, Image, Package, Globe, Instagram,
   ClipboardList, Layers, Settings2, CalendarClock, Users, Truck, Percent, FileBox,
-  Inbox, Sparkle, Search, MessageSquare, Send,
+  Inbox, Sparkle, Search, MessageSquare, Send, ScanLine,
 } from "lucide-react";
 
 interface AdminCard {
@@ -49,6 +49,7 @@ const commerceGroup: AdminCard[] = [
 ];
 
 const analyticsGroup: AdminCard[] = [
+  { title: "AR Experience", description: "Dated AR launch attempts, confirmed opens and fallback-rate trends", url: "/trade/admin/ar-analytics", icon: ScanLine },
   { title: "Directory Activity", description: "Search edits, A–Z selections, profile views and modal dismissals over time", url: "/trade/admin/directory-activity", icon: BarChart3 },
   { title: "Stripe Monitoring", description: "Live delivery health, signature errors, and processing delays", url: "/trade/admin/stripe-metrics", icon: BarChart3 },
   { title: "Insights", description: "Portal engagement, traffic, and usage analytics", url: "/trade/insights", icon: BarChart3 },

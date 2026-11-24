@@ -186,6 +186,7 @@ import { Route as StudiosSlugInsightsRouteImport } from './routes/studios_.$slug
 import { Route as TradeAdminAccountIdentitiesRouteImport } from './routes/trade.admin_.account-identities'
 import { Route as TradeAdminAcquisitionsRouteImport } from './routes/trade.admin_.acquisitions'
 import { Route as TradeAdminAiUsageRouteImport } from './routes/trade.admin_.ai-usage'
+import { Route as TradeAdminArAnalyticsRouteImport } from './routes/trade.admin_.ar-analytics'
 import { Route as TradeAdminAxonometricCadQaRouteImport } from './routes/trade.admin_.axonometric-cad-qa'
 import { Route as TradeAdminBrandLeadTimesRouteImport } from './routes/trade.admin_.brand-lead-times'
 import { Route as TradeAdminBulkFinishesRouteImport } from './routes/trade.admin_.bulk-finishes'
@@ -1173,6 +1174,11 @@ const TradeAdminAiUsageRoute = TradeAdminAiUsageRouteImport.update({
   path: '/admin/ai-usage',
   getParentRoute: () => TradeRoute,
 } as any)
+const TradeAdminArAnalyticsRoute = TradeAdminArAnalyticsRouteImport.update({
+  id: '/admin_/ar-analytics',
+  path: '/admin/ar-analytics',
+  getParentRoute: () => TradeRoute,
+} as any)
 const TradeAdminAxonometricCadQaRoute =
   TradeAdminAxonometricCadQaRouteImport.update({
     id: '/admin_/axonometric-cad-qa',
@@ -1840,6 +1846,7 @@ export interface FileRoutesByFullPath {
   '/trade/admin/account-identities': typeof TradeAdminAccountIdentitiesRoute
   '/trade/admin/acquisitions': typeof TradeAdminAcquisitionsRoute
   '/trade/admin/ai-usage': typeof TradeAdminAiUsageRoute
+  '/trade/admin/ar-analytics': typeof TradeAdminArAnalyticsRoute
   '/trade/admin/axonometric-cad-qa': typeof TradeAdminAxonometricCadQaRoute
   '/trade/admin/brand-lead-times': typeof TradeAdminBrandLeadTimesRoute
   '/trade/admin/bulk-finishes': typeof TradeAdminBulkFinishesRoute
@@ -2109,6 +2116,7 @@ export interface FileRoutesByTo {
   '/trade/admin/account-identities': typeof TradeAdminAccountIdentitiesRoute
   '/trade/admin/acquisitions': typeof TradeAdminAcquisitionsRoute
   '/trade/admin/ai-usage': typeof TradeAdminAiUsageRoute
+  '/trade/admin/ar-analytics': typeof TradeAdminArAnalyticsRoute
   '/trade/admin/axonometric-cad-qa': typeof TradeAdminAxonometricCadQaRoute
   '/trade/admin/brand-lead-times': typeof TradeAdminBrandLeadTimesRoute
   '/trade/admin/bulk-finishes': typeof TradeAdminBulkFinishesRoute
@@ -2380,6 +2388,7 @@ export interface FileRoutesById {
   '/trade/admin_/account-identities': typeof TradeAdminAccountIdentitiesRoute
   '/trade/admin_/acquisitions': typeof TradeAdminAcquisitionsRoute
   '/trade/admin_/ai-usage': typeof TradeAdminAiUsageRoute
+  '/trade/admin_/ar-analytics': typeof TradeAdminArAnalyticsRoute
   '/trade/admin_/axonometric-cad-qa': typeof TradeAdminAxonometricCadQaRoute
   '/trade/admin_/brand-lead-times': typeof TradeAdminBrandLeadTimesRoute
   '/trade/admin_/bulk-finishes': typeof TradeAdminBulkFinishesRoute
@@ -2652,6 +2661,7 @@ export interface FileRouteTypes {
     | '/trade/admin/account-identities'
     | '/trade/admin/acquisitions'
     | '/trade/admin/ai-usage'
+    | '/trade/admin/ar-analytics'
     | '/trade/admin/axonometric-cad-qa'
     | '/trade/admin/brand-lead-times'
     | '/trade/admin/bulk-finishes'
@@ -2921,6 +2931,7 @@ export interface FileRouteTypes {
     | '/trade/admin/account-identities'
     | '/trade/admin/acquisitions'
     | '/trade/admin/ai-usage'
+    | '/trade/admin/ar-analytics'
     | '/trade/admin/axonometric-cad-qa'
     | '/trade/admin/brand-lead-times'
     | '/trade/admin/bulk-finishes'
@@ -3191,6 +3202,7 @@ export interface FileRouteTypes {
     | '/trade/admin_/account-identities'
     | '/trade/admin_/acquisitions'
     | '/trade/admin_/ai-usage'
+    | '/trade/admin_/ar-analytics'
     | '/trade/admin_/axonometric-cad-qa'
     | '/trade/admin_/brand-lead-times'
     | '/trade/admin_/bulk-finishes'
@@ -4641,6 +4653,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TradeAdminAiUsageRouteImport
       parentRoute: typeof TradeRoute
     }
+    '/trade/admin_/ar-analytics': {
+      id: '/trade/admin_/ar-analytics'
+      path: '/admin/ar-analytics'
+      fullPath: '/trade/admin/ar-analytics'
+      preLoaderRoute: typeof TradeAdminArAnalyticsRouteImport
+      parentRoute: typeof TradeRoute
+    }
     '/trade/admin_/axonometric-cad-qa': {
       id: '/trade/admin_/axonometric-cad-qa'
       path: '/admin/axonometric-cad-qa'
@@ -5363,6 +5382,7 @@ interface TradeRouteChildren {
   TradeAdminAccountIdentitiesRoute: typeof TradeAdminAccountIdentitiesRoute
   TradeAdminAcquisitionsRoute: typeof TradeAdminAcquisitionsRoute
   TradeAdminAiUsageRoute: typeof TradeAdminAiUsageRoute
+  TradeAdminArAnalyticsRoute: typeof TradeAdminArAnalyticsRoute
   TradeAdminAxonometricCadQaRoute: typeof TradeAdminAxonometricCadQaRoute
   TradeAdminBrandLeadTimesRoute: typeof TradeAdminBrandLeadTimesRoute
   TradeAdminBulkFinishesRoute: typeof TradeAdminBulkFinishesRoute
@@ -5520,6 +5540,7 @@ const TradeRouteChildren: TradeRouteChildren = {
   TradeAdminAccountIdentitiesRoute: TradeAdminAccountIdentitiesRoute,
   TradeAdminAcquisitionsRoute: TradeAdminAcquisitionsRoute,
   TradeAdminAiUsageRoute: TradeAdminAiUsageRoute,
+  TradeAdminArAnalyticsRoute: TradeAdminArAnalyticsRoute,
   TradeAdminAxonometricCadQaRoute: TradeAdminAxonometricCadQaRoute,
   TradeAdminBrandLeadTimesRoute: TradeAdminBrandLeadTimesRoute,
   TradeAdminBulkFinishesRoute: TradeAdminBulkFinishesRoute,
