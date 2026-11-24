@@ -4,13 +4,15 @@ import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
 
 const url = z.string().refine(value => value.startsWith("https://") || value.startsWith("/__l5e/"), "Invalid media URL").nullable();
 const material = z.object({ id: z.string(), name: z.string(), category: z.string(), brand_name: z.string(), image_url: url, material_type: z.string().nullable(), color_family: z.string().nullable() });
-export const viewingRoomItemSchema = z.object({ id: z.string().uuid(), product_name: z.string(), category: z.string().nullable(), subcategory: z.string().nullable(), image_url: url, dimensions: z.string().nullable(), width_mm: z.number().nullable(), depth_mm: z.number().nullable(), height_mm: z.number().nullable(), glb_url: url, material_roles: z.record(z.string(), z.enum(["fabric", "base", "top", "ignore"])).optional(), lead_time: z.string().nullable(), materials: z.record(z.string(), material) });
+export const viewingRoomItemSchema = z.object({ id: z.string().uuid(), product_name: z.string(), category: z.string().nullable(), subcategory: z.string().nullable(), image_url: url, dimensions: z.string().nullable(), width_mm: z.number().nullable(), depth_mm: z.number().nullable(), height_mm: z.number().nullable(), glb_url: url, material_roles: z.record(z.string(), z.enum(["fabric", "backrest", "base", "top", "ignore"])).optional(), lead_time: z.string().nullable(), materials: z.record(z.string(), material) });
 export const viewingRoomPackageSchema = z.object({ id: z.string().uuid(), tier_name: z.string(), package_price: z.number().nonnegative(), currency: z.enum(["EUR", "USD", "SGD", "GBP", "CHF"]), description: z.string(), lead_time_weeks: z.number().nullable() });
 export const viewingRoomSchema = z.object({ name: z.string(), logo: url, hero: url, project_name: z.string(), layouts: z.array(z.object({ id: z.string().uuid(), name: z.string(), floorplan_url: url, specs_label: z.string().nullable(), room_environment_glb: url, packages: z.array(viewingRoomPackageSchema) })) });
 export type ViewingRoom = z.infer<typeof viewingRoomSchema>;
 export type ViewingRoomItem = z.infer<typeof viewingRoomItemSchema>;
-export const viewingRoomFinishSchema = z.object({ key: z.string(), label: z.string(), retail_price: z.number().nonnegative(), materials: z.record(z.string(), material), image_url: url, lead_time: z.string().nullable(), size_key: z.string().optional(), dimensions: z.string().optional(), colourways: z.array(material).default([]) });
-export const viewingRoomChoiceSchema = viewingRoomItemSchema.extend({ retail_price: z.number().nullable(), retail_price_from: z.boolean().default(false), finish_options: z.array(viewingRoomFinishSchema).default([]), finish_key: z.string().optional(), size_key: z.string().optional(), colourway_id: z.string().optional(), size_options: z.array(z.object({ key: z.string(), label: z.string() })).default([]) });
+export const viewingRoomFinishSchema = z.object({ key: z.string(), label: z.string(), retail_price: z.number().nonnegative(), materials: z.record(z.string(), material), image_url: url, lead_time: z.string().nullable(), size_key: z.string().optional(), dimensions: z.string().optional(), colourways: z.array(material).default([]), axes: z.array(z.object({ role: z.enum(["seat", "backrest", "frame"]), label: z.string(), value: z.string().nullable(), colours: z.array(material).default([]) })).default([]) });
+export type ViewingRoomAxisRole = "seat" | "backrest" | "frame";
+export const AXIS_MATERIAL_KEY: Record<ViewingRoomAxisRole, string> = { seat: "upholstery", backrest: "backrest", frame: "base" };
+export const viewingRoomChoiceSchema = viewingRoomItemSchema.extend({ retail_price: z.number().nullable(), retail_price_from: z.boolean().default(false), finish_options: z.array(viewingRoomFinishSchema).default([]), finish_key: z.string().optional(), size_key: z.string().optional(), colourway_id: z.string().optional(), axis_colours: z.partialRecord(z.enum(["seat", "backrest", "frame"]), z.string()).optional(), size_options: z.array(z.object({ key: z.string(), label: z.string() })).default([]) });
 export const viewingRoomSlotSchema = viewingRoomChoiceSchema.extend({ alternatives: z.array(viewingRoomChoiceSchema), is_swappable: z.boolean().default(true), allow_finish_customization: z.boolean().default(true) });
 export type ViewingRoomChoice = z.infer<typeof viewingRoomChoiceSchema>;
 export type ViewingRoomSlot = z.infer<typeof viewingRoomSlotSchema>;
@@ -20,23 +22,31 @@ export function viewingRoomTotal(base: number, slots: ViewingRoomSlot[], choices
     if (!choice) return sum;
     const approved = choice.id === slot.id ? slot : slot.is_swappable ? slot.alternatives.find(row => row.id === choice.id) : null;
     if (!approved || approved.retail_price == null || slot.retail_price == null) throw new Error("Unapproved or unpriced choice");
-    const selected = viewingRoomSelection(slot, choice.id, choice.finish_key, choice.size_key, choice.colourway_id);
+    const selected = viewingRoomSelection(slot, choice.id, choice.finish_key, choice.size_key, choice.colourway_id, choice.axis_colours);
     return sum + Number(selected.retail_price) - slot.retail_price;
   }, base);
 }
 
-export function viewingRoomSelection(slot: ViewingRoomSlot, productId: string, finishKey?: string, sizeKey?: string, colourwayId?: string): ViewingRoomChoice {
+export function viewingRoomSelection(slot: ViewingRoomSlot, productId: string, finishKey?: string, sizeKey?: string, colourwayId?: string, axisColours?: Partial<Record<ViewingRoomAxisRole, string>>): ViewingRoomChoice {
   const product = productId === slot.id ? slot : slot.is_swappable ? slot.alternatives.find(row => row.id === productId) : null;
   if (!product) throw new Error("Unapproved choice");
   const finish = finishKey && slot.allow_finish_customization ? product.finish_options.find(row => row.key === finishKey) : null;
   if (finishKey && !finish) throw new Error("Unapproved finish");
   if ((finish && finish.size_key !== sizeKey) || (sizeKey && !finish)) throw new Error("Unapproved size");
-  if (!finish) { if (colourwayId) throw new Error("Unapproved colourway"); return product; }
+  if (!finish) { if (colourwayId || (axisColours && Object.keys(axisColours).length)) throw new Error("Unapproved colourway"); return product; }
   const colourway = colourwayId ? finish.colourways.find(row => row.id === colourwayId) : undefined;
   if (colourwayId && !colourway) throw new Error("Unapproved colourway");
   const { colourways: _colourways, ...rest } = finish;
   const selected: ViewingRoomChoice = { ...product, ...rest, id: product.id, finish_key: finish.key, retail_price_from: false, materials: colourway ? { ...finish.materials, upholstery: colourway } : finish.materials };
   if (colourway) selected.colourway_id = colourway.id; else delete selected.colourway_id;
+  const picked: Partial<Record<ViewingRoomAxisRole, string>> = {};
+  for (const [role, id] of Object.entries(axisColours ?? {}) as [ViewingRoomAxisRole, string][]) {
+    const colour = (finish.axes ?? []).find(axis => axis.role === role)?.colours.find(row => row.id === id);
+    if (!colour) throw new Error("Unapproved colourway");
+    selected.materials = { ...selected.materials, [AXIS_MATERIAL_KEY[role]]: colour };
+    picked[role] = id;
+  }
+  if (Object.keys(picked).length) selected.axis_colours = picked; else delete selected.axis_colours;
   return selected;
 }
 
@@ -48,7 +58,7 @@ export function viewingRoomSizeSelection(slot: ViewingRoomSlot, draft: ViewingRo
   const finish = available.find(option => option.label === previous?.label) ?? available[0];
   if (!finish) throw new Error("Unapproved size");
   const colourway = draft.colourway_id && finish.colourways.some(row => row.id === draft.colourway_id) ? draft.colourway_id : undefined;
-  return viewingRoomSelection(slot, draft.id, finish.key, sizeKey, colourway);
+  return viewingRoomSelection(slot, draft.id, finish.key, sizeKey, colourway, keptAxisColours(finish, draft.axis_colours));
 }
 
 /** Only named visual materials and measured placement enter the client renderer. */
@@ -84,4 +94,11 @@ export function viewingRoomViewerMaterials(choice: ViewingRoomChoice): ViewingRo
   if (choice.finish_key || choice.materials.upholstery || choice.materials.base || choice.materials.top) return choice.materials;
   const match = choice.finish_options.find(option => option.size_key === choice.size_key && option.retail_price === choice.retail_price && Object.keys(option.materials).length > 0);
   return match ? { ...match.materials, ...(match.colourways[0] && !match.materials["upholstery"] ? { upholstery: match.colourways[0] } : {}) } : choice.materials;
+}
+
+/** Keep per-axis colour picks that are still approved on the newly chosen finish. */
+export function keptAxisColours(finish: ViewingRoomChoice["finish_options"][number] | undefined, picks: Partial<Record<ViewingRoomAxisRole, string>> | undefined) {
+  const kept: Partial<Record<ViewingRoomAxisRole, string>> = {};
+  for (const [role, id] of Object.entries(picks ?? {}) as [ViewingRoomAxisRole, string][]) if (finish?.axes?.some(axis => axis.role === role && axis.colours.some(row => row.id === id))) kept[role] = id;
+  return kept;
 }

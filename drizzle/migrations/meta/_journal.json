@@ -2311,6 +2311,20 @@
       "when": 1795431471599,
       "tag": "0329_public_glb_material_roles",
       "breakpoints": true
+    },
+    {
+      "idx": 330,
+      "version": "7",
+      "when": 1795496290707,
+      "tag": "0330_viewing_room_three_axis_finishes",
+      "breakpoints": true
+    },
+    {
+      "idx": 331,
+      "version": "7",
+      "when": 1795496701511,
+      "tag": "0331_viewing_room_axis_materials_fix",
+      "breakpoints": true
     }
   ]
 }

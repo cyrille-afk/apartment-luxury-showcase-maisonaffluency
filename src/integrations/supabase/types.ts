@@ -14136,7 +14136,20 @@ export type Database = {
         Args: { _base: number; _label: string; _variants: Json }
         Returns: Json
       }
+      _viewing_room_axis_colours: {
+        Args: { _brand: string; _textile: boolean; _value: string }
+        Returns: Json
+      }
       _viewing_room_editorial_product: {
+        Args: {
+          _currency: string
+          _item: Json
+          _product: string
+          _variant: string
+        }
+        Returns: Json
+      }
+      _viewing_room_editorial_product_without_axes: {
         Args: {
           _currency: string
           _item: Json

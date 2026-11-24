@@ -93,6 +93,8 @@ interface Props {
    * keyword group (top, tabletop, surface, marble, stone, glass).
    */
   topTextureUrl?: string | null;
+  /** Separate backrest upholstery; materials tagged "backrest" fall back to the fabric texture when absent. */
+  backrestTextureUrl?: string | null;
   /**
    * Optional filter for the top texture. Defaults to the top keyword group.
    */
@@ -104,7 +106,7 @@ interface Props {
    * from the map fall through to keyword matching, then to the "ignore"
    * default (they keep their original texture and receive no swatch).
    */
-  materialRoles?: Record<string, "fabric" | "base" | "top" | "ignore">;
+  materialRoles?: Record<string, "fabric" | "backrest" | "base" | "top" | "ignore">;
   /**
    * Called once the underlying GLB has loaded, with the actual material names
    * discovered in the file. Used by the admin manager to build the role UI.
@@ -190,6 +192,7 @@ const Product3DViewer: React.FC<Props> = ({
   fabricTextureUrl,
   baseTextureUrl,
   topTextureUrl,
+  backrestTextureUrl,
   fabricMaterialNameIncludes,
   baseMaterialNameIncludes,
   topMaterialNameIncludes,
@@ -376,7 +379,7 @@ const Product3DViewer: React.FC<Props> = ({
         return ids.some((id) => kws.some((k) => id.includes(k)));
       };
 
-      const roleOf = (m: any): "fabric" | "base" | "top" | "ignore" | null => {
+      const roleOf = (m: any): "fabric" | "backrest" | "base" | "top" | "ignore" | null => {
         const name = String(m?.name || "");
         if (materialRoles && Object.prototype.hasOwnProperty.call(materialRoles, name)) {
           return materialRoles[name];
@@ -404,10 +407,12 @@ const Product3DViewer: React.FC<Props> = ({
       let baseMatched: any[];
       let topMatched: any[];
       let ignored: any[];
+      let backrestMatched: any[] = [];
 
       if (hasExplicitRoles) {
         // Explicit map wins. Unmapped materials default to "ignore".
-        fabricMatched = materials.filter((m) => roleOf(m) === "fabric");
+        fabricMatched = materials.filter((m) => roleOf(m) === "fabric" || (roleOf(m) === "backrest" && !backrestTextureUrl));
+        backrestMatched = backrestTextureUrl ? materials.filter((m) => roleOf(m) === "backrest") : [];
         baseMatched = materials.filter((m) => roleOf(m) === "base");
         topMatched = materials.filter((m) => roleOf(m) === "top");
         ignored = materials.filter((m) => (roleOf(m) ?? "ignore") === "ignore");
@@ -502,6 +507,7 @@ const Product3DViewer: React.FC<Props> = ({
         } else {
           for (const m of fabricTargets) restoreOne(m);
         }
+        if (backrestTextureUrl) await applyOne(backrestMatched, backrestTextureUrl, true);
         // Base layer
         if (baseTextureUrl) {
           await applyOne(baseTargets, baseTextureUrl);
@@ -530,7 +536,7 @@ const Product3DViewer: React.FC<Props> = ({
     };
     mv.addEventListener("load", onModelLoad);
     return () => { cancelled = true; mv.removeEventListener("load", onModelLoad); };
-  }, [opened, ready, fabricTextureUrl, baseTextureUrl, topTextureUrl, fabricMaterialNameIncludes, baseMaterialNameIncludes, topMaterialNameIncludes, materialRoles, hasExplicitRoles, onMaterialsDiscovered, url]);
+  }, [opened, ready, fabricTextureUrl, baseTextureUrl, topTextureUrl, backrestTextureUrl, fabricMaterialNameIncludes, baseMaterialNameIncludes, topMaterialNameIncludes, materialRoles, hasExplicitRoles, onMaterialsDiscovered, url]);
 
   // Reset cached originals whenever the model URL changes.
   useEffect(() => {

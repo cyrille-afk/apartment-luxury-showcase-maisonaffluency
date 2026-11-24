@@ -3,7 +3,7 @@ import { Loader2, Check, Eye, EyeOff, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
-type MaterialRole = "fabric" | "base" | "top" | "ignore";
+type MaterialRole = "fabric" | "backrest" | "base" | "top" | "ignore";
 
 /**
  * Heuristic name-based role detection. Returns null when the material name is
@@ -75,12 +75,13 @@ interface Props {
 
 const ROLE_LABEL: Record<MaterialRole, string> = {
   fabric: "Fabric / Leather",
+  backrest: "Backrest upholstery",
   base: "Base (wood · metal)",
   top: "Top (stone · marble · glass)",
   ignore: "Ignore",
 };
 
-const ROLE_ORDER: MaterialRole[] = ["fabric", "base", "top", "ignore"];
+const ROLE_ORDER: MaterialRole[] = ["fabric", "backrest", "base", "top", "ignore"];
 
 export function GlbMaterialRolesEditor({
   variantId,
@@ -214,7 +215,7 @@ export function GlbMaterialRolesEditor({
       </div>
       {(() => {
         const grouped: Record<MaterialRole, { name: string; token: string }[]> = {
-          fabric: [], base: [], top: [], ignore: [],
+          fabric: [], backrest: [], base: [], top: [], ignore: [],
         };
         for (const [name, info] of Object.entries(autoInfo)) {
           grouped[info.role].push({ name, token: info.token });
@@ -223,6 +224,7 @@ export function GlbMaterialRolesEditor({
         if (total === 0) return null;
         const swatch: Record<MaterialRole, string> = {
           fabric: "bg-emerald-600",
+          backrest: "bg-emerald-600",
           base: "bg-amber-700",
           top: "bg-neutral-500",
           ignore: "bg-muted",

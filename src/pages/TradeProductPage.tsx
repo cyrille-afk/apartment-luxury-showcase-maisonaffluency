@@ -854,7 +854,7 @@ const TradeProductPage: React.FC<{ embeddedProduct?: { id?: string; designerSlug
   // Per-variant 3D models: one row per size/label. `default` variant wins when
   // no size is selected. Falls back to legacy tradeProducts.glb_url otherwise.
   const [glbVariants, setGlbVariants] = useState<
-    { variant_label: string; glb_url: string; is_default: boolean; material_roles: Record<string, "fabric" | "base" | "top" | "ignore"> | null }[]
+    { variant_label: string; glb_url: string; is_default: boolean; material_roles: Record<string, "fabric" | "backrest" | "base" | "top" | "ignore"> | null }[]
   >([]);
   useEffect(() => {
     const tpId = (data as any)?.tradeProductId as string | null | undefined;
@@ -2737,7 +2737,7 @@ const TradeProductPage: React.FC<{ embeddedProduct?: { id?: string; designerSlug
                 .map(norm)
                 .filter(Boolean);
               const byLabel = candidates.reduce<
-                { variant_label: string; glb_url: string; is_default: boolean; material_roles: Record<string, "fabric" | "base" | "top" | "ignore"> | null } | null
+                { variant_label: string; glb_url: string; is_default: boolean; material_roles: Record<string, "fabric" | "backrest" | "base" | "top" | "ignore"> | null } | null
               >((hit, cand) => {
                 if (hit) return hit;
                 return (
