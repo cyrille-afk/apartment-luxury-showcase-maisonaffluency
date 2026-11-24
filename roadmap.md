@@ -1,5 +1,8 @@
 # Roadmap
 
+## QR selection confirmation
+- [x] Show the current furniture name/photo and selected upholstery swatch/name in the QR modal, with separate backrest upholstery where present. Real signed-in Sandy Cove Sofa → Opera Delft → QR confirmation verified: both images load, exact selection remains after closing, no page errors; modal visually inspected, twelve existing tests pass and build OK. No pricing or sharing behavior changed.
+
 ## Selected upholstery in AR
 - [x] Wait for the latest material textures before native AR export; block stale or failed upholstery launches.
 - [x] Carry selected finish identifiers in desktop QR links and restore only catalogue-approved preview choices on the receiving board/private room; never save or alter access.

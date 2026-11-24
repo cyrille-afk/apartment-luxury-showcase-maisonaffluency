@@ -374,6 +374,8 @@ export default function FinishesDrawer({
               alt={productName}
               poster={baseImage}
               fabricTextureUrl={textures.fabric ?? null}
+              fabricLabel={textures.fabric ? shownAxes?.top ?? picked.top?.name ?? activeVariant?.top ?? null : null}
+              backrestFabricLabel={shownAxes?.extra?.[0]?.name ?? null}
               baseTextureUrl={textures.base ?? null}
               topTextureUrl={textures.top ?? null}
               backrestTextureUrl={"backrest" in textures ? textures.backrest ?? null : null}

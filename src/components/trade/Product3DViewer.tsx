@@ -75,6 +75,8 @@ interface Props {
    * undefined restores the model's original materials in place.
    */
   fabricTextureUrl?: string | null;
+  fabricLabel?: string | null;
+  backrestFabricLabel?: string | null;
   /**
    * Optional SECOND texture layer for dual-axis products (e.g. Base finish ×
    * Top fabric). When set, applied to materials matching the "frame/base"
@@ -200,6 +202,8 @@ const Product3DViewer: React.FC<Props> = ({
   alt,
   poster,
   fabricTextureUrl,
+  fabricLabel,
+  backrestFabricLabel,
   baseTextureUrl,
   topTextureUrl,
   backrestTextureUrl,
@@ -725,6 +729,17 @@ const Product3DViewer: React.FC<Props> = ({
         <DialogContent className="space-preview-dialog w-[calc(100%-2rem)] max-w-md gap-5 px-8 py-10 text-center" overlayClassName="bg-foreground/40 backdrop-blur-sm">
           <DialogTitle className="font-display text-3xl font-normal leading-tight tracking-normal">Experience in Your Space</DialogTitle>
           <DialogDescription className="font-display text-base leading-relaxed">Scan with your iPhone camera to place this piece to scale in your room.</DialogDescription>
+          <div className="flex min-w-0 items-center gap-4 border-y border-border/60 py-4 text-left">
+            {poster && <img src={poster} alt={alt} className="size-20 shrink-0 object-contain" />}
+            <div className="min-w-0 flex-1 space-y-2">
+              <p className="break-words font-display text-xl leading-snug">{alt}</p>
+              {(fabricLabel || fabricTextureUrl) && <div className="flex items-center gap-2.5">
+                {fabricTextureUrl && <img src={fabricTextureUrl} alt={fabricLabel ?? "Selected upholstery"} className="size-9 shrink-0 rounded-full border border-border/60 object-cover" />}
+                <div className="min-w-0"><p className="font-body text-[10px] uppercase text-muted-foreground">{backrestTextureUrl ? "Seat upholstery" : "Selected upholstery"}</p><p className="break-words font-body text-xs leading-relaxed">{fabricLabel ?? "Selected fabric"}</p></div>
+              </div>}
+              {backrestTextureUrl && <div className="flex items-center gap-2.5"><img src={backrestTextureUrl} alt={backrestFabricLabel ?? "Selected backrest upholstery"} className="size-9 shrink-0 rounded-full border border-border/60 object-cover" /><div className="min-w-0"><p className="font-body text-[10px] uppercase text-muted-foreground">Backrest upholstery</p><p className="break-words font-body text-xs leading-relaxed">{backrestFabricLabel ?? "Selected backrest finish"}</p></div></div>}
+            </div>
+          </div>
           {qrUrl && <QRCodeSVG value={qrUrl} size={232} level="M" marginSize={4} fgColor="var(--space-qr-ink)" bgColor="var(--space-qr-paper)" title="Scan to open this piece on your iPhone" className="mx-auto h-auto w-full max-w-60" />}
           <p className="font-display text-sm leading-relaxed text-muted-foreground">No app download required · Works with iOS Safari &amp; Chrome</p>
         </DialogContent>
