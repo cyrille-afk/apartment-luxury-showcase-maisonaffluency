@@ -40,7 +40,7 @@ it("restores the previous sofa's exact size, finish and retail total", async () 
   fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Undo swap — restore Original Sofa" }));
   expect(screen.getByLabelText("Collection Total")).toHaveTextContent("12,500.00");
   expect(screen.getByRole("combobox", { name: "Sofa size" })).toHaveTextContent("W 250 cm");
-  expect(screen.getByRole("combobox", { name: "Finish selection" })).toHaveTextContent("Velvet");
+  expect(screen.getByRole("combobox", { name: "Upholstery" })).toHaveTextContent("Velvet");
 });
 it("restores the immediately previous alternative, not always the original piece", async () => {
   await mount();

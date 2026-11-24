@@ -36,7 +36,7 @@ it("retains a committed finish and total through a failed refresh and successful
   const client = mount();
   await screen.findByRole("button", { name: "Swap piece — Saved Sofa" });
   fireEvent.click(screen.getByRole("button", { name: "Materials and finishes for Saved Sofa" }));
-  fireEvent.click(screen.getByRole("combobox", { name: "Finish selection" }));
+  fireEvent.click(screen.getByRole("combobox", { name: "Upholstery" }));
   fireEvent.click(await screen.findByRole("option", { name: /Velvet/ }));
   fireEvent.click(screen.getByRole("button", { name: "UPDATE SELECTION" }));
   expect(screen.getByLabelText("Collection Total")).toHaveTextContent("12,500.00");
