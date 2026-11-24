@@ -14180,6 +14180,10 @@ export type Database = {
         Args: { _package_id: string; _slot_id: string }
         Returns: Json
       }
+      _viewing_room_proposal_metadata: {
+        Args: { _item: Json; _product: string }
+        Returns: Json
+      }
       _viewing_room_swatch_matrix: {
         Args: { _currency: string; _product: string }
         Returns: Json

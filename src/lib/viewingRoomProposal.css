@@ -1,0 +1,53 @@
+@font-face{font-family:ProposalEditorial;src:url('/fonts/pdf/CormorantGaramond-Regular.ttf') format('truetype');font-weight:400;font-display:block}
+@font-face{font-family:ProposalBody;src:url('/fonts/pdf/Inter-Light.ttf') format('truetype');font-weight:400;font-display:block}
+.private-proposal{--proposal-paper:#FAF9F6;--proposal-ink:#1C1C1C;--proposal-muted:#666159;--proposal-border:#E5E0D8;--proposal-accent:#1F4E46;--proposal-white:#FFFFFF;--proposal-shade:linear-gradient(180deg,transparent 30%,rgb(0 0 0 / 30%) 53%,rgb(0 0 0 / 84%) 100%);--proposal-logo-shade:rgb(255 255 255 / 94%);color:var(--proposal-ink);font-family:ProposalBody,sans-serif;font-size:12px;letter-spacing:0}
+.private-proposal *{box-sizing:border-box;letter-spacing:0}
+.private-proposal h1,.private-proposal h2,.private-proposal h3,.private-proposal p{margin:0;font-weight:400}
+.private-proposal h1,.private-proposal h2,.private-proposal h3,.proposal-value{font-family:ProposalEditorial,serif}
+.proposal-page{position:relative;width:210mm;height:297mm;padding:18mm;background:var(--proposal-paper);page-break-after:always;break-after:page;overflow:hidden;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.proposal-page:last-child{page-break-after:auto;break-after:auto}
+.proposal-kicker{font-size:10px;text-transform:uppercase;line-height:1.6;color:var(--proposal-muted)}
+.proposal-page h2{font-size:44px;line-height:1.07;margin:12px 0 14px}
+.proposal-footer{position:absolute;bottom:12mm;left:18mm;right:18mm;display:flex;justify-content:space-between;border-top:1px solid var(--proposal-border);padding-top:11px;color:var(--proposal-muted);font-size:8px;text-transform:uppercase}
+.proposal-cover{padding:0;color:var(--proposal-white)}
+.proposal-hero,.proposal-scrim{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.proposal-scrim{background:var(--proposal-shade)}
+.proposal-brands{position:absolute;top:18mm;left:18mm;display:flex;align-items:center;gap:20px;padding:15px 18px;background:var(--proposal-logo-shade);color:var(--proposal-ink)}
+.proposal-developer-logo{width:130px;height:65px;object-fit:contain}
+.proposal-affluency{display:flex;align-items:center;gap:12px}
+.proposal-affluency img{width:40px;height:48px;object-fit:contain;mix-blend-mode:multiply}
+.proposal-wordmark{font-size:11px;line-height:1.5}
+.proposal-wordmark strong{font-size:15px;font-weight:400}
+.proposal-cover-copy{position:absolute;bottom:25mm;left:18mm;right:18mm}
+.proposal-cover .proposal-kicker{color:var(--proposal-white)}
+.proposal-cover h1{font-size:51px;line-height:1.05;margin:20px 0 22px;max-width:640px}
+.proposal-cover-collection{font-size:21px;margin-bottom:32px!important}
+.proposal-cover-details{display:flex;justify-content:space-between;align-items:flex-end;border-top:1px solid var(--proposal-white);padding-top:18px}
+.proposal-cover-total{font-family:ProposalEditorial,serif;font-size:37px;line-height:1.2;margin-top:6px!important}
+.proposal-date{font-size:11px;padding-bottom:7px}
+.proposal-plan{width:100%;height:91mm;margin-top:12px;display:flex;align-items:center;justify-content:center}
+.proposal-plan img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply}
+.proposal-plan-label{margin-top:10px!important;color:var(--proposal-muted);font-size:10px;line-height:1.6}
+.proposal-overview{margin-top:21px;border-top:1px solid var(--proposal-border);padding-top:24px}
+.proposal-overview h3{font-size:34px;margin-bottom:18px}
+.proposal-summary{display:grid;grid-template-columns:1.25fr 1fr;gap:20px;padding-bottom:22px;border-bottom:1px solid var(--proposal-border)}
+.proposal-value{font-size:31px;margin-top:8px!important;line-height:1.2;color:var(--proposal-accent)}
+.proposal-delivery{margin-top:20px}
+.proposal-delivery p:last-child{font-size:12px;line-height:1.8;margin-top:8px;max-width:590px}
+.proposal-schedule-intro{font-size:11px;color:var(--proposal-muted);line-height:1.7;margin-bottom:24px!important}
+.proposal-item{height:102mm;display:grid;grid-template-columns:160px minmax(0,1fr);gap:27px;padding:24px 0;border-top:1px solid var(--proposal-border);break-inside:avoid;page-break-inside:avoid}
+.proposal-product-photo{width:160px;height:160px;object-fit:contain;align-self:start;margin-top:14px}
+.proposal-photo-column{min-width:0}
+.proposal-item-number{font-size:10px;color:var(--proposal-muted);margin-top:14px!important}
+.proposal-item h3{font-size:29px;line-height:1.12;margin-bottom:7px}
+.proposal-maker{font-size:11px;color:var(--proposal-muted);line-height:1.5;margin-bottom:15px!important}
+.proposal-specs{font-size:10px;line-height:1.8;margin-bottom:15px!important}
+.proposal-finishes{display:grid;gap:8px}
+.proposal-finish{display:flex;align-items:center;gap:11px;min-height:28px}
+.proposal-swatch{width:28px;height:28px;border:1px solid var(--proposal-border);border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--proposal-paper)}
+.proposal-swatch img{width:100%;height:100%;object-fit:cover}
+.proposal-finish-text{font-size:10px;line-height:1.4;max-width:320px}
+.proposal-finish-label{display:block;font-size:8px;color:var(--proposal-muted);margin-bottom:2px}
+.proposal-line-price{font-family:ProposalEditorial,serif;font-size:25px;margin-top:18px!important;color:var(--proposal-accent)}
+@page{size:A4;margin:0}
+@media print{html,body{margin:0;padding:0}.proposal-page{width:210mm;height:297mm;margin:0;box-shadow:none}.proposal-item{break-inside:avoid;page-break-inside:avoid}}

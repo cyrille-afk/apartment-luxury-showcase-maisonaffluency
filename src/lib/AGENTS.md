@@ -1,4 +1,5 @@
 # src/lib rules
+- Private-room proposals use validated retail line sums and selected axis materials, embedded editorial/body fonts and exact A4 page capture through appPdfDownload; two-item pages prevent splitting and supplier defaults never become selected finishes.
 - Customer saves: owner deltas; clear on logout.
 - Editorial drawer framing uses model-viewer's recomputed bounds and public orientation/target API with category-scoped Z-up detection and known exporter corrections — keeps shared material handling and other viewers unchanged.
 - Viewing-room invitations use unique short-code aliases; service-only, rate-limited resolution sets a scoped HttpOnly legacy credential cookie, and every read/proposal revalidates the parent credential and matching name. Legacy links remain valid — readable names alone are not credentials.

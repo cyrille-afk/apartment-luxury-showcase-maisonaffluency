@@ -1,5 +1,9 @@
 # Roadmap
 
+## Private viewing-room editorial proposal
+- [x] Replace plain PDF with exact A4 cover, selected residence overview and two-item editorial schedule; use validated selected retail totals and resolved selected swatches only.
+- [x] Real Canaletto Bespoke lock/download verified before and after Rift Ebonized Oak + GUM Edson Charbon/Tundra 603/Smooth Oak selections: US$163,447.34, four exact 210×297mm pages, all pages inspected. Fixed missing Rift photo after finish selection. 95 regressions plus 11 final focused tests pass; build OK, no browser errors. Removed all four test requests; source boards unchanged. Yoma has no recorded selected materials, and the residence plan remains the existing explicitly labelled sample reference; neither is invented.
+
 ## Private viewing-room finish parity
 - [x] Match GUM-style and Rift CTS dropdowns to the moodboard without repeated swatches; independent seat/Tundra/frame and oak/travertine changes verified on real Bespoke models, Update Selection/reopen restores exact choices and totals. Desktop/phone inspected; 87 tests pass. Existing Signature packages have no saved finish-permission rows and remain fixed; no permissions or catalogue data changed.
 

@@ -16,9 +16,10 @@ import { moodBudgetLedger, isMoodCurrency } from "@/lib/moodBoardBudget";
 import { downloadViewingRoomProposal } from "@/lib/viewingRoomProposal";
 import { formatPdfMoney } from "@/lib/pdfFormatting";
 import { viewingRoomSwapsEnabled } from "@/lib/viewingRoomAlternatives";
+import type { ViewingRoomProposalContext } from "@/lib/viewingRoomProposalData";
 
-export default function ViewingRoomExperience({ token, packageId, baseTotal, currency, residence, developer, onTotal, fallbackItems = [] }: {
-  token: string; packageId: string; baseTotal: number; currency: string; residence: string; developer: string; onTotal: (total: number) => void; fallbackItems?: ViewingRoomItem[];
+export default function ViewingRoomExperience({ token, packageId, baseTotal, currency, residence, developer, onTotal, fallbackItems = [], proposalContext = {} }: {
+  token: string; packageId: string; baseTotal: number; currency: string; residence: string; developer: string; onTotal: (total: number) => void; fallbackItems?: ViewingRoomItem[]; proposalContext?: ViewingRoomProposalContext;
 }) {
   const query = useQuery({ queryKey: ["viewing-room-choices", token, packageId], queryFn: () => getViewingRoomChoices({ data: { token, packageId } }), retry: false });
   const [choices, setChoices] = useState<Record<string, ViewingRoomChoice>>({});
@@ -74,7 +75,12 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
       key.current ??= crypto.randomUUID();
       const final = snapshot.current ?? await lock({ data: { token, packageId, requestKey: key.current, choices: slots.map(slot => ({ slot_id: slot.id, product_id: choices[slot.id]?.id ?? slot.id, finish_key: choices[slot.id]?.finish_key, size_key: choices[slot.id]?.size_key, colourway_id: choices[slot.id]?.colourway_id, axis_colours: choices[slot.id]?.axis_colours })) } });
       snapshot.current = final; setLocked(true);
-      await downloadViewingRoomProposal(final, residence, developer);
+      const presentation = { ...final, items: final.items.map((item, index) => {
+        const slot = slots[index];
+        const approved = slot?.product_name === item.product_name ? slot : slot?.alternatives.find(piece => piece.product_name === item.product_name);
+        return { ...item, image_url: item.image_url ?? approved?.image_url ?? null };
+      }) };
+      await downloadViewingRoomProposal(presentation, residence, developer, proposalContext);
       setFeedback("Selection locked · proposal requested and PDF downloaded.");
     } catch { setFeedback(snapshot.current ? "Selection locked. PDF download failed; please retry." : "Your proposal couldn’t be locked. Please try again."); }
     finally { setBusy(false); }

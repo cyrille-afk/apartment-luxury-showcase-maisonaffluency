@@ -27,7 +27,7 @@ export function pdfPageCuts(height: number, pageHeight: number, blocks: { top: n
 
 let exporting = false;
 /** Render only the supplied document, never the browser page URL or print chrome. */
-export async function downloadDocumentPdf(input: { html?: string; element?: HTMLElement; filename: string; landscape?: boolean; marginMm?: number; repeatHeaderSelector?: string; pageSelector?: string }) {
+export async function downloadDocumentPdf(input: { html?: string; element?: HTMLElement; filename: string; landscape?: boolean; marginMm?: number; repeatHeaderSelector?: string; pageSelector?: string; throwOnError?: boolean }) {
   if (exporting) return;
   exporting = true;
   const notice = toast.loading('Preparing PDF…');
@@ -151,5 +151,6 @@ export async function downloadDocumentPdf(input: { html?: string; element?: HTML
   } catch (error) {
     console.error('PDF rendering failed', error instanceof Error ? error.message : 'Unknown rendering error');
     toast.error('The PDF could not be generated. Please try again.', { id: notice });
+    if (input.throwOnError) throw error;
   } finally { frame.remove(); exporting = false; }
 }
