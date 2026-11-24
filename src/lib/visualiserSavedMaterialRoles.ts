@@ -5,12 +5,12 @@ import type { FinishPart } from "./visualiserFinishTargets";
 /** Role saved on the 3D model admin page (shared with Product3DViewer). */
 export type SavedMaterialRole = "fabric" | "backrest" | "base" | "top" | "ignore";
 /** Per-GLB-material role for the visualiser; null = never refinished. */
-export type VisualiserSavedRoles = Record<string, "upholstery" | "frame" | "top" | null>;
+export type VisualiserSavedRoles = Record<string, "upholstery" | "backrest" | "frame" | "top" | null>;
 
 /** Translate saved roles into visualiser parts: fabric→upholstery, base→frame/base, ignore→untouched. */
 export function toVisualiserRoles(saved: Record<string, SavedMaterialRole> | null | undefined): VisualiserSavedRoles {
   const out: VisualiserSavedRoles = {};
-  for (const [name, role] of Object.entries(saved ?? {})) out[name] = role === "fabric" || role === "backrest" ? "upholstery" : role === "base" ? "frame" : role === "top" ? "top" : null;
+  for (const [name, role] of Object.entries(saved ?? {})) out[name] = role === "fabric" ? "upholstery" : role === "backrest" ? "backrest" : role === "base" ? "frame" : role === "top" ? "top" : null;
   return out;
 }
 

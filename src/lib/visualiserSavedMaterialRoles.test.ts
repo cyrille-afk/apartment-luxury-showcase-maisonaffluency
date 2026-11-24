@@ -18,3 +18,9 @@ describe("saved fabric/frame mapping in the room visualiser", () => {
     expect(roles).toEqual({ Shell: "upholstery", Legs: "base", Post: null });
   });
 });
+
+import { toVisualiserRoles as toRoles2 } from "./visualiserSavedMaterialRoles";
+import { expect as expect2, it as it2 } from "vitest";
+it2("keeps a saved backrest separate from the seat upholstery", () => {
+  expect2(toRoles2({ "01 - Default": "backrest", "02 - Default": "fabric", "09 - Default": "base" })).toEqual({ "01 - Default": "backrest", "02 - Default": "upholstery", "09 - Default": "frame" });
+});
