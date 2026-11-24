@@ -109,3 +109,27 @@ export function keptAxisColours(finish: ViewingRoomChoice["finish_options"][numb
   for (const [role, id] of Object.entries(picks ?? {}) as [ViewingRoomAxisRole, string][]) if (finish?.axes?.some(axis => axis.role === role && axis.colours.some(row => row.id === id))) kept[role] = id;
   return kept;
 }
+
+type ViewingRoomMaterial = ViewingRoomItem["materials"][string];
+/** Cropped swatch previews for a Stage 3 card: selected finishes once customized, otherwise active + available finish-option swatches (or same-piece package defaults when no finish options exist). */
+export function viewingRoomCardSwatches(piece: ViewingRoomChoice, fallbackItem?: ViewingRoomItem, limit = 5): ViewingRoomMaterial[] {
+  const seen = new Map<string, ViewingRoomMaterial>();
+  const add = (material: ViewingRoomMaterial | undefined) => {
+    if (!material?.image_url || seen.has(material.id) || seen.size >= limit) return;
+    seen.set(material.id, material);
+  };
+  for (const [axis, material] of Object.entries(viewingRoomViewerMaterials(piece))) {
+    if (!axis.startsWith("default-")) add(material);
+  }
+  if (piece.finish_key) return [...seen.values()];
+  for (const option of piece.finish_options) Object.values(option.materials ?? {}).forEach(add);
+  for (const option of piece.finish_options) {
+    (option.colourways ?? []).forEach(add);
+    (option.axes ?? []).forEach(axis => (axis.colours ?? []).forEach(add));
+  }
+  if (piece.finish_options.length === 0) {
+    Object.values(piece.materials).forEach(add);
+    if (fallbackItem && fallbackItem.id === piece.id) Object.values(fallbackItem.materials).forEach(add);
+  }
+  return [...seen.values()];
+}

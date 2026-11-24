@@ -10,7 +10,7 @@ import Product3DViewer from "../Product3DViewer";
 import ViewingRoomAxisFinishes from "./ViewingRoomAxisFinishes";
 import { Product3dBadge } from "../Product3dBadge";
 import { getViewingRoomChoices, lockViewingRoomProposal } from "@/lib/viewingRoom.functions";
-import { viewingRoomTotal, viewingRoomSelection, viewingRoomSizeSelection, viewingRoomViewerMaterials, type ViewingRoomChoice, type ViewingRoomSlot, type ViewingRoomItem } from "@/lib/viewingRoom";
+import { viewingRoomTotal, viewingRoomSelection, viewingRoomSizeSelection, viewingRoomViewerMaterials, viewingRoomCardSwatches, type ViewingRoomChoice, type ViewingRoomSlot, type ViewingRoomItem } from "@/lib/viewingRoom";
 import { downloadViewingRoomProposal } from "@/lib/viewingRoomProposal";
 import { formatPdfMoney } from "@/lib/pdfFormatting";
 import { viewingRoomSwapsEnabled } from "@/lib/viewingRoomAlternatives";
@@ -40,6 +40,7 @@ export default function ViewingRoomExperience({ token, packageId, tierName, base
   const slots = useMemo<ViewingRoomSlot[]>(() => query.data
     ? query.data.items.map(slot => ({ ...slot, is_swappable: viewingRoomSwapsEnabled(slot.is_swappable, query.data?.allow_alternatives ?? false) }))
     : fallbackItems.map(item => ({ ...item, retail_price: null, retail_price_from: false, finish_options: [], size_options: [], alternatives: [], is_swappable: false, allow_finish_customization: false })), [query.data, fallbackItems]);
+  const fallbackById = useMemo(() => new Map(fallbackItems.map(item => [item.id, item])), [fallbackItems]);
   const recommendationsUnavailable = query.isError || (!query.isPending && !query.data);
   // Saved swap permissions are read once per page load, so a fixed piece may simply be stale state.
   const fixedCollectionVisible = Boolean(query.data) && !recommendationsUnavailable && slots.some(slot => !slot.is_swappable);
@@ -126,7 +127,7 @@ export default function ViewingRoomExperience({ token, packageId, tierName, base
             {slot.is_swappable && <Button variant="outline" disabled={busy || locked} className="absolute right-3 top-3 z-10 h-auto gap-1.5 rounded-none border-border/60 bg-background/85 px-2.5 py-1.5 text-[10px] uppercase backdrop-blur-sm" aria-label={`Swap piece — ${piece.product_name}`} onClick={() => openPiece(slot, "alternatives")}><ArrowLeftRight className="size-3.5" strokeWidth={1.5} />SWAP PIECE</Button>}
           </div>
           <div className="mt-4 flex flex-1 flex-col gap-3"><h2 className="font-display text-xl">{piece.product_name}</h2>
-            <div className="flex min-h-6 flex-wrap gap-2">{[...new Map(Object.values(piece.materials).map(material => [material.id, material])).values()].map(material => <span key={material.id} title={material.name} className="size-6 shrink-0 overflow-hidden rounded-full border border-border">{material.image_url && <img src={material.image_url} alt={material.name} className="size-full object-cover" />}</span>)}</div>
+            <div className="flex min-h-6 flex-wrap gap-2">{viewingRoomCardSwatches(piece, fallbackById.get(slot.id)).map(material => <span key={material.id} title={material.name} className="size-6 shrink-0 overflow-hidden rounded-full border border-border"><img src={material.image_url ?? ""} alt={material.name} className="size-full object-cover" /></span>)}</div>
             {piece.finish_key && <p className="text-xs text-muted-foreground">{piece.finish_options.find(finish => finish.key === piece.finish_key)?.label}</p>}
             {piece.size_key && <p className="text-xs text-muted-foreground">{piece.dimensions}</p>}
             <div className="mt-auto"><p aria-label="Item price" className="text-sm">{piece.retail_price == null ? "Price to be confirmed" : `${piece.retail_price_from ? "From " : ""}${money(piece.retail_price)}`}</p><p className="mt-1 text-xs text-muted-foreground">Lead time · {piece.lead_time ?? "To be confirmed"}</p></div>
