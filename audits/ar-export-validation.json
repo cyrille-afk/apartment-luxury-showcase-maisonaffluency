@@ -1,0 +1,1115 @@
+{
+  "generatedAt": "2026-11-24T10:53:18.816Z",
+  "inventoryDate": "2026-11-24",
+  "scope": "Active, visible Trade catalogue GLB variants read on inventoryDate; refresh this input for new or replaced catalogue models. No prices or access credentials.",
+  "summary": {
+    "checked": 35,
+    "flagged": 10,
+    "unconfirmed": 23,
+    "verified": 2
+  },
+  "results": [
+    {
+      "id": "f3dacd65-3c2e-4062-8a68-985ab6ea7b6d",
+      "name": "BOB Armchair for Delcourt Collection",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/f3dacd65-3c2e-4062-8a68-985ab6ea7b6d/w-120-x-d-89-x-h-70-cm-1791608568314.glb",
+      "dimensionsMetres": [
+        124.9178695678711,
+        89.348876953125,
+        70.38620995543897
+      ],
+      "vertices": 257741,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "expectedMetres": [
+        1.2,
+        0.7,
+        0.89
+      ],
+      "measurementBasis": "Recorded model size label",
+      "status": "flagged",
+      "issues": [
+        {
+          "code": "unrealistic-dimensions",
+          "severity": "error",
+          "message": "Export dimensions are outside 5cm–10m; check source units and export scale."
+        },
+        {
+          "code": "dimension-mismatch",
+          "severity": "error",
+          "message": "Export size disagrees with its recorded dimensions by more than 20% or 5cm."
+        },
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "f3dacd65-3c2e-4062-8a68-985ab6ea7b6d",
+      "name": "BOB Armchair for Delcourt Collection",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/f3dacd65-3c2e-4062-8a68-985ab6ea7b6d/w-95-x-d-77-x-h-70-cm-1791608310508.glb",
+      "dimensionsMetres": [
+        95.0152702331543,
+        77.20653915405273,
+        70.3824110031128
+      ],
+      "vertices": 174001,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "expectedMetres": [
+        0.95,
+        0.7,
+        0.77
+      ],
+      "measurementBasis": "Recorded model size label",
+      "status": "flagged",
+      "issues": [
+        {
+          "code": "unrealistic-dimensions",
+          "severity": "error",
+          "message": "Export dimensions are outside 5cm–10m; check source units and export scale."
+        },
+        {
+          "code": "dimension-mismatch",
+          "severity": "error",
+          "message": "Export size disagrees with its recorded dimensions by more than 20% or 5cm."
+        },
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "938efe1a-8744-47e9-9d1d-dbd00634ab1a",
+      "name": "Bond Street Stool by Yabu Pushelberg",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/938efe1a-8744-47e9-9d1d-dbd00634ab1a/1783389292330.glb",
+      "dimensionsMetres": [
+        0.6280439794063568,
+        0.653732028339391,
+        0.5676959902048111
+      ],
+      "vertices": 386688,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "status": "unconfirmed",
+      "issues": [
+        {
+          "code": "dimensions-unconfirmed",
+          "severity": "review",
+          "message": "No complete recorded measurements; true scale needs review."
+        },
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "163af529-08b9-4391-9a48-03663261c085",
+      "name": "Cinnamon Gardens Floor Lamp by Yabu Pushelberg",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/163af529-08b9-4391-9a48-03663261c085/-55-h-156-cm-1783393125349.glb",
+      "dimensionsMetres": [
+        0.5496195051819086,
+        1.5787804768802074,
+        0.5496196001041763
+      ],
+      "vertices": 61045,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "status": "unconfirmed",
+      "issues": [
+        {
+          "code": "dimensions-unconfirmed",
+          "severity": "review",
+          "message": "No complete recorded measurements; true scale needs review."
+        },
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "8960e070-49f0-46dd-a137-2209717b7dc0",
+      "name": "DUP low coffee table by Vincent Dupont-Rougier",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/8960e070-49f0-46dd-a137-2209717b7dc0/default-1791611326521.glb",
+      "dimensionsMetres": [
+        90,
+        139.9221954345703,
+        25
+      ],
+      "vertices": 4135,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "status": "flagged",
+      "issues": [
+        {
+          "code": "unrealistic-dimensions",
+          "severity": "error",
+          "message": "Export dimensions are outside 5cm–10m; check source units and export scale."
+        },
+        {
+          "code": "dimensions-unconfirmed",
+          "severity": "review",
+          "message": "No complete recorded measurements; true scale needs review."
+        },
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "353547c3-ea0c-4d59-b79a-21b761bfb291",
+      "name": "Frenchmen Street Armchair",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/353547c3-ea0c-4d59-b79a-21b761bfb291/1783389210646.glb",
+      "dimensionsMetres": [
+        0.8277940154075623,
+        0.7213650115008932,
+        0.7643919885158539
+      ],
+      "vertices": 305712,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "expectedMetres": [
+        0.62,
+        0.8,
+        0.59
+      ],
+      "measurementBasis": "Recorded product measurements",
+      "status": "flagged",
+      "issues": [
+        {
+          "code": "dimension-mismatch",
+          "severity": "error",
+          "message": "Export size disagrees with its recorded dimensions by more than 20% or 5cm."
+        },
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "2816322a-94f6-49e7-a70f-4a8c15292d5a",
+      "name": "Frenchmen Street Lounge Chair",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/2816322a-94f6-49e7-a70f-4a8c15292d5a/w-82-d-77-h-73-cm-sh-41-cm-1783392122132.glb",
+      "dimensionsMetres": [
+        0.8277940154075623,
+        0.7213650115008932,
+        0.7643919885158539
+      ],
+      "vertices": 305712,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "expectedMetres": [
+        0.82,
+        0.73,
+        0.77
+      ],
+      "measurementBasis": "Recorded model size label",
+      "status": "unconfirmed",
+      "issues": [
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "7b2d698c-cdcb-47ea-8c13-135b975bf94a",
+      "name": "Frenchmen Street Side Chair",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/7b2d698c-cdcb-47ea-8c13-135b975bf94a/default-1792555338026.glb",
+      "dimensionsMetres": [
+        0.5332809686660767,
+        0.7921115859930453,
+        0.5874320618112506
+      ],
+      "vertices": 85008,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "status": "unconfirmed",
+      "issues": [
+        {
+          "code": "dimensions-unconfirmed",
+          "severity": "review",
+          "message": "No complete recorded measurements; true scale needs review."
+        },
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "f72b4185-9eeb-4ec0-b862-0972abc93a9f",
+      "name": "GUM armchair by Christophe Delcourt",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/f72b4185-9eeb-4ec0-b862-0972abc93a9f/default-1791609555869.glb",
+      "dimensionsMetres": [
+        0.9005060195922852,
+        0.7498939849847714,
+        0.7704689739164983
+      ],
+      "vertices": 7403,
+      "exportTransform": {
+        "scale": "0.001 0.001 0.001",
+        "orientation": "0deg -90deg 0deg",
+        "corrected": true
+      },
+      "expectedMetres": [
+        0.9,
+        0.75,
+        0.77
+      ],
+      "measurementBasis": "Recorded product measurements",
+      "status": "verified",
+      "issues": []
+    },
+    {
+      "id": "fd8c2682-d8a1-48fe-b110-d22209cbcce7",
+      "name": "IBO low table by Christophe Delcourt",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/fd8c2682-d8a1-48fe-b110-d22209cbcce7/default-1791611289330.glb",
+      "dimensionsMetres": [
+        1.699710235595703,
+        0.4100000000000002,
+        0.949867057800293
+      ],
+      "vertices": 34511,
+      "exportTransform": {
+        "scale": "0.01 0.01 0.01",
+        "orientation": "0deg -90deg 0deg",
+        "corrected": true
+      },
+      "expectedMetres": [
+        1.69971,
+        0.41,
+        0.949867
+      ],
+      "measurementBasis": "Audited source revision and native USDZ bounds, 24 Nov 2026; not mixed-shape product defaults",
+      "status": "verified",
+      "issues": []
+    },
+    {
+      "id": "5a2768f7-16db-434d-b119-cad533979d08",
+      "name": "LIZ console by Christophe Delcourt",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/5a2768f7-16db-434d-b119-cad533979d08/230-1791612087084.glb",
+      "dimensionsMetres": [
+        2300,
+        500,
+        514.72998046875
+      ],
+      "vertices": 17647,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "status": "flagged",
+      "issues": [
+        {
+          "code": "unrealistic-dimensions",
+          "severity": "error",
+          "message": "Export dimensions are outside 5cm–10m; check source units and export scale."
+        },
+        {
+          "code": "dimensions-unconfirmed",
+          "severity": "review",
+          "message": "No complete recorded measurements; true scale needs review."
+        },
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "5a2768f7-16db-434d-b119-cad533979d08",
+      "name": "LIZ console by Christophe Delcourt",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/5a2768f7-16db-434d-b119-cad533979d08/high-console-w-180-x-d-50-x-h-84-5-cm-1791615707152.glb",
+      "dimensionsMetres": [
+        1800,
+        500,
+        844.72998046875
+      ],
+      "vertices": 16705,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "expectedMetres": [
+        1.8,
+        0.845,
+        0.5
+      ],
+      "measurementBasis": "Recorded model size label",
+      "status": "flagged",
+      "issues": [
+        {
+          "code": "unrealistic-dimensions",
+          "severity": "error",
+          "message": "Export dimensions are outside 5cm–10m; check source units and export scale."
+        },
+        {
+          "code": "dimension-mismatch",
+          "severity": "error",
+          "message": "Export size disagrees with its recorded dimensions by more than 20% or 5cm."
+        },
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "8a072491-e699-44ee-ac6b-51838d7514ed",
+      "name": "Madison Avenue Side Table",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/8a072491-e699-44ee-ac6b-51838d7514ed/default-1783392434931.glb",
+      "dimensionsMetres": [
+        0.4044719934463501,
+        0.4690370099451684,
+        0.4044719934463501
+      ],
+      "vertices": 247296,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "expectedMetres": [
+        0.405,
+        0.47,
+        0.405
+      ],
+      "measurementBasis": "Recorded product measurements",
+      "status": "unconfirmed",
+      "issues": [
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "0afae676-33b3-459f-9298-d08d7a95ee9f",
+      "name": "Mono CLS Console",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/0afae676-33b3-459f-9298-d08d7a95ee9f/w-120-x-d-42-x-h-80-cm-1793879923135.glb",
+      "dimensionsMetres": [
+        1.2000000476837158,
+        0.8099999992251394,
+        0.41999998688697815
+      ],
+      "vertices": 25701,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "expectedMetres": [
+        1.2,
+        0.8,
+        0.42
+      ],
+      "measurementBasis": "Recorded model size label",
+      "status": "unconfirmed",
+      "issues": [
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "0afae676-33b3-459f-9298-d08d7a95ee9f",
+      "name": "Mono CLS Console",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/0afae676-33b3-459f-9298-d08d7a95ee9f/w-160-x-d-42-x-h-80-cm-1793879925628.glb",
+      "dimensionsMetres": [
+        1.600000023841858,
+        0.8099999992251564,
+        0.41999998688697815
+      ],
+      "vertices": 28629,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "expectedMetres": [
+        1.6,
+        0.8,
+        0.42
+      ],
+      "measurementBasis": "Recorded model size label",
+      "status": "unconfirmed",
+      "issues": [
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "0afae676-33b3-459f-9298-d08d7a95ee9f",
+      "name": "Mono CLS Console",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/0afae676-33b3-459f-9298-d08d7a95ee9f/w-80-x-d-42-x-h-80-cm-1793879920321.glb",
+      "dimensionsMetres": [
+        0.800000011920929,
+        0.8099999992251394,
+        0.41999998688697815
+      ],
+      "vertices": 24844,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "expectedMetres": [
+        0.8,
+        0.8,
+        0.42
+      ],
+      "measurementBasis": "Recorded model size label",
+      "status": "unconfirmed",
+      "issues": [
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "164e518d-3436-4402-a625-173c56725913",
+      "name": "Mono STS",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/164e518d-3436-4402-a625-173c56725913/w-34-x-d-26-x-h-40-cm-1793880384653.glb",
+      "dimensionsMetres": [
+        0.3400000035762787,
+        0.40800000037997936,
+        0.25999999046325684
+      ],
+      "vertices": 26173,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "expectedMetres": [
+        0.34,
+        0.4,
+        0.26
+      ],
+      "measurementBasis": "Recorded model size label",
+      "status": "unconfirmed",
+      "issues": [
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "164e518d-3436-4402-a625-173c56725913",
+      "name": "Mono STS",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/164e518d-3436-4402-a625-173c56725913/w-42-x-d-32-x-h-44-cm-1793880379696.glb",
+      "dimensionsMetres": [
+        0.41999998688697815,
+        0.44800000010430735,
+        0.3199999928474426
+      ],
+      "vertices": 25305,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "expectedMetres": [
+        0.42,
+        0.44,
+        0.32
+      ],
+      "measurementBasis": "Recorded model size label",
+      "status": "unconfirmed",
+      "issues": [
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "fb9d1465-3abb-48c9-b43b-4b4f6186f754",
+      "name": "ORS Bookshelf by Christophe Delcourt",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/fb9d1465-3abb-48c9-b43b-4b4f6186f754/default-1791611355808.glb",
+      "dimensionsMetres": [
+        274.3303642272949,
+        58.416259765625,
+        230.00000324845314
+      ],
+      "vertices": 13628,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "expectedMetres": [
+        2.75,
+        2.3,
+        0.59
+      ],
+      "measurementBasis": "Recorded product measurements",
+      "status": "flagged",
+      "issues": [
+        {
+          "code": "unrealistic-dimensions",
+          "severity": "error",
+          "message": "Export dimensions are outside 5cm–10m; check source units and export scale."
+        },
+        {
+          "code": "dimension-mismatch",
+          "severity": "error",
+          "message": "Export size disagrees with its recorded dimensions by more than 20% or 5cm."
+        },
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "95911ce0-4cb3-4954-b4bb-5ac58ebe06bc",
+      "name": "Park Place Bar/Counter Stool by Yabu Pushelberg",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/95911ce0-4cb3-4954-b4bb-5ac58ebe06bc/bar-stool---w-44-x-d-48-x-h-105---sh-75-cm-1783392330171.glb",
+      "dimensionsMetres": [
+        0.4704819917678833,
+        1.049149990081787,
+        0.4407850056886673
+      ],
+      "vertices": 350616,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "expectedMetres": [
+        0.44,
+        1.05,
+        0.48
+      ],
+      "measurementBasis": "Recorded model size label",
+      "status": "unconfirmed",
+      "issues": [
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "95911ce0-4cb3-4954-b4bb-5ac58ebe06bc",
+      "name": "Park Place Bar/Counter Stool by Yabu Pushelberg",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/95911ce0-4cb3-4954-b4bb-5ac58ebe06bc/counter-stool---w-44-x-d-48-x-h-92-5---sh-65-cm-1783392371440.glb",
+      "dimensionsMetres": [
+        0.4702740013599396,
+        0.9241510033607483,
+        0.4406930059194565
+      ],
+      "vertices": 347928,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "expectedMetres": [
+        0.44,
+        0.925,
+        0.48
+      ],
+      "measurementBasis": "Recorded model size label",
+      "status": "unconfirmed",
+      "issues": [
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "f198902d-aa9e-41d8-8630-bad4226aaa45",
+      "name": "Praia da Granja Coffee Table",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/f198902d-aa9e-41d8-8630-bad4226aaa45/rectangle---w-128-x-d-83-x-h-34-cm-1783392485221.glb",
+      "dimensionsMetres": [
+        1.2828490138053894,
+        0.3400860098342946,
+        0.834225982427597
+      ],
+      "vertices": 132216,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "expectedMetres": [
+        1.28,
+        0.34,
+        0.83
+      ],
+      "measurementBasis": "Recorded model size label",
+      "status": "unconfirmed",
+      "issues": [
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "f198902d-aa9e-41d8-8630-bad4226aaa45",
+      "name": "Praia da Granja Coffee Table",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/f198902d-aa9e-41d8-8630-bad4226aaa45/square---w-103-x-d-103-x-h-34-cm-1783392500755.glb",
+      "dimensionsMetres": [
+        1.0358459949493408,
+        0.3400860098342946,
+        1.0360360145568848
+      ],
+      "vertices": 36432,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "expectedMetres": [
+        1.03,
+        0.34,
+        1.03
+      ],
+      "measurementBasis": "Recorded model size label",
+      "status": "unconfirmed",
+      "issues": [
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "b26d428c-98ce-46e3-befa-d5308b894ba6",
+      "name": "Rift CTS",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/b26d428c-98ce-46e3-befa-d5308b894ba6/w-108-d-108-h-28-cm-1793853908872.glb",
+      "dimensionsMetres": [
+        1.0800212621688843,
+        0.2900000009685769,
+        1.0800212621688843
+      ],
+      "vertices": 18886,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "expectedMetres": [
+        1.08,
+        0.28,
+        1.08
+      ],
+      "measurementBasis": "Recorded model size label",
+      "status": "unconfirmed",
+      "issues": [
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "b26d428c-98ce-46e3-befa-d5308b894ba6",
+      "name": "Rift CTS",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/b26d428c-98ce-46e3-befa-d5308b894ba6/w-128-d-128-h-28-cm---bleached-oak-or-smoked-1793877869830.glb",
+      "dimensionsMetres": [
+        1.2800213098526,
+        0.2900000009685769,
+        1.2800213098526
+      ],
+      "vertices": 19825,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "expectedMetres": [
+        1.28,
+        0.28,
+        1.28
+      ],
+      "measurementBasis": "Recorded model size label",
+      "status": "unconfirmed",
+      "issues": [
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "b26d428c-98ce-46e3-befa-d5308b894ba6",
+      "name": "Rift CTS",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/b26d428c-98ce-46e3-befa-d5308b894ba6/w-148-d-148-h-28-cm---bleached-oak-or-smoked-1793877899696.glb",
+      "dimensionsMetres": [
+        1.480021357536316,
+        0.280000001192095,
+        1.480021357536316
+      ],
+      "vertices": 37858,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "expectedMetres": [
+        1.48,
+        0.28,
+        1.48
+      ],
+      "measurementBasis": "Recorded model size label",
+      "status": "unconfirmed",
+      "issues": [
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "b26d428c-98ce-46e3-befa-d5308b894ba6",
+      "name": "Rift CTS",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/b26d428c-98ce-46e3-befa-d5308b894ba6/w-168-d-88-h-28-cm---bleached-oak-or-smoked-1793877910846.glb",
+      "dimensionsMetres": [
+        1.680006504058838,
+        0.2900000009685769,
+        0.880000114440918
+      ],
+      "vertices": 24391,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "expectedMetres": [
+        1.68,
+        0.28,
+        0.88
+      ],
+      "measurementBasis": "Recorded model size label",
+      "status": "unconfirmed",
+      "issues": [
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "bca1d4e5-8d50-4030-8a81-905ca50033c6",
+      "name": "Rift CTW Coffee Table",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/bca1d4e5-8d50-4030-8a81-905ca50033c6/w-160-x-d-82-x-h-28-cm-1793878853746.glb",
+      "dimensionsMetres": [
+        1.6000000253320579,
+        0.2800000011920984,
+        0.8200000013410981
+      ],
+      "vertices": 1456,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "expectedMetres": [
+        1.6,
+        0.28,
+        0.82
+      ],
+      "measurementBasis": "Recorded model size label",
+      "status": "unconfirmed",
+      "issues": [
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "bca1d4e5-8d50-4030-8a81-905ca50033c6",
+      "name": "Rift CTW Coffee Table",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/bca1d4e5-8d50-4030-8a81-905ca50033c6/w-180-x-d-82-x-h-28-cm-1793878859159.glb",
+      "dimensionsMetres": [
+        1.8000000268220901,
+        0.2800000011920984,
+        0.820000001341101
+      ],
+      "vertices": 1448,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "expectedMetres": [
+        1.8,
+        0.28,
+        0.82
+      ],
+      "measurementBasis": "Recorded model size label",
+      "status": "unconfirmed",
+      "issues": [
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "bca1d4e5-8d50-4030-8a81-905ca50033c6",
+      "name": "Rift CTW Coffee Table",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/bca1d4e5-8d50-4030-8a81-905ca50033c6/w-200-x-d-82-x-h-28-cm-1793878862308.glb",
+      "dimensionsMetres": [
+        2.0000000298023224,
+        0.2800000011921232,
+        0.820000001341101
+      ],
+      "vertices": 1452,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "expectedMetres": [
+        2,
+        0.28,
+        0.82
+      ],
+      "measurementBasis": "Recorded model size label",
+      "status": "unconfirmed",
+      "issues": [
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "bca1d4e5-8d50-4030-8a81-905ca50033c6",
+      "name": "Rift CTW Coffee Table",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/bca1d4e5-8d50-4030-8a81-905ca50033c6/w-220-x-d-82-x-h-28-cm-1793878863539.glb",
+      "dimensionsMetres": [
+        2.200000047683716,
+        0.2800000011921232,
+        0.820000001341101
+      ],
+      "vertices": 1454,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "expectedMetres": [
+        2.2,
+        0.28,
+        0.82
+      ],
+      "measurementBasis": "Recorded model size label",
+      "status": "unconfirmed",
+      "issues": [
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "cd3c22d9-cd6c-488a-aff0-d6776c8a742f",
+      "name": "Rua Leblon by Yabu Pushelberg",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/cd3c22d9-cd6c-488a-aff0-d6776c8a742f/1783386690528.glb",
+      "dimensionsMetres": [
+        0.8943960070610046,
+        0.7772799927979577,
+        1.63400399684906
+      ],
+      "vertices": 427962,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "expectedMetres": [
+        0.9,
+        0.76,
+        0.92
+      ],
+      "measurementBasis": "Recorded product measurements",
+      "status": "flagged",
+      "issues": [
+        {
+          "code": "dimension-mismatch",
+          "severity": "error",
+          "message": "Export size disagrees with its recorded dimensions by more than 20% or 5cm."
+        },
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "ffd33487-bb3d-4d18-80ee-1e35b858738e",
+      "name": "Sandy Cove Sofa",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/ffd33487-bb3d-4d18-80ee-1e35b858738e/w-190-d-108-h-70-sh-40-cm-com-fabric-1783390163774.glb",
+      "dimensionsMetres": [
+        1.959210991859436,
+        0.8504980206489563,
+        1.0620149970054626
+      ],
+      "vertices": 138351,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "expectedMetres": [
+        1.9,
+        0.7,
+        1.08
+      ],
+      "measurementBasis": "Recorded model size label",
+      "status": "flagged",
+      "issues": [
+        {
+          "code": "dimension-mismatch",
+          "severity": "error",
+          "message": "Export size disagrees with its recorded dimensions by more than 20% or 5cm."
+        },
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "ffd33487-bb3d-4d18-80ee-1e35b858738e",
+      "name": "Sandy Cove Sofa",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/ffd33487-bb3d-4d18-80ee-1e35b858738e/w-250-d-112-h-70-sh-40-cm-com-fabric-1783390208634.glb",
+      "dimensionsMetres": [
+        2.500041961669922,
+        0.8420010209083557,
+        1.0764590501785278
+      ],
+      "vertices": 133488,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "expectedMetres": [
+        2.5,
+        0.7,
+        1.12
+      ],
+      "measurementBasis": "Recorded model size label",
+      "status": "flagged",
+      "issues": [
+        {
+          "code": "dimension-mismatch",
+          "severity": "error",
+          "message": "Export size disagrees with its recorded dimensions by more than 20% or 5cm."
+        },
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    },
+    {
+      "id": "d6094740-c916-4c7f-9f76-08883bc0c066",
+      "name": "Yoma CLW Console",
+      "sourceRevision": "/storage/v1/object/public/assets/glb-models/d6094740-c916-4c7f-9f76-08883bc0c066/default-1793853218274.glb",
+      "dimensionsMetres": [
+        2.605996433446215,
+        0.9999999994050747,
+        0.7279999999997677
+      ],
+      "vertices": 78615,
+      "exportTransform": {
+        "scale": "1 1 1",
+        "orientation": "0deg 0deg 0deg",
+        "corrected": false
+      },
+      "status": "unconfirmed",
+      "issues": [
+        {
+          "code": "dimensions-unconfirmed",
+          "severity": "review",
+          "message": "No complete recorded measurements; true scale needs review."
+        },
+        {
+          "code": "orientation-unconfirmed",
+          "severity": "review",
+          "message": "No audited up direction; dimensions alone cannot prove the piece stands upright."
+        }
+      ]
+    }
+  ]
+}

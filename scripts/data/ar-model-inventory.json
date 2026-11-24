@@ -1,0 +1,365 @@
+{
+  "inventoryDate": "2026-11-24",
+  "scope": "Active, visible Trade catalogue GLB variants read on inventoryDate; refresh this input for new or replaced catalogue models. No prices or access credentials.",
+  "models": [
+    {
+      "id": "f3dacd65-3c2e-4062-8a68-985ab6ea7b6d",
+      "name": "BOB Armchair for Delcourt Collection",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/f3dacd65-3c2e-4062-8a68-985ab6ea7b6d/w-120-x-d-89-x-h-70-cm-1791608568314.glb",
+      "expected": [
+        1.2,
+        0.7,
+        0.89
+      ],
+      "measurementBasis": "Recorded model size label"
+    },
+    {
+      "id": "f3dacd65-3c2e-4062-8a68-985ab6ea7b6d",
+      "name": "BOB Armchair for Delcourt Collection",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/f3dacd65-3c2e-4062-8a68-985ab6ea7b6d/w-95-x-d-77-x-h-70-cm-1791608310508.glb",
+      "expected": [
+        0.95,
+        0.7,
+        0.77
+      ],
+      "measurementBasis": "Recorded model size label"
+    },
+    {
+      "id": "938efe1a-8744-47e9-9d1d-dbd00634ab1a",
+      "name": "Bond Street Stool by Yabu Pushelberg",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/938efe1a-8744-47e9-9d1d-dbd00634ab1a/1783389292330.glb"
+    },
+    {
+      "id": "163af529-08b9-4391-9a48-03663261c085",
+      "name": "Cinnamon Gardens Floor Lamp by Yabu Pushelberg",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/163af529-08b9-4391-9a48-03663261c085/-55-h-156-cm-1783393125349.glb"
+    },
+    {
+      "id": "8960e070-49f0-46dd-a137-2209717b7dc0",
+      "name": "DUP low coffee table by Vincent Dupont-Rougier",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/8960e070-49f0-46dd-a137-2209717b7dc0/default-1791611326521.glb"
+    },
+    {
+      "id": "353547c3-ea0c-4d59-b79a-21b761bfb291",
+      "name": "Frenchmen Street Armchair",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/353547c3-ea0c-4d59-b79a-21b761bfb291/1783389210646.glb",
+      "expected": [
+        0.62,
+        0.8,
+        0.59
+      ],
+      "measurementBasis": "Recorded product measurements"
+    },
+    {
+      "id": "2816322a-94f6-49e7-a70f-4a8c15292d5a",
+      "name": "Frenchmen Street Lounge Chair",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/2816322a-94f6-49e7-a70f-4a8c15292d5a/w-82-d-77-h-73-cm-sh-41-cm-1783392122132.glb",
+      "expected": [
+        0.82,
+        0.73,
+        0.77
+      ],
+      "measurementBasis": "Recorded model size label"
+    },
+    {
+      "id": "7b2d698c-cdcb-47ea-8c13-135b975bf94a",
+      "name": "Frenchmen Street Side Chair",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/7b2d698c-cdcb-47ea-8c13-135b975bf94a/default-1792555338026.glb"
+    },
+    {
+      "id": "f72b4185-9eeb-4ec0-b862-0972abc93a9f",
+      "name": "GUM armchair by Christophe Delcourt",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/f72b4185-9eeb-4ec0-b862-0972abc93a9f/default-1791609555869.glb",
+      "expected": [
+        0.9,
+        0.75,
+        0.77
+      ],
+      "measurementBasis": "Recorded product measurements",
+      "sourceUp": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "fd8c2682-d8a1-48fe-b110-d22209cbcce7",
+      "name": "IBO low table by Christophe Delcourt",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/fd8c2682-d8a1-48fe-b110-d22209cbcce7/default-1791611289330.glb",
+      "sourceUp": [
+        0,
+        0,
+        1
+      ],
+      "expected": [
+        1.69971,
+        0.41,
+        0.949867
+      ],
+      "measurementBasis": "Audited source revision and native USDZ bounds, 24 Nov 2026; not mixed-shape product defaults"
+    },
+    {
+      "id": "5a2768f7-16db-434d-b119-cad533979d08",
+      "name": "LIZ console by Christophe Delcourt",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/5a2768f7-16db-434d-b119-cad533979d08/230-1791612087084.glb"
+    },
+    {
+      "id": "5a2768f7-16db-434d-b119-cad533979d08",
+      "name": "LIZ console by Christophe Delcourt",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/5a2768f7-16db-434d-b119-cad533979d08/high-console-w-180-x-d-50-x-h-84-5-cm-1791615707152.glb",
+      "expected": [
+        1.8,
+        0.845,
+        0.5
+      ],
+      "measurementBasis": "Recorded model size label"
+    },
+    {
+      "id": "8a072491-e699-44ee-ac6b-51838d7514ed",
+      "name": "Madison Avenue Side Table",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/8a072491-e699-44ee-ac6b-51838d7514ed/default-1783392434931.glb",
+      "expected": [
+        0.405,
+        0.47,
+        0.405
+      ],
+      "measurementBasis": "Recorded product measurements"
+    },
+    {
+      "id": "0afae676-33b3-459f-9298-d08d7a95ee9f",
+      "name": "Mono CLS Console",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/0afae676-33b3-459f-9298-d08d7a95ee9f/w-120-x-d-42-x-h-80-cm-1793879923135.glb",
+      "expected": [
+        1.2,
+        0.8,
+        0.42
+      ],
+      "measurementBasis": "Recorded model size label"
+    },
+    {
+      "id": "0afae676-33b3-459f-9298-d08d7a95ee9f",
+      "name": "Mono CLS Console",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/0afae676-33b3-459f-9298-d08d7a95ee9f/w-160-x-d-42-x-h-80-cm-1793879925628.glb",
+      "expected": [
+        1.6,
+        0.8,
+        0.42
+      ],
+      "measurementBasis": "Recorded model size label"
+    },
+    {
+      "id": "0afae676-33b3-459f-9298-d08d7a95ee9f",
+      "name": "Mono CLS Console",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/0afae676-33b3-459f-9298-d08d7a95ee9f/w-80-x-d-42-x-h-80-cm-1793879920321.glb",
+      "expected": [
+        0.8,
+        0.8,
+        0.42
+      ],
+      "measurementBasis": "Recorded model size label"
+    },
+    {
+      "id": "164e518d-3436-4402-a625-173c56725913",
+      "name": "Mono STS",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/164e518d-3436-4402-a625-173c56725913/w-34-x-d-26-x-h-40-cm-1793880384653.glb",
+      "expected": [
+        0.34,
+        0.4,
+        0.26
+      ],
+      "measurementBasis": "Recorded model size label"
+    },
+    {
+      "id": "164e518d-3436-4402-a625-173c56725913",
+      "name": "Mono STS",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/164e518d-3436-4402-a625-173c56725913/w-42-x-d-32-x-h-44-cm-1793880379696.glb",
+      "expected": [
+        0.42,
+        0.44,
+        0.32
+      ],
+      "measurementBasis": "Recorded model size label"
+    },
+    {
+      "id": "fb9d1465-3abb-48c9-b43b-4b4f6186f754",
+      "name": "ORS Bookshelf by Christophe Delcourt",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/fb9d1465-3abb-48c9-b43b-4b4f6186f754/default-1791611355808.glb",
+      "expected": [
+        2.75,
+        2.3,
+        0.59
+      ],
+      "measurementBasis": "Recorded product measurements"
+    },
+    {
+      "id": "95911ce0-4cb3-4954-b4bb-5ac58ebe06bc",
+      "name": "Park Place Bar/Counter Stool by Yabu Pushelberg",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/95911ce0-4cb3-4954-b4bb-5ac58ebe06bc/bar-stool---w-44-x-d-48-x-h-105---sh-75-cm-1783392330171.glb",
+      "expected": [
+        0.44,
+        1.05,
+        0.48
+      ],
+      "measurementBasis": "Recorded model size label"
+    },
+    {
+      "id": "95911ce0-4cb3-4954-b4bb-5ac58ebe06bc",
+      "name": "Park Place Bar/Counter Stool by Yabu Pushelberg",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/95911ce0-4cb3-4954-b4bb-5ac58ebe06bc/counter-stool---w-44-x-d-48-x-h-92-5---sh-65-cm-1783392371440.glb",
+      "expected": [
+        0.44,
+        0.925,
+        0.48
+      ],
+      "measurementBasis": "Recorded model size label"
+    },
+    {
+      "id": "f198902d-aa9e-41d8-8630-bad4226aaa45",
+      "name": "Praia da Granja Coffee Table",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/f198902d-aa9e-41d8-8630-bad4226aaa45/rectangle---w-128-x-d-83-x-h-34-cm-1783392485221.glb",
+      "expected": [
+        1.28,
+        0.34,
+        0.83
+      ],
+      "measurementBasis": "Recorded model size label"
+    },
+    {
+      "id": "f198902d-aa9e-41d8-8630-bad4226aaa45",
+      "name": "Praia da Granja Coffee Table",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/f198902d-aa9e-41d8-8630-bad4226aaa45/square---w-103-x-d-103-x-h-34-cm-1783392500755.glb",
+      "expected": [
+        1.03,
+        0.34,
+        1.03
+      ],
+      "measurementBasis": "Recorded model size label"
+    },
+    {
+      "id": "b26d428c-98ce-46e3-befa-d5308b894ba6",
+      "name": "Rift CTS",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/b26d428c-98ce-46e3-befa-d5308b894ba6/w-108-d-108-h-28-cm-1793853908872.glb",
+      "expected": [
+        1.08,
+        0.28,
+        1.08
+      ],
+      "measurementBasis": "Recorded model size label"
+    },
+    {
+      "id": "b26d428c-98ce-46e3-befa-d5308b894ba6",
+      "name": "Rift CTS",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/b26d428c-98ce-46e3-befa-d5308b894ba6/w-128-d-128-h-28-cm---bleached-oak-or-smoked-1793877869830.glb",
+      "expected": [
+        1.28,
+        0.28,
+        1.28
+      ],
+      "measurementBasis": "Recorded model size label"
+    },
+    {
+      "id": "b26d428c-98ce-46e3-befa-d5308b894ba6",
+      "name": "Rift CTS",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/b26d428c-98ce-46e3-befa-d5308b894ba6/w-148-d-148-h-28-cm---bleached-oak-or-smoked-1793877899696.glb",
+      "expected": [
+        1.48,
+        0.28,
+        1.48
+      ],
+      "measurementBasis": "Recorded model size label"
+    },
+    {
+      "id": "b26d428c-98ce-46e3-befa-d5308b894ba6",
+      "name": "Rift CTS",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/b26d428c-98ce-46e3-befa-d5308b894ba6/w-168-d-88-h-28-cm---bleached-oak-or-smoked-1793877910846.glb",
+      "expected": [
+        1.68,
+        0.28,
+        0.88
+      ],
+      "measurementBasis": "Recorded model size label"
+    },
+    {
+      "id": "bca1d4e5-8d50-4030-8a81-905ca50033c6",
+      "name": "Rift CTW Coffee Table",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/bca1d4e5-8d50-4030-8a81-905ca50033c6/w-160-x-d-82-x-h-28-cm-1793878853746.glb",
+      "expected": [
+        1.6,
+        0.28,
+        0.82
+      ],
+      "measurementBasis": "Recorded model size label"
+    },
+    {
+      "id": "bca1d4e5-8d50-4030-8a81-905ca50033c6",
+      "name": "Rift CTW Coffee Table",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/bca1d4e5-8d50-4030-8a81-905ca50033c6/w-180-x-d-82-x-h-28-cm-1793878859159.glb",
+      "expected": [
+        1.8,
+        0.28,
+        0.82
+      ],
+      "measurementBasis": "Recorded model size label"
+    },
+    {
+      "id": "bca1d4e5-8d50-4030-8a81-905ca50033c6",
+      "name": "Rift CTW Coffee Table",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/bca1d4e5-8d50-4030-8a81-905ca50033c6/w-200-x-d-82-x-h-28-cm-1793878862308.glb",
+      "expected": [
+        2.0,
+        0.28,
+        0.82
+      ],
+      "measurementBasis": "Recorded model size label"
+    },
+    {
+      "id": "bca1d4e5-8d50-4030-8a81-905ca50033c6",
+      "name": "Rift CTW Coffee Table",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/bca1d4e5-8d50-4030-8a81-905ca50033c6/w-220-x-d-82-x-h-28-cm-1793878863539.glb",
+      "expected": [
+        2.2,
+        0.28,
+        0.82
+      ],
+      "measurementBasis": "Recorded model size label"
+    },
+    {
+      "id": "cd3c22d9-cd6c-488a-aff0-d6776c8a742f",
+      "name": "Rua Leblon by Yabu Pushelberg",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/cd3c22d9-cd6c-488a-aff0-d6776c8a742f/1783386690528.glb",
+      "expected": [
+        0.9,
+        0.76,
+        0.92
+      ],
+      "measurementBasis": "Recorded product measurements"
+    },
+    {
+      "id": "ffd33487-bb3d-4d18-80ee-1e35b858738e",
+      "name": "Sandy Cove Sofa",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/ffd33487-bb3d-4d18-80ee-1e35b858738e/w-190-d-108-h-70-sh-40-cm-com-fabric-1783390163774.glb",
+      "expected": [
+        1.9,
+        0.7,
+        1.08
+      ],
+      "measurementBasis": "Recorded model size label"
+    },
+    {
+      "id": "ffd33487-bb3d-4d18-80ee-1e35b858738e",
+      "name": "Sandy Cove Sofa",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/ffd33487-bb3d-4d18-80ee-1e35b858738e/w-250-d-112-h-70-sh-40-cm-com-fabric-1783390208634.glb",
+      "expected": [
+        2.5,
+        0.7,
+        1.12
+      ],
+      "measurementBasis": "Recorded model size label"
+    },
+    {
+      "id": "d6094740-c916-4c7f-9f76-08883bc0c066",
+      "name": "Yoma CLW Console",
+      "url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models/d6094740-c916-4c7f-9f76-08883bc0c066/default-1793853218274.glb"
+    }
+  ]
+}

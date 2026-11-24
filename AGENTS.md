@@ -11,7 +11,7 @@
 - Password-setup resends reuse the review drawer and retain attempt keys on retry; never change approval. Verified activation links the account; the queue reads user_id for setup status.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
-- Revision-scoped arModelTransform repairs feed shared viewers and dimensionless room/worker fitting; preview sizing/placements remain independent — prevents CAD-unit drift across AR and room displays without rewriting stored scenes or finishes.
+- Revision-scoped arModelTransform repairs feed viewers, room fitting and the pre-publish AR geometry audit; dated inventory and missing up/size evidence stay explicit — prevents unit drift or false verification without rewriting scenes or finishes.
 - Viewer AR waits for the latest successful texture commit and exports the live scene; QR handoffs carry only catalogue finish identifiers on the canonical origin, restored into an exact accessible item preview without saving or granting access — prevents stale upholstery and cross-piece finish leaks.
 - Product3DViewer enables AR only below the mobile breakpoint with coarse input and native model-viewer capability; its slotted Button uses fixed AR scale and live generated Quick Look/WebXR scenes, never a separate stale USDZ — preserves desktop-only 3D and selected finishes.
 - Private viewing-room finish menus combine range/colour per axis; editorialModelMaterials supplies revision/count-checked roles for audited unnamed exports only after saved roles — avoids duplicated swatches and painting unrelated parts without changing catalogue data.

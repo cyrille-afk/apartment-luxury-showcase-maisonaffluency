@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "node scripts/run-prebuild.mjs scripts/build-designers-index.mjs 90 && node scripts/run-prebuild.mjs scripts/build-featured-designers.mjs 90 && node scripts/run-prebuild.mjs scripts/build-catalog-manifest.mjs 90 && vite build && node scripts/run-prebuild.mjs scripts/build-sitemap.mjs 90",
+    "build": "node scripts/verify-ar-exports.mjs --warn-only && node scripts/run-prebuild.mjs scripts/build-designers-index.mjs 90 && node scripts/run-prebuild.mjs scripts/build-featured-designers.mjs 90 && node scripts/run-prebuild.mjs scripts/build-catalog-manifest.mjs 90 && vite build && node scripts/run-prebuild.mjs scripts/build-sitemap.mjs 90",
     "build:dev": "node scripts/run-prebuild.mjs scripts/build-designers-index.mjs 90 && node scripts/run-prebuild.mjs scripts/build-featured-designers.mjs 90 && node scripts/run-prebuild.mjs scripts/build-catalog-manifest.mjs 90 && vite build --mode development && node scripts/run-prebuild.mjs scripts/build-sitemap.mjs 90",
     "lint": "eslint .",
     "preview": "node scripts/preview-built.mjs",
@@ -30,7 +30,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:og:designers": "bun --env-file=.env scripts/verify-designer-og.ts",
-    "test:routes": "bun ./scripts/verify-site-routes.ts"
+    "test:routes": "bun ./scripts/verify-site-routes.ts",
+    "check:ar": "node scripts/verify-ar-exports.mjs"
   },
   "overrides": {
     "uuid": "11.1.1",
