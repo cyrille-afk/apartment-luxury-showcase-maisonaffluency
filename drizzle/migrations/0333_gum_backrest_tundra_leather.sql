@@ -1,0 +1,1 @@
+UPDATE public.designer_curator_picks SET size_variants=(SELECT jsonb_agg(jsonb_set(v,'{top}','"Tundra leather range"')) FROM jsonb_array_elements(size_variants) v) WHERE id='83cf75e3-b4ff-4243-b1e1-8dc5b89cee0d';

@@ -2332,6 +2332,13 @@
       "when": 1795497942588,
       "tag": "0332_shared_board_three_axis_finishes",
       "breakpoints": true
+    },
+    {
+      "idx": 333,
+      "version": "7",
+      "when": 1795501573336,
+      "tag": "0333_gum_backrest_tundra_leather",
+      "breakpoints": true
     }
   ]
 }
