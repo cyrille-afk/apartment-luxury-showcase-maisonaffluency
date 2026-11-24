@@ -46,6 +46,11 @@ export function columnObstacles(columns: PlanColumn[]): Array<{ position: [numbe
   return columns.map(column => ({ position: [column.x, 0, column.y], radius: (column.size * Math.SQRT2) / 2 }));
 }
 
+/** Display room footprint dimensions rounded cleanly to two decimal places. */
+export function formatRoomDimensions(width: number, depth: number): string {
+  return `${width.toFixed(2)} × ${depth.toFixed(2)} m`;
+}
+
 /** Both 3D cameras aim at the room centre — the 2D plan origin — never a fixed showroom point. */
 export function layoutCamera(bounds: RoomBounds, view: WorkspaceView, positions: ReadonlyArray<readonly number[]> = []): { position: [number, number, number]; target: [number, number, number]; polar: number; fov: number } {
   if (view === "axonometric") return { position: [bounds.width * 0.65, Math.max(bounds.width, bounds.depth) * 1.25, bounds.depth * 0.9], target: [0, 0, 0], polar: Math.PI / 5, fov: 45 };

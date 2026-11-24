@@ -33,6 +33,7 @@ const coreItems = [
   { title: "Clients", url: "/trade/client-management", icon: Users },
   { title: "QUOTES & PROFORMAS", url: "/trade/quotes", icon: FileText },
   { title: "Tools", url: "/trade/tools", icon: Wrench },
+  { title: "AI Render Studio", url: "/tools/ai-render-studio", icon: Image },
   { title: "Settings", url: "/trade/settings", icon: Settings },
 ];
 
@@ -61,9 +62,10 @@ export function TradeMobileMenu({ open, onOpenChange }: TradeMobileMenuProps) {
   const hasTradeAccess = isAdmin || isTradeUser || applicationStatus === "approved";
   const items = TRADE_SANDBOX_ONLY
     ? [{ title: "Visualiser Sandbox", url: "/trade/visualiser", icon: Scan }]
-    : hasTradeAccess
+    : (hasTradeAccess
     ? coreItems.filter((i) => i.url !== "/trade/me")
-    : coreItems.filter((i) => i.url !== "/trade/concierge");
+    : coreItems.filter((i) => i.url !== "/trade/concierge"))
+    .filter((i) => i.url !== "/tools/ai-render-studio" || isAdmin);
 
   const isActive = (url: string, end?: boolean) =>
     end ? location.pathname === url : location.pathname.startsWith(url);

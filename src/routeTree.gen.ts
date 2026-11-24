@@ -51,6 +51,7 @@ import { Route as StudiosRouteImport } from './routes/studios'
 import { Route as SuccessRouteImport } from './routes/success'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TestRouteImport } from './routes/test'
+import { Route as ToolsRouteImport } from './routes/tools'
 import { Route as TradeRouteImport } from './routes/trade'
 import { Route as TradeCarouselRouteImport } from './routes/trade-carousel'
 import { Route as TradeDemoRouteImport } from './routes/trade-demo'
@@ -95,6 +96,7 @@ import { Route as StagingSplatRouteImport } from './routes/staging_.$'
 import { Route as StudiosSlugRouteImport } from './routes/studios_.$slug'
 import { Route as StudiosSubmitRouteImport } from './routes/studios_.submit'
 import { Route as TestSplatRouteImport } from './routes/test_.$'
+import { Route as ToolsAiRenderStudioRouteImport } from './routes/tools.ai-render-studio'
 import { Route as TradeProgramApplyRouteImport } from './routes/trade-program_.apply'
 import { Route as TradeIndexRouteImport } from './routes/trade.index'
 import { Route as TradeAdminRouteImport } from './routes/trade.admin'
@@ -490,6 +492,11 @@ const TestRoute = TestRouteImport.update({
   path: '/test',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ToolsRoute = ToolsRouteImport.update({
+  id: '/tools',
+  path: '/tools',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TradeRoute = TradeRouteImport.update({
   id: '/trade',
   path: '/trade',
@@ -710,6 +717,11 @@ const TestSplatRoute = TestSplatRouteImport.update({
   id: '/test_/$',
   path: '/test/$',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsAiRenderStudioRoute = ToolsAiRenderStudioRouteImport.update({
+  id: '/ai-render-studio',
+  path: '/ai-render-studio',
+  getParentRoute: () => ToolsRoute,
 } as any)
 const TradeProgramApplyRoute = TradeProgramApplyRouteImport.update({
   id: '/trade-program_/apply',
@@ -1718,6 +1730,7 @@ export interface FileRoutesByFullPath {
   '/success': typeof SuccessRoute
   '/terms': typeof TermsRoute
   '/test': typeof TestRoute
+  '/tools': typeof ToolsRouteWithChildren
   '/trade': typeof TradeRouteWithChildren
   '/trade-carousel': typeof TradeCarouselRoute
   '/trade-demo': typeof TradeDemoRoute
@@ -1762,6 +1775,7 @@ export interface FileRoutesByFullPath {
   '/studios/$slug': typeof StudiosSlugRoute
   '/studios/submit': typeof StudiosSubmitRoute
   '/test/$': typeof TestSplatRoute
+  '/tools/ai-render-studio': typeof ToolsAiRenderStudioRoute
   '/trade-program/apply': typeof TradeProgramApplyRoute
   '/trade/admin': typeof TradeAdminRoute
   '/trade/admin-dashboard': typeof TradeAdminDashboardRoute
@@ -1990,6 +2004,7 @@ export interface FileRoutesByTo {
   '/success': typeof SuccessRoute
   '/terms': typeof TermsRoute
   '/test': typeof TestRoute
+  '/tools': typeof ToolsRouteWithChildren
   '/trade-carousel': typeof TradeCarouselRoute
   '/trade-demo': typeof TradeDemoRoute
   '/trade-faq': typeof TradeFaqRoute
@@ -2033,6 +2048,7 @@ export interface FileRoutesByTo {
   '/studios/$slug': typeof StudiosSlugRoute
   '/studios/submit': typeof StudiosSubmitRoute
   '/test/$': typeof TestSplatRoute
+  '/tools/ai-render-studio': typeof ToolsAiRenderStudioRoute
   '/trade-program/apply': typeof TradeProgramApplyRoute
   '/trade/admin': typeof TradeAdminRoute
   '/trade/admin-dashboard': typeof TradeAdminDashboardRoute
@@ -2262,6 +2278,7 @@ export interface FileRoutesById {
   '/success': typeof SuccessRoute
   '/terms': typeof TermsRoute
   '/test': typeof TestRoute
+  '/tools': typeof ToolsRouteWithChildren
   '/trade': typeof TradeRouteWithChildren
   '/trade-carousel': typeof TradeCarouselRoute
   '/trade-demo': typeof TradeDemoRoute
@@ -2306,6 +2323,7 @@ export interface FileRoutesById {
   '/studios_/$slug': typeof StudiosSlugRoute
   '/studios_/submit': typeof StudiosSubmitRoute
   '/test_/$': typeof TestSplatRoute
+  '/tools/ai-render-studio': typeof ToolsAiRenderStudioRoute
   '/trade-program_/apply': typeof TradeProgramApplyRoute
   '/trade/admin': typeof TradeAdminRoute
   '/trade/admin-dashboard': typeof TradeAdminDashboardRoute
@@ -2536,6 +2554,7 @@ export interface FileRouteTypes {
     | '/success'
     | '/terms'
     | '/test'
+    | '/tools'
     | '/trade'
     | '/trade-carousel'
     | '/trade-demo'
@@ -2580,6 +2599,7 @@ export interface FileRouteTypes {
     | '/studios/$slug'
     | '/studios/submit'
     | '/test/$'
+    | '/tools/ai-render-studio'
     | '/trade-program/apply'
     | '/trade/admin'
     | '/trade/admin-dashboard'
@@ -2808,6 +2828,7 @@ export interface FileRouteTypes {
     | '/success'
     | '/terms'
     | '/test'
+    | '/tools'
     | '/trade-carousel'
     | '/trade-demo'
     | '/trade-faq'
@@ -2851,6 +2872,7 @@ export interface FileRouteTypes {
     | '/studios/$slug'
     | '/studios/submit'
     | '/test/$'
+    | '/tools/ai-render-studio'
     | '/trade-program/apply'
     | '/trade/admin'
     | '/trade/admin-dashboard'
@@ -3079,6 +3101,7 @@ export interface FileRouteTypes {
     | '/success'
     | '/terms'
     | '/test'
+    | '/tools'
     | '/trade'
     | '/trade-carousel'
     | '/trade-demo'
@@ -3123,6 +3146,7 @@ export interface FileRouteTypes {
     | '/studios_/$slug'
     | '/studios_/submit'
     | '/test_/$'
+    | '/tools/ai-render-studio'
     | '/trade-program_/apply'
     | '/trade/admin'
     | '/trade/admin-dashboard'
@@ -3352,6 +3376,7 @@ export interface RootRouteChildren {
   SuccessRoute: typeof SuccessRoute
   TermsRoute: typeof TermsRoute
   TestRoute: typeof TestRoute
+  ToolsRoute: typeof ToolsRouteWithChildren
   TradeRoute: typeof TradeRouteWithChildren
   TradeCarouselRoute: typeof TradeCarouselRoute
   TradeDemoRoute: typeof TradeDemoRoute
@@ -3722,6 +3747,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TestRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tools': {
+      id: '/tools'
+      path: '/tools'
+      fullPath: '/tools'
+      preLoaderRoute: typeof ToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/trade': {
       id: '/trade'
       path: '/trade'
@@ -4029,6 +4061,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/test/$'
       preLoaderRoute: typeof TestSplatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/tools/ai-render-studio': {
+      id: '/tools/ai-render-studio'
+      path: '/ai-render-studio'
+      fullPath: '/tools/ai-render-studio'
+      preLoaderRoute: typeof ToolsAiRenderStudioRouteImport
+      parentRoute: typeof ToolsRoute
     }
     '/trade-program_/apply': {
       id: '/trade-program_/apply'
@@ -5333,6 +5372,16 @@ const SettingsRouteWithChildren = SettingsRoute._addFileChildren(
   SettingsRouteChildren,
 )
 
+interface ToolsRouteChildren {
+  ToolsAiRenderStudioRoute: typeof ToolsAiRenderStudioRoute
+}
+
+const ToolsRouteChildren: ToolsRouteChildren = {
+  ToolsAiRenderStudioRoute: ToolsAiRenderStudioRoute,
+}
+
+const ToolsRouteWithChildren = ToolsRoute._addFileChildren(ToolsRouteChildren)
+
 interface TradeRouteChildren {
   TradeAdminRoute: typeof TradeAdminRoute
   TradeAdminDashboardRoute: typeof TradeAdminDashboardRoute
@@ -5695,6 +5744,7 @@ const rootRouteChildren: RootRouteChildren = {
   SuccessRoute: SuccessRoute,
   TermsRoute: TermsRoute,
   TestRoute: TestRoute,
+  ToolsRoute: ToolsRouteWithChildren,
   TradeRoute: TradeRouteWithChildren,
   TradeCarouselRoute: TradeCarouselRoute,
   TradeDemoRoute: TradeDemoRoute,

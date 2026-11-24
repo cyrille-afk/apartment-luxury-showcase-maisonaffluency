@@ -70,7 +70,7 @@ const aiGroup: AdminCard[] = [
 
 const systemGroup: AdminCard[] = [
   { title: "Admin Tools", description: "Concierge leads, Instagram audit, CAD/3D assets, hotspot mapping, onboarding, heroes, scrapers, OG rescrape, sample requests", url: "/trade/admin/tools", icon: Settings2 },
-  { title: "Axonometric Studio", description: "Manage 3D visualisation requests and gallery", url: "/trade/axonometric", icon: Box },
+  { title: "AI Render Studio", description: "Transform 2D elevations and floor plans into stylised 3D axonometric renders using AI", url: "/tools/ai-render-studio", icon: Box },
   { title: "Instagram Audit", description: "Map and verify all designer Instagram accounts", url: "/trade/designers/instagram", icon: Instagram },
   { title: "Product Sheet Audit", description: "Compare Public + Trade product sheets side-by-side in synced iframes", url: "/trade/admin/product-audit", icon: Search },
   { title: "Section Heroes", description: "Manage hero banner images across the portal", url: "/trade/admin", icon: Image },

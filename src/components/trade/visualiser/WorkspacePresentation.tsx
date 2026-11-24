@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { Map, Layers, LockKeyhole } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { WorkspacePresentation as Presentation } from "@/lib/workspacePresentation";
+import { formatRoomDimensions } from "@/lib/activeProjectLayout";
 import SharedVisualiserScene from "./SharedVisualiserScene";
 const noop = () => {};
 export default function WorkspacePresentation({ data }: { data: Presentation }) {
@@ -23,7 +24,7 @@ export default function WorkspacePresentation({ data }: { data: Presentation }) 
       {data.views.map(v => <Button key={v.id} variant={active === v.id ? "default" : "outline"} className="h-auto min-h-10 whitespace-normal text-left" onClick={() => setActive(v.id)}><Layers className="h-4 w-4 shrink-0" />{v.name}</Button>)}
     </nav>
     <main className="py-8">
-      {view && <div className="mx-auto mb-6 max-w-6xl px-6"><h2 className="font-display text-2xl">{view.name}</h2><p className="mt-2 text-xs text-muted-foreground">{view.bounds.width} × {view.bounds.depth} m · {new Date(view.created_at).toLocaleDateString("en-GB")}</p></div>}
+      {view && <div className="mx-auto mb-6 max-w-6xl px-6"><h2 className="font-display text-2xl">{view.name}</h2><p className="mt-2 text-xs text-muted-foreground">{formatRoomDimensions(view.bounds.width, view.bounds.depth)} · {new Date(view.created_at).toLocaleDateString("en-GB")}</p></div>}
       {plan && <div className="mx-auto mb-8 max-w-6xl px-6">{failedPlan === plan ? <p role="alert" className="text-sm text-muted-foreground">The floor plan is unavailable. Please contact your designer.</p> : <img src={plan} alt="Project floor plan" onError={() => setFailedPlan(plan)} className="max-h-[70dvh] w-full object-contain" />}</div>}
       {view?.scene && <SharedVisualiserScene key={view.id} room={view.scene} readOnly onSelectPiece={noop} onApprove={async () => {}} approved={false} approvalDisabled />}
       {active === "plan" && !data.floorPlanUrl && <div className="mx-auto max-w-6xl px-6"><Button variant="outline" onClick={() => { const first = data.views[0]; if (first) setActive(first.id); }}><Layers className="h-4 w-4" />Open saved room</Button></div>}

@@ -1476,7 +1476,7 @@ const TradeVisualiser = () => {
       {/* Header */}
       <div className="visualiser-canvas-heading pointer-events-none absolute left-0 right-0 top-0 z-20 flex items-start justify-between px-4 pt-4">
         <div>
-          <h1 className="font-serif text-2xl text-foreground">{activeProject?.view === "axonometric" ? "Axonometric Studio" : "Visualiser Sandbox"}</h1>
+          <h1 className="font-serif text-2xl text-foreground">{activeProject?.view === "axonometric" ? "3D Isometric View" : "Visualiser Sandbox"}</h1>
           <p className={cn(microLabel, "mt-2 text-muted-foreground")}>
             {projectName ? `${projectName} // ` : ""}3D Spatial Composition // {objects.length} / {MAX_OBJECTS} Objects
             {loadingProject ? " // Loading specification…" : ""}

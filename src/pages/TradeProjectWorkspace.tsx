@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { useLocation, useSearchParams } from "@/lib/router-compat";
+import { Link, useLocation, useSearchParams } from "@/lib/router-compat";
 import { Map, Layers, Armchair, Clapperboard, Eye, Image, Ruler, Upload, Square, Trash2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import { ActiveProjectProvider, useActiveProject } from "@/contexts/ActiveProjec
 import { useProjectInventory, type ProjectInventoryItem } from "@/contexts/ProjectInventoryContext";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
-import { clampToRoom, DEFAULT_COLUMN_SIZE_M, patchLayoutItem, type WorkspaceView } from "@/lib/activeProjectLayout";
+import { clampToRoom, DEFAULT_COLUMN_SIZE_M, formatRoomDimensions, patchLayoutItem, type WorkspaceView } from "@/lib/activeProjectLayout";
 import { createPlacedObject, inventoryItemToPlaceable, MAX_PLACED_OBJECTS } from "@/lib/placedObjectFactory";
 import { formatGap, tightestGap } from "@/lib/layoutGuides";
 import { resolveDimensions } from "@/lib/productDimensions";
@@ -25,7 +25,6 @@ import { writeSharedRoomLayout } from "@/lib/sharedRoomLayout";
 import { buildVisualiserProposalStaging, sharedProposalPath } from "@/lib/viewingRoomVisualiser";
 import { getViewingRoomProposalForVisualiser } from "@/lib/viewingRoomVisualiser.functions";
 const Sandbox = lazy(() => import("./TradeVisualiser"));
-const Axonometric = lazy(() => import("./TradeAxonometric"));
 const WalkthroughStudio = lazy(() => import("./TradeAILayoutStudio"));
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -36,8 +35,6 @@ function WorkspacePanels({ proposalId }: { proposalId: string | null }) {
   const loadProposal = useServerFn(getViewingRoomProposalForVisualiser);
   const [proposalStatus, setProposalStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const [visited, setVisited] = useState(false);
-  const [imageStudio, setImageStudio] = useState(Boolean(proposalId));
-  const [imageVisited, setImageVisited] = useState(Boolean(proposalId));
   const [walkVisited, setWalkVisited] = useState(false);
   const [planSelectedId, setPlanSelectedId] = useState<string | null>(null);
   const [showGuides, setShowGuides] = useState(true);
@@ -45,7 +42,6 @@ function WorkspacePanels({ proposalId }: { proposalId: string | null }) {
   useEffect(() => {
     setPlanSelectedId(current => current && !project?.objects.some(object => object.instanceId === current) ? null : current);
   }, [project?.objects]);
-  useEffect(() => { if (imageStudio) setImageVisited(true); }, [imageStudio]);
   useEffect(() => { if (project?.view !== "plan") setVisited(true); if (project?.view === "walkthrough") setWalkVisited(true); }, [project?.view]);
   useEffect(() => {
     if (!proposalId || !project || !rolesLoaded) return;
@@ -122,7 +118,8 @@ function WorkspacePanels({ proposalId }: { proposalId: string | null }) {
     if (item) placeInventoryItem(item, [x, y]);
   };
 
-  const tabs: { value: WorkspaceView; label: string; icon: typeof Map }[] = [{ value: "plan", label: "2D Layout Plan", icon: Map }, { value: "axonometric", label: "Axonometric Studio", icon: Layers }, { value: "sandbox", label: "Eye-Level Sandbox", icon: Armchair }, { value: "walkthrough", label: "Walkthrough & Video", icon: Clapperboard }];
+  const tabs: { value: WorkspaceView; label: string; icon: typeof Map }[] = [{ value: "plan", label: "2D Layout Plan", icon: Map }, { value: "axonometric", label: "3D Isometric View", icon: Layers }, { value: "sandbox", label: "Eye-Level Sandbox", icon: Armchair }, { value: "walkthrough", label: "Walkthrough & Video", icon: Clapperboard }];
+  const imageStudioHref = proposalId ? `/tools/ai-render-studio?proposalId=${encodeURIComponent(proposalId)}` : "/tools/ai-render-studio";
   return <div className="flex h-full min-h-0 flex-col bg-background">
     <div className="relative z-40 w-full shrink-0 border-b border-border/40 bg-background px-3 py-3 sm:px-6">
       <ToolsBreadcrumb className="mb-0" />
@@ -156,7 +153,7 @@ function WorkspacePanels({ proposalId }: { proposalId: string | null }) {
     </div>
     <section id="panel-plan" role="tabpanel" aria-labelledby="workspace-plan" hidden={view !== "plan"} className={cn("flex min-h-0 flex-1 flex-col overflow-hidden", view !== "plan" && "hidden")}>
       <div className="flex shrink-0 flex-wrap items-end justify-between gap-4 px-4 pt-4 sm:px-6"><h1 className="font-display text-2xl">2D Layout Plan</h1><SourceUpload folder="axonometric-sources" label="Upload floor plan" onSourceReady={project.setFloorPlanUrl} /></div>
-      <div className="flex shrink-0 flex-wrap items-end gap-4 px-4 py-4 sm:px-6">{(["width", "depth", "height"] as const).map(axis => <div key={axis} className="w-28 space-y-1"><Label htmlFor={`room-${axis}`} className="capitalize">{axis} (m)</Label><Input id={`room-${axis}`} type="number" min="2" max="100" step="0.1" value={state.bounds[axis]} onChange={event => { const value = Number(event.target.value); if (Number.isFinite(value) && value >= 2 && value <= 100) project.setBounds(current => ({ ...current, [axis]: value })); }} /></div>)}<Button variant="outline" onClick={() => setView("axonometric")}><Layers className="h-4 w-4" />Open Axonometric Studio</Button><Button variant="ghost" size="sm" aria-pressed={showGuides} onClick={() => setShowGuides(value => !value)}><Ruler className="h-4 w-4" />Guides</Button><Button variant="ghost" size="sm" onClick={() => { const id = `col-${Date.now().toString(36)}`; project.setColumns(current => [...current, { id, x: 0, y: 0, size: DEFAULT_COLUMN_SIZE_M }]); setSelectedColumnId(id); }}><Square className="h-4 w-4" />Add column</Button>{selectedColumnId && state.columns.some(column => column.id === selectedColumnId) && <Button variant="ghost" size="sm" onClick={() => { project.setColumns(current => current.filter(column => column.id !== selectedColumnId)); setSelectedColumnId(null); }}><Trash2 className="h-4 w-4" />Remove column</Button>}{gapChip}</div>
+      <div className="flex shrink-0 flex-wrap items-end gap-4 px-4 py-4 sm:px-6">{(["width", "depth", "height"] as const).map(axis => <div key={axis} className="w-28 space-y-1"><Label htmlFor={`room-${axis}`} className="capitalize">{axis} (m)</Label><Input id={`room-${axis}`} type="number" min="2" max="100" step="0.1" value={state.bounds[axis]} onChange={event => { const value = Number(event.target.value); if (Number.isFinite(value) && value >= 2 && value <= 100) project.setBounds(current => ({ ...current, [axis]: value })); }} /></div>)}<Button variant="outline" onClick={() => setView("axonometric")}><Layers className="h-4 w-4" />Open 3D Isometric View</Button><Button variant="ghost" size="sm" aria-pressed={showGuides} onClick={() => setShowGuides(value => !value)}><Ruler className="h-4 w-4" />Guides</Button><Button variant="ghost" size="sm" onClick={() => { const id = `col-${Date.now().toString(36)}`; project.setColumns(current => [...current, { id, x: 0, y: 0, size: DEFAULT_COLUMN_SIZE_M }]); setSelectedColumnId(id); }}><Square className="h-4 w-4" />Add column</Button>{selectedColumnId && state.columns.some(column => column.id === selectedColumnId) && <Button variant="ghost" size="sm" onClick={() => { project.setColumns(current => current.filter(column => column.id !== selectedColumnId)); setSelectedColumnId(null); }}><Trash2 className="h-4 w-4" />Remove column</Button>}{gapChip}</div>
       <div className="relative min-h-0 flex-1 border-t border-border">
         <LayoutPlanCanvas
           objects={project.objects}
@@ -181,9 +178,8 @@ function WorkspacePanels({ proposalId }: { proposalId: string | null }) {
       </div>
     </section>
     <div id={`panel-${view === "sandbox" ? "sandbox" : "axonometric"}`} role="tabpanel" aria-labelledby={`workspace-${view === "sandbox" ? "sandbox" : "axonometric"}`} hidden={view === "plan" || view === "walkthrough"} className={cn("flex min-h-0 flex-1 flex-col", (view === "plan" || view === "walkthrough") && "hidden")}>
-      {view === "axonometric" && <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2"><span className="text-xs text-muted-foreground">{state.placedItems.length} placed pieces · {state.bounds.width} × {state.bounds.depth} m</span>{gapChip}<div className="flex gap-2">{isAdmin && <Button variant="ghost" size="sm" aria-pressed={imageStudio} onClick={() => setImageStudio(value => !value)}><Image className="h-4 w-4" />Image Studio</Button>}<Button size="sm" onClick={() => { setImageStudio(false); setView("sandbox"); }}><Eye className="h-4 w-4" />Step Inside Room</Button></div></div>}
-      <div className={cn("min-h-0 flex-1", imageStudio && view === "axonometric" && "hidden")}><Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Opening workspace…</div>}>{visited && <Sandbox />}</Suspense></div>
-      <div className={cn("min-h-0 flex-1 overflow-auto", (!imageStudio || view !== "axonometric") && "hidden")}><Suspense fallback={<div className="p-6">Opening Image Studio…</div>}>{imageVisited && <Axonometric />}</Suspense></div>
+      {view === "axonometric" && <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2"><span className="text-xs text-muted-foreground">{state.placedItems.length} placed pieces · {formatRoomDimensions(state.bounds.width, state.bounds.depth)}</span>{gapChip}<div className="flex gap-2">{isAdmin && <Button asChild variant="ghost" size="sm"><Link to={imageStudioHref}><Image className="h-4 w-4" />Image Studio</Link></Button>}<Button size="sm" onClick={() => setView("sandbox")}><Eye className="h-4 w-4" />Step Inside Room</Button></div></div>}
+      <div className="min-h-0 flex-1"><Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Opening workspace…</div>}>{visited && <Sandbox />}</Suspense></div>
     </div>
     <section id="panel-walkthrough" role="tabpanel" aria-labelledby="workspace-walkthrough" hidden={view !== "walkthrough"} className={cn("min-h-0 flex-1 overflow-auto", view !== "walkthrough" && "hidden")}>
       <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Opening walkthrough…</div>}>{walkVisited && <WalkthroughStudio embedded />}</Suspense>

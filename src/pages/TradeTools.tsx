@@ -42,6 +42,7 @@ const categories: ToolCategory[] = [
       { title: "Product Comparator", description: "Compare specs side by side", url: "/trade/comparator", icon: Columns },
       { title: "Markup & Annotation", description: "Annotate images and drawings", url: "/trade/annotations", icon: MessageCircle },
       { title: "Visualiser & Walkthrough", description: "Arrange your Mood Board furniture in 3D, then preview and record a cinematic walkthrough.", url: "/trade/visualiser", icon: Scan },
+      { title: "AI Render Studio", description: "Transform 2D elevations and floor plans into stylised 3D axonometric renders using AI.", url: "/tools/ai-render-studio", icon: Wand2 },
       { title: "Tearsheet Builder", description: "Create printable product specs", url: "/trade/tearsheets", icon: Scissors },
       { title: "Specification Sheet Generator", description: "Branded client presentation decks & pitch PDFs", url: "/trade/spec-generator", icon: Presentation },
       { title: "FF&E Schedule", description: "Auto-generate furniture schedules", url: "/trade/ffe-schedule", icon: FileSpreadsheet },
@@ -113,7 +114,7 @@ export default function TradeTools() {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { projects, loading: projectsLoading } = useProjects();
   const [projectId, setProjectId] = useState("");
   const workspace = useProjectWorkspace();
@@ -241,7 +242,14 @@ export default function TradeTools() {
     );
   }, [favorites, persist]);
 
-  const allTools = useMemo(() => categories.flatMap((c) => c.tools), []);
+  const visibleCategories = useMemo(
+    () => categories.map((cat) => ({
+      ...cat,
+      tools: cat.tools.filter((t) => t.url !== "/tools/ai-render-studio" || isAdmin),
+    })),
+    [isAdmin],
+  );
+  const allTools = useMemo(() => visibleCategories.flatMap((c) => c.tools), [visibleCategories]);
   const favoriteTools = useMemo(
     () => favorites.map((url) => allTools.find((t) => t.url === url)).filter(Boolean) as Tool[],
     [favorites, allTools],
@@ -250,8 +258,8 @@ export default function TradeTools() {
   const trimmedQuery = query.trim().toLowerCase();
   const isSearching = trimmedQuery.length > 0;
   const filteredCategories = useMemo(() => {
-    if (!isSearching) return categories;
-    return categories
+    if (!isSearching) return visibleCategories;
+    return visibleCategories
       .map((cat) => ({
         ...cat,
         tools: cat.tools.filter(
@@ -261,7 +269,7 @@ export default function TradeTools() {
         ),
       }))
       .filter((cat) => cat.tools.length > 0);
-  }, [trimmedQuery, isSearching]);
+  }, [trimmedQuery, isSearching, visibleCategories]);
   const totalMatches = filteredCategories.reduce((n, c) => n + c.tools.length, 0);
 
   return (

@@ -43,6 +43,7 @@ const topItems: NavItem[] = [
   { title: "THE COLLECTION", url: "/trade/the-collection", icon: MapPin },
   { title: "Favorites", url: "/trade/favorites", icon: Heart },
   { title: "Tools", url: "/trade/tools", icon: Wrench },
+  { title: "AI Render Studio", url: "/tools/ai-render-studio", icon: Image },
   { title: "Trade Concierge (Powered by Felix)", url: "/trade/concierge", icon: Sparkles },
   { title: "AI Extension Sync", url: "/trade/extension-sync", icon: Wand2 },
   { title: "QUOTES & PROFORMAS", url: "/trade/quotes", icon: FileText },
@@ -119,7 +120,9 @@ export function TradeSidebar() {
     hasTradeAccess
       ? topItems.filter((i) => i.url !== "/trade/me")
       : topItems.filter((i) => i.url !== "/trade/concierge")
-  ).filter((i) => i.url !== "/trade/beta-feedboard" || canSeeBetaFeedboard);
+  )
+    .filter((i) => i.url !== "/trade/beta-feedboard" || canSeeBetaFeedboard)
+    .filter((i) => i.url !== "/tools/ai-render-studio" || isAdmin);
   // Sandbox-only mode: the whole portal menu collapses to the Visualiser.
   const navTopItems: NavItem[] = TRADE_SANDBOX_ONLY
     ? [{ title: "Visualiser Sandbox", url: "/trade/visualiser", icon: Scan }]

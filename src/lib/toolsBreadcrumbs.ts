@@ -27,6 +27,7 @@ export const TOOL_ROUTES: Record<string, [string, string]> = {
   // Specification
   "/trade/project-studio": ["Specification", "Project Studio"],
   "/trade/visualiser": ["Specification", "Visualiser"],
+  "/tools/ai-render-studio": ["Specification", "AI Render Studio"],
   "/trade/mood-boards": ["Specification", "Mood Board"],
   "/trade/annotations": ["Specification", "Markup & Annotation"],
   "/trade/tearsheets": ["Specification", "Specsheet Builder"],

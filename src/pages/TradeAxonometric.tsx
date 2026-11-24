@@ -1,13 +1,14 @@
 import { useState, useRef, useCallback, useMemo, useEffect, lazy, Suspense } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useActiveProject } from "@/contexts/ActiveProjectContext";
-import { publishVisualiserToProposal } from "@/lib/viewingRoomVisualiser.functions";
+import { buildVisualiserProposalStaging, sharedProposalPath, type LinkedProposalState } from "@/lib/viewingRoomVisualiser";
+import { getViewingRoomProposalForVisualiser, publishVisualiserToProposal } from "@/lib/viewingRoomVisualiser.functions";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "@/lib/router-compat";
+import { Link, useNavigate, useSearchParams } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 
 /** Ensure image URLs are absolute so the AI gateway can fetch them */
@@ -224,17 +225,37 @@ const CategoryFilterBar = ({
   );
 };
 
-const TradeAxonometric = () => {
+const TradeAxonometricWorkspace = () => {
   const activeProject = useActiveProject();
-  const { isAdmin } = useAuth();
+  const { isAdmin, rolesLoaded } = useAuth();
+  const [searchParams] = useSearchParams();
+  const loadProposal = useServerFn(getViewingRoomProposalForVisualiser);
   const publishToProposal = useServerFn(publishVisualiserToProposal);
-  const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const savedDraftRef = useRef<any>(readSavedDraft());
+  const rawProposalId = searchParams.get("proposalId");
+  const proposalId = rawProposalId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawProposalId) ? rawProposalId : null;
+  const [standaloneProposal, setStandaloneProposal] = useState<LinkedProposalState | null>(null);
+  const linkedProposal = activeProject?.linkedProposal ?? standaloneProposal;
 
   const [sourceImage, setSourceImage] = useState<string | null>(activeProject?.state.floorPlanUrl || savedDraftRef.current?.sourceImage || null);
   useEffect(() => { if (activeProject?.state.floorPlanUrl) setSourceImage(activeProject.state.floorPlanUrl); }, [activeProject?.state.floorPlanUrl]);
+  useEffect(() => {
+    if (!proposalId || activeProject?.linkedProposal || !rolesLoaded || !isAdmin) return;
+    let cancelled = false;
+    void (async () => {
+      const payload = await loadProposal({ data: { proposalId } });
+      if (cancelled) return;
+      const staged = buildVisualiserProposalStaging(payload);
+      setStandaloneProposal(staged.linkedProposal);
+      if (staged.floorPlanUrl) setSourceImage(staged.floorPlanUrl);
+    })().catch(() => {
+      if (!cancelled) toast({ title: "Could not load linked proposal", variant: "destructive" });
+    });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [proposalId, activeProject?.linkedProposal, rolesLoaded, isAdmin]);
   const [mode, setMode] = useState<Mode>(savedDraftRef.current?.mode || "elevation_to_axo");
   const [style, setStyle] = useState(savedDraftRef.current?.style || STYLE_PRESETS[0].value);
   const [overlayImages, setOverlayImages] = useState<string[]>(Array.isArray(savedDraftRef.current?.overlayImages) ? savedDraftRef.current.overlayImages : []);
@@ -361,16 +382,16 @@ const TradeAxonometric = () => {
   useEffect(() => {
     if (draftRestoredRef.current) return;
     draftRestoredRef.current = true;
-    if (!activeProject?.linkedProposal && savedDraftRef.current && (sourceImage || result || activeRequestId || model3dUrl || model3dProjectName)) {
-      toast({ title: "Axonometric work restored" });
+    if (!linkedProposal && !proposalId && savedDraftRef.current && (sourceImage || result || activeRequestId || model3dUrl || model3dProjectName)) {
+      toast({ title: "AI Render Studio work restored" });
     }
-  }, [activeProject?.linkedProposal, activeRequestId, model3dProjectName, model3dUrl, result, sourceImage, toast]);
+  }, [linkedProposal, proposalId, activeRequestId, model3dProjectName, model3dUrl, result, sourceImage, toast]);
 
   useEffect(() => {
-    const linked = activeProject?.linkedProposal;
+    const linked = linkedProposal;
     if (!linked) return;
     if (!galleryTitle.trim()) setGalleryTitle(`${linked.residenceName} · ${linked.tierName}`);
-  }, [activeProject?.linkedProposal, galleryTitle]);
+  }, [linkedProposal, galleryTitle]);
 
   // Concierge hand-off: prefill from a `prepare_visualization_brief` proposal
   // dropped into sessionStorage by VisualizationBriefCard. Consume once on mount.
@@ -410,42 +431,6 @@ const TradeAxonometric = () => {
     window.addEventListener("maf:axonometric:brief-ready", consumeIncomingBrief);
     return () => window.removeEventListener("maf:axonometric:brief-ready", consumeIncomingBrief);
   }, [toast]);
-
-  // Admin gate: log unauthorized attempts + show message then redirect non-admins
-  useEffect(() => {
-    if (!isAdmin) {
-      // Fire-and-forget audit log; failures are non-fatal
-      supabase
-        .rpc("log_unauthorized_access", {
-          _route: "/trade/axonometric",
-          _details: {
-            timestamp: new Date().toISOString(),
-            user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
-            referrer: typeof document !== "undefined" ? document.referrer || null : null,
-          },
-        })
-        .then(({ error }) => {
-          if (error) console.warn("[axonometric] audit log failed", error);
-        });
-      const id = setTimeout(() => navigate("/trade", { replace: true }), 2500);
-      return () => clearTimeout(id);
-    }
-    return undefined;
-  }, [isAdmin, navigate]);
-
-  if (!isAdmin) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center">
-        <Helmet>
-          <title>Admin Only — Maison Affluency</title>
-        </Helmet>
-        <h1 className="font-heading text-2xl text-foreground mb-3">Admin Only</h1>
-        <p className="font-body text-sm text-muted-foreground max-w-md">
-          The Axonometric Studio is restricted to admin users. You will be redirected to the Trade lounge shortly.
-        </p>
-      </div>
-    );
-  }
 
   // Rate-limit cooldown timer + auto-retry queue
   const COOLDOWN_SECONDS = 45;
@@ -828,7 +813,7 @@ const TradeAxonometric = () => {
   const saveToGallery = async (publish: boolean) => {
     if (!result) return;
     const imageUrl = result.storedUrl || result.imageUrl;
-    const linked = activeProject?.linkedProposal ?? null;
+    const linked = linkedProposal ?? null;
     const resolvedTitle = galleryTitle.trim() || (linked ? `${linked.residenceName} · ${linked.tierName}` : "");
     if (!resolvedTitle) return;
     setSavingToGallery(true);
@@ -847,6 +832,12 @@ const TradeAxonometric = () => {
       if (publish && linked && isAdmin) {
         const published = await publishToProposal({ data: { proposalId: linked.proposalId, axonometricRenderUrl: imageUrl } });
         activeProject?.setLinkedProposal((current) => current ? {
+          ...current,
+          axonometricRenderUrl: published.axonometricRenderUrl,
+          walkthroughUrl: published.walkthroughUrl,
+          visualiserPublishedAt: published.visualiserPublishedAt,
+        } : current);
+        setStandaloneProposal((current) => current ? {
           ...current,
           axonometricRenderUrl: published.axonometricRenderUrl,
           walkthroughUrl: published.walkthroughUrl,
@@ -1018,17 +1009,37 @@ const TradeAxonometric = () => {
   return (
     <>
       <Helmet>
-        <title>Axonometric Studio | Trade Portal</title>
+        <title>AI Render Studio | Trade Portal</title>
       </Helmet>
 
       <div className="max-w-7xl mx-auto space-y-8">
+        {linkedProposal && (
+          <div role="status" className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-muted/40 px-4 py-2.5 text-xs">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span className="font-medium text-foreground">Linked Proposal · {linkedProposal.residenceName} ({linkedProposal.tierName})</span>
+              <span className="text-muted-foreground">
+                Page 2 Spatial Context: {linkedProposal.axonometricRenderUrl ? "Axonometric published" : "Axonometric pending"}
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button asChild size="sm" variant="outline" className="h-7 text-xs">
+                <Link to={`/trade/visualiser?proposalId=${encodeURIComponent(linkedProposal.proposalId)}`}>Back to 3D Visualiser</Link>
+              </Button>
+              <Button asChild size="sm" variant="outline" className="h-7 text-xs">
+                <a href={sharedProposalPath(linkedProposal.shareToken)} target="_blank" rel="noreferrer">
+                  <ExternalLink className="w-3.5 h-3.5 mr-1" />Open Client Proposal Page
+                </a>
+              </Button>
+            </div>
+          </div>
+        )}
         {/* Header */}
         <SectionHero
           section="axonometric"
-          title="Axonometric Studio"
+          title="AI Render Studio"
           subtitle="Transform 2D elevations and sections into stylised 3D axonometric views using AI"
         >
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {activeRequestId && (
               <Button variant="outline" size="sm" onClick={() => { setActiveRequestId(null); resetWithFreshSourceImage(null, setSourceImage, setResult, setHistory, setLockedLayoutUrl); setShowQueue(true); }}>
                 <Inbox className="w-3.5 h-3.5 mr-1.5" />Back to Queue
@@ -2192,7 +2203,7 @@ const TradeAxonometric = () => {
                     <Button
                       size="sm"
                       className="flex-1"
-                      disabled={savingToGallery || (!galleryTitle.trim() && !activeProject?.linkedProposal)}
+                      disabled={savingToGallery || (!galleryTitle.trim() && !linkedProposal)}
                       onClick={async () => {
                         await saveToGallery(true);
                       }}
@@ -2201,9 +2212,9 @@ const TradeAxonometric = () => {
                       Save & Publish
                     </Button>
                   </div>
-                  {activeProject?.linkedProposal && isAdmin && (
+                  {linkedProposal && isAdmin && (
                     <p className="font-body text-[11px] text-muted-foreground">
-                      Save &amp; Publish attaches this render to Page 2 (Spatial Context) of {activeProject.linkedProposal.residenceName} ({activeProject.linkedProposal.tierName}).
+                      Save &amp; Publish attaches this render to Page 2 (Spatial Context) of {linkedProposal.residenceName} ({linkedProposal.tierName}).
                     </p>
                   )}
                 </div>
@@ -2340,6 +2351,55 @@ const TradeAxonometric = () => {
       )}
     </>
   );
+};
+
+const TradeAxonometric = () => {
+  const { isAdmin, rolesLoaded } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (rolesLoaded && !isAdmin) {
+      supabase
+        .rpc("log_unauthorized_access", {
+          _route: "/tools/ai-render-studio",
+          _details: {
+            timestamp: new Date().toISOString(),
+            user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
+            referrer: typeof document !== "undefined" ? document.referrer || null : null,
+          },
+        })
+        .then(({ error }) => {
+          if (error) console.warn("[axonometric] audit log failed", error);
+        });
+      const id = setTimeout(() => navigate("/trade", { replace: true }), 2500);
+      return () => clearTimeout(id);
+    }
+    return undefined;
+  }, [isAdmin, rolesLoaded, navigate]);
+
+  if (!rolesLoaded) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <DotCircleLoader />
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center">
+        <Helmet>
+          <title>Admin Only — Maison Affluency</title>
+        </Helmet>
+        <h1 className="font-heading text-2xl text-foreground mb-3">Admin Only</h1>
+        <p className="font-body text-sm text-muted-foreground max-w-md">
+          AI Render Studio is restricted to admin users. You will be redirected to the Trade lounge shortly.
+        </p>
+      </div>
+    );
+  }
+
+  return <TradeAxonometricWorkspace />;
 };
 
 export default TradeAxonometric;

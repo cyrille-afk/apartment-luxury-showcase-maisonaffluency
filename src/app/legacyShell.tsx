@@ -175,6 +175,7 @@ export const TradeProvenance = lazy(() => import("@/pages/TradeProvenance"));
 export const TradeDocumentsAdmin = lazy(() => import("@/pages/TradeDocumentsAdmin"));
 export const TradeMediaLibrary = lazy(() => import("@/pages/TradeMediaLibrary"));
 export const TradeQuotesAdmin = lazy(() => import("@/pages/TradeQuotesAdmin"));
+export const TradeAxonometric = lazy(() => import("@/pages/TradeAxonometric"));
 export const TradeAxonometricRequests = lazy(() => import("@/pages/TradeAxonometricRequests"));
 
 export const TradeCustomRequests = lazy(() => import("@/pages/TradeCustomRequests"));

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { layoutCamera, layoutItems, patchLayoutItem } from "./activeProjectLayout";
+import { formatRoomDimensions, layoutCamera, layoutItems, patchLayoutItem } from "./activeProjectLayout";
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
 const object: PlacedObject = { id: "chair", instanceId: "chair-1", product_name: "Armchair", brand_name: "Atelier", image_url: null, dimensions: "80 × 80 × 80 cm", glb_url: "https://assets.example/chair.glb", position: [2, 0.2, -3], rotation: [0.1, Math.PI / 2, 0.2], scale: 1.2, material: { id: "oak", name: "Oak", brand_name: "Atelier", category: "Wood", material_type: "wood", color_family: "natural", image_url: "https://assets.example/oak.jpg" }, restoreKey: 4 };
 describe("synchronized project coordinates", () => {
@@ -30,5 +30,9 @@ describe("synchronized project coordinates", () => {
     const camera = layoutCamera({ width: 12, depth: 8, height: 3 }, "axonometric");
     expect(camera.position).toEqual([7.800000000000001, 15, 7.2]);
     expect(camera.target).toEqual([0, 0, 0]);
+  });
+  it("rounds floating-point room width and depth cleanly to two decimals", () => {
+    expect(formatRoomDimensions(7.999999999999999, 6)).toBe("8.00 × 6.00 m");
+    expect(formatRoomDimensions(7.2, 6)).toBe("7.20 × 6.00 m");
   });
 });

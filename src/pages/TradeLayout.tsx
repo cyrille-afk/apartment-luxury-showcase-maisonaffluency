@@ -548,7 +548,7 @@ const TradeLayout = () => {
   }
 
   // The Visualiser runs as a fixed-viewport workspace: no page scroll, no main padding.
-  const fullBleed = ["/trade/visualiser", "/trade/axonometric"].includes(location.pathname.replace(/\/$/, ""));
+  const fullBleed = location.pathname.replace(/\/$/, "") === "/trade/visualiser";
 
   return (
     <CollaboratorInviteProvider><SidebarProvider>
