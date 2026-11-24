@@ -248,6 +248,7 @@ const Product3DViewer: React.FC<Props> = ({
   const [locked, setLocked] = useState(false);
   const [mobileAr, setMobileAr] = useState(false);
   const [arAvailable, setArAvailable] = useState(false);
+  const [arChecked, setArChecked] = useState(false);
   const [qrUrl, setQrUrl] = useState("");
   const [appliedAppearance, setAppliedAppearance] = useState<string | null>(null);
   const [arError, setArError] = useState("");
@@ -264,21 +265,27 @@ const Product3DViewer: React.FC<Props> = ({
 
   useEffect(() => {
     setArAvailable(false);
+    setArChecked(false);
+    setArError("");
     if (!mobileAr || !opened || !ready) return;
     const viewer = mvRef.current as (HTMLElement & { canActivateAR?: boolean; updateComplete?: Promise<unknown> }) | null;
     if (!viewer) return;
     let cancelled = false;
     const update = async () => {
       await viewer.updateComplete;
-      if (!cancelled) setArAvailable(viewer.canActivateAR === true);
+      if (!cancelled) { setArAvailable(viewer.canActivateAR === true); setArChecked(true); }
+    };
+    const status = (event: Event) => {
+      if ((event as CustomEvent<{ status?: string }>).detail?.status === "failed") setArError("AR couldn’t open in this browser. Your selected finishes are still visible in 3D. Try again, or open this page in Safari on a compatible iPhone.");
+      void update();
     };
     void update();
     viewer.addEventListener("load", update);
-    viewer.addEventListener("ar-status", update);
+    viewer.addEventListener("ar-status", status);
     return () => {
       cancelled = true;
       viewer.removeEventListener("load", update);
-      viewer.removeEventListener("ar-status", update);
+      viewer.removeEventListener("ar-status", status);
     };
   }, [mobileAr, opened, ready, url]);
 
@@ -703,8 +710,11 @@ const Product3DViewer: React.FC<Props> = ({
               <Button slot="ar-button" type="button" variant="space-preview" disabled={!appearanceReady} title={appearanceReady ? "View your selected finishes in AR" : "Preparing selected finishes…"} className="absolute bottom-4 right-4 max-w-[calc(100%-2rem)] rounded-full px-4 font-display text-sm md:hidden" onClick={event => {
                 event.preventDefault(); event.stopPropagation();
                 if (!appearanceReady || !mvRef.current?.activateAR) return;
+                setArError("");
                 // Call synchronously from the tap; Quick Look exports the freshly textured scene.
-                void mvRef.current.activateAR().catch(() => setArError("AR couldn’t open. Please try again."));
+                try {
+                  void mvRef.current.activateAR().catch(() => setArError("AR couldn’t open in this browser. Your selected finishes are still visible in 3D. Try again, or open this page in Safari on a compatible iPhone."));
+                } catch { setArError("AR couldn’t open in this browser. Your selected finishes are still visible in 3D. Try again, or open this page in Safari on a compatible iPhone."); }
               }}>
                 <Box strokeWidth={1.25} aria-hidden="true" />
                 View in Your Space
@@ -757,7 +767,11 @@ const Product3DViewer: React.FC<Props> = ({
               <span className="block">Pick a fabric or wood finish on the right — the 3D preview updates live.</span>
             </>)}
       </p>
-      {arError && <p role="status" className="px-3 pb-2 font-display text-xs text-muted-foreground">{arError}</p>}
+      {opened && ((mobileAr && arChecked && !arAvailable) || arError) && <div role="status" className="space-y-3 border-t border-border bg-background px-3 py-3">
+        <p className="font-display text-sm leading-relaxed text-muted-foreground">{arError || "AR isn’t available on this device or browser. Your selected finishes remain visible in 3D. For a room preview, open this page in Safari on a compatible iPhone."}</p>
+        {(fabricTextureUrl || fabricLabel) && <div className="flex items-center gap-2.5">{fabricTextureUrl && <img src={fabricTextureUrl} alt={fabricLabel ?? "Selected upholstery"} className="size-9 shrink-0 rounded-full border border-border/60 object-cover" />}<p className="min-w-0 break-words font-body text-xs text-muted-foreground">{fabricLabel ?? "Selected upholstery"}</p></div>}
+        {backrestTextureUrl && <div className="flex items-center gap-2.5"><img src={backrestTextureUrl} alt={backrestFabricLabel ?? "Selected backrest upholstery"} className="size-9 shrink-0 rounded-full border border-border/60 object-cover" /><p className="min-w-0 break-words font-body text-xs text-muted-foreground">{backrestFabricLabel ?? "Selected backrest upholstery"}</p></div>}
+      </div>}
 
       {arAvailable && (
         <Accordion type="single" collapsible className="md:hidden border-t border-border bg-background px-3">

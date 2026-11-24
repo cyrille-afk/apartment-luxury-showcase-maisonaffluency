@@ -1,5 +1,8 @@
 # Roadmap
 
+## AR unavailable fallback
+- [x] Show capability/launch failure guidance without replacing the selected 3D scene; retain selected upholstery and backrest swatches. Real signed-in phone Sandy Cove Opera Delft unsupported fallback and simulated native failed-status verified: same model/material textures and selected dropdown remain unchanged, no page errors; screenshots inspected. Thirteen viewer tests pass including unsupported/rejected/failed-event material retention; build OK. Physical iPhone launch remains untested.
+
 ## QR selection confirmation
 - [x] Show the current furniture name/photo and selected upholstery swatch/name in the QR modal, with separate backrest upholstery where present. Real signed-in Sandy Cove Sofa → Opera Delft → QR confirmation verified: both images load, exact selection remains after closing, no page errors; modal visually inspected, twelve existing tests pass and build OK. No pricing or sharing behavior changed.
 

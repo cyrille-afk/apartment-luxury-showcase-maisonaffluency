@@ -31,6 +31,24 @@ describe("desktop AR phone handoff", () => {
 });
 
 describe("mobile AR availability", () => {
+  it.each(["unsupported", "rejected", "failed-event"])("retains selected upholstery and the same 3D scene when AR is %s", async (failure) => {
+    mobileCapability(true);
+    const seat = material("seat", "default.jpg", [1, 1, 1, 1]);
+    const { container } = render(<Product3DViewer url="/chair.glb" alt="Chair" autoOpen fabricLabel="Opera Delft" fabricTextureUrl="opera.jpg" materialRoles={{ seat: "fabric" }} />);
+    const viewer = container.querySelector("model-viewer") as TestModelViewer;
+    await act(async () => { viewer.model = { materials: [seat] }; viewer.canActivateAR = failure !== "unsupported"; viewer.dispatchEvent(new Event("load")); });
+    await waitFor(() => expect(seat.pbrMetallicRoughness.baseColorTexture.texture.name).toBe("opera.jpg"));
+    if (failure === "rejected") {
+      viewer.activateAR = vi.fn(async () => { throw new Error("Unsupported browser"); });
+      fireEvent.click(await screen.findByRole("button", { name: "View in Your Space" }));
+    } else if (failure === "failed-event") {
+      await act(async () => { viewer.dispatchEvent(new CustomEvent("ar-status", { detail: { status: "failed" } })); });
+    }
+    await screen.findByRole("status");
+    expect(container.querySelector("model-viewer")).toBe(viewer);
+    expect(viewer.model.materials[0]).toBe(seat);
+    expect(seat.pbrMetallicRoughness.baseColorTexture.texture.name).toBe("opera.jpg");
+  });
   it("waits for the newly selected upholstery before exporting the live scene to AR", async () => {
     mobileCapability(true);
     const seat = material("seat", "default.jpg", [1, 1, 1, 1]);
