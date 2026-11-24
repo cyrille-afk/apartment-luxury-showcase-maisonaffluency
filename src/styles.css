@@ -263,6 +263,11 @@
   --secondary-foreground: 40 12% 12%;
   letter-spacing: 0;
 }
+html:has(.viewing-room),
+body:has(.viewing-room) {
+  background-color: #FAF9F6;
+  min-height: 100dvh;
+}
 .viewing-room-canvas { background-color: hsl(var(--background)); }
 
 :root {

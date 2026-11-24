@@ -31,7 +31,7 @@ export function ViewingRoomAccessEnded({ status, onNewCode }: { status: "expired
     }
   };
   return (
-    <main className="viewing-room flex min-h-screen flex-col bg-background text-foreground">
+    <main className="viewing-room flex min-h-[100dvh] flex-col bg-background text-foreground">
       <header className="flex items-center justify-center border-b border-border px-6 py-6">
         <img src={affluencyLogo} alt="Affluency" className="h-7 w-auto mix-blend-multiply" />
       </header>
