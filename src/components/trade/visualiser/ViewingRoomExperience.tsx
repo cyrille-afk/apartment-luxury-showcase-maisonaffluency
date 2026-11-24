@@ -16,6 +16,7 @@ import { moodBudgetLedger, isMoodCurrency } from "@/lib/moodBoardBudget";
 import { downloadViewingRoomProposal } from "@/lib/viewingRoomProposal";
 import { formatPdfMoney } from "@/lib/pdfFormatting";
 import { viewingRoomSwapsEnabled } from "@/lib/viewingRoomAlternatives";
+import ViewingRoomSwapNotice from "./ViewingRoomSwapNotice";
 import type { ViewingRoomProposalContext } from "@/lib/viewingRoomProposalData";
 import { readArViewerHandoff } from "@/lib/arViewerHandoff";
 
@@ -41,6 +42,8 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
     ? query.data.items.map(slot => ({ ...slot, is_swappable: viewingRoomSwapsEnabled(slot.is_swappable, query.data?.allow_alternatives ?? false) }))
     : fallbackItems.map(item => ({ ...item, retail_price: null, retail_price_from: false, finish_options: [], size_options: [], alternatives: [], is_swappable: false, allow_finish_customization: false })), [query.data, fallbackItems]);
   const recommendationsUnavailable = query.isError || (!query.isPending && !query.data);
+  // Saved swap permissions are read once per page load, so a fixed piece may simply be stale state.
+  const fixedCollectionVisible = Boolean(query.data) && !recommendationsUnavailable && slots.some(slot => !slot.is_swappable);
   const current = slots.find(slot => slot.id === active);
   // Server validates each candidate against the slot's saved footprint overrides.
   const alternatives = current?.alternatives ?? [];
@@ -120,6 +123,7 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
     <div className="mx-auto max-w-[1500px] px-6 pt-6 md:px-12">
       {recommendationsUnavailable && <div role="status" className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-6"><div className="max-w-xl"><p className="font-display text-xl">Recommendations are temporarily unavailable</p><p className="mt-2 text-sm text-muted-foreground">Your collection is still here. You can inspect its pieces and selected materials while we reconnect.{!query.data && " Finish changes and confirmed totals will return when recommendations load."}</p></div>{retryButton}</div>}
       {query.data && isMoodCurrency(currency) && <section ref={budgetRef} aria-label="Budget Allocation"><MoodBoardBudgetBar ledger={ledger} pending={false} currency={currency} /></section>}
+      {fixedCollectionVisible && <div className="pt-6"><ViewingRoomSwapNotice /></div>}
       <div aria-label="Client editorial collection" className="grid grid-cols-1 gap-x-8 gap-y-12 py-8 sm:grid-cols-2 lg:grid-cols-3">
         {slots.map(slot => { const piece = choices[slot.id] ?? slot; return <article key={slot.id} className="flex min-w-0 flex-col" aria-label={piece.product_name}>
           <div className="relative aspect-[4/5] bg-muted/40">
@@ -173,7 +177,7 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
           </div>
           </TabsContent>
           <TabsContent value="alternatives" className="space-y-4 pt-4">
-            {recommendationsUnavailable ? <div className="space-y-4"><p className="text-sm text-muted-foreground">We couldn’t refresh recommendations. Your current piece and selections are unchanged.</p>{retryButton}<Button variant="ghost" onClick={() => setDrawerTab("finishes")}>Return to materials &amp; finishes</Button></div> : !current.is_swappable ? <p className="text-sm text-muted-foreground">This piece is part of the fixed collection.</p> : !alternatives.length ? <div className="space-y-4"><p className="text-sm text-muted-foreground">No footprint-compatible alternatives are currently available. You can keep this piece and explore its selected materials.</p><Button variant="ghost" onClick={() => setDrawerTab("finishes")}>Return to materials &amp; finishes</Button></div> : alternatives.map(option => {
+            {recommendationsUnavailable ? <div className="space-y-4"><p className="text-sm text-muted-foreground">We couldn’t refresh recommendations. Your current piece and selections are unchanged.</p>{retryButton}<Button variant="ghost" onClick={() => setDrawerTab("finishes")}>Return to materials &amp; finishes</Button></div> : !current.is_swappable ? <div className="space-y-4"><p className="text-sm text-muted-foreground">This piece is part of the fixed collection.</p><ViewingRoomSwapNotice compact /></div> : !alternatives.length ? <div className="space-y-4"><p className="text-sm text-muted-foreground">No footprint-compatible alternatives are currently available. You can keep this piece and explore its selected materials.</p><Button variant="ghost" onClick={() => setDrawerTab("finishes")}>Return to materials &amp; finishes</Button></div> : alternatives.map(option => {
               const selectedPiece = choices[current.id] ?? current;
               const delta = option.retail_price != null && selectedPiece.retail_price != null ? option.retail_price - selectedPiece.retail_price : null;
               return <article key={option.id} className="grid grid-cols-[5rem_minmax(0,1fr)] gap-4 border-b border-border py-4">
