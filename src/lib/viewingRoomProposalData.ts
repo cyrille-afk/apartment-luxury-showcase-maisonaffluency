@@ -2,7 +2,16 @@ import type { ViewingRoomChoice } from "./viewingRoom";
 import { viewingRoomViewerMaterials } from "./viewingRoom";
 
 export type ViewingRoomProposalSnapshot = { package: string; currency: string; total: number; items: ViewingRoomChoice[] };
-export type ViewingRoomProposalContext = { hero?: string | null; logo?: string | null; floorplan?: string | null; specs?: string | null; leadTimeWeeks?: number | null };
+export type ViewingRoomProposalContext = { hero?: string | null; logo?: string | null; floorplan?: string | null; specs?: string | null; leadTimeWeeks?: number | null; clientName?: string | null; projectNotes?: string | null };
+
+export const PROPOSAL_CLIENT_NAME_MAX = 120;
+export const PROPOSAL_NOTES_MAX = 500;
+
+export function normalizeProposalDetails(input: { clientName?: string | null; projectNotes?: string | null }) {
+  const name = (input.clientName ?? "").replace(/\s+/g, " ").trim().slice(0, PROPOSAL_CLIENT_NAME_MAX);
+  const notes = (input.projectNotes ?? "").replace(/\r\n?/g, "\n").trim().slice(0, PROPOSAL_NOTES_MAX);
+  return { ...(name ? { clientName: name } : {}), ...(notes ? { projectNotes: notes } : {}) };
+}
 
 /** Only validated line prices enter the presentation; the package target is not its configured total. */
 export function proposalConfiguredTotal(snapshot: ViewingRoomProposalSnapshot): number {

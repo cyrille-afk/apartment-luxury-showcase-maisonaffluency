@@ -31,6 +31,8 @@ export default function ViewingRoomExperience({ token, packageId, tierName, base
   const [busy, setBusy] = useState(false);
   const [locked, setLocked] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [clientName, setClientName] = useState("");
+  const [projectNotes, setProjectNotes] = useState("");
   const [feedback, setFeedback] = useState("");
   const [scrolled, setScrolled] = useState(false);
   const key = useRef<string | null>(null);
@@ -105,7 +107,7 @@ export default function ViewingRoomExperience({ token, packageId, tierName, base
         const approved = slot?.product_name === item.product_name ? slot : slot?.alternatives.find(piece => piece.product_name === item.product_name);
         return { ...item, image_url: item.image_url ?? approved?.image_url ?? null };
       }) };
-      await downloadViewingRoomProposal(presentation, residence, developer, proposalContext);
+      await downloadViewingRoomProposal(presentation, residence, developer, { ...proposalContext, clientName, projectNotes });
       setFeedback("Selection locked · proposal requested and PDF downloaded.");
       setPreviewOpen(false);
     } catch { setFeedback(snapshot.current ? "Selection locked. PDF download failed; please retry." : "Your proposal couldn’t be locked. Please try again."); }
@@ -187,6 +189,6 @@ export default function ViewingRoomExperience({ token, packageId, tierName, base
         </>}
       </SheetContent>
     </Sheet>
-    <ViewingRoomProposalPreview open={previewOpen} onOpenChange={setPreviewOpen} {...(tierName ? { tierName } : {})} residence={residence} developer={developer} currency={currency} slots={slots} choices={choices} total={total} busy={busy} locked={locked} feedback={feedback} onConfirm={() => void requestProposal()} />
+    <ViewingRoomProposalPreview open={previewOpen} onOpenChange={setPreviewOpen} {...(tierName ? { tierName } : {})} residence={residence} developer={developer} currency={currency} slots={slots} choices={choices} total={total} busy={busy} locked={locked} feedback={feedback} clientName={clientName} projectNotes={projectNotes} onClientNameChange={setClientName} onProjectNotesChange={setProjectNotes} onConfirm={() => void requestProposal()} />
   </div>;
 }

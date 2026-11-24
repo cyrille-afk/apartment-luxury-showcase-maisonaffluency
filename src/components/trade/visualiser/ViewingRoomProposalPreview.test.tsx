@@ -109,9 +109,17 @@ describe("Proposal preview step before locking", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Review & Lock Proposal" }));
     const confirmDialog = await screen.findByRole("dialog");
+    fireEvent.change(within(confirmDialog).getByLabelText("Client name (optional)"), { target: { value: "  Elena Rossi  " } });
+    fireEvent.change(within(confirmDialog).getByLabelText("Project notes (optional)"), { target: { value: "Prefer warm oak tones for Q4 move-in." } });
+    expect(within(confirmDialog).getByText("Prepared for Elena Rossi")).toBeInTheDocument();
     fireEvent.click(within(confirmDialog).getByRole("button", { name: "Lock & Download Proposal" }));
     await waitFor(() => expect(lock).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(download).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(download).toHaveBeenCalledWith(
+      expect.objectContaining({ package: "Signature" }),
+      "2-Bedroom Residence",
+      "Cipriani Residences Miami",
+      expect.objectContaining({ clientName: "  Elena Rossi  ", projectNotes: "Prefer warm oak tones for Q4 move-in." }),
+    ));
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     expect(screen.getByRole("button", { name: "Download Locked Proposal" })).toBeInTheDocument();
   });

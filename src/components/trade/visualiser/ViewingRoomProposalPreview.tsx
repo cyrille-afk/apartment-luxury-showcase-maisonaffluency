@@ -1,10 +1,13 @@
 import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { formatPdfMoney } from "@/lib/pdfFormatting";
 import { productAttribution } from "@/lib/productAttribution";
 import { AXIS_MATERIAL_KEY, type ViewingRoomChoice, type ViewingRoomSlot } from "@/lib/viewingRoom";
-import { proposalSelectedFinishes } from "@/lib/viewingRoomProposalData";
+import { PROPOSAL_CLIENT_NAME_MAX, PROPOSAL_NOTES_MAX, proposalSelectedFinishes } from "@/lib/viewingRoomProposalData";
 
 type PreviewFinish = { key: string; label: string; name: string; image_url: string | null };
 
@@ -32,22 +35,35 @@ function previewFinishes(piece: ViewingRoomChoice): PreviewFinish[] {
   return swatches;
 }
 
-export default function ViewingRoomProposalPreview({ open, onOpenChange, tierName, residence, developer, currency, slots, choices, total, busy, locked, feedback, onConfirm }: {
+export default function ViewingRoomProposalPreview({ open, onOpenChange, tierName, residence, developer, currency, slots, choices, total, busy, locked, feedback, clientName, projectNotes, onClientNameChange, onProjectNotesChange, onConfirm }: {
   open: boolean; onOpenChange: (open: boolean) => void; tierName?: string; residence: string; developer: string; currency: string;
-  slots: ViewingRoomSlot[]; choices: Record<string, ViewingRoomChoice>; total: number; busy: boolean; locked: boolean; feedback: string; onConfirm: () => void;
+  slots: ViewingRoomSlot[]; choices: Record<string, ViewingRoomChoice>; total: number; busy: boolean; locked: boolean; feedback: string;
+  clientName: string; projectNotes: string; onClientNameChange: (value: string) => void; onProjectNotesChange: (value: string) => void; onConfirm: () => void;
 }) {
   const money = (value: number) => formatPdfMoney(Math.round(value * 100), currency);
   const selectedItems = slots.map(slot => ({ slot, piece: choices[slot.id] ?? slot }));
   const hasUnpriced = selectedItems.some(({ piece }) => piece.retail_price == null);
   const heading = tierName ? `${tierName} Collection` : "Selected Collection";
+  const trimmedClient = clientName.trim();
   return <Dialog open={open} onOpenChange={next => { if (!busy) onOpenChange(next); }}>
     <DialogContent className="viewing-room flex max-h-[90dvh] w-[calc(100%-1.5rem)] max-w-2xl flex-col gap-0 overflow-hidden rounded-none border-border bg-background p-0 text-foreground">
       <div className="border-b border-border py-5 pl-12 pr-6 sm:px-6 sm:pr-12">
         <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Proposal Preview</p>
         <DialogTitle className="mt-1 font-display text-2xl font-normal">{heading}</DialogTitle>
         <DialogDescription className="mt-1 text-xs text-muted-foreground">{residence} · {developer} · {selectedItems.length} {selectedItems.length === 1 ? "piece" : "pieces"}</DialogDescription>
+        {trimmedClient && <p className="mt-1.5 text-xs text-foreground">Prepared for {trimmedClient}</p>}
       </div>
       <div aria-label="Proposal pieces" className="min-h-0 flex-1 divide-y divide-border overflow-y-auto px-6">
+        <div className="space-y-3 py-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="proposal-client-name" className="text-xs font-normal text-muted-foreground">Client name (optional)</Label>
+            <Input id="proposal-client-name" value={clientName} maxLength={PROPOSAL_CLIENT_NAME_MAX} disabled={busy || locked} placeholder="e.g. Mr & Mrs Laurent" className="rounded-none bg-background text-sm" onChange={event => onClientNameChange(event.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="proposal-project-notes" className="text-xs font-normal text-muted-foreground">Project notes (optional)</Label>
+            <Textarea id="proposal-project-notes" value={projectNotes} maxLength={PROPOSAL_NOTES_MAX} rows={2} disabled={busy || locked} placeholder="Delivery timing, preferred tones, or residence notes for the PDF" className="min-h-16 resize-y rounded-none bg-background text-sm" onChange={event => onProjectNotesChange(event.target.value)} />
+          </div>
+        </div>
         {selectedItems.map(({ slot, piece }) => {
           const attribution = productAttribution({ title: piece.product_name, brandName: piece.brand_name });
           const finishes = previewFinishes(piece);
