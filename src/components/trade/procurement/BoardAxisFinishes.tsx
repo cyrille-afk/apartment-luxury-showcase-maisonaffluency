@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger } from "@/components/ui/select";
 
 export type BoardAxisRole = "seat" | "backrest" | "frame";
 export type BoardAxisColour = { name: string; image_url: string | null; category?: string | null };
@@ -42,15 +41,30 @@ export default function BoardAxisFinishes({ variants, initial, onChange }: { var
   const [variant, setVariant] = useState(initialVariant);
   const [colours, setColours] = useState<Partial<Record<BoardAxisRole, BoardAxisColour>>>(() => Object.fromEntries((initialVariant?.axes ?? []).flatMap(a => { const colour = a.colours.find(c => normal(c.name) === normal(names[a.role])) ?? a.colours[0]; return colour ? [[a.role, colour]] : []; })));
   if (!variant) return null;
-  return <div className="space-y-5">{(variant.axes ?? []).map(axis => <div key={axis.role} className="space-y-2">
-    <p className="font-body text-xs text-muted-foreground">{axis.label}</p>
-    <Select value={axis.value ?? ""} onValueChange={value => {
-      const next = variants.find(v => v.axes?.every(a => a.role === axis.role ? a.value === value : a.value === variant.axes?.find(old => old.role === a.role)?.value)) ?? variants.find(v => v.axes?.some(a => a.role === axis.role && a.value === value));
-      if (!next) return;
-      const nextColours = Object.fromEntries((next.axes ?? []).flatMap(a => { const retained = a.colours.find(c => c.name === colours[a.role]?.name) ?? a.colours[0]; return retained ? [[a.role, retained]] : []; }));
-      setVariant(next); setColours(nextColours); onChange(next, nextColours);
-    }}><SelectTrigger aria-label={axis.label}><SelectValue /></SelectTrigger><SelectContent>{[...new Set(variants.flatMap(v => v.axes?.filter(a => a.role === axis.role).map(a => a.value).filter((v): v is string => !!v) ?? []))].map(value => <SelectItem key={value} value={value}>{value}</SelectItem>)}</SelectContent></Select>
-    {axis.colours.length > 0 && <div role="radiogroup" aria-label={`${axis.label} colour`} className="flex flex-wrap gap-2">{axis.colours.map(colour => <Button key={colour.name} variant="outline" size="icon" role="radio" aria-checked={colours[axis.role]?.name === colour.name} aria-label={colour.name} title={colour.name} className={`size-9 overflow-hidden rounded-full p-0 ${colours[axis.role]?.name === colour.name ? "ring-1 ring-foreground ring-offset-2 ring-offset-background" : ""}`} onClick={() => { const next = { ...colours, [axis.role]: colour }; setColours(next); onChange(variant, next); }}>{colour.image_url && <img src={colour.image_url} alt="" className="size-full object-cover" />}</Button>)}</div>}
-    <p className="font-body text-xs text-muted-foreground">{colours[axis.role]?.name ?? (axis.value === "COM" ? "Customer’s own material" : axis.value)}</p>
-  </div>)}</div>;
+  const pick = (role: BoardAxisRole, value: string, colourName: string | null) => {
+    const next = variants.find(v => v.axes?.every(a => a.role === role ? a.value === value : a.value === variant.axes?.find(old => old.role === a.role)?.value)) ?? variants.find(v => v.axes?.some(a => a.role === role && a.value === value));
+    if (!next) return;
+    const nextColours = Object.fromEntries((next.axes ?? []).flatMap(a => {
+      const wanted = a.role === role ? colourName : colours[a.role]?.name;
+      const retained = a.colours.find(c => c.name === wanted) ?? a.colours[0];
+      return retained ? [[a.role, retained]] : [];
+    }));
+    setVariant(next); setColours(nextColours); onChange(next, nextColours);
+  };
+  return <div className="space-y-5">{(variant.axes ?? []).map(axis => {
+    const ranges = new Map<string, BoardAxisColour[]>();
+    for (const v of variants) for (const a of v.axes ?? []) if (a.role === axis.role && a.value && !ranges.has(a.value)) ranges.set(a.value, a.colours);
+    const current = colours[axis.role];
+    const currentKey = `${axis.value ?? ""}::${current?.name ?? ""}`;
+    return <div key={axis.role} className="space-y-2">
+      <p className="font-body text-xs text-muted-foreground">{axis.label}</p>
+      <Select value={currentKey} onValueChange={key => { const [value, name] = key.split("::"); if (value) pick(axis.role, value, name || null); }}>
+        <SelectTrigger aria-label={axis.label}><span className="flex min-w-0 items-center gap-2">{current?.image_url && <img src={current.image_url} alt="" className="size-5 shrink-0 rounded-full object-cover" />}<span className="truncate">{current?.name ?? (axis.value === "COM" ? "Customer’s own material" : axis.value)}</span></span></SelectTrigger>
+        <SelectContent>{[...ranges].map(([value, list]) => <SelectGroup key={value}><SelectLabel>{value === "COM" ? "COM · Customer’s own material" : value}</SelectLabel>
+          {list.length ? list.map(c => <SelectItem key={c.name} value={`${value}::${c.name}`}><span className="flex items-center gap-2">{c.image_url && <img src={c.image_url} alt="" className="size-5 rounded-full object-cover" />}{c.name}</span></SelectItem>)
+            : <SelectItem value={`${value}::`}>{value === "COM" ? "Customer’s own material" : `${value} (colour on request)`}</SelectItem>}
+        </SelectGroup>)}</SelectContent>
+      </Select>
+    </div>;
+  })}</div>;
 }

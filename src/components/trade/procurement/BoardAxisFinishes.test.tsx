@@ -17,12 +17,11 @@ describe("independent client board finishes", () => {
     expect(resolveBoardAxisSelection(result.label, variants)).toEqual(result);
     expect(result.price_cents).toBe(825600);
   });
-  it("changes only the backrest colour without replacing the seat or frame", () => {
-    const onChange = vi.fn();
-    render(<BoardAxisFinishes variants={variants} initial={null} onChange={onChange} />);
-    const backrest = screen.getByRole("radiogroup", { name: "Backrest Upholstery colour" });
-    fireEvent.click(backrest.querySelector('[aria-label="Edson Gris"]') as HTMLElement);
-    expect(onChange).toHaveBeenCalledWith(variants[0], { seat: { name: "Edson Charbon", image_url: "seat.jpg" }, backrest: { name: "Edson Gris", image_url: "grey.jpg" }, frame: { name: "Smooth Oak", image_url: "oak.jpg" } });
+  it("shows each finish once: one dropdown per axis, no repeated swatch row", () => {
+    render(<BoardAxisFinishes variants={variants} initial={null} onChange={vi.fn()} />);
+    expect(screen.getAllByRole("combobox").map(c => c.getAttribute("aria-label"))).toEqual(["Seat Upholstery", "Backrest Upholstery", "Frame Finish"]);
+    expect(screen.queryAllByRole("radiogroup")).toHaveLength(0);
+    expect(screen.getAllByText("Edson Charbon")).toHaveLength(2);
   });
   it("never borrows a confirmed price for an unavailable three-part combination", () => {
     const result = resolveBoardAxisSelection("Seat Upholstery: Unknown · Backrest Upholstery: Edson Gris · Frame Finish: Smooth Oak", variants);
