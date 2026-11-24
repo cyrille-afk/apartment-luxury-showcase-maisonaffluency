@@ -894,3 +894,7 @@
 ## GUM backrest leather
 - [x] Backrest always Tundra leather in catalogue options.
 - [ ] Viewing room drawer still repeats range dropdown + colour row (same layout as old board).
+
+## Rift CTS finishes
+- [x] Client/project board drawer offers wood × stone choices for size-priced pieces.
+- [ ] Private viewing room still shows Rift swatches as "being curated" (needs server-side finish projection + lock validation).

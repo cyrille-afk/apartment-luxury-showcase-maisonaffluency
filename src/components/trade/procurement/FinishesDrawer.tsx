@@ -19,6 +19,21 @@ const roleOf = (cat: string | null) => {
   return null;
 };
 
+/** Products priced by size/wood group (variants without top/base) but with linked
+ *  stone/wood swatches: build one option per stone × wood pair. Price is taken from
+ *  the first variant whose label names that wood (the catalogue's first size);
+ *  no match means price stays unconfirmed. */
+export function swatchMatrixVariants(raw: any, list: { name: string; category: string | null }[]): any[] {
+  const all: any[] = Array.isArray(raw) ? raw : [];
+  const real = all.filter((v) => v.top || v.base);
+  if (real.length) return real;
+  const tops = list.filter((x) => roleOf(x.category) === "top"), bases = list.filter((x) => roleOf(x.category) === "base");
+  if (!tops.length && !bases.length) return [];
+  const key = (n: string) => n.toLowerCase().split(/\s+/)[0] ?? "";
+  const priceFor = (wood?: string) => wood ? all.find((v) => String(v.label ?? "").toLowerCase().includes(key(wood)))?.price_cents ?? null : all[0]?.price_cents ?? null;
+  return (tops.length ? tops : [null]).flatMap((t) => (bases.length ? bases : [null]).map((b) => ({ top: t?.name ?? "", base: b?.name ?? "", label: "", price_cents: priceFor(b?.name) })));
+}
+
 export type FinishSelection = { label: string; price_cents: number | null; image_url: string | null; top?: string | null; base?: string | null; top_image?: string | null; base_image?: string | null; extra?: { name: string; img: string | null }[] };
 
 const normKey = (s?: string | null) => (s || "").toLowerCase().normalize("NFD").replace(/[^a-z0-9]/g, "");
@@ -187,7 +202,7 @@ export default function FinishesDrawer({
       const list = preloaded.swatches || [];
       setCurrency(preloaded.currency || "EUR"); setLead(preloaded.lead);
       setGlbs(preloaded.glbs || []); setSwatches(list);
-      setVariants((preloaded.variants || []).filter((v: Variant) => v.top || v.base));
+      setVariants(swatchMatrixVariants(preloaded.variants, list));
       setImgMap(preloaded.variant_image_map || {}); setGallery(preloaded.gallery_images || []);
       const find = (n?: string | null, role?: string) => n ? (list.find((x) => roleOf(x.category) === role && norm(x.name) === norm(n)) || null) : null;
       const t0 = find(initialTop, "fabric") || find(initialTop, "top"), b0 = find(initialBase, "base");
@@ -216,8 +231,8 @@ export default function FinishesDrawer({
           supabase.from("trade_product_glb_variants").select("variant_label, glb_url, is_default, material_roles").eq("product_id", productId),
           supabase.from("product_fabric_swatches_public").select("name, image_url, category, price_tier_label").eq("pick_id", t.source_pick_id),
         ]);
+        const list = (sw as Swatch[]) || [];
         if (alive) {
-          const list = (sw as Swatch[]) || [];
           setGlbs((g as Glb[]) || []); setSwatches(list);
           const find = (n?: string | null, role?: string) => n ? (list.find((x) => roleOf(x.category) === role && norm(x.name) === norm(n)) || null) : null;
           const t0 = find(initialTop, "fabric") || find(initialTop, "top"), b0 = find(initialBase, "base");
@@ -225,7 +240,7 @@ export default function FinishesDrawer({
         }
         const p: any = pick || {};
         if (!alive) return;
-        setVariants(Array.isArray(p.size_variants) ? p.size_variants.filter((v: Variant) => v.top || v.base) : []);
+        setVariants(swatchMatrixVariants(p.size_variants, list));
         setImgMap(p.variant_image_map || {});
         setGallery(p.gallery_images || []);
       } else setVariants([]);
