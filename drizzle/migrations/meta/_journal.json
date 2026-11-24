@@ -2367,6 +2367,13 @@
       "when": 1795521723774,
       "tag": "0337_enable_signature_finishes_ibo_sizes_and_delcourt_wood_swatches",
       "breakpoints": true
+    },
+    {
+      "idx": 338,
+      "version": "7",
+      "when": 1795529096857,
+      "tag": "0338_viewing_room_proposal_visualiser_bridge",
+      "breakpoints": true
     }
   ]
 }

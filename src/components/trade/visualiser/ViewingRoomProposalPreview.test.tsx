@@ -131,6 +131,7 @@ describe("Proposal preview step before locking", () => {
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     expect(screen.getByRole("button", { name: "Download Locked Proposal" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Export Blender Scene JSON" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Stage in Visualiser" })).not.toBeInTheDocument();
   });
 
   it("shows Export Blender Scene JSON only to admins after locking and downloads the manifest", async () => {
@@ -143,7 +144,13 @@ describe("Proposal preview step before locking", () => {
       residence_layout: { name: "2-Bedroom Residence", floorplan_url: "https://example.com/plan.png" },
       items: [],
     };
-    lock.mockResolvedValue({ package: "Signature", currency: "USD", total: 350000, items: [sofaSlot, gumSlot] });
+    lock.mockResolvedValue({
+      package: "Signature",
+      currency: "USD",
+      total: 350000,
+      items: [sofaSlot, gumSlot],
+      proposal_id: "7ce69b58-fff5-42a7-b7ee-ecccb2baa50a",
+    });
     download.mockResolvedValue(undefined);
     exportBlender.mockResolvedValue(manifest);
     mount([sofaSlot, gumSlot], "Signature", true);
@@ -157,6 +164,8 @@ describe("Proposal preview step before locking", () => {
     fireEvent.click(within(dialog).getByRole("button", { name: "Lock & Download Proposal" }));
 
     const exportButton = await screen.findByRole("button", { name: "Export Blender Scene JSON" });
+    const stageLink = screen.getByRole("link", { name: "Stage in Visualiser" });
+    expect(stageLink).toHaveAttribute("href", "/trade/visualiser?proposalId=7ce69b58-fff5-42a7-b7ee-ecccb2baa50a");
     fireEvent.click(exportButton);
     await waitFor(() => expect(exportBlender).toHaveBeenCalledWith({
       data: { packageId: "pkg-sig", requestKey: expect.any(String) },

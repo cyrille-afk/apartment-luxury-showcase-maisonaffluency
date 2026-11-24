@@ -2,7 +2,23 @@ import type { ViewingRoomChoice } from "./viewingRoom";
 import { viewingRoomViewerMaterials } from "./viewingRoom";
 
 export type ViewingRoomProposalSnapshot = { package: string; currency: string; total: number; items: ViewingRoomChoice[] };
-export type ViewingRoomProposalContext = { hero?: string | null; logo?: string | null; floorplan?: string | null; specs?: string | null; leadTimeWeeks?: number | null; clientName?: string | null; projectNotes?: string | null };
+export type ViewingRoomProposalContext = {
+  hero?: string | null;
+  logo?: string | null;
+  floorplan?: string | null;
+  specs?: string | null;
+  leadTimeWeeks?: number | null;
+  clientName?: string | null;
+  projectNotes?: string | null;
+  axonometricRenderUrl?: string | null;
+  walkthroughUrl?: string | null;
+};
+
+export function safeProposalUrl(url?: string | null): string | null {
+  const trimmed = url?.trim();
+  if (!trimmed) return null;
+  return trimmed.startsWith("https://") || trimmed.startsWith("http://") || trimmed.startsWith("/__l5e/") ? trimmed : null;
+}
 
 export const PROPOSAL_CLIENT_NAME_MAX = 120;
 export const PROPOSAL_NOTES_MAX = 500;

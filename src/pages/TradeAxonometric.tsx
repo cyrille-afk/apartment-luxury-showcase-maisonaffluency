@@ -1,5 +1,7 @@
 import { useState, useRef, useCallback, useMemo, useEffect, lazy, Suspense } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { useActiveProject } from "@/contexts/ActiveProjectContext";
+import { publishVisualiserToProposal } from "@/lib/viewingRoomVisualiser.functions";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
@@ -225,6 +227,7 @@ const CategoryFilterBar = ({
 const TradeAxonometric = () => {
   const activeProject = useActiveProject();
   const { isAdmin } = useAuth();
+  const publishToProposal = useServerFn(publishVisualiserToProposal);
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -358,10 +361,16 @@ const TradeAxonometric = () => {
   useEffect(() => {
     if (draftRestoredRef.current) return;
     draftRestoredRef.current = true;
-    if (savedDraftRef.current && (sourceImage || result || activeRequestId || model3dUrl || model3dProjectName)) {
+    if (!activeProject?.linkedProposal && savedDraftRef.current && (sourceImage || result || activeRequestId || model3dUrl || model3dProjectName)) {
       toast({ title: "Axonometric work restored" });
     }
-  }, [activeRequestId, model3dProjectName, model3dUrl, result, sourceImage, toast]);
+  }, [activeProject?.linkedProposal, activeRequestId, model3dProjectName, model3dUrl, result, sourceImage, toast]);
+
+  useEffect(() => {
+    const linked = activeProject?.linkedProposal;
+    if (!linked) return;
+    if (!galleryTitle.trim()) setGalleryTitle(`${linked.residenceName} · ${linked.tierName}`);
+  }, [activeProject?.linkedProposal, galleryTitle]);
 
   // Concierge hand-off: prefill from a `prepare_visualization_brief` proposal
   // dropped into sessionStorage by VisualizationBriefCard. Consume once on mount.
@@ -819,20 +828,34 @@ const TradeAxonometric = () => {
   const saveToGallery = async (publish: boolean) => {
     if (!result) return;
     const imageUrl = result.storedUrl || result.imageUrl;
+    const linked = activeProject?.linkedProposal ?? null;
+    const resolvedTitle = galleryTitle.trim() || (linked ? `${linked.residenceName} · ${linked.tierName}` : "");
+    if (!resolvedTitle) return;
     setSavingToGallery(true);
     try {
       const { error } = await (supabase as any).from("axonometric_gallery").insert({
         created_by: (await supabase.auth.getUser()).data.user?.id,
-        title: galleryTitle.trim().slice(0, 200),
+        title: resolvedTitle.slice(0, 200),
         description: galleryDesc.trim().slice(0, 500) || null,
         image_url: imageUrl,
         style_preset: STYLE_PRESETS.find(s => s.value === style)?.label || null,
-        project_name: activeRequestId ? (pendingRequests?.find((r: any) => r.id === activeRequestId)?.project_name || null) : null,
+        project_name: linked ? `${linked.developerName} — ${linked.residenceName}` : (activeRequestId ? (pendingRequests?.find((r: any) => r.id === activeRequestId)?.project_name || null) : null),
         request_id: activeRequestId || null,
         is_published: publish,
       });
       if (error) throw error;
-      toast({ title: publish ? "Saved & published to gallery" : "Saved as draft" });
+      if (publish && linked && isAdmin) {
+        const published = await publishToProposal({ data: { proposalId: linked.proposalId, axonometricRenderUrl: imageUrl } });
+        activeProject?.setLinkedProposal((current) => current ? {
+          ...current,
+          axonometricRenderUrl: published.axonometricRenderUrl,
+          walkthroughUrl: published.walkthroughUrl,
+          visualiserPublishedAt: published.visualiserPublishedAt,
+        } : current);
+        toast({ title: "Saved & published to client proposal", description: `Attached to Page 2 (Spatial Context) of ${linked.residenceName}.` });
+      } else {
+        toast({ title: publish ? "Saved & published to gallery" : "Saved as draft" });
+      }
       setGalleryTitle("");
       setGalleryDesc("");
     } catch (e: any) {
@@ -2169,7 +2192,7 @@ const TradeAxonometric = () => {
                     <Button
                       size="sm"
                       className="flex-1"
-                      disabled={savingToGallery || !galleryTitle.trim()}
+                      disabled={savingToGallery || (!galleryTitle.trim() && !activeProject?.linkedProposal)}
                       onClick={async () => {
                         await saveToGallery(true);
                       }}
@@ -2178,6 +2201,11 @@ const TradeAxonometric = () => {
                       Save & Publish
                     </Button>
                   </div>
+                  {activeProject?.linkedProposal && isAdmin && (
+                    <p className="font-body text-[11px] text-muted-foreground">
+                      Save &amp; Publish attaches this render to Page 2 (Spatial Context) of {activeProject.linkedProposal.residenceName} ({activeProject.linkedProposal.tierName}).
+                    </p>
+                  )}
                 </div>
 
                 {/* Save as Reference Style */}

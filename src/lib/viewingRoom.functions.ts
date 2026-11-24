@@ -75,7 +75,17 @@ export const lockViewingRoomProposal = createServerFn({ method: "POST" }).inputV
   if (!access) throw new Error("Please enter your private access code again.");
   const result = await publicClient().rpc("lock_viewing_room_proposal", { _token: access.credential, _package_id: data.packageId, _request_key: data.requestKey, _choices: data.choices });
   if (result.error) throw new Error("Your proposal couldn’t be locked. Please try again.");
-  return z.object({ package: z.string(), currency: z.string(), total: z.number(), items: z.array(viewingRoomChoiceSchema), status: z.literal("requested") }).parse(result.data);
+  return z.object({
+    package: z.string(),
+    currency: z.string(),
+    total: z.number(),
+    items: z.array(viewingRoomChoiceSchema),
+    status: z.literal("requested"),
+    proposal_id: z.string().uuid().optional(),
+    share_token: z.string().optional(),
+    axonometric_render_url: z.string().nullable().optional(),
+    walkthrough_url: z.string().nullable().optional(),
+  }).parse(result.data);
 });
 export const getViewingRoomPackage = createServerFn({ method: "POST" }).inputValidator(z.object({ token: locator, packageId: z.string().uuid() })).handler(async ({ data }) => {
   setResponseHeader("Cache-Control", "private, no-store");

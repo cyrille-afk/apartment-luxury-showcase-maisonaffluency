@@ -13641,25 +13641,43 @@ export type Database = {
       }
       viewing_room_proposal_requests: {
         Row: {
+          axonometric_render_url: string | null
           created_at: string
           id: string
           package_id: string
           request_key: string
+          share_token: string
           snapshot: Json
+          visualiser_published_at: string | null
+          visualiser_published_by: string | null
+          walkthrough_layout_id: string | null
+          walkthrough_url: string | null
         }
         Insert: {
+          axonometric_render_url?: string | null
           created_at?: string
           id?: string
           package_id: string
           request_key: string
+          share_token?: string
           snapshot: Json
+          visualiser_published_at?: string | null
+          visualiser_published_by?: string | null
+          walkthrough_layout_id?: string | null
+          walkthrough_url?: string | null
         }
         Update: {
+          axonometric_render_url?: string | null
           created_at?: string
           id?: string
           package_id?: string
           request_key?: string
+          share_token?: string
           snapshot?: Json
+          visualiser_published_at?: string | null
+          visualiser_published_by?: string | null
+          walkthrough_layout_id?: string | null
+          walkthrough_url?: string | null
         }
         Relationships: [
           {
@@ -13667,6 +13685,13 @@ export type Database = {
             columns: ["package_id"]
             isOneToOne: false
             referencedRelation: "furniture_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "viewing_room_proposal_requests_walkthrough_layout_id_fkey"
+            columns: ["walkthrough_layout_id"]
+            isOneToOne: false
+            referencedRelation: "ai_curated_layouts"
             referencedColumns: ["id"]
           },
         ]
@@ -14853,6 +14878,10 @@ export type Database = {
           items: Json
           name: string
         }[]
+      }
+      get_shared_viewing_room_proposal: {
+        Args: { _share_token: string }
+        Returns: Json
       }
       get_shared_workspace: { Args: { _token: string }; Returns: Json }
       get_studio_contact_email: {

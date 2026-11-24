@@ -263,6 +263,7 @@ import { Route as TradeSpatialFitAuditRouteImport } from './routes/trade.spatial
 import { Route as TradeToolsFfeRouteImport } from './routes/trade.tools_.ffe'
 import { Route as TradeVisualiserSharedRoomsRouteImport } from './routes/trade.visualiser_.shared-rooms'
 import { Route as TradeConciergeSidebarRouteImport } from './routes/trade_.concierge_.sidebar'
+import { Route as ViewingRoomProposalTokenRouteImport } from './routes/viewing-room_.proposal.$token'
 import { Route as ApiProcurementAcknowledgePoIdRouteImport } from './routes/api_.procurement_.acknowledge_.$poId'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -1583,6 +1584,12 @@ const TradeConciergeSidebarRoute = TradeConciergeSidebarRouteImport.update({
   path: '/trade/concierge/sidebar',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ViewingRoomProposalTokenRoute =
+  ViewingRoomProposalTokenRouteImport.update({
+    id: '/viewing-room_/proposal/$token',
+    path: '/viewing-room/proposal/$token',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiProcurementAcknowledgePoIdRoute =
   ApiProcurementAcknowledgePoIdRouteImport.update({
     id: '/api_/procurement_/acknowledge_/$poId',
@@ -1923,6 +1930,7 @@ export interface FileRoutesByFullPath {
   '/trade/tools/ffe': typeof TradeToolsFfeRoute
   '/trade/visualiser/shared-rooms': typeof TradeVisualiserSharedRoomsRoute
   '/trade/concierge/sidebar': typeof TradeConciergeSidebarRoute
+  '/viewing-room/proposal/$token': typeof ViewingRoomProposalTokenRoute
   '/api/procurement/acknowledge/$poId': typeof ApiProcurementAcknowledgePoIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -2193,6 +2201,7 @@ export interface FileRoutesByTo {
   '/trade/tools/ffe': typeof TradeToolsFfeRoute
   '/trade/visualiser/shared-rooms': typeof TradeVisualiserSharedRoomsRoute
   '/trade/concierge/sidebar': typeof TradeConciergeSidebarRoute
+  '/viewing-room/proposal/$token': typeof ViewingRoomProposalTokenRoute
   '/api/procurement/acknowledge/$poId': typeof ApiProcurementAcknowledgePoIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -2465,6 +2474,7 @@ export interface FileRoutesById {
   '/trade/tools_/ffe': typeof TradeToolsFfeRoute
   '/trade/visualiser_/shared-rooms': typeof TradeVisualiserSharedRoomsRoute
   '/trade_/concierge_/sidebar': typeof TradeConciergeSidebarRoute
+  '/viewing-room_/proposal/$token': typeof ViewingRoomProposalTokenRoute
   '/api_/procurement_/acknowledge_/$poId': typeof ApiProcurementAcknowledgePoIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -2738,6 +2748,7 @@ export interface FileRouteTypes {
     | '/trade/tools/ffe'
     | '/trade/visualiser/shared-rooms'
     | '/trade/concierge/sidebar'
+    | '/viewing-room/proposal/$token'
     | '/api/procurement/acknowledge/$poId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -3008,6 +3019,7 @@ export interface FileRouteTypes {
     | '/trade/tools/ffe'
     | '/trade/visualiser/shared-rooms'
     | '/trade/concierge/sidebar'
+    | '/viewing-room/proposal/$token'
     | '/api/procurement/acknowledge/$poId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -3279,6 +3291,7 @@ export interface FileRouteTypes {
     | '/trade/tools_/ffe'
     | '/trade/visualiser_/shared-rooms'
     | '/trade_/concierge_/sidebar'
+    | '/viewing-room_/proposal/$token'
     | '/api_/procurement_/acknowledge_/$poId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -3405,6 +3418,7 @@ export interface RootRouteChildren {
   SharedBoardTokenRoute: typeof SharedBoardTokenRoute
   StudiosSlugInsightsRoute: typeof StudiosSlugInsightsRoute
   TradeConciergeSidebarRoute: typeof TradeConciergeSidebarRoute
+  ViewingRoomProposalTokenRoute: typeof ViewingRoomProposalTokenRoute
   ApiProcurementAcknowledgePoIdRoute: typeof ApiProcurementAcknowledgePoIdRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -5192,6 +5206,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TradeConciergeSidebarRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/viewing-room_/proposal/$token': {
+      id: '/viewing-room_/proposal/$token'
+      path: '/viewing-room/proposal/$token'
+      fullPath: '/viewing-room/proposal/$token'
+      preLoaderRoute: typeof ViewingRoomProposalTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api_/procurement_/acknowledge_/$poId': {
       id: '/api_/procurement_/acknowledge_/$poId'
       path: '/api/procurement/acknowledge/$poId'
@@ -5742,6 +5763,7 @@ const rootRouteChildren: RootRouteChildren = {
   SharedBoardTokenRoute: SharedBoardTokenRoute,
   StudiosSlugInsightsRoute: StudiosSlugInsightsRoute,
   TradeConciergeSidebarRoute: TradeConciergeSidebarRoute,
+  ViewingRoomProposalTokenRoute: ViewingRoomProposalTokenRoute,
   ApiProcurementAcknowledgePoIdRoute: ApiProcurementAcknowledgePoIdRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,

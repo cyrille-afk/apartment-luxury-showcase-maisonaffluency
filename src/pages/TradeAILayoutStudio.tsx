@@ -1,4 +1,5 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { createPortal } from "react-dom";
 import { Helmet } from "react-helmet-async";
 import { Canvas } from "@react-three/fiber";
@@ -43,6 +44,9 @@ import { canUseAiLayout } from "@/lib/aiLayoutAccess";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { supabase } from "@/integrations/supabase/client";
 import RoomOverviewCamera from "@/components/trade/visualiser/RoomOverviewCamera";
+import { useActiveProject } from "@/contexts/ActiveProjectContext";
+import { useAuth } from "@/hooks/useAuth";
+import { publishVisualiserToProposal } from "@/lib/viewingRoomVisualiser.functions";
 import RoomCameraPresets from "@/components/trade/visualiser/RoomCameraPresets";
 import SelectedPieceDetails from "@/components/trade/visualiser/SelectedPieceDetails";
 import LayoutPieceCompare from "@/components/trade/visualiser/LayoutPieceCompare";
@@ -91,6 +95,10 @@ const ClearanceWarning = ({ conflicts }: { conflicts: ClearanceConflict[] }) => 
 
 /** `embedded` = Walkthrough & Video tab inside the Visualiser Sandbox workspace: mirrors the live Sandbox room. */
 const TradeAILayoutStudio = ({ embedded = false }: { embedded?: boolean } = {}) => {
+  const activeProject = useActiveProject();
+  const { isAdmin } = useAuth();
+  const publishToProposal = useServerFn(publishVisualiserToProposal);
+  const [publishingProposal, setPublishingProposal] = useState(false);
   const { brief, setBrief, setDimension } = useAiLayoutForm();
   const [scene, setScene] = useState<AICuratedSceneSchema | null>(null);
   // Keep the working layout across reloads (dev refreshes, tab restores).
@@ -163,6 +171,43 @@ const TradeAILayoutStudio = ({ embedded = false }: { embedded?: boolean } = {}) 
     }
   };
 
+  const saveAndPublishToProposal = async () => {
+    const linked = activeProject?.linkedProposal;
+    if (!scene || !linked || !isAdmin) return;
+    setPublishingProposal(true);
+    try {
+      const resolvedTitle = title.trim() || `${linked.residenceName} · ${linked.tierName} Walkthrough`;
+      const row = await saveLayout({
+        id: current?.id ?? linked.walkthroughLayoutId ?? undefined,
+        title: resolvedTitle,
+        brief,
+        scene,
+        products: snapshotProducts(scene, catalogue),
+        projectId: linked.projectId,
+      });
+      await setShared(row.id, true);
+      const link = shareUrl(row.share_token);
+      const published = await publishToProposal({
+        data: { proposalId: linked.proposalId, walkthroughUrl: link, walkthroughLayoutId: row.id },
+      });
+      setCurrent({ ...row, is_shared: true });
+      activeProject?.setLinkedProposal((prev) => prev ? {
+        ...prev,
+        axonometricRenderUrl: published.axonometricRenderUrl,
+        walkthroughUrl: published.walkthroughUrl,
+        walkthroughLayoutId: published.walkthroughLayoutId,
+        visualiserPublishedAt: published.visualiserPublishedAt,
+      } : prev);
+      void markLayoutStage();
+      void refreshSaved();
+      toast.success(`Walkthrough published to Page 2 (Spatial Context) of ${linked.residenceName}.`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not publish walkthrough to proposal");
+    } finally {
+      setPublishingProposal(false);
+    }
+  };
+
   const toggleShare = async (on: boolean) => {
     if (!current) return;
     try {
@@ -204,7 +249,13 @@ const TradeAILayoutStudio = ({ embedded = false }: { embedded?: boolean } = {}) 
   const navigate = useNavigate();
   const queryClientRef = useQueryClient();
   const [searchParams] = useSearchParams();
-  const sharedProjectId = searchParams.get("project");
+  const sharedProjectId = activeProject?.linkedProposal?.projectId ?? searchParams.get("project") ?? null;
+  useEffect(() => {
+    const linked = activeProject?.linkedProposal;
+    if (linked && title === "Living room proposal") {
+      setTitle(`${linked.residenceName} · ${linked.tierName} Walkthrough`);
+    }
+  }, [activeProject?.linkedProposal, title]);
 
   // Visualiser → Curated: render the sandbox arrangement on the grid with live prices.
   const handoffDone = useRef(false);
@@ -245,7 +296,7 @@ const TradeAILayoutStudio = ({ embedded = false }: { embedded?: boolean } = {}) 
     window.addEventListener("ma-live-room-layout", onLive);
     return () => window.removeEventListener("ma-live-room-layout", onLive);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [embedded]);
+  }, [embedded, sharedProjectId]);
 
   // Project progress milestone → open this project's newest saved layout.
   const openDone = useRef(false);
@@ -952,11 +1003,22 @@ const TradeAILayoutStudio = ({ embedded = false }: { embedded?: boolean } = {}) 
             <p className={micro}>Save &amp; share</p>
             <Input value={title} maxLength={120} onChange={(e) => setTitle(e.target.value)} placeholder="Layout title" />
             <div className="flex gap-2">
-              <Button size="sm" variant="outline" className="flex-1" onClick={() => save()} disabled={saving}>
+              <Button size="sm" variant="outline" className="flex-1" onClick={() => save()} disabled={saving || publishingProposal}>
                 {saving ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <Save className="mr-1 h-3.5 w-3.5" />}{current ? "Save changes" : "Save layout"}
               </Button>
-              {current && <Button size="sm" variant="ghost" onClick={() => save(true)} disabled={saving}>Save as new</Button>}
+              {current && <Button size="sm" variant="ghost" onClick={() => save(true)} disabled={saving || publishingProposal}>Save as new</Button>}
             </div>
+            {activeProject?.linkedProposal && isAdmin && (
+              <div className="space-y-1.5 border border-border bg-muted/30 p-3">
+                <Button size="sm" className="w-full" onClick={() => void saveAndPublishToProposal()} disabled={saving || publishingProposal}>
+                  {publishingProposal ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Save className="mr-1.5 h-3.5 w-3.5" />}
+                  Save &amp; Publish
+                </Button>
+                <p className="text-[11px] text-muted-foreground">
+                  Attaches the interactive 3D walkthrough link to Page 2 (Spatial Context) of {activeProject.linkedProposal.residenceName} ({activeProject.linkedProposal.tierName}).
+                </p>
+              </div>
+            )}
             {current && (
               <div className="space-y-2 border border-border p-3">
                 <label className="flex items-center justify-between text-xs">

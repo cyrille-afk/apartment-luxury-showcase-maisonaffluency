@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Lock, ArrowLeftRight, RotateCw, Undo2, FileJson } from "lucide-react";
+import { Lock, ArrowLeftRight, RotateCw, Undo2, FileJson, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,6 +12,7 @@ import { Product3dBadge } from "../Product3dBadge";
 import { getViewingRoomChoices, lockViewingRoomProposal } from "@/lib/viewingRoom.functions";
 import { exportViewingRoomBlenderScene } from "@/lib/viewingRoomBlenderScene.functions";
 import { downloadBlenderSceneManifest } from "@/lib/viewingRoomBlenderScene";
+import { visualiserProposalPath } from "@/lib/viewingRoomVisualiser";
 import { viewingRoomTotal, viewingRoomSelection, viewingRoomSizeSelection, viewingRoomViewerMaterials, viewingRoomCardSwatches, type ViewingRoomChoice, type ViewingRoomSlot, type ViewingRoomItem } from "@/lib/viewingRoom";
 import { downloadViewingRoomProposal } from "@/lib/viewingRoomProposal";
 import { formatPdfMoney } from "@/lib/pdfFormatting";
@@ -33,6 +34,7 @@ export default function ViewingRoomExperience({ token, packageId, tierName, base
   const [busy, setBusy] = useState(false);
   const [exportingBlender, setExportingBlender] = useState(false);
   const [locked, setLocked] = useState(false);
+  const [lockedProposalId, setLockedProposalId] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [clientName, setClientName] = useState("");
   const [projectNotes, setProjectNotes] = useState("");
@@ -106,12 +108,19 @@ export default function ViewingRoomExperience({ token, packageId, tierName, base
       key.current ??= crypto.randomUUID();
       const final = snapshot.current ?? await lock({ data: { token, packageId, requestKey: key.current, choices: slots.map(slot => ({ slot_id: slot.id, product_id: choices[slot.id]?.id ?? slot.id, finish_key: choices[slot.id]?.finish_key, size_key: choices[slot.id]?.size_key, colourway_id: choices[slot.id]?.colourway_id, axis_colours: choices[slot.id]?.axis_colours })) } });
       snapshot.current = final; setLocked(true);
+      if (final.proposal_id) setLockedProposalId(final.proposal_id);
       const presentation = { ...final, items: final.items.map((item, index) => {
         const slot = slots[index];
         const approved = slot?.product_name === item.product_name ? slot : slot?.alternatives.find(piece => piece.product_name === item.product_name);
         return { ...item, image_url: item.image_url ?? approved?.image_url ?? null };
       }) };
-      await downloadViewingRoomProposal(presentation, residence, developer, { ...proposalContext, clientName, projectNotes });
+      await downloadViewingRoomProposal(presentation, residence, developer, {
+        ...proposalContext,
+        clientName,
+        projectNotes,
+        ...(final.axonometric_render_url ? { axonometricRenderUrl: final.axonometric_render_url } : {}),
+        ...(final.walkthrough_url ? { walkthroughUrl: final.walkthrough_url } : {}),
+      });
       setFeedback("Selection locked · proposal requested and PDF downloaded.");
       setPreviewOpen(false);
     } catch { setFeedback(snapshot.current ? "Selection locked. PDF download failed; please retry." : "Your proposal couldn’t be locked. Please try again."); }
@@ -131,6 +140,7 @@ export default function ViewingRoomExperience({ token, packageId, tierName, base
   const retryButton = <Button variant="outline" disabled={query.isFetching} onClick={() => void query.refetch()}><RotateCw className={`size-4 ${query.isFetching ? "animate-spin" : ""}`} />{query.isFetching ? "Retrying…" : "Retry recommendations"}</Button>;
   const proposalButton = <Button className="max-w-48 whitespace-normal text-xs sm:max-w-none sm:text-sm" disabled={busy || !slots.length || !query.data} onClick={() => { if (locked) { void requestProposal(); } else { setFeedback(""); setPreviewOpen(true); } }}><Lock className="size-4 shrink-0" />{busy ? "Preparing proposal…" : locked ? "Download Locked Proposal" : "Review & Lock Proposal"}</Button>;
   const blenderExportButton = locked && canExportBlenderScene ? <Button variant="outline" className="max-w-48 whitespace-normal text-xs sm:max-w-none sm:text-sm" disabled={busy || exportingBlender} onClick={() => void exportBlenderScene()}><FileJson className="size-4 shrink-0" />{exportingBlender ? "Exporting Blender JSON…" : "Export Blender Scene JSON"}</Button> : null;
+  const stageInVisualiserButton = locked && canExportBlenderScene && lockedProposalId ? <Button asChild variant="outline" className="max-w-48 whitespace-normal text-xs sm:max-w-none sm:text-sm"><a href={visualiserProposalPath(lockedProposalId)}><Layers className="size-4 shrink-0" />Stage in Visualiser</a></Button> : null;
   const hideMobileBar = Boolean(query.data && !scrolled && Object.keys(choices).length === 0 && !locked && !feedback);
   return <div className="viewing-room bg-background pb-[calc(7rem+env(safe-area-inset-bottom))] text-foreground">
     <div className="mx-auto max-w-[1500px] px-6 pt-6 md:px-12">
@@ -155,7 +165,7 @@ export default function ViewingRoomExperience({ token, packageId, tierName, base
     </div>
     <div data-mobile-bar-visible={hideMobileBar ? "false" : "true"} className={`fixed inset-x-0 bottom-0 z-40 grid ${blenderExportButton ? "grid-cols-1" : "grid-cols-[minmax(0,1fr)_auto]"} items-center gap-2 border-t border-border bg-background/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-sm transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none md:pointer-events-auto md:flex md:flex-wrap md:translate-y-0 md:justify-between md:px-6 md:opacity-100 ${hideMobileBar ? "pointer-events-none translate-y-full opacity-0" : "pointer-events-auto translate-y-0 opacity-100"}`}>
       <div><p className="text-xs text-muted-foreground">Collection Total</p><p className="font-display text-lg sm:text-2xl" aria-label="Collection Total" aria-live="polite">{query.data ? money(total) : "Awaiting confirmed prices"}</p></div>
-      <div className="flex flex-wrap items-center justify-end gap-2">{blenderExportButton}{proposalButton}</div>
+      <div className="flex flex-wrap items-center justify-end gap-2">{stageInVisualiserButton}{blenderExportButton}{proposalButton}</div>
       {feedback && <p role="status" className={`text-sm md:basis-full ${blenderExportButton ? "" : "col-span-2"}`}>{feedback}</p>}
     </div>
     <Sheet open={!!current && !!draft} onOpenChange={open => { if (!open) { setActive(null); setDraft(null); } }}>
@@ -205,6 +215,6 @@ export default function ViewingRoomExperience({ token, packageId, tierName, base
         </>}
       </SheetContent>
     </Sheet>
-    <ViewingRoomProposalPreview open={previewOpen} onOpenChange={setPreviewOpen} {...(tierName ? { tierName } : {})} residence={residence} developer={developer} currency={currency} slots={slots} choices={choices} total={total} busy={busy} locked={locked} feedback={feedback} clientName={clientName} projectNotes={projectNotes} onClientNameChange={setClientName} onProjectNotesChange={setProjectNotes} onConfirm={() => void requestProposal()} canExportBlenderScene={canExportBlenderScene} exportingBlender={exportingBlender} onExportBlender={() => void exportBlenderScene()} />
+    <ViewingRoomProposalPreview open={previewOpen} onOpenChange={setPreviewOpen} {...(tierName ? { tierName } : {})} residence={residence} developer={developer} currency={currency} slots={slots} choices={choices} total={total} busy={busy} locked={locked} feedback={feedback} clientName={clientName} projectNotes={projectNotes} onClientNameChange={setClientName} onProjectNotesChange={setProjectNotes} onConfirm={() => void requestProposal()} canExportBlenderScene={canExportBlenderScene} exportingBlender={exportingBlender} onExportBlender={() => void exportBlenderScene()} {...(lockedProposalId ? { stageInVisualiserHref: visualiserProposalPath(lockedProposalId) } : {})} />
   </div>;
 }

@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { useLocation, useSearchParams } from "@/lib/router-compat";
-import { Map, Layers, Armchair, Clapperboard, Eye, Image, Ruler, Upload, Square, Trash2 } from "lucide-react";
+import { Map, Layers, Armchair, Clapperboard, Eye, Image, Ruler, Upload, Square, Trash2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -20,17 +21,23 @@ import { formatGap, tightestGap } from "@/lib/layoutGuides";
 import { resolveDimensions } from "@/lib/productDimensions";
 import { DEFAULT_SLOT_SPACING, footprintRadius, pickFootprintSlot } from "@/lib/visualiserPlacement";
 import { useVisualiserHandoffScope } from "@/lib/visualiserHandoffScope";
+import { writeSharedRoomLayout } from "@/lib/sharedRoomLayout";
+import { buildVisualiserProposalStaging, sharedProposalPath } from "@/lib/viewingRoomVisualiser";
+import { getViewingRoomProposalForVisualiser } from "@/lib/viewingRoomVisualiser.functions";
 const Sandbox = lazy(() => import("./TradeVisualiser"));
 const Axonometric = lazy(() => import("./TradeAxonometric"));
 const WalkthroughStudio = lazy(() => import("./TradeAILayoutStudio"));
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-function WorkspacePanels() {
-  const { isAdmin } = useAuth();
+function WorkspacePanels({ proposalId }: { proposalId: string | null }) {
+  const { isAdmin, rolesLoaded } = useAuth();
   const project = useActiveProject();
   const { projectInventory } = useProjectInventory();
+  const loadProposal = useServerFn(getViewingRoomProposalForVisualiser);
+  const [proposalStatus, setProposalStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const [visited, setVisited] = useState(false);
-  const [imageStudio, setImageStudio] = useState(false);
-  const [imageVisited, setImageVisited] = useState(false);
+  const [imageStudio, setImageStudio] = useState(Boolean(proposalId));
+  const [imageVisited, setImageVisited] = useState(Boolean(proposalId));
   const [walkVisited, setWalkVisited] = useState(false);
   const [planSelectedId, setPlanSelectedId] = useState<string | null>(null);
   const [showGuides, setShowGuides] = useState(true);
@@ -40,6 +47,33 @@ function WorkspacePanels() {
   }, [project?.objects]);
   useEffect(() => { if (imageStudio) setImageVisited(true); }, [imageStudio]);
   useEffect(() => { if (project?.view !== "plan") setVisited(true); if (project?.view === "walkthrough") setWalkVisited(true); }, [project?.view]);
+  useEffect(() => {
+    if (!proposalId || !project || !rolesLoaded) return;
+    if (!isAdmin) { setProposalStatus("error"); return; }
+    let cancelled = false;
+    setProposalStatus("loading");
+    void (async () => {
+      const payload = await loadProposal({ data: { proposalId } });
+      if (cancelled) return;
+      const staged = buildVisualiserProposalStaging(payload);
+      project.setFloorPlanUrl(staged.floorPlanUrl);
+      project.setBounds(staged.bounds);
+      project.setObjects(staged.objects);
+      project.setLinkedProposal(staged.linkedProposal);
+      writeSharedRoomLayout(staged.sharedRoomLayout);
+      window.dispatchEvent(new CustomEvent("ma-live-room-layout", { detail: staged.sharedRoomLayout }));
+      setVisited(true);
+      setProposalStatus("ready");
+      toast.success(`Loaded ${payload.layout.name} (${payload.tierName}) — ${staged.objects.length} locked piece${staged.objects.length === 1 ? "" : "s"}.`);
+    })().catch(() => {
+      if (!cancelled) {
+        setProposalStatus("error");
+        toast.error("Could not load this locked client proposal.");
+      }
+    });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [proposalId, rolesLoaded, isAdmin]);
   if (!project) return null;
   const { view, setView, state } = project;
   const gap = tightestGap(project.objects, state.bounds);
@@ -93,6 +127,29 @@ function WorkspacePanels() {
     <div className="relative z-40 w-full shrink-0 border-b border-border/40 bg-background px-3 py-3 sm:px-6">
       <ToolsBreadcrumb className="mb-0" />
     </div>
+    {proposalId && (
+      <div role="status" className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border bg-muted/40 px-3 py-2 text-xs sm:px-6">
+        {proposalStatus === "loading" && <span className="text-muted-foreground">Loading locked client proposal into Visualiser…</span>}
+        {proposalStatus === "error" && <span className="text-destructive">Locked client proposal couldn’t load (admin access required).</span>}
+        {project.linkedProposal && (
+          <>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span className="font-medium text-foreground">Linked Proposal · {project.linkedProposal.residenceName} ({project.linkedProposal.tierName})</span>
+              <span className="text-muted-foreground">{project.linkedProposal.developerName}</span>
+              <span className="text-muted-foreground">
+                Page 2 Spatial Context: {project.linkedProposal.axonometricRenderUrl ? "Axonometric published" : "Axonometric pending"} · {project.linkedProposal.walkthroughUrl ? "Walkthrough published" : "Walkthrough pending"}
+              </span>
+            </div>
+            <Button asChild size="sm" variant="outline" className="h-7 text-xs">
+              <a href={sharedProposalPath(project.linkedProposal.shareToken)} target="_blank" rel="noreferrer">
+                <ExternalLink className="size-3.5" />
+                Open Client Proposal Page
+              </a>
+            </Button>
+          </>
+        )}
+      </div>
+    )}
     <div role="tablist" aria-label="Project workspace views" className="flex shrink-0 gap-1 overflow-x-auto border-b border-border px-3 py-2 sm:px-6">
       {tabs.map(tab => <Button key={tab.value} id={`workspace-${tab.value}`} role="tab" aria-selected={view === tab.value} aria-controls={`panel-${tab.value}`} variant="ghost" className={cn("shrink-0 rounded-none border-b-2 text-xs sm:text-sm", view === tab.value ? "border-primary text-foreground" : "border-transparent text-muted-foreground")} onClick={() => setView(tab.value)}><tab.icon className="h-4 w-4" />{tab.label}</Button>)}
       {view !== "sandbox" && view !== "walkthrough" && <div className="ml-auto flex items-center"><WorkspaceShare /></div>}
@@ -138,7 +195,10 @@ export default function TradeProjectWorkspace() {
   const location = useLocation();
   const [params] = useSearchParams();
   const projectId = params.get("project") || "sandbox";
-  const initialView: WorkspaceView = location.pathname.endsWith("axonometric") ? "axonometric" : params.get("view") === "walkthrough" ? "walkthrough" : "sandbox";
+  const rawProposalId = params.get("proposalId");
+  const proposalId = rawProposalId && UUID_RE.test(rawProposalId) ? rawProposalId : null;
+  const initialView: WorkspaceView = location.pathname.endsWith("axonometric") ? "axonometric" : params.get("view") === "walkthrough" ? "walkthrough" : params.get("view") === "plan" ? "plan" : params.get("view") === "axonometric" ? "axonometric" : proposalId ? "plan" : "sandbox";
   const handoffScope = useVisualiserHandoffScope(user?.id || "guest", projectId, params);
-  return <ActiveProjectProvider key={handoffScope.key} accountId={user?.id || "guest"} projectId={projectId} initialView={initialView} freshHandoff={handoffScope.freshHandoff}><WorkspacePanels /></ActiveProjectProvider>;
+  const scopeKey = proposalId ? `${user?.id || "guest"}:proposal:${proposalId}` : handoffScope.key;
+  return <ActiveProjectProvider key={scopeKey} accountId={user?.id || "guest"} projectId={projectId} initialView={initialView} freshHandoff={Boolean(proposalId) || handoffScope.freshHandoff}><WorkspacePanels proposalId={proposalId} /></ActiveProjectProvider>;
 }

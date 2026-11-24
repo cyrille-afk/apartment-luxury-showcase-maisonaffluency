@@ -1,4 +1,4 @@
-import { FileJson, Lock } from "lucide-react";
+import { FileJson, Layers, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -35,11 +35,11 @@ function previewFinishes(piece: ViewingRoomChoice): PreviewFinish[] {
   return swatches;
 }
 
-export default function ViewingRoomProposalPreview({ open, onOpenChange, tierName, residence, developer, currency, slots, choices, total, busy, locked, feedback, clientName, projectNotes, onClientNameChange, onProjectNotesChange, onConfirm, canExportBlenderScene = false, exportingBlender = false, onExportBlender }: {
+export default function ViewingRoomProposalPreview({ open, onOpenChange, tierName, residence, developer, currency, slots, choices, total, busy, locked, feedback, clientName, projectNotes, onClientNameChange, onProjectNotesChange, onConfirm, canExportBlenderScene = false, exportingBlender = false, onExportBlender, stageInVisualiserHref }: {
   open: boolean; onOpenChange: (open: boolean) => void; tierName?: string; residence: string; developer: string; currency: string;
   slots: ViewingRoomSlot[]; choices: Record<string, ViewingRoomChoice>; total: number; busy: boolean; locked: boolean; feedback: string;
   clientName: string; projectNotes: string; onClientNameChange: (value: string) => void; onProjectNotesChange: (value: string) => void; onConfirm: () => void;
-  canExportBlenderScene?: boolean; exportingBlender?: boolean; onExportBlender?: () => void;
+  canExportBlenderScene?: boolean; exportingBlender?: boolean; onExportBlender?: () => void; stageInVisualiserHref?: string;
 }) {
   const money = (value: number) => formatPdfMoney(Math.round(value * 100), currency);
   const selectedItems = slots.map(slot => ({ slot, piece: choices[slot.id] ?? slot }));
@@ -100,6 +100,14 @@ export default function ViewingRoomProposalPreview({ open, onOpenChange, tierNam
         {feedback && <p role="status" className="text-xs text-muted-foreground">{feedback}</p>}
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button variant="outline" disabled={busy || exportingBlender} onClick={() => onOpenChange(false)}>Back to Collection</Button>
+          {locked && canExportBlenderScene && stageInVisualiserHref && (
+            <Button asChild variant="outline">
+              <a href={stageInVisualiserHref}>
+                <Layers className="size-4 shrink-0" />
+                Stage in Visualiser
+              </a>
+            </Button>
+          )}
           {locked && canExportBlenderScene && onExportBlender && (
             <Button variant="outline" disabled={busy || exportingBlender} onClick={onExportBlender}>
               <FileJson className="size-4 shrink-0" />

@@ -6,7 +6,7 @@ import { formatPdfMoney, formatPdfDate } from "./pdfFormatting";
 import { viewingRoomLeadTime } from "./viewingRoom";
 import { productAttribution } from "./productAttribution";
 import { downloadDocumentPdf } from "./appPdfDownload";
-import { normalizeProposalDetails, proposalConfiguredTotal, proposalSelectedFinishes, proposalSchedulePages, type ViewingRoomProposalSnapshot, type ViewingRoomProposalContext } from "./viewingRoomProposalData";
+import { normalizeProposalDetails, proposalConfiguredTotal, proposalSelectedFinishes, proposalSchedulePages, safeProposalUrl, type ViewingRoomProposalSnapshot, type ViewingRoomProposalContext } from "./viewingRoomProposalData";
 
 const escape = (text: string) => text.replace(/[&<>"']/g, value => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[value] ?? value);
 
@@ -22,8 +22,11 @@ export async function viewingRoomProposalHtml(snapshot: ViewingRoomProposalSnaps
     return value;
   };
   const cipriani = /cipriani/i.test(developer);
-  const [hero, logo, mark, plan, editorialFont, bodyFont] = await Promise.all([
+  const safeAxoUrl = safeProposalUrl(context.axonometricRenderUrl);
+  const safeWalkthroughUrl = safeProposalUrl(context.walkthroughUrl);
+  const [hero, logo, mark, plan, axoRender, editorialFont, bodyFont] = await Promise.all([
     media(context.hero || (cipriani ? heroAsset.url : null)), media(context.logo || (cipriani ? developerLogo.url : null)), media(affluencyMark.url), media(context.floorplan),
+    safeAxoUrl ? media(safeAxoUrl).catch(() => "") : Promise.resolve(""),
     fontData("/fonts/pdf/CormorantGaramond-Regular.ttf"), fontData("/fonts/pdf/Inter-Light.ttf"),
   ]);
   const styles = proposalStyles.replace("/fonts/pdf/CormorantGaramond-Regular.ttf", editorialFont).replace("/fonts/pdf/Inter-Light.ttf", bodyFont);
@@ -47,9 +50,16 @@ export async function viewingRoomProposalHtml(snapshot: ViewingRoomProposalSnaps
   const coverClient = clientName ? `<p class="proposal-cover-client">Prepared for ${escape(clientName)}</p>` : "";
   const overviewClient = clientName ? `<p class="proposal-overview-client"><span class="proposal-kicker">PREPARED FOR</span> ${escape(clientName)}</p>` : "";
   const notesBlock = projectNotes ? `<div class="proposal-notes"><p class="proposal-kicker">PROJECT NOTES</p><p>${escape(projectNotes).replace(/\n/g, "<br>")}</p></div>` : "";
+  const spatialVisual = axoRender
+    ? `<div class="proposal-spatial-pair"><figure><div class="proposal-spatial-frame">${plan ? img(plan, "proposal-plan-img", `${residence} floor plan`) : '<p class="proposal-kicker">Floor plan pending</p>'}</div><figcaption class="proposal-plan-label">Residence Floor Plan</figcaption></figure><figure><div class="proposal-spatial-frame proposal-axo-frame">${img(axoRender, "proposal-axo-img", `${residence} axonometric render`)}</div><figcaption class="proposal-plan-label">Axonometric Perspective Render</figcaption></figure></div>`
+    : `<div class="proposal-plan">${plan ? img(plan, "", `${residence} floor plan`) : '<p class="proposal-kicker">Residence floor plan to be confirmed</p>'}</div>`;
+  const walkthroughBlock = safeWalkthroughUrl
+    ? `<div class="proposal-walkthrough"><p class="proposal-kicker">INTERACTIVE 3D WALKTHROUGH</p><p><a href="${escape(safeWalkthroughUrl)}">${escape(safeWalkthroughUrl)}</a></p></div>`
+    : "";
+  const compactSpatial = Boolean(projectNotes || safeWalkthroughUrl || axoRender);
   return `<!doctype html><html><head><meta charset="utf-8"><title>${escape(developer)} · Private Client Proposal</title><style>${styles}</style></head><body><main class="private-proposal">
   <section class="proposal-page proposal-cover">${img(hero, "proposal-hero", developer)}<div class="proposal-scrim"></div><div class="proposal-brands">${logo ? img(logo, "proposal-developer-logo", developer) : `<span>${escape(developer)}</span>`}<span>×</span><div class="proposal-affluency">${img(mark, "", "Maison Affluency")}<span class="proposal-wordmark">MAISON<br><strong>AFFLUENCY</strong></span></div></div><div class="proposal-cover-copy"><p class="proposal-kicker">PRIVATE CLIENT PRESENTATION</p><h1>${escape(developer)}<br>— ${escape(residence)}</h1><p class="proposal-cover-collection">${escape(snapshot.package)} Collection</p>${coverClient}<div class="proposal-cover-details"><div><p class="proposal-kicker">CONFIGURED COLLECTION TOTAL</p><p class="proposal-cover-total">${total}</p></div><p class="proposal-date">${date}</p></div></div></section>
-  <section class="proposal-page${projectNotes ? " proposal-has-notes" : ""}"><p class="proposal-kicker">02 / SPATIAL CONTEXT</p><h2>The residence, considered.</h2><div class="proposal-plan">${plan ? img(plan, "", `${residence} floor plan`) : '<p class="proposal-kicker">Residence floor plan to be confirmed</p>'}</div><p class="proposal-plan-label">${escape(residence)}${context.specs ? ` · ${escape(context.specs)}` : ""}</p><div class="proposal-overview"><h3>Executive overview</h3>${overviewClient}<div class="proposal-summary"><div><p class="proposal-kicker">CONFIGURED COLLECTION TOTAL</p><p class="proposal-value">${total}</p></div><div><p class="proposal-kicker">ESTIMATED LEAD TIME</p><p class="proposal-value">${escape(leadTime === "To be confirmed" && context.leadTimeWeeks ? `${context.leadTimeWeeks} weeks` : leadTime)}</p></div></div>${notesBlock}<div class="proposal-delivery"><p class="proposal-kicker">WHITE-GLOVE DELIVERY & INSTALLATION</p><p>Maison Affluency coordinates procurement, supplier lead times and consolidated delivery, followed by placement and installation in your residence. Final delivery arrangements, installation scope and any associated charges are confirmed with your dedicated advisor.</p></div></div>${footer(2)}</section>${schedule.join("")}</main></body></html>`;
+  <section class="proposal-page${compactSpatial ? " proposal-has-notes" : ""}"><p class="proposal-kicker">02 / SPATIAL CONTEXT</p><h2>The residence, considered.</h2>${spatialVisual}<p class="proposal-plan-label">${escape(residence)}${context.specs ? ` · ${escape(context.specs)}` : ""}</p><div class="proposal-overview"><h3>Executive overview</h3>${overviewClient}<div class="proposal-summary"><div><p class="proposal-kicker">CONFIGURED COLLECTION TOTAL</p><p class="proposal-value">${total}</p></div><div><p class="proposal-kicker">ESTIMATED LEAD TIME</p><p class="proposal-value">${escape(leadTime === "To be confirmed" && context.leadTimeWeeks ? `${context.leadTimeWeeks} weeks` : leadTime)}</p></div></div>${walkthroughBlock}${notesBlock}<div class="proposal-delivery"><p class="proposal-kicker">WHITE-GLOVE DELIVERY & INSTALLATION</p><p>Maison Affluency coordinates procurement, supplier lead times and consolidated delivery, followed by placement and installation in your residence. Final delivery arrangements, installation scope and any associated charges are confirmed with your dedicated advisor.</p></div></div>${footer(2)}</section>${schedule.join("")}</main></body></html>`;
 }
 
 export async function downloadViewingRoomProposal(snapshot: ViewingRoomProposalSnapshot, residence: string, developer: string, context: ViewingRoomProposalContext = {}) {

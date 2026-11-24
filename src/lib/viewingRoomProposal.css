@@ -27,15 +27,27 @@
 .proposal-cover-total{font-family:ProposalEditorial,serif;font-size:37px;line-height:1.2;margin-top:6px!important}
 .proposal-date{font-size:11px;padding-bottom:7px}
 .proposal-plan{width:100%;height:91mm;margin-top:12px;display:flex;align-items:center;justify-content:center}
-.proposal-has-notes .proposal-plan{height:68mm}
+.proposal-has-notes .proposal-plan{height:64mm}
 .proposal-plan img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply}
+.proposal-spatial-pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+.proposal-spatial-pair figure{margin:0}
+.proposal-spatial-frame{width:100%;height:60mm;display:flex;align-items:center;justify-content:center;border:1px solid var(--proposal-border);background:var(--proposal-white);padding:6px}
+.proposal-axo-frame{padding:0;overflow:hidden}
+.proposal-plan-img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply}
+.proposal-axo-img{width:100%;height:100%;object-fit:cover}
 .proposal-plan-label{margin-top:10px!important;color:var(--proposal-muted);font-size:10px;line-height:1.6}
 .proposal-overview{margin-top:21px;border-top:1px solid var(--proposal-border);padding-top:24px}
+.proposal-has-notes .proposal-overview{margin-top:14px;padding-top:16px}
 .proposal-overview h3{font-size:34px;margin-bottom:18px}
+.proposal-has-notes .proposal-overview h3{font-size:28px;margin-bottom:12px}
 .proposal-overview-client{font-size:13px;line-height:1.6;margin:-8px 0 16px!important;color:var(--proposal-ink)}
 .proposal-overview-client .proposal-kicker{margin-right:8px}
 .proposal-summary{display:grid;grid-template-columns:1.25fr 1fr;gap:20px;padding-bottom:22px;border-bottom:1px solid var(--proposal-border)}
+.proposal-has-notes .proposal-summary{padding-bottom:14px}
 .proposal-value{font-size:31px;margin-top:8px!important;line-height:1.2;color:var(--proposal-accent)}
+.proposal-walkthrough{margin-top:12px;padding-bottom:12px;border-bottom:1px solid var(--proposal-border)}
+.proposal-walkthrough p:last-child{font-size:10.5px;line-height:1.5;margin-top:4px;overflow-wrap:anywhere}
+.proposal-walkthrough a{color:var(--proposal-accent);text-decoration:underline}
 .proposal-notes{margin-top:16px;padding-bottom:16px;border-bottom:1px solid var(--proposal-border)}
 .proposal-notes p:last-child{font-size:11.5px;line-height:1.7;margin-top:6px;max-width:590px;overflow-wrap:anywhere}
 .proposal-delivery{margin-top:20px}

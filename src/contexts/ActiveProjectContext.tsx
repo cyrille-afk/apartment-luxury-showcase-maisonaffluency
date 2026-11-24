@@ -2,11 +2,13 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState, type D
 import { supabase } from "@/integrations/supabase/client";
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
 import { DEFAULT_LAYOUT_BOUNDS, layoutItems, type ActiveProjectState, type PlanColumn, type RoomBounds, type WorkspaceView } from "@/lib/activeProjectLayout";
+import type { LinkedProposalState } from "@/lib/viewingRoomVisualiser";
 
 type ProjectContext = {
   state: ActiveProjectState; objects: PlacedObject[]; setObjects: Dispatch<SetStateAction<PlacedObject[]>>;
   view: WorkspaceView; setView: Dispatch<SetStateAction<WorkspaceView>>;
   setFloorPlanUrl: Dispatch<SetStateAction<string | null>>; setBounds: Dispatch<SetStateAction<RoomBounds>>; setColumns: Dispatch<SetStateAction<PlanColumn[]>>;
+  linkedProposal: LinkedProposalState | null; setLinkedProposal: Dispatch<SetStateAction<LinkedProposalState | null>>;
   hasSavedLayout: boolean; sandboxStorageKey: string;
 };
 const Context = createContext<ProjectContext | null>(null);
@@ -24,10 +26,11 @@ export function ActiveProjectProvider({ children, projectId, accountId, initialV
     return { objects: [] } as { objects: PlacedObject[]; savedAt?: number; floorPlanUrl?: string; bounds?: RoomBounds; columns?: PlanColumn[]; hasSavedLayout?: boolean };
   }, [key, projectId]);
   const [objects, setObjects] = useState<PlacedObject[]>(freshHandoff ? [] : initial.objects);
-  const [floorPlanUrl, setFloorPlanUrl] = useState<string | null>(initial.floorPlanUrl || null);
+  const [floorPlanUrl, setFloorPlanUrl] = useState<string | null>(freshHandoff ? null : initial.floorPlanUrl || null);
   const [bounds, setBounds] = useState<RoomBounds>(initial.bounds || DEFAULT_LAYOUT_BOUNDS);
   const [columns, setColumns] = useState<PlanColumn[]>(Array.isArray(initial.columns) ? initial.columns : []);
   const [view, setView] = useState<WorkspaceView>(initialView);
+  const [linkedProposal, setLinkedProposal] = useState<LinkedProposalState | null>(null);
   // Project copy: pieces with their fabrics/finishes, bounds and plan are saved with the project so any
   // later visit (new tab or device) restores them. The newer of session and project copy wins on load.
   const persistable = /^[0-9a-f-]{36}$/i.test(projectId);
@@ -71,5 +74,5 @@ export function ActiveProjectProvider({ children, projectId, accountId, initialV
     return () => window.clearTimeout(t);
   }, [cloudReady, key, objects, floorPlanUrl, bounds, columns, persistable, projectId]);
   const state: ActiveProjectState = { projectId, floorPlanUrl, placedItems: layoutItems(objects), bounds, columns, cameraPerspective: view === "sandbox" ? "eye-level" : "isometric" };
-  return <Context.Provider value={{ state, objects, setObjects, view, setView, setFloorPlanUrl, setBounds, setColumns, hasSavedLayout: initial.hasSavedLayout === true, sandboxStorageKey }}>{children}</Context.Provider>;
+  return <Context.Provider value={{ state, objects, setObjects, view, setView, setFloorPlanUrl, setBounds, setColumns, linkedProposal, setLinkedProposal, hasSavedLayout: initial.hasSavedLayout === true, sandboxStorageKey }}>{children}</Context.Provider>;
 }

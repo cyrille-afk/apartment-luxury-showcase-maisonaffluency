@@ -24,6 +24,7 @@ import { viewingRoomPath, shortViewingRoomPath, rememberViewingRoomReturn } from
 import ViewingRoomAccessControls from "./ViewingRoomAccessControls";
 import ViewingRoomInviteDialog from "./ViewingRoomInviteDialog";
 import ViewingRoomInviteActivity from "./ViewingRoomInviteActivity";
+import ViewingRoomLockedProposals from "./ViewingRoomLockedProposals";
 import { useQueryClient } from "@tanstack/react-query";
 
 const emptyDeveloper = { developer_name: "", developer_logo_url: "", hero_image_url: "" };
@@ -229,6 +230,7 @@ export function DeveloperViewingRoomAdmin({ projectId }: { projectId: string }) 
           <div className="flex flex-wrap gap-2"><Button variant="outline" disabled={!magicLink} onClick={() => void navigator.clipboard.writeText(magicLink).then(() => setNotice("Viewing room address copied.")).catch(() => setError("The address couldn’t be copied. Select it above and copy again."))}><Copy className="size-4" />Copy address</Button><Button variant="outline" disabled={!savedDeveloper || accessEnded} onClick={() => { if (!savedDeveloper) return; void navigator.clipboard.writeText(privateCode).then(() => setNotice("Private access code copied. Share it only with your invited client.")).catch(() => setError("The code couldn’t be copied. Please try again.")); }}><Copy className="size-4" />Copy access code</Button><Button variant="outline" disabled={!magicLink || accessEnded} onClick={() => setInviteOpen(true)}><Send className="size-4" />Send by email</Button><Button variant="ghost" disabled={!magicLink || accessEnded} aria-label="Open client viewing room" onClick={() => { if (!savedDeveloper) return; rememberViewingRoomReturn(window.location.pathname + window.location.search); window.location.assign(`${viewingRoomPath(savedDeveloper.developer_name)}?code=${encodeURIComponent(privateCode)}`); }}><ExternalLink className="size-4" />Open</Button></div>
           {savedDeveloper && <ViewingRoomInviteDialog open={inviteOpen} onOpenChange={setInviteOpen} developerId={savedDeveloper.id} projectId={projectId} developerName={savedDeveloper.developer_name} logoUrl={savedDeveloper.developer_logo_url} heroUrl={savedDeveloper.hero_image_url} link={magicLink} code={privateCode} savedEmail={savedDeveloper.client_email ?? ""} onActivity={() => void activityClient.invalidateQueries({ queryKey: ["viewing-room-invite-activity", savedDeveloper.id] })} onEmailSaved={email => { setClientEmail(email); setDevelopers(rows => rows.map(row => row.id === savedDeveloper.id ? { ...row, client_email: email } : row)); }} />}
           {savedDeveloper && <ViewingRoomInviteActivity developerId={savedDeveloper.id} />}
+          {savedDeveloper && <ViewingRoomLockedProposals developerId={savedDeveloper.id} />}
           {savedDeveloper && <ViewingRoomAccessControls key={savedDeveloper.id} developer={savedDeveloper} projectId={projectId} disabled={disabled} onChanged={updated => setDevelopers(rows => rows.map(row => row.id === updated.id ? updated : row))} />}
         </div>
       </div>
