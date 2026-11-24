@@ -15,11 +15,12 @@ import { downloadViewingRoomProposal } from "@/lib/viewingRoomProposal";
 import { formatPdfMoney } from "@/lib/pdfFormatting";
 import { viewingRoomSwapsEnabled } from "@/lib/viewingRoomAlternatives";
 import ViewingRoomSwapNotice from "./ViewingRoomSwapNotice";
+import ViewingRoomProposalPreview from "./ViewingRoomProposalPreview";
 import type { ViewingRoomProposalContext } from "@/lib/viewingRoomProposalData";
 import { readArViewerHandoff } from "@/lib/arViewerHandoff";
 
-export default function ViewingRoomExperience({ token, packageId, baseTotal, currency, residence, developer, onTotal, fallbackItems = [], proposalContext = {} }: {
-  token: string; packageId: string; baseTotal: number; currency: string; residence: string; developer: string; onTotal: (total: number) => void; fallbackItems?: ViewingRoomItem[]; proposalContext?: ViewingRoomProposalContext;
+export default function ViewingRoomExperience({ token, packageId, tierName, baseTotal, currency, residence, developer, onTotal, fallbackItems = [], proposalContext = {} }: {
+  token: string; packageId: string; tierName?: string; baseTotal: number; currency: string; residence: string; developer: string; onTotal: (total: number) => void; fallbackItems?: ViewingRoomItem[]; proposalContext?: ViewingRoomProposalContext;
 }) {
   const query = useQuery({ queryKey: ["viewing-room-choices", token, packageId], queryFn: () => getViewingRoomChoices({ data: { token, packageId } }), retry: false });
   const [choices, setChoices] = useState<Record<string, ViewingRoomChoice>>({});
@@ -29,6 +30,7 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
   const [drawerTab, setDrawerTab] = useState("finishes");
   const [busy, setBusy] = useState(false);
   const [locked, setLocked] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [scrolled, setScrolled] = useState(false);
   const key = useRef<string | null>(null);
@@ -104,12 +106,13 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
       }) };
       await downloadViewingRoomProposal(presentation, residence, developer, proposalContext);
       setFeedback("Selection locked · proposal requested and PDF downloaded.");
+      setPreviewOpen(false);
     } catch { setFeedback(snapshot.current ? "Selection locked. PDF download failed; please retry." : "Your proposal couldn’t be locked. Please try again."); }
     finally { setBusy(false); }
   }
   if (query.isPending && !slots.length) return <p role="status" className="p-12 text-muted-foreground">Preparing your collection…</p>;
   const retryButton = <Button variant="outline" disabled={query.isFetching} onClick={() => void query.refetch()}><RotateCw className={`size-4 ${query.isFetching ? "animate-spin" : ""}`} />{query.isFetching ? "Retrying…" : "Retry recommendations"}</Button>;
-  const proposalButton = <Button className="max-w-48 whitespace-normal text-xs sm:max-w-none sm:text-sm" disabled={busy || !slots.length || !query.data} onClick={() => void requestProposal()}><Lock className="size-4 shrink-0" />{busy ? "Preparing proposal…" : locked ? "Download Locked Proposal" : "Lock & Download Proposal"}</Button>;
+  const proposalButton = <Button className="max-w-48 whitespace-normal text-xs sm:max-w-none sm:text-sm" disabled={busy || !slots.length || !query.data} onClick={() => { if (locked) { void requestProposal(); } else { setFeedback(""); setPreviewOpen(true); } }}><Lock className="size-4 shrink-0" />{busy ? "Preparing proposal…" : locked ? "Download Locked Proposal" : "Review & Lock Proposal"}</Button>;
   const hideMobileBar = Boolean(query.data && !scrolled && Object.keys(choices).length === 0 && !locked && !feedback);
   return <div className="viewing-room bg-background pb-[calc(7rem+env(safe-area-inset-bottom))] text-foreground">
     <div className="mx-auto max-w-[1500px] px-6 pt-6 md:px-12">
@@ -183,5 +186,6 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
         </>}
       </SheetContent>
     </Sheet>
+    <ViewingRoomProposalPreview open={previewOpen} onOpenChange={setPreviewOpen} {...(tierName ? { tierName } : {})} residence={residence} developer={developer} currency={currency} slots={slots} choices={choices} total={total} busy={busy} locked={locked} feedback={feedback} onConfirm={() => void requestProposal()} />
   </div>;
 }

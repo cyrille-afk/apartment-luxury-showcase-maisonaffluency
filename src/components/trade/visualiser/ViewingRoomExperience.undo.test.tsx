@@ -68,7 +68,9 @@ it("does not allow undo after the proposal locks", async () => {
   fireEvent.click(screen.getByRole("button", { name: "Swap piece — Original Sofa" }));
   await selectAlternative("Alternative Sofa");
   fireEvent.click(screen.getByRole("button", { name: "Close" }));
-  fireEvent.click(screen.getByRole("button", { name: "Lock & Download Proposal" }));
+  fireEvent.click(screen.getByRole("button", { name: "Review & Lock Proposal" }));
+  expect(lock).not.toHaveBeenCalled();
+  fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Lock & Download Proposal" }));
   await waitFor(() => expect(lock).toHaveBeenCalledTimes(1));
   await waitFor(() => expect(screen.queryByRole("button", { name: /Undo swap/ })).not.toBeInTheDocument());
   expect(screen.getByLabelText("Collection Total")).toHaveTextContent("149,000.00");

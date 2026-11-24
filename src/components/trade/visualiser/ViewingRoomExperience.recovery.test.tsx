@@ -22,12 +22,12 @@ it("keeps original pieces inspectable without permitting unconfirmed changes or 
   await waitFor(() => expect(readChoices).toHaveBeenCalledTimes(1));
   await waitFor(() => expect(screen.getByRole("button", { name: "Retry recommendations" })).toBeEnabled());
   expect(screen.getByRole("article", { name: "Saved Sofa" })).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "Lock & Download Proposal" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Review & Lock Proposal" })).toBeDisabled();
   fireEvent.click(screen.getByRole("button", { name: "Materials and finishes for Saved Sofa" }));
   expect(screen.queryByRole("button", { name: "UPDATE SELECTION" })).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Close" }));
   fireEvent.click(screen.getByRole("button", { name: "Retry recommendations" }));
-  await waitFor(() => expect(screen.getByRole("button", { name: "Lock & Download Proposal" })).toBeEnabled());
+  await waitFor(() => expect(screen.getByRole("button", { name: "Review & Lock Proposal" })).toBeEnabled());
   expect(readChoices).toHaveBeenCalledTimes(2);
   expect(screen.getByLabelText("Collection Total")).toHaveTextContent("150,000.00");
 });
