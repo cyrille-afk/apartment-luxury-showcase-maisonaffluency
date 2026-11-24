@@ -237,6 +237,17 @@
   letter-spacing: 0;
 }
 .space-preview-action:hover { background: var(--space-preview-ink); opacity: .94; }
+.space-preview-dialog {
+  --space-qr-ink: #1C2B22;
+  --space-qr-paper: #FAF9F6;
+  --background: 45 28.571% 97.255%;
+  --foreground: 144 21% 14%;
+  --muted-foreground: 40 8% 42%;
+  --border: 40 15% 82%;
+  background: var(--space-qr-paper);
+  color: var(--space-qr-ink);
+  letter-spacing: 0;
+}
 
 .viewing-room {
   --viewing-room-paper: #FAF9F6;

@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { AlertTriangle, Box, Camera, Lock, LockOpen, Move, Smartphone } from "lucide-react";
+import { AlertTriangle, Box, Camera, Lock, LockOpen, Move, QrCode, Smartphone } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { absoluteUrl } from "@/config/site";
 import { editorialModelCamera, editorialUprightRotation } from "@/lib/editorialModelFraming";
 import { editorialUnnamedMaterialRole } from "@/lib/editorialModelMaterials";
 
@@ -236,6 +239,7 @@ const Product3DViewer: React.FC<Props> = ({
   const [locked, setLocked] = useState(false);
   const [mobileAr, setMobileAr] = useState(false);
   const [arAvailable, setArAvailable] = useState(false);
+  const [qrUrl, setQrUrl] = useState("");
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 767px) and (pointer: coarse)");
@@ -681,7 +685,25 @@ const Product3DViewer: React.FC<Props> = ({
             <span className="font-body text-[11px] uppercase tracking-[0.12em]">Loading 3D…</span>
           </div>
         )}
+        {opened && ready && (
+          <Button type="button" variant="space-preview" className="absolute bottom-4 right-4 hidden max-w-[calc(100%-2rem)] rounded-full px-4 font-display text-sm md:flex" onClick={() => {
+            const current = new URL(window.location.href);
+            // A phone cannot open a sandbox host; retain the exact page/query on the public origin.
+            setQrUrl(absoluteUrl(`${current.pathname}${current.search}${current.hash}`));
+          }}>
+            <QrCode strokeWidth={1.25} aria-hidden="true" />
+            View in Your Room (AR)
+          </Button>
+        )}
       </div>
+      <Dialog open={!!qrUrl} onOpenChange={open => { if (!open) setQrUrl(""); }}>
+        <DialogContent className="space-preview-dialog w-[calc(100%-2rem)] max-w-md gap-5 px-8 py-10 text-center" overlayClassName="bg-foreground/40 backdrop-blur-sm">
+          <DialogTitle className="font-display text-3xl font-normal leading-tight tracking-normal">Experience in Your Space</DialogTitle>
+          <DialogDescription className="font-display text-base leading-relaxed">Scan with your iPhone camera to place this piece to scale in your room.</DialogDescription>
+          {qrUrl && <QRCodeSVG value={qrUrl} size={232} level="M" marginSize={4} fgColor="var(--space-qr-ink)" bgColor="var(--space-qr-paper)" title="Scan to open this piece on your iPhone" className="mx-auto h-auto w-full max-w-60" />}
+          <p className="font-display text-sm leading-relaxed text-muted-foreground">No app download required · Works with iOS Safari &amp; Chrome</p>
+        </DialogContent>
+      </Dialog>
       <p className="px-3 py-2 font-display text-[10px] leading-snug text-muted-foreground/70 border-t border-border">
         {opened
           ? (locked

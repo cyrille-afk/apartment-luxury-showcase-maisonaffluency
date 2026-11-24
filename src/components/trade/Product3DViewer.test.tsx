@@ -2,6 +2,9 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import Product3DViewer from "./Product3DViewer";
 
+const qrRenderer = vi.hoisted(() => vi.fn(() => null));
+vi.mock("qrcode.react", () => ({ QRCodeSVG: qrRenderer }));
+
 class TestModelViewer extends HTMLElement {
   canActivateAR = false;
   model: { materials: any[] } = { materials: [] };
@@ -13,6 +16,18 @@ function mobileCapability(matches: boolean) {
   vi.stubGlobal("matchMedia", vi.fn(() => ({ matches, addEventListener: vi.fn(), removeEventListener: vi.fn() })));
 }
 beforeEach(() => mobileCapability(false));
+
+describe("desktop AR phone handoff", () => {
+  it("keeps the exact current page, furniture and fabric query parameters on the public website", () => {
+    window.history.replaceState({}, "", "/trade/boards/example?project=cipriani&piece=gum&fabric=Edson%20008#finishes");
+    render(<Product3DViewer url="/chair.glb" alt="Chair" autoOpen />);
+    fireEvent.click(screen.getByRole("button", { name: "View in Your Room (AR)" }));
+    expect(qrRenderer).toHaveBeenCalledWith(expect.objectContaining({ value: "https://www.maisonaffluency.com/trade/boards/example?project=cipriani&piece=gum&fabric=Edson%20008#finishes" }), undefined);
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+    expect(screen.queryByRole("dialog")).toBeNull();
+    window.history.replaceState({}, "", "/");
+  });
+});
 
 describe("mobile AR availability", () => {
   it("never enables AR on desktop even when the model supports it", async () => {

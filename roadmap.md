@@ -1,5 +1,8 @@
 # Roadmap
 
+## Desktop AR QR handoff
+- [x] Installed qrcode.react and added desktop-only viewer QR button/editorial modal. Signed-in current board → GUM viewer → modal opens, QR image decodes to exact board path/project query on the public website, close returns to unchanged 3D viewer; phone button hidden. Cream/green modal inspected; 78 tests pass, build OK, no page errors. Existing URL parameters are preserved; unencoded in-memory selections and authentication are not transferred. Previous Cipriani short code returned unavailable, so verification used the user's active board without changing access.
+
 ## Mobile AR controls
 - [x] Added capability-gated slotted View in Your Space button, fixed AR scale and collapsed mobile guide. Real Cipriani GUM desktop/phone viewer verified; simulated native capability checks button and all three scrolled guide steps. Seven viewer tests pass, build OK, no page errors. Physical iPhone Quick Look launch, lighting and scale remain device-only checks; no model dimensions or saved selections changed.
 
