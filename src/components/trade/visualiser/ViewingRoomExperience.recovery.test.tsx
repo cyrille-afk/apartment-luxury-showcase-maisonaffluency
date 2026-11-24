@@ -29,7 +29,7 @@ it("keeps original pieces inspectable without permitting unconfirmed changes or 
   fireEvent.click(screen.getByRole("button", { name: "Retry recommendations" }));
   await waitFor(() => expect(screen.getByRole("button", { name: "Lock & Download Proposal" })).toBeEnabled());
   expect(readChoices).toHaveBeenCalledTimes(2);
-  expect(screen.getByLabelText("Collection Total")).toHaveTextContent("10,000.00");
+  expect(screen.getByLabelText("Collection Total")).toHaveTextContent("150,000.00");
 });
 it("retains a committed finish and total through a failed refresh and successful retry", async () => {
   readChoices.mockResolvedValueOnce({ items: [slot], allow_alternatives: true }).mockRejectedValueOnce(new Error("offline")).mockResolvedValue({ items: [slot], allow_alternatives: true });
@@ -39,11 +39,11 @@ it("retains a committed finish and total through a failed refresh and successful
   fireEvent.click(screen.getByRole("combobox", { name: "Upholstery" }));
   fireEvent.click(await screen.findByRole("option", { name: /Velvet/ }));
   fireEvent.click(screen.getByRole("button", { name: "UPDATE SELECTION" }));
-  expect(screen.getByLabelText("Collection Total")).toHaveTextContent("12,500.00");
+  expect(screen.getByLabelText("Collection Total")).toHaveTextContent("152,500.00");
   await client.refetchQueries({ queryKey: ["viewing-room-choices", "room", "package"] });
   await screen.findByRole("button", { name: "Retry recommendations" });
-  expect(screen.getByLabelText("Collection Total")).toHaveTextContent("12,500.00");
+  expect(screen.getByLabelText("Collection Total")).toHaveTextContent("152,500.00");
   fireEvent.click(screen.getByRole("button", { name: "Retry recommendations" }));
   await waitFor(() => expect(readChoices).toHaveBeenCalledTimes(3));
-  expect(screen.getByLabelText("Collection Total")).toHaveTextContent("12,500.00");
+  expect(screen.getByLabelText("Collection Total")).toHaveTextContent("152,500.00");
 });

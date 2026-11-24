@@ -9,10 +9,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import Product3DViewer from "../Product3DViewer";
 import ViewingRoomAxisFinishes from "./ViewingRoomAxisFinishes";
 import { Product3dBadge } from "../Product3dBadge";
-import { MoodBoardBudgetBar } from "../MoodBoardBudgetControls";
 import { getViewingRoomChoices, lockViewingRoomProposal } from "@/lib/viewingRoom.functions";
 import { viewingRoomTotal, viewingRoomSelection, viewingRoomSizeSelection, viewingRoomViewerMaterials, type ViewingRoomChoice, type ViewingRoomSlot, type ViewingRoomItem } from "@/lib/viewingRoom";
-import { moodBudgetLedger, isMoodCurrency } from "@/lib/moodBoardBudget";
 import { downloadViewingRoomProposal } from "@/lib/viewingRoomProposal";
 import { formatPdfMoney } from "@/lib/pdfFormatting";
 import { viewingRoomSwapsEnabled } from "@/lib/viewingRoomAlternatives";
@@ -32,8 +30,7 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
   const [busy, setBusy] = useState(false);
   const [locked, setLocked] = useState(false);
   const [feedback, setFeedback] = useState("");
-  const [budgetVisible, setBudgetVisible] = useState(true);
-  const budgetRef = useRef<HTMLElement | null>(null);
+  const [scrolled, setScrolled] = useState(false);
   const key = useRef<string | null>(null);
   const snapshot = useRef<Awaited<ReturnType<typeof lockViewingRoomProposal>> | null>(null);
   const arRestored = useRef<string | null>(null);
@@ -47,9 +44,7 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
   const current = slots.find(slot => slot.id === active);
   // Server validates each candidate against the slot's saved footprint overrides.
   const alternatives = current?.alternatives ?? [];
-  const items = useMemo(() => slots.map(slot => ({ ...(choices[slot.id] ?? slot), id: slot.id })), [slots, choices]);
   const total = viewingRoomTotal(baseTotal, slots, choices);
-  const ledger = moodBudgetLedger(items.map(item => ({ id: item.id, product_name: item.product_name })), new Map(items.map(item => [item.id, { retail: item.retail_price == null ? null : Math.round(item.retail_price * 100), trade: null }])), { roomType: "living", totalEur: baseTotal, caps: {}, anchors: [] });
   const money = (value: number) => formatPdfMoney(Math.round(value * 100), currency);
   // A drawer opened before choices loaded holds the read-only fallback piece; adopt the loaded slot once it arrives.
   useEffect(() => { if (query.data && current && draft && draft.id === current.id && !choices[current.id] && draft.finish_options.length === 0 && current.finish_options.length > 0) setDraft(current); }, [query.data, current, draft, choices]);
@@ -91,14 +86,11 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
   const undoButton = (slot: ViewingRoomSlot) => previousPieces[slot.id] && !locked ? <Button variant="ghost" disabled={busy || !query.data} className="h-auto justify-start gap-2 self-start px-0 py-2 text-xs" aria-label={`Undo swap — restore ${previousPieces[slot.id].product_name}`} onClick={() => undoSwap(slot)}><Undo2 className="size-4" />Undo Swap</Button> : null;
   useEffect(() => { onTotal(total); }, [total]);
   useEffect(() => {
-    const node = budgetRef.current;
-    if (typeof IntersectionObserver === "undefined") { setBudgetVisible(false); return; }
-    if (!node) return;
-    setBudgetVisible(true);
-    const observer = new IntersectionObserver(([entry]) => setBudgetVisible(Boolean(entry?.isIntersecting)), { threshold: 0 });
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [query.data, currency]);
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
   async function requestProposal() {
     setBusy(true); setFeedback("");
     try {
@@ -118,11 +110,10 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
   if (query.isPending && !slots.length) return <p role="status" className="p-12 text-muted-foreground">Preparing your collection…</p>;
   const retryButton = <Button variant="outline" disabled={query.isFetching} onClick={() => void query.refetch()}><RotateCw className={`size-4 ${query.isFetching ? "animate-spin" : ""}`} />{query.isFetching ? "Retrying…" : "Retry recommendations"}</Button>;
   const proposalButton = <Button className="max-w-48 whitespace-normal text-xs sm:max-w-none sm:text-sm" disabled={busy || !slots.length || !query.data} onClick={() => void requestProposal()}><Lock className="size-4 shrink-0" />{busy ? "Preparing proposal…" : locked ? "Download Locked Proposal" : "Lock & Download Proposal"}</Button>;
-  const hideMobileBar = Boolean(query.data && isMoodCurrency(currency) && budgetVisible && Object.keys(choices).length === 0 && !locked && !feedback);
+  const hideMobileBar = Boolean(query.data && !scrolled && Object.keys(choices).length === 0 && !locked && !feedback);
   return <div className="viewing-room bg-background pb-[calc(7rem+env(safe-area-inset-bottom))] text-foreground">
     <div className="mx-auto max-w-[1500px] px-6 pt-6 md:px-12">
       {recommendationsUnavailable && <div role="status" className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-6"><div className="max-w-xl"><p className="font-display text-xl">Recommendations are temporarily unavailable</p><p className="mt-2 text-sm text-muted-foreground">Your collection is still here. You can inspect its pieces and selected materials while we reconnect.{!query.data && " Finish changes and confirmed totals will return when recommendations load."}</p></div>{retryButton}</div>}
-      {query.data && isMoodCurrency(currency) && <section ref={budgetRef} aria-label="Budget Allocation"><MoodBoardBudgetBar ledger={ledger} pending={false} currency={currency} /></section>}
       {fixedCollectionVisible && <div className="pt-6"><ViewingRoomSwapNotice /></div>}
       <div aria-label="Client editorial collection" className="grid grid-cols-1 gap-x-8 gap-y-12 py-8 sm:grid-cols-2 lg:grid-cols-3">
         {slots.map(slot => { const piece = choices[slot.id] ?? slot; return <article key={slot.id} className="flex min-w-0 flex-col" aria-label={piece.product_name}>
@@ -142,7 +133,7 @@ export default function ViewingRoomExperience({ token, packageId, baseTotal, cur
       </div>
     </div>
     <div data-mobile-bar-visible={hideMobileBar ? "false" : "true"} className={`fixed inset-x-0 bottom-0 z-40 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-t border-border bg-background/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-sm transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none md:pointer-events-auto md:flex md:translate-y-0 md:justify-between md:px-6 md:opacity-100 ${hideMobileBar ? "pointer-events-none translate-y-full opacity-0" : "pointer-events-auto translate-y-0 opacity-100"}`}>
-      <div><p className="text-xs text-muted-foreground">Collection Total</p><p className="font-display text-lg sm:text-2xl" aria-label="Collection Total" aria-live="polite">{query.data ? money(ledger.allocated / 100) : "Awaiting confirmed prices"}</p></div>{proposalButton}
+      <div><p className="text-xs text-muted-foreground">Collection Total</p><p className="font-display text-lg sm:text-2xl" aria-label="Collection Total" aria-live="polite">{query.data ? money(total) : "Awaiting confirmed prices"}</p></div>{proposalButton}
       {feedback && <p role="status" className="col-span-2 text-sm">{feedback}</p>}
     </div>
     <Sheet open={!!current && !!draft} onOpenChange={open => { if (!open) { setActive(null); setDraft(null); } }}>

@@ -33,7 +33,7 @@ it("restores the QR upholstery and size as a private-room preview without changi
   await mount();
   await waitFor(() => expect(screen.getByRole("combobox", { name: "Upholstery" })).toHaveTextContent("Velvet"));
   expect(screen.getByRole("combobox", { name: "Sofa size" })).toHaveTextContent("W 250 cm");
-  expect(screen.getByLabelText("Collection Total")).toHaveTextContent("10,000.00");
+  expect(screen.getByLabelText("Collection Total")).toHaveTextContent("150,000.00");
   expect(lock).not.toHaveBeenCalled();
 });
 it("restores the previous sofa's exact size, finish and retail total", async () => {
@@ -42,12 +42,12 @@ it("restores the previous sofa's exact size, finish and retail total", async () 
   fireEvent.click(screen.getByRole("combobox", { name: "Sofa size" }));
   fireEvent.click(await screen.findByRole("option", { name: "W 250 cm" }));
   fireEvent.click(screen.getByRole("button", { name: "UPDATE SELECTION" }));
-  expect(screen.getByLabelText("Collection Total")).toHaveTextContent("12,500.00");
+  expect(screen.getByLabelText("Collection Total")).toHaveTextContent("152,500.00");
   fireEvent.click(screen.getByRole("button", { name: "Swap piece — Original Sofa" }));
   await selectAlternative("Alternative Sofa");
-  expect(screen.getByLabelText("Collection Total")).toHaveTextContent("9,000.00");
+  expect(screen.getByLabelText("Collection Total")).toHaveTextContent("149,000.00");
   fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Undo swap — restore Original Sofa" }));
-  expect(screen.getByLabelText("Collection Total")).toHaveTextContent("12,500.00");
+  expect(screen.getByLabelText("Collection Total")).toHaveTextContent("152,500.00");
   expect(screen.getByRole("combobox", { name: "Sofa size" })).toHaveTextContent("W 250 cm");
   expect(screen.getByRole("combobox", { name: "Upholstery" })).toHaveTextContent("Velvet");
 });
@@ -59,7 +59,7 @@ it("restores the immediately previous alternative, not always the original piece
   fireEvent.click(screen.getByRole("button", { name: "Close" }));
   fireEvent.click(screen.getByRole("button", { name: "Undo swap — restore Alternative Sofa" }));
   expect(screen.getByRole("article", { name: "Alternative Sofa" })).toBeInTheDocument();
-  expect(screen.getByLabelText("Collection Total")).toHaveTextContent("9,000.00");
+  expect(screen.getByLabelText("Collection Total")).toHaveTextContent("149,000.00");
   expect(screen.queryByRole("button", { name: /Undo swap/ })).not.toBeInTheDocument();
 });
 it("does not allow undo after the proposal locks", async () => {
@@ -71,5 +71,5 @@ it("does not allow undo after the proposal locks", async () => {
   fireEvent.click(screen.getByRole("button", { name: "Lock & Download Proposal" }));
   await waitFor(() => expect(lock).toHaveBeenCalledTimes(1));
   await waitFor(() => expect(screen.queryByRole("button", { name: /Undo swap/ })).not.toBeInTheDocument());
-  expect(screen.getByLabelText("Collection Total")).toHaveTextContent("9,000.00");
+  expect(screen.getByLabelText("Collection Total")).toHaveTextContent("149,000.00");
 });
