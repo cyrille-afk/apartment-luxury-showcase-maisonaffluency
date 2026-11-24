@@ -29,7 +29,7 @@ export default defineConfig({
     client: { entry: "client" },
   },
   vite: {
-    define: { "import.meta.env.VITE_APP_BUILD_ID": JSON.stringify(buildId) },
+    define: { "import.meta.env.VITE_APP_BUILD_ID": JSON.stringify(buildId), "import.meta.env.VITE_APP_BUILD_TIME": JSON.stringify(new Date().toISOString()) },
     plugins: [mcpPlugin(), emitVersionPlugin(buildId), emitOgManifestPlugin(), environmentRobotsPlugin(), visualiserSourceLabels()],
     // React Email's parser needs entities v4.5.0; nested v5+ copies removed lib/decode.js.
     resolve: {
