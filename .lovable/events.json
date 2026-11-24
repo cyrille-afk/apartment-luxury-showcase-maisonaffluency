@@ -1,6 +1,97 @@
 {
   "schema_version": 1,
   "events": {
+    "project.ar_fallback_displayed": {
+      "event_schema_version": 1,
+      "description": "The mobile viewer displays unsupported-device or failed-launch guidance while retaining finishes. Repeated signals for the same fallback are deduplicated; retry creates a new attempt.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "surface",
+          "reason"
+        ],
+        "properties": {
+          "surface": {
+            "type": "string",
+            "enum": [
+              "board",
+              "viewing-room",
+              "product"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "unsupported",
+              "launch_failed"
+            ]
+          }
+        }
+      }
+    },
+    "project.ar_preview_launched": {
+      "event_schema_version": 1,
+      "description": "A user taps the native AR control after selected materials are ready; counts attempts, not successful opens.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "surface"
+        ],
+        "properties": {
+          "surface": {
+            "type": "string",
+            "enum": [
+              "board",
+              "viewing-room",
+              "product"
+            ]
+          }
+        }
+      }
+    },
+    "project.ar_preview_opened": {
+      "event_schema_version": 1,
+      "description": "An attempted AR preview is confirmed by a WebXR session-started signal or Quick Look native banner interaction. Quick Look opens without an interaction are unconfirmed and are not counted; resolving activateAR alone is not success.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "surface",
+          "confirmation"
+        ],
+        "properties": {
+          "surface": {
+            "type": "string",
+            "enum": [
+              "board",
+              "viewing-room",
+              "product"
+            ]
+          },
+          "confirmation": {
+            "type": "string",
+            "enum": [
+              "webxr_session",
+              "quick_look_interaction"
+            ]
+          }
+        }
+      }
+    },
     "project.catalog_glb_compression_failed": {
       "event_schema_version": 1,
       "description": "Browser GLB compression rejected before upload; records original size and elapsed compression time without filenames or error text.",

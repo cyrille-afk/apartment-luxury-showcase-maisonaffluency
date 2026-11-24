@@ -31,6 +31,49 @@ describe("desktop AR phone handoff", () => {
 });
 
 describe("mobile AR availability", () => {
+  it("counts attempts separately from confirmed opens and deduplicates native signals and fallback displays", async () => {
+    mobileCapability(true);
+    const track = vi.fn(() => null);
+    window.__lovableEvents = { track };
+    const { container } = render(<Product3DViewer url="/chair.glb" alt="Chair" autoOpen />);
+    const viewer = container.querySelector("model-viewer") as TestModelViewer;
+    await act(async () => { viewer.model = { materials: [material("seat", "default.jpg", [1, 1, 1, 1])] }; viewer.canActivateAR = true; viewer.dispatchEvent(new Event("load")); });
+    const ar = await screen.findByRole("button", { name: "View in Your Space" });
+    await waitFor(() => expect(ar).toBeEnabled());
+    fireEvent.click(ar);
+    expect(track.mock.calls).toEqual([["project.ar_preview_launched", { surface: "product" }]]);
+    await act(async () => {
+      viewer.dispatchEvent(new CustomEvent("ar-status", { detail: { status: "session-started" } }));
+      viewer.dispatchEvent(new CustomEvent("ar-status", { detail: { status: "session-started" } }));
+    });
+    expect(track).toHaveBeenCalledWith("project.ar_preview_opened", { surface: "product", confirmation: "webxr_session" });
+    expect(track.mock.calls).toHaveLength(2);
+    fireEvent.click(ar);
+    await act(async () => {
+      viewer.dispatchEvent(new CustomEvent("ar-status", { detail: { status: "failed" } }));
+      viewer.dispatchEvent(new CustomEvent("ar-status", { detail: { status: "failed" } }));
+    });
+    expect(track).toHaveBeenCalledWith("project.ar_fallback_displayed", { surface: "product", reason: "launch_failed" });
+    expect(track.mock.calls).toHaveLength(4);
+    fireEvent.click(ar);
+    await act(async () => {
+      viewer.dispatchEvent(new Event("quick-look-button-tapped"));
+      viewer.dispatchEvent(new Event("quick-look-button-tapped"));
+    });
+    expect(track).toHaveBeenCalledWith("project.ar_preview_opened", { surface: "product", confirmation: "quick_look_interaction" });
+    expect(track.mock.calls).toHaveLength(6);
+    delete window.__lovableEvents;
+  });
+  it("counts an unsupported fallback once even when capability checks repeat", async () => {
+    mobileCapability(true);
+    const track = vi.fn(() => null);
+    window.__lovableEvents = { track };
+    const { container } = render(<Product3DViewer url="/chair.glb" alt="Chair" autoOpen />);
+    const viewer = container.querySelector("model-viewer") as TestModelViewer;
+    await act(async () => { viewer.dispatchEvent(new Event("load")); viewer.dispatchEvent(new Event("load")); });
+    expect(track.mock.calls).toEqual([["project.ar_fallback_displayed", { surface: "product", reason: "unsupported" }]]);
+    delete window.__lovableEvents;
+  });
   it.each(["unsupported", "rejected", "failed-event"])("retains selected upholstery and the same 3D scene when AR is %s", async (failure) => {
     mobileCapability(true);
     const seat = material("seat", "default.jpg", [1, 1, 1, 1]);

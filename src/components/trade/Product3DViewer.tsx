@@ -252,6 +252,10 @@ const Product3DViewer: React.FC<Props> = ({
   const [qrUrl, setQrUrl] = useState("");
   const [appliedAppearance, setAppliedAppearance] = useState<string | null>(null);
   const [arError, setArError] = useState("");
+  const arAttempt = useRef({ pending: false, confirmed: false });
+  const arFallbackLogged = useRef<string | null>(null);
+  const arSurface = useRef(arHandoff?.kind ?? "product");
+  arSurface.current = arHandoff?.kind ?? "product";
   const appearanceKey = JSON.stringify([url, fabricTextureUrl, baseTextureUrl, topTextureUrl, backrestTextureUrl, materialRoles, scale]);
   const appearanceReady = appliedAppearance === appearanceKey;
 
@@ -267,25 +271,53 @@ const Product3DViewer: React.FC<Props> = ({
     setArAvailable(false);
     setArChecked(false);
     setArError("");
+    arAttempt.current = { pending: false, confirmed: false };
+    arFallbackLogged.current = null;
     if (!mobileAr || !opened || !ready) return;
     const viewer = mvRef.current as (HTMLElement & { canActivateAR?: boolean; updateComplete?: Promise<unknown> }) | null;
     if (!viewer) return;
     let cancelled = false;
     const update = async () => {
       await viewer.updateComplete;
-      if (!cancelled) { setArAvailable(viewer.canActivateAR === true); setArChecked(true); }
+      if (!cancelled) {
+        setArAvailable(viewer.canActivateAR === true); setArChecked(true);
+        if (viewer.canActivateAR !== true && arFallbackLogged.current === null) {
+          arFallbackLogged.current = "unsupported";
+          window.__lovableEvents?.track?.("project.ar_fallback_displayed", { surface: arSurface.current, reason: "unsupported" });
+        }
+      }
     };
     const status = (event: Event) => {
-      if ((event as CustomEvent<{ status?: string }>).detail?.status === "failed") setArError("AR couldn’t open in this browser. Your selected finishes are still visible in 3D. Try again, or open this page in Safari on a compatible iPhone.");
+      const state = (event as CustomEvent<{ status?: string }>).detail?.status;
+      if (state === "session-started" && arAttempt.current.pending && !arAttempt.current.confirmed) {
+        arAttempt.current.confirmed = true;
+        window.__lovableEvents?.track?.("project.ar_preview_opened", { surface: arSurface.current, confirmation: "webxr_session" });
+      }
+      if (state === "failed") {
+        arAttempt.current.pending = false;
+        setArError("AR couldn’t open in this browser. Your selected finishes are still visible in 3D. Try again, or open this page in Safari on a compatible iPhone.");
+        if (arFallbackLogged.current !== "launch_failed") {
+          arFallbackLogged.current = "launch_failed";
+          window.__lovableEvents?.track?.("project.ar_fallback_displayed", { surface: arSurface.current, reason: "launch_failed" });
+        }
+      }
       void update();
+    };
+    // Quick Look does not report session-started; its native banner interaction proves an open.
+    const nativeInteraction = () => {
+      if (!arAttempt.current.pending || arAttempt.current.confirmed) return;
+      arAttempt.current.confirmed = true;
+      window.__lovableEvents?.track?.("project.ar_preview_opened", { surface: arSurface.current, confirmation: "quick_look_interaction" });
     };
     void update();
     viewer.addEventListener("load", update);
     viewer.addEventListener("ar-status", status);
+    viewer.addEventListener("quick-look-button-tapped", nativeInteraction);
     return () => {
       cancelled = true;
       viewer.removeEventListener("load", update);
       viewer.removeEventListener("ar-status", status);
+      viewer.removeEventListener("quick-look-button-tapped", nativeInteraction);
     };
   }, [mobileAr, opened, ready, url]);
 
@@ -711,10 +743,27 @@ const Product3DViewer: React.FC<Props> = ({
                 event.preventDefault(); event.stopPropagation();
                 if (!appearanceReady || !mvRef.current?.activateAR) return;
                 setArError("");
+                arAttempt.current = { pending: true, confirmed: false };
+                arFallbackLogged.current = null;
+                window.__lovableEvents?.track?.("project.ar_preview_launched", { surface: arSurface.current });
                 // Call synchronously from the tap; Quick Look exports the freshly textured scene.
                 try {
-                  void mvRef.current.activateAR().catch(() => setArError("AR couldn’t open in this browser. Your selected finishes are still visible in 3D. Try again, or open this page in Safari on a compatible iPhone."));
-                } catch { setArError("AR couldn’t open in this browser. Your selected finishes are still visible in 3D. Try again, or open this page in Safari on a compatible iPhone."); }
+                  void mvRef.current.activateAR().catch(() => {
+                    arAttempt.current.pending = false;
+                    setArError("AR couldn’t open in this browser. Your selected finishes are still visible in 3D. Try again, or open this page in Safari on a compatible iPhone.");
+                    if (arFallbackLogged.current !== "launch_failed") {
+                      arFallbackLogged.current = "launch_failed";
+                      window.__lovableEvents?.track?.("project.ar_fallback_displayed", { surface: arSurface.current, reason: "launch_failed" });
+                    }
+                  });
+                } catch {
+                  arAttempt.current.pending = false;
+                  setArError("AR couldn’t open in this browser. Your selected finishes are still visible in 3D. Try again, or open this page in Safari on a compatible iPhone.");
+                  if (arFallbackLogged.current !== "launch_failed") {
+                    arFallbackLogged.current = "launch_failed";
+                    window.__lovableEvents?.track?.("project.ar_fallback_displayed", { surface: arSurface.current, reason: "launch_failed" });
+                  }
+                }
               }}>
                 <Box strokeWidth={1.25} aria-hidden="true" />
                 View in Your Space

@@ -1,5 +1,8 @@
 # Roadmap
 
+## AR experience analytics
+- [x] Track launch attempts, evidence-confirmed opens and deduplicated fallback displays using existing visitor analytics. Three schemas registered (39 total), compatibility check passes; fifteen tests cover exact counts and duplicate signals. Real signed-in phone Opera Delft fallback recording verified with a local tracking spy; scene/finishes unchanged. Quick Look lacks a session-open callback: only native banner interaction is counted as confirmed, never a resolved launch promise. Collector arrival awaits actual preview/published usage; physical native launch remains untested. Orders paid each month already has project.order_paid coverage.
+
 ## AR unavailable fallback
 - [x] Show capability/launch failure guidance without replacing the selected 3D scene; retain selected upholstery and backrest swatches. Real signed-in phone Sandy Cove Opera Delft unsupported fallback and simulated native failed-status verified: same model/material textures and selected dropdown remain unchanged, no page errors; screenshots inspected. Thirteen viewer tests pass including unsupported/rejected/failed-event material retention; build OK. Physical iPhone launch remains untested.
 
