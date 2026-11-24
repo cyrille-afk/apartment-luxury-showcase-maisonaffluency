@@ -890,3 +890,7 @@
 
 - [ ] Designer pages: mobile scroll freeze
 - [x] Viewing room drawer: split finish pickers, fabric colours on 3D
+
+## GUM backrest leather
+- [x] Backrest always Tundra leather in catalogue options.
+- [ ] Viewing room drawer still repeats range dropdown + colour row (same layout as old board).
