@@ -5,6 +5,7 @@ import ViewingRoomExperience from "./ViewingRoomExperience";
 
 const { readChoices } = vi.hoisted(() => ({ readChoices: vi.fn() }));
 vi.mock("@/lib/viewingRoom.functions", () => ({ getViewingRoomChoices: readChoices, lockViewingRoomProposal: vi.fn() }));
+vi.mock("@/lib/viewingRoomBlenderScene.functions", () => ({ exportViewingRoomBlenderScene: vi.fn() }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
 vi.mock("../Product3DViewer", () => ({ default: () => null }));
 vi.mock("@/lib/viewingRoomProposal", () => ({ downloadViewingRoomProposal: vi.fn() }));

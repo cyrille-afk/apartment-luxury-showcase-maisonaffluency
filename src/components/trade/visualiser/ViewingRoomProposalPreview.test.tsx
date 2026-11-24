@@ -4,8 +4,16 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import ViewingRoomExperience from "./ViewingRoomExperience";
 import type { ViewingRoomSlot } from "@/lib/viewingRoom";
 
-const { readChoices, lock, download } = vi.hoisted(() => ({ readChoices: vi.fn(), lock: vi.fn(), download: vi.fn() }));
+const { readChoices, lock, download, exportBlender, downloadBlender } = vi.hoisted(() => ({
+  readChoices: vi.fn(),
+  lock: vi.fn(),
+  download: vi.fn(),
+  exportBlender: vi.fn(),
+  downloadBlender: vi.fn(),
+}));
 vi.mock("@/lib/viewingRoom.functions", () => ({ getViewingRoomChoices: readChoices, lockViewingRoomProposal: lock }));
+vi.mock("@/lib/viewingRoomBlenderScene.functions", () => ({ exportViewingRoomBlenderScene: exportBlender }));
+vi.mock("@/lib/viewingRoomBlenderScene", () => ({ downloadBlenderSceneManifest: downloadBlender }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
 vi.mock("../Product3DViewer", () => ({ default: () => null }));
 vi.mock("@/lib/viewingRoomProposal", () => ({ downloadViewingRoomProposal: download }));
@@ -74,12 +82,12 @@ const gumSlot: ViewingRoomSlot = {
 
 afterEach(() => { cleanup(); vi.resetAllMocks(); });
 
-function mount(slots: ViewingRoomSlot[], tierName = "Signature") {
+function mount(slots: ViewingRoomSlot[], tierName = "Signature", canExportBlenderScene = false) {
   readChoices.mockResolvedValue({ items: slots, allow_alternatives: true });
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(
     <QueryClientProvider client={client}>
-      <ViewingRoomExperience token="cipriani" packageId="pkg-sig" tierName={tierName} baseTotal={350000} currency="USD" residence="2-Bedroom Residence" developer="Cipriani Residences Miami" onTotal={() => {}} />
+      <ViewingRoomExperience token="cipriani" packageId="pkg-sig" tierName={tierName} baseTotal={350000} currency="USD" residence="2-Bedroom Residence" developer="Cipriani Residences Miami" canExportBlenderScene={canExportBlenderScene} onTotal={() => {}} />
     </QueryClientProvider>,
   );
 }
@@ -122,6 +130,39 @@ describe("Proposal preview step before locking", () => {
     ));
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     expect(screen.getByRole("button", { name: "Download Locked Proposal" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Export Blender Scene JSON" })).not.toBeInTheDocument();
+  });
+
+  it("shows Export Blender Scene JSON only to admins after locking and downloads the manifest", async () => {
+    const manifest = {
+      schema_version: 1,
+      exported_at: "2026-11-24T13:00:00.000Z",
+      proposal_id: "prop-1",
+      locked_at: "2026-11-24T12:55:00.000Z",
+      package_tier: "Signature",
+      residence_layout: { name: "2-Bedroom Residence", floorplan_url: "https://example.com/plan.png" },
+      items: [],
+    };
+    lock.mockResolvedValue({ package: "Signature", currency: "USD", total: 350000, items: [sofaSlot, gumSlot] });
+    download.mockResolvedValue(undefined);
+    exportBlender.mockResolvedValue(manifest);
+    mount([sofaSlot, gumSlot], "Signature", true);
+
+    await screen.findByRole("button", { name: "Review & Lock Proposal" });
+    expect(screen.queryByRole("button", { name: "Export Blender Scene JSON" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Review & Lock Proposal" }));
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).queryByRole("button", { name: "Export Blender Scene JSON" })).not.toBeInTheDocument();
+    fireEvent.click(within(dialog).getByRole("button", { name: "Lock & Download Proposal" }));
+
+    const exportButton = await screen.findByRole("button", { name: "Export Blender Scene JSON" });
+    fireEvent.click(exportButton);
+    await waitFor(() => expect(exportBlender).toHaveBeenCalledWith({
+      data: { packageId: "pkg-sig", requestKey: expect.any(String) },
+    }));
+    expect(downloadBlender).toHaveBeenCalledWith(manifest);
+    expect(await screen.findByText("Blender scene JSON downloaded.")).toBeInTheDocument();
   });
 
   it("blocks locking in the preview when any piece is awaiting price confirmation", async () => {

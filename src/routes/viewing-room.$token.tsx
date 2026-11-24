@@ -13,6 +13,7 @@ import { viewingRoomAccessToken, isLegacyViewingRoomLink, isShortViewingRoomCode
 import affluencyLogo from "@/assets/affluency-logo-full.jpeg";
 import { readViewingRoomReturn } from "@/lib/viewingRoomLink";
 import { siteBuildLabel } from "@/lib/siteVersion";
+import { useAuth } from "@/hooks/useAuth";
 const Viewer = lazy(() => import("@/components/trade/visualiser/ViewingRoomExperience"));
 const roomQuery = (token: string) => queryOptions({ queryKey: ["developer-viewing-room", token], queryFn: () => getViewingRoom({ data: { token } }), retry: false, staleTime: 0, refetchInterval: 15000, refetchIntervalInBackground: true, refetchOnWindowFocus: "always" });
 
@@ -45,6 +46,8 @@ function ViewingRoomPage() {
   const { token: locator } = Route.useParams();
   const token = locator;
   const queryClient = useQueryClient();
+  const { isAdmin, rolesLoaded } = useAuth();
+  const canExportBlenderScene = rolesLoaded && isAdmin;
   const [code, setCode] = useState("");
   const [accessBusy, setAccessBusy] = useState(false);
   const [accessError, setAccessError] = useState("");
@@ -130,7 +133,7 @@ function ViewingRoomPage() {
       </>}
     </div>
     {layout && selected && <section aria-label={`${selected.tier_name} editorial collection`} className="border-y border-border">
-      {isLoading ? <div role="status" className="flex min-h-96 items-center justify-center text-muted-foreground">Preparing your collection…</div> : isError || !composition ? <div role="alert" className="flex min-h-80 flex-col items-center justify-center gap-5"><p>Your collection couldn’t load.</p><Button variant="outline" onClick={() => void refetch()}><RotateCw className="size-4" />Retry collection</Button></div> : !composition.items.length ? <p className="py-24 text-center text-muted-foreground">This collection is being prepared.</p> : <ClientOnly fallback={<div className="min-h-96" />}><Suspense fallback={<div role="status" className="min-h-96 p-10">Preparing your collection…</div>}><Viewer key={selected.id} token={token} packageId={selected.id} tierName={selected.tier_name} baseTotal={selected.package_price} currency={selected.currency} residence={layout.name} developer={room.name} fallbackItems={composition.items} proposalContext={{ hero: room.hero, logo: room.logo, floorplan: layout.floorplan_url, specs: layout.specs_label, leadTimeWeeks: selected.lead_time_weeks }} onTotal={total => setLiveTotals(values => ({ ...values, [selected.id]: total }))} /></Suspense></ClientOnly>}
+      {isLoading ? <div role="status" className="flex min-h-96 items-center justify-center text-muted-foreground">Preparing your collection…</div> : isError || !composition ? <div role="alert" className="flex min-h-80 flex-col items-center justify-center gap-5"><p>Your collection couldn’t load.</p><Button variant="outline" onClick={() => void refetch()}><RotateCw className="size-4" />Retry collection</Button></div> : !composition.items.length ? <p className="py-24 text-center text-muted-foreground">This collection is being prepared.</p> : <ClientOnly fallback={<div className="min-h-96" />}><Suspense fallback={<div role="status" className="min-h-96 p-10">Preparing your collection…</div>}><Viewer key={selected.id} token={token} packageId={selected.id} tierName={selected.tier_name} baseTotal={selected.package_price} currency={selected.currency} residence={layout.name} developer={room.name} fallbackItems={composition.items} proposalContext={{ hero: room.hero, logo: room.logo, floorplan: layout.floorplan_url, specs: layout.specs_label, leadTimeWeeks: selected.lead_time_weeks }} canExportBlenderScene={canExportBlenderScene} onTotal={total => setLiveTotals(values => ({ ...values, [selected.id]: total }))} /></Suspense></ClientOnly>}
     </section>}
     <footer className={`${selected ? "hidden" : "flex"} flex-wrap items-center justify-between gap-4 px-6 py-8 text-xs text-muted-foreground md:px-12`}><span>{room.name}</span><span>Curated by Maison Affluency</span></footer>
   </main>;

@@ -9,6 +9,7 @@ vi.mock("@/lib/viewingRoom.functions", () => ({
   getViewingRoomChoices: (...args: unknown[]) => fetchChoices(...args),
   lockViewingRoomProposal: vi.fn(),
 }));
+vi.mock("@/lib/viewingRoomBlenderScene.functions", () => ({ exportViewingRoomBlenderScene: vi.fn() }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
 vi.mock("../Product3DViewer", () => ({ default: () => <div data-testid="viewer-3d" /> }));
 vi.mock("@/lib/viewingRoomProposal", () => ({ downloadViewingRoomProposal: vi.fn() }));

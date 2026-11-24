@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Lock, ArrowLeftRight, RotateCw, Undo2 } from "lucide-react";
+import { Lock, ArrowLeftRight, RotateCw, Undo2, FileJson } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -10,6 +10,8 @@ import Product3DViewer from "../Product3DViewer";
 import ViewingRoomAxisFinishes from "./ViewingRoomAxisFinishes";
 import { Product3dBadge } from "../Product3dBadge";
 import { getViewingRoomChoices, lockViewingRoomProposal } from "@/lib/viewingRoom.functions";
+import { exportViewingRoomBlenderScene } from "@/lib/viewingRoomBlenderScene.functions";
+import { downloadBlenderSceneManifest } from "@/lib/viewingRoomBlenderScene";
 import { viewingRoomTotal, viewingRoomSelection, viewingRoomSizeSelection, viewingRoomViewerMaterials, viewingRoomCardSwatches, type ViewingRoomChoice, type ViewingRoomSlot, type ViewingRoomItem } from "@/lib/viewingRoom";
 import { downloadViewingRoomProposal } from "@/lib/viewingRoomProposal";
 import { formatPdfMoney } from "@/lib/pdfFormatting";
@@ -19,8 +21,8 @@ import ViewingRoomProposalPreview from "./ViewingRoomProposalPreview";
 import type { ViewingRoomProposalContext } from "@/lib/viewingRoomProposalData";
 import { readArViewerHandoff } from "@/lib/arViewerHandoff";
 
-export default function ViewingRoomExperience({ token, packageId, tierName, baseTotal, currency, residence, developer, onTotal, fallbackItems = [], proposalContext = {} }: {
-  token: string; packageId: string; tierName?: string; baseTotal: number; currency: string; residence: string; developer: string; onTotal: (total: number) => void; fallbackItems?: ViewingRoomItem[]; proposalContext?: ViewingRoomProposalContext;
+export default function ViewingRoomExperience({ token, packageId, tierName, baseTotal, currency, residence, developer, onTotal, fallbackItems = [], proposalContext = {}, canExportBlenderScene = false }: {
+  token: string; packageId: string; tierName?: string; baseTotal: number; currency: string; residence: string; developer: string; onTotal: (total: number) => void; fallbackItems?: ViewingRoomItem[]; proposalContext?: ViewingRoomProposalContext; canExportBlenderScene?: boolean;
 }) {
   const query = useQuery({ queryKey: ["viewing-room-choices", token, packageId], queryFn: () => getViewingRoomChoices({ data: { token, packageId } }), retry: false });
   const [choices, setChoices] = useState<Record<string, ViewingRoomChoice>>({});
@@ -29,6 +31,7 @@ export default function ViewingRoomExperience({ token, packageId, tierName, base
   const [draft, setDraft] = useState<ViewingRoomChoice | null>(null);
   const [drawerTab, setDrawerTab] = useState("finishes");
   const [busy, setBusy] = useState(false);
+  const [exportingBlender, setExportingBlender] = useState(false);
   const [locked, setLocked] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [clientName, setClientName] = useState("");
@@ -39,6 +42,7 @@ export default function ViewingRoomExperience({ token, packageId, tierName, base
   const snapshot = useRef<Awaited<ReturnType<typeof lockViewingRoomProposal>> | null>(null);
   const arRestored = useRef<string | null>(null);
   const lock = useServerFn(lockViewingRoomProposal);
+  const exportBlender = useServerFn(exportViewingRoomBlenderScene);
   const slots = useMemo<ViewingRoomSlot[]>(() => query.data
     ? query.data.items.map(slot => ({ ...slot, is_swappable: viewingRoomSwapsEnabled(slot.is_swappable, query.data?.allow_alternatives ?? false) }))
     : fallbackItems.map(item => ({ ...item, retail_price: null, retail_price_from: false, finish_options: [], size_options: [], alternatives: [], is_swappable: false, allow_finish_customization: false })), [query.data, fallbackItems]);
@@ -113,9 +117,20 @@ export default function ViewingRoomExperience({ token, packageId, tierName, base
     } catch { setFeedback(snapshot.current ? "Selection locked. PDF download failed; please retry." : "Your proposal couldn’t be locked. Please try again."); }
     finally { setBusy(false); }
   }
+  async function exportBlenderScene() {
+    if (!canExportBlenderScene || !locked || !key.current) return;
+    setExportingBlender(true); setFeedback("");
+    try {
+      const manifest = await exportBlender({ data: { packageId, requestKey: key.current } });
+      downloadBlenderSceneManifest(manifest);
+      setFeedback("Blender scene JSON downloaded.");
+    } catch { setFeedback("Blender scene JSON couldn’t be exported. Please retry."); }
+    finally { setExportingBlender(false); }
+  }
   if (query.isPending && !slots.length) return <p role="status" className="p-12 text-muted-foreground">Preparing your collection…</p>;
   const retryButton = <Button variant="outline" disabled={query.isFetching} onClick={() => void query.refetch()}><RotateCw className={`size-4 ${query.isFetching ? "animate-spin" : ""}`} />{query.isFetching ? "Retrying…" : "Retry recommendations"}</Button>;
   const proposalButton = <Button className="max-w-48 whitespace-normal text-xs sm:max-w-none sm:text-sm" disabled={busy || !slots.length || !query.data} onClick={() => { if (locked) { void requestProposal(); } else { setFeedback(""); setPreviewOpen(true); } }}><Lock className="size-4 shrink-0" />{busy ? "Preparing proposal…" : locked ? "Download Locked Proposal" : "Review & Lock Proposal"}</Button>;
+  const blenderExportButton = locked && canExportBlenderScene ? <Button variant="outline" className="max-w-48 whitespace-normal text-xs sm:max-w-none sm:text-sm" disabled={busy || exportingBlender} onClick={() => void exportBlenderScene()}><FileJson className="size-4 shrink-0" />{exportingBlender ? "Exporting Blender JSON…" : "Export Blender Scene JSON"}</Button> : null;
   const hideMobileBar = Boolean(query.data && !scrolled && Object.keys(choices).length === 0 && !locked && !feedback);
   return <div className="viewing-room bg-background pb-[calc(7rem+env(safe-area-inset-bottom))] text-foreground">
     <div className="mx-auto max-w-[1500px] px-6 pt-6 md:px-12">
@@ -138,9 +153,10 @@ export default function ViewingRoomExperience({ token, packageId, tierName, base
         </article>; })}
       </div>
     </div>
-    <div data-mobile-bar-visible={hideMobileBar ? "false" : "true"} className={`fixed inset-x-0 bottom-0 z-40 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-t border-border bg-background/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-sm transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none md:pointer-events-auto md:flex md:translate-y-0 md:justify-between md:px-6 md:opacity-100 ${hideMobileBar ? "pointer-events-none translate-y-full opacity-0" : "pointer-events-auto translate-y-0 opacity-100"}`}>
-      <div><p className="text-xs text-muted-foreground">Collection Total</p><p className="font-display text-lg sm:text-2xl" aria-label="Collection Total" aria-live="polite">{query.data ? money(total) : "Awaiting confirmed prices"}</p></div>{proposalButton}
-      {feedback && <p role="status" className="col-span-2 text-sm">{feedback}</p>}
+    <div data-mobile-bar-visible={hideMobileBar ? "false" : "true"} className={`fixed inset-x-0 bottom-0 z-40 grid ${blenderExportButton ? "grid-cols-1" : "grid-cols-[minmax(0,1fr)_auto]"} items-center gap-2 border-t border-border bg-background/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-sm transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none md:pointer-events-auto md:flex md:flex-wrap md:translate-y-0 md:justify-between md:px-6 md:opacity-100 ${hideMobileBar ? "pointer-events-none translate-y-full opacity-0" : "pointer-events-auto translate-y-0 opacity-100"}`}>
+      <div><p className="text-xs text-muted-foreground">Collection Total</p><p className="font-display text-lg sm:text-2xl" aria-label="Collection Total" aria-live="polite">{query.data ? money(total) : "Awaiting confirmed prices"}</p></div>
+      <div className="flex flex-wrap items-center justify-end gap-2">{blenderExportButton}{proposalButton}</div>
+      {feedback && <p role="status" className={`text-sm md:basis-full ${blenderExportButton ? "" : "col-span-2"}`}>{feedback}</p>}
     </div>
     <Sheet open={!!current && !!draft} onOpenChange={open => { if (!open) { setActive(null); setDraft(null); } }}>
       <SheetContent className="viewing-room flex w-full flex-col overflow-y-auto bg-background text-foreground sm:max-w-lg" side="right">
@@ -189,6 +205,6 @@ export default function ViewingRoomExperience({ token, packageId, tierName, base
         </>}
       </SheetContent>
     </Sheet>
-    <ViewingRoomProposalPreview open={previewOpen} onOpenChange={setPreviewOpen} {...(tierName ? { tierName } : {})} residence={residence} developer={developer} currency={currency} slots={slots} choices={choices} total={total} busy={busy} locked={locked} feedback={feedback} clientName={clientName} projectNotes={projectNotes} onClientNameChange={setClientName} onProjectNotesChange={setProjectNotes} onConfirm={() => void requestProposal()} />
+    <ViewingRoomProposalPreview open={previewOpen} onOpenChange={setPreviewOpen} {...(tierName ? { tierName } : {})} residence={residence} developer={developer} currency={currency} slots={slots} choices={choices} total={total} busy={busy} locked={locked} feedback={feedback} clientName={clientName} projectNotes={projectNotes} onClientNameChange={setClientName} onProjectNotesChange={setProjectNotes} onConfirm={() => void requestProposal()} canExportBlenderScene={canExportBlenderScene} exportingBlender={exportingBlender} onExportBlender={() => void exportBlenderScene()} />
   </div>;
 }
