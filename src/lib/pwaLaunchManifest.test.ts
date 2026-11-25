@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import base from "../../public/manifest.json";
+import publicManifest from "../../public/manifest.json";
+import { pwaManifestBase as base } from "./pwaManifestBase";
 import { launchManifestResponse, mobileManifestHref, takeLaunchToken } from "./pwaLaunchManifest";
 import { readPendingAuthToken, storePendingAuthToken } from "./pwaPendingAuth";
 
@@ -7,6 +8,9 @@ const token = "q".repeat(43);
 beforeEach(() => { window.localStorage.clear(); window.history.replaceState({}, "", "/"); });
 
 describe("per-install launch handoff", () => {
+  it("keeps the server-side manifest copy identical to public/manifest.json", () => {
+    expect(base).toEqual(publicManifest);
+  });
   it("puts the one-time code in start_url without changing installed app identity", async () => {
     const response = launchManifestResponse(new Request(`https://www.maisonaffluency.com/mobile-manifest.json?token=${token}`));
     expect(await response.json()).toEqual({ ...base, start_url: `/?source=pwa&token=${token}` });

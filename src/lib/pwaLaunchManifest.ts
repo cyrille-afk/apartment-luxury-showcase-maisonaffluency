@@ -1,4 +1,4 @@
-import manifest from "../../public/manifest.json";
+import { pwaManifestBase as manifest } from "./pwaManifestBase";
 
 /** Only the short-lived QR credential format is accepted; redemption validates it. */
 export function isLaunchToken(token: string | null): token is string {
