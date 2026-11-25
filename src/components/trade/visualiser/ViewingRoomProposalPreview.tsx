@@ -96,7 +96,7 @@ export default function ViewingRoomProposalPreview({ open, onOpenChange, tierNam
           <p className="text-xs text-muted-foreground">Live Collection Total</p>
           <p aria-label="Preview Collection Total" className="font-display text-2xl">{money(total)}</p>
         </div>
-        {hasUnpriced && <p role="alert" className="text-xs text-destructive">Price confirmation is required for every piece before locking this proposal.</p>}
+        {hasUnpriced && <p role="status" className="text-xs text-muted-foreground">Pieces marked “Price to be confirmed” are excluded from the total; your advisor will confirm them separately.</p>}
         {feedback && <p role="status" className="text-xs text-muted-foreground">{feedback}</p>}
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button variant="outline" disabled={busy || exportingBlender} onClick={() => onOpenChange(false)}>Back to Collection</Button>
@@ -114,7 +114,7 @@ export default function ViewingRoomProposalPreview({ open, onOpenChange, tierNam
               {exportingBlender ? "Exporting Blender JSON…" : "Export Blender Scene JSON"}
             </Button>
           )}
-          <Button disabled={busy || exportingBlender || !selectedItems.length || hasUnpriced} onClick={onConfirm}>
+          <Button disabled={busy || exportingBlender || !selectedItems.length} onClick={onConfirm}>
             <Lock className="size-4 shrink-0" />
             {busy ? "Locking & preparing PDF…" : locked ? "Download Locked Proposal" : "Lock & Download Proposal"}
           </Button>

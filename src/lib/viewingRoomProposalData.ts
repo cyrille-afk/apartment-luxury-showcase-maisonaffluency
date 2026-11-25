@@ -29,12 +29,16 @@ export function normalizeProposalDetails(input: { clientName?: string | null; pr
   return { ...(name ? { clientName: name } : {}), ...(notes ? { projectNotes: notes } : {}) };
 }
 
-/** Only validated line prices enter the presentation; the package target is not its configured total. */
+/** Only validated line prices enter the presentation; the package target is not its configured total. Unpriced pieces stay out of the sum — never invented. */
 export function proposalConfiguredTotal(snapshot: ViewingRoomProposalSnapshot): number {
   return snapshot.items.reduce((sum, item) => {
-    if (item.retail_price == null || !Number.isFinite(item.retail_price) || item.retail_price < 0) throw new Error("A selected piece has no confirmed retail price.");
+    if (item.retail_price == null || !Number.isFinite(item.retail_price) || item.retail_price < 0) return sum;
     return sum + Math.round(item.retail_price * 100);
   }, 0);
+}
+
+export function proposalHasUnpricedItems(snapshot: ViewingRoomProposalSnapshot): boolean {
+  return snapshot.items.some(item => item.retail_price == null || !Number.isFinite(item.retail_price) || item.retail_price < 0);
 }
 
 export function proposalSelectedFinishes(item: ViewingRoomChoice) {

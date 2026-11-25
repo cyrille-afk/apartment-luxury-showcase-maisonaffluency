@@ -174,13 +174,22 @@ describe("Proposal preview step before locking", () => {
     expect(await screen.findByText("Blender scene JSON downloaded.")).toBeInTheDocument();
   });
 
-  it("blocks locking in the preview when any piece is awaiting price confirmation", async () => {
-    mount([{ ...sofaSlot, retail_price: null }], "Essential");
+  it("allows locking when a piece is awaiting price confirmation, noting the exclusion", async () => {
+    const unpricedSofa = { ...sofaSlot, retail_price: null };
+    lock.mockResolvedValue({ package: "Essential", currency: "USD", total: 350000, items: [unpricedSofa] });
+    download.mockResolvedValue(undefined);
+    mount([unpricedSofa], "Essential");
     await screen.findByRole("button", { name: "Review & Lock Proposal" });
     fireEvent.click(screen.getByRole("button", { name: "Review & Lock Proposal" }));
     const dialog = await screen.findByRole("dialog");
     expect(within(dialog).getByRole("heading", { name: "Essential Collection" })).toBeInTheDocument();
-    expect(within(dialog).getByRole("button", { name: "Lock & Download Proposal" })).toBeDisabled();
-    expect(within(dialog).getByRole("alert")).toHaveTextContent(/Price confirmation is required/);
+    expect(within(dialog).getByText("Price to be confirmed")).toBeInTheDocument();
+    expect(within(dialog).getByText(/excluded from the total/)).toBeInTheDocument();
+    const confirm = within(dialog).getByRole("button", { name: "Lock & Download Proposal" });
+    expect(confirm).toBeEnabled();
+    fireEvent.click(confirm);
+    await waitFor(() => expect(lock).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(download).toHaveBeenCalled());
+    expect(await screen.findByRole("button", { name: "Download Locked Proposal" })).toBeInTheDocument();
   });
 });
