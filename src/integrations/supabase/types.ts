@@ -589,6 +589,85 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_render_history: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          kind: string
+          metadata: Json
+          mode: string
+          project_id: string | null
+          project_name: string | null
+          prompt_note: string | null
+          proposal_id: string | null
+          quality_tier: string
+          request_id: string | null
+          result_image_url: string
+          source_image_url: string | null
+          style_preset: string | null
+          style_prompt: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          kind?: string
+          metadata?: Json
+          mode: string
+          project_id?: string | null
+          project_name?: string | null
+          prompt_note?: string | null
+          proposal_id?: string | null
+          quality_tier?: string
+          request_id?: string | null
+          result_image_url: string
+          source_image_url?: string | null
+          style_preset?: string | null
+          style_prompt?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          kind?: string
+          metadata?: Json
+          mode?: string
+          project_id?: string | null
+          project_name?: string | null
+          prompt_note?: string | null
+          proposal_id?: string | null
+          quality_tier?: string
+          request_id?: string | null
+          result_image_url?: string
+          source_image_url?: string | null
+          style_preset?: string | null
+          style_prompt?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_render_history_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_render_history_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "viewing_room_proposal_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_render_history_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "axonometric_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_response_cache: {
         Row: {
           completion_tokens: number | null

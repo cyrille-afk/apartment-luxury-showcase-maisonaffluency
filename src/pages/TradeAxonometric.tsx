@@ -26,7 +26,21 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inbox, CheckCircle2, Clock, ArrowRight, Save, Eye, EyeOff, PenTool, Search, FileInput, ExternalLink, Link2, X, Undo2, Redo2, Trash2, Upload, Timer } from "lucide-react";
+import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inbox, CheckCircle2, Clock, ArrowRight, Save, Eye, EyeOff, PenTool, Search, FileInput, ExternalLink, Link2, X, Undo2, Redo2, Trash2, Upload, Timer, History, FolderKanban, Columns2 } from "lucide-react";
+import { AiRenderHistoryPanel, type RenderHistoryProjectOption } from "@/components/trade/AiRenderHistoryPanel";
+import { AiRenderCompareDialog } from "@/components/trade/AiRenderCompareDialog";
+import {
+  extractRestorePayload,
+  filterRenderHistoryByScope,
+  isValidUuid,
+  parseRenderMetadata,
+  resolveComparePair,
+  toggleCompareSelection,
+  type AiRenderHistoryEntry,
+  type ProjectScopeFilter,
+  type QualityTier,
+  type RenderHistoryKind,
+} from "@/lib/aiRenderHistory";
 const AxonometricSceneEditor = lazy(() => import("@/components/trade/AxonometricSceneEditor"));
 
 const ProposalBuilder = lazy(() => import("@/components/trade/ProposalBuilder"));
@@ -228,16 +242,33 @@ const CategoryFilterBar = ({
 const TradeAxonometricWorkspace = () => {
   const activeProject = useActiveProject();
   const { isAdmin, rolesLoaded } = useAuth();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const loadProposal = useServerFn(getViewingRoomProposalForVisualiser);
   const publishToProposal = useServerFn(publishVisualiserToProposal);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const savedDraftRef = useRef<any>(readSavedDraft());
   const rawProposalId = searchParams.get("proposalId");
-  const proposalId = rawProposalId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawProposalId) ? rawProposalId : null;
+  const proposalId = isValidUuid(rawProposalId) ? rawProposalId : null;
+  const rawProjectId = searchParams.get("project");
+  const urlProjectId = isValidUuid(rawProjectId) ? rawProjectId : null;
   const [standaloneProposal, setStandaloneProposal] = useState<LinkedProposalState | null>(null);
   const linkedProposal = activeProject?.linkedProposal ?? standaloneProposal;
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
+    urlProjectId ??
+      (isValidUuid(activeProject?.state.projectId) ? activeProject.state.projectId : null) ??
+      (isValidUuid(savedDraftRef.current?.selectedProjectId) ? savedDraftRef.current.selectedProjectId : null),
+  );
+  const [historyScope, setHistoryScope] = useState<ProjectScopeFilter>(selectedProjectId ?? "all");
+  const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [compareOpen, setCompareOpen] = useState(false);
+  const [deletingHistoryId, setDeletingHistoryId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!urlProjectId) return;
+    setSelectedProjectId(urlProjectId);
+    setHistoryScope(urlProjectId);
+  }, [urlProjectId]);
 
   const [sourceImage, setSourceImage] = useState<string | null>(activeProject?.state.floorPlanUrl || savedDraftRef.current?.sourceImage || null);
   useEffect(() => { if (activeProject?.state.floorPlanUrl) setSourceImage(activeProject.state.floorPlanUrl); }, [activeProject?.state.floorPlanUrl]);
@@ -348,6 +379,7 @@ const TradeAxonometricWorkspace = () => {
     try {
       localStorage.setItem(AXONOMETRIC_DRAFT_KEY, JSON.stringify({
         savedAt: Date.now(),
+        selectedProjectId,
         sourceImage,
         mode,
         style,
@@ -377,7 +409,7 @@ const TradeAxonometricWorkspace = () => {
     } catch {
       // If storage quota is full, keep the UI running rather than interrupting the render.
     }
-  }, [sourceImage, mode, style, overlayImages, cadBlocks, technicalDrawingUrl, selectedProduct, result, history, activeRequestId, adminNotes, activeBrief, galleryTitle, galleryDesc, model3dUrl, model3dProjectName, model3dNotes, qualityTier, preloadedFavoriteProductIds, lockedLayoutUrl, lightingStrength, brightness, contrast, saturation, warmth]);
+  }, [selectedProjectId, sourceImage, mode, style, overlayImages, cadBlocks, technicalDrawingUrl, selectedProduct, result, history, activeRequestId, adminNotes, activeBrief, galleryTitle, galleryDesc, model3dUrl, model3dProjectName, model3dNotes, qualityTier, preloadedFavoriteProductIds, lockedLayoutUrl, lightingStrength, brightness, contrast, saturation, warmth]);
 
   useEffect(() => {
     if (draftRestoredRef.current) return;
@@ -615,6 +647,219 @@ const TradeAxonometricWorkspace = () => {
     enabled: isAdmin,
   });
 
+  // Fetch projects for render history grouping
+  const { data: studioProjects = [] } = useQuery<RenderHistoryProjectOption[]>({
+    queryKey: ["ai-render-studio-projects"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("projects")
+        .select("id, name, client_name")
+        .order("updated_at", { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      return (data || []) as RenderHistoryProjectOption[];
+    },
+    enabled: isAdmin,
+  });
+
+  // Fetch persistent per-project render history
+  const { data: renderHistory = [], isLoading: renderHistoryLoading } = useQuery<AiRenderHistoryEntry[]>({
+    queryKey: ["ai-render-history"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ai_render_history")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(200);
+      if (error) throw error;
+      return (data || []).map((row) => ({
+        ...row,
+        quality_tier: (row.quality_tier === "draft" || row.quality_tier === "premium" ? row.quality_tier : "standard") as QualityTier,
+        kind: (row.kind === "ai_edit" || row.kind === "scene_edit" ? row.kind : "generation") as RenderHistoryKind,
+        metadata: parseRenderMetadata(row.metadata),
+      }));
+    },
+    enabled: isAdmin,
+  });
+
+  const selectedProject = useMemo(
+    () => studioProjects.find((p) => p.id === selectedProjectId) ?? null,
+    [studioProjects, selectedProjectId],
+  );
+
+  const scopedHistoryCount = useMemo(
+    () => filterRenderHistoryByScope(renderHistory, selectedProjectId ?? "all").length,
+    [renderHistory, selectedProjectId],
+  );
+
+  const comparePair = useMemo(
+    () => resolveComparePair(renderHistory, compareIds),
+    [renderHistory, compareIds],
+  );
+
+  const handleProjectChange = useCallback(
+    (nextId: string | null) => {
+      setSelectedProjectId(nextId);
+      setHistoryScope(nextId ?? "all");
+      setSearchParams(
+        (prev) => {
+          const updated = new URLSearchParams(prev);
+          if (nextId) updated.set("project", nextId);
+          else updated.delete("project");
+          return updated;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
+
+  const persistRenderHistoryEntry = useCallback(
+    async (opts: {
+      resultImageUrl: string;
+      storedUrl: string | null;
+      mode: string;
+      kind: RenderHistoryKind;
+      promptNote?: string | null;
+      sourceImageUrl?: string | null;
+      sourceProduct?: SelectedProduct | null;
+      text?: string;
+    }) => {
+      try {
+        const userId = (await supabase.auth.getUser()).data.user?.id;
+        if (!userId) return;
+
+        let finalUrl = opts.storedUrl || opts.resultImageUrl;
+        if (!opts.storedUrl && finalUrl.startsWith("data:image/")) {
+          try {
+            const res = await fetch(finalUrl);
+            const blob = await res.blob();
+            const ext = blob.type.includes("jpeg") ? "jpg" : blob.type.includes("webp") ? "webp" : "png";
+            const fileName = `axonometric/history/${Date.now()}-${crypto.randomUUID()}.${ext}`;
+            const { error: upErr } = await supabase.storage
+              .from("assets")
+              .upload(fileName, blob, { contentType: blob.type || "image/png" });
+            if (!upErr) {
+              const { data: pub } = supabase.storage.from("assets").getPublicUrl(fileName);
+              finalUrl = pub.publicUrl;
+            }
+          } catch {
+            // keep original URL if upload fallback fails
+          }
+        }
+
+        const projectName =
+          selectedProject?.name ||
+          (linkedProposal ? `${linkedProposal.developerName} — ${linkedProposal.residenceName}` : null) ||
+          (activeRequestId ? (pendingRequests?.find((r: any) => r.id === activeRequestId)?.project_name || null) : null);
+
+        const { error } = await supabase.from("ai_render_history").insert({
+          created_by: userId,
+          project_id: selectedProjectId,
+          project_name: projectName,
+          proposal_id: linkedProposal?.proposalId ?? null,
+          request_id: activeRequestId || null,
+          source_image_url: opts.sourceImageUrl ?? sourceImage ?? null,
+          result_image_url: finalUrl,
+          mode: opts.mode,
+          style_preset: STYLE_PRESETS.find((s) => s.value === style)?.label || null,
+          style_prompt: style,
+          quality_tier: qualityTier,
+          prompt_note: opts.promptNote ? opts.promptNote.trim().slice(0, 1000) : null,
+          kind: opts.kind,
+          metadata: {
+            sourceProduct: opts.sourceProduct ?? null,
+            activeBrief,
+            overlayImages,
+            technicalDrawingUrl,
+            lockedLayoutUrl,
+            lightingStrength,
+            text: opts.text || "",
+          } as any,
+        });
+        if (error) throw error;
+        queryClient.invalidateQueries({ queryKey: ["ai-render-history"] });
+      } catch (err: any) {
+        console.warn("[ai-render-history] save failed:", err);
+        toast({
+          title: "Render not saved to history",
+          description: err?.message || "Could not record this generation in history.",
+          variant: "destructive",
+        });
+      }
+    },
+    [
+      selectedProject,
+      selectedProjectId,
+      linkedProposal,
+      activeRequestId,
+      pendingRequests,
+      sourceImage,
+      style,
+      qualityTier,
+      activeBrief,
+      overlayImages,
+      technicalDrawingUrl,
+      lockedLayoutUrl,
+      lightingStrength,
+      queryClient,
+      toast,
+    ],
+  );
+
+  const handleReopenHistoryEntry = useCallback(
+    (entry: AiRenderHistoryEntry) => {
+      const restored = extractRestorePayload(entry, STYLE_PRESETS[0].value);
+      setSourceImage(restored.sourceImage);
+      setMode(restored.mode);
+      setStyle(restored.stylePrompt);
+      setQualityTier(restored.qualityTier);
+      setSelectedProduct(restored.sourceProduct);
+      setActiveBrief(restored.activeBrief);
+      setOverlayImages(restored.overlayImages);
+      setTechnicalDrawingUrl(restored.technicalDrawingUrl);
+      setLockedLayoutUrl(restored.lockedLayoutUrl);
+      setLightingStrength(restored.lightingStrength);
+      const reopened: GenerationResult = {
+        imageUrl: restored.resultImageUrl,
+        storedUrl: restored.resultImageUrl,
+        text: restored.text,
+        sourceProduct: restored.sourceProduct,
+        mode: restored.mode,
+      };
+      setResult(reopened);
+      setHistory((prev) => [reopened, ...prev.filter((h) => (h.storedUrl || h.imageUrl) !== restored.resultImageUrl)].slice(0, 12));
+      setHistoryIndex(-1);
+      if (restored.projectId && restored.projectId !== selectedProjectId) {
+        handleProjectChange(restored.projectId);
+      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      toast({
+        title: "Render reopened",
+        description: entry.project_name ? `Loaded from ${entry.project_name}.` : "Previous render and settings restored.",
+      });
+    },
+    [selectedProjectId, handleProjectChange, toast],
+  );
+
+  const handleDeleteHistoryEntry = useCallback(
+    async (entry: AiRenderHistoryEntry) => {
+      setDeletingHistoryId(entry.id);
+      try {
+        const { error } = await supabase.from("ai_render_history").delete().eq("id", entry.id);
+        if (error) throw error;
+        setCompareIds((prev) => prev.filter((id) => id !== entry.id));
+        queryClient.invalidateQueries({ queryKey: ["ai-render-history"] });
+        toast({ title: "Removed from render history" });
+      } catch (err: any) {
+        toast({ title: "Delete failed", description: err?.message || "Could not remove render.", variant: "destructive" });
+      } finally {
+        setDeletingHistoryId(null);
+      }
+    },
+    [queryClient, toast],
+  );
+
   const currentRefStyle = referenceStyles?.find((r) => r.mode === mode);
 
   useEffect(() => {
@@ -736,6 +981,16 @@ const TradeAxonometricWorkspace = () => {
         mode,
       };
       pushResult(gen);
+      void persistRenderHistoryEntry({
+        resultImageUrl: data.imageUrl,
+        storedUrl: data.storedUrl ?? null,
+        mode,
+        kind: "generation",
+        promptNote: activeBrief.briefNotes || activeBrief.roomType || null,
+        sourceImageUrl: sourceImage,
+        sourceProduct: selectedProduct,
+        text: data.text,
+      });
       toast({ title: "Axonometric view generated" });
 
       // Auto-generate empty room for Proposal Builder
@@ -824,7 +1079,7 @@ const TradeAxonometricWorkspace = () => {
         description: galleryDesc.trim().slice(0, 500) || null,
         image_url: imageUrl,
         style_preset: STYLE_PRESETS.find(s => s.value === style)?.label || null,
-        project_name: linked ? `${linked.developerName} — ${linked.residenceName}` : (activeRequestId ? (pendingRequests?.find((r: any) => r.id === activeRequestId)?.project_name || null) : null),
+        project_name: linked ? `${linked.developerName} — ${linked.residenceName}` : (selectedProject?.name || (activeRequestId ? (pendingRequests?.find((r: any) => r.id === activeRequestId)?.project_name || null) : null)),
         request_id: activeRequestId || null,
         is_published: publish,
       });
@@ -951,6 +1206,16 @@ const TradeAxonometricWorkspace = () => {
         mode: result.mode,
       };
       pushResult(gen);
+      void persistRenderHistoryEntry({
+        resultImageUrl: data.imageUrl,
+        storedUrl: data.storedUrl ?? null,
+        mode: body.mode || result.mode,
+        kind: "ai_edit",
+        promptNote: userMsg + productLabel,
+        sourceImageUrl: sourceImage,
+        sourceProduct: result.sourceProduct,
+        text: data.text,
+      });
       setAiHistory((prev) => [...prev, { role: "ai", text: userMsg, imageUrl: data.storedUrl || data.imageUrl }]);
       setTimeout(() => aiChatRef.current?.scrollTo({ top: aiChatRef.current.scrollHeight, behavior: "smooth" }), 100);
     } catch (e: any) {
@@ -1046,6 +1311,19 @@ const TradeAxonometricWorkspace = () => {
               </Button>
             )}
             <Button
+              variant="outline"
+              size="sm"
+              onClick={() => document.getElementById("render-history")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+            >
+              <History className="w-3.5 h-3.5 mr-1.5" />
+              Render History
+              {scopedHistoryCount > 0 && (
+                <span className="ml-1.5 inline-flex items-center justify-center min-w-5 h-5 px-1 rounded-full bg-muted text-muted-foreground text-[10px] font-medium">
+                  {scopedHistoryCount}
+                </span>
+              )}
+            </Button>
+            <Button
               variant={showDrafts ? "default" : "outline"}
               size="sm"
               onClick={() => { setShowDrafts(!showDrafts); if (!showDrafts) { setShowQueue(false); setShow3dSubmit(false); } }}
@@ -1081,6 +1359,37 @@ const TradeAxonometricWorkspace = () => {
             </Button>
           </div>
         </SectionHero>
+
+        {/* Active Project Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-muted/20 px-4 py-3">
+          <div className="flex flex-wrap items-center gap-2.5 min-w-0">
+            <FolderKanban className="w-4 h-4 text-muted-foreground shrink-0" />
+            <label htmlFor="ai-studio-active-project" className="font-display text-xs text-foreground">
+              Project
+            </label>
+            <select
+              id="ai-studio-active-project"
+              value={selectedProjectId ?? ""}
+              onChange={(e) => handleProjectChange(e.target.value || null)}
+              className="h-8 max-w-[260px] rounded-md border border-border bg-background px-2.5 font-body text-xs text-foreground focus:outline-hidden focus:ring-1 focus:ring-foreground/20"
+            >
+              <option value="">Unassigned (No project)</option>
+              {studioProjects.map((project) => (
+                <option key={project.id} value={project.id}>
+                  {project.name}{project.client_name ? ` — ${project.client_name}` : ""}
+                </option>
+              ))}
+            </select>
+            <span className="font-body text-[11px] text-muted-foreground">
+              New generations save automatically to {selectedProject ? selectedProject.name : "Unassigned history"}.
+            </span>
+          </div>
+          {comparePair && (
+            <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => setCompareOpen(true)}>
+              <Columns2 className="w-3.5 h-3.5 mr-1.5" />Compare Selected (2)
+            </Button>
+          )}
+        </div>
 
         {/* Request Queue */}
         {showQueue && pendingRequests && pendingRequests.length > 0 && (
@@ -2281,7 +2590,7 @@ const TradeAxonometricWorkspace = () => {
             {/* History */}
             {history.length > 1 && (
               <div className="border border-border rounded-lg p-5 space-y-3">
-                <h2 className="font-display text-sm text-foreground">Generation History</h2>
+                <h2 className="font-display text-sm text-foreground">Session Versions</h2>
                 <div className="grid grid-cols-4 gap-2">
                   {history.map((h, i) => (
                     <button
@@ -2303,7 +2612,31 @@ const TradeAxonometricWorkspace = () => {
             )}
           </div>
         </div>
+
+        {/* Persistent Per-Project Render History */}
+        <AiRenderHistoryPanel
+          entries={renderHistory}
+          loading={renderHistoryLoading}
+          projects={studioProjects}
+          scope={historyScope}
+          onScopeChange={setHistoryScope}
+          activeResultUrl={result ? (result.storedUrl || result.imageUrl) : null}
+          compareIds={compareIds}
+          onToggleCompare={(id) => setCompareIds((prev) => toggleCompareSelection(prev, id))}
+          onOpenCompare={() => setCompareOpen(true)}
+          onClearCompare={() => setCompareIds([])}
+          onReopen={handleReopenHistoryEntry}
+          onDelete={handleDeleteHistoryEntry}
+          deletingId={deletingHistoryId}
+        />
       </div>
+
+      <AiRenderCompareDialog
+        open={compareOpen && !!comparePair}
+        onOpenChange={setCompareOpen}
+        pair={comparePair}
+        onReopen={handleReopenHistoryEntry}
+      />
 
       {/* Scene Editor */}
       {showSceneEditor && result && (
@@ -2321,6 +2654,16 @@ const TradeAxonometricWorkspace = () => {
                 mode: "composite",
               };
               pushResult(gen);
+              void persistRenderHistoryEntry({
+                resultImageUrl: res.imageUrl,
+                storedUrl: res.storedUrl ?? null,
+                mode: "composite",
+                kind: "scene_edit",
+                promptNote: "Scene editor composite",
+                sourceImageUrl: sourceImage,
+                sourceProduct: result.sourceProduct,
+                text: res.text,
+              });
               setShowSceneEditor(false);
             }}
           />

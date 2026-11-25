@@ -24,6 +24,7 @@ import { useVisualiserHandoffScope } from "@/lib/visualiserHandoffScope";
 import { writeSharedRoomLayout } from "@/lib/sharedRoomLayout";
 import { buildVisualiserProposalStaging, sharedProposalPath } from "@/lib/viewingRoomVisualiser";
 import { getViewingRoomProposalForVisualiser } from "@/lib/viewingRoomVisualiser.functions";
+import { buildImageStudioHref } from "@/lib/aiRenderHistory";
 const Sandbox = lazy(() => import("./TradeVisualiser"));
 const WalkthroughStudio = lazy(() => import("./TradeAILayoutStudio"));
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -119,7 +120,7 @@ function WorkspacePanels({ proposalId }: { proposalId: string | null }) {
   };
 
   const tabs: { value: WorkspaceView; label: string; icon: typeof Map }[] = [{ value: "plan", label: "2D Layout Plan", icon: Map }, { value: "axonometric", label: "3D Isometric View", icon: Layers }, { value: "sandbox", label: "Eye-Level Sandbox", icon: Armchair }, { value: "walkthrough", label: "Walkthrough & Video", icon: Clapperboard }];
-  const imageStudioHref = proposalId ? `/tools/ai-render-studio?proposalId=${encodeURIComponent(proposalId)}` : "/tools/ai-render-studio";
+  const imageStudioHref = buildImageStudioHref({ proposalId, projectId: state.projectId });
   return <div className="flex h-full min-h-0 flex-col bg-background">
     <div className="relative z-40 w-full shrink-0 border-b border-border/40 bg-background px-3 py-3 sm:px-6">
       <ToolsBreadcrumb className="mb-0" />

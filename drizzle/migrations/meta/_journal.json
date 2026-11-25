@@ -2374,6 +2374,13 @@
       "when": 1795529096857,
       "tag": "0338_viewing_room_proposal_visualiser_bridge",
       "breakpoints": true
+    },
+    {
+      "idx": 339,
+      "version": "7",
+      "when": 1795569097682,
+      "tag": "0339_create_ai_render_history",
+      "breakpoints": true
     }
   ]
 }
