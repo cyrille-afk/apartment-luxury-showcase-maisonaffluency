@@ -2381,6 +2381,13 @@
       "when": 1795569097682,
       "tag": "0339_create_ai_render_history",
       "breakpoints": true
+    },
+    {
+      "idx": 340,
+      "version": "7",
+      "when": 1795687948542,
+      "tag": "0340_allow_admins_delete_axonometric_requests",
+      "breakpoints": true
     }
   ]
 }

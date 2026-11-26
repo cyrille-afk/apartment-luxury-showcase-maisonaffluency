@@ -29,6 +29,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inbox, CheckCircle2, Clock, ArrowRight, Save, Eye, EyeOff, PenTool, Search, FileInput, ExternalLink, Link2, X, Undo2, Redo2, Trash2, Upload, Timer, History, FolderKanban, Columns2 } from "lucide-react";
 import { AiRenderHistoryPanel, type RenderHistoryProjectOption } from "@/components/trade/AiRenderHistoryPanel";
 import { AiRenderCompareDialog } from "@/components/trade/AiRenderCompareDialog";
+import { AiRenderPendingQueue, type PendingAxonometricRequest } from "@/components/trade/AiRenderPendingQueue";
 import {
   extractRestorePayload,
   filterRenderHistoryByScope,
@@ -307,6 +308,7 @@ const TradeAxonometricWorkspace = () => {
   const [adminNotes, setAdminNotes] = useState(savedDraftRef.current?.adminNotes || "");
   const [activeBrief, setActiveBrief] = useState<Record<string, string>>(savedDraftRef.current?.activeBrief || {});
   const [showQueue, setShowQueue] = useState(true);
+  const [deletingRequestId, setDeletingRequestId] = useState<string | null>(null);
   const [galleryTitle, setGalleryTitle] = useState(savedDraftRef.current?.galleryTitle || "");
   const [galleryDesc, setGalleryDesc] = useState(savedDraftRef.current?.galleryDesc || "");
   const [savingToGallery, setSavingToGallery] = useState(false);
@@ -1065,6 +1067,45 @@ const TradeAxonometricWorkspace = () => {
     }
   };
 
+  const handleDeletePendingRequest = useCallback(
+    async (req: PendingAxonometricRequest): Promise<boolean> => {
+      if (!req.id) return false;
+      setDeletingRequestId(req.id);
+      try {
+        const { data, error } = await (supabase as any)
+          .from("axonometric_requests")
+          .delete()
+          .eq("id", req.id)
+          .select("id");
+        if (error) throw error;
+        if (!Array.isArray(data) || data.length === 0) {
+          throw new Error("Request could not be deleted (missing permission or already removed).");
+        }
+        if (activeRequestId === req.id) {
+          setActiveRequestId(null);
+          resetWithFreshSourceImage(null, setSourceImage, setResult, setHistory, setLockedLayoutUrl);
+          setAdminNotes("");
+          setActiveBrief({});
+          setPreloadedFavoriteProductIds([]);
+        }
+        queryClient.invalidateQueries({ queryKey: ["axonometric-requests-admin"] });
+        queryClient.invalidateQueries({ queryKey: ["axonometric-requests"] });
+        toast({ title: "Request deleted" });
+        return true;
+      } catch (err: any) {
+        toast({
+          title: "Delete failed",
+          description: err?.message || "Could not delete request.",
+          variant: "destructive",
+        });
+        return false;
+      } finally {
+        setDeletingRequestId(null);
+      }
+    },
+    [activeRequestId, queryClient, toast],
+  );
+
   const saveToGallery = async (publish: boolean) => {
     if (!result) return;
     const imageUrl = result.storedUrl || result.imageUrl;
@@ -1392,58 +1433,20 @@ const TradeAxonometricWorkspace = () => {
         </div>
 
         {/* Request Queue */}
-        {showQueue && pendingRequests && pendingRequests.length > 0 && (
-          <div className="border border-border rounded-lg divide-y divide-border">
-            <div className="px-5 py-3 bg-muted/30">
-              <h2 className="font-display text-sm text-foreground">Pending Requests</h2>
-            </div>
-            {pendingRequests.map((req: any) => {
-              const profile = req.profiles;
-              const userName = profile ? `${profile.first_name} ${profile.last_name}`.trim() : "Unknown";
-              return (
-                <div key={req.id} className="flex items-center gap-4 px-5 py-3 hover:bg-muted/20 transition-colors">
-                  {req.request_type === "3d_model" ? (
-                    <div className="w-16 h-16 rounded border border-border shrink-0 flex items-center justify-center bg-muted/30">
-                      <Upload className="w-6 h-6 text-muted-foreground" />
-                    </div>
-                  ) : (
-                    <img src={req.image_url} alt="" className="w-16 h-16 object-cover rounded border border-border shrink-0" />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-display text-sm text-foreground">{req.project_name || "Untitled"}</p>
-                    <p className="font-body text-xs text-muted-foreground">
-                      {userName}{profile?.company ? ` · ${profile.company}` : ""} · {req.request_type === "3d_model" ? "3D Model" : req.request_type} · {format(new Date(req.created_at), "d MMM yyyy")}
-                    </p>
-                    {req.notes && <p className="font-body text-xs text-muted-foreground/70 line-clamp-1 mt-0.5">{req.notes}</p>}
-                    {Array.isArray(req.linked_favorite_product_ids) && req.linked_favorite_product_ids.length > 0 && (
-                      <p className="font-body text-[10px] text-[hsl(var(--gold))] mt-0.5">
-                        ♥ {req.linked_favorite_product_ids.length} favorite{req.linked_favorite_product_ids.length !== 1 ? "s" : ""} attached
-                      </p>
-                    )}
-                  </div>
-                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${req.status === "in_progress" ? "bg-blue-500/10 text-blue-700" : "bg-yellow-500/10 text-yellow-700"}`}>
-                    {req.status === "in_progress" ? "In Progress" : "Pending"}
-                  </span>
-                  {req.request_type === "3d_model" ? (
-                    <Button variant="outline" size="sm" onClick={() => forceDownload(req.image_url, `3d-model-${req.project_name || Date.now()}.${req.image_url.split('.').pop()?.split('?')[0] || 'zip'}`)}>
-                      <Download className="w-3.5 h-3.5 mr-1" />Download
-                    </Button>
-                  ) : (
-                    <Button variant="outline" size="sm" onClick={() => loadFromQueue(req)}>
-                      <ArrowRight className="w-3.5 h-3.5 mr-1" />Process
-                    </Button>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {showQueue && (!pendingRequests || pendingRequests.length === 0) && (
-          <div className="border border-dashed border-border rounded-lg py-12 flex flex-col items-center justify-center gap-2">
-            <CheckCircle2 className="w-6 h-6 text-muted-foreground/40" />
-            <p className="font-body text-sm text-muted-foreground">No pending requests — all caught up</p>
-          </div>
+        {showQueue && (
+          <AiRenderPendingQueue
+            requests={(pendingRequests as PendingAxonometricRequest[] | undefined) || []}
+            activeRequestId={activeRequestId}
+            deletingId={deletingRequestId}
+            onProcess={loadFromQueue}
+            onDownload3dModel={(req) =>
+              forceDownload(
+                req.image_url,
+                `3d-model-${req.project_name || Date.now()}.${req.image_url.split(".").pop()?.split("?")[0] || "zip"}`,
+              )
+            }
+            onDelete={handleDeletePendingRequest}
+          />
         )}
 
         {/* My Drafts Panel */}
