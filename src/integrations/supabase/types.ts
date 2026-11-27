@@ -11100,6 +11100,7 @@ export type Database = {
           id: string
           instagram_handle: string | null
           instagram_retry_after: string | null
+          instagram_retry_blocked_source: string | null
           instagram_retry_claimed_at: string | null
           intent: string | null
           job_title: string | null
@@ -11134,6 +11135,7 @@ export type Database = {
           id?: string
           instagram_handle?: string | null
           instagram_retry_after?: string | null
+          instagram_retry_blocked_source?: string | null
           instagram_retry_claimed_at?: string | null
           intent?: string | null
           job_title?: string | null
@@ -11168,6 +11170,7 @@ export type Database = {
           id?: string
           instagram_handle?: string | null
           instagram_retry_after?: string | null
+          instagram_retry_blocked_source?: string | null
           instagram_retry_claimed_at?: string | null
           intent?: string | null
           job_title?: string | null
@@ -14229,6 +14232,10 @@ export type Database = {
         Returns: boolean
       }
       _hotspot_public_ids: { Args: never; Returns: string[] }
+      _instagram_retry_eligible: {
+        Args: { a: Database["public"]["Tables"]["trade_accounts"]["Row"] }
+        Returns: boolean
+      }
       _internal_job_token: { Args: never; Returns: string }
       _norm_board_path: { Args: { _p: string }; Returns: string }
       _norm_designer_name: { Args: { txt: string }; Returns: string }

@@ -8,6 +8,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { checkInstagram, getMetaToken } from "../_shared/metaToken.ts";
 import { instagramRetrievalFailure } from "../_shared/instagramRetrievalFailure.ts";
+import { shouldRetryInstagramAccount } from "../_shared/instagramRetry.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 import { requireAdmin } from "../_shared/auth.ts";
 import { modelFor } from "../_shared/aiModels.ts";
@@ -92,11 +93,15 @@ async function instagramViaGraph(handle: string): Promise<ScrapeResult> {
     const igId = (acc?.data ?? []).map((p: any) => p?.instagram_business_account?.id).find(Boolean);
     if (!igId) return { text: "", images: [], notes: [`Instagram lookup unavailable (${acc?.error?.message ?? "no linked IG business account"})`] };
     const fields = `business_discovery.username(${encodeURIComponent(handle)}){username,name,biography,website,followers_count,media.limit(18){media_type,media_url,thumbnail_url,caption}}`;
-    const d = await fetchWithRetry(`${G}/${igId}?fields=${fields}&access_token=${token}`, {
+    const discoveryResponse = await fetchWithRetry(`${G}/${igId}?fields=${fields}&access_token=${token}`, {
       headers: { Accept: "application/json" },
-    }).then((r) => r.json());
+    });
+    const d = await discoveryResponse.json();
     const bd = d?.business_discovery;
-    if (!bd) return { text: "", images: [], notes: [`Instagram @${handle}: ${d?.error?.message ?? "not found or not a business/creator account"}`] };
+    if (!bd) {
+      const temporary = discoveryResponse.status === 429 || discoveryResponse.status >= 500 || d?.error?.is_transient === true || [1, 2, 4, 17, 32, 190, 613].includes(d?.error?.code);
+      return { text: "", images: [], notes: [`Instagram ${temporary ? "temporary lookup failure " : ""}@${handle}: ${d?.error?.message ?? "not found or not a business/creator account"}`] };
+    }
     const media = (bd.media?.data ?? []) as any[];
     const images = media
       .map((m) => (m.media_type === "VIDEO" ? m.thumbnail_url : m.media_url))
@@ -264,16 +269,16 @@ serve(async (req) => {
   const id = String(body.trade_account_id ?? "");
   if (!UUID_RE.test(id)) return json({ error: "trade_account_id required" }, 400);
 
-  const apiKey = Deno.env.get("LOVABLE_API_KEY");
-  if (!apiKey) return json({ error: "AI is not configured" }, 500);
-
   const supabase = createClient(backendUrl, serviceKey, { auth: { persistSession: false } });
 
   const { data: account } = await supabase
-    .from("trade_accounts").select("id, studio_name, website_or_ig, email, business_reg_number, radar_status").eq("id", id).maybeSingle();
+    .from("trade_accounts").select("id, studio_name, website_or_ig, email, business_reg_number, status, radar_status, instagram_retry_blocked_source").eq("id", id).maybeSingle();
   if (!account) return json({ error: "Trade account not found" }, 404);
   const automaticInstagramRetry = isInternal && body.instagram_retry === true;
-  if (automaticInstagramRetry && (account.radar_status !== "unverified" || !resolveStudioSource(account.website_or_ig).instagramHandle)) return json({ ok: true, skipped: "not unverified Instagram" });
+  if (automaticInstagramRetry && !shouldRetryInstagramAccount(account)) return json({ ok: true, skipped: "not eligible for automatic Instagram retry" });
+
+  const apiKey = Deno.env.get("LOVABLE_API_KEY");
+  if (!apiKey) return json({ error: "AI is not configured" }, 500);
 
   // Admin re-run also re-scores the AI Critical Radar if it never finished.
   if (!isInternal && account.radar_status !== "scored") {
@@ -335,8 +340,14 @@ serve(async (req) => {
   if (!text && images.length === 0 && screenshots.length === 0) {
     if (resolveStudioSource(account.website_or_ig).instagramHandle) {
       const connection = await checkInstagram(await getMetaToken());
-      const { message: error } = instagramRetrievalFailure(connection, notes);
+      const { message: error, permanentHandleError } = instagramRetrievalFailure(connection, notes);
       await supabase.from("studio_aesthetic_dna").update({ status: "failed", error }).eq("trade_account_id", id);
+      if (permanentHandleError) {
+        const { error: blockError } = await supabase.from("trade_accounts")
+          .update({ instagram_retry_blocked_source: account.website_or_ig })
+          .eq("id", id).eq("website_or_ig", account.website_or_ig);
+        if (blockError) throw blockError;
+      }
       const update = unverifiedPortfolioUpdate(Boolean(dna?.analyzed_at));
       if (Object.keys(update).length) await supabase.from("trade_accounts").update(update).eq("id", id);
       await logRun("unverified", error);

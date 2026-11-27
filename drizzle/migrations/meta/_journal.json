@@ -2388,6 +2388,13 @@
       "when": 1795687948542,
       "tag": "0340_allow_admins_delete_axonometric_requests",
       "breakpoints": true
+    },
+    {
+      "idx": 341,
+      "version": "7",
+      "when": 1795745089845,
+      "tag": "0341_stop_ineligible_instagram_retries",
+      "breakpoints": true
     }
   ]
 }

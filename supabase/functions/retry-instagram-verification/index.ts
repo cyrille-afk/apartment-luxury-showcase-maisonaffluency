@@ -34,8 +34,8 @@ Deno.serve(async (req) => {
         await db.from("trade_accounts").update({ instagram_retry_claimed_at: null }).eq("id", id);
       }
     });
-    // Continue remaining due work; claimed failures wait until tomorrow.
-    if (result.attempted > 0) await db.rpc("instagram_retry_dispatch");
+    // Dispatch checks due work and disarms an empty eligible queue, even after zero claims.
+    if (!result.paused) await db.rpc("instagram_retry_dispatch");
     return json({ ...result, connection: check.state });
   } catch { return json({ error: "Verification retry temporarily unavailable; studio scores unchanged" }, 503); }
 });

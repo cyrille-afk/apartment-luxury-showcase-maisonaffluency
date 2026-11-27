@@ -1,5 +1,9 @@
 # Roadmap
 
+## Instagram automatic retry eligibility
+- [x] Exclude approved accounts and explicit permanent Instagram handle errors from claims, dispatch and analyzer; retain outage recovery and corrected-handle retries.
+- [x] Both functions deployed and boot/live checks pass; 16 regressions pass. Live private eligibility confirms approved/permanent=false and outage/corrected=true. Existing approved @gregarbonville is source-blocked, scheduled retry jobs=0, and an authenticated internal retry call returns HTTP 200, working connection, attempted=0. Scores and approval unchanged.
+
 ## Pre-publish AR export validation
 - [x] Audit the dated, price-free 35-model catalogue inventory using the shared viewer export transform and decoded original geometry. Flag unrealistic bounds, size/axis mismatches, sideways/inverted audited up directions and missing evidence; no models or catalogue data changed.
 - [x] Production build runs the visible warning check before bundling; the separate strict check returns nonzero for flagged/unconfirmed exports. Saved report: 10 flagged, 23 unconfirmed, GUM/IBO verified. All 62 focused regressions pass; live strict CLI passes both corrected sources, rejects an inverted GUM audit, and rejects the full flagged inventory. Preview build OK. Inventory must be refreshed for new/replaced catalogue revisions; physical AR placement and remediation of other models are outside this request.
