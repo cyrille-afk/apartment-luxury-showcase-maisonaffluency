@@ -23,6 +23,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useExportCurrency } from "@/lib/displayMoney";
 import PrivateTradeImage from "@/components/trade/PrivateTradeImage";
+import { prepareAiRenderImages } from "@/lib/aiRenderImages";
 
 const toAbsoluteUrl = (url: string | null | undefined): string | null => {
   if (!url) return null;
@@ -302,14 +303,14 @@ export default function ProposalBuilder({
       }));
 
       const { data, error } = await supabase.functions.invoke("axonometric-generate", {
-        body: {
+        body: await prepareAiRenderImages({
           imageUrl: toAbsoluteUrl(emptyRoomUrl),
           referenceImageUrl: toAbsoluteUrl(furnishedImageUrl),
           mode: "proposal_render",
           style,
           qualityTier,
           placements,
-        },
+        }),
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
@@ -358,7 +359,7 @@ export default function ProposalBuilder({
       };
 
       const { data, error } = await supabase.functions.invoke("axonometric-generate", {
-        body: {
+        body: await prepareAiRenderImages({
           imageUrl: toAbsoluteUrl(proposalResult),
           referenceImageUrl: toAbsoluteUrl(furnishedImageUrl),
           mode: "proposal_refine",
@@ -367,7 +368,7 @@ export default function ProposalBuilder({
           placements,
           refinementPrompt: refinementPrompt.trim(),
           markerHints,
-        },
+        }),
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
@@ -424,12 +425,12 @@ export default function ProposalBuilder({
       }));
 
       const { data, error } = await supabase.functions.invoke("axonometric-generate", {
-        body: {
+        body: await prepareAiRenderImages({
           imageUrl: toAbsoluteUrl(proposalResult),
           mode: "cad_dimension_overlay",
           qualityTier,
           placements,
-        },
+        }),
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 

@@ -1,5 +1,10 @@
 # Roadmap
 
+## Catalogue coffee table render transport
+- [x] Confirmed the actual 06:34 failure: selected Praia da Granja photo used an authenticated preview URL, rejected by the image service. prepareAiRenderImages embeds local/preview photo bytes only in requests, leaving cloud links and stored selections unchanged.
+- [x] Real signed-in Praia da Granja selection → Generate Proposal succeeds and reads back a generated image with no page errors; request contains photo bytes, not a preview URL. 23 regressions and build pass. Image generation succeeds; exact furniture likeness/placement is not guaranteed.
+- [x] Rule: every selected furniture photo must reach the render service. Read/fixed Proposal Builder generation/refinement/CAD audit, Scene Editor, main Studio generation/swaps/textures/overlays, Multi-View and Admin CAD QA. History/queue/draft reopen feed these same callers; no separate database/background generation path. No catalogue, permissions, settings or settled records changed.
+
 ## Proposal Builder empty-floor workflow
 - [x] Proposal Builder opens in a fullscreen portal; explicit Create Empty Room/retry works for reopened/history/draft renders, with exact-render-bound template persistence. Scene Editor shares the portal fix; phone header and catalogue grid fit.
 - [x] Real signed-in Residence 01: builder visible, one successful clean_room generation, catalogue selection enables Generate Proposal, empty floor survives refresh; desktop/phone inspected, no page errors, 20 tests/build pass. Final furnished proposal generation was not rerun.

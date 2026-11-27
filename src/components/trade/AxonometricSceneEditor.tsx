@@ -3,6 +3,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { supabase } from "@/integrations/supabase/client";
+import { prepareAiRenderImages } from "@/lib/aiRenderImages";
 
 const toAbsoluteUrl = (url: string | null | undefined): string | null => {
   if (!url) return null;
@@ -236,14 +237,14 @@ const AxonometricSceneEditor = ({ imageUrl, style, onClose, onResult }: Props) =
       }));
 
       const { data, error } = await supabase.functions.invoke("axonometric-generate", {
-        body: {
+        body: await prepareAiRenderImages({
           imageUrl: toAbsoluteUrl(imageUrl),
           mode: "scene_edit",
           style,
           maskDataUrl,
           placements,
           overlayImages: placedProducts.map((p) => toAbsoluteUrl(p.image_url)).filter(Boolean),
-        },
+        }),
       });
 
       if (error) throw error;

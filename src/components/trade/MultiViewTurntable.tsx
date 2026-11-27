@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { prepareAiRenderImages } from "@/lib/aiRenderImages";
 import { toast } from "@/hooks/use-toast";
 
 type View = { label: string; azimuth: number; elevation: number };
@@ -164,7 +165,7 @@ export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View"
       const n = views.length;
       const gridLayout = n === 4 ? "2x2" : n === 6 ? "3x2" : `${n}x1`;
       const { data, error } = await supabase.functions.invoke("axonometric-generate", {
-        body: {
+        body: await prepareAiRenderImages({
           mode: "multi_view",
           imageUrl: sourceImageUrl,
           views: views.map((v) => ({
@@ -174,7 +175,7 @@ export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View"
           })),
           gridLayout,
           qualityTier: "standard",
-        },
+        }),
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);

@@ -10,6 +10,7 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useNavigate, useSearchParams } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
+import { prepareAiRenderImages } from "@/lib/aiRenderImages";
 import { AI_RENDER_DRAFT_KEY, compactAiRenderDraft, saveAiRenderDraft } from "@/lib/aiRenderDraft";
 
 /** Ensure image URLs are absolute so the AI gateway can fetch them */
@@ -622,6 +623,7 @@ const TradeAxonometricWorkspace = () => {
     /(rate limit|too many requests|try again shortly|please wait|429)/i.test(message);
 
   const invokeAxonometricGenerate = async (body: any, accessToken?: string, maxRetries = 1) => {
+    const preparedBody = await prepareAiRenderImages(body);
     const timeoutMs = 120000;
     let lastMessage = "Generation failed";
 
@@ -629,7 +631,7 @@ const TradeAxonometricWorkspace = () => {
       try {
         const invokePromise = supabase.functions
           .invoke("axonometric-generate", {
-            body,
+            body: preparedBody,
             headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
           })
           .then(async ({ data, error }) => {

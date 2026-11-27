@@ -1,4 +1,5 @@
 # src/lib rules
+- AI render callers use prepareAiRenderImages for transient local/preview photo bytes; cloud links remain unchanged and bytes never enter drafts — external models cannot fetch protected preview assets.
 - Private-room proposals use validated retail line sums and selected axis materials, embedded editorial/body fonts and exact A4 page capture through appPdfDownload; two-item pages prevent splitting and supplier defaults never become selected finishes.
 - Customer saves: owner deltas; clear on logout.
 - Editorial drawer framing uses model-viewer's recomputed bounds and public orientation/target API with category-scoped Z-up detection and known exporter corrections — keeps shared material handling and other viewers unchanged.

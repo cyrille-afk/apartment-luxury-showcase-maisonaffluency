@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
+import { prepareAiRenderImages } from "@/lib/aiRenderImages";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -309,12 +310,12 @@ export default function TradeAdminAxonometricCadQa() {
         }
 
         const { data, error } = await supabase.functions.invoke("axonometric-generate", {
-          body: {
+          body: await prepareAiRenderImages({
             imageUrl: item.result_image_url,
             mode: "cad_dimension_overlay",
             qualityTier: "draft",
             placements,
-          },
+          }),
           headers: { Authorization: `Bearer ${accessToken}` },
         });
         if (error) throw new Error(error.message);
