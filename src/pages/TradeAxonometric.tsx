@@ -38,6 +38,14 @@ import {
   type SavedReferenceStyle,
 } from "@/lib/aiRenderReferenceStyle";
 import {
+  EMPTY_SCOPED_BRIEF,
+  hasActiveCreativeBrief,
+  resolveBriefAfterSourceChange,
+  restoreScopedBrief,
+  type CreativeBriefOrigin,
+  type ScopedCreativeBriefState,
+} from "@/lib/aiRenderBrief";
+import {
   extractRestorePayload,
   filterRenderHistoryByScope,
   isValidUuid,
@@ -278,8 +286,18 @@ const TradeAxonometricWorkspace = () => {
     setHistoryScope(urlProjectId);
   }, [urlProjectId]);
 
-  const [sourceImage, setSourceImage] = useState<string | null>(activeProject?.state.floorPlanUrl || savedDraftRef.current?.sourceImage || null);
-  useEffect(() => { if (activeProject?.state.floorPlanUrl) setSourceImage(activeProject.state.floorPlanUrl); }, [activeProject?.state.floorPlanUrl]);
+  const initialSourceImage = activeProject?.state.floorPlanUrl || savedDraftRef.current?.sourceImage || null;
+  const initialScopedBrief = useMemo(
+    () => restoreScopedBrief(savedDraftRef.current, initialSourceImage),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+  const [sourceImage, setSourceImage] = useState<string | null>(initialSourceImage);
+  useEffect(() => {
+    if (!activeProject?.state.floorPlanUrl) return;
+    setSourceImage(activeProject.state.floorPlanUrl);
+    setScopedBrief((prev) => resolveBriefAfterSourceChange(prev, activeProject.state.floorPlanUrl || null));
+  }, [activeProject?.state.floorPlanUrl]);
   useEffect(() => {
     if (!proposalId || activeProject?.linkedProposal || !rolesLoaded || !isAdmin) return;
     let cancelled = false;
@@ -288,7 +306,10 @@ const TradeAxonometricWorkspace = () => {
       if (cancelled) return;
       const staged = buildVisualiserProposalStaging(payload);
       setStandaloneProposal(staged.linkedProposal);
-      if (staged.floorPlanUrl) setSourceImage(staged.floorPlanUrl);
+      if (staged.floorPlanUrl) {
+        setSourceImage(staged.floorPlanUrl);
+        setScopedBrief(EMPTY_SCOPED_BRIEF);
+      }
     })().catch(() => {
       if (!cancelled) toast({ title: "Could not load linked proposal", variant: "destructive" });
     });
@@ -313,7 +334,17 @@ const TradeAxonometricWorkspace = () => {
   const [historyIndex, setHistoryIndex] = useState(-1); // -1 = no history navigated
   const [activeRequestId, setActiveRequestId] = useState<string | null>(savedDraftRef.current?.activeRequestId || null);
   const [adminNotes, setAdminNotes] = useState(savedDraftRef.current?.adminNotes || "");
-  const [activeBrief, setActiveBrief] = useState<Record<string, string>>(savedDraftRef.current?.activeBrief || {});
+  const [scopedBrief, setScopedBrief] = useState<ScopedCreativeBriefState>(initialScopedBrief);
+  const activeBrief = scopedBrief.brief;
+  const clearBriefState = useCallback(() => {
+    setScopedBrief(EMPTY_SCOPED_BRIEF);
+  }, []);
+  const setBoundBrief = useCallback(
+    (brief: Record<string, string>, boundSourceUrl: string | null, origin: CreativeBriefOrigin) => {
+      setScopedBrief(hasActiveCreativeBrief(brief) ? { brief, sourceUrl: boundSourceUrl, origin } : EMPTY_SCOPED_BRIEF);
+    },
+    [],
+  );
   const [showQueue, setShowQueue] = useState(true);
   const [deletingRequestId, setDeletingRequestId] = useState<string | null>(null);
   const [galleryTitle, setGalleryTitle] = useState(savedDraftRef.current?.galleryTitle || "");
@@ -402,6 +433,8 @@ const TradeAxonometricWorkspace = () => {
         activeRequestId,
         adminNotes,
         activeBrief,
+        activeBriefSourceUrl: scopedBrief.sourceUrl,
+        activeBriefOrigin: scopedBrief.origin,
         galleryTitle,
         galleryDesc,
         model3dUrl,
@@ -419,7 +452,7 @@ const TradeAxonometricWorkspace = () => {
     } catch {
       // If storage quota is full, keep the UI running rather than interrupting the render.
     }
-  }, [selectedProjectId, sourceImage, mode, style, overlayImages, cadBlocks, technicalDrawingUrl, selectedProduct, result, history, activeRequestId, adminNotes, activeBrief, galleryTitle, galleryDesc, model3dUrl, model3dProjectName, model3dNotes, qualityTier, preloadedFavoriteProductIds, lockedLayoutUrl, lightingStrength, brightness, contrast, saturation, warmth]);
+  }, [selectedProjectId, sourceImage, mode, style, overlayImages, cadBlocks, technicalDrawingUrl, selectedProduct, result, history, activeRequestId, adminNotes, activeBrief, scopedBrief.sourceUrl, scopedBrief.origin, galleryTitle, galleryDesc, model3dUrl, model3dProjectName, model3dNotes, qualityTier, preloadedFavoriteProductIds, lockedLayoutUrl, lightingStrength, brightness, contrast, saturation, warmth]);
 
   useEffect(() => {
     if (draftRestoredRef.current) return;
@@ -457,15 +490,25 @@ const TradeAxonometricWorkspace = () => {
     if (typeof brief.room_label === "string" && brief.room_label.trim()) nextBrief.roomType = brief.room_label.trim();
     if (typeof brief.style_preset === "string" && brief.style_preset.trim()) nextBrief.styleDirection = brief.style_preset.trim();
     if (typeof brief.title === "string" && brief.title.trim()) nextBrief.title = brief.title.trim();
-    if (Object.keys(nextBrief).length) setActiveBrief((prev) => ({ ...prev, ...nextBrief }));
+    const incomingSourceUrl =
+      typeof brief.source_image_url === "string" && /^https?:\/\//.test(brief.source_image_url)
+        ? brief.source_image_url
+        : null;
+    if (Object.keys(nextBrief).length) {
+      setScopedBrief((prev) => ({
+        brief: { ...prev.brief, ...nextBrief },
+        sourceUrl: incomingSourceUrl,
+        origin: "concierge",
+      }));
+    }
     if (Array.isArray(brief.pick_ids) && brief.pick_ids.length) {
       setPreloadedFavoriteProductIds(brief.pick_ids.filter((id: unknown) => typeof id === "string"));
     }
     if (Array.isArray(brief.overlay_image_urls) && brief.overlay_image_urls.length) {
       setOverlayImages(brief.overlay_image_urls.filter((url: unknown) => typeof url === "string" && /^https?:\/\//.test(url)).slice(0, 5));
     }
-    if (typeof brief.source_image_url === "string" && /^https?:\/\//.test(brief.source_image_url)) {
-      setSourceImage(brief.source_image_url);
+    if (incomingSourceUrl) {
+      setSourceImage(incomingSourceUrl);
     }
     toast({ title: "Concierge brief loaded", description: "Brief and product overlays are ready. Add a source image if needed, then generate from this page." });
     };
@@ -825,7 +868,7 @@ const TradeAxonometricWorkspace = () => {
       setStyle(restored.stylePrompt);
       setQualityTier(restored.qualityTier);
       setSelectedProduct(restored.sourceProduct);
-      setActiveBrief(restored.activeBrief);
+      setBoundBrief(restored.activeBrief, restored.sourceImage, "history");
       setOverlayImages(restored.overlayImages);
       setTechnicalDrawingUrl(restored.technicalDrawingUrl);
       setLockedLayoutUrl(restored.lockedLayoutUrl);
@@ -1061,14 +1104,18 @@ const TradeAxonometricWorkspace = () => {
     const linkedIds = Array.isArray(req.linked_favorite_product_ids) ? req.linked_favorite_product_ids : [];
     setPreloadedFavoriteProductIds(linkedIds);
     // Store creative brief fields
-    setActiveBrief({
-      roomType: req.room_type || "",
-      styleDirection: req.style_direction || "",
-      lightingMood: req.lighting_mood || "",
-      renderEngine: req.render_engine || "",
-      cameraAngles: req.camera_angles || "",
-      briefNotes: req.notes || "",
-    });
+    setBoundBrief(
+      {
+        roomType: req.room_type || "",
+        styleDirection: req.style_direction || "",
+        lightingMood: req.lighting_mood || "",
+        renderEngine: req.render_engine || "",
+        cameraAngles: req.camera_angles || "",
+        briefNotes: req.notes || "",
+      },
+      req.image_url || null,
+      "queue",
+    );
   };
 
   const completeRequest = async () => {
@@ -1094,6 +1141,8 @@ const TradeAxonometricWorkspace = () => {
       setActiveRequestId(null);
       resetWithFreshSourceImage(null, setSourceImage, setResult, setHistory, setLockedLayoutUrl);
       setAdminNotes("");
+      clearBriefState();
+      setPreloadedFavoriteProductIds([]);
       setShowQueue(true);
       queryClient.invalidateQueries({ queryKey: ["axonometric-requests-admin"] });
     } catch (e: any) {
@@ -1119,7 +1168,7 @@ const TradeAxonometricWorkspace = () => {
           setActiveRequestId(null);
           resetWithFreshSourceImage(null, setSourceImage, setResult, setHistory, setLockedLayoutUrl);
           setAdminNotes("");
-          setActiveBrief({});
+          clearBriefState();
           setPreloadedFavoriteProductIds([]);
         }
         queryClient.invalidateQueries({ queryKey: ["axonometric-requests-admin"] });
@@ -1381,7 +1430,7 @@ const TradeAxonometricWorkspace = () => {
         >
           <div className="flex flex-wrap items-center gap-2">
             {activeRequestId && (
-              <Button variant="outline" size="sm" onClick={() => { setActiveRequestId(null); resetWithFreshSourceImage(null, setSourceImage, setResult, setHistory, setLockedLayoutUrl); setShowQueue(true); }}>
+              <Button variant="outline" size="sm" onClick={() => { setActiveRequestId(null); setAdminNotes(""); clearBriefState(); setPreloadedFavoriteProductIds([]); resetWithFreshSourceImage(null, setSourceImage, setResult, setHistory, setLockedLayoutUrl); setShowQueue(true); }}>
                 <Inbox className="w-3.5 h-3.5 mr-1.5" />Back to Queue
               </Button>
             )}
@@ -1511,6 +1560,8 @@ const TradeAxonometricWorkspace = () => {
                         className="flex-1"
                         onClick={() => {
                           resetWithFreshSourceImage(draft.image_url, setSourceImage, setResult, setHistory, setLockedLayoutUrl);
+                          setActiveRequestId(null);
+                          clearBriefState();
                           setResult({ imageUrl: draft.image_url, storedUrl: draft.image_url, text: "", mode: "elevation_to_axo" });
                           setGalleryTitle(draft.title || "");
                           setGalleryDesc(draft.description || "");
@@ -1587,7 +1638,13 @@ const TradeAxonometricWorkspace = () => {
                       className="w-full rounded-md border border-border object-contain max-h-64"
                     />
                     <button
-                      onClick={() => { resetWithFreshSourceImage(null, setSourceImage, setResult, setHistory, setLockedLayoutUrl); setSelectedProduct(null); }}
+                      onClick={() => {
+                        resetWithFreshSourceImage(null, setSourceImage, setResult, setHistory, setLockedLayoutUrl);
+                        setSelectedProduct(null);
+                        setActiveRequestId(null);
+                        setAdminNotes("");
+                        clearBriefState();
+                      }}
                       className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm text-foreground rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <RotateCcw className="w-3.5 h-3.5" />
@@ -1616,7 +1673,15 @@ const TradeAxonometricWorkspace = () => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <SourceUpload onSourceReady={(url) => { activeProject?.setFloorPlanUrl(url); resetWithFreshSourceImage(url, setSourceImage, setResult, setHistory, setLockedLayoutUrl); }} />
+                  <SourceUpload
+                    onSourceReady={(url) => {
+                      activeProject?.setFloorPlanUrl(url);
+                      resetWithFreshSourceImage(url, setSourceImage, setResult, setHistory, setLockedLayoutUrl);
+                      setActiveRequestId(null);
+                      setAdminNotes("");
+                      setScopedBrief((prev) => resolveBriefAfterSourceChange(prev, url));
+                    }}
+                  />
 
         {/* Submit 3D Model Panel */}
         {show3dSubmit && (
@@ -1773,9 +1838,20 @@ const TradeAxonometricWorkspace = () => {
             </div>
 
             {/* Active Creative Brief — shown for queue requests or concierge handoffs */}
-            {Object.values(activeBrief).some(v => v && v !== "no_preference") && (
+            {hasActiveCreativeBrief(activeBrief) && (
               <div className="border border-primary/30 bg-primary/5 rounded-lg p-4 space-y-2">
-                <h2 className="font-display text-xs text-primary uppercase tracking-wider">Creative Brief</h2>
+                <div className="flex items-center justify-between gap-2">
+                  <h2 className="font-display text-xs text-primary uppercase tracking-wider">Creative Brief</h2>
+                  <button
+                    type="button"
+                    onClick={clearBriefState}
+                    className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-body text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+                    title="Clear creative brief"
+                  >
+                    <X className="w-3 h-3" />
+                    Clear
+                  </button>
+                </div>
                 <div className="flex flex-wrap gap-1.5">
                   {activeBrief.roomType && (
                     <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-muted text-foreground">
@@ -1939,6 +2015,8 @@ const TradeAxonometricWorkspace = () => {
                   brand={pickerBrand || undefined}
                   onSelect={(product) => {
                     setSelectedProduct(product);
+                    setActiveRequestId(null);
+                    clearBriefState();
                     resetWithFreshSourceImage(product.image_url, setSourceImage, setResult, setHistory, setLockedLayoutUrl);
                   }}
                   selectedProduct={selectedProduct}

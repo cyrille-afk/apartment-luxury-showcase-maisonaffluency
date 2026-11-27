@@ -2,6 +2,13 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { logAiUsage } from "../_shared/aiUsage.ts";
 import { withCache } from "../_shared/aiCache.ts";
+import {
+  AXO_CUTAWAY_CAMERA_GUARD,
+  buildAxoStyleText,
+  buildSkipStyleReferenceClause,
+  getAxoStyleProfile,
+  isAxoExtrusionMode,
+} from "../_shared/axonometricPrompt.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -115,93 +122,28 @@ serve(async (req) => {
     const briefCameraAngles = body.cameraAngles as string | undefined;
     const briefNotes = body.briefNotes as string | undefined;
 
-    const normalizeText = (value?: string) => (value || "").trim().toLowerCase();
-
-    const getStyleProfile = (rawStyle?: string) => {
-      const normalized = normalizeText(rawStyle);
-
-      if (normalized.includes("editorial")) {
-        return {
-          key: "editorial_luxury",
-          label: "Editorial Luxury",
-          renderInstructions:
-            "Create a high-fashion luxury interiors image with sculptural light, richer contrast, deeper shadow separation that still preserves detail, brighter specular highlights on stone/metal/glass, warmer highlights, cleaner blacks, and a premium magazine-grade finish. This must feel dramatic, glamorous, and intentionally art-directed rather than neutral.",
-          lockedReferenceBehavior:
-            "After matching the reference render exactly, apply ONLY a finishing pass of editorial grading: slightly deeper blacks, richer contrast, crisper reflections, and more sculptural highlight roll-off. Do NOT change the reference lighting direction, exposure balance, warmth, or shadow pattern.",
-        };
-      }
-
-      if (normalized.includes("watercolor")) {
-        return {
-          key: "watercolor",
-          label: "Watercolor",
-          renderInstructions:
-            "Create an elegant watercolor architectural illustration with soft pigment washes, visible paper softness, restrained edge definition, fine architectural linework, and delicate tonal transitions.",
-          lockedReferenceBehavior:
-            "Preserve the reference composition and lighting structure, but reinterpret the final finish as a refined watercolor wash without changing the underlying light placement or geometry.",
-        };
-      }
-
-      if (normalized.includes("minimal")) {
-        return {
-          key: "minimal_line",
-          label: "Minimal Line",
-          renderInstructions:
-            "Create a pared-back architectural image with restrained tones, clean line emphasis, soft neutral shadows, simplified material expression, and a calm gallery-like presentation.",
-          lockedReferenceBehavior:
-            "Preserve the reference lighting structure and geometry, then simplify the finish into a cleaner, quieter, more minimal presentation without re-lighting the image.",
-        };
-      }
-
-      if (normalized.includes("scandinavian")) {
-        return {
-          key: "scandinavian",
-          label: "Scandinavian",
-          renderInstructions:
-            "Create a Scandinavian interior image with airy daylight, pale timber, soft diffuse reflections, understated contrast, light tactile materials, and a serene residential atmosphere.",
-          lockedReferenceBehavior:
-            "Keep the exact reference lighting structure intact, but finish the image with a lighter Scandinavian tonality and softer material palette cues only where they do not contradict the locked reference.",
-        };
-      }
-
-      return {
-        key: "photorealistic",
-        label: "Photorealistic",
-        renderInstructions:
-          "Create a neutral high-end archviz image with balanced exposure, true-to-material color, realistic daylight roll-off, natural highlight behavior, readable shadow detail, and minimal grading. This must feel like a premium real photograph of the finished interior rather than a stylized editorial shoot.",
-        lockedReferenceBehavior:
-          "After matching the reference render exactly, keep the finish neutral and documentary: balanced exposure, accurate material color, restrained grading, and no exaggerated contrast or fashion-editorial treatment.",
-      };
-    };
-
-    const styleProfile = getStyleProfile(style || briefStyleDirection);
+    const axoExtrusion = isAxoExtrusionMode(mode);
+    const styleProfile = getAxoStyleProfile(style || briefStyleDirection, axoExtrusion);
     const hasLockedReference = Boolean(
-      referenceImageUrl && (mode === "elevation_to_axo" || mode === "section_to_axo")
+      referenceImageUrl && axoExtrusion
     );
 
     // Build a rich style string that incorporates the creative brief
-    const buildStyle = () => {
-      const parts: string[] = [
-        `Primary style preset: ${styleProfile.label}. ${styleProfile.renderInstructions}`,
-      ];
-      if (style && normalizeText(style) !== normalizeText(styleProfile.label)) {
-        parts.push(`Preset source text: ${style}`);
-      }
-      if (briefStyleDirection) parts.push(`Project style direction (secondary to the preset): ${briefStyleDirection}`);
-      if (briefLightingMood) {
-        parts.push(
-          `Lighting mood request (secondary to the preset${hasLockedReference ? " and never allowed to override the locked reference lighting" : ""}): ${briefLightingMood}`
-        );
-      }
-      if (briefRoomType) parts.push(`Room type: ${briefRoomType}`);
-      if (briefRenderEngine && briefRenderEngine !== "no_preference") {
-        const engineLabel = briefRenderEngine === "corona" ? "Corona Renderer" : briefRenderEngine === "vray" ? "V-Ray" : briefRenderEngine;
-        parts.push(`Render engine aesthetic: ${engineLabel} (match its characteristic look — GI, tone-mapping, material response)`);
-      }
-      if (briefCameraAngles) parts.push(`Preferred camera angles: ${briefCameraAngles}`);
-      if (briefNotes) parts.push(`Additional notes: ${briefNotes}`);
-      return parts.join(". ");
-    };
+    const buildStyle = () =>
+      buildAxoStyleText({
+        mode,
+        style,
+        styleProfile,
+        hasLockedReference,
+        brief: {
+          roomType: briefRoomType,
+          styleDirection: briefStyleDirection,
+          lightingMood: briefLightingMood,
+          renderEngine: briefRenderEngine,
+          cameraAngles: briefCameraAngles,
+          briefNotes,
+        },
+      });
 
     // Turntable angle mode — generates a single view at a specified angle
     const turntableAngle = body.turntableAngle as number | undefined;
@@ -249,7 +191,7 @@ PHOTOREALISTIC MATERIAL & LIGHTING:
 - GLASS: Subtle reflections, transparency, edge refractions.
 - LIGHTING: Warm natural light (3500-4500K) with soft penumbra shadows and ambient occlusion.
 
-Render from an elevated oblique angle (approximately 45° azimuth, 30° elevation) showing the full interior as an open cutaway. Style: ${defaultStyle}. The result must look like a professional Corona/V-Ray archviz output.${NO_DRAFTING_FRAME}`;
+Render from an elevated oblique angle (approximately 45° azimuth, 35°–45° elevation) showing the ENTIRE uploaded floor plan as ONE open cutaway architectural model. Style: ${defaultStyle}. The result must look like a professional Corona/V-Ray archviz output.${AXO_CUTAWAY_CAMERA_GUARD}${NO_DRAFTING_FRAME}`;
     } else if (mode === "section_to_axo") {
       prompt = `RULE #1 — LAYOUT FIDELITY (MOST IMPORTANT — VIOLATING IT MEANS TOTAL FAILURE):
 You are given a 2D architectural section drawing. Your output MUST faithfully reproduce the EXACT spatial arrangement shown:
@@ -272,7 +214,7 @@ Every element visible in the section must appear at the EXACT same position, hei
 PHOTOREALISTIC MATERIALS: PBR stone veining, visible wood grain, fabric texture with creasing, distinct metal finishes.
 LIGHTING: Warm natural (3500-4500K) with soft shadows and ambient occlusion. Interior walls: light plaster — NEVER dark or thick.
 
-Style: ${defaultStyle}. The result must look like a professional Corona/V-Ray archviz output.${NO_DRAFTING_FRAME}`;
+Style: ${defaultStyle}. The result must look like a professional Corona/V-Ray archviz output.${AXO_CUTAWAY_CAMERA_GUARD}${NO_DRAFTING_FRAME}`;
     } else if (mode === "stylize") {
       prompt = `Dramatically enhance this architectural 3D axonometric view to professional archviz portfolio quality. Apply physically-based material rendering: realistic marble/stone veining with depth, visible wood grain and plank variation, fabric textures with weave and natural creasing, distinct metal finishes. Add warm natural lighting (3500-4500K) with soft shadows featuring proper penumbra, ambient occlusion in all corners and junctions, and subtle atmospheric perspective. Keep the geometry and layout exactly the same but elevate every surface to photorealistic quality matching ${defaultStyle}.${NO_DRAFTING_FRAME}`;
     } else if (mode === "composite") {
@@ -701,7 +643,7 @@ Style: ${buildStyle()}. The output must look like the SAME render session as the
 - IMAGE 1 (the source floor plan / section drawing) is the SOLE AND EXCLUSIVE AUTHORITY for the building outline, perimeter shape, room count, room shapes, wall positions, doors, windows, and furniture layout.
 - ABSOLUTE PROHIBITION: NEVER copy any room layout, floor plan shape, curved walls, exterior shell, terrace, or furniture arrangement from the LAST (style reference) image. Copying the style reference's floor plan instead of IMAGE 1 is a TOTAL FAILURE.`;
     } else if (skipStyleReference) {
-      prompt += `\n\nIMPORTANT: Generate a FRESH, original interpretation of this drawing. Choose your own optimal camera angle, viewpoint, color palette, and lighting setup only when no hard layout reference is provided.`;
+      prompt += buildSkipStyleReferenceClause(mode);
     }
 
     // Build message content
