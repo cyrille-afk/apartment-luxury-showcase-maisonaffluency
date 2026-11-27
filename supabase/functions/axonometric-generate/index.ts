@@ -696,7 +696,10 @@ Style: ${buildStyle()}. The output must look like the SAME render session as the
     }
 
     if (styleReferenceUrl) {
-      prompt += `\n\nIMPORTANT STYLE REFERENCE: A reference image is provided as the LAST image in this message. You MUST match its exact visual finish, color grading, material quality, and rendering technique as closely as possible. Match style only — do NOT let it override any locked geometry, camera, lighting, exposure, or reference-render instructions already given.`;
+      prompt += `\n\nIMPORTANT STYLE REFERENCE (FINISH & PALETTE ONLY — NEVER COPY LAYOUT):
+- The LAST image in this message is a STYLE-ONLY swatch showing the desired rendering finish, lighting warmth, shadow softness, and material quality.
+- IMAGE 1 (the source floor plan / section drawing) is the SOLE AND EXCLUSIVE AUTHORITY for the building outline, perimeter shape, room count, room shapes, wall positions, doors, windows, and furniture layout.
+- ABSOLUTE PROHIBITION: NEVER copy any room layout, floor plan shape, curved walls, exterior shell, terrace, or furniture arrangement from the LAST (style reference) image. Copying the style reference's floor plan instead of IMAGE 1 is a TOTAL FAILURE.`;
     } else if (skipStyleReference) {
       prompt += `\n\nIMPORTANT: Generate a FRESH, original interpretation of this drawing. Choose your own optimal camera angle, viewpoint, color palette, and lighting setup only when no hard layout reference is provided.`;
     }

@@ -30,6 +30,13 @@ import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inb
 import { AiRenderHistoryPanel, type RenderHistoryProjectOption } from "@/components/trade/AiRenderHistoryPanel";
 import { AiRenderCompareDialog } from "@/components/trade/AiRenderCompareDialog";
 import { AiRenderPendingQueue, type PendingAxonometricRequest } from "@/components/trade/AiRenderPendingQueue";
+import { AiRenderReferenceStyleControl } from "@/components/trade/AiRenderReferenceStyleControl";
+import {
+  DEFAULT_USE_LOCKED_REF_STYLE,
+  findReferenceStyleForMode,
+  resolveStyleReferencePayload,
+  type SavedReferenceStyle,
+} from "@/lib/aiRenderReferenceStyle";
 import {
   extractRestorePayload,
   filterRenderHistoryByScope,
@@ -323,7 +330,8 @@ const TradeAxonometricWorkspace = () => {
   const [emptyRoomUrl, setEmptyRoomUrl] = useState<string | null>(null);
   const [emptyRoomGenerating, setEmptyRoomGenerating] = useState(false);
   const [savingRefStyle, setSavingRefStyle] = useState(false);
-  const [useLockedRefStyle, setUseLockedRefStyle] = useState(true);
+  const [deletingRefStyle, setDeletingRefStyle] = useState(false);
+  const [useLockedRefStyle, setUseLockedRefStyle] = useState(DEFAULT_USE_LOCKED_REF_STYLE);
   const [qualityTier, setQualityTier] = useState<"draft" | "standard" | "premium">(savedDraftRef.current?.qualityTier || "standard");
   const [preloadedFavoriteProductIds, setPreloadedFavoriteProductIds] = useState<string[]>(Array.isArray(savedDraftRef.current?.preloadedFavoriteProductIds) ? savedDraftRef.current.preloadedFavoriteProductIds : []);
   const [lockedLayoutUrl, setLockedLayoutUrl] = useState<string | null>(null);
@@ -644,7 +652,7 @@ const TradeAxonometricWorkspace = () => {
         .from("reference_styles")
         .select("*");
       if (error) throw error;
-      return data as { id: string; mode: string; image_url: string; updated_at: string }[];
+      return data as SavedReferenceStyle[];
     },
     enabled: isAdmin,
   });
@@ -862,10 +870,10 @@ const TradeAxonometricWorkspace = () => {
     [queryClient, toast],
   );
 
-  const currentRefStyle = referenceStyles?.find((r) => r.mode === mode);
+  const currentRefStyle = findReferenceStyleForMode(referenceStyles, mode);
 
   useEffect(() => {
-    setUseLockedRefStyle(true);
+    setUseLockedRefStyle(DEFAULT_USE_LOCKED_REF_STYLE);
   }, [mode]);
 
   const saveAsReferenceStyle = async () => {
@@ -895,6 +903,27 @@ const TradeAxonometricWorkspace = () => {
       toast({ title: "Failed to save reference style", description: e.message, variant: "destructive" });
     } finally {
       setSavingRefStyle(false);
+    }
+  };
+
+  const deleteReferenceStyle = async (): Promise<boolean> => {
+    if (!currentRefStyle) return false;
+    setDeletingRefStyle(true);
+    try {
+      const { error } = await (supabase as any)
+        .from("reference_styles")
+        .delete()
+        .eq("id", currentRefStyle.id);
+      if (error) throw error;
+      setUseLockedRefStyle(false);
+      queryClient.invalidateQueries({ queryKey: ["reference-styles"] });
+      toast({ title: "Saved reference style deleted" });
+      return true;
+    } catch (e: any) {
+      toast({ title: "Failed to delete reference style", description: e.message, variant: "destructive" });
+      return false;
+    } finally {
+      setDeletingRefStyle(false);
     }
   };
 
@@ -937,7 +966,12 @@ const TradeAxonometricWorkspace = () => {
           .eq("id", activeRequestId);
       }
 
-      const refStyle = referenceStyles?.find((r) => r.mode === mode);
+      const { styleReferenceUrl, skipStyleReference } = resolveStyleReferencePayload({
+        mode,
+        referenceStyles,
+        useLockedRefStyle,
+        toAbsoluteUrl,
+      });
       // Only use a layout reference when the user has explicitly locked one.
       // Previously we auto-fed the prior render back as a reference for elevation/section modes,
       // which caused old furniture to leak into fresh generations of an empty room.
@@ -962,8 +996,8 @@ const TradeAxonometricWorkspace = () => {
         lightingStrength: lockedLayoutReference ? lightingStrength : undefined,
         overlayImages: (mode === "composite" || mode === "cad_overlay") ? overlayImages.map(u => toAbsoluteUrl(u)).filter(Boolean) : undefined,
         technicalDrawingUrl: mode === "cad_overlay" ? toAbsoluteUrl(technicalDrawingUrl) : undefined,
-        styleReferenceUrl: (useLockedRefStyle && refStyle) ? toAbsoluteUrl(refStyle.image_url) : undefined,
-        skipStyleReference: !useLockedRefStyle && !!refStyle,
+        styleReferenceUrl,
+        skipStyleReference,
         // Creative brief fields from the request queue
         ...(activeBrief.roomType && { roomType: activeBrief.roomType }),
         ...(activeBrief.styleDirection && { styleDirection: activeBrief.styleDirection }),
@@ -1792,20 +1826,13 @@ const TradeAxonometricWorkspace = () => {
               </Select>
 
               {currentRefStyle && (
-                <div className="rounded-md border border-border bg-muted/30 p-2.5 space-y-2">
-                  <p className="font-body text-[11px] text-muted-foreground">
-                    Locked reference style is currently <span className="font-medium text-foreground">{useLockedRefStyle ? "ON" : "OFF"}</span> for this mode.
-                  </p>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    onClick={() => setUseLockedRefStyle((prev) => !prev)}
-                  >
-                    {useLockedRefStyle ? "Generate Without Locked Style" : "Use Locked Style Again"}
-                  </Button>
-                </div>
+                <AiRenderReferenceStyleControl
+                  currentRefStyle={currentRefStyle}
+                  enabled={useLockedRefStyle}
+                  deleting={deletingRefStyle}
+                  onToggle={() => setUseLockedRefStyle((prev) => !prev)}
+                  onDelete={deleteReferenceStyle}
+                />
               )}
             </div>
 
@@ -2545,6 +2572,17 @@ const TradeAxonometricWorkspace = () => {
                       <span className="font-body text-[10px] text-muted-foreground flex-1">
                         Current reference saved {new Date(currentRefStyle.updated_at).toLocaleDateString()}
                       </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        disabled={deletingRefStyle}
+                        aria-label="Remove saved reference style"
+                        className="h-7 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => { void deleteReferenceStyle(); }}
+                      >
+                        {deletingRefStyle ? <DotCircleLoader size="sm" className="w-3 h-3" /> : <Trash2 className="w-3.5 h-3.5" />}
+                      </Button>
                     </div>
                   )}
                   <Button
