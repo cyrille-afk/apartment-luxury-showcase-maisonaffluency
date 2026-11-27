@@ -8,12 +8,15 @@
  * never touching the auth session, the basket, or consent records.
  */
 
+import { AI_RENDER_DRAFT_KEY, compactSavedAiRenderDraft } from "./aiRenderDraft";
+
 const PROTECTED_PREFIXES = ["sb-", "ma_cart", "ma_consent", "cookie_consent", "consent_"];
 const PROTECTED_KEYS = new Set([
   "ma_cart_v1",
   "ma_cart_v1_backup",
   "ma_order_placed",
   "ga_optout",
+  AI_RENDER_DRAFT_KEY,
 ]);
 
 function isProtected(key: string): boolean {
@@ -52,6 +55,7 @@ function canStore(probeBytes: number): boolean {
 export function ensureStorageHeadroom(needBytes = 120_000): boolean {
   if (typeof window === "undefined") return true;
   try {
+    compactSavedAiRenderDraft(localStorage);
     if (canStore(needBytes)) return true;
     for (const { key } of entriesBySize()) {
       try { localStorage.removeItem(key); } catch { /* noop */ }
@@ -74,6 +78,7 @@ export function installStorageQuotaGuard(): void {
   if (typeof window === "undefined" || guardInstalled) return;
   guardInstalled = true;
   try {
+    compactSavedAiRenderDraft(localStorage);
     const proto = Storage.prototype;
     const original = proto.setItem;
     proto.setItem = function patchedSetItem(this: Storage, key: string, value: string) {

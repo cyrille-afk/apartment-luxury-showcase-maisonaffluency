@@ -10,6 +10,7 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useNavigate, useSearchParams } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
+import { AI_RENDER_DRAFT_KEY, compactAiRenderDraft, saveAiRenderDraft } from "@/lib/aiRenderDraft";
 
 /** Ensure image URLs are absolute so the AI gateway can fetch them */
 const toAbsoluteUrl = (url: string | null | undefined): string | null => {
@@ -91,13 +92,14 @@ const STYLE_PRESETS = [
   { value: "contemporary Scandinavian design with light wood, white walls, and soft daylight", label: "Scandinavian" },
 ];
 
-const AXONOMETRIC_DRAFT_KEY = "maf:axonometric-studio:draft:v2";
+const AXONOMETRIC_DRAFT_KEY = AI_RENDER_DRAFT_KEY;
 const VIZ_BRIEF_INCOMING_KEY = "maf:axonometric:incoming-brief";
 
 const readSavedDraft = () => {
   if (typeof window === "undefined") return null;
   try {
-    return JSON.parse(localStorage.getItem(AXONOMETRIC_DRAFT_KEY) || "null");
+    const parsed = JSON.parse(localStorage.getItem(AXONOMETRIC_DRAFT_KEY) || "null");
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? compactAiRenderDraft(parsed) : null;
   } catch {
     return null;
   }
@@ -418,7 +420,7 @@ const TradeAxonometricWorkspace = () => {
     }
 
     try {
-      localStorage.setItem(AXONOMETRIC_DRAFT_KEY, JSON.stringify({
+      saveAiRenderDraft(localStorage, {
         savedAt: Date.now(),
         selectedProjectId,
         sourceImage,
@@ -448,7 +450,7 @@ const TradeAxonometricWorkspace = () => {
         contrast,
         saturation,
         warmth,
-      }));
+      });
     } catch {
       // If storage quota is full, keep the UI running rather than interrupting the render.
     }

@@ -1,5 +1,9 @@
 # Roadmap
 
+## AI Render Studio source draft persistence
+- [x] Save cloud image links instead of generated base64; compact legacy drafts before quota cleanup and protect the saved source draft from eviction. Quota fallback drops optional render history, not source/settings.
+- [x] Signed-in Residence 01 source and saved render remain visible through legacy base64 recovery, refresh, mode change and second refresh; draft shrinks to 1,782 characters with no raw image data. No page errors; 19 regressions and preview build pass.
+
 ## Instagram automatic retry eligibility
 - [x] Exclude approved accounts and explicit permanent Instagram handle errors from claims, dispatch and analyzer; retain outage recovery and corrected-handle retries.
 - [x] Both functions deployed and boot/live checks pass; 16 regressions pass. Live private eligibility confirms approved/permanent=false and outage/corrected=true. Existing approved @gregarbonville is source-blocked, scheduled retry jobs=0, and an authenticated internal retry call returns HTTP 200, working connection, attempted=0. Scores and approval unchanged.
