@@ -1,5 +1,6 @@
 # Page rules
 - AI Render Studio drafts use aiRenderDraft to persist durable image links only; compact legacy drafts before storage reclamation and protect the source draft from eviction — generated base64 must never erase uploaded source work.
+- Proposal/Scene editors use fullscreen portalled Dialogs; empty rooms persist bound to their render with preparation/retry — shell transforms and refresh must not hide editing.
 - Specification Tools completion is explicit, project-scoped and stored per stage under project view/edit RLS; tool visits never imply completion, and independent stage writes preserve collaborators' other progress. The project overview partitions the same saved progress into completed/remaining stages, never inferring completion from project status.
 - Standalone public designer portraits reserve the shared desktop `--header-h` for their masthead and close control, retaining mobile offsets — all designers stay clear when site navigation height changes.
 - Product detail sidebars render one transaction anchor after configuration and specs, using the existing price renderer and a shared base utility grid; global clientSafeMode controls the container's editorial swap, with no sidebar-local toggle — avoids duplicate prices and divergent modes.

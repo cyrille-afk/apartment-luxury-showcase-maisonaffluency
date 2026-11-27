@@ -24,6 +24,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import CloudUpload from "@/components/trade/CloudUpload";
 import SourceUpload from "@/components/trade/SourceUpload";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -360,8 +361,10 @@ const TradeAxonometricWorkspace = () => {
   const [model3dNotes, setModel3dNotes] = useState(savedDraftRef.current?.model3dNotes || "");
   const [submitting3dModel, setSubmitting3dModel] = useState(false);
   const [showProposal, setShowProposal] = useState(false);
-  const [emptyRoomUrl, setEmptyRoomUrl] = useState<string | null>(null);
+  const [emptyRoomUrl, setEmptyRoomUrl] = useState<string | null>(savedDraftRef.current?.emptyRoomUrl || null);
+  const [emptyRoomSourceUrl, setEmptyRoomSourceUrl] = useState<string | null>(savedDraftRef.current?.emptyRoomSourceUrl || null);
   const [emptyRoomGenerating, setEmptyRoomGenerating] = useState(false);
+  const [emptyRoomError, setEmptyRoomError] = useState<string | null>(null);
   const [savingRefStyle, setSavingRefStyle] = useState(false);
   const [deletingRefStyle, setDeletingRefStyle] = useState(false);
   const [useLockedRefStyle, setUseLockedRefStyle] = useState(DEFAULT_USE_LOCKED_REF_STYLE);
@@ -432,6 +435,8 @@ const TradeAxonometricWorkspace = () => {
         selectedProduct,
         result,
         history: history.slice(0, 8),
+        emptyRoomUrl,
+        emptyRoomSourceUrl,
         activeRequestId,
         adminNotes,
         activeBrief,
@@ -454,7 +459,7 @@ const TradeAxonometricWorkspace = () => {
     } catch {
       // If storage quota is full, keep the UI running rather than interrupting the render.
     }
-  }, [selectedProjectId, sourceImage, mode, style, overlayImages, cadBlocks, technicalDrawingUrl, selectedProduct, result, history, activeRequestId, adminNotes, activeBrief, scopedBrief.sourceUrl, scopedBrief.origin, galleryTitle, galleryDesc, model3dUrl, model3dProjectName, model3dNotes, qualityTier, preloadedFavoriteProductIds, lockedLayoutUrl, lightingStrength, brightness, contrast, saturation, warmth]);
+  }, [selectedProjectId, sourceImage, mode, style, overlayImages, cadBlocks, technicalDrawingUrl, selectedProduct, result, history, emptyRoomUrl, emptyRoomSourceUrl, activeRequestId, adminNotes, activeBrief, scopedBrief.sourceUrl, scopedBrief.origin, galleryTitle, galleryDesc, model3dUrl, model3dProjectName, model3dNotes, qualityTier, preloadedFavoriteProductIds, lockedLayoutUrl, lightingStrength, brightness, contrast, saturation, warmth]);
 
   useEffect(() => {
     if (draftRestoredRef.current) return;
@@ -973,12 +978,15 @@ const TradeAxonometricWorkspace = () => {
   };
 
   const generateEmptyRoom = async (imageUrl: string) => {
+    if (emptyRoomGenerating) return;
     setEmptyRoomGenerating(true);
     setEmptyRoomUrl(null);
+    setEmptyRoomSourceUrl(imageUrl);
+    setEmptyRoomError(null);
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       const accessToken = sessionData.session?.access_token;
-      if (!accessToken) return;
+      if (!accessToken) throw new Error("Please sign in again to prepare the empty room.");
 
       const data = await invokeAxonometricGenerate({
         imageUrl: toAbsoluteUrl(imageUrl),
@@ -986,10 +994,12 @@ const TradeAxonometricWorkspace = () => {
         style,
       }, accessToken, 1);
 
-      setEmptyRoomUrl(data.storedUrl || data.imageUrl);
+      const url = data.storedUrl || data.imageUrl;
+      if (!url) throw new Error("No empty-room image was returned.");
+      setEmptyRoomUrl(url);
     } catch (e: any) {
       console.error("Empty room generation failed:", e);
-      // Non-blocking — don't toast, proposal is optional
+      setEmptyRoomError("The empty room could not be prepared. Please try again.");
     } finally {
       setEmptyRoomGenerating(false);
     }
@@ -2760,7 +2770,10 @@ const TradeAxonometricWorkspace = () => {
       />
 
       {/* Scene Editor */}
-      {showSceneEditor && result && (
+      <Dialog open={showSceneEditor && !!result} onOpenChange={setShowSceneEditor}>
+      {result && (
+        <DialogContent hideClose aria-describedby={undefined} className="inset-0 left-0 top-0 h-[100dvh] max-w-none translate-x-0 translate-y-0 rounded-none border-0 p-0 sm:rounded-none">
+        <DialogTitle className="sr-only">Scene Editor</DialogTitle>
         <Suspense fallback={null}>
           <AxonometricSceneEditor
             imageUrl={result.storedUrl || result.imageUrl}
@@ -2789,17 +2802,23 @@ const TradeAxonometricWorkspace = () => {
             }}
           />
         </Suspense>
+        </DialogContent>
       )}
+      </Dialog>
 
       {/* Proposal Builder */}
-      {showProposal && result && (
-        <div className="fixed inset-0 z-50 bg-background overflow-y-auto">
-          <div className="max-w-7xl mx-auto px-6 py-8">
+      <Dialog open={showProposal && !!result} onOpenChange={setShowProposal}>
+        {result && (
+        <DialogContent hideClose aria-describedby={undefined} className="inset-0 left-0 top-0 h-[100dvh] max-w-none translate-x-0 translate-y-0 overflow-y-auto rounded-none border-0 p-0 sm:rounded-none">
+          <DialogTitle className="sr-only">Proposal Builder</DialogTitle>
+          <div className="w-full min-w-0 max-w-7xl mx-auto px-6 py-8">
             <Suspense fallback={<div className="py-16 text-center font-body text-sm text-muted-foreground">Loading Proposal Builder…</div>}>
               <ProposalBuilder
                 furnishedImageUrl={result.storedUrl || result.imageUrl}
-                emptyRoomUrl={emptyRoomUrl}
+                emptyRoomUrl={emptyRoomSourceUrl === (result.storedUrl || result.imageUrl) ? emptyRoomUrl : null}
                 emptyRoomGenerating={emptyRoomGenerating}
+                emptyRoomError={emptyRoomError}
+                onPrepareEmptyRoom={() => void generateEmptyRoom(result.storedUrl || result.imageUrl)}
                 style={style}
                 preloadedProductIds={preloadedFavoriteProductIds}
                 onClose={() => setShowProposal(false)}
@@ -2811,8 +2830,9 @@ const TradeAxonometricWorkspace = () => {
               />
             </Suspense>
           </div>
-        </div>
-      )}
+        </DialogContent>
+        )}
+      </Dialog>
     </>
   );
 };

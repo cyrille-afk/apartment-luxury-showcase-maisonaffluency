@@ -7,6 +7,13 @@ const inlineImage = `data:image/png;base64,${"A".repeat(4_000_000)}`;
 const result = { imageUrl: inlineImage, storedUrl, mode: "section_to_axo", text: "Done" };
 
 describe("AI Render Studio draft persistence", () => {
+  it("restores an empty room with its exact furnished-render binding after refresh", () => {
+    let saved = "";
+    const emptyRoomUrl = "https://example.com/empty-room.png";
+    saveAiRenderDraft({ setItem: (_key, value) => { saved = value; } },
+      { sourceImage, result, emptyRoomUrl, emptyRoomSourceUrl: storedUrl });
+    expect(JSON.parse(saved)).toMatchObject({ sourceImage, emptyRoomUrl, emptyRoomSourceUrl: storedUrl });
+  });
   it("preserves the source through save/read while replacing duplicated image bytes with cloud links", () => {
     let saved = "";
     saveAiRenderDraft({ setItem: (key, value) => { expect(key).toBe(AI_RENDER_DRAFT_KEY); saved = value; } },

@@ -63,6 +63,8 @@ interface ProposalBuilderProps {
   furnishedImageUrl: string;
   emptyRoomUrl: string | null;
   emptyRoomGenerating: boolean;
+  emptyRoomError?: string | null;
+  onPrepareEmptyRoom?: () => void;
   style: string;
   preloadedProductIds?: string[];
   onClose: () => void;
@@ -76,6 +78,8 @@ export default function ProposalBuilder({
   furnishedImageUrl,
   emptyRoomUrl,
   emptyRoomGenerating,
+  emptyRoomError,
+  onPrepareEmptyRoom,
   style,
   preloadedProductIds,
   onClose,
@@ -1253,7 +1257,7 @@ export default function ProposalBuilder({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
       {/* Hidden file input for external uploads */}
       <input
         ref={externalFileRef}
@@ -1264,19 +1268,19 @@ export default function ProposalBuilder({
       />
 
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Back to AI Render Studio" className="shrink-0">
             <ArrowLeft className="w-4 h-4" />
-          </button>
-          <div>
+          </Button>
+          <div className="min-w-0">
             <h2 className="font-display text-sm text-foreground">Proposal Builder</h2>
             <p className="font-body text-[11px] text-muted-foreground">
               Select replacement products — AI will place them matching the client's original layout
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Quality Tier */}
           <div className="flex items-center border border-border rounded-md overflow-hidden text-[10px] font-display">
             {(["draft", "standard", "premium"] as const).map((tier) => (
@@ -1447,8 +1451,14 @@ export default function ProposalBuilder({
               <p className="font-body text-xs text-muted-foreground">Generating empty room…</p>
             </div>
           ) : (
-            <div className="border border-dashed border-border rounded-lg flex items-center justify-center min-h-[300px]">
-              <p className="font-body text-xs text-muted-foreground">Empty room will appear here</p>
+            <div className="border border-dashed border-border rounded-lg flex flex-col items-center justify-center min-h-[300px] gap-3 p-6">
+              {emptyRoomError && <p role="alert" className="font-body text-xs text-destructive text-center">{emptyRoomError}</p>}
+              {onPrepareEmptyRoom ? (
+                <Button variant="outline" size="sm" onClick={onPrepareEmptyRoom}>
+                  <Wand2 className="w-3.5 h-3.5 mr-1.5" />
+                  {emptyRoomError ? "Retry Empty Room" : "Create Empty Room"}
+                </Button>
+              ) : <p className="font-body text-xs text-muted-foreground">Empty room will appear here</p>}
             </div>
           )}
         </div>
@@ -1457,7 +1467,7 @@ export default function ProposalBuilder({
       {/* Selected products summary */}
       {selectedProducts.length > 0 && (
         <div className="border border-border rounded-lg p-4">
-          <h3 className="font-display text-xs text-foreground mb-3"><h3 className="font-display text-xs text-foreground mb-3">Selected Products ({selectedProducts.length}/10)</h3></h3>
+          <h3 className="font-display text-xs text-foreground mb-3">Selected Products ({selectedProducts.length}/10)</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             {selectedProducts.map((p) => (
               <div key={p.id} className="flex items-center gap-2 bg-muted/30 rounded-md px-2.5 py-2 group">
@@ -1668,7 +1678,7 @@ export default function ProposalBuilder({
                 {brands.map((b) => <option key={b} value={b}>{b}</option>)}
               </select>
             </div>
-            <div className="grid grid-cols-6 gap-2 max-h-48 overflow-y-auto">
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2 max-h-48 overflow-y-auto">
               {products.map((p) => (
                 <button
                   key={p.id}

@@ -1,5 +1,10 @@
 # Roadmap
 
+## Proposal Builder empty-floor workflow
+- [x] Proposal Builder opens in a fullscreen portal; explicit Create Empty Room/retry works for reopened/history/draft renders, with exact-render-bound template persistence. Scene Editor shares the portal fix; phone header and catalogue grid fit.
+- [x] Real signed-in Residence 01: builder visible, one successful clean_room generation, catalogue selection enables Generate Proposal, empty floor survives refresh; desktop/phone inspected, no page errors, 20 tests/build pass. Final furnished proposal generation was not rerun.
+- [x] Rule audit: furniture tools must open visibly and let a reopened render prepare its own empty floor. Read all ProposalBuilder/SceneEditor callers, history reopen, draft Resume, generation/auto-cleanup, proposal_render/clean_room/scene_edit handlers, and expanded proposal view. Portal fixes cover affected siblings; existing generation/placement rules follow the rule. No database RPC or background job opens these tools; settled records, permissions and settings unchanged.
+
 ## AI Render Studio source draft persistence
 - [x] Save cloud image links instead of generated base64; compact legacy drafts before quota cleanup and protect the saved source draft from eviction. Quota fallback drops optional render history, not source/settings.
 - [x] Signed-in Residence 01 source and saved render remain visible through legacy base64 recovery, refresh, mode change and second refresh; draft shrinks to 1,782 characters with no raw image data. No page errors; 19 regressions and preview build pass.
