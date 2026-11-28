@@ -10,6 +10,7 @@ import { generateChatCompletion } from "npm:@lovable.dev/ai-gateway@0.1.15";
 import { fullFrameFurnitureLock, proposalRefinementLock, requireRoomFurnitureReferences, roomFurnitureReferenceImages, roomFurnitureReferenceText, selectSecondaryReferencePhotos } from "../_shared/roomFurnitureEditing.ts";
 import { proposalRefinementInputs, studioFurnitureInputs } from "../_shared/studioFurnitureReferences.ts";
 import { safeFetch } from "../_shared/safeFetch.ts";
+import { surfaceEditPrompt } from "../_shared/eyeLevelSurfaces.ts";
 import {
   AXO_CUTAWAY_CAMERA_GUARD,
   buildAxoStyleText,
@@ -76,6 +77,10 @@ serve(async (req) => {
 
     if (!imageUrl) throw new Error("imageUrl is required");
     if (mode === "proposal_refine") requireRoomFurnitureReferences(placements);
+    if (body.surfaceStagingId) {
+      if (mode !== "proposal_refine" || !Array.isArray(placements) || placements[0]?.id !== body.surfaceStagingId || placements.filter((p: any) => p.id === body.surfaceStagingId).length !== 1) throw new Error("Choose exactly one rug or artwork to stage.");
+      surfaceEditPrompt(placements[0]);
+    }
     if (body.fullFrameFurnitureEdit) {
       if (mode !== "product_swap" || maskDataUrl) throw new Error("Full-frame furniture correction requires a product swap without a mask.");
       requireRoomFurnitureReferences(placements);
@@ -542,7 +547,7 @@ Style: ${defaultStyle}.`;
         ? `Move hint: from (${markerHints.move_from.x_percent}%, ${markerHints.move_from.y_percent}%) to (${markerHints.move_to.x_percent}%, ${markerHints.move_to.y_percent}%).`
         : "";
 
-      const userInstruction = refinementPrompt || "Improve the placement and integration of furniture.";
+      const userInstruction = body.surfaceStagingId ? surfaceEditPrompt(placements[0]) : refinementPrompt || "Improve the placement and integration of furniture.";
 
       prompt = `You are performing a TARGETED edit on an already-generated proposal render.
 
@@ -910,6 +915,7 @@ Style: ${buildStyle()}. The output must look like the SAME render session as the
         if (references.length) {
           content.splice(1, content.length - 1, ...await proposalRefinementInputs(imageUrl, references, (url, init) => safeFetch(String(url), init)));
           content.push({ type: "text", text: "Refinement references are identity checks only: preserve every non-target item and its current finish exactly as IMAGE 1 shows. Apply studio geometry/swatches ONLY to an explicitly requested change; never restage the other furniture." });
+          if (body.surfaceStagingId) content.push({ type: "text", text: surfaceEditPrompt(placements[0]) });
         }
       }
     }

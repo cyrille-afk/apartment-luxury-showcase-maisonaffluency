@@ -1,5 +1,11 @@
 # Roadmap
 
+## 2D eye-level rugs and artwork
+- [x] Include image-backed rug/artwork catalogue items without models and carry recorded metric axes. Legacy Trade rugs are read without catalogue writes; ambiguous/custom sizes require explicit metric entry.
+- [x] Stage surfaces onto the active render; artwork uses wall pins, rugs stay beneath existing furniture. Target studio image follows the active render, then all current furniture references; explicit review/apply/undo commits image and selection together.
+- [x] Signed-in Expanded View selected the real 2.3 × 3 m CC-Tapis rug; two real staging requests returned 200 with six references, review displayed the rug below the coffee table/chair legs, Apply gave six selections and Undo restored five. Desktop/390px phone inspected; 35 regressions, boot/deploy/live and preview checks pass. AI pixel-identical preservation is not guaranteed.
+- [ ] Real artwork generation awaits catalogue artwork records: current spatial and Trade catalogues contain none classified as artwork. Wall-pin pointer coordinates, W×H validation and draft restoration are regression-tested; no catalogue records fabricated.
+
 ## Exact catalogue furniture references
 - [x] Original studio photo bytes and selected pictured finish swatches are fetched for every eye-level piece; primary references follow the shell, with exact replica instructions and no text-only fallback. Selected swatch crops are preserved; failed reference fetches stop inference.
 - [x] Correct one piece sends only the selected item's studio photos/swatches, retaining all room identities as preservation metadata and full-frame review/apply/undo. Real signed-in Rift correction returned 200, Apply displayed the result and Undo restored the original; design likeness remains imperfect.

@@ -1,6 +1,9 @@
 import { useState, useRef, useMemo, useCallback, useEffect } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
+import { useEyeLevelCatalogue } from "@/hooks/useEyeLevelCatalogue";
+import SurfaceStagingDialog from "./SurfaceStagingDialog";
+import { isEyeLevelSurface, surfaceMetricSize } from "../../../supabase/functions/_shared/eyeLevelSurfaces";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -128,6 +131,7 @@ export default function ProposalBuilder({
   const [lockedIteration, setLockedIteration] = useState<number | null>(null);
   const [compareMode, setCompareMode] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [surfacePickerOpen, setSurfacePickerOpen] = useState(false);
   const [qualityTier, setQualityTier] = useState<"draft" | "standard" | "premium">("standard");
   const [correctingPiece, setCorrectingPiece] = useState(false);
   const [preflight, setPreflight] = useState<"shell" | "proposal" | null>(null);
@@ -241,8 +245,9 @@ export default function ProposalBuilder({
   const [brand, setBrand] = useState("");
 
   const { allProducts: allTradeProds, brands } = useTradeProducts();
+  const surfaceCatalogue = useEyeLevelCatalogue(allTradeProds, Boolean(user));
   const products = useMemo(() => {
-    let all = allTradeProds.filter((p) => p.image_url);
+    let all = surfaceCatalogue.products.filter((p) => p.image_url);
     if (category) all = all.filter((p) => p.category === category);
     if (subcategory) all = all.filter((p) => p.subcategory === subcategory);
     if (brand) all = all.filter((p) => p.brand_name === brand);
@@ -256,7 +261,7 @@ export default function ProposalBuilder({
       );
     }
     return all.slice(0, 24);
-  }, [allTradeProds, search, category, subcategory, brand]);
+  }, [surfaceCatalogue.products, search, category, subcategory, brand]);
 
   const subcategories = category ? (SUBCATEGORY_MAP[category] || []) : [];
 
@@ -292,17 +297,19 @@ export default function ProposalBuilder({
     loadPreloaded();
   }, [preloadedProductIds, lockedProducts]);
 
-  const addProduct = useCallback((product: { product_id?: string; product_name: string; brand_name: string; image_url: string; dimensions?: string; materials?: string; isExternal?: boolean; pdf_url?: string; pdf_urls?: { label: string; url: string; filename?: string }[] }) => {
+  const addProduct = useCallback((product: Omit<SelectedProduct, "id">) => {
     if (busy || lockedProducts?.length) return;
     if (selectedProducts.length >= 10) {
       toast({ title: "Maximum 10 products per proposal", variant: "destructive" });
       return;
     }
-    setSelectedProducts((prev) => [
-      ...prev,
-      { id: nextPinId(), ...product, ...(roomZone ? { room_section: roomZone.room_name } : {}) },
-    ]);
-  }, [selectedProducts.length, toast, busy, lockedProducts,roomZone]);
+    const nextProducts = [...selectedProducts, { id: nextPinId(), ...product, ...(roomZone ? { room_section: roomZone.room_name } : {}) }];
+    if (proposalResult && renderView === "eye-level" && isEyeLevelSurface(product)) {
+      previousFurnitureSignature.current = JSON.stringify(nextProducts.map(({ id,product_id,room_section,material_override,selected_finishes,rotation }) => ({ id,product_id,room_section,material_override,selected_finishes,rotation })));
+      setSurfacePickerOpen(true);
+    }
+    setSelectedProducts(nextProducts);
+  }, [selectedProducts, toast, busy, lockedProducts,roomZone,proposalResult,renderView]);
 
   const removeProduct = useCallback((id: string) => {
     if (busy || lockedProducts?.length) return;
@@ -424,6 +431,7 @@ export default function ProposalBuilder({
       if (!accessToken) throw new Error("Session expired. Please sign in again.");
 
       const placements = stagingProducts.map((p) => ({
+        id: p.id, category_role: p.category_role, width_m: p.width_m, depth_m: p.depth_m, height_m: p.height_m,
         product_id: p.product_id || null,
         product_name: p.product_name,
         brand_name: p.brand_name,
@@ -480,6 +488,7 @@ export default function ProposalBuilder({
       if (!accessToken) throw new Error("Session expired. Please sign in again.");
 
       const placements = stagingProducts.map((p) => ({
+        id: p.id, category_role: p.category_role, width_m: p.width_m, depth_m: p.depth_m, height_m: p.height_m,
         product_id: p.product_id || null,
         product_name: p.product_name,
         brand_name: p.brand_name,
@@ -546,6 +555,18 @@ export default function ProposalBuilder({
     setProposalHistory(previous => [...previous, url]); setCorrectingPiece(false);
     onResult?.({ imageUrl: url, storedUrl: url, text: "Single-piece correction", pinnedProducts: selectedProducts, renderView, draft: { ...draft, axonometricResult: nextResults.axonometric, eyeLevelResult: nextResults["eye-level"] } });
   };
+  const applySurfaceStaging = (url: string, piece: SelectedProduct) => {
+    if (!proposalResult) return;
+    const placedPiece = { ...piece, ...(roomZone ? { room_section: roomZone.room_name } : {}), dimensions: surfaceMetricSize(piece) };
+    const nextProducts = selectedProducts.some(p => p.id === piece.id) ? selectedProducts.map(p => p.id === piece.id ? placedPiece : p) : [...selectedProducts, placedPiece];
+    previousFurnitureSignature.current = JSON.stringify(nextProducts.map(({ id,product_id,room_section,material_override,selected_finishes,rotation }) => ({ id,product_id,room_section,material_override,selected_finishes,rotation })));
+    setCorrectionUndo({ before: proposalResult, after: url, view: renderView, productsBefore: selectedProducts });
+    const nextResults = { ...viewResults, [renderView]: url };
+    setSelectedProducts(nextProducts); setViewResults(nextResults); setProposalResult(url); setLockedIteration(null); setSurfacePickerOpen(false);
+    setProposalHistory(previous => [...previous, url]);
+    onResult?.({ imageUrl: url, storedUrl: url, text: "2D catalogue surface staged", pinnedProducts: nextProducts, renderView, draft: { ...draft, products: nextProducts, axonometricResult: nextResults.axonometric, eyeLevelResult: nextResults["eye-level"] } });
+  };
+  const surfaceDialog = surfacePickerOpen && proposalResult ? <SurfaceStagingDialog imageUrl={proposalResult} products={stagingProducts} catalogue={surfaceCatalogue.products} onClose={() => setSurfacePickerOpen(false)} onApply={applySurfaceStaging} /> : null;
   const applyPieceRemoval = (url: string, id?: string) => {
     if (!proposalResult || !id || lockedProducts?.length) return;
     const nextProducts = selectedProducts.filter(piece => piece.id !== id);
@@ -1116,6 +1137,7 @@ export default function ProposalBuilder({
   if (expanded && proposalResult) {
     return (
       <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex flex-col">
+        {surfaceDialog}
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center gap-3">
             <h2 className="font-display text-sm text-foreground">Proposal — Expanded View</h2>
@@ -1129,6 +1151,7 @@ export default function ProposalBuilder({
             )}
           </div>
           <div className="flex items-center gap-1.5">
+            {renderView === "eye-level" && !lockedProducts?.length && <Button variant="outline" size="sm" disabled={busy || surfaceCatalogue.loading} onClick={() => setSurfacePickerOpen(true)}><Image className="size-3.5" />Add Rug / Artwork</Button>}
             {/* Move mode toggle */}
             <Button
               variant={moveMode ? "default" : "outline"}
@@ -1633,8 +1656,10 @@ export default function ProposalBuilder({
               {/* Refinement prompt */}
               <div className="flex flex-wrap gap-2">
                 <Button size="sm" variant="outline" disabled={busy || !stagingProducts.length} onClick={() => setCorrectingPiece(true)}><RefreshCw className="size-3.5" />Correct one piece</Button>
-                {correctionUndo?.view === renderView && correctionUndo.after === proposalResult && <Button size="sm" variant="ghost" disabled={busy} onClick={undoPieceCorrection}><Undo2 className="size-3.5" />{correctionUndo.productsBefore ? "Undo removal" : "Undo correction"}</Button>}
+                {correctionUndo?.view === renderView && correctionUndo.after === proposalResult && <Button size="sm" variant="ghost" disabled={busy} onClick={undoPieceCorrection}><Undo2 className="size-3.5" />{correctionUndo.productsBefore ? "Undo room edit" : "Undo correction"}</Button>}
               </div>
+              {surfaceDialog}
+              {renderView === "eye-level" && !lockedProducts?.length && <Button size="sm" variant="outline" disabled={busy || surfaceCatalogue.loading} onClick={() => setSurfacePickerOpen(true)}><Image className="size-3.5" />Add Rug / Artwork</Button>}
               {correctingPiece && <FurnitureCorrectionDialog imageUrl={proposalResult} products={stagingProducts} onClose={() => setCorrectingPiece(false)} onApply={applyPieceCorrection} />}
               <div className="flex gap-2">
                 <Input
@@ -1875,6 +1900,7 @@ export default function ProposalBuilder({
 
         {pickerOpen && selectedProducts.length < 10 && (
           <div className="space-y-2">
+            {surfaceCatalogue.error && <div role="alert" className="flex items-center gap-2 text-sm text-destructive">Rugs and artworks couldn’t be loaded.<Button size="sm" variant="outline" onClick={() => void surfaceCatalogue.retry()}>Try again</Button></div>}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
               <Input
@@ -1920,10 +1946,11 @@ export default function ProposalBuilder({
                     p.image_url &&
                     addProduct({
                       product_id: (p as any).trade_product_id ?? undefined,
+                      category_role: p.category_role, width_m: p.width_m, depth_m: p.depth_m, height_m: p.height_m,
                       product_name: p.product_name,
                       brand_name: p.brand_name,
                       image_url: p.image_url,
-                      dimensions: p.dimensions,
+                      dimensions: isEyeLevelSurface(p) ? (() => { try { return surfaceMetricSize(p); } catch { return p.dimensions; } })() : p.dimensions,
                       materials: p.materials,
                       pdf_url: p.pdf_url,
                       pdf_urls: p.pdf_urls,

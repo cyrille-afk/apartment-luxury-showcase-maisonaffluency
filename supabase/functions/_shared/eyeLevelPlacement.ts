@@ -5,8 +5,9 @@ export function validEyeLevelTarget(value: unknown): value is EyeLevelTarget {
   return [target["x"], target["y"]].every(n => typeof n === "number" && Number.isFinite(n) && n >= 0 && n <= 100) &&
     typeof target["instruction"] === "string" && target["instruction"].length <= 300;
 }
-export function requireEyeLevelTargets(placements: { product_name: string; target?: unknown }[]): void {
+export function requireEyeLevelTargets(placements: { product_name: string; category_role?: string; target?: unknown }[]): void {
   for (const piece of placements) {
+    if (piece.category_role === "rug") continue;
     if (!validEyeLevelTarget(piece.target)) throw new Error(`Place a pin for ${piece.product_name} on the empty room image. Placement notes are optional (maximum 300 characters).`);
   }
 }

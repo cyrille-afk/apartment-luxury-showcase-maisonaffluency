@@ -12,6 +12,7 @@ export type ProposalProduct = {
   material_override?: string; selected_finishes?: { axis: string; name: string; image_url?: string | null }[];
   pdf_url?: string; pdf_urls?: { label: string; url: string; filename?: string }[];
   target?: EyeLevelTarget;
+  category_role?: string; width_m?: number; depth_m?: number; height_m?: number;
 };
 export type ProposalRenderDraft = {
   sourceKey: string; view: "axonometric" | "eye-level"; camera: EyeLevelCamera | null;

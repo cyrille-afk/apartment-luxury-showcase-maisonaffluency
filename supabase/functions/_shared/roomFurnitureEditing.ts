@@ -1,6 +1,7 @@
 import { eyeLevelShapeGuardrail } from "./eyeLevelPrompt.ts";
 
 export type RoomFurnitureReference = {
+  id?: string; category_role?: string; width_m?: number; depth_m?: number; height_m?: number;
   product_id?: string | null; product_name: string; brand_name?: string; image_url: string;
   secondary_image_urls?: string[];
   dimensions?: string | null; materials?: string | null; material_override?: string | null;
