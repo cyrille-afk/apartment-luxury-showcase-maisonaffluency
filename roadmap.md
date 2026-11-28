@@ -1041,4 +1041,5 @@
 - [x] Connect galleries to exact saved-room package matches; revalidate current finishes/signature and preserve saved shell, pins and slot identities when publishing.
 - [x] Clarify that three pieces means the saved package list, not a staging limit: Bespoke contains Rift CTS, one GUM and Yoma; the render adds Mono STS and a second GUM.
 - [x] 18 matching/publishing/buyer-toggle regressions pass; preview build OK and signed-in restored five-piece turntable visually checked. Real buyer publication remains blocked on a matching saved package.
-- [ ] Verify publishing through the buyer page: awaiting the user's residence/tier choice for the five-piece room; no saved room rows exist and existing packages contain three pieces. Do not overwrite package contents without that choice.
+- [x] Add the confirmed Mono STS and second GUM to the shared Bespoke list, preserving existing pieces and finishes; database readback and signed-in folder show all five pieces and matching GUM finishes.
+- [ ] Verify publishing through the buyer page once the matching room shell/pins are saved; no saved room rows exist yet.
