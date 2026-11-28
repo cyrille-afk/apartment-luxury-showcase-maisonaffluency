@@ -43,7 +43,11 @@ export default function FurnitureCorrectionDialog({ imageUrl, products, onClose,
       onPointerMove={event => { if (busy || !start.current) return; const point = planPoint(event.clientX, event.clientY, event.currentTarget.getBoundingClientRect()); setArea({ x: Math.min(start.current.x, point.x), y: Math.min(start.current.y, point.y), width: Math.abs(point.x - start.current.x), height: Math.abs(point.y - start.current.y) }); }}
       onPointerUp={() => { start.current = null; }} onPointerCancel={() => { start.current = null; }}>
       {area && <rect x={area.x} y={area.y} width={area.width} height={area.height} fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="1 1" />}
-    </svg></div></div>}
+    </svg>
+    {busy ? null : area
+      ? <p className="pointer-events-none absolute left-2 top-2 rounded-md bg-background/90 px-2 py-1 text-xs font-medium text-foreground shadow-sm">Box drawn — press “Regenerate piece”.</p>
+      : <div className="pointer-events-none absolute inset-x-3 top-3 flex justify-center"><p className="max-w-md rounded-md bg-background/90 px-3 py-2 text-center text-sm font-medium text-foreground shadow-sm">Drag a box over the incorrect piece — here, the wrong chair — before you can generate a correction.</p></div>}
+    </div></div>}
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
     <div className="flex flex-wrap justify-end gap-2"><Button variant="ghost" disabled={busy} onClick={onClose}><X className="size-4" />Cancel</Button>{candidate && <Button variant="outline" onClick={() => setCandidate(null)}>Adjust area</Button>}<Button variant="outline" disabled={busy || !piece || !area || area.width < 1 || area.height < 1} onClick={generate}>{busy ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}{busy ? "Correcting piece…" : candidate ? "Retry correction" : "Regenerate piece"}</Button>{candidate && <Button onClick={() => onApply(candidate)}><Check className="size-4" />Apply correction</Button>}</div>
   </DialogContent></Dialog>;
