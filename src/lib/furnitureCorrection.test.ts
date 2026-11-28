@@ -18,6 +18,13 @@ describe("single-piece correction", () => {
     expect(request.placements[1]?.dimensions).toBe("108 × 108 × 28 cm");
     expect(request).not.toHaveProperty("maskDataUrl");
   });
+  it("embeds the 1:1 rounded-square squircle guardrail and target identity when Rift CTS is corrected", () => {
+    const request = furnitureCorrectionRequest("https://example.com/current.png", { ...rift, product_id: "b26d428c-98ce-46e3-befa-d5308b894ba6" }, { x: 40, y: 60, width: 25, height: 20 }, [chair, rift]);
+    expect(request.swaps[0]?.productId).toBe("b26d428c-98ce-46e3-befa-d5308b894ba6");
+    expect(request.swaps[0]?.productName).toBe("Rift CTS Coffee Table");
+    expect(request.swaps[0]?.prompt).toContain("1:1 rounded-square (squircle)");
+    expect(request.swaps[0]?.prompt).not.toContain("not another selected chair");
+  });
   it("rejects empty or out-of-image edit areas", () => {
     expect(() => correctionBounds({ x: 90, y: 0, width: 20, height: 10 }, 100, 100)).toThrow();
     expect(() => correctionBounds({ x: 0, y: 0, width: 0, height: 10 }, 100, 100)).toThrow();

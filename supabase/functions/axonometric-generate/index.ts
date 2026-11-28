@@ -5,7 +5,7 @@ import { withCache } from "../_shared/aiCache.ts";
 import { eyeLevelShellPrompt, eyeLevelStagingPrompt } from "../_shared/eyeLevelPrompt.ts";
 import { requireEyeLevelTargets } from "../_shared/eyeLevelPlacement.ts";
 import { ROOM_TYPES, type RoomType } from "../_shared/roomZone.ts";
-import { fullFrameFurnitureLock, requireRoomFurnitureReferences, roomFurnitureReferenceImages, roomFurnitureReferenceText } from "../_shared/roomFurnitureEditing.ts";
+import { fullFrameFurnitureLock, requireRoomFurnitureReferences, roomFurnitureReferenceImages, roomFurnitureReferenceText, selectSecondaryReferencePhotos } from "../_shared/roomFurnitureEditing.ts";
 import {
   AXO_CUTAWAY_CAMERA_GUARD,
   buildAxoStyleText,
@@ -258,7 +258,7 @@ CRITICAL: Do not crop, rotate, or re-frame the scene relative to the source. The
     } else if (mode === "cad_overlay") {
       prompt = `Take this architectural technical drawing (floor plan or elevation) and insert the provided CAD furniture/product block drawings into the appropriate positions. Scale the blocks to match the drawing's proportions. Maintain the technical drawing style — clean lines, no shading. Position the product blocks logically within rooms or against walls as appropriate for the product type. Keep the original technical drawing intact and overlay the product blocks seamlessly.`;
     } else if (mode === "product_swap") {
-      const swaps = body.swaps as { prompt: string; imageUrl: string }[] | undefined;
+      const swaps = body.swaps as { prompt: string; imageUrl: string; productId?: string | null; productName?: string | null }[] | undefined;
       // Legacy single-swap support
       const singlePrompt = body.swapPrompt || "";
       const singleImage = body.replacementImageUrl;
@@ -273,9 +273,12 @@ CRITICAL: Do not crop, rotate, or re-frame the scene relative to the source. The
       const swapInstructions = swapList
         .map((s, i) => `${i + 1}. ${s.prompt}`)
         .join("\n");
+      const targetNames = swapList
+        .map((s) => ("productName" in s && typeof s.productName === "string" ? s.productName : ""))
+        .filter(Boolean);
 
       prompt = `You are given an interior architectural render. The user wants to swap ${swapList.length === 1 ? "a specific piece" : "multiple pieces"} of furniture/products in the scene. For each swap instruction below, remove the specified item and replace it IN THE EXACT SAME POSITION with the corresponding replacement product image (provided in order after the scene image). Match scale, perspective, lighting, and shadows perfectly so each replacement looks naturally integrated.\n\nCRITICAL: You MUST preserve EVERY other element in the scene EXACTLY as they are — all other furniture, walls, flooring, decorations, lighting fixtures, plants, artwork, windows, rugs, and architectural details must remain completely unchanged. Do NOT remove, move, or alter anything that is not explicitly mentioned in the swap instructions. The output image should be pixel-identical to the input except for the swapped items.\n\nSwap instructions:\n${swapInstructions}\n\nStyle: ${defaultStyle}.`;
-      prompt += `\n\n${fullFrameFurnitureLock(Array.isArray(placements) ? placements : [])}`;
+      prompt += `\n\n${fullFrameFurnitureLock(Array.isArray(placements) ? placements : [], targetNames)}`;
     } else if (mode === "freeform") {
       const userPrompt = body.userPrompt;
       if (!userPrompt?.trim()) throw new Error("userPrompt is required for freeform mode");
@@ -709,20 +712,75 @@ Style: ${buildStyle()}. The output must look like the SAME render session as the
     }
 
 
+    // Resolve secondary angle photos from trade_products.gallery_images so low front-on shots
+    // never hide a piece's true 3D footprint (e.g. Rift CTS's 108×108 rounded-square corners).
+    const secondaryPhotosByKey = new Map<string, string[]>();
+    if (["product_swap", "eye_level_proposal", "proposal_refine"].includes(mode)) {
+      const swapItems = Array.isArray(body.swaps) ? body.swaps : [];
+      const placementItems = Array.isArray(placements) ? placements : [];
+      const lookupIds = Array.from(new Set([
+        ...swapItems.map((s: any) => s?.productId),
+        ...placementItems.map((p: any) => p?.product_id),
+      ].filter((id: any): id is string => typeof id === "string" && id.length > 0)));
+      const lookupNames = Array.from(new Set([
+        ...swapItems.map((s: any) => s?.productName),
+        ...placementItems.map((p: any) => p?.product_name),
+      ].filter((name: any): name is string => typeof name === "string" && name.trim().length > 0)));
+      if (lookupIds.length > 0 || lookupNames.length > 0) {
+        try {
+          const svc = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+          const galleryRows: any[] = [];
+          if (lookupIds.length > 0) {
+            const { data } = await svc.from("trade_products").select("id, product_name, image_url, gallery_images").in("id", lookupIds);
+            if (data) galleryRows.push(...data);
+          }
+          if (lookupNames.length > 0) {
+            const { data } = await svc.from("trade_products").select("id, product_name, image_url, gallery_images").in("product_name", lookupNames);
+            if (data) galleryRows.push(...data);
+          }
+          for (const row of galleryRows) {
+            const extras = selectSecondaryReferencePhotos(row.image_url || "", row.gallery_images, 2);
+            if (!extras.length) continue;
+            if (row.id) secondaryPhotosByKey.set(`id:${row.id}`, extras);
+            if (row.product_name) secondaryPhotosByKey.set(`name:${String(row.product_name).trim().toLowerCase()}`, extras);
+          }
+        } catch (galleryErr) {
+          console.warn("[axo-gen] Secondary gallery photo lookup skipped:", galleryErr);
+        }
+      }
+    }
+    const getSecondaryPhotos = (id?: string | null, name?: string | null, primaryUrl?: string | null) => {
+      const found = (id ? secondaryPhotosByKey.get(`id:${id}`) : undefined)
+        || (name ? secondaryPhotosByKey.get(`name:${name.trim().toLowerCase()}`) : undefined)
+        || [];
+      return primaryUrl ? found.filter((u) => u !== primaryUrl) : found;
+    };
+
     // Add replacement product images for product_swap mode
     if (mode === "product_swap") {
-      const swaps = body.swaps as { prompt: string; imageUrl: string }[] | undefined;
+      const swaps = body.swaps as { prompt: string; imageUrl: string; productId?: string | null; productName?: string | null }[] | undefined;
       const singleImage = body.replacementImageUrl;
       const swapList = swaps && swaps.length > 0
         ? swaps
         : singleImage ? [{ prompt: "", imageUrl: singleImage }] : [];
+      const swapTargetNames = swapList
+        .map((s) => ("productName" in s && typeof s.productName === "string" ? s.productName : ""))
+        .filter(Boolean);
       for (const s of swapList.slice(0, 10)) {
         content.push({
           type: "image_url",
           image_url: { url: s.imageUrl },
         });
+        const targetExtras = getSecondaryPhotos("productId" in s ? s.productId : null, "productName" in s ? s.productName : null, s.imageUrl);
+        for (const extraUrl of targetExtras) {
+          content.push({
+            type: "text",
+            text: `Additional angle reference photo for replacement piece (${("productName" in s && s.productName) || "target piece"}): use this angle together with the main product photo to match its true 3D footprint, corners and proportions.`,
+          });
+          content.push({ type: "image_url", image_url: { url: extraUrl } });
+        }
       }
-      if (Array.isArray(placements) && placements.length) content.push(...roomFurnitureReferenceImages(placements));
+      if (Array.isArray(placements) && placements.length) content.push(...roomFurnitureReferenceImages(placements, swapTargetNames));
     }
 
     // Add overlay product images for composite mode
@@ -811,6 +869,16 @@ Style: ${buildStyle()}. The output must look like the SAME render session as the
     if (mode === "eye_level_proposal") {
       if (referenceImageUrl) content.push({ type: "image_url", image_url: { url: referenceImageUrl } });
       for (const p of placements) content.push({ type: "image_url", image_url: { url: p.image_url } });
+      let extraBudget = 6;
+      for (const [index, p] of placements.entries()) {
+        if (extraBudget <= 0) break;
+        const extras = getSecondaryPhotos(p.product_id, p.product_name, p.image_url).slice(0, Math.min(2, extraBudget));
+        for (const extraUrl of extras) {
+          content.push({ type: "text", text: `Additional angle reference for product ${index + 1} (${p.product_name}): shows true 3D footprint, corners and side geometry.` });
+          content.push({ type: "image_url", image_url: { url: extraUrl } });
+          extraBudget--;
+        }
+      }
     }
 
     // Proposal refine: keep current proposal as base image, then provide layout + product refs
@@ -826,6 +894,16 @@ Style: ${buildStyle()}. The output must look like the SAME render session as the
               type: "image_url",
               image_url: { url: p.image_url },
             });
+          }
+        }
+        let extraBudget = 6;
+        for (const [index, p] of placements.slice(0, 10).entries()) {
+          if (extraBudget <= 0) break;
+          const extras = getSecondaryPhotos(p.product_id, p.product_name, p.image_url).slice(0, Math.min(2, extraBudget));
+          for (const extraUrl of extras) {
+            content.push({ type: "text", text: `Additional angle reference for product ${index + 1} (${p.product_name}): shows true 3D footprint, corners and side geometry.` });
+            content.push({ type: "image_url", image_url: { url: extraUrl } });
+            extraBudget--;
           }
         }
       }

@@ -29,5 +29,9 @@ describe("recorded eye-level furniture proportions", () => {
   });
   it("preserves another recorded Rift size rather than substituting example dimensions", () => {
     expect(eyeLevelMetricDimensions("W 108 × D 108 × H 28 cm – 254 kg")).toMatchObject({ w: 108, d: 108, h: 28, footprintRatio: 1 });
+    const guardrail = eyeLevelShapeGuardrail({ product_name: "Rift CTS", dimensions: "W 108 × D 108 × H 28 cm – 254 kg" });
+    expect(guardrail).toContain("1:1 rounded-square (squircle)");
+    expect(guardrail).toContain("NEVER an elongated oval");
+    expect(guardrail).not.toContain("near-circular");
   });
 });
