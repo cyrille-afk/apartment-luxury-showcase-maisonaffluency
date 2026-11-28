@@ -1,4 +1,4 @@
-const IMAGE_FIELDS = new Set(["imageUrl", "image_url", "referenceImageUrl", "textureImageUrl", "styleReferenceUrl", "technicalDrawingUrl", "overlayImages"]);
+const IMAGE_FIELDS = new Set(["imageUrl", "image_url", "referenceImageUrl", "lockedRoomUrl", "textureImageUrl", "styleReferenceUrl", "technicalDrawingUrl", "overlayImages"]);
 
 /** The render service cannot fetch authenticated preview assets; send their bytes instead. */
 export async function prepareAiRenderImages<T>(payload: T): Promise<T> {

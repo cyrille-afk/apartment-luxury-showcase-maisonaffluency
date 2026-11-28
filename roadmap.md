@@ -1033,3 +1033,9 @@
 - [x] Use the active render plus every placed original studio reference for move/remove/refine; remove conflicting layout/material/replacement instructions.
 - [x] 27 reference/removal/framing regressions pass; function boot/deployment/live-start check pass; preview build OK. Expanded and inline proposal edits and removal dialog were read and share the updated request handler.
 - [ ] Verify actual generated furniture/architecture visually: the available signed-in account shows “No studio yet” instead of this project's editor, so the real expanded edit flow is blocked; pixel-perfect preservation is not verified.
+
+## Room-scoped multi-view turntable
+- [x] Four-corner eye-level rig, tight room crop and browser-prepared furniture references.
+- [x] Atomic four-angle publishing and token-scoped buyer toggles; package/signature regressions pass.
+- [x] Live signed-in five-piece generation, desktop/mobile crop dragging, deployment/startup checks and regressions pass. Output remains in one room, but furniture instance/silhouette accuracy is not guaranteed.
+- [ ] Verify publishing through the buyer page with a matching saved room package: no residence_room_renders exist and the saved five-piece draft differs from the three-piece packages; do not fabricate or overwrite package contents for testing.

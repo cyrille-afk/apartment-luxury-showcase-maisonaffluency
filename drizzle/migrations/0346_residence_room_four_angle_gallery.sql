@@ -1,0 +1,2 @@
+ALTER TABLE public.residence_room_renders ADD COLUMN IF NOT EXISTS gallery_views jsonb NOT NULL DEFAULT '[]'::jsonb;
+COMMENT ON COLUMN public.residence_room_renders.gallery_views IS 'Ordered four-corner room gallery with labels and image URLs, matching the room selection signature; guest reads remain token-scoped.';

@@ -11,6 +11,7 @@ import { fullFrameFurnitureLock, proposalRefinementLock, requireRoomFurnitureRef
 import { multimodalConditioningClause, proposalRefinementInputs, studioFurnitureInputs } from "../_shared/studioFurnitureReferences.ts";
 import { buildReferenceManifest, requireBrowserReferences, type ProductReferenceManifestEntry } from "../_shared/productReferenceManifest.ts";
 import { safeFetch } from "../_shared/safeFetch.ts";
+import { roomTurntablePrompt } from "../_shared/roomTurntable.ts";
 import { surfaceEditPrompt } from "../_shared/eyeLevelSurfaces.ts";
 import {
   AXO_CUTAWAY_CAMERA_GUARD,
@@ -82,7 +83,7 @@ serve(async (req) => {
     const browserReferences = body.browserReferenceImages === true;
     let referenceManifest: ProductReferenceManifestEntry[] | null = null;
     if (browserReferences) {
-      if (mode !== "eye_level_proposal" && mode !== "proposal_refine") throw new Error("Prepared product photos are only accepted for proposal staging and refinement.");
+      if (mode !== "eye_level_proposal" && mode !== "proposal_refine" && mode !== "multi_view") throw new Error("Prepared product photos are only accepted for proposal staging and refinement.");
       requireBrowserReferences(placements);
       referenceManifest = await buildReferenceManifest(placements);
     }
@@ -609,29 +610,12 @@ Style: ${defaultStyle}. Produce a single cohesive professional architectural ren
         throw new Error("Scene edit requires either a mask (erase areas) or product placements");
       }
     } else if (mode === "multi_view") {
-      // Single-call N-angle "turntable": ask the model to render ONE composite
-      // contact sheet so all views share the same furniture, materials, and lighting.
-      const views = (body.views as { label: string; azimuth: number; elevation: number }[] | undefined) || [];
-      if (!views.length) throw new Error("multi_view requires a non-empty `views` array");
-      if (views.length > 6) throw new Error("multi_view supports up to 6 views per call");
-      const gridLayout = (body.gridLayout as string) ||
-        (views.length === 4 ? "2x2" : views.length <= 2 ? `${views.length}x1` : `${views.length}x1`);
-      const viewList = views
-        .map((v, i) => `  ${i + 1}. "${v.label}" — azimuth ${v.azimuth}°, elevation ${v.elevation}°`)
-        .join("\n");
-      prompt = `You are given ONE source interior render. Produce ONE SQUARE composite contact sheet arranged as a ${gridLayout} grid that shows the SAME scene from ${views.length} different camera angles:
-${viewList}
-
-ABSOLUTE CONSISTENCY RULES (any violation = total failure):
-- Every cell must show the EXACT SAME room layout, the EXACT SAME furniture pieces (same shapes, same colors, same materials, same finishes, same positions), the EXACT SAME architectural shell, and the EXACT SAME lighting setup (same key-light direction, same warmth, same shadow softness, same ambient occlusion).
-- Do NOT add, remove, swap, recolor, or restyle any furniture between views. A green velvet sofa in cell 1 must be the SAME green velvet sofa in cells 2, 3 and 4 — only the camera moves.
-- Treat all views as frames of ONE 3D scene rendered from different camera positions in a SINGLE render session — never as independent generations.
-- Each cell must be a clean rectangular crop separated by a thin neutral hairline, with a small white-on-dark label in the top-left corner of every cell carrying its view name (e.g. "${views[0]?.label}").
-- The whole composite must be a single 1:1 square image at the highest resolution available, with no extra header, watermark, or background outside the grid.
-
-Source render fidelity: preserve the exact materials, finishes, and palette of the source image — this is the locked appearance reference for every cell.
-
-Style: ${defaultStyle}. Quality must match a single Corona/V-Ray turntable batch.`;
+      prompt = roomTurntablePrompt(body.roomZone, body.views);
+      if (referenceImageUrl || styleReferenceUrl) throw new Error("Room turntables accept only the cropped room and its locked room references.");
+      if (Array.isArray(placements) && placements.length) {
+        requireBrowserReferences(placements);
+        if (!browserReferences) throw new Error("Attach browser-prepared photos for every room piece.");
+      }
     } else if (![
       "elevation_to_axo",
       "section_to_axo",
@@ -893,6 +877,17 @@ Style: ${buildStyle()}. The output must look like the SAME render session as the
       }
     }
 
+    if (mode === "multi_view") {
+      if (Array.isArray(placements) && placements.length) {
+        content.push({ type: "text", text: multimodalConditioningClause(placements, "the selected room crop (IMAGE 1)") });
+        content.push(...await studioFurnitureInputs(placements, (url, init) => safeFetch(String(url), init)));
+      }
+      if (body.lockedRoomUrl) {
+        content.push({ type: "text", text: "LOCKED SAME-ROOM RENDER: furniture arrangement and finishes only. IMAGE 1 defines the single room footprint. Never copy this camera into all four angles." });
+        content.push({ type: "image_url", image_url: { url: body.lockedRoomUrl } });
+      }
+    }
+
     // Eye-level shell uses plan architecture, never an inherited axonometric camera.
     if (mode === "eye_level_shell" && referenceImageUrl) {
       content.push({ type: "image_url", image_url: { url: referenceImageUrl } });
@@ -1018,15 +1013,15 @@ The final output must be indistinguishable from a professional Corona Renderer 1
     let generatedImage: string | undefined;
     let textResponse = "";
 
-    for (let attempt = 1; attempt <= (preparedFrame ? 1 : MAX_ATTEMPTS); attempt++) {
+    for (let attempt = 1; attempt <= (preparedFrame || mode === "multi_view" ? 1 : MAX_ATTEMPTS); attempt++) {
       // On final attempt, always escalate to Pro model as fallback
       const attemptModel = (attempt === MAX_ATTEMPTS && tier === "draft") ? "google/gemini-3-pro-image-preview" : selectedModel;
       if (attempt > 1) {
         console.log(`[axo-gen] Retry attempt ${attempt} with model=${attemptModel}`);
       }
 
-      if (preparedFrame) {
-        const request = { messages: [{ role: "user" as const, content }], modalities: ["image", "text"] as ["image", "text"], temperature: 0, image_config: { aspect_ratio: preparedFrame.frame.aspect } };
+      if (preparedFrame || mode === "multi_view") {
+        const request = { messages: [{ role: "user" as const, content }], modalities: ["image", "text"] as ["image", "text"], temperature: 0, image_config: { aspect_ratio: preparedFrame ? preparedFrame.frame.aspect : "1:1" as const } };
         // Canonical SDK names for the same existing Flash/Pro models, not a model change.
         const result = tier === "draft"
           ? await generateChatCompletion({ ...request, model: "google/gemini-3.1-flash-image" }, { maxRetries: 0 })

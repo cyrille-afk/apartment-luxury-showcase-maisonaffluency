@@ -2423,6 +2423,13 @@
       "when": 1795834134687,
       "tag": "0345_restrict_residence_room_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 346,
+      "version": "7",
+      "when": 1795873280347,
+      "tag": "0346_residence_room_four_angle_gallery",
+      "breakpoints": true
     }
   ]
 }

@@ -2569,7 +2569,7 @@ const TradeAxonometricWorkspace = () => {
                   <Button variant="outline" size="sm" onClick={downloadImage}>
                     <Download className="w-3.5 h-3.5 mr-1.5" />Download
                   </Button>
-                  <MultiViewTurntable sourceImageUrl={result?.storedUrl || result?.imageUrl} />
+                  <MultiViewTurntable sourceImageUrl={result?.storedUrl || result?.imageUrl} initialZone={restoredProposalDraft?.roomZone ?? null} pieces={restoredProposalDraft?.products ?? lockedProposalProducts ?? []} shellUrl={restoredProposalDraft?.shellUrl ?? null} lockedRoomUrl={restoredProposalDraft?.eyeLevelResult ?? null} />
                   {result && (
                     <Button
                       variant={lockedLayoutUrl ? "default" : "outline"}

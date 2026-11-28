@@ -28,3 +28,5 @@
 - Walkthrough video fullscreen uses the native Fullscreen API on the existing player container, synchronized by fullscreenchange, with native video fullscreen on iOS; keeping the element mounted preserves playback and keeps the return control inside fullscreen.
 - Shared path menus and side-by-side comparison derive diagrams and durations from the same memoized CinematicPath as playback; durations include entry and speed so previews cannot drift, and comparison changes the route only on explicit selection.
 - Project folder and procurement card 3D badges render through the shared Product3dBadge, which reads the validated model URL (has3dAsset) — pieces without geometry show a muted, inert "3D Unavailable" notice that stops propagation, so a card never promises a viewer it cannot open and the finishes workspace stays reachable from the card image.
+
+- Room turntables use a single cropped room and shared four-corner rig with browser-prepared catalogue photos; published quadrants share the existing package validation/signature and token-scoped room projection, never a separate public gallery — prevents cross-room drift and stale finish views.

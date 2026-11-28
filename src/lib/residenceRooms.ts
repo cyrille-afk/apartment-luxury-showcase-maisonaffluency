@@ -3,7 +3,7 @@ import { ROOM_TYPES } from "./roomZone";
 import type { VisualizationChoice } from "./residenceVisualization";
 
 export const roomTypeSchema = z.enum(Object.keys(ROOM_TYPES) as [keyof typeof ROOM_TYPES, ...(keyof typeof ROOM_TYPES)[]]);
-export const residenceRoomSchema = z.object({ id: z.string().uuid(), room_name: z.string(), room_type: roomTypeSchema, shell_url: z.string().url(), render_url: z.string().url().nullable(), slot_ids: z.array(z.string().uuid()), selection_signature: z.string() });
+export const residenceRoomSchema = z.object({ id: z.string().uuid(), room_name: z.string(), room_type: roomTypeSchema, shell_url: z.string().url(), render_url: z.string().url().nullable(), slot_ids: z.array(z.string().uuid()), selection_signature: z.string(), gallery_views: z.array(z.object({ label: z.string(),url: z.string().url() })).optional() });
 export type ResidenceRoom = z.infer<typeof residenceRoomSchema>;
 export function roomChoices(choices: VisualizationChoice[], slotIds: string[]) {
   const ids = new Set(slotIds);

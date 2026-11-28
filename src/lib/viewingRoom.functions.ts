@@ -141,9 +141,9 @@ export const getResidenceRoomRenders = createServerFn({ method: "POST" }).inputV
   const layout = access?.room.layouts.find(row => row.packages.some(pkg => pkg.id === data.packageId));
   if (!access || !layout) throw new Error("Please enter your private access code again.");
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const result = await supabaseAdmin.from("residence_room_renders").select("id,room_name,room_type,shell_url,render_url,slot_ids,selection_signature").eq("residence_layout_id",layout.id).eq("furniture_package_id",data.packageId).order("created_at");
+  const result = await supabaseAdmin.from("residence_room_renders").select("id,room_name,room_type,shell_url,render_url,slot_ids,selection_signature,gallery_views").eq("residence_layout_id",layout.id).eq("furniture_package_id",data.packageId).order("created_at");
   if (result.error) throw new Error("Room views couldn’t load.");
-  return Promise.all(z.array(residenceRoomSchema).parse(result.data).map(async room => ({ ...room,shell_url: await freshRoomImage(room.shell_url),render_url: room.render_url ? await freshRoomImage(room.render_url) : null })));
+  return Promise.all(z.array(residenceRoomSchema).parse(result.data).map(async room => ({ ...room,shell_url: await freshRoomImage(room.shell_url),render_url: room.render_url ? await freshRoomImage(room.render_url) : null,gallery_views: await Promise.all((room.gallery_views ?? []).map(async view => ({ ...view,url: await freshRoomImage(view.url) }))) })));
 });
 export const generateResidenceVisualization = createServerFn({ method: "POST" }).inputValidator(z.object({ token: locator, packageId: z.string().uuid(), shellUrl: z.string().url().max(4096), choices: z.array(visualizationChoiceSchema).max(50),roomRenderId: z.string().uuid().optional() })).handler(async ({ data }) => {
   setResponseHeader("Cache-Control","private, no-store");

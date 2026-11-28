@@ -1,547 +1,117 @@
-import { useRef, useState, useEffect } from "react";
-import { Loader2, Orbit, Download, Plus, Trash2, Undo2, Redo2, RotateCcw } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { Loader2, Orbit, Download, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { prepareAiRenderImages } from "@/lib/aiRenderImages";
+import { prepareProductReferenceImages } from "@/lib/productReferenceImages";
+import { cropRoomPlan, ROOM_TYPES, type RoomZone, type RoomType } from "@/lib/roomZone";
+import { ROOM_CORNER_VIEWS, moveRoomRig, requireRoomTurntable, roomCropDataUrl, publishableRoomAngles } from "@/lib/roomTurntable";
+import { listResidenceShellLayouts } from "@/lib/residenceShells.functions";
+import { listResidenceRoomPackages, saveResidenceRoom } from "@/lib/residenceRooms.functions";
+import type { ProposalProduct } from "@/lib/proposalRenderDraft";
 import { toast } from "@/hooks/use-toast";
 
-type View = { label: string; azimuth: number; elevation: number };
-
-// Quick-fill presets. Selecting one replaces the current list with its angles.
-const PRESETS: { id: string; name: string; views: View[] }[] = [
-  {
-    id: "4-corners",
-    name: "4 corners (default)",
-    views: [
-      { label: "Front-Left", azimuth: 45, elevation: 30 },
-      { label: "Front-Right", azimuth: 135, elevation: 30 },
-      { label: "Back-Right", azimuth: 225, elevation: 30 },
-      { label: "Back-Left", azimuth: 315, elevation: 30 },
-    ],
-  },
-  {
-    id: "3-hero",
-    name: "3 hero angles",
-    views: [
-      { label: "Hero", azimuth: 45, elevation: 30 },
-      { label: "Top-Down", azimuth: 0, elevation: 85 },
-      { label: "Eye-Level", azimuth: 45, elevation: 5 },
-    ],
-  },
-  {
-    id: "6-orbit",
-    name: "6-step orbit",
-    views: [
-      { label: "0°", azimuth: 0, elevation: 30 },
-      { label: "60°", azimuth: 60, elevation: 30 },
-      { label: "120°", azimuth: 120, elevation: 30 },
-      { label: "180°", azimuth: 180, elevation: 30 },
-      { label: "240°", azimuth: 240, elevation: 30 },
-      { label: "300°", azimuth: 300, elevation: 30 },
-    ],
-  },
-  {
-    id: "2-compare",
-    name: "2-up compare",
-    views: [
-      { label: "Front", azimuth: 45, elevation: 30 },
-      { label: "Top-Down", azimuth: 0, elevation: 85 },
-    ],
-  },
-];
-
-const clampInt = (v: number, min: number, max: number) =>
-  Math.max(min, Math.min(max, Math.round(Number.isFinite(v) ? v : min)));
-
+type GeneratedRoom = { url: string; zone: RoomZone; pieces: ProposalProduct[]; shellUrl: string | null };
 interface MultiViewTurntableProps {
   sourceImageUrl: string | null | undefined;
   triggerLabel?: string;
+  initialZone?: RoomZone | null;
+  pieces?: ProposalProduct[];
+  shellUrl?: string | null;
+  lockedRoomUrl?: string | null;
 }
 
-const LS_KEY = "ma_multiViewTurntable";
-
-function loadPersisted(): { history: View[][]; index: number } | null {
-  try {
-    const raw = localStorage.getItem(LS_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (
-      Array.isArray(parsed.history) &&
-      typeof parsed.index === "number" &&
-      parsed.index >= 0 &&
-      parsed.index < parsed.history.length
-    ) {
-      return { history: parsed.history as View[][], index: parsed.index };
-    }
-  } catch {
-    // ignore parse errors
+export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View", initialZone = null, pieces = [], shellUrl = null, lockedRoomUrl = null }: MultiViewTurntableProps) {
+  const [open,setOpen] = useState(false);
+  const [zone,setZone] = useState<RoomZone>(initialZone ?? { x: 30,y: 30,width: 40,height: 40,room_type: "living_room",room_name: "Living Room" });
+  const [placed,setPlaced] = useState(Boolean(initialZone));
+  const [elevation,setElevation] = useState(8);
+  const [omitted,setOmitted] = useState<string[]>([]);
+  const [loading,setLoading] = useState(false),[publishing,setPublishing] = useState(false);
+  const [result,setResult] = useState<GeneratedRoom|null>(null);
+  const [feedback,setFeedback] = useState("");
+  const [layoutId,setLayoutId] = useState(""),[packageId,setPackageId] = useState("");
+  const [angles,setAngles] = useState<{ label: string; url: string }[]|null>(null);
+  const plan = useRef<HTMLDivElement>(null);
+  const drag = useRef(false);
+  const list = useServerFn(listResidenceShellLayouts),listPackages = useServerFn(listResidenceRoomPackages),save = useServerFn(saveResidenceRoom);
+  const layouts = useQuery({ queryKey: ["residence-shell-layouts"],queryFn: () => list(),enabled: open,retry: false });
+  const packages = useQuery({ queryKey: ["residence-room-packages",layoutId],queryFn: () => listPackages({ data: { layoutId } }),enabled: open && !!layoutId,retry: false });
+  const busy = loading || publishing;
+  const views = ROOM_CORNER_VIEWS.map(v => ({ ...v,elevation }));
+  const selected = pieces.filter(p => !omitted.includes(p.id) && (!p.room_section || p.room_section === zone.room_name));
+  const initialZoneKey = JSON.stringify(initialZone);
+  useEffect(() => { if (initialZone) { setZone(initialZone);setPlaced(true); } setResult(null);setAngles(null);setFeedback(""); },[sourceImageUrl,initialZoneKey]);
+  function move(clientX: number,clientY: number) {
+    const bounds = plan.current?.getBoundingClientRect();if (!bounds || busy) return;
+    setZone(current => moveRoomRig(current,(clientX-bounds.left)/bounds.width*100,(clientY-bounds.top)/bounds.height*100));setPlaced(true);
   }
-  return null;
-}
-
-function savePersisted(history: View[][], index: number) {
-  try {
-    localStorage.setItem(LS_KEY, JSON.stringify({ history, index }));
-  } catch {
-    // ignore quota errors
+  function resize(key: "width"|"height",value: number) {
+    if (!Number.isFinite(value)) return;
+    setZone(current => { const size = Math.max(2,Math.min(95,value));return moveRoomRig({ ...current,[key]: size },current.x+current.width/2,current.y+current.height/2); });setPlaced(true);
   }
-}
-
-export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View" }: MultiViewTurntableProps) {
-  const [open, setOpen] = useState(false);
-
-  // Undo/redo history stack (with localStorage hydration)
-  const persisted = loadPersisted();
-  const [history, setHistory] = useState<View[][]>(persisted?.history ?? [PRESETS[0].views]);
-  const [historyIndex, setHistoryIndex] = useState(persisted?.index ?? 0);
-  const views = history[historyIndex];
-
-  useEffect(() => {
-    savePersisted(history, historyIndex);
-  }, [history, historyIndex]);
-
-  const canUndo = historyIndex > 0;
-  const canRedo = historyIndex < history.length - 1;
-
-  const pushHistory = (nextViews: View[]) => {
-    setHistory((prev) => {
-      const trimmed = prev.slice(0, historyIndex + 1);
-      const last = trimmed[trimmed.length - 1];
-      if (last && JSON.stringify(last) === JSON.stringify(nextViews)) return trimmed;
-      return [...trimmed, nextViews];
-    });
-    setHistoryIndex((i) => i + 1);
-  };
-
-  const setViews = (nextViews: View[]) => pushHistory(nextViews.map((v) => ({ ...v })));
-
-  const undo = () => setHistoryIndex((i) => Math.max(0, i - 1));
-  const redo = () => setHistoryIndex((i) => Math.min(history.length - 1, i + 1));
-  const reset = () => {
-    setViews(PRESETS[0].views);
-  };
-
-  const [loading, setLoading] = useState(false);
-  const [resultUrl, setResultUrl] = useState<string | null>(null);
-
-  const applyPreset = (id: string) => {
-    const p = PRESETS.find((x) => x.id === id);
-    if (p) setViews(p.views.map((v) => ({ ...v })));
-  };
-
-  const updateView = (i: number, patch: Partial<View>) => {
-    setViews(views.map((v, idx) => (idx === i ? { ...v, ...patch } : v)));
-  };
-
-  const addView = () => {
-    if (views.length >= 6) return;
-    setViews([...views, { label: `View ${views.length + 1}`, azimuth: 45, elevation: 30 }]);
-  };
-
-  const removeView = (i: number) => {
-    setViews(views.filter((_, idx) => idx !== i));
-  };
-
-  const generate = async () => {
-    if (!sourceImageUrl) {
-      toast({ title: "No source render", description: "Generate a base scene first.", variant: "destructive" });
-      return;
-    }
-    if (views.length < 2) {
-      toast({ title: "Need at least 2 views", variant: "destructive" });
-      return;
-    }
-    if (views.length > 6) {
-      toast({ title: "Maximum 6 views per call", variant: "destructive" });
-      return;
-    }
-    setLoading(true);
-    setResultUrl(null);
+  async function generate() {
+    if (!sourceImageUrl || busy) return;
+    setLoading(true);setFeedback("");
     try {
-      const n = views.length;
-      const gridLayout = n === 4 ? "2x2" : n === 6 ? "3x2" : `${n}x1`;
-      const { data, error } = await supabase.functions.invoke("axonometric-generate", {
-        body: await prepareAiRenderImages({
-          mode: "multi_view",
-          imageUrl: sourceImageUrl,
-          views: views.map((v) => ({
-            label: v.label.trim() || `View`,
-            azimuth: clampInt(v.azimuth, 0, 360),
-            elevation: clampInt(v.elevation, 0, 90),
-          })),
-          gridLayout,
-          qualityTier: "standard",
-        }),
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      const url = data?.storedUrl || data?.imageUrl;
-      if (!url) throw new Error("No image returned");
-      setResultUrl(url);
-    } catch (e: any) {
-      toast({ title: "Generation failed", description: e?.message || "Try again.", variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const download = async () => {
-    if (!resultUrl) return;
+      if (!placed) throw new Error("Place the camera rig on your room first.");
+      requireRoomTurntable(zone,views);
+      const crop = await roomCropDataUrl(await cropRoomPlan(sourceImageUrl,zone));
+      const prepared = selected.length ? await prepareProductReferenceImages(selected) : null;
+      const sameRoom = initialZone && JSON.stringify(zone) === JSON.stringify(initialZone);
+      const { data,error } = await supabase.functions.invoke("axonometric-generate",{ body: await prepareAiRenderImages({ mode: "multi_view",imageUrl: crop,roomZone: zone,roomType: zone.room_type,views,gridLayout: "2x2",qualityTier: "standard",...(prepared ? { placements: prepared.pieces,browserReferenceImages: true } : {}),...(sameRoom && lockedRoomUrl ? { lockedRoomUrl } : {}) }) });
+      if (error) throw error;if (data?.error) throw new Error(data.error);
+      const url = data?.storedUrl || data?.imageUrl;if (!url) throw new Error("No room gallery returned.");
+      setResult({ url,zone: { ...zone },pieces: selected.map(p => ({ ...p })),shellUrl: sameRoom ? shellUrl : null });setAngles(null);
+    } catch(e) { const message = e instanceof Error ? e.message : "Try again.";setFeedback(message);toast({ title: "Room generation stopped",description: message,variant: "destructive" }); }
+    finally { setLoading(false); }
+  }
+  async function publish() {
+    if (!result || !packageId || busy) return;
+    setPublishing(true);setFeedback("");
     try {
-      const resp = await fetch(resultUrl);
-      const blob = await resp.blob();
-      const objUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = objUrl;
-      a.download = `multi-view-${Date.now()}.png`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(objUrl);
-    } catch {
-      window.open(resultUrl, "_blank");
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" disabled={!sourceImageUrl}>
-          <Orbit className="w-3.5 h-3.5 mr-1.5" />
-          {triggerLabel}
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Multi-View Turntable</DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-4">
-          <p className="text-xs text-muted-foreground">
-            All selected angles are rendered in a single batched call to keep furniture, materials and lighting
-            consistent across views.
-          </p>
-
-          {/* Preset quick-fill + undo/redo/reset */}
-          <div className="flex items-center gap-2">
-            <Label className="text-xs text-muted-foreground whitespace-nowrap">Preset</Label>
-            <Select onValueChange={applyPreset}>
-              <SelectTrigger className="h-8 text-xs flex-1">
-                <SelectValue placeholder="Load a preset…" />
-              </SelectTrigger>
-              <SelectContent>
-                {PRESETS.map((p) => (
-                  <SelectItem key={p.id} value={p.id} className="text-xs">
-                    {p.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={undo}
-                disabled={!canUndo}
-                aria-label="Undo"
-                title="Undo"
-              >
-                <Undo2 className="w-3.5 h-3.5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={redo}
-                disabled={!canRedo}
-                aria-label="Redo"
-                title="Redo"
-              >
-                <Redo2 className="w-3.5 h-3.5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={reset}
-                aria-label="Reset to default"
-                title="Reset to default"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Editable view list */}
-          <div className="space-y-2">
-            <div className="grid grid-cols-[1fr_88px_88px_32px] gap-2 text-[10px] uppercase tracking-wide text-muted-foreground px-1">
-              <span>Label</span>
-              <span>Azimuth °</span>
-              <span>Elevation °</span>
-              <span />
-            </div>
-            {views.map((v, i) => (
-              <div key={i} className="grid grid-cols-[1fr_88px_88px_32px] gap-2 items-center">
-                <Input
-                  value={v.label}
-                  onChange={(e) => updateView(i, { label: e.target.value })}
-                  className="h-8 text-xs"
-                  placeholder={`View ${i + 1}`}
-                />
-                <Input
-                  type="number"
-                  min={0}
-                  max={360}
-                  value={v.azimuth}
-                  onChange={(e) => updateView(i, { azimuth: Number(e.target.value) })}
-                  className="h-8 text-xs"
-                />
-                <Input
-                  type="number"
-                  min={0}
-                  max={90}
-                  value={v.elevation}
-                  onChange={(e) => updateView(i, { elevation: Number(e.target.value) })}
-                  className="h-8 text-xs"
-                />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => removeView(i)}
-                  disabled={views.length <= 2}
-                  aria-label="Remove view"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </Button>
-              </div>
-            ))}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={addView}
-              disabled={views.length >= 6}
-              className="w-full"
-            >
-              <Plus className="w-3.5 h-3.5 mr-1.5" />
-              Add view ({views.length}/6)
-            </Button>
-            <p className="text-[10px] text-muted-foreground px-1">
-              Azimuth = compass rotation (0–360°). Elevation = camera tilt (0° eye-level, 90° top-down).
-            </p>
-          </div>
-
-          {/* Lightweight camera-angle preview overlay */}
-          <CameraAnglePreview
-            views={views}
-            sourceImageUrl={sourceImageUrl ?? null}
-            onChange={(i, patch) => updateView(i, patch)}
-          />
-
-          <div className="flex items-center justify-between">
-            <Label className="text-xs text-muted-foreground">
-              N = {views.length} · grid {views.length === 4 ? "2×2" : views.length === 6 ? "3×2" : `${views.length}×1`}
-            </Label>
-            <div className="flex gap-2">
-              {resultUrl && (
-                <Button variant="outline" size="sm" onClick={download}>
-                  <Download className="w-3.5 h-3.5 mr-1.5" />
-                  Download
-                </Button>
-              )}
-              <Button size="sm" onClick={generate} disabled={loading || !sourceImageUrl}>
-                {loading ? (
-                  <>
-                    <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-                    Rendering…
-                  </>
-                ) : (
-                  "Generate"
-                )}
-              </Button>
-            </div>
-          </div>
-
-          <div className="aspect-square w-full rounded-md border border-border/60 bg-muted/20 overflow-hidden flex items-center justify-center">
-            {loading ? (
-              <div className="text-xs text-muted-foreground flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Batching {views.length} consistent views…
-              </div>
-            ) : resultUrl ? (
-              <img src={resultUrl} alt="Multi-view turntable" className="w-full h-full object-contain" />
-            ) : (
-              <div className="text-xs text-muted-foreground">Result will appear here</div>
-            )}
-          </div>
+      if (!result.pieces.length) throw new Error("Attach this room's package pieces before generating and publishing.");
+      const gallery = angles ?? await publishableRoomAngles(result.url);setAngles(gallery);
+      await save({ data: { layoutId,packageId,roomName: result.zone.room_name,roomType: result.zone.room_type,shellUrl: result.shellUrl,renderUrl: gallery[0]?.url ?? null,galleryViews: gallery,pieces: result.pieces.map(p => ({ product_id: p.product_id ?? p.id,product_name: p.product_name,brand_name: p.brand_name,...(p.target ? { target: p.target } : {}),...(p.selected_finishes ? { selected_finishes: p.selected_finishes } : {}),...(p.material_override ? { material_override: p.material_override } : {}) })) } });
+      setFeedback(`Published all four ${result.zone.room_name} angles to the Private Viewing Room.`);
+    } catch(e) { setFeedback(e instanceof Error ? e.message : "The gallery could not be published."); }
+    finally { setPublishing(false); }
+  }
+  async function download() {
+    if (!result) return;
+    try { const response = await fetch(result.url);if (!response.ok) throw new Error("Download failed.");const url = URL.createObjectURL(await response.blob());const a = document.createElement("a");a.href = url;a.download = `${result.zone.room_name}-four-angles.png`;a.click();URL.revokeObjectURL(url); }
+    catch { setFeedback("The gallery could not download. Please retry."); }
+  }
+  return <Dialog open={open} onOpenChange={value => { if (!busy) setOpen(value); }}><DialogTrigger asChild><Button variant="outline" size="sm" disabled={!sourceImageUrl}><Orbit className="size-4" />{triggerLabel}</Button></DialogTrigger>
+    <DialogContent className="max-w-4xl max-h-[90dvh] overflow-y-auto"><DialogHeader><DialogTitle>Multi-View Turntable</DialogTitle></DialogHeader>
+      <div className="space-y-5">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="col-span-2 space-y-2"><Label htmlFor="turntable-room">Room Label</Label><Select value={zone.room_type} disabled={busy} onValueChange={value => setZone(z => ({ ...z,room_type: value as RoomType,room_name: ROOM_TYPES[value as RoomType] }))}><SelectTrigger id="turntable-room"><SelectValue /></SelectTrigger><SelectContent>{Object.entries(ROOM_TYPES).map(([key,name]) => <SelectItem key={key} value={key}>{name}</SelectItem>)}</SelectContent></Select></div>
+          <div className="space-y-2"><Label htmlFor="turntable-elevation">Elevation °</Label><Input id="turntable-elevation" type="number" min={0} max={15} value={elevation} disabled={busy} onChange={e => setElevation(Math.max(0,Math.min(15,Number(e.target.value))))} /></div>
+          <div className="space-y-2"><Label htmlFor="turntable-name">Room Name</Label><Input id="turntable-name" value={zone.room_name} maxLength={120} disabled={busy} onChange={e => setZone(z => ({ ...z,room_name: e.target.value }))} /></div>
         </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-/**
- * Lightweight top-down + side preview of the selected camera angles.
- * Pure SVG, no 3D engine. Subject sits at the center; each view is a
- * labeled camera dot positioned by azimuth (top-down) and elevation (side).
- */
-function CameraAnglePreview({
-  views,
-  sourceImageUrl,
-  onChange,
-}: {
-  views: View[];
-  sourceImageUrl: string | null;
-  onChange: (index: number, patch: Partial<View>) => void;
-}) {
-  const size = 200;
-  const cx = size / 2;
-  const cy = size / 2;
-  const radius = size / 2 - 24;
-  const svgRef = useRef<SVGSVGElement>(null);
-  const [dragging, setDragging] = useState<number | null>(null);
-
-  const toXY = (azimuthDeg: number, elevationDeg: number) => {
-    const rad = ((azimuthDeg - 90) * Math.PI) / 180;
-    const r = radius * (1 - clampInt(elevationDeg, 0, 90) / 120);
-    return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
-  };
-
-  const pointToView = (clientX: number, clientY: number) => {
-    const svg = svgRef.current;
-    if (!svg) return null;
-    const rect = svg.getBoundingClientRect();
-    const px = ((clientX - rect.left) / rect.width) * size;
-    const py = ((clientY - rect.top) / rect.height) * size;
-    const dx = px - cx;
-    const dy = py - cy;
-    const angleDeg = (Math.atan2(dy, dx) * 180) / Math.PI; // -180..180, 0 = east
-    const azimuth = Math.round((angleDeg + 90 + 360) % 360);
-    const r = Math.min(radius, Math.hypot(dx, dy));
-    const elevation = clampInt((1 - r / radius) * 120, 0, 90);
-    return { azimuth, elevation };
-  };
-
-  const onDotPointerDown = (i: number) => (e: React.PointerEvent<SVGGElement>) => {
-    e.preventDefault();
-    (e.target as Element).setPointerCapture?.(e.pointerId);
-    setDragging(i);
-    const next = pointToView(e.clientX, e.clientY);
-    if (next) onChange(i, next);
-  };
-
-  const onDotPointerMove = (i: number) => (e: React.PointerEvent<SVGGElement>) => {
-    if (dragging !== i) return;
-    const next = pointToView(e.clientX, e.clientY);
-    if (next) onChange(i, next);
-  };
-
-  const onDotPointerUp = (i: number) => (e: React.PointerEvent<SVGGElement>) => {
-    if (dragging !== i) return;
-    (e.target as Element).releasePointerCapture?.(e.pointerId);
-    setDragging(null);
-  };
-
-  return (
-    <div className="rounded-md border border-border/60 bg-muted/10 p-3">
-      <div className="flex items-center justify-between mb-2">
-        <Label className="text-[10px] uppercase tracking-wide text-muted-foreground">
-          Camera placement preview
-        </Label>
-        <span className="text-[10px] text-muted-foreground">Drag any dot to adjust</span>
-      </div>
-      <div className="grid grid-cols-[200px_1fr] gap-3 items-start">
-        <svg ref={svgRef} width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="bg-background rounded touch-none select-none">
-          <circle cx={cx} cy={cy} r={radius} fill="none" stroke="hsl(var(--border))" strokeDasharray="3 3" />
-          <circle cx={cx} cy={cy} r={radius * 0.5} fill="none" stroke="hsl(var(--border))" strokeDasharray="2 4" opacity={0.6} />
-          <text x={cx} y={14} textAnchor="middle" fontSize="9" fill="hsl(var(--muted-foreground))">N 0°</text>
-          <text x={size - 4} y={cy + 3} textAnchor="end" fontSize="9" fill="hsl(var(--muted-foreground))">E 90°</text>
-          <text x={cx} y={size - 4} textAnchor="middle" fontSize="9" fill="hsl(var(--muted-foreground))">S 180°</text>
-          <text x={4} y={cy + 3} fontSize="9" fill="hsl(var(--muted-foreground))">W 270°</text>
-          {sourceImageUrl ? (
-            <image
-              href={sourceImageUrl}
-              x={cx - 18}
-              y={cy - 18}
-              width={36}
-              height={36}
-              preserveAspectRatio="xMidYMid slice"
-              clipPath="circle(18px at 18px 18px)"
-            />
-          ) : (
-            <circle cx={cx} cy={cy} r={10} fill="hsl(var(--primary))" opacity={0.7} />
-          )}
-          {views.map((v, i) => {
-            const { x, y } = toXY(v.azimuth, v.elevation);
-            const opacity = 0.45 + (1 - clampInt(v.elevation, 0, 90) / 90) * 0.55;
-            const active = dragging === i;
-            return (
-              <g
-                key={i}
-                onPointerDown={onDotPointerDown(i)}
-                onPointerMove={onDotPointerMove(i)}
-                onPointerUp={onDotPointerUp(i)}
-                onPointerCancel={onDotPointerUp(i)}
-                style={{ cursor: active ? "grabbing" : "grab" }}
-              >
-                <line x1={cx} y1={cy} x2={x} y2={y} stroke="hsl(var(--primary))" strokeWidth={0.8} opacity={0.35} />
-                {/* invisible larger hit target */}
-                <circle cx={x} cy={y} r={14} fill="transparent" />
-                <circle
-                  cx={x}
-                  cy={y}
-                  r={active ? 9 : 7}
-                  fill="hsl(var(--primary))"
-                  opacity={opacity}
-                  stroke={active ? "hsl(var(--primary-foreground))" : "none"}
-                  strokeWidth={active ? 1.5 : 0}
-                />
-                <text x={x} y={y + 3} textAnchor="middle" fontSize="9" fontWeight={600} fill="hsl(var(--primary-foreground))" pointerEvents="none">
-                  {i + 1}
-                </text>
-              </g>
-            );
-          })}
-        </svg>
-
-        {/* Legend + side-elevation strip */}
-        <div className="space-y-2">
-          <div className="space-y-1 max-h-[150px] overflow-y-auto pr-1">
-            {views.map((v, i) => (
-              <div key={i} className="flex items-center gap-2 text-[11px]">
-                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary text-primary-foreground text-[9px] font-semibold shrink-0">
-                  {i + 1}
-                </span>
-                <span className="truncate flex-1">{v.label || `View ${i + 1}`}</span>
-                <span className="text-muted-foreground tabular-nums">
-                  {clampInt(v.azimuth, 0, 360)}° · {clampInt(v.elevation, 0, 90)}°↑
-                </span>
-              </div>
-            ))}
-          </div>
-          {/* side-elevation strip: shows tilt height */}
-          <svg width="100%" height="36" viewBox="0 0 200 36" className="bg-background rounded border border-border/40">
-            <line x1={0} y1={30} x2={200} y2={30} stroke="hsl(var(--border))" />
-            <text x={2} y={10} fontSize="8" fill="hsl(var(--muted-foreground))">elevation</text>
-            {views.map((v, i) => {
-              const x = 20 + (i * 160) / Math.max(1, views.length - 1);
-              const y = 30 - (clampInt(v.elevation, 0, 90) / 90) * 22;
-              return (
-                <g key={i}>
-                  <line x1={x} y1={30} x2={x} y2={y} stroke="hsl(var(--primary))" strokeWidth={0.8} opacity={0.5} />
-                  <circle cx={x} cy={y} r={4} fill="hsl(var(--primary))" />
-                  <text x={x} y={y - 6} textAnchor="middle" fontSize="8" fill="hsl(var(--muted-foreground))">{i + 1}</text>
-                </g>
-              );
-            })}
+        <div ref={plan} className="relative w-full touch-none select-none overflow-hidden rounded border border-border" onPointerDown={e => { if (busy) return;e.currentTarget.setPointerCapture(e.pointerId);drag.current = true;move(e.clientX,e.clientY); }} onPointerMove={e => { if (drag.current) move(e.clientX,e.clientY); }} onPointerUp={() => { drag.current = false; }} onPointerCancel={() => { drag.current = false; }}>
+          {sourceImageUrl && <img src={sourceImageUrl} alt="Room camera rig floor plan" draggable={false} className="w-full" />}
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 size-full cursor-crosshair text-primary" role="img" aria-label="Drag camera rig centre to the selected room">
+            <path d={`M0 0H100V100H0Z M${zone.x} ${zone.y}v${zone.height}h${zone.width}v-${zone.height}Z`} fill="currentColor" fillRule="evenodd" opacity="0.28" />
+            <rect x={zone.x} y={zone.y} width={zone.width} height={zone.height} fill="none" stroke="currentColor" strokeWidth="0.6" />
+            {[[zone.x+2,zone.y+2],[zone.x+zone.width-2,zone.y+2],[zone.x+zone.width-2,zone.y+zone.height-2],[zone.x+2,zone.y+zone.height-2]].map(([x,y],i) => <g key={i}><line x1={x} y1={y} x2={zone.x+zone.width/2} y2={zone.y+zone.height/2} stroke="currentColor" strokeWidth="0.4" /><circle cx={x} cy={y} r="1.5" fill="currentColor" /><text x={x} y={(y ?? 0)+0.6} textAnchor="middle" className="fill-primary-foreground" fontSize="1.7">{i+1}</text></g>)}
+            <circle cx={zone.x+zone.width/2} cy={zone.y+zone.height/2} r="3" fill="currentColor" /><path d={`M${zone.x+zone.width/2-2} ${zone.y+zone.height/2}h4 M${zone.x+zone.width/2} ${zone.y+zone.height/2-2}v4`} className="stroke-primary-foreground" strokeWidth="0.5" />
           </svg>
         </div>
+        <div className="grid grid-cols-2 gap-3"><div className="space-y-2"><Label htmlFor="turntable-width">Room crop width %</Label><Input id="turntable-width" type="number" min={2} max={95} value={Number(zone.width.toFixed(2))} disabled={busy} onChange={e => resize("width",Number(e.target.value))} /></div><div className="space-y-2"><Label htmlFor="turntable-height">Room crop height %</Label><Input id="turntable-height" type="number" min={2} max={95} value={Number(zone.height.toFixed(2))} disabled={busy} onChange={e => resize("height",Number(e.target.value))} /></div></div>
+        <fieldset className="space-y-2"><legend className="text-sm font-medium">Locked catalogue references · {selected.length}</legend><div className="grid grid-cols-1 gap-2 sm:grid-cols-2">{pieces.map(p => <label key={p.id} className="flex min-w-0 items-center gap-3"><Checkbox checked={!omitted.includes(p.id)} disabled={busy} onCheckedChange={checked => setOmitted(ids => checked ? ids.filter(id => id !== p.id) : [...ids,p.id])} /><img src={p.image_url} alt={p.product_name} className="size-12 object-contain" /><span className="min-w-0 text-sm">{p.product_name}{p.room_section && p.room_section !== zone.room_name && <span className="block text-xs text-muted-foreground">{p.room_section} · excluded from this room</span>}</span></label>)}</div></fieldset>
+        <div className="flex flex-wrap items-center justify-between gap-3"><span className="text-xs text-muted-foreground">{zone.room_name} · 4 corners · {elevation}°</span><Button onClick={() => void generate()} disabled={busy || !sourceImageUrl || !placed}>{loading ? <Loader2 className="size-4 animate-spin" /> : <Orbit className="size-4" />}{loading ? "Rendering…" : "Generate 4 Room Angles"}</Button></div>
+        {result && <><div className="grid grid-cols-2 gap-2">{ROOM_CORNER_VIEWS.map((v,i) => <figure key={v.label}><div className="relative aspect-square overflow-hidden"><img src={result.url} alt={`${result.zone.room_name} — ${v.label}`} className={`absolute h-[200%] w-[200%] max-w-none ${i%2 ? 'right-0' : 'left-0'} ${i<2 ? 'top-0' : 'bottom-0'}`} /></div><figcaption className="py-2 text-xs">{v.label}</figcaption></figure>)}</div><Button variant="outline" onClick={() => void download()}><Download className="size-4" />Download</Button>
+          <div className="space-y-3 border-t border-border pt-4"><Label>Publish {result.zone.room_name}</Label><div className="grid gap-3 sm:grid-cols-2"><Select value={layoutId} disabled={busy} onValueChange={value => { setLayoutId(value);setPackageId(""); }}><SelectTrigger aria-label="Residence"><SelectValue placeholder="Select residence" /></SelectTrigger><SelectContent>{layouts.data?.map(l => <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>)}</SelectContent></Select><Select value={packageId} disabled={busy || !layoutId} onValueChange={setPackageId}><SelectTrigger aria-label="Furniture package"><SelectValue placeholder="Select furniture package" /></SelectTrigger><SelectContent>{packages.data?.map(p => <SelectItem key={p.id} value={p.id}>{p.tier_name}</SelectItem>)}</SelectContent></Select></div>{(layouts.isError || packages.isError) && <Button variant="outline" onClick={() => { void layouts.refetch();void packages.refetch(); }}>Retry residences</Button>}<Button disabled={busy || !packageId || !result.pieces.length} onClick={() => void publish()}>{publishing ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}{publishing ? "Publishing…" : "Publish 4-Angle Room Gallery"}</Button></div></>}
+        {feedback && <p role="status" className="text-sm">{feedback}</p>}
       </div>
-    </div>
-  );
+    </DialogContent></Dialog>;
 }

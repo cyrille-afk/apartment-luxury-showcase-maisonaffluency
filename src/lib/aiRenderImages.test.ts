@@ -23,4 +23,9 @@ describe("render product image transport", () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false }));
     await expect(prepareAiRenderImages({ imageUrl: "/src/assets/missing.png" })).rejects.toThrow("could not be loaded");
   });
+  it("embeds a protected locked room image alongside its cropped plan",async () => {
+    vi.stubGlobal("fetch",vi.fn().mockResolvedValue({ ok: true,blob: async () => new Blob(["room"],{ type: "image/png" }) }));
+    const result = await prepareAiRenderImages({ lockedRoomUrl: "/src/assets/locked-room.png" });
+    expect(result.lockedRoomUrl).toBe("data:image/png;base64,cm9vbQ==");
+  });
 });
