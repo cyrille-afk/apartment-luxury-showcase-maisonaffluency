@@ -32,6 +32,7 @@ import SandboxShellCapture from "./SandboxShellCapture";
 import SaveResidenceRoom from "./SaveResidenceRoom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ROOM_TYPES, validRoomZone, cropRoomPlan, roomCropCamera, type RoomType, type RoomZone } from "@/lib/roomZone";
+import { cameraForRoomCrop, productsForRoomCrop } from "@/lib/roomZoneSelection";
 import { eyeLevelCameraKey, validEyeLevelCamera, requireEyeLevelTargets, type EyeLevelTarget, type ProposalProduct, type ProposalRenderDraft } from "@/lib/proposalRenderDraft";
 
 const toAbsoluteUrl = (url: string | null | undefined): string | null => {
@@ -107,7 +108,7 @@ export default function ProposalBuilder({
 
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>(initialDraft?.products ?? lockedProducts ?? []);
   const [renderView, setRenderView] = useState<"axonometric" | "eye-level">(initialDraft?.view ?? "axonometric");
-  const [camera, setCamera] = useState(initialDraft?.camera ?? null);
+  const [camera, setCamera] = useState(() => cameraForRoomCrop(initialDraft?.camera ?? null, initialDraft?.roomZone ?? null));
   const [roomZone,setRoomZone] = useState<RoomZone | null>(initialDraft?.roomZone ?? null);
   const [roomType,setRoomType] = useState<RoomType>(initialDraft?.roomZone?.room_type ?? "living_room");
   const [roomName,setRoomName] = useState(initialDraft?.roomZone?.room_name ?? "Living Room");
@@ -131,10 +132,7 @@ export default function ProposalBuilder({
   const [correctionUndo, setCorrectionUndo] = useState<{ before: string; after: string; view: "axonometric" | "eye-level" } | null>(null);
   const cameraPlanUrl = emptyRoomUrl || sourcePlanUrl || furnishedImageUrl;
   const currentShellKey = camera && validEyeLevelCamera(camera) ? eyeLevelCameraKey(cameraPlanUrl, camera) + (roomZone ? JSON.stringify(roomZone) : "") : null;
-  const roomProducts = useMemo(() => roomZone ? selectedProducts.filter(p => {
-    const name = (p.room_section ?? "").trim().toLowerCase();
-    return name === roomZone.room_name.trim().toLowerCase() || name === ROOM_TYPES[roomZone.room_type].toLowerCase() || (roomZone.room_type === "primary_bedroom" && name === "bedroom");
-  }) : selectedProducts,[selectedProducts,roomZone]);
+  const roomProducts = useMemo(() => productsForRoomCrop(selectedProducts, roomZone), [selectedProducts, roomZone]);
   const stagingProducts = renderView === "eye-level" ? roomProducts : selectedProducts;
   const shellReady = Boolean(eyeLevelShell && (shellSource !== "generated" || shellKey === currentShellKey));
   const proposalBaseUrl = renderView === "eye-level" ? (shellReady ? eyeLevelShell : null) : emptyRoomUrl;
@@ -152,6 +150,8 @@ export default function ProposalBuilder({
   const captureShell = useCallback((url: string) => replaceShell(url, "sandbox"), [replaceShell]);
   const changeRoomZone = (zone: RoomZone | null) => {
     setRoomZone(zone);
+    setCamera(previous => cameraForRoomCrop(previous, zone));
+    setRenderError(null);
     setSelectedProducts(previous => previous.map(p => { const { target,...rest } = p;return rest; }));
     setViewResults(previous => ({ ...previous,"eye-level": null }));setProposalResult(null);setProposalHistory([]);setLockedIteration(null);
   };
@@ -386,7 +386,11 @@ export default function ProposalBuilder({
   };
 
   const generateProposal = async () => {
-    if (!proposalBaseUrl || selectedProducts.length === 0 || busy) return;
+    if (selectedProducts.length === 0 || busy) return;
+    if (!proposalBaseUrl) {
+      setRenderError(renderView === "eye-level" ? "Generate the eye-level shell for this room crop first, then place your selected pieces on it." : "Prepare the empty room first.");
+      return;
+    }
     if (!stagingProducts.length) { setRenderError("Assign the selected pieces to this room using their Room section fields.");return; }
     if (selectedProducts.length > 10 || selectedProducts.some(p => !p.image_url)) {
       setRenderError("Every selected piece needs a reference photo; a proposal supports up to 10 pieces."); return;
@@ -1442,7 +1446,7 @@ export default function ProposalBuilder({
           <Button
             size="sm"
             onClick={generateProposal}
-            disabled={busy || !proposalBaseUrl || selectedProducts.length === 0}
+            disabled={busy || selectedProducts.length === 0}
           >
             {generating ? (
               <><DotCircleLoader size="sm" className="w-3.5 h-3.5 mr-1.5" />Generating…</>
@@ -1450,6 +1454,7 @@ export default function ProposalBuilder({
               <><Wand2 className="w-3.5 h-3.5 mr-1.5" />Generate Proposal ({selectedProducts.length})</>
             )}
           </Button>
+          {renderView === "eye-level" && !proposalBaseUrl && !busy && <span className="text-xs text-muted-foreground">Generate the room shell first.</span>}
           {proposalResult && (
             <>
               <Button variant="outline" size="sm" onClick={() => setExpanded(true)}>

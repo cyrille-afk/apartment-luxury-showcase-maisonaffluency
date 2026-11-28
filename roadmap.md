@@ -1,5 +1,8 @@
 # Roadmap
 
+## Room crop generation recovery
+- [x] Crop commits rehome outside camera pins, retain unassigned selections and exclude explicit other-room pieces; incomplete generation gives inline feedback. Verified the user's live five-piece draft remains intact, plus isolated real crop → shell (200) → five pins → five-piece proposal (200) → saved image reopen. 24 regressions and preview build pass; furniture/architecture fidelity remains subject to AI review.
+
 ## Seamless full-frame furniture editing
 - [x] Remove rectangular patch compositing; retain complete generated image bytes with review/apply/undo. No inpainting mask is used; marked bounds locate the target only.
 - [x] Send all active room photos/finishes with strict non-target and Rift locks; refinements edit the current furnished image, not the empty shell. Main Studio attached-product swaps also carry the saved active-room references.
