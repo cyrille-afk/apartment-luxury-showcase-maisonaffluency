@@ -3,8 +3,8 @@ import { afterEach, expect, it, vi } from "vitest";
 import * as THREE from "three";
 import InitialRoomReveal from "./InitialRoomReveal";
 
-const harness = vi.hoisted(() => ({ frame: null as null | ((state: { scene: THREE.Scene; invalidate: () => void }) => void) }));
-vi.mock("@react-three/fiber", () => ({ useFrame: (fn: typeof harness.frame) => { harness.frame = fn; } }));
+const harness = vi.hoisted(() => ({ frame: null as null | ((state: { scene: THREE.Scene; invalidate: () => void }) => void), invalidate: vi.fn() }));
+vi.mock("@react-three/fiber", () => ({ useFrame: (fn: typeof harness.frame) => { harness.frame = fn; }, useThree: (select: (state: { invalidate: () => void }) => unknown) => select({ invalidate: harness.invalidate }) }));
 afterEach(() => { vi.restoreAllMocks(); });
 
 it("waits for all initial assets, finish maps and two full-resolution frames, then reveals only once", () => {
@@ -19,6 +19,7 @@ it("waits for all initial assets, finish maps and two full-resolution frames, th
   act(() => harness.frame?.(state));
   expect(queued).toHaveLength(0);
   view.rerender(<InitialRoomReveal ready modelCount={1} onReady={onReady} />);
+  expect(harness.invalidate).toHaveBeenCalled();
   act(() => harness.frame?.(state));
   expect(queued).toHaveLength(0);
   model.userData.visualiserInitialReady = true;

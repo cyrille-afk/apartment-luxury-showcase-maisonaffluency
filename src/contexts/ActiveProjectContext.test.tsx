@@ -9,6 +9,18 @@ function Consumer() {
   return <><output>{JSON.stringify(project.state)}</output><button onClick={() => project.setFloorPlanUrl("https://assets.example/plan.png")}>Plan</button><button onClick={() => project.setView("sandbox")}>Inside</button><button onClick={() => project.setBounds({ width: 11.475, depth: 5.81, height: 3 })}>Bounds</button></>;
 }
 describe("active project state", () => {
+  it("read-only shell capture never writes room edits into the session or project", () => {
+    const id = "f6068253-c046-44f6-a29d-2efe2fedfb31";
+    const key = `ma-active-layout-v1:owner:${id}`;
+    const original = JSON.stringify({ objects: [], floorPlanUrl: "https://assets.example/original.png" });
+    sessionStorage.setItem(key, original);
+    const writes = vi.spyOn(supabase, "from");
+    render(<ActiveProjectProvider accountId="owner" projectId={id} initialView="sandbox" readOnly freshHandoff><Consumer /></ActiveProjectProvider>);
+    fireEvent.click(screen.getByText("Plan")); fireEvent.click(screen.getByText("Bounds"));
+    expect(sessionStorage.getItem(key)).toBe(original);
+    expect(writes).not.toHaveBeenCalledWith("project_visualiser_layouts");
+    writes.mockRestore();
+  });
   it("restores a transferred piece's edited position, rotation and finish on refresh", () => {
     const piece = { instanceId: "transferred-sofa", id: "sofa", product_name: "Sofa", position: [1.25, 0, -2], rotation: [0, Math.PI / 4, 0], scale: 1, material: { id: "selected-oak", name: "Selected oak" }, finishesLocked: true };
     sessionStorage.setItem("ma-active-layout-v1:owner:transferred-project", JSON.stringify({ objects: [piece] }));

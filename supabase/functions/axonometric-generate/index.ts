@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { logAiUsage } from "../_shared/aiUsage.ts";
 import { withCache } from "../_shared/aiCache.ts";
 import { eyeLevelShellPrompt, eyeLevelStagingPrompt } from "../_shared/eyeLevelPrompt.ts";
+import { requireEyeLevelTargets } from "../_shared/eyeLevelPlacement.ts";
 import {
   AXO_CUTAWAY_CAMERA_GUARD,
   buildAxoStyleText,
@@ -68,6 +69,10 @@ serve(async (req) => {
     const useDepthMap = body.useDepthMap !== false; // default ON
 
     if (!imageUrl) throw new Error("imageUrl is required");
+    if (mode === "eye_level_proposal" && !privateRoomRequest) {
+      if (!Array.isArray(placements) || placements.length === 0 || placements.length > 10) throw new Error("Select between 1 and 10 products.");
+      requireEyeLevelTargets(placements);
+    }
 
     // ---- Depth map helper (Replicate Depth Anything V2 via Lovable gateway) ----
     // Returns a public depth-map URL for the given input image, or null on failure.
@@ -439,10 +444,10 @@ ABSOLUTE PROHIBITIONS:
     } else if (mode === "eye_level_shell") {
       prompt = eyeLevelShellPrompt(body.camera);
     } else if (mode === "eye_level_proposal") {
-      if (!referenceImageUrl || !Array.isArray(placements) || placements.some((p: any) => !p?.image_url || !p?.product_name)) {
-        throw new Error("Provide the room layout and each selected furniture photo.");
+      if (!Array.isArray(placements) || placements.some((p: any) => !p?.image_url || !p?.product_name)) {
+        throw new Error("Provide the empty room shell and each selected furniture photo.");
       }
-      prompt = eyeLevelStagingPrompt(placements);
+      prompt = eyeLevelStagingPrompt(placements, { requireTargets: !privateRoomRequest, hasLayout: Boolean(referenceImageUrl), ...(typeof refinementPrompt === "string" ? { refinement: refinementPrompt.slice(0, 2000) } : {}) });
     } else if (mode === "proposal_render") {
       const hasMaterialOverrides = (placements || []).some((p: any) => p.material_override?.trim());
       const productList = (placements || [])
@@ -802,7 +807,7 @@ Style: ${buildStyle()}. The output must look like the SAME render session as the
       content.push({ type: "image_url", image_url: { url: referenceImageUrl } });
     }
     if (mode === "eye_level_proposal") {
-      content.push({ type: "image_url", image_url: { url: referenceImageUrl } });
+      if (referenceImageUrl) content.push({ type: "image_url", image_url: { url: referenceImageUrl } });
       for (const p of placements) content.push({ type: "image_url", image_url: { url: p.image_url } });
     }
 
@@ -892,6 +897,7 @@ The final output must be indistinguishable from a professional Corona Renderer 1
     }
 
     console.log(`[axo-gen] mode=${mode}, tier=${tier}, model=${selectedModel}, images=${content.filter((c: any) => c.type === "image_url").length}`);
+    if (mode === "eye_level_proposal") content.push({ type: "text", text: "Final priority: immutable IMAGE 1 architecture and the assigned product pins override ALL style/quality/refinement suggestions. Keep original daylight, wall/window/floor lines and existing built-ins. Never invent a kitchen island or place a console against glass or in a kitchen work zone." });
 
     const MAX_ATTEMPTS = 3;
     let generatedImage: string | undefined;

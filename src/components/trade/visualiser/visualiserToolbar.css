@@ -1,6 +1,7 @@
 .visualiser-workspace {
   container-type: inline-size;
 }
+.visualiser-workspace[data-shell-capture] .visualiser-floating-tools { display: none; }
 .trade-editorial-main:has(.visualiser-workspace) > div { height: 100%; min-height: 0; }
 
 @media (max-width: 767px) {

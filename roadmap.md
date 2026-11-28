@@ -1,5 +1,10 @@
 # Roadmap
 
+## Verified eye-level shells and spatial staging
+- [x] Upload architectural room photos/developer renders and capture empty live Sandbox views through a read-only workspace without changing saved furniture. Signed-in upload and actual empty 3D frame capture succeeded.
+- [x] Add numbered draggable/keyboard per-product shell pins with spatial instructions; real three-piece pins and uploaded shell survive refresh, replacing the shell clears old targets/results. Desktop/390px phone inspected.
+- [x] Existing generator rejects missing admin pins and stages the exact shell without a blueprint; real three-piece generation succeeded, console placed on the solid left wall, no new island. Deployed boot/live checks pass. Architecture/pin precision and likeness remain AI approximations requiring visual review; pixel-perfect preservation is not guaranteed by prompting.
+
 ## Proposal Builder residence-save refinements
 - [x] Give selected-product fields full-width stacked labels and adequate card width; real two-product desktop/390px phone screenshots inspected.
 - [x] Place residence save beside shell generation, with explicit empty-shell/staged-view selection. Both real images saved through signed-in UI to an isolated residence and read back as named views; existing buyer projection reads the same array. Ten regressions and preview build pass, no page errors. Temporary residence removed; no live residence assignments changed.

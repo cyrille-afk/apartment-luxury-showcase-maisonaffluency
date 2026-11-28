@@ -9,10 +9,12 @@ export function InitialAssetsCommitted({ onReady }: { onReady: (ready: boolean) 
 
 /** Reveal only after the complete full-DPR room has drawn; later edits never mask it. */
 export default function InitialRoomReveal({ ready, modelCount, onReady }: { ready: boolean; modelCount: number; onReady: () => void }) {
+  const invalidate = useThree(state => state.invalidate);
   const revealed = useRef(false);
   const frames = useRef(0);
   const pending = useRef<number | null>(null);
   useEffect(() => () => { if (pending.current !== null) cancelAnimationFrame(pending.current); }, []);
+  useEffect(() => { if (ready) invalidate(); }, [ready, modelCount, invalidate]);
   useFrame(({ scene, invalidate }) => {
     if (revealed.current) return;
     let loadedModels = 0;

@@ -13,7 +13,7 @@ type ProjectContext = {
 };
 const Context = createContext<ProjectContext | null>(null);
 export const useActiveProject = () => useContext(Context);
-export function ActiveProjectProvider({ children, projectId, accountId, initialView, freshHandoff = false }: { children: ReactNode; projectId: string; accountId: string; initialView: WorkspaceView; freshHandoff?: boolean }) {
+export function ActiveProjectProvider({ children, projectId, accountId, initialView, freshHandoff = false, readOnly = false }: { children: ReactNode; projectId: string; accountId: string; initialView: WorkspaceView; freshHandoff?: boolean; readOnly?: boolean }) {
   const key = `ma-active-layout-v1:${accountId}:${projectId}`;
   const sandboxStorageKey = `trade-visualiser-sandbox-v3:${accountId}:${projectId}`;
   const initial = useMemo(() => {
@@ -59,7 +59,7 @@ export function ActiveProjectProvider({ children, projectId, accountId, initialV
   }, [projectId, freshHandoff]);
   const firstWrite = useRef(true);
   useEffect(() => {
-    if (!cloudReady) return;
+    if (!cloudReady || readOnly) return;
     const now = Date.now();
     try { sessionStorage.setItem(key, JSON.stringify({ objects, floorPlanUrl, bounds, columns, savedAt: now })); } catch { /* Full storage does not clear the room. */ }
     if (firstWrite.current) { firstWrite.current = false; return; } // hydration itself is not an edit
@@ -72,7 +72,7 @@ export function ActiveProjectProvider({ children, projectId, accountId, initialV
       })().catch(() => { /* session copy keeps the room; next edit retries */ });
     }, 1200);
     return () => window.clearTimeout(t);
-  }, [cloudReady, key, objects, floorPlanUrl, bounds, columns, persistable, projectId]);
+  }, [cloudReady, key, objects, floorPlanUrl, bounds, columns, persistable, projectId, readOnly]);
   const state: ActiveProjectState = { projectId, floorPlanUrl, placedItems: layoutItems(objects), bounds, columns, cameraPerspective: view === "sandbox" ? "eye-level" : "isometric" };
   return <Context.Provider value={{ state, objects, setObjects, view, setView, setFloorPlanUrl, setBounds, setColumns, linkedProposal, setLinkedProposal, hasSavedLayout: initial.hasSavedLayout === true, sandboxStorageKey }}>{children}</Context.Provider>;
 }

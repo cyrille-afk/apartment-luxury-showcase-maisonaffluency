@@ -5,7 +5,7 @@ import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
-import { uploadPrivateTradeAsset } from "@/lib/privateTradeUpload";
+import { uploadPrivateTradeAsset, resignPrivateTradeUrl } from "@/lib/privateTradeUpload";
 import { useToast } from "@/hooks/use-toast";
 import {
   Loader2, Wand2, Search, X, Download, ArrowLeft, RefreshCw, Send, Maximize2, Minimize2, Upload, RotateCw, RotateCcw, ZoomIn, ZoomOut, Move, MousePointer2, Crosshair, Trash2, Link, Save, Image, Layout, FolderOpen, FileText, Lock, Unlock, CheckCircle2, SplitSquareHorizontal, Undo2, Ruler, Eye, EyeOff,
@@ -26,7 +26,9 @@ import PrivateTradeImage from "@/components/trade/PrivateTradeImage";
 import { prepareAiRenderImages } from "@/lib/aiRenderImages";
 import { EyeLevelCameraPlan } from "./EyeLevelCameraPlan";
 import SaveResidenceShell from "./SaveResidenceShell";
-import { eyeLevelCameraKey, validEyeLevelCamera, type ProposalProduct, type ProposalRenderDraft } from "@/lib/proposalRenderDraft";
+import EyeLevelPlacementShell from "./EyeLevelPlacementShell";
+import SandboxShellCapture from "./SandboxShellCapture";
+import { eyeLevelCameraKey, validEyeLevelCamera, requireEyeLevelTargets, type EyeLevelTarget, type ProposalProduct, type ProposalRenderDraft } from "@/lib/proposalRenderDraft";
 
 const toAbsoluteUrl = (url: string | null | undefined): string | null => {
   if (!url) return null;
@@ -92,6 +94,8 @@ export default function ProposalBuilder({
   // Proposal figures follow the member's declared base preference currency.
   const exportCurrency = useExportCurrency();
   const externalFileRef = useRef<HTMLInputElement>(null);
+  const shellFileRef = useRef<HTMLInputElement>(null);
+  const [shellUploading, setShellUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [creatingPresentation, setCreatingPresentation] = useState(false);
   const [showPrices, setShowPrices] = useState(true);
@@ -101,6 +105,7 @@ export default function ProposalBuilder({
   const [camera, setCamera] = useState(initialDraft?.camera ?? null);
   const [eyeLevelShell, setEyeLevelShell] = useState(initialDraft?.shellUrl ?? null);
   const [shellKey, setShellKey] = useState(initialDraft?.shellKey ?? null);
+  const [shellSource, setShellSource] = useState<"generated" | "upload" | "sandbox">(initialDraft?.shellSource ?? "generated");
   const [shellGenerating, setShellGenerating] = useState(false);
   const [renderError, setRenderError] = useState<string | null>(null);
   const [exportingPageTwo, setExportingPageTwo] = useState(false);
@@ -116,12 +121,36 @@ export default function ProposalBuilder({
   const [qualityTier, setQualityTier] = useState<"draft" | "standard" | "premium">("standard");
   const cameraPlanUrl = emptyRoomUrl || sourcePlanUrl || furnishedImageUrl;
   const currentShellKey = camera && validEyeLevelCamera(camera) ? eyeLevelCameraKey(cameraPlanUrl, camera) : null;
-  const shellReady = Boolean(eyeLevelShell && shellKey === currentShellKey);
+  const shellReady = Boolean(eyeLevelShell && (shellSource !== "generated" || shellKey === currentShellKey));
   const proposalBaseUrl = renderView === "eye-level" ? (shellReady ? eyeLevelShell : null) : emptyRoomUrl;
-  const busy = generating || refining || shellGenerating || exportingPageTwo;
-  const draft: ProposalRenderDraft = useMemo(() => ({ sourceKey, view: renderView, camera, shellUrl: eyeLevelShell, shellKey, products: selectedProducts, axonometricResult: viewResults.axonometric, eyeLevelResult: viewResults["eye-level"] }), [sourceKey, renderView, camera, eyeLevelShell, shellKey, selectedProducts, viewResults]);
+  const busy = generating || refining || shellGenerating || shellUploading || exportingPageTwo;
+  const draft: ProposalRenderDraft = useMemo(() => ({ sourceKey, view: renderView, camera, shellUrl: eyeLevelShell, shellKey, shellSource, products: selectedProducts, axonometricResult: viewResults.axonometric, eyeLevelResult: viewResults["eye-level"] }), [sourceKey, renderView, camera, eyeLevelShell, shellKey, shellSource, selectedProducts, viewResults]);
   useEffect(() => { onDraftChange(draft); }, [draft, onDraftChange]);
-  useEffect(() => { if (lockedProducts?.length) setSelectedProducts(lockedProducts); }, [lockedProducts]);
+  useEffect(() => { if (lockedProducts?.length) setSelectedProducts(previous => lockedProducts.map(piece => { const target = previous.find(p => p.id === piece.id)?.target; return target ? { ...piece, target } : piece; })); }, [lockedProducts]);
+  useEffect(() => { if (!initialDraft?.shellUrl || initialDraft.shellSource === "generated") return; let cancelled = false; void resignPrivateTradeUrl(initialDraft.shellUrl).then(url => { if (!cancelled) setEyeLevelShell(url); }); return () => { cancelled = true; }; }, []);
+  const replaceShell = useCallback((url: string, source: "generated" | "upload" | "sandbox", key: string | null = null) => {
+    setEyeLevelShell(url); setShellSource(source); setShellKey(key); setRenderError(null);
+    setSelectedProducts(previous => previous.map(piece => { const { target, ...rest } = piece; return rest; }));
+    setViewResults(previous => ({ ...previous, "eye-level": null }));
+    setProposalResult(null); setProposalHistory([]); setLockedIteration(null);
+  }, []);
+  const captureShell = useCallback((url: string) => replaceShell(url, "sandbox"), [replaceShell]);
+  const uploadShell = async (file: File | undefined) => {
+    if (!file || !user || busy) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 20 * 1024 * 1024) { setRenderError("Choose a JPEG, PNG or WebP room image under 20 MB."); return; }
+    setShellUploading(true); setRenderError(null);
+    try {
+      const bitmap = await createImageBitmap(file); bitmap.close();
+      const ext = file.type === "image/jpeg" ? "jpg" : file.type === "image/webp" ? "webp" : "png";
+      const url = await uploadPrivateTradeAsset(`axonometric-sources/${user.id}/shell-${crypto.randomUUID()}.${ext}`, file, file.type);
+      replaceShell(url, "upload");
+    } catch { setRenderError("The room image couldn’t be uploaded. Your current shell is unchanged."); }
+    finally { setShellUploading(false); if (shellFileRef.current) shellFileRef.current.value = ""; }
+  };
+  const updateTarget = (id: string, target: EyeLevelTarget | null) => {
+    setSelectedProducts(previous => previous.map(piece => { if (piece.id !== id) return piece; const { target: oldTarget, ...rest } = piece; return target ? { ...rest, target } : rest; }));
+    setViewResults(previous => ({ ...previous, "eye-level": null })); setProposalResult(null); setProposalHistory([]); setLockedIteration(null);
+  };
   const changeView = (view: "axonometric" | "eye-level") => {
     if (busy || view === renderView) return;
     setRenderView(view); setProposalResult(viewResults[view]); setProposalHistory(viewResults[view] ? [viewResults[view]] : []); setLockedIteration(null); setRenderError(null); setCadOverlayUrl(null);
@@ -134,7 +163,7 @@ export default function ProposalBuilder({
       if (error || data?.error) throw new Error(data?.error || error?.message || "Eye-level shell generation failed.");
       const url = data.storedUrl || data.imageUrl;
       if (!url) throw new Error("No eye-level image returned.");
-      setEyeLevelShell(url); setShellKey(currentShellKey); setRenderError(null);
+      replaceShell(url, "generated", currentShellKey);
     } catch (e) { setRenderError(e instanceof Error ? e.message : "Could not generate the eye-level shell. Your plan and camera are unchanged."); }
     finally { setShellGenerating(false); }
   };
@@ -330,6 +359,7 @@ export default function ProposalBuilder({
     if (selectedProducts.length > 10 || selectedProducts.some(p => !p.image_url)) {
       setRenderError("Every selected piece needs a reference photo; a proposal supports up to 10 pieces."); return;
     }
+    if (renderView === "eye-level") { try { requireEyeLevelTargets(selectedProducts); } catch (error) { setRenderError(error instanceof Error ? error.message : "Assign every furniture pin."); return; } }
     setGenerating(true);
     setRenderError(null);
     try {
@@ -348,12 +378,14 @@ export default function ProposalBuilder({
         materials: p.materials || null,
         room_section: p.room_section || null,
         selected_finishes: p.selected_finishes || [],
+        ...(renderView === "eye-level" ? { target: p.target } : {}),
       }));
 
       const { data, error } = await supabase.functions.invoke("axonometric-generate", {
         body: await prepareAiRenderImages({
           imageUrl: toAbsoluteUrl(proposalBaseUrl),
-          referenceImageUrl: toAbsoluteUrl(furnishedImageUrl),
+          referenceImageUrl: renderView === "eye-level" ? null : toAbsoluteUrl(furnishedImageUrl),
+          requirePlacementPins: renderView === "eye-level",
           mode: renderView === "eye-level" ? "eye_level_proposal" : "proposal_render",
           style,
           qualityTier,
@@ -384,6 +416,7 @@ export default function ProposalBuilder({
 
   const refineProposal = async () => {
     if (!proposalResult || !refinementPrompt.trim()) return;
+    if (renderView === "eye-level") { try { requireEyeLevelTargets(selectedProducts); } catch (error) { setRenderError(error instanceof Error ? error.message : "Assign every furniture pin."); return; } }
     setRefining(true);
     try {
       const { data: sessionData } = await supabase.auth.getSession();
@@ -400,6 +433,7 @@ export default function ProposalBuilder({
         materials: p.materials || null,
         material_override: p.material_override || null,
         selected_finishes: p.selected_finishes || [],
+        ...(renderView === "eye-level" ? { target: p.target } : {}),
       }));
 
       const markerHints = {
@@ -414,9 +448,10 @@ export default function ProposalBuilder({
 
       const { data, error } = await supabase.functions.invoke("axonometric-generate", {
         body: await prepareAiRenderImages({
-          imageUrl: toAbsoluteUrl(proposalResult),
-          referenceImageUrl: toAbsoluteUrl(furnishedImageUrl),
-          mode: "proposal_refine",
+          imageUrl: toAbsoluteUrl(renderView === "eye-level" ? proposalBaseUrl : proposalResult),
+          referenceImageUrl: renderView === "eye-level" ? null : toAbsoluteUrl(furnishedImageUrl),
+          mode: renderView === "eye-level" ? "eye_level_proposal" : "proposal_refine",
+          requirePlacementPins: renderView === "eye-level",
           style,
           qualityTier,
           placements,
@@ -1449,7 +1484,13 @@ export default function ProposalBuilder({
         </div>
         <div className="space-y-3">
           <h3 className="font-display text-xs text-muted-foreground uppercase">Empty Eye-Level Shell</h3>
-          {eyeLevelShell ? <img src={eyeLevelShell} alt="Empty eye-level interior shell" className="w-full rounded-md border border-border" /> : <div className="min-h-48 flex items-center justify-center border border-dashed border-border text-sm text-muted-foreground">{shellGenerating ? "Generating interior…" : "Eye-level shell pending"}</div>}
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" variant="outline" className="h-auto min-h-9 whitespace-normal text-left" disabled={busy} onClick={() => shellFileRef.current?.click()}><Upload />{shellUploading ? "Uploading Room Image…" : "Upload Developer Render / Empty Room Photo"}</Button>
+            <input ref={shellFileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={e => void uploadShell(e.target.files?.[0])} />
+            <SandboxShellCapture disabled={busy} onCapture={captureShell} />
+          </div>
+          {eyeLevelShell ? <EyeLevelPlacementShell url={eyeLevelShell} products={selectedProducts} disabled={busy || !shellReady} onTarget={updateTarget} /> : <div className="min-h-48 flex items-center justify-center border border-dashed border-border text-sm text-muted-foreground">{shellGenerating ? "Generating interior…" : "Eye-level shell pending"}</div>}
+          {eyeLevelShell && <p className="text-xs text-muted-foreground">{shellSource === "upload" ? "Developer render / room photo" : shellSource === "sandbox" ? "3D Sandbox capture" : "AI-generated shell"}</p>}
           {eyeLevelShell && !shellReady && <p className="text-xs text-muted-foreground">Camera or plan changed · shell needs regeneration.</p>}
         </div>
       </div>}

@@ -61,6 +61,8 @@ import { cn } from "@/lib/utils";
 import { checkpointStatusText, type CheckpointEvent } from "@/lib/visualiserRenderCheckpoint";
 import type { SceneCaptureHandle } from "@/components/trade/visualiser/InitialRoomReveal";
 import { captureCanvasPng, MOCKUP_BACKGROUND, downloadDataUrl, mockupCapturePrep, mockupFilename, nextPaintedFrame } from "@/lib/visualiserExport";
+import { uploadPrivateTradeAsset } from "@/lib/privateTradeUpload";
+import { emptyShellObjects } from "@/lib/eyeLevelShellCapture";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
@@ -273,7 +275,7 @@ const CanvasLoader = () => (
   </div>
 );
 
-const TradeVisualiser = () => {
+const TradeVisualiser = ({ captureOnly = false, onShellCapture }: { captureOnly?: boolean; onShellCapture?: (url: string) => void } = {}) => {
   const { user } = useAuth();
   const activeProject = useActiveProject();
   const workspaceCamera = useMemo(() => activeProject && activeProject.view !== "plan" ? layoutCamera(activeProject.state.bounds, activeProject.view, activeProject.objects.map(o => o.position)) : undefined, [activeProject?.view, activeProject?.state.bounds]);
@@ -300,6 +302,7 @@ const TradeVisualiser = () => {
     else if (notice === "reset") toast.warning("A display error occurred again — your scene was kept as is and reloaded.");
   }, []);
   const [searchParams, setSearchParams] = useSearchParams();
+  const shellCaptureMode = captureOnly;
   const [handoffStatus, setHandoffStatus] = useState<"idle" | "loading" | "ready" | "error" | "missing">("idle");
   const [handoffVersion, setHandoffVersion] = useState(0);
   // Let the successful composition reach the existing session writers before
@@ -643,14 +646,16 @@ const TradeVisualiser = () => {
         backdropColor,
         backdropBrightness,
       });
-      sessionStorage.setItem(STORAGE_KEY, sandboxJson);
-      sessionStorage.setItem(sandboxStorageKey, sandboxJson);
+      if (!shellCaptureMode) {
+        sessionStorage.setItem(STORAGE_KEY, sandboxJson);
+        sessionStorage.setItem(sandboxStorageKey, sandboxJson);
+      }
     } catch {
       /* quota exceeded — composition stays in memory */
     }
     // Promote to "last working scene" once it has rendered cleanly for a few seconds.
     const json = sandboxJson;
-    if (!json || sceneFailed) return;
+    if (!json || sceneFailed || shellCaptureMode) return;
     const timer = window.setTimeout(() => {
       try { sessionStorage.setItem(LAST_GOOD_KEY, json); } catch { /* ignore */ }
     }, STABLE_AFTER_MS);
@@ -1006,10 +1011,10 @@ const TradeVisualiser = () => {
   useEffect(() => { setFinishCategory("all"); }, [selectedProductId]);
   useEffect(() => { setPreviewMaterial(null); }, [selectedId, effectiveTarget]);
   const canvasObjects = useMemo(
-    () => (previewMaterial && selectedId
+    () => emptyShellObjects(previewMaterial && selectedId
       ? objects.map((object) => (object.instanceId === selectedId ? withPartMaterial(object, effectiveTarget, previewMaterial) : object))
-      : objects),
-    [objects, previewMaterial, selectedId, effectiveTarget],
+      : objects, shellCaptureMode),
+    [objects, previewMaterial, selectedId, effectiveTarget, shellCaptureMode],
   );
 
   const uploadBackdrop = (file: File | null, matchPerspective = false) => {
@@ -1088,7 +1093,7 @@ const TradeVisualiser = () => {
     finishesLocked: o.finishesLocked, finishes: o.finishes,
   });
   useEffect(() => {
-    if (!activeProject || (searchParams.get("handoff") === "curated" && handoffStatus !== "ready")) return;
+    if (shellCaptureMode || !activeProject || (searchParams.get("handoff") === "curated" && handoffStatus !== "ready")) return;
     const bounds = activeProject.state.bounds;
     const prev = readSharedRoomLayout(sharedProject);
     const layout = {
@@ -1271,6 +1276,20 @@ const TradeVisualiser = () => {
   // Export a clean PNG mockup: hide the floor grid, let one frame render,
   // capture the WebGL canvas, then restore the grid exactly as it was.
   const [exporting, setExporting] = useState(false);
+  const captureEmptyShell = async () => {
+    if (!captureOnly || !onShellCapture || !user || exporting || !initialRoomReady || sceneFailed || contextState !== "ready") return;
+    setExporting(true);
+    try {
+      const handle = captureHandle.current;
+      if (!handle || !handle.modelsReady()) throw new Error("The room is still loading.");
+      handle.invalidate(); await nextPaintedFrame(); await nextPaintedFrame();
+      const image = handle.captureOpaqueFrame(MOCKUP_BACKGROUND);
+      const blob = await (await fetch(image)).blob();
+      const url = await uploadPrivateTradeAsset(`axonometric-sources/${user.id}/sandbox-shell-${crypto.randomUUID()}.png`, blob, "image/png");
+      onShellCapture(url);
+    } catch { toast.error("The empty room couldn’t be captured. Wait for the room to finish loading and retry."); }
+    finally { setExporting(false); }
+  };
   const downloadPresentationMockup = async () => {
     const canvas = canvasWrapRef.current?.querySelector("canvas");
     if (!canvas || exporting) return;
@@ -1313,7 +1332,7 @@ const TradeVisualiser = () => {
 
   return (
     <VisualiserSelectionProvider objects={objects} selectedId={selectedId} setSelectedId={setSelectedId}>
-    <div className="visualiser-workspace relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-visualiser-canvas">
+    <div className="visualiser-workspace relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-visualiser-canvas" data-shell-capture={shellCaptureMode || undefined}>
       <Helmet>
         <title>Visualiser Sandbox | Maison Affluency Trade</title>
         <meta name="description" content="Compose interiors in a live 3D sandbox with collectible design assets." />
@@ -1326,7 +1345,7 @@ const TradeVisualiser = () => {
       </div>}
 
       <div ref={mediaRef} className="relative min-h-0 flex-1 overflow-hidden">
-      <ProjectLayoutOverview />
+      {!shellCaptureMode && <ProjectLayoutOverview />}
       {backdropSrc && (
         <img
           src={backdropSrc}
@@ -1385,7 +1404,7 @@ const TradeVisualiser = () => {
           {handoffStatus === "error" && <Button variant="outline" className="cursor-pointer" onClick={() => { curatedHandoffDone.current = false; setHandoffStatus("loading"); setHandoffVersion(value => value + 1); }}>Retry selected board</Button>}
           {searchParams.get("project") && <Button variant="outline" className="cursor-pointer" onClick={() => navigateTo(`/trade/projects/${encodeURIComponent(searchParams.get("project") || "")}/studio${searchParams.get("board") ? `?board=${encodeURIComponent(searchParams.get("board") || "")}` : ""}`)}>Back to Project Studio</Button>}
         </div>}
-        {showHotspots && !exporting && (initialRoomReady || hotspotStatus === "error") && !sceneFailed && handoffStatus !== "loading" && handoffStatus !== "error" && handoffStatus !== "missing" && (objects.length === 0 || hotspotStatus !== "ready") && <div role={hotspotStatus === "error" ? "alert" : "status"} data-visualiser-hotspot-obstacle className="absolute inset-x-4 bottom-24 z-30 mx-auto flex max-w-md flex-col items-center gap-3 border border-border bg-background/95 px-4 py-3 text-center shadow-sm">
+        {!shellCaptureMode && showHotspots && !exporting && (initialRoomReady || hotspotStatus === "error") && !sceneFailed && handoffStatus !== "loading" && handoffStatus !== "error" && handoffStatus !== "missing" && (objects.length === 0 || hotspotStatus !== "ready") && <div role={hotspotStatus === "error" ? "alert" : "status"} data-visualiser-hotspot-obstacle className="absolute inset-x-4 bottom-24 z-30 mx-auto flex max-w-md flex-col items-center gap-3 border border-border bg-background/95 px-4 py-3 text-center shadow-sm">
           <p className="text-sm text-muted-foreground">{objects.length === 0 ? "No pieces in this room — no furniture hotspots to display." : hotspotStatus === "error" ? "Furniture hotspots couldn’t load. Your room and saved pieces are unchanged." : `Loading ${objects.length} furniture hotspots…`}</p>
           {hotspotStatus === "error" && objects.length > 0 && <Button variant="outline" className="cursor-pointer" onClick={() => { setHotspotStatus("loading"); setHotspotEpoch(value => value + 1); }}>Retry hotspots</Button>}
         </div>}
@@ -1410,7 +1429,7 @@ const TradeVisualiser = () => {
             }}
             focusRef={focusRef}
             objects={canvasObjects}
-            selectedId={selectedId}
+            selectedId={shellCaptureMode ? null : selectedId}
             orbitEnabled={orbitEnabled}
             hasBackdrop={Boolean(backdropSrc)}
             featureWallFinish={featureWallFinishKey}
@@ -1419,9 +1438,9 @@ const TradeVisualiser = () => {
             onDragStateChange={(dragging) => setOrbitEnabled(!dragging)}
             onTextureParts={handleTextureParts}
             snapToGrid={snapToGrid}
-            showGrid={showGrid}
-            showLabels={showLabels}
-            showHotspots={showHotspots && !exporting && hotspotStatus !== "error"}
+            showGrid={!shellCaptureMode && showGrid}
+            showLabels={!shellCaptureMode && showLabels}
+            showHotspots={!shellCaptureMode && showHotspots && !exporting && hotspotStatus !== "error"}
             hotspotEpoch={hotspotEpoch}
             onHotspotStatus={handleHotspotStatus}
             onFindAlternatives={openAlternatives}
@@ -1463,7 +1482,7 @@ const TradeVisualiser = () => {
             rugWeave={rugWeaveKey}
             rugPile={rugPile}
             rugLayout={rugLayout}
-            showRug={showRug}
+            showRug={!shellCaptureMode && showRug}
             backdropColor={backdropColor}
             backdropBrightness={backdropBrightness}
           />
@@ -1482,11 +1501,11 @@ const TradeVisualiser = () => {
             {loadingProject ? " // Loading specification…" : ""}
           </p>
         </div>
-        <div className="pointer-events-auto flex flex-wrap justify-end gap-2"><VisualiserClientShare objects={objects} projectId={projectId} projectName={projectName} room={() => ({ objects, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl: backdropSrc, environmentSource, advancedRendering, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, featureWallFinish: featureWallFinishKey, rugColor: rugColorKey, rugBorderColor: rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeave: rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, rugRotation, showRug, backdropColor, backdropBrightness })} /></div>
+        <div className="pointer-events-auto flex flex-wrap justify-end gap-2">{shellCaptureMode ? <Button variant="outline" onClick={captureEmptyShell} disabled={exporting || !initialRoomReady || sceneFailed || contextState !== "ready"}>{exporting ? <Loader2 className="animate-spin" /> : <ImageUp />}Use Empty Sandbox View</Button> : <VisualiserClientShare objects={objects} projectId={projectId} projectName={projectName} room={() => ({ objects, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl: backdropSrc, environmentSource, advancedRendering, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, featureWallFinish: featureWallFinishKey, rugColor: rugColorKey, rugBorderColor: rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeave: rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, rugRotation, showRug, backdropColor, backdropBrightness })} />}</div>
       </div>
 
       {/* Inspector sidebar — reads the shared selection context */}
-      <VisualiserInspector sidebarActions={(!activeProject || activeProject.view === "sandbox") && <><input ref={roomPhotoRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" aria-label="Empty room photo" onChange={e => { uploadBackdrop(e.target.files?.[0] ?? null, true); e.target.value = ""; }} /><Button variant="outline" size="sm" className="w-full gap-2" onClick={() => roomPhotoRef.current?.click()}><ImageUp className="h-4 w-4" />Upload Empty Room Photo</Button></>} onToggleLock={togglePositionLock} onFindAlternatives={openAlternatives} onRemove={removeObject} onScale={scaleObject} onRestore={restoreObject} nearestClearance={selectedClearance}>
+      {!shellCaptureMode && <VisualiserInspector sidebarActions={(!activeProject || activeProject.view === "sandbox") && <><input ref={roomPhotoRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" aria-label="Empty room photo" onChange={e => { uploadBackdrop(e.target.files?.[0] ?? null, true); e.target.value = ""; }} /><Button variant="outline" size="sm" className="w-full gap-2" onClick={() => roomPhotoRef.current?.click()}><ImageUp className="h-4 w-4" />Upload Empty Room Photo</Button></>} onToggleLock={togglePositionLock} onFindAlternatives={openAlternatives} onRemove={removeObject} onScale={scaleObject} onRestore={restoreObject} nearestClearance={selectedClearance}>
         {selected && (<>
           <FinishComparison
             key={`${selected.instanceId}:${effectiveTarget}`}
@@ -1640,7 +1659,7 @@ const TradeVisualiser = () => {
           </div>
           )}
         </>)}
-      </VisualiserInspector>
+      </VisualiserInspector>}
 
       {/* Project Assets — pieces added from product pages, placeable into the layout */}
       {(activeProject?.view === "axonometric" || photoMode) && <ProjectAssetsDrawer anchorClassName="visualiser-assets-position" onPlace={placeInventoryAsset} />}
