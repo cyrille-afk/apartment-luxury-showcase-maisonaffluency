@@ -33,7 +33,7 @@ export default function EyeLevelPlacementShell({ url, products, disabled, onTarg
     {products.map((piece, i) => <div key={piece.id} className="space-y-1">
       <div className="flex items-center justify-between gap-2"><Label htmlFor={`placement-note-${piece.id}`} className="text-xs">Pin {i + 1}: {piece.product_name}</Label><Button variant="ghost" size="icon-sm" title="Remove placement pin" aria-label={`Remove pin ${i + 1}`} disabled={disabled || !piece.target} onClick={() => onTarget(piece.id, null)}><Trash2 /></Button></div>
       <p className="text-xs text-muted-foreground">{piece.target ? `${piece.target.x.toFixed(1)}%, ${piece.target.y.toFixed(1)}%` : "Not placed"} · {piece.dimensions || "Dimensions unconfirmed"}</p>
-      <Input id={`placement-note-${piece.id}`} disabled={disabled || !piece.target} maxLength={300} value={piece.target?.instruction ?? ""} placeholder="e.g. flush against solid left wall" onChange={e => { if (piece.target) onTarget(piece.id, { ...piece.target, instruction: e.target.value }); }} />
+      <Input id={`placement-note-${piece.id}`} disabled={disabled || !piece.target} maxLength={300} value={piece.target?.instruction ?? ""} placeholder="Optional note, e.g. flush against solid left wall" onChange={e => { if (piece.target) onTarget(piece.id, { ...piece.target, instruction: e.target.value }); }} />
     </div>)}
   </div>;
 }

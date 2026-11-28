@@ -11,6 +11,7 @@
 - Password-setup resends reuse the review drawer and retain attempt keys on retry; never change approval. Verified activation links the account; the queue reads user_id for setup status.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Eye-level staging requires valid placement coordinates but treats written pin notes as optional in shared client/server validation; drafts retain blank-note pins and the prompt keeps pin authority and interior safety — placing furniture must not require extra prose.
 - Room-zone generation sends only the cropped plan and remaps its camera; package room views use validated board-slot assignments and room-only signatures; buyer updates use private single-use jobs without changing shared defaults — prevents adjacent-room hallucinations and cross-room furniture leakage.
 - Revision-scoped arModelTransform repairs feed viewers, room fitting and the pre-publish AR geometry audit; dated inventory and missing up/size evidence stay explicit — prevents unit drift or false verification without rewriting scenes or finishes.
 - Viewer AR waits for the latest successful texture commit and exports the live scene; QR handoffs carry only catalogue finish identifiers on the canonical origin, restored into an exact accessible item preview without saving or granting access — prevents stale upholstery and cross-piece finish leaks.
