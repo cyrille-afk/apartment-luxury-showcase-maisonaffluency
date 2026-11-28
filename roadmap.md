@@ -1,5 +1,9 @@
 # Roadmap
 
+## Placement and furniture removal
+- [x] Stale shells no longer disable pins/notes. Explicit Keep this room view preserves its image and targets; pin edits retain the reviewed render. Verified pin movement, preflight enablement and refresh persistence in the correct signed-in account.
+- [x] Remove piece opens marked-area full-frame removal, preserves remaining references, commits image and selection after review and restores both via Undo. Real five-piece GUM removal returned 200, visually removed only the left chair, Apply changed 5→4 and Undo restored the original five/image. Cancel kept both unchanged; 31 regressions and preview build pass. Original open draft untouched; AI positioning remains approximate.
+
 ## Generation preflight preview
 - [x] Preflight shows the exact crop/local camera and all selections with inclusion, sizes, finishes and pins before shell/proposal generation. Desktop/phone checked on the saved five-piece proposal: cancel preserves selections without AI calls; shell confirmation and subsequent five-piece generation returned 200 and displayed results. 24 regressions and preview build pass; original browser draft untouched.
 

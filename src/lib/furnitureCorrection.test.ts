@@ -1,10 +1,23 @@
 import { describe, expect, it, vi } from "vitest";
 vi.mock("./privateTradeUpload", () => ({ resignPrivateTradeUrl: (url: string) => url }));
-import { correctionBounds, furnitureCorrectionRequest, fullFrameCorrectionImage } from "./furnitureCorrection";
+import { correctionBounds, furnitureCorrectionRequest, furnitureRemovalRequest, fullFrameCorrectionImage } from "./furnitureCorrection";
 import type { ProposalProduct } from "./proposalRenderDraft";
 const chair: ProposalProduct = { id: "frenchmen", product_name: "Frenchmen Street Lounge Chair", brand_name: "Man of Parts", image_url: "https://example.com/frenchmen.jpg", selected_finishes: [{ axis: "Fabric", name: "Linen", image_url: "https://example.com/linen.jpg" }] };
 const rift: ProposalProduct = { id: "rift", product_name: "Rift CTS Coffee Table", brand_name: "Delcourt", image_url: "https://example.com/rift.jpg", dimensions: "108 × 108 × 28 cm", selected_finishes: [{ axis: "Top", name: "Oak" }, { axis: "Base", name: "Travertine" }] };
 describe("single-piece correction", () => {
+  it("removes only the selected instance while retaining the other identical chair and Rift references", () => {
+    const duplicate = { ...chair, id: "second-chair" };
+    const request = furnitureRemovalRequest("current.png", chair, { x: 10, y: 30, width: 20, height: 40 }, [chair, duplicate, rift]);
+    expect(request.mode).toBe("proposal_refine");
+    expect(request.imageUrl).toBe("current.png");
+    expect(request.placements).toHaveLength(2);
+    expect(request.placements.map(p => p.product_name)).toEqual([duplicate.product_name, rift.product_name]);
+    expect(request.markerHints.remove_points[0]).toEqual({ x_percent: 20, y_percent: 50, label: chair.product_name });
+    expect([chair, duplicate, rift].filter(p => p.id !== chair.id).map(p => p.id)).toEqual(["second-chair", "rift"]);
+  });
+  it("allows removing the final piece without adding a replacement reference", () => {
+    expect(furnitureRemovalRequest("current.png", chair, { x: 10, y: 30, width: 20, height: 40 }, [chair]).placements).toEqual([]);
+  });
   it("sends the full current image and every active room photo/finish, not only the target", () => {
     const request = furnitureCorrectionRequest("https://example.com/current.png", chair, { x: 50, y: 40, width: 30, height: 50 }, [chair, rift]);
     expect(request.mode).toBe("product_swap");

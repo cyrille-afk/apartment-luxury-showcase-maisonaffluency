@@ -131,7 +131,8 @@ export default function ProposalBuilder({
   const [qualityTier, setQualityTier] = useState<"draft" | "standard" | "premium">("standard");
   const [correctingPiece, setCorrectingPiece] = useState(false);
   const [preflight, setPreflight] = useState<"shell" | "proposal" | null>(null);
-  const [correctionUndo, setCorrectionUndo] = useState<{ before: string; after: string; view: "axonometric" | "eye-level" } | null>(null);
+  const [correctionUndo, setCorrectionUndo] = useState<{ before: string; after: string; view: "axonometric" | "eye-level"; productsBefore?: SelectedProduct[] } | null>(null);
+  const [removingPieceId, setRemovingPieceId] = useState<string | null>(null);
   const cameraPlanUrl = emptyRoomUrl || sourcePlanUrl || furnishedImageUrl;
   const currentShellKey = camera && validEyeLevelCamera(camera) ? eyeLevelCameraKey(cameraPlanUrl, camera) + (roomZone ? JSON.stringify(roomZone) : "") : null;
   const roomProducts = useMemo(() => productsForRoomCrop(selectedProducts, roomZone), [selectedProducts, roomZone]);
@@ -171,7 +172,7 @@ export default function ProposalBuilder({
   };
   const updateTarget = (id: string, target: EyeLevelTarget | null) => {
     setSelectedProducts(previous => previous.map(piece => { if (piece.id !== id) return piece; const { target: oldTarget, ...rest } = piece; return target ? { ...rest, target } : rest; }));
-    setViewResults(previous => ({ ...previous, "eye-level": null })); setProposalResult(null); setProposalHistory([]); setLockedIteration(null);
+    setRenderError(null); setLockedIteration(null);
   };
   const changeView = (view: "axonometric" | "eye-level") => {
     if (busy || view === renderView) return;
@@ -302,8 +303,10 @@ export default function ProposalBuilder({
   }, [selectedProducts.length, toast, busy, lockedProducts,roomZone]);
 
   const removeProduct = useCallback((id: string) => {
+    if (busy || lockedProducts?.length) return;
+    if (proposalResult) { setRemovingPieceId(id); return; }
     setSelectedProducts((prev) => prev.filter((p) => p.id !== id));
-  }, []);
+  }, [busy, lockedProducts, proposalResult]);
 
   const rotateProduct = useCallback((id: string, direction: 1 | -1) => {
     setSelectedProducts((prev) =>
@@ -541,11 +544,24 @@ export default function ProposalBuilder({
     setProposalHistory(previous => [...previous, url]); setCorrectingPiece(false);
     onResult?.({ imageUrl: url, storedUrl: url, text: "Single-piece correction", pinnedProducts: selectedProducts, renderView, draft: { ...draft, axonometricResult: nextResults.axonometric, eyeLevelResult: nextResults["eye-level"] } });
   };
+  const applyPieceRemoval = (url: string, id?: string) => {
+    if (!proposalResult || !id || lockedProducts?.length) return;
+    const nextProducts = selectedProducts.filter(piece => piece.id !== id);
+    previousFurnitureSignature.current = JSON.stringify(nextProducts.map(({ id,product_id,room_section,material_override,selected_finishes,rotation }) => ({ id,product_id,room_section,material_override,selected_finishes,rotation })));
+    setCorrectionUndo({ before: proposalResult, after: url, view: renderView, productsBefore: selectedProducts });
+    const nextResults = { ...viewResults, [renderView]: url };
+    setSelectedProducts(nextProducts); setViewResults(nextResults); setProposalResult(url); setLockedIteration(null);
+    setProposalHistory(previous => [...previous, url]); setRemovingPieceId(null);
+    onResult?.({ imageUrl: url, storedUrl: url, text: "Single-piece removal", pinnedProducts: nextProducts, renderView, draft: { ...draft, products: nextProducts, axonometricResult: nextResults.axonometric, eyeLevelResult: nextResults["eye-level"] } });
+  };
   const undoPieceCorrection = () => {
     if (!correctionUndo || correctionUndo.view !== renderView || correctionUndo.after !== proposalResult) return;
     const url = correctionUndo.before, nextResults = { ...viewResults, [renderView]: url };
+    const products = correctionUndo.productsBefore ?? selectedProducts;
+    previousFurnitureSignature.current = JSON.stringify(products.map(({ id,product_id,room_section,material_override,selected_finishes,rotation }) => ({ id,product_id,room_section,material_override,selected_finishes,rotation })));
+    setSelectedProducts(products);
     setViewResults(nextResults); setProposalResult(url); setCorrectionUndo(null); setLockedIteration(null);
-    onResult?.({ imageUrl: url, storedUrl: url, text: "Single-piece correction undone", pinnedProducts: selectedProducts, renderView, draft: { ...draft, axonometricResult: nextResults.axonometric, eyeLevelResult: nextResults["eye-level"] } });
+    onResult?.({ imageUrl: url, storedUrl: url, text: "Single-piece edit undone", pinnedProducts: products, renderView, draft: { ...draft, products, axonometricResult: nextResults.axonometric, eyeLevelResult: nextResults["eye-level"] } });
   };
 
   const downloadProposal = async () => {
@@ -1420,6 +1436,7 @@ export default function ProposalBuilder({
   return (
     <div className="min-w-0 space-y-6">
       {preflight && <ProposalPreflightDialog mode={preflight} eyeLevel={renderView === "eye-level"} planUrl={cameraPlanUrl} shellUrl={proposalBaseUrl} suppliedShell={shellSource !== "generated"} zone={roomZone} camera={camera} products={selectedProducts} activeProducts={stagingProducts} quality={qualityTier} warning={preflightWarning} onClose={() => setPreflight(null)} onConfirm={() => { const mode = preflight; setPreflight(null); if (mode === "shell") void runGenerateEyeLevelShell(); else void runGenerateProposal(); }} />}
+      {removingPieceId && proposalResult && <FurnitureCorrectionDialog imageUrl={proposalResult} products={stagingProducts.some(piece => piece.id === removingPieceId) ? stagingProducts : selectedProducts} removal initialPieceId={removingPieceId} onClose={() => setRemovingPieceId(null)} onApply={applyPieceRemoval} />}
       {/* Hidden file input for external uploads */}
       <input
         ref={externalFileRef}
@@ -1561,9 +1578,12 @@ export default function ProposalBuilder({
             <input ref={shellFileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={e => void uploadShell(e.target.files?.[0])} />
             <SandboxShellCapture disabled={busy} onCapture={captureShell} />
           </div>
-          {eyeLevelShell ? <EyeLevelPlacementShell url={eyeLevelShell} products={roomProducts} disabled={busy || !shellReady} onTarget={updateTarget} /> : <div className="min-h-48 flex items-center justify-center border border-dashed border-border text-sm text-muted-foreground">{shellGenerating ? "Generating interior…" : "Eye-level shell pending"}</div>}
+          {eyeLevelShell ? <EyeLevelPlacementShell url={eyeLevelShell} products={roomProducts} disabled={busy} onTarget={updateTarget} onRemove={lockedProducts?.length ? undefined : removeProduct} /> : <div className="min-h-48 flex items-center justify-center border border-dashed border-border text-sm text-muted-foreground">{shellGenerating ? "Generating interior…" : "Eye-level shell pending"}</div>}
           {eyeLevelShell && <p className="text-xs text-muted-foreground">{shellSource === "upload" ? "Developer render / room photo" : shellSource === "sandbox" ? "3D Sandbox capture" : "AI-generated shell"}</p>}
-          {eyeLevelShell && !shellReady && <p className="text-xs text-muted-foreground">Camera or plan changed · shell needs regeneration.</p>}
+          {eyeLevelShell && !shellReady && <div className="space-y-2">
+            <p className="text-xs text-muted-foreground">Camera or plan changed. Keep this room’s existing perspective, or regenerate the shell to apply the new camera.</p>
+            <Button size="sm" variant="outline" disabled={busy || !currentShellKey} onClick={() => { setShellKey(currentShellKey); setRenderError(null); }}><CheckCircle2 className="size-3.5" />Keep this room view</Button>
+          </div>}
         </div>
       </div>}
 
@@ -1611,7 +1631,7 @@ export default function ProposalBuilder({
               {/* Refinement prompt */}
               <div className="flex flex-wrap gap-2">
                 <Button size="sm" variant="outline" disabled={busy || !stagingProducts.length} onClick={() => setCorrectingPiece(true)}><RefreshCw className="size-3.5" />Correct one piece</Button>
-                {correctionUndo?.view === renderView && correctionUndo.after === proposalResult && <Button size="sm" variant="ghost" disabled={busy} onClick={undoPieceCorrection}><Undo2 className="size-3.5" />Undo correction</Button>}
+                {correctionUndo?.view === renderView && correctionUndo.after === proposalResult && <Button size="sm" variant="ghost" disabled={busy} onClick={undoPieceCorrection}><Undo2 className="size-3.5" />{correctionUndo.productsBefore ? "Undo removal" : "Undo correction"}</Button>}
               </div>
               {correctingPiece && <FurnitureCorrectionDialog imageUrl={proposalResult} products={stagingProducts} onClose={() => setCorrectingPiece(false)} onApply={applyPieceCorrection} />}
               <div className="flex gap-2">
@@ -1732,7 +1752,7 @@ export default function ProposalBuilder({
                     className="w-full text-xs"
                   />
                 </div>
-                {!lockedProducts?.length && <div className="col-start-3 row-start-1 shrink-0 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                {!lockedProducts?.length && <div className="col-start-3 row-start-1 shrink-0 flex items-center gap-0.5">
                   <button
                     onClick={() => rotateProduct(p.id, -1)}
                     className="text-muted-foreground hover:text-foreground transition-colors p-0.5"
@@ -1747,12 +1767,11 @@ export default function ProposalBuilder({
                   >
                     <RotateCw className="w-3 h-3" />
                   </button>
-                  <button
+                  <Button variant="ghost" size="icon-sm" disabled={busy} title="Remove piece from selection and render" aria-label={`Remove selected piece: ${p.product_name}`}
                     onClick={() => removeProduct(p.id)}
-                    className="text-muted-foreground hover:text-destructive transition-colors p-0.5"
                   >
-                    <X className="w-3 h-3" />
-                  </button>
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
                 </div>}
               </div>
             ))}

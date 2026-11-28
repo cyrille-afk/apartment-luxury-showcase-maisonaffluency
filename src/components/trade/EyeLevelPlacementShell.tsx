@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Trash2 } from "lucide-react";
 import { planPoint, type ProposalProduct, type EyeLevelTarget } from "@/lib/proposalRenderDraft";
 
-export default function EyeLevelPlacementShell({ url, products, disabled, onTarget }: { url: string; products: ProposalProduct[]; disabled: boolean; onTarget: (id: string, target: EyeLevelTarget | null) => void }) {
+export default function EyeLevelPlacementShell({ url, products, disabled, onTarget, onRemove }: { url: string; products: ProposalProduct[]; disabled: boolean; onTarget: (id: string, target: EyeLevelTarget | null) => void; onRemove?: ((id: string) => void) | undefined }) {
   const [activeId, setActiveId] = useState(products[0]?.id ?? "");
   const drag = useRef<string | null>(null);
   const active = products.find(p => p.id === activeId) ?? products[0];
@@ -31,7 +31,7 @@ export default function EyeLevelPlacementShell({ url, products, disabled, onTarg
       </svg>
     </div>
     {products.map((piece, i) => <div key={piece.id} className="space-y-1">
-      <div className="flex items-center justify-between gap-2"><Label htmlFor={`placement-note-${piece.id}`} className="text-xs">Pin {i + 1}: {piece.product_name}</Label><Button variant="ghost" size="icon-sm" title="Remove placement pin" aria-label={`Remove pin ${i + 1}`} disabled={disabled || !piece.target} onClick={() => onTarget(piece.id, null)}><Trash2 /></Button></div>
+      <div className="flex items-center justify-between gap-2"><Label htmlFor={`placement-note-${piece.id}`} className="text-xs">Pin {i + 1}: {piece.product_name}</Label><div className="flex shrink-0 items-center gap-1"><Button variant="ghost" size="icon-sm" title="Clear placement pin only" aria-label={`Remove pin ${i + 1}`} disabled={disabled || !piece.target} onClick={() => onTarget(piece.id, null)}><Trash2 /></Button>{onRemove && <Button variant="outline" size="sm" aria-label={`Remove piece ${i + 1}: ${piece.product_name}`} disabled={disabled} onClick={() => onRemove(piece.id)}><Trash2 className="size-3.5" />Remove piece</Button>}</div></div>
       <p className="text-xs text-muted-foreground">{piece.target ? `${piece.target.x.toFixed(1)}%, ${piece.target.y.toFixed(1)}%` : "Not placed"} · {piece.dimensions || "Dimensions unconfirmed"}</p>
       <Input id={`placement-note-${piece.id}`} disabled={disabled || !piece.target} maxLength={300} value={piece.target?.instruction ?? ""} placeholder="Optional note, e.g. flush against solid left wall" onChange={e => { if (piece.target) onTarget(piece.id, { ...piece.target, instruction: e.target.value }); }} />
     </div>)}
