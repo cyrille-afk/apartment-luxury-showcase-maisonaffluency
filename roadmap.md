@@ -1,5 +1,8 @@
 # Roadmap
 
+## Generation preflight preview
+- [x] Preflight shows the exact crop/local camera and all selections with inclusion, sizes, finishes and pins before shell/proposal generation. Desktop/phone checked on the saved five-piece proposal: cancel preserves selections without AI calls; shell confirmation and subsequent five-piece generation returned 200 and displayed results. 24 regressions and preview build pass; original browser draft untouched.
+
 ## Room crop generation recovery
 - [x] Crop commits rehome outside camera pins, retain unassigned selections and exclude explicit other-room pieces; incomplete generation gives inline feedback. Verified the user's live five-piece draft remains intact, plus isolated real crop → shell (200) → five pins → five-piece proposal (200) → saved image reopen. 24 regressions and preview build pass; furniture/architecture fidelity remains subject to AI review.
 

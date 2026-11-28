@@ -13,6 +13,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import BeforeAfterSplit from "./BeforeAfterSplit";
 import FurnitureCorrectionDialog from "./FurnitureCorrectionDialog";
+import ProposalPreflightDialog from "./ProposalPreflightDialog";
 import { createActiveDraftQuote } from "@/lib/activeProjectId";
 
 import {
@@ -129,6 +130,7 @@ export default function ProposalBuilder({
   const [expanded, setExpanded] = useState(false);
   const [qualityTier, setQualityTier] = useState<"draft" | "standard" | "premium">("standard");
   const [correctingPiece, setCorrectingPiece] = useState(false);
+  const [preflight, setPreflight] = useState<"shell" | "proposal" | null>(null);
   const [correctionUndo, setCorrectionUndo] = useState<{ before: string; after: string; view: "axonometric" | "eye-level" } | null>(null);
   const cameraPlanUrl = emptyRoomUrl || sourcePlanUrl || furnishedImageUrl;
   const currentShellKey = camera && validEyeLevelCamera(camera) ? eyeLevelCameraKey(cameraPlanUrl, camera) + (roomZone ? JSON.stringify(roomZone) : "") : null;
@@ -175,7 +177,20 @@ export default function ProposalBuilder({
     if (busy || view === renderView) return;
     setRenderView(view); setProposalResult(viewResults[view]); setProposalHistory(viewResults[view] ? [viewResults[view]] : []); setLockedIteration(null); setRenderError(null); setCadOverlayUrl(null);
   };
-  const generateEyeLevelShell = async () => {
+  const generateEyeLevelShell = () => { setRenderError(null); setPreflight("shell"); };
+  const generateProposal = () => { setExpanded(false); setRenderError(null); setPreflight("proposal"); };
+  let preflightWarning: string | null = null;
+  if (preflight === "shell") {
+    if (!roomZone || !validRoomZone(roomZone)) preflightWarning = "Draw a crop around one room first.";
+    else if (!camera || !validEyeLevelCamera(camera)) preflightWarning = "Place the camera and sightline inside this room crop.";
+    else { try { roomCropCamera(camera, roomZone); } catch { preflightWarning = "Keep the camera and sightline inside this room crop."; } }
+  } else if (preflight === "proposal") {
+    if (!proposalBaseUrl) preflightWarning = renderView === "eye-level" ? "Generate the eye-level shell for this room crop first, then place your selected pieces on it." : "Prepare the empty room first.";
+    else if (!stagingProducts.length) preflightWarning = "No selected pieces are assigned to this room.";
+    else if (selectedProducts.length > 10 || selectedProducts.some(piece => !piece.image_url)) preflightWarning = "Every selected piece needs a reference photo; a proposal supports up to 10 pieces.";
+    else if (renderView === "eye-level") { try { requireEyeLevelTargets(stagingProducts); } catch (error) { preflightWarning = error instanceof Error ? error.message : "Assign every furniture pin."; } }
+  }
+  const runGenerateEyeLevelShell = async () => {
     if (!camera || !validEyeLevelCamera(camera) || !currentShellKey || busy) return;
     setShellGenerating(true); setRenderError(null);
     try {
@@ -385,7 +400,7 @@ export default function ProposalBuilder({
     }
   };
 
-  const generateProposal = async () => {
+  const runGenerateProposal = async () => {
     if (selectedProducts.length === 0 || busy) return;
     if (!proposalBaseUrl) {
       setRenderError(renderView === "eye-level" ? "Generate the eye-level shell for this room crop first, then place your selected pieces on it." : "Prepare the empty room first.");
@@ -1404,6 +1419,7 @@ export default function ProposalBuilder({
 
   return (
     <div className="min-w-0 space-y-6">
+      {preflight && <ProposalPreflightDialog mode={preflight} eyeLevel={renderView === "eye-level"} planUrl={cameraPlanUrl} shellUrl={proposalBaseUrl} suppliedShell={shellSource !== "generated"} zone={roomZone} camera={camera} products={selectedProducts} activeProducts={stagingProducts} quality={qualityTier} warning={preflightWarning} onClose={() => setPreflight(null)} onConfirm={() => { const mode = preflight; setPreflight(null); if (mode === "shell") void runGenerateEyeLevelShell(); else void runGenerateProposal(); }} />}
       {/* Hidden file input for external uploads */}
       <input
         ref={externalFileRef}
