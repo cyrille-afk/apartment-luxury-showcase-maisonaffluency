@@ -2409,6 +2409,20 @@
       "when": 1795829001808,
       "tag": "0343_append_residence_eye_level_shell",
       "breakpoints": true
+    },
+    {
+      "idx": 344,
+      "version": "7",
+      "when": 1795832982514,
+      "tag": "0344_residence_room_renders",
+      "breakpoints": true
+    },
+    {
+      "idx": 345,
+      "version": "7",
+      "when": 1795834134687,
+      "tag": "0345_restrict_residence_room_grants",
+      "breakpoints": true
     }
   ]
 }

@@ -8,7 +8,7 @@ const fetchChoices = vi.fn();
 vi.mock("@/lib/viewingRoom.functions", () => ({
   getViewingRoomChoices: (...args: unknown[]) => fetchChoices(...args),
   lockViewingRoomProposal: vi.fn(),
-  getResidenceVisualizationShells: vi.fn(), generateResidenceVisualization: vi.fn(),
+  getResidenceRoomRenders: async () => [], getResidenceVisualizationShells: vi.fn(), generateResidenceVisualization: vi.fn(),
 }));
 vi.mock("@/lib/viewingRoomBlenderScene.functions", () => ({ exportViewingRoomBlenderScene: vi.fn() }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));

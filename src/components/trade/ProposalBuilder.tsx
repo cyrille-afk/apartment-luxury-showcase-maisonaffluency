@@ -28,6 +28,9 @@ import { EyeLevelCameraPlan } from "./EyeLevelCameraPlan";
 import SaveResidenceShell from "./SaveResidenceShell";
 import EyeLevelPlacementShell from "./EyeLevelPlacementShell";
 import SandboxShellCapture from "./SandboxShellCapture";
+import SaveResidenceRoom from "./SaveResidenceRoom";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ROOM_TYPES, validRoomZone, cropRoomPlan, roomCropCamera, type RoomType, type RoomZone } from "@/lib/roomZone";
 import { eyeLevelCameraKey, validEyeLevelCamera, requireEyeLevelTargets, type EyeLevelTarget, type ProposalProduct, type ProposalRenderDraft } from "@/lib/proposalRenderDraft";
 
 const toAbsoluteUrl = (url: string | null | undefined): string | null => {
@@ -40,6 +43,7 @@ const ROOM_SECTIONS = [
   "Living Room",
   "Dining Room",
   "Bedroom",
+  "Primary Bedroom",
   "Study",
   "Lounge Area",
   "Entrance Hall",
@@ -103,6 +107,9 @@ export default function ProposalBuilder({
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>(initialDraft?.products ?? lockedProducts ?? []);
   const [renderView, setRenderView] = useState<"axonometric" | "eye-level">(initialDraft?.view ?? "axonometric");
   const [camera, setCamera] = useState(initialDraft?.camera ?? null);
+  const [roomZone,setRoomZone] = useState<RoomZone | null>(initialDraft?.roomZone ?? null);
+  const [roomType,setRoomType] = useState<RoomType>(initialDraft?.roomZone?.room_type ?? "living_room");
+  const [roomName,setRoomName] = useState(initialDraft?.roomZone?.room_name ?? "Living Room");
   const [eyeLevelShell, setEyeLevelShell] = useState(initialDraft?.shellUrl ?? null);
   const [shellKey, setShellKey] = useState(initialDraft?.shellKey ?? null);
   const [shellSource, setShellSource] = useState<"generated" | "upload" | "sandbox">(initialDraft?.shellSource ?? "generated");
@@ -120,11 +127,16 @@ export default function ProposalBuilder({
   const [expanded, setExpanded] = useState(false);
   const [qualityTier, setQualityTier] = useState<"draft" | "standard" | "premium">("standard");
   const cameraPlanUrl = emptyRoomUrl || sourcePlanUrl || furnishedImageUrl;
-  const currentShellKey = camera && validEyeLevelCamera(camera) ? eyeLevelCameraKey(cameraPlanUrl, camera) : null;
+  const currentShellKey = camera && validEyeLevelCamera(camera) ? eyeLevelCameraKey(cameraPlanUrl, camera) + (roomZone ? JSON.stringify(roomZone) : "") : null;
+  const roomProducts = useMemo(() => roomZone ? selectedProducts.filter(p => {
+    const name = (p.room_section ?? "").trim().toLowerCase();
+    return name === roomZone.room_name.trim().toLowerCase() || name === ROOM_TYPES[roomZone.room_type].toLowerCase() || (roomZone.room_type === "primary_bedroom" && name === "bedroom");
+  }) : selectedProducts,[selectedProducts,roomZone]);
+  const stagingProducts = renderView === "eye-level" ? roomProducts : selectedProducts;
   const shellReady = Boolean(eyeLevelShell && (shellSource !== "generated" || shellKey === currentShellKey));
   const proposalBaseUrl = renderView === "eye-level" ? (shellReady ? eyeLevelShell : null) : emptyRoomUrl;
   const busy = generating || refining || shellGenerating || shellUploading || exportingPageTwo;
-  const draft: ProposalRenderDraft = useMemo(() => ({ sourceKey, view: renderView, camera, shellUrl: eyeLevelShell, shellKey, shellSource, products: selectedProducts, axonometricResult: viewResults.axonometric, eyeLevelResult: viewResults["eye-level"] }), [sourceKey, renderView, camera, eyeLevelShell, shellKey, shellSource, selectedProducts, viewResults]);
+  const draft: ProposalRenderDraft = useMemo(() => ({ sourceKey, view: renderView, camera, roomZone, shellUrl: eyeLevelShell, shellKey, shellSource, products: selectedProducts, axonometricResult: viewResults.axonometric, eyeLevelResult: viewResults["eye-level"] }), [sourceKey, renderView, camera, roomZone, eyeLevelShell, shellKey, shellSource, selectedProducts, viewResults]);
   useEffect(() => { onDraftChange(draft); }, [draft, onDraftChange]);
   useEffect(() => { if (lockedProducts?.length) setSelectedProducts(previous => lockedProducts.map(piece => { const target = previous.find(p => p.id === piece.id)?.target; return target ? { ...piece, target } : piece; })); }, [lockedProducts]);
   useEffect(() => { if (!initialDraft?.shellUrl || initialDraft.shellSource === "generated") return; let cancelled = false; void resignPrivateTradeUrl(initialDraft.shellUrl).then(url => { if (!cancelled) setEyeLevelShell(url); }); return () => { cancelled = true; }; }, []);
@@ -135,6 +147,11 @@ export default function ProposalBuilder({
     setProposalResult(null); setProposalHistory([]); setLockedIteration(null);
   }, []);
   const captureShell = useCallback((url: string) => replaceShell(url, "sandbox"), [replaceShell]);
+  const changeRoomZone = (zone: RoomZone | null) => {
+    setRoomZone(zone);
+    setSelectedProducts(previous => previous.map(p => { const { target,...rest } = p;return rest; }));
+    setViewResults(previous => ({ ...previous,"eye-level": null }));setProposalResult(null);setProposalHistory([]);setLockedIteration(null);
+  };
   const uploadShell = async (file: File | undefined) => {
     if (!file || !user || busy) return;
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 20 * 1024 * 1024) { setRenderError("Choose a JPEG, PNG or WebP room image under 20 MB."); return; }
@@ -159,7 +176,11 @@ export default function ProposalBuilder({
     if (!camera || !validEyeLevelCamera(camera) || !currentShellKey || busy) return;
     setShellGenerating(true); setRenderError(null);
     try {
-      const { data, error } = await supabase.functions.invoke("axonometric-generate", { body: await prepareAiRenderImages({ mode: "eye_level_shell", imageUrl: toAbsoluteUrl(cameraPlanUrl), referenceImageUrl: toAbsoluteUrl(sourcePlanUrl), camera, qualityTier }) });
+      if (!roomZone || !validRoomZone(roomZone) || !user) throw new Error("Draw a crop around one room before generating its shell.");
+      const localCamera = roomCropCamera(camera,roomZone);
+      const crop = await cropRoomPlan(cameraPlanUrl,roomZone);
+      const croppedUrl = await uploadPrivateTradeAsset(`axonometric-sources/${user.id}/room-crop-${crypto.randomUUID()}.png`,crop,"image/png");
+      const { data, error } = await supabase.functions.invoke("axonometric-generate", { body: await prepareAiRenderImages({ mode: "eye_level_shell", imageUrl: croppedUrl, referenceImageUrl: null, camera: localCamera, roomType: roomZone.room_type, qualityTier }) });
       if (error || data?.error) throw new Error(data?.error || error?.message || "Eye-level shell generation failed.");
       const url = data.storedUrl || data.imageUrl;
       if (!url) throw new Error("No eye-level image returned.");
@@ -258,9 +279,9 @@ export default function ProposalBuilder({
     }
     setSelectedProducts((prev) => [
       ...prev,
-      { id: nextPinId(), ...product },
+      { id: nextPinId(), ...product, ...(roomZone ? { room_section: roomZone.room_name } : {}) },
     ]);
-  }, [selectedProducts.length, toast, busy, lockedProducts]);
+  }, [selectedProducts.length, toast, busy, lockedProducts,roomZone]);
 
   const removeProduct = useCallback((id: string) => {
     setSelectedProducts((prev) => prev.filter((p) => p.id !== id));
@@ -279,6 +300,13 @@ export default function ProposalBuilder({
       prev.map((p) => (p.id === id ? { ...p, room_section: section || undefined } : p))
     );
   }, []);
+  const furnitureSignature = JSON.stringify(selectedProducts.map(({ id,product_id,room_section,material_override,selected_finishes,rotation }) => ({ id,product_id,room_section,material_override,selected_finishes,rotation })));
+  const previousFurnitureSignature = useRef(furnitureSignature);
+  useEffect(() => {
+    if (previousFurnitureSignature.current === furnitureSignature) return;
+    previousFurnitureSignature.current = furnitureSignature;
+    setViewResults({ axonometric: null,"eye-level": null });setProposalResult(null);setProposalHistory([]);setLockedIteration(null);
+  },[furnitureSignature]);
 
   // Handle external image upload
   const handleExternalFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -356,10 +384,11 @@ export default function ProposalBuilder({
 
   const generateProposal = async () => {
     if (!proposalBaseUrl || selectedProducts.length === 0 || busy) return;
+    if (!stagingProducts.length) { setRenderError("Assign the selected pieces to this room using their Room section fields.");return; }
     if (selectedProducts.length > 10 || selectedProducts.some(p => !p.image_url)) {
       setRenderError("Every selected piece needs a reference photo; a proposal supports up to 10 pieces."); return;
     }
-    if (renderView === "eye-level") { try { requireEyeLevelTargets(selectedProducts); } catch (error) { setRenderError(error instanceof Error ? error.message : "Assign every furniture pin."); return; } }
+    if (renderView === "eye-level") { try { requireEyeLevelTargets(stagingProducts); } catch (error) { setRenderError(error instanceof Error ? error.message : "Assign every furniture pin."); return; } }
     setGenerating(true);
     setRenderError(null);
     try {
@@ -367,7 +396,7 @@ export default function ProposalBuilder({
       const accessToken = sessionData.session?.access_token;
       if (!accessToken) throw new Error("Session expired. Please sign in again.");
 
-      const placements = selectedProducts.map((p) => ({
+      const placements = stagingProducts.map((p) => ({
         product_id: p.product_id || null,
         product_name: p.product_name,
         brand_name: p.brand_name,
@@ -386,6 +415,7 @@ export default function ProposalBuilder({
           imageUrl: toAbsoluteUrl(proposalBaseUrl),
           referenceImageUrl: renderView === "eye-level" ? null : toAbsoluteUrl(furnishedImageUrl),
           requirePlacementPins: renderView === "eye-level",
+          ...(renderView === "eye-level" && roomZone ? { roomType: roomZone.room_type } : {}),
           mode: renderView === "eye-level" ? "eye_level_proposal" : "proposal_render",
           style,
           qualityTier,
@@ -416,14 +446,14 @@ export default function ProposalBuilder({
 
   const refineProposal = async () => {
     if (!proposalResult || !refinementPrompt.trim()) return;
-    if (renderView === "eye-level") { try { requireEyeLevelTargets(selectedProducts); } catch (error) { setRenderError(error instanceof Error ? error.message : "Assign every furniture pin."); return; } }
+    if (renderView === "eye-level") { try { requireEyeLevelTargets(stagingProducts); } catch (error) { setRenderError(error instanceof Error ? error.message : "Assign every furniture pin."); return; } }
     setRefining(true);
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       const accessToken = sessionData.session?.access_token;
       if (!accessToken) throw new Error("Session expired. Please sign in again.");
 
-      const placements = selectedProducts.map((p) => ({
+      const placements = stagingProducts.map((p) => ({
         product_id: p.product_id || null,
         product_name: p.product_name,
         brand_name: p.brand_name,
@@ -452,6 +482,7 @@ export default function ProposalBuilder({
           referenceImageUrl: renderView === "eye-level" ? null : toAbsoluteUrl(furnishedImageUrl),
           mode: renderView === "eye-level" ? "eye_level_proposal" : "proposal_refine",
           requirePlacementPins: renderView === "eye-level",
+          ...(renderView === "eye-level" && roomZone ? { roomType: roomZone.room_type } : {}),
           style,
           qualityTier,
           placements,
@@ -1476,10 +1507,13 @@ export default function ProposalBuilder({
       {renderView === "eye-level" && <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="space-y-3">
           <h3 className="font-display text-xs text-muted-foreground uppercase">Empty Room Template · Camera</h3>
-          <EyeLevelCameraPlan imageUrl={cameraPlanUrl} camera={camera} onChange={setCamera} disabled={busy} />
+          <div className="grid gap-3 sm:grid-cols-2"><div className="space-y-1"><label htmlFor="builder-room-type" className="text-xs text-muted-foreground">Room type</label><Select value={roomType} disabled={busy} onValueChange={value => { const type = value as RoomType;setRoomType(type);setRoomName(ROOM_TYPES[type]);if (roomZone) changeRoomZone({ ...roomZone,room_type: type,room_name: ROOM_TYPES[type] }); }}><SelectTrigger id="builder-room-type"><SelectValue /></SelectTrigger><SelectContent>{Object.entries(ROOM_TYPES).map(([key,label]) => <SelectItem key={key} value={key}>{label}</SelectItem>)}</SelectContent></Select></div><div className="space-y-1"><label htmlFor="builder-room-name" className="text-xs text-muted-foreground">Room name</label><Input id="builder-room-name" value={roomName} maxLength={120} disabled={busy} onChange={e => { setRoomName(e.target.value);if (roomZone) changeRoomZone({ ...roomZone,room_name: e.target.value }); }} /></div></div>
+          <EyeLevelCameraPlan imageUrl={cameraPlanUrl} camera={camera} onChange={setCamera} disabled={busy} zone={roomZone} onZoneChange={box => changeRoomZone({ ...box,room_type: roomType,room_name: roomName })} />
+          {roomZone && <p className="text-xs text-muted-foreground">{roomZone.room_name} · {Math.round(roomZone.width)}% × {Math.round(roomZone.height)}% crop · {roomProducts.length} assigned pieces</p>}
           <div className="flex flex-wrap items-center gap-2">
-            <Button size="sm" disabled={busy || !currentShellKey} onClick={generateEyeLevelShell}><Wand2 className="size-3.5 mr-1.5" />{shellGenerating ? "Generating Eye-Level Shell…" : eyeLevelShell && !shellReady ? "Regenerate Eye-Level Shell" : "Generate Eye-Level Shell"}</Button>
+            <Button size="sm" disabled={busy || !currentShellKey || !validRoomZone(roomZone)} onClick={generateEyeLevelShell}><Wand2 className="size-3.5 mr-1.5" />{shellGenerating ? "Generating Eye-Level Shell…" : eyeLevelShell && !shellReady ? "Regenerate Eye-Level Shell" : "Generate Eye-Level Shell"}</Button>
             {isAdmin && rolesLoaded && <SaveResidenceShell url={shellReady ? eyeLevelShell : null} proposalUrl={proposalResult} disabled={busy} />}
+            {isAdmin && rolesLoaded && roomZone && validRoomZone(roomZone) && <SaveResidenceRoom shellUrl={shellReady ? eyeLevelShell : null} renderUrl={proposalResult} zone={roomZone} pieces={roomProducts} disabled={busy} />}
           </div>
         </div>
         <div className="space-y-3">
@@ -1489,7 +1523,7 @@ export default function ProposalBuilder({
             <input ref={shellFileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={e => void uploadShell(e.target.files?.[0])} />
             <SandboxShellCapture disabled={busy} onCapture={captureShell} />
           </div>
-          {eyeLevelShell ? <EyeLevelPlacementShell url={eyeLevelShell} products={selectedProducts} disabled={busy || !shellReady} onTarget={updateTarget} /> : <div className="min-h-48 flex items-center justify-center border border-dashed border-border text-sm text-muted-foreground">{shellGenerating ? "Generating interior…" : "Eye-level shell pending"}</div>}
+          {eyeLevelShell ? <EyeLevelPlacementShell url={eyeLevelShell} products={roomProducts} disabled={busy || !shellReady} onTarget={updateTarget} /> : <div className="min-h-48 flex items-center justify-center border border-dashed border-border text-sm text-muted-foreground">{shellGenerating ? "Generating interior…" : "Eye-level shell pending"}</div>}
           {eyeLevelShell && <p className="text-xs text-muted-foreground">{shellSource === "upload" ? "Developer render / room photo" : shellSource === "sandbox" ? "3D Sandbox capture" : "AI-generated shell"}</p>}
           {eyeLevelShell && !shellReady && <p className="text-xs text-muted-foreground">Camera or plan changed · shell needs regeneration.</p>}
         </div>
@@ -1629,6 +1663,7 @@ export default function ProposalBuilder({
                   <select
                     id={`room-section-${p.id}`}
                     value={p.room_section || ""}
+                    disabled={busy}
                     onChange={(e) => updateRoomSection(p.id, e.target.value)}
                     className="w-full bg-transparent border border-border rounded px-2 py-1.5 font-body text-xs text-muted-foreground outline-hidden focus:border-foreground transition-colors cursor-pointer"
                   >
@@ -1636,6 +1671,7 @@ export default function ProposalBuilder({
                     {ROOM_SECTIONS.map((r) => (
                       <option key={r} value={r}>{r}</option>
                     ))}
+                    {roomZone && !ROOM_SECTIONS.some(r => r === roomZone.room_name) && <option value={roomZone.room_name}>{roomZone.room_name}</option>}
                   </select>
                   {p.selected_finishes?.map(finish => <p key={`${finish.axis}:${finish.name}`} className="mt-1 font-body text-[10px] text-muted-foreground">{finish.axis}: {finish.name}</p>)}
                   <label htmlFor={`material-override-${p.id}`} className="block text-xs text-muted-foreground">Material override</label>

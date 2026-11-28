@@ -1,5 +1,11 @@
 # Roadmap
 
+## Room-by-room eye-level experience
+- [x] Crop a named room from the floor plan, remap its camera, and enforce room-specific architecture restrictions. Real cropped living-room generation passes with no full-plan reference or kitchen fixtures.
+- [x] Save admin-validated room shells and staged views per residence/package with explicit room furniture assignments; real signed-in two-piece package save/readback passes.
+- [x] Show instant saved room views and room-filtered cards; update only the selected room after furniture/finish changes. Real guest two-piece staging passes; saved render displays with zero new AI requests. Full proposal totals retain the entire collection.
+- [x] Verified desktop/mobile room frame, private-code buyer flow, service-only jobs, administrator RLS and restricted anonymous grants; 46 regressions and preview build pass. Temporary verification data removed. Room presets must be saved by admins; AI architecture and product likeness still require visual approval.
+
 ## Verified eye-level shells and spatial staging
 - [x] Upload architectural room photos/developer renders and capture empty live Sandbox views through a read-only workspace without changing saved furniture. Signed-in upload and actual empty 3D frame capture succeeded.
 - [x] Add numbered draggable/keyboard per-product shell pins with spatial instructions; real three-piece pins and uploaded shell survive refresh, replacing the shell clears old targets/results. Desktop/390px phone inspected.

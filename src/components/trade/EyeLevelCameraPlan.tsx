@@ -1,21 +1,26 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Camera, Crosshair, Trash2 } from "lucide-react";
 import { planPoint, type EyeLevelCamera, type PlanPoint } from "@/lib/proposalRenderDraft";
+import type { RoomZone } from "@/lib/roomZone";
 
-export function EyeLevelCameraPlan({ imageUrl, camera, onChange, disabled }: { imageUrl: string; camera: EyeLevelCamera | null; onChange: (camera: EyeLevelCamera | null) => void; disabled: boolean }) {
+export function EyeLevelCameraPlan({ imageUrl, camera, onChange, disabled, zone, onZoneChange }: { imageUrl: string; camera: EyeLevelCamera | null; onChange: (camera: EyeLevelCamera | null) => void; disabled: boolean; zone?: RoomZone | null; onZoneChange?: (box: Pick<RoomZone,"x"|"y"|"width"|"height">) => void }) {
+  const [mode,setMode] = useState<"camera"|"crop">("camera");
+  const cropStart = useRef<PlanPoint | null>(null);
   const drag = useRef<"position" | "target" | null>(null);
   const move = (point: PlanPoint, part: "position" | "target") => {
     if (camera) onChange({ ...camera, [part]: point });
     else onChange({ position: point, target: { x: point.x, y: Math.max(0, point.y - 20) } });
   };
   return <div className="space-y-2">
+    {onZoneChange && <div role="group" aria-label="Plan editing mode" className="flex gap-2"><Button size="sm" variant={mode === "crop" ? "default" : "outline"} disabled={disabled} onClick={() => setMode("crop")}>Draw Room Crop</Button><Button size="sm" variant={mode === "camera" ? "default" : "outline"} disabled={disabled} onClick={() => setMode("camera")}>Camera &amp; Sightline</Button></div>}
     <div className="relative overflow-hidden rounded-md border border-border bg-muted/10">
       <img src={imageUrl} alt="Empty room camera plan" className="block w-full" draggable={false} />
       <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full touch-none text-primary" aria-label="Eye-level camera plan"
-        onPointerDown={e => { if (disabled) return; const part = (e.target as Element).getAttribute("data-camera-part"); drag.current = part === "target" ? "target" : "position"; e.currentTarget.setPointerCapture(e.pointerId); move(planPoint(e.clientX, e.clientY, e.currentTarget.getBoundingClientRect()), drag.current); }}
-        onPointerMove={e => { if (!disabled && drag.current) move(planPoint(e.clientX, e.clientY, e.currentTarget.getBoundingClientRect()), drag.current); }}
-        onPointerUp={() => { drag.current = null; }} onPointerCancel={() => { drag.current = null; }}>
+        onPointerDown={e => { if (disabled) return; e.currentTarget.setPointerCapture(e.pointerId); const point = planPoint(e.clientX,e.clientY,e.currentTarget.getBoundingClientRect()); if (mode === "crop" && onZoneChange) { cropStart.current = point; return; } const part = (e.target as Element).getAttribute("data-camera-part"); drag.current = part === "target" ? "target" : "position"; move(point, drag.current); }}
+        onPointerMove={e => { if (disabled) return; const point = planPoint(e.clientX,e.clientY,e.currentTarget.getBoundingClientRect()); if (cropStart.current && onZoneChange) { const start = cropStart.current; onZoneChange({ x: Math.min(start.x,point.x),y: Math.min(start.y,point.y),width: Math.abs(point.x-start.x),height: Math.abs(point.y-start.y) }); } else if (drag.current) move(point, drag.current); }}
+        onPointerUp={() => { drag.current = null; cropStart.current = null; }} onPointerCancel={() => { drag.current = null; cropStart.current = null; }}>
+        {zone && <rect x={zone.x} y={zone.y} width={zone.width} height={zone.height} fill="var(--primary)" fillOpacity="0.08" stroke="currentColor" strokeWidth="0.5" strokeDasharray="1 0.5" pointerEvents="none" />}
         <defs><marker id="eye-level-sightline" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0 0L5 2.5L0 5" fill="currentColor" /></marker></defs>
         {camera && <>
           <line x1={camera.position.x} y1={camera.position.y} x2={camera.target.x} y2={camera.target.y} stroke="currentColor" strokeWidth="0.6" markerEnd="url(#eye-level-sightline)" />

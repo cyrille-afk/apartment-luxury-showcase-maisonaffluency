@@ -9,7 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import Product3DViewer from "../Product3DViewer";
 import ViewingRoomAxisFinishes from "./ViewingRoomAxisFinishes";
 import { Product3dBadge } from "../Product3dBadge";
-import { getViewingRoomChoices, lockViewingRoomProposal } from "@/lib/viewingRoom.functions";
+import { getViewingRoomChoices, lockViewingRoomProposal, getResidenceRoomRenders } from "@/lib/viewingRoom.functions";
 import { exportViewingRoomBlenderScene } from "@/lib/viewingRoomBlenderScene.functions";
 import { downloadBlenderSceneManifest } from "@/lib/viewingRoomBlenderScene";
 import { visualiserProposalPath } from "@/lib/viewingRoomVisualiser";
@@ -23,11 +23,15 @@ import type { ViewingRoomProposalContext } from "@/lib/viewingRoomProposalData";
 import { readArViewerHandoff } from "@/lib/arViewerHandoff";
 import ResidenceVisualizationDialog, { type ResidenceVisualizationResult } from "./ResidenceVisualizationDialog";
 import { visualizationChoices } from "@/lib/residenceVisualization";
+import ResidenceRoomView from "./ResidenceRoomView";
 
 export default function ViewingRoomExperience({ token, packageId, tierName, baseTotal, currency, residence, developer, onTotal, fallbackItems = [], proposalContext = {}, canExportBlenderScene = false }: {
   token: string; packageId: string; tierName?: string; baseTotal: number; currency: string; residence: string; developer: string; onTotal: (total: number) => void; fallbackItems?: ViewingRoomItem[]; proposalContext?: ViewingRoomProposalContext; canExportBlenderScene?: boolean;
 }) {
   const query = useQuery({ queryKey: ["viewing-room-choices", token, packageId], queryFn: () => getViewingRoomChoices({ data: { token, packageId } }), retry: false });
+  const loadRooms = useServerFn(getResidenceRoomRenders);
+  const roomQuery = useQuery({ queryKey: ["viewing-room-renders",token,packageId],queryFn: () => loadRooms({ data: { token,packageId } }),retry: false });
+  const [selectedRoom,setSelectedRoom] = useState("");
   const [choices, setChoices] = useState<Record<string, ViewingRoomChoice>>({});
   const [previousPieces, setPreviousPieces] = useState<Record<string, ViewingRoomChoice>>({});
   const [active, setActive] = useState<string | null>(null);
@@ -61,6 +65,8 @@ export default function ViewingRoomExperience({ token, packageId, tierName, base
   const alternatives = current?.alternatives ?? [];
   const total = viewingRoomTotal(baseTotal, slots, choices);
   const renderChoices = visualizationChoices(slots, choices);
+  const room = roomQuery.data?.find(row => row.id === selectedRoom) ?? (selectedRoom === "all" ? null : roomQuery.data?.[0]);
+  const visibleSlots = room ? slots.filter(slot => room.slot_ids.includes(slot.id)) : slots;
   const selectionKey = JSON.stringify(renderChoices);
   const currentVisualization = attachedVisualization?.selectionKey === selectionKey ? attachedVisualization : null;
   const money = (value: number) => formatPdfMoney(Math.round(value * 100), currency);
@@ -151,10 +157,12 @@ export default function ViewingRoomExperience({ token, packageId, tierName, base
   const hideMobileBar = Boolean(query.data && !scrolled && Object.keys(choices).length === 0 && !locked && !feedback);
   return <div className="viewing-room bg-background pb-[calc(7rem+env(safe-area-inset-bottom))] text-foreground">
     <div className="mx-auto max-w-[1500px] px-6 pt-6 md:px-12">
+      {roomQuery.data && roomQuery.data.length > 0 && <ResidenceRoomView key={packageId} token={token} packageId={packageId} rooms={roomQuery.data} roomId={selectedRoom || roomQuery.data[0]?.id || "all"} onRoom={setSelectedRoom} choices={renderChoices} disabled={busy || locked || !query.data} />}
+      {roomQuery.isError && <div role="status" className="flex flex-wrap items-center gap-3 py-4 text-sm text-muted-foreground">Room views couldn’t load. Your collection is unchanged.<Button variant="outline" disabled={roomQuery.isFetching} onClick={() => void roomQuery.refetch()}><RotateCw className="size-4" />Retry Room Views</Button></div>}
       {recommendationsUnavailable && <div role="status" className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-6"><div className="max-w-xl"><p className="font-display text-xl">Recommendations are temporarily unavailable</p><p className="mt-2 text-sm text-muted-foreground">Your collection is still here. You can inspect its pieces and selected materials while we reconnect.{!query.data && " Finish changes and confirmed totals will return when recommendations load."}</p></div>{retryButton}</div>}
       {fixedCollectionVisible && <div className="pt-6"><ViewingRoomSwapNotice /></div>}
       <div aria-label="Client editorial collection" className="grid grid-cols-1 gap-x-8 gap-y-12 py-8 sm:grid-cols-2 lg:grid-cols-3">
-        {slots.map(slot => { const piece = choices[slot.id] ?? slot; return <article key={slot.id} className="flex min-w-0 flex-col" aria-label={piece.product_name}>
+        {visibleSlots.map(slot => { const piece = choices[slot.id] ?? slot; return <article key={slot.id} className="flex min-w-0 flex-col" aria-label={piece.product_name}>
           <div className="relative aspect-[4/5] bg-muted/40">
             <Product3dBadge glbUrl={piece.glb_url} productName={piece.product_name} onOpen={() => openPiece(slot)} className="left-3 top-3 z-10" />
             <Button variant="ghost" aria-label={`Materials and finishes for ${piece.product_name}`} onClick={() => openPiece(slot)} className="h-full w-full rounded-none p-6 hover:bg-transparent">{piece.image_url ? <img src={piece.image_url} alt={piece.product_name} className="h-full w-full object-contain" loading="lazy" /> : <span className="text-muted-foreground">Image pending</span>}</Button>

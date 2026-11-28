@@ -9084,6 +9084,66 @@ export type Database = {
           },
         ]
       }
+      residence_room_renders: {
+        Row: {
+          created_at: string
+          furniture_package_id: string
+          id: string
+          placement_targets: Json
+          render_url: string | null
+          residence_layout_id: string
+          room_name: string
+          room_type: string
+          selection_signature: string
+          shell_url: string
+          slot_ids: string[]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          furniture_package_id: string
+          id?: string
+          placement_targets?: Json
+          render_url?: string | null
+          residence_layout_id: string
+          room_name: string
+          room_type: string
+          selection_signature: string
+          shell_url: string
+          slot_ids: string[]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          furniture_package_id?: string
+          id?: string
+          placement_targets?: Json
+          render_url?: string | null
+          residence_layout_id?: string
+          room_name?: string
+          room_type?: string
+          selection_signature?: string
+          shell_url?: string
+          slot_ids?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "residence_room_renders_furniture_package_id_residence_layo_fkey"
+            columns: ["furniture_package_id", "residence_layout_id"]
+            isOneToOne: false
+            referencedRelation: "furniture_packages"
+            referencedColumns: ["id", "residence_layout_id"]
+          },
+          {
+            foreignKeyName: "residence_room_renders_residence_layout_id_fkey"
+            columns: ["residence_layout_id"]
+            isOneToOne: false
+            referencedRelation: "residence_layouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       room_planner_projects: {
         Row: {
           created_at: string

@@ -6,6 +6,8 @@ import type { Database } from "@/integrations/supabase/types";
 import { viewingRoomSchema, viewingRoomItemSchema, viewingRoomSlotSchema, viewingRoomChoiceSchema } from "./viewingRoom";
 import { viewingRoomPath, viewingRoomCookieName, isShortViewingRoomCode } from "./viewingRoomLink";
 import { approvedVisualizationPieces, residenceShellsSchema, visualizationChoiceSchema, visualizationPlacements, visualizationSignature } from "./residenceVisualization";
+import { residenceRoomSchema, roomSelectionKey } from "./residenceRooms";
+import { validEyeLevelTarget } from "./proposalRenderDraft";
 
 const token = z.string().min(8).max(128).regex(/^[a-zA-Z0-9_-]+(?:-[a-zA-Z0-9_-]+)*$/);
 const locator = z.string().min(1).max(180).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
@@ -105,6 +107,16 @@ async function credentialHash(credential: string) {
   const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(credential));
   return Array.from(new Uint8Array(bytes), n => n.toString(16).padStart(2,"0")).join("");
 }
+async function freshRoomImage(url: string) {
+  const match = url.match(/\/storage\/v1\/object\/(?:sign|public|authenticated)\/trade-private\/([^?]+)/);
+  if (!match?.[1]) return url;
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const result = await supabaseAdmin.storage.from("trade-private").createSignedUrl(decodeURIComponent(match[1]),3600);
+  if (result.error || !result.data?.signedUrl) throw new Error("This room image couldn’t load. Please retry.");
+  const signed = new URL(result.data.signedUrl);
+  const original = new URL(url);
+  return `${original.origin}${signed.pathname}${signed.search}`;
+}
 async function attachPrivateVisualization(credential: string, packageId: string, visualizationId: string, proposalId: string, items: z.infer<typeof viewingRoomChoiceSchema>[]) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const result = await supabaseAdmin.from("viewing_room_visualizations").select("image_url,selection_signature").eq("id",visualizationId).eq("package_id",packageId).eq("credential_hash",await credentialHash(credential)).eq("status","completed").single();
@@ -123,20 +135,47 @@ export const getResidenceVisualizationShells = createServerFn({ method: "POST" }
   if (result.error) throw new Error("Residence views couldn’t load.");
   return residenceShellsSchema.parse(result.data.eye_level_shell_urls);
 });
-export const generateResidenceVisualization = createServerFn({ method: "POST" }).inputValidator(z.object({ token: locator, packageId: z.string().uuid(), shellUrl: z.string().url().max(2048), choices: z.array(visualizationChoiceSchema).max(50) })).handler(async ({ data }) => {
+export const getResidenceRoomRenders = createServerFn({ method: "POST" }).inputValidator(z.object({ token: locator,packageId: z.string().uuid() })).handler(async ({ data }) => {
   setResponseHeader("Cache-Control","private, no-store");
   const access = await verifiedRoom(data.token);
   const layout = access?.room.layouts.find(row => row.packages.some(pkg => pkg.id === data.packageId));
   if (!access || !layout) throw new Error("Please enter your private access code again.");
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const shells = await supabaseAdmin.from("residence_layouts").select("eye_level_shell_urls").eq("id",layout.id).single();
-  if (shells.error || !residenceShellsSchema.parse(shells.data.eye_level_shell_urls).some(shell => shell.url === data.shellUrl)) throw new Error("Choose a saved view of this residence.");
+  const result = await supabaseAdmin.from("residence_room_renders").select("id,room_name,room_type,shell_url,render_url,slot_ids,selection_signature").eq("residence_layout_id",layout.id).eq("furniture_package_id",data.packageId).order("created_at");
+  if (result.error) throw new Error("Room views couldn’t load.");
+  return Promise.all(z.array(residenceRoomSchema).parse(result.data).map(async room => ({ ...room,shell_url: await freshRoomImage(room.shell_url),render_url: room.render_url ? await freshRoomImage(room.render_url) : null })));
+});
+export const generateResidenceVisualization = createServerFn({ method: "POST" }).inputValidator(z.object({ token: locator, packageId: z.string().uuid(), shellUrl: z.string().url().max(4096), choices: z.array(visualizationChoiceSchema).max(50),roomRenderId: z.string().uuid().optional() })).handler(async ({ data }) => {
+  setResponseHeader("Cache-Control","private, no-store");
+  const access = await verifiedRoom(data.token);
+  const layout = access?.room.layouts.find(row => row.packages.some(pkg => pkg.id === data.packageId));
+  if (!access || !layout) throw new Error("Please enter your private access code again.");
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const roomResult = data.roomRenderId ? await supabaseAdmin.from("residence_room_renders").select("*").eq("id",data.roomRenderId).eq("residence_layout_id",layout.id).eq("furniture_package_id",data.packageId).single() : null;
+  const room = roomResult?.data;
+  if (data.roomRenderId) {
+    if (roomResult?.error || !room) throw new Error("Choose a saved room from this package.");
+  } else {
+    const shells = await supabaseAdmin.from("residence_layouts").select("eye_level_shell_urls").eq("id",layout.id).single();
+    if (shells.error || !residenceShellsSchema.parse(shells.data.eye_level_shell_urls).some(shell => shell.url === data.shellUrl)) throw new Error("Choose a saved view of this residence.");
+  }
   const result = await publicClient().rpc("get_viewing_room_personalization", { _token: access.credential, _package_id: data.packageId });
   if (result.error || !result.data) throw new Error("Collection choices couldn’t load.");
   const approved = z.object({ items: z.array(viewingRoomSlotSchema), allow_alternatives: z.boolean().default(true) }).parse(result.data);
-  const pieces = approvedVisualizationPieces(approved.items.map(slot => ({ ...slot, is_swappable: slot.is_swappable && approved.allow_alternatives })), data.choices);
+  const allPieces = approvedVisualizationPieces(approved.items.map(slot => ({ ...slot, is_swappable: slot.is_swappable && approved.allow_alternatives })), data.choices);
+  const pieces = room ? allPieces.filter((_,i) => room.slot_ids.includes(approved.items[i]?.id ?? "")) : allPieces;
+  if (!pieces.length || (room && pieces.length !== room.slot_ids.length)) throw new Error("The saved room assignments changed. Please contact your residence team.");
   if (pieces.some(piece => !piece.image_url)) throw new Error("Every collection piece needs a reference photo.");
-  const queued = await supabaseAdmin.rpc("queue_viewing_room_visualization", { _package_id: data.packageId, _credential_hash: await credentialHash(access.credential), _selection_signature: visualizationSignature(pieces), _payload: { mode: "eye_level_proposal", imageUrl: data.shellUrl, referenceImageUrl: layout.floorplan_url?.startsWith("https://") ? layout.floorplan_url : data.shellUrl, qualityTier: "standard", placements: visualizationPlacements(pieces) } });
+  const placements = visualizationPlacements(pieces).map((piece,i) => {
+    if (!room) return piece;
+    const slot = approved.items.filter(s => room.slot_ids.includes(s.id))[i];
+    const targets = room.placement_targets as Record<string,unknown>;
+    const target = targets[slot?.id ?? ""];
+    if (!validEyeLevelTarget(target)) throw new Error("This room needs approved placement pins before updating.");
+    return { ...piece,target };
+  });
+  const signature = room ? roomSelectionKey(data.choices,room.slot_ids) : visualizationSignature(pieces);
+  const queued = await supabaseAdmin.rpc("queue_viewing_room_visualization", { _package_id: data.packageId, _credential_hash: await credentialHash(access.credential), _selection_signature: signature, _payload: { mode: "eye_level_proposal", imageUrl: await freshRoomImage(room?.shell_url ?? data.shellUrl), referenceImageUrl: null,qualityTier: "standard",placements,...(room ? { roomType: room.room_type,requirePlacementPins: true } : {}) } });
   if (queued.error || !queued.data) throw new Error("A visualization is already running or your hourly allowance is reached. Please try later.");
   try {
     const generation = await supabaseAdmin.functions.invoke("axonometric-generate", { body: { viewingRoomRenderId: queued.data } });

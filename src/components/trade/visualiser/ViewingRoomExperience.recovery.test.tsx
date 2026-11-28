@@ -4,7 +4,7 @@ import { afterEach, expect, it, vi } from "vitest";
 import ViewingRoomExperience from "./ViewingRoomExperience";
 
 const { readChoices } = vi.hoisted(() => ({ readChoices: vi.fn() }));
-vi.mock("@/lib/viewingRoom.functions", () => ({ getViewingRoomChoices: readChoices, lockViewingRoomProposal: vi.fn(), getResidenceVisualizationShells: vi.fn(), generateResidenceVisualization: vi.fn() }));
+vi.mock("@/lib/viewingRoom.functions", () => ({ getViewingRoomChoices: readChoices, lockViewingRoomProposal: vi.fn(), getResidenceRoomRenders: async () => [], getResidenceVisualizationShells: vi.fn(), generateResidenceVisualization: vi.fn() }));
 vi.mock("@/lib/viewingRoomBlenderScene.functions", () => ({ exportViewingRoomBlenderScene: vi.fn() }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
 vi.mock("../Product3DViewer", () => ({ default: () => null }));

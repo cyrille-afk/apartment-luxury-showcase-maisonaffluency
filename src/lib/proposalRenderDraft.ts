@@ -1,5 +1,6 @@
 import { validEyeLevelCamera, type EyeLevelCamera } from "../../supabase/functions/_shared/eyeLevelCamera";
 import { validEyeLevelTarget, type EyeLevelTarget } from "../../supabase/functions/_shared/eyeLevelPlacement";
+import { validRoomZone, type RoomZone } from "./roomZone";
 export { validEyeLevelTarget, requireEyeLevelTargets } from "../../supabase/functions/_shared/eyeLevelPlacement";
 export type { EyeLevelTarget } from "../../supabase/functions/_shared/eyeLevelPlacement";
 export { eyeLevelCameraKey, planPoint, validEyeLevelCamera } from "../../supabase/functions/_shared/eyeLevelCamera";
@@ -17,6 +18,7 @@ export type ProposalRenderDraft = {
   shellUrl: string | null; shellKey: string | null; products: ProposalProduct[];
   axonometricResult: string | null; eyeLevelResult: string | null;
   shellSource?: "generated" | "upload" | "sandbox";
+  roomZone?: RoomZone | null;
 };
 export function restoreProposalRenderDraft(raw: unknown, sourceKey: string): ProposalRenderDraft | null {
   if (!raw || typeof raw !== "object") return null;
@@ -28,6 +30,7 @@ export function restoreProposalRenderDraft(raw: unknown, sourceKey: string): Pro
     camera: validEyeLevelCamera(value["camera"]) ? value["camera"] : null,
     shellUrl: durable(value["shellUrl"]), shellKey: typeof value["shellKey"] === "string" ? value["shellKey"] : null,
     shellSource: value["shellSource"] === "upload" || value["shellSource"] === "sandbox" ? value["shellSource"] : "generated",
+    roomZone: validRoomZone(value["roomZone"]) ? value["roomZone"] : null,
     products: Array.isArray(value["products"]) ? value["products"].filter((p): p is ProposalProduct => Boolean(p && typeof p === "object" && typeof p.id === "string" && typeof p.product_name === "string" && typeof p.brand_name === "string" && durable(p.image_url))).slice(0, 10).map(p => { const { target, ...rest } = p; return validEyeLevelTarget(target) ? { ...rest, target } : rest; }) : [],
     axonometricResult: durable(value["axonometricResult"]), eyeLevelResult: durable(value["eyeLevelResult"]),
   };

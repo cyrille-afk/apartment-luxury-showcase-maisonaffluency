@@ -4,6 +4,7 @@ import { logAiUsage } from "../_shared/aiUsage.ts";
 import { withCache } from "../_shared/aiCache.ts";
 import { eyeLevelShellPrompt, eyeLevelStagingPrompt } from "../_shared/eyeLevelPrompt.ts";
 import { requireEyeLevelTargets } from "../_shared/eyeLevelPlacement.ts";
+import { ROOM_TYPES, type RoomType } from "../_shared/roomZone.ts";
 import {
   AXO_CUTAWAY_CAMERA_GUARD,
   buildAxoStyleText,
@@ -69,6 +70,8 @@ serve(async (req) => {
     const useDepthMap = body.useDepthMap !== false; // default ON
 
     if (!imageUrl) throw new Error("imageUrl is required");
+    if (body.roomType && !Object.hasOwn(ROOM_TYPES, body.roomType)) throw new Error("Choose a supported room type.");
+    if (mode === "eye_level_shell" && body.roomType && referenceImageUrl) throw new Error("Room shells accept only the cropped room image, not the full apartment.");
     if (mode === "eye_level_proposal" && !privateRoomRequest) {
       if (!Array.isArray(placements) || placements.length === 0 || placements.length > 10) throw new Error("Select between 1 and 10 products.");
       requireEyeLevelTargets(placements);
@@ -442,12 +445,12 @@ ABSOLUTE PROHIBITIONS:
 - Do NOT add a title block, sheet border, scale bar, north arrow, or watermark.
 - Do NOT relabel products or invent dimensions — use the exact CAD values listed above.`;
     } else if (mode === "eye_level_shell") {
-      prompt = eyeLevelShellPrompt(body.camera);
+      prompt = eyeLevelShellPrompt(body.camera, body.roomType as RoomType | undefined);
     } else if (mode === "eye_level_proposal") {
       if (!Array.isArray(placements) || placements.some((p: any) => !p?.image_url || !p?.product_name)) {
         throw new Error("Provide the empty room shell and each selected furniture photo.");
       }
-      prompt = eyeLevelStagingPrompt(placements, { requireTargets: !privateRoomRequest, hasLayout: Boolean(referenceImageUrl), ...(typeof refinementPrompt === "string" ? { refinement: refinementPrompt.slice(0, 2000) } : {}) });
+      prompt = eyeLevelStagingPrompt(placements, { requireTargets: !privateRoomRequest || body.requirePlacementPins === true, hasLayout: Boolean(referenceImageUrl), ...(body.roomType ? { roomType: body.roomType as RoomType } : {}), ...(typeof refinementPrompt === "string" ? { refinement: refinementPrompt.slice(0, 2000) } : {}) });
     } else if (mode === "proposal_render") {
       const hasMaterialOverrides = (placements || []).some((p: any) => p.material_override?.trim());
       const productList = (placements || [])

@@ -1,9 +1,11 @@
 import { validEyeLevelCamera, EYE_LEVEL_HEIGHT_M, EYE_LEVEL_LENS_MM, type EyeLevelCamera } from "./eyeLevelCamera.ts";
 import { requireEyeLevelTargets, validEyeLevelTarget, type EyeLevelTarget } from "./eyeLevelPlacement.ts";
+import { roomArchitectureConstraint, type RoomType } from "./roomZone.ts";
 
-export function eyeLevelShellPrompt(camera: EyeLevelCamera): string {
+export function eyeLevelShellPrompt(camera: EyeLevelCamera, roomType?: RoomType): string {
   if (!validEyeLevelCamera(camera)) throw new Error("Place the camera and sightline at different points inside the plan.");
   return `Generate ONE photorealistic EMPTY interior architectural photograph from the supplied top-down plan.
+${roomType ? roomArchitectureConstraint(roomType) : ""}
 CAMERA: image coordinates are percentages, origin top-left; x increases right, y increases down.
 Stand at (${camera.position.x.toFixed(2)}%, ${camera.position.y.toFixed(2)}%) and look toward (${camera.target.x.toFixed(2)}%, ${camera.target.y.toFixed(2)}%). These are image-space room locations, NOT compass headings or metres.
 Camera height exactly ${EYE_LEVEL_HEIGHT_M}m above the floor; ${EYE_LEVEL_LENS_MM}mm full-frame wide-angle lens, horizontal optical axis, straight verticals, realistic perspective. Frame only the room containing the camera, looking along the indicated sightline.
@@ -13,10 +15,11 @@ Output one immersive edge-to-edge EYE-LEVEL interior photograph. No axonometric,
 }
 
 export type EyeLevelPlacement = { product_name: string; brand_name?: string; dimensions?: string | null; materials?: string | null; material_override?: string | null; room_section?: string | null; target?: EyeLevelTarget; selected_finishes?: { axis: string; name: string; image_url?: string | null }[] };
-export function eyeLevelStagingPrompt(placements: EyeLevelPlacement[], options: { requireTargets?: boolean; hasLayout?: boolean; refinement?: string } = {}): string {
+export function eyeLevelStagingPrompt(placements: EyeLevelPlacement[], options: { requireTargets?: boolean; hasLayout?: boolean; refinement?: string; roomType?: RoomType } = {}): string {
   if (!placements.length || placements.length > 10) throw new Error("Select between 1 and 10 products.");
   if (options.requireTargets) requireEyeLevelTargets(placements);
   return `Stage the client's EXACT collectible furniture inside the EMPTY EYE-LEVEL SHELL.
+${options.roomType ? roomArchitectureConstraint(options.roomType) : ""}
 IMAGE ORDER: 1 = empty eye-level shell (PRIMARY image and absolute camera/architecture authority); ${options.hasLayout === false ? "NO blueprint is provided or required;" : "2 = original top-down layout (secondary furniture zones only);"} next ${placements.length} images = product photos in the numbered order below; subsequent labelled images = selected finish swatches.
 ${placements.map((p, i) => `${i + 1}. ${p.product_name} by ${p.brand_name || "recorded maker"}; dimensions W × D × H: ${p.dimensions || "unconfirmed — do not invent measurements"}; ${validEyeLevelTarget(p.target) ? `PIN ${i + 1}: floor-contact/footprint centre at (${p.target.x.toFixed(2)}%, ${p.target.y.toFixed(2)}%) of IMAGE 1; placement instruction: ${p.target.instruction}` : `zone: ${p.room_section || "safe matching furniture zone"}`}; recorded materials: ${p.materials || "as photographed"}; selected finishes: ${(p.selected_finishes || []).map(f => `${f.axis}: ${f.name}`).join("; ") || "as photographed"}${p.material_override ? `; explicit finish override: ${p.material_override}` : ""}`).join("\n")}
 IMMUTABLE ARCHITECTURAL BASE: IMAGE 1 is a supplied interior photograph/render, not a blueprint to reinterpret. Keep its actual camera, lens, crop, every wall/window/door edge, glazing mullion, floor line, ceiling, material, built-in, daylight direction and shadow exactly unchanged. Do not force a new 1.5m/24mm camera onto a supplied photo. Only new furniture, its contact shadows/reflections and its physically necessary occlusion may alter the base. Never add, remove, enlarge or move a kitchen island, peninsula, counter, cabinet, partition or opening. No invented islands, fake walls or relocated glass doors. NEVER use an overhead reference camera.
