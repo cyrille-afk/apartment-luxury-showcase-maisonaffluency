@@ -1,5 +1,9 @@
 # Roadmap
 
+## Proposal Builder residence-save refinements
+- [x] Give selected-product fields full-width stacked labels and adequate card width; real two-product desktop/390px phone screenshots inspected.
+- [x] Place residence save beside shell generation, with explicit empty-shell/staged-view selection. Both real images saved through signed-in UI to an isolated residence and read back as named views; existing buyer projection reads the same array. Ten regressions and preview build pass, no page errors. Temporary residence removed; no live residence assignments changed.
+
 ## Residence eye-level visualization
 - [x] Save named empty eye-level shells to residence layouts through admin-only atomic append; real admin save/readback verified on an isolated residence. No shells were assigned to live residences without a specific selection.
 - [x] Stage all buyer-selected, server-validated furniture and recorded finishes through scoped private-room access and service-only single-use jobs; angle tabs and explicit PDF attachment match the current selection. Missing views show an unavailable state; invalid/ended access and non-admin saves are rejected.

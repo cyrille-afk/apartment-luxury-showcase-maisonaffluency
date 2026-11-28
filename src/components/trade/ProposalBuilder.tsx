@@ -1442,13 +1442,15 @@ export default function ProposalBuilder({
         <div className="space-y-3">
           <h3 className="font-display text-xs text-muted-foreground uppercase">Empty Room Template · Camera</h3>
           <EyeLevelCameraPlan imageUrl={cameraPlanUrl} camera={camera} onChange={setCamera} disabled={busy} />
-          <Button size="sm" disabled={busy || !currentShellKey} onClick={generateEyeLevelShell}><Wand2 className="size-3.5 mr-1.5" />{shellGenerating ? "Generating Eye-Level Shell…" : eyeLevelShell && !shellReady ? "Regenerate Eye-Level Shell" : "Generate Eye-Level Shell"}</Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button size="sm" disabled={busy || !currentShellKey} onClick={generateEyeLevelShell}><Wand2 className="size-3.5 mr-1.5" />{shellGenerating ? "Generating Eye-Level Shell…" : eyeLevelShell && !shellReady ? "Regenerate Eye-Level Shell" : "Generate Eye-Level Shell"}</Button>
+            {isAdmin && rolesLoaded && <SaveResidenceShell url={shellReady ? eyeLevelShell : null} proposalUrl={proposalResult} disabled={busy} />}
+          </div>
         </div>
         <div className="space-y-3">
           <h3 className="font-display text-xs text-muted-foreground uppercase">Empty Eye-Level Shell</h3>
           {eyeLevelShell ? <img src={eyeLevelShell} alt="Empty eye-level interior shell" className="w-full rounded-md border border-border" /> : <div className="min-h-48 flex items-center justify-center border border-dashed border-border text-sm text-muted-foreground">{shellGenerating ? "Generating interior…" : "Eye-level shell pending"}</div>}
           {eyeLevelShell && !shellReady && <p className="text-xs text-muted-foreground">Camera or plan changed · shell needs regeneration.</p>}
-          {eyeLevelShell && shellReady && isAdmin && rolesLoaded && <SaveResidenceShell url={eyeLevelShell} disabled={busy} />}
         </div>
       </div>}
 
@@ -1551,9 +1553,9 @@ export default function ProposalBuilder({
       {selectedProducts.length > 0 && (
         <div className="border border-border rounded-lg p-4">
           <h3 className="font-display text-xs text-foreground mb-3">Selected Products ({selectedProducts.length}/10)</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,240px),1fr))] gap-3">
             {selectedProducts.map((p) => (
-              <div key={p.id} className="flex items-center gap-2 bg-muted/30 rounded-md px-2.5 py-2 group">
+              <div key={p.id} className="grid grid-cols-[44px_minmax(0,1fr)_auto] items-start gap-2 bg-muted/30 rounded-md px-2.5 py-2 group">
                 {/* Thumbnail with rotation overlay */}
                 <div className="relative w-11 h-11 shrink-0">
                   <div
@@ -1580,10 +1582,14 @@ export default function ProposalBuilder({
                     {p.isExternal && <span className="ml-1 text-muted-foreground/50">(ext)</span>}
                   </p>
                   {p.dimensions && <p className="font-body text-[8px] text-muted-foreground/70 truncate">{p.dimensions}</p>}
+                </div>
+                <div className="col-span-full col-start-1 row-start-2 space-y-2">
+                  <label htmlFor={`room-section-${p.id}`} className="block text-xs text-muted-foreground">Room section</label>
                   <select
+                    id={`room-section-${p.id}`}
                     value={p.room_section || ""}
                     onChange={(e) => updateRoomSection(p.id, e.target.value)}
-                    className="mt-1 w-full bg-transparent border border-border rounded px-1 py-0.5 font-body text-[9px] text-muted-foreground outline-hidden focus:border-foreground transition-colors cursor-pointer"
+                    className="w-full bg-transparent border border-border rounded px-2 py-1.5 font-body text-xs text-muted-foreground outline-hidden focus:border-foreground transition-colors cursor-pointer"
                   >
                     <option value="">Room section…</option>
                     {ROOM_SECTIONS.map((r) => (
@@ -1591,7 +1597,9 @@ export default function ProposalBuilder({
                     ))}
                   </select>
                   {p.selected_finishes?.map(finish => <p key={`${finish.axis}:${finish.name}`} className="mt-1 font-body text-[10px] text-muted-foreground">{finish.axis}: {finish.name}</p>)}
-                  <input
+                  <label htmlFor={`material-override-${p.id}`} className="block text-xs text-muted-foreground">Material override</label>
+                  <Input
+                    id={`material-override-${p.id}`}
                     type="text"
                     disabled={busy || Boolean(lockedProducts?.length)}
                     value={p.material_override || ""}
@@ -1600,11 +1608,11 @@ export default function ProposalBuilder({
                         prev.map((x) => x.id === p.id ? { ...x, material_override: e.target.value } : x)
                       )
                     }
-                    placeholder="Material override… e.g. brushed brass"
-                    className="mt-1 w-full bg-transparent border border-border rounded px-1.5 py-0.5 font-body text-[9px] text-muted-foreground placeholder:text-muted-foreground/40 outline-hidden focus:border-foreground transition-colors"
+                    placeholder="e.g. brushed brass"
+                    className="w-full text-xs"
                   />
                 </div>
-                {!lockedProducts?.length && <div className="shrink-0 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                {!lockedProducts?.length && <div className="col-start-3 row-start-1 shrink-0 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
                     onClick={() => rotateProduct(p.id, -1)}
                     className="text-muted-foreground hover:text-foreground transition-colors p-0.5"
