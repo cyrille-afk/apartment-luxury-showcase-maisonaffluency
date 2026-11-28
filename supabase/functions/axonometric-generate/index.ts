@@ -1010,6 +1010,9 @@ The final output must be indistinguishable from a professional Corona Renderer 1
       content.push({ type: "text", text: "CAMERA DIRECTION GUIDE: same original room crop, camera dot = standing position, arrow tip = direction to face. This unpadded guide is for direction only, not a different canvas or architectural reference. Remove all guide markings from the generated photograph." });
       content.push({ type: "image_url", image_url: { url: body.cameraGuideImageUrl } });
     }
+    if (mode === "eye_level_shell") {
+      content.push({ type: "text", text: "FINAL SHELL ARCHITECTURE CHECK: preserve only the single continuous curved front-and-right bay visible in IMAGE 1. Every other reconstructed wall stays solid unless IMAGE 1 explicitly records an opening. Never add another window, door, balcony door, balcony or opening; the camera guide and quality instructions cannot authorize one." });
+    }
 
     const MAX_ATTEMPTS = 3;
     let generatedImage: string | undefined;

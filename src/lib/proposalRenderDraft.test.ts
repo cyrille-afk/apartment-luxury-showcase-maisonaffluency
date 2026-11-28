@@ -5,6 +5,13 @@ import { EYE_LEVEL_HEIGHT_M, EYE_LEVEL_LENS_MM } from "../../supabase/functions/
 const camera = { position: { x: 60, y: 70 }, target: { x: 60, y: 20 } };
 describe("eye-level proposal rules", () => {
   it("uses the requested 1.5m eye height and 30mm architectural lens", () => { expect(EYE_LEVEL_HEIGHT_M).toBe(1.5); expect(EYE_LEVEL_LENS_MM).toBe(30); expect(() => eyeLevelShellPrompt(camera)).not.toThrow(); });
+  it("locks the shell to one continuous front-and-right curved bay without invented openings", () => {
+    const prompt = eyeLevelShellPrompt(camera, "living_room");
+    expect(prompt).toContain("ONE CONTINUOUS CURVED BAY wrapping the front and right");
+    expect(prompt).toContain("it is the ONLY window system in the room");
+    expect(prompt).toContain("DO NOT ADD ANY WINDOWS, DOORS, BALCONY DOORS, BALCONIES OR OTHER OPENINGS");
+    expect(prompt).toContain("continuous solid surfaces with no new openings");
+  });
   it("maps camera coordinates against actual image bounds", () => { expect(planPoint(300, 450, { left: 100, top: 50, width: 400, height: 500 })).toEqual({ x: 50, y: 80 }); });
   it("rejects coincident or outside-plan sightlines", () => { expect(validEyeLevelCamera({ position: camera.position, target: camera.position })).toBe(false); expect(validEyeLevelCamera({ ...camera, position: { x: 101, y: 50 } })).toBe(false); });
   it("invalidates a shell when camera, target or plan changes", () => { const key = eyeLevelCameraKey("plan-a", camera); expect(eyeLevelCameraKey("plan-b", camera)).not.toBe(key); expect(eyeLevelCameraKey("plan-a", { ...camera, target: { x: 50, y: 20 } })).not.toBe(key); });
