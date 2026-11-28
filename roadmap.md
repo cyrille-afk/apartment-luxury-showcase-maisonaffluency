@@ -1,5 +1,8 @@
 # Roadmap
 
+## Single-piece render correction
+- [x] Added marked-area correction with before/after review, explicit apply and undo. Real Frenchmen Street replacement, private image upload and phone controls verified; decoded pixel comparison confirms zero changes outside the marked area. Inner edges blend; AI changes inside the area still require visual review.
+
 ## Room-by-room eye-level experience
 - [x] Crop a named room from the floor plan, remap its camera, and enforce room-specific architecture restrictions. Real cropped living-room generation passes with no full-plan reference or kitchen fixtures.
 - [x] Save admin-validated room shells and staged views per residence/package with explicit room furniture assignments; real signed-in two-piece package save/readback passes.

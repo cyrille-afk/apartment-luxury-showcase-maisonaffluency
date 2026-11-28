@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import BeforeAfterSplit from "./BeforeAfterSplit";
+import FurnitureCorrectionDialog from "./FurnitureCorrectionDialog";
 import { createActiveDraftQuote } from "@/lib/activeProjectId";
 
 import {
@@ -126,6 +127,8 @@ export default function ProposalBuilder({
   const [compareMode, setCompareMode] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [qualityTier, setQualityTier] = useState<"draft" | "standard" | "premium">("standard");
+  const [correctingPiece, setCorrectingPiece] = useState(false);
+  const [correctionUndo, setCorrectionUndo] = useState<{ before: string; after: string; view: "axonometric" | "eye-level" } | null>(null);
   const cameraPlanUrl = emptyRoomUrl || sourcePlanUrl || furnishedImageUrl;
   const currentShellKey = camera && validEyeLevelCamera(camera) ? eyeLevelCameraKey(cameraPlanUrl, camera) + (roomZone ? JSON.stringify(roomZone) : "") : null;
   const roomProducts = useMemo(() => roomZone ? selectedProducts.filter(p => {
@@ -510,6 +513,21 @@ export default function ProposalBuilder({
     } finally {
       setRefining(false);
     }
+  };
+
+  const applyPieceCorrection = (url: string) => {
+    if (!proposalResult) return;
+    setCorrectionUndo({ before: proposalResult, after: url, view: renderView });
+    const nextResults = { ...viewResults, [renderView]: url };
+    setViewResults(nextResults); setProposalResult(url); setLockedIteration(null);
+    setProposalHistory(previous => [...previous, url]); setCorrectingPiece(false);
+    onResult?.({ imageUrl: url, storedUrl: url, text: "Single-piece correction", pinnedProducts: selectedProducts, renderView, draft: { ...draft, axonometricResult: nextResults.axonometric, eyeLevelResult: nextResults["eye-level"] } });
+  };
+  const undoPieceCorrection = () => {
+    if (!correctionUndo || correctionUndo.view !== renderView || correctionUndo.after !== proposalResult) return;
+    const url = correctionUndo.before, nextResults = { ...viewResults, [renderView]: url };
+    setViewResults(nextResults); setProposalResult(url); setCorrectionUndo(null); setLockedIteration(null);
+    onResult?.({ imageUrl: url, storedUrl: url, text: "Single-piece correction undone", pinnedProducts: selectedProducts, renderView, draft: { ...draft, axonometricResult: nextResults.axonometric, eyeLevelResult: nextResults["eye-level"] } });
   };
 
   const downloadProposal = async () => {
@@ -1571,6 +1589,11 @@ export default function ProposalBuilder({
                 </p>
               )}
               {/* Refinement prompt */}
+              <div className="flex flex-wrap gap-2">
+                <Button size="sm" variant="outline" disabled={busy || !stagingProducts.length} onClick={() => setCorrectingPiece(true)}><RefreshCw className="size-3.5" />Correct one piece</Button>
+                {correctionUndo?.view === renderView && correctionUndo.after === proposalResult && <Button size="sm" variant="ghost" disabled={busy} onClick={undoPieceCorrection}><Undo2 className="size-3.5" />Undo correction</Button>}
+              </div>
+              {correctingPiece && <FurnitureCorrectionDialog imageUrl={proposalResult} products={stagingProducts} onClose={() => setCorrectingPiece(false)} onApply={applyPieceCorrection} />}
               <div className="flex gap-2">
                 <Input
                   value={refinementPrompt}
