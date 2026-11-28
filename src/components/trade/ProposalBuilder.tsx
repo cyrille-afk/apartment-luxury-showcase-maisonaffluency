@@ -24,6 +24,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useExportCurrency } from "@/lib/displayMoney";
 import PrivateTradeImage from "@/components/trade/PrivateTradeImage";
 import { prepareAiRenderImages } from "@/lib/aiRenderImages";
+import { EyeLevelCameraPlan } from "./EyeLevelCameraPlan";
+import { eyeLevelCameraKey, validEyeLevelCamera, type ProposalProduct, type ProposalRenderDraft } from "@/lib/proposalRenderDraft";
 
 const toAbsoluteUrl = (url: string | null | undefined): string | null => {
   if (!url) return null;
@@ -44,21 +46,7 @@ const ROOM_SECTIONS = [
   "Other",
 ] as const;
 
-interface SelectedProduct {
-  id: string;
-  product_id?: string; // trade_products.id — used server-side to look up parsed CAD bbox geometry
-  product_name: string;
-  brand_name: string;
-  image_url: string;
-  dimensions?: string;
-  materials?: string;
-  isExternal?: boolean;
-  rotation?: number;
-  room_section?: string;
-  material_override?: string;
-  pdf_url?: string;
-  pdf_urls?: { label: string; url: string; filename?: string }[];
-}
+type SelectedProduct = ProposalProduct;
 
 interface ProposalBuilderProps {
   furnishedImageUrl: string;
@@ -68,8 +56,14 @@ interface ProposalBuilderProps {
   onPrepareEmptyRoom?: () => void;
   style: string;
   preloadedProductIds?: string[];
+  lockedProducts?: SelectedProduct[];
+  sourcePlanUrl?: string | null;
+  sourceKey: string;
+  initialDraft?: ProposalRenderDraft | null;
+  onDraftChange: (draft: ProposalRenderDraft) => void;
+  onExportPageTwo: (imageUrl: string) => Promise<void>;
   onClose: () => void;
-  onResult?: (result: { imageUrl: string; storedUrl: string | null; text: string; pinnedProducts: SelectedProduct[] }) => void;
+  onResult?: (result: { imageUrl: string; storedUrl: string | null; text: string; pinnedProducts: SelectedProduct[]; renderView: "axonometric" | "eye-level"; draft: ProposalRenderDraft }) => void;
 }
 
 let _pinId = 0;
@@ -83,6 +77,12 @@ export default function ProposalBuilder({
   onPrepareEmptyRoom,
   style,
   preloadedProductIds,
+  lockedProducts,
+  sourcePlanUrl,
+  sourceKey,
+  initialDraft,
+  onDraftChange,
+  onExportPageTwo,
   onClose,
   onResult,
 }: ProposalBuilderProps) {
@@ -95,9 +95,17 @@ export default function ProposalBuilder({
   const [creatingPresentation, setCreatingPresentation] = useState(false);
   const [showPrices, setShowPrices] = useState(true);
 
-  const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>(initialDraft?.products ?? lockedProducts ?? []);
+  const [renderView, setRenderView] = useState<"axonometric" | "eye-level">(initialDraft?.view ?? "axonometric");
+  const [camera, setCamera] = useState(initialDraft?.camera ?? null);
+  const [eyeLevelShell, setEyeLevelShell] = useState(initialDraft?.shellUrl ?? null);
+  const [shellKey, setShellKey] = useState(initialDraft?.shellKey ?? null);
+  const [shellGenerating, setShellGenerating] = useState(false);
+  const [renderError, setRenderError] = useState<string | null>(null);
+  const [exportingPageTwo, setExportingPageTwo] = useState(false);
+  const [viewResults, setViewResults] = useState({ axonometric: initialDraft?.axonometricResult ?? null, "eye-level": initialDraft?.eyeLevelResult ?? null });
   const [generating, setGenerating] = useState(false);
-  const [proposalResult, setProposalResult] = useState<string | null>(null);
+  const [proposalResult, setProposalResult] = useState<string | null>(initialDraft?.view === "eye-level" ? initialDraft.eyeLevelResult : initialDraft?.axonometricResult ?? null);
   const [proposalHistory, setProposalHistory] = useState<string[]>([]);
   const [refinementPrompt, setRefinementPrompt] = useState("");
   const [refining, setRefining] = useState(false);
@@ -105,6 +113,37 @@ export default function ProposalBuilder({
   const [compareMode, setCompareMode] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [qualityTier, setQualityTier] = useState<"draft" | "standard" | "premium">("standard");
+  const cameraPlanUrl = emptyRoomUrl || sourcePlanUrl || furnishedImageUrl;
+  const currentShellKey = camera && validEyeLevelCamera(camera) ? eyeLevelCameraKey(cameraPlanUrl, camera) : null;
+  const shellReady = Boolean(eyeLevelShell && shellKey === currentShellKey);
+  const proposalBaseUrl = renderView === "eye-level" ? (shellReady ? eyeLevelShell : null) : emptyRoomUrl;
+  const busy = generating || refining || shellGenerating || exportingPageTwo;
+  const draft: ProposalRenderDraft = useMemo(() => ({ sourceKey, view: renderView, camera, shellUrl: eyeLevelShell, shellKey, products: selectedProducts, axonometricResult: viewResults.axonometric, eyeLevelResult: viewResults["eye-level"] }), [sourceKey, renderView, camera, eyeLevelShell, shellKey, selectedProducts, viewResults]);
+  useEffect(() => { onDraftChange(draft); }, [draft, onDraftChange]);
+  useEffect(() => { if (lockedProducts?.length) setSelectedProducts(lockedProducts); }, [lockedProducts]);
+  const changeView = (view: "axonometric" | "eye-level") => {
+    if (busy || view === renderView) return;
+    setRenderView(view); setProposalResult(viewResults[view]); setProposalHistory(viewResults[view] ? [viewResults[view]] : []); setLockedIteration(null); setRenderError(null); setCadOverlayUrl(null);
+  };
+  const generateEyeLevelShell = async () => {
+    if (!camera || !validEyeLevelCamera(camera) || !currentShellKey || busy) return;
+    setShellGenerating(true); setRenderError(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("axonometric-generate", { body: await prepareAiRenderImages({ mode: "eye_level_shell", imageUrl: toAbsoluteUrl(cameraPlanUrl), referenceImageUrl: toAbsoluteUrl(sourcePlanUrl), camera, qualityTier }) });
+      if (error || data?.error) throw new Error(data?.error || error?.message || "Eye-level shell generation failed.");
+      const url = data.storedUrl || data.imageUrl;
+      if (!url) throw new Error("No eye-level image returned.");
+      setEyeLevelShell(url); setShellKey(currentShellKey); setRenderError(null);
+    } catch (e) { setRenderError(e instanceof Error ? e.message : "Could not generate the eye-level shell. Your plan and camera are unchanged."); }
+    finally { setShellGenerating(false); }
+  };
+  const exportPageTwo = async () => {
+    if (!proposalResult || busy) return;
+    setExportingPageTwo(true); setRenderError(null);
+    try { await onExportPageTwo(proposalResult); }
+    catch (e) { setRenderError(e instanceof Error ? e.message : "Could not export the client proposal."); }
+    finally { setExportingPageTwo(false); }
+  };
 
   // CAD dimension audit overlay state
   const [cadAuditing, setCadAuditing] = useState(false);
@@ -151,7 +190,7 @@ export default function ProposalBuilder({
 
   // Auto-load products from preloaded favorite IDs
   useEffect(() => {
-    if (!preloadedProductIds || preloadedProductIds.length === 0) return;
+    if (lockedProducts?.length || !preloadedProductIds || preloadedProductIds.length === 0) return;
     const loadPreloaded = async () => {
       const { data } = await supabase
         .from("trade_products")
@@ -179,9 +218,10 @@ export default function ProposalBuilder({
       }
     };
     loadPreloaded();
-  }, [preloadedProductIds]);
+  }, [preloadedProductIds, lockedProducts]);
 
   const addProduct = useCallback((product: { product_id?: string; product_name: string; brand_name: string; image_url: string; dimensions?: string; materials?: string; isExternal?: boolean; pdf_url?: string; pdf_urls?: { label: string; url: string; filename?: string }[] }) => {
+    if (busy || lockedProducts?.length) return;
     if (selectedProducts.length >= 10) {
       toast({ title: "Maximum 10 products per proposal", variant: "destructive" });
       return;
@@ -190,7 +230,7 @@ export default function ProposalBuilder({
       ...prev,
       { id: nextPinId(), ...product },
     ]);
-  }, [selectedProducts.length, toast]);
+  }, [selectedProducts.length, toast, busy, lockedProducts]);
 
   const removeProduct = useCallback((id: string) => {
     setSelectedProducts((prev) => prev.filter((p) => p.id !== id));
@@ -285,8 +325,12 @@ export default function ProposalBuilder({
   };
 
   const generateProposal = async () => {
-    if (!emptyRoomUrl || selectedProducts.length === 0) return;
+    if (!proposalBaseUrl || selectedProducts.length === 0 || busy) return;
+    if (selectedProducts.length > 10 || selectedProducts.some(p => !p.image_url)) {
+      setRenderError("Every selected piece needs a reference photo; a proposal supports up to 10 pieces."); return;
+    }
     setGenerating(true);
+    setRenderError(null);
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       const accessToken = sessionData.session?.access_token;
@@ -300,13 +344,16 @@ export default function ProposalBuilder({
         rotation: p.rotation || 0,
         dimensions: p.dimensions || null,
         material_override: p.material_override || null,
+        materials: p.materials || null,
+        room_section: p.room_section || null,
+        selected_finishes: p.selected_finishes || [],
       }));
 
       const { data, error } = await supabase.functions.invoke("axonometric-generate", {
         body: await prepareAiRenderImages({
-          imageUrl: toAbsoluteUrl(emptyRoomUrl),
+          imageUrl: toAbsoluteUrl(proposalBaseUrl),
           referenceImageUrl: toAbsoluteUrl(furnishedImageUrl),
-          mode: "proposal_render",
+          mode: renderView === "eye-level" ? "eye_level_proposal" : "proposal_render",
           style,
           qualityTier,
           placements,
@@ -318,11 +365,16 @@ export default function ProposalBuilder({
       if (data?.error) throw new Error(data.error);
 
       const resultUrl = data.storedUrl || data.imageUrl;
+      if (!resultUrl) throw new Error("No proposal image returned.");
+      const nextResults = { ...viewResults, [renderView]: resultUrl };
+      setViewResults(nextResults);
+      setLockedIteration(null);
       setProposalHistory((prev) => [...prev, resultUrl]);
       setProposalResult(resultUrl);
-      onResult?.({ imageUrl: data.imageUrl, storedUrl: data.storedUrl, text: data.text, pinnedProducts: selectedProducts });
+      onResult?.({ imageUrl: data.imageUrl, storedUrl: data.storedUrl, text: data.text, pinnedProducts: selectedProducts, renderView, draft: { ...draft, axonometricResult: nextResults.axonometric, eyeLevelResult: nextResults["eye-level"] } });
       toast({ title: "Proposal generated successfully" });
     } catch (e: any) {
+      setRenderError(e?.message || "Proposal generation failed. Your shell and furniture selections are unchanged.");
       toast({ title: "Proposal generation failed", description: e?.message || "Unknown error", variant: "destructive" });
     } finally {
       setGenerating(false);
@@ -346,6 +398,7 @@ export default function ProposalBuilder({
         dimensions: p.dimensions || null,
         materials: p.materials || null,
         material_override: p.material_override || null,
+        selected_finishes: p.selected_finishes || [],
       }));
 
       const markerHints = {
@@ -376,10 +429,14 @@ export default function ProposalBuilder({
       if (data?.error) throw new Error(data.error);
 
       const resultUrl = data.storedUrl || data.imageUrl;
+      if (!resultUrl) throw new Error("No proposal image returned.");
+      const nextResults = { ...viewResults, [renderView]: resultUrl };
+      setViewResults(nextResults);
+      setLockedIteration(null);
       setProposalHistory((prev) => [...prev, resultUrl]);
       setProposalResult(resultUrl);
       setRefinementPrompt("");
-      onResult?.({ imageUrl: data.imageUrl, storedUrl: data.storedUrl, text: data.text, pinnedProducts: selectedProducts });
+      onResult?.({ imageUrl: data.imageUrl, storedUrl: data.storedUrl, text: data.text, pinnedProducts: selectedProducts, renderView, draft: { ...draft, axonometricResult: nextResults.axonometric, eyeLevelResult: nextResults["eye-level"] } });
       toast({ title: "Proposal refined successfully" });
     } catch (e: any) {
       toast({ title: "Refinement failed", description: e?.message || "Unknown error", variant: "destructive" });
@@ -1301,7 +1358,7 @@ export default function ProposalBuilder({
           <Button
             size="sm"
             onClick={generateProposal}
-            disabled={generating || !emptyRoomUrl || selectedProducts.length === 0}
+            disabled={busy || !proposalBaseUrl || selectedProducts.length === 0}
           >
             {generating ? (
               <><DotCircleLoader size="sm" className="w-3.5 h-3.5 mr-1.5" />Generating…</>
@@ -1372,6 +1429,27 @@ export default function ProposalBuilder({
         </div>
       </div>
 
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
+        <div className="flex gap-1" role="group" aria-label="Proposal viewpoint">
+          <Button size="sm" variant={renderView === "axonometric" ? "default" : "outline"} disabled={busy} onClick={() => changeView("axonometric")}>Top-down Axonometric</Button>
+          <Button size="sm" variant={renderView === "eye-level" ? "default" : "outline"} disabled={busy} onClick={() => changeView("eye-level")}><Eye className="size-3.5 mr-1.5" />Eye-Level Interior</Button>
+        </div>
+        {proposalResult && <Button size="sm" variant="outline" disabled={busy} onClick={exportPageTwo}><FileText className="size-3.5 mr-1.5" />{exportingPageTwo ? "Exporting…" : "Export to Client Proposal · Page 2"}</Button>}
+      </div>
+      {renderError && <p role="alert" className="text-sm text-destructive">{renderError}</p>}
+      {renderView === "eye-level" && <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="space-y-3">
+          <h3 className="font-display text-xs text-muted-foreground uppercase">Empty Room Template · Camera</h3>
+          <EyeLevelCameraPlan imageUrl={cameraPlanUrl} camera={camera} onChange={setCamera} disabled={busy} />
+          <Button size="sm" disabled={busy || !currentShellKey} onClick={generateEyeLevelShell}><Wand2 className="size-3.5 mr-1.5" />{shellGenerating ? "Generating Eye-Level Shell…" : eyeLevelShell && !shellReady ? "Regenerate Eye-Level Shell" : "Generate Eye-Level Shell"}</Button>
+        </div>
+        <div className="space-y-3">
+          <h3 className="font-display text-xs text-muted-foreground uppercase">Empty Eye-Level Shell</h3>
+          {eyeLevelShell ? <img src={eyeLevelShell} alt="Empty eye-level interior shell" className="w-full rounded-md border border-border" /> : <div className="min-h-48 flex items-center justify-center border border-dashed border-border text-sm text-muted-foreground">{shellGenerating ? "Generating interior…" : "Eye-level shell pending"}</div>}
+          {eyeLevelShell && !shellReady && <p className="text-xs text-muted-foreground">Camera or plan changed · shell needs regeneration.</p>}
+        </div>
+      </div>}
+
       {/* Side-by-side view */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Left: Original furnished */}
@@ -1394,7 +1472,7 @@ export default function ProposalBuilder({
         {/* Right: Empty room or generated proposal */}
         <div className="space-y-2">
           <h3 className="font-display text-xs text-muted-foreground uppercase tracking-wider">
-            {proposalResult ? "Generated Proposal" : "Empty Room Template"}
+            {proposalResult ? (renderView === "eye-level" ? "Eye-Level Furniture Proposal" : "Generated Proposal") : renderView === "eye-level" ? "Eye-Level Proposal" : "Empty Room Template"}
           </h3>
 
           {proposalResult ? (
@@ -1442,6 +1520,8 @@ export default function ProposalBuilder({
                 </Button>
               </div>
             </div>
+          ) : renderView === "eye-level" ? (
+            <div className="min-h-48 flex items-center justify-center border border-dashed border-border text-sm text-muted-foreground">Furniture proposal pending</div>
           ) : emptyRoomUrl ? (
             <div className="border border-border rounded-lg overflow-hidden bg-muted/10">
               <img src={emptyRoomUrl} alt="Empty room template" className="w-full object-contain" />
@@ -1508,8 +1588,10 @@ export default function ProposalBuilder({
                       <option key={r} value={r}>{r}</option>
                     ))}
                   </select>
+                  {p.selected_finishes?.map(finish => <p key={`${finish.axis}:${finish.name}`} className="mt-1 font-body text-[10px] text-muted-foreground">{finish.axis}: {finish.name}</p>)}
                   <input
                     type="text"
+                    disabled={busy || Boolean(lockedProducts?.length)}
                     value={p.material_override || ""}
                     onChange={(e) =>
                       setSelectedProducts((prev) =>
@@ -1520,7 +1602,7 @@ export default function ProposalBuilder({
                     className="mt-1 w-full bg-transparent border border-border rounded px-1.5 py-0.5 font-body text-[9px] text-muted-foreground placeholder:text-muted-foreground/40 outline-hidden focus:border-foreground transition-colors"
                   />
                 </div>
-                <div className="shrink-0 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                {!lockedProducts?.length && <div className="shrink-0 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
                     onClick={() => rotateProduct(p.id, -1)}
                     className="text-muted-foreground hover:text-foreground transition-colors p-0.5"
@@ -1541,7 +1623,7 @@ export default function ProposalBuilder({
                   >
                     <X className="w-3 h-3" />
                   </button>
-                </div>
+                </div>}
               </div>
             ))}
           </div>
@@ -1549,7 +1631,7 @@ export default function ProposalBuilder({
       )}
 
       {/* Product Picker */}
-      <div className="border border-border rounded-lg p-4 space-y-3">
+      {!lockedProducts?.length && <div className="border border-border rounded-lg p-4 space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="font-display text-xs text-foreground">
             Add Products to Proposal {selectedProducts.length >= 10 && <span className="text-muted-foreground">(max reached)</span>}
@@ -1689,7 +1771,7 @@ export default function ProposalBuilder({
                       product_id: (p as any).trade_product_id ?? undefined,
                       product_name: p.product_name,
                       brand_name: p.brand_name,
-                      image_url: p.image_url!,
+                      image_url: p.image_url,
                       dimensions: p.dimensions,
                       materials: p.materials,
                       pdf_url: p.pdf_url,
@@ -1699,7 +1781,7 @@ export default function ProposalBuilder({
                   className="rounded border border-border overflow-hidden text-left transition-all hover:border-foreground/30"
                   title={`${p.product_name} — ${p.brand_name}`}
                 >
-                  <PrivateTradeImage src={p.image_url!} alt={p.product_name} className="w-full aspect-square object-cover" />
+                  <PrivateTradeImage src={p.image_url || ""} alt={p.product_name} className="w-full aspect-square object-cover" />
                   <div className="px-1 py-0.5">
                     <p className="font-body text-[9px] text-foreground truncate">{p.product_name}</p>
                     <p className="font-body text-[8px] text-muted-foreground truncate">{p.brand_name}</p>
@@ -1714,6 +1796,7 @@ export default function ProposalBuilder({
         )}
       </div>
 
+      }
       <Dialog open={showCadOverlay} onOpenChange={setShowCadOverlay}>
         <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>

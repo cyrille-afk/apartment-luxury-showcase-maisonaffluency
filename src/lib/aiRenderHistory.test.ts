@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildImageStudioHref,
   extractRestorePayload,
+  parseRenderMetadata,
   filterRenderHistoryByScope,
   resolveComparePair,
   toggleCompareSelection,
@@ -34,6 +35,13 @@ const makeEntry = (overrides: Partial<AiRenderHistoryEntry> = {}): AiRenderHisto
 });
 
 describe("aiRenderHistory", () => {
+  it("retains eye-level camera, shell and exact finish references on history restore", () => {
+    const metadata = parseRenderMetadata({ proposalLayoutUrl: "https://example.com/plan.png", proposalDraft: { sourceKey: "room", view: "eye-level", camera: { position: { x: 20, y: 80 }, target: { x: 40, y: 20 } }, shellUrl: "https://example.com/shell.png", eyeLevelResult: "https://example.com/eye.png", products: [{ id: "table", product_name: "Praia da Granja", brand_name: "Man of Parts", image_url: "https://example.com/table.png", selected_finishes: [{ axis: "Tabletop", name: "Selected stone", image_url: "https://example.com/stone.png" }] }] } });
+    expect(metadata.proposalDraft?.camera?.position).toEqual({ x: 20, y: 80 });
+    expect(metadata.proposalDraft?.products[0]?.selected_finishes?.[0]?.name).toBe("Selected stone");
+    expect(metadata.proposalDraft?.eyeLevelResult).toBe("https://example.com/eye.png");
+    expect(metadata.proposalLayoutUrl).toBe("https://example.com/plan.png");
+  });
   it("filters render history strictly by project, unassigned, or all", () => {
     const a = makeEntry({ id: "a", project_id: "f6068253-c046-44f6-a29d-2efe2fedfb31" });
     const b = makeEntry({ id: "b", project_id: "646c5957-65f0-4fc5-a41c-837fa5b83767", project_name: "37A" });

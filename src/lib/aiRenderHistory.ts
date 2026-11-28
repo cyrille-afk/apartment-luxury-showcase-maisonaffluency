@@ -1,3 +1,4 @@
+import { restoreProposalRenderDraft, type ProposalRenderDraft } from "./proposalRenderDraft";
 export type RenderMode = "elevation_to_axo" | "section_to_axo" | "stylize" | "composite" | "3d_to_cad" | "cad_overlay";
 export type QualityTier = "draft" | "standard" | "premium";
 export type RenderHistoryKind = "generation" | "ai_edit" | "scene_edit";
@@ -19,6 +20,9 @@ export interface RenderHistoryMetadata {
   lockedLayoutUrl?: string | null;
   lightingStrength?: number;
   text?: string;
+  proposalDraft?: ProposalRenderDraft;
+  proposalLayoutUrl?: string;
+  proposalEmptyRoomUrl?: string;
 }
 
 export interface AiRenderHistoryEntry {
@@ -69,6 +73,8 @@ const MODE_LABELS: Record<string, string> = {
   freeform: "AI Edit",
   product_swap: "Product Swap",
   apply_texture: "Texture Swap",
+  eye_level_proposal: "Eye-Level Proposal",
+  proposal_render: "Axonometric Proposal",
 };
 
 export function renderModeLabel(mode: string): string {
@@ -143,6 +149,15 @@ export function parseRenderMetadata(raw: unknown): RenderHistoryMetadata {
     meta.lightingStrength = obj["lightingStrength"];
   }
   if (typeof obj["text"] === "string") meta.text = obj["text"];
+  if (typeof obj["proposalLayoutUrl"] === "string" && /^(https?:\/\/|\/)/.test(obj["proposalLayoutUrl"])) meta.proposalLayoutUrl = obj["proposalLayoutUrl"];
+  if (typeof obj["proposalEmptyRoomUrl"] === "string" && /^(https?:\/\/|\/)/.test(obj["proposalEmptyRoomUrl"])) meta.proposalEmptyRoomUrl = obj["proposalEmptyRoomUrl"];
+  if (obj["proposalDraft"] && typeof obj["proposalDraft"] === "object") {
+    const key = (obj["proposalDraft"] as Record<string, unknown>)["sourceKey"];
+    if (typeof key === "string") {
+      const restored = restoreProposalRenderDraft(obj["proposalDraft"], key);
+      if (restored) meta.proposalDraft = restored;
+    }
+  }
   return meta;
 }
 

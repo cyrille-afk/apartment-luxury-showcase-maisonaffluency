@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { logAiUsage } from "../_shared/aiUsage.ts";
 import { withCache } from "../_shared/aiCache.ts";
+import { eyeLevelShellPrompt, eyeLevelStagingPrompt } from "../_shared/eyeLevelPrompt.ts";
 import {
   AXO_CUTAWAY_CAMERA_GUARD,
   buildAxoStyleText,
@@ -261,7 +262,7 @@ CRITICAL: Do not crop, rotate, or re-frame the scene relative to the source. The
     // bbox_mm is the source of truth — exact W×D×Hcm beats the free-text dimensions field.
     // We also write one row per placement to `axonometric_cad_qa` so admins can flag drift.
     let qaRowsForResponse: any[] = [];
-    if ((mode === "proposal_render" || mode === "proposal_refine" || mode === "cad_dimension_overlay") && Array.isArray(placements) && placements.length > 0) {
+    if ((mode === "proposal_render" || mode === "eye_level_proposal" || mode === "proposal_refine" || mode === "cad_dimension_overlay") && Array.isArray(placements) && placements.length > 0) {
       const productIds = Array.from(new Set(
         placements.map((p: any) => p?.product_id).filter((id: any) => typeof id === "string" && id.length > 0),
       ));
@@ -423,6 +424,13 @@ ABSOLUTE PROHIBITIONS:
 - Do NOT include any pixels of the original room, walls, floor, products, or shadows. Background must be transparent.
 - Do NOT add a title block, sheet border, scale bar, north arrow, or watermark.
 - Do NOT relabel products or invent dimensions — use the exact CAD values listed above.`;
+    } else if (mode === "eye_level_shell") {
+      prompt = eyeLevelShellPrompt(body.camera);
+    } else if (mode === "eye_level_proposal") {
+      if (!referenceImageUrl || !Array.isArray(placements) || placements.some((p: any) => !p?.image_url || !p?.product_name)) {
+        throw new Error("Provide the room layout and each selected furniture photo.");
+      }
+      prompt = eyeLevelStagingPrompt(placements);
     } else if (mode === "proposal_render") {
       const hasMaterialOverrides = (placements || []).some((p: any) => p.material_override?.trim());
       const productList = (placements || [])
@@ -777,6 +785,15 @@ Style: ${buildStyle()}. The output must look like the SAME render session as the
       }
     }
 
+    // Eye-level shell uses plan architecture, never an inherited axonometric camera.
+    if (mode === "eye_level_shell" && referenceImageUrl) {
+      content.push({ type: "image_url", image_url: { url: referenceImageUrl } });
+    }
+    if (mode === "eye_level_proposal") {
+      content.push({ type: "image_url", image_url: { url: referenceImageUrl } });
+      for (const p of placements) content.push({ type: "image_url", image_url: { url: p.image_url } });
+    }
+
     // Proposal refine: keep current proposal as base image, then provide layout + product refs
     if (mode === "proposal_refine") {
       // content already has [text_prompt, current_proposal_image]
@@ -791,6 +808,17 @@ Style: ${buildStyle()}. The output must look like the SAME render session as the
               image_url: { url: p.image_url },
             });
           }
+        }
+      }
+    }
+
+    // Label exact selected finish swatches after product photos in both proposal views/edits.
+    if (["proposal_render", "eye_level_proposal", "proposal_refine"].includes(mode)) {
+      for (const [index, p] of (placements || []).entries()) {
+        for (const finish of (p.selected_finishes || []).slice(0, 8)) {
+          if (!finish.image_url) continue;
+          content.push({ type: "text", text: `Selected finish for product ${index + 1} (${p.product_name}), axis ${finish.axis}: ${finish.name}. Apply only to this axis.` });
+          content.push({ type: "image_url", image_url: { url: finish.image_url } });
         }
       }
     }

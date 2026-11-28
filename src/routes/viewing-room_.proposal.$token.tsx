@@ -143,9 +143,9 @@ function SharedViewingRoomProposalPage() {
             {proposal.axonometric_render_url && (
               <figure className="space-y-2">
                 <div className="aspect-[4/3] overflow-hidden border border-border bg-card">
-                  <img src={proposal.axonometric_render_url} alt={`${proposal.residence.name} axonometric render`} className="size-full object-cover" />
+                  <img src={proposal.axonometric_render_url} alt={`${proposal.residence.name} collection perspective render`} className="size-full object-contain" />
                 </div>
-                <figcaption className="text-xs text-muted-foreground">Axonometric Perspective Render</figcaption>
+                <figcaption className="text-xs text-muted-foreground">Collection Perspective Render</figcaption>
               </figure>
             )}
           </div>

@@ -1,5 +1,10 @@
 # Roadmap
 
+## Eye-level client furniture renders
+- [x] Add draggable plan camera and sightline, with a separate 1.5m / 24mm eye-level shell mode; camera changes invalidate stale shells.
+- [x] Stage selected or locked furniture with recorded finish names/swatches; source/account/project-scoped compact drafts retain separate perspectives and history reopens the original plan. Real Praia da Granja staging, refresh, history reopen and phone dragging pass with no page errors.
+- [x] Real three-piece locked collection generation and explicit publish/readback/PDF download pass on a temporary proposal, preserving the original. Both 3-page selected and 4-page locked A4 PDFs show the final render on Page 2; 33 regressions and preview build pass. Exact architecture, dimensions and product likeness remain AI approximations requiring visual approval, not guaranteed reconstruction.
+
 ## Catalogue coffee table render transport
 - [x] Confirmed the actual 06:34 failure: selected Praia da Granja photo used an authenticated preview URL, rejected by the image service. prepareAiRenderImages embeds local/preview photo bytes only in requests, leaving cloud links and stored selections unchanged.
 - [x] Real signed-in Praia da Granja selection → Generate Proposal succeeds and reads back a generated image with no page errors; request contains photo bytes, not a preview URL. 23 regressions and build pass. Image generation succeeds; exact furniture likeness/placement is not guaranteed.

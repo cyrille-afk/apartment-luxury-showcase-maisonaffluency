@@ -1,8 +1,8 @@
 import { useState, useRef, useCallback, useMemo, useEffect, lazy, Suspense } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useActiveProject } from "@/contexts/ActiveProjectContext";
-import { buildVisualiserProposalStaging, sharedProposalPath, type LinkedProposalState } from "@/lib/viewingRoomVisualiser";
-import { getViewingRoomProposalForVisualiser, publishVisualiserToProposal } from "@/lib/viewingRoomVisualiser.functions";
+import { buildVisualiserProposalStaging, sharedProposalPath, type LinkedProposalState, type VisualiserProposalItem } from "@/lib/viewingRoomVisualiser";
+import { getViewingRoomProposalForVisualiser, publishVisualiserToProposal, getSharedViewingRoomProposal } from "@/lib/viewingRoomVisualiser.functions";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
@@ -12,6 +12,10 @@ import { Link, useNavigate, useSearchParams } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 import { prepareAiRenderImages } from "@/lib/aiRenderImages";
 import { AI_RENDER_DRAFT_KEY, compactAiRenderDraft, saveAiRenderDraft } from "@/lib/aiRenderDraft";
+import { restoreProposalRenderDraft, type ProposalRenderDraft, type ProposalProduct } from "@/lib/proposalRenderDraft";
+import { proposalSelectedFinishes } from "@/lib/viewingRoomProposalData";
+import type { ViewingRoomChoice } from "@/lib/viewingRoom";
+import { useExportCurrency } from "@/lib/displayMoney";
 
 /** Ensure image URLs are absolute so the AI gateway can fetch them */
 const toAbsoluteUrl = (url: string | null | undefined): string | null => {
@@ -261,10 +265,12 @@ const CategoryFilterBar = ({
 
 const TradeAxonometricWorkspace = () => {
   const activeProject = useActiveProject();
-  const { isAdmin, rolesLoaded } = useAuth();
+  const { user, isAdmin, rolesLoaded } = useAuth();
+  const exportCurrency = useExportCurrency();
   const [searchParams, setSearchParams] = useSearchParams();
   const loadProposal = useServerFn(getViewingRoomProposalForVisualiser);
   const publishToProposal = useServerFn(publishVisualiserToProposal);
+  const loadSharedProposal = useServerFn(getSharedViewingRoomProposal);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const savedDraftRef = useRef<any>(readSavedDraft());
@@ -273,6 +279,7 @@ const TradeAxonometricWorkspace = () => {
   const rawProjectId = searchParams.get("project");
   const urlProjectId = isValidUuid(rawProjectId) ? rawProjectId : null;
   const [standaloneProposal, setStandaloneProposal] = useState<LinkedProposalState | null>(null);
+  const [lockedProposalItems, setLockedProposalItems] = useState<VisualiserProposalItem[]>([]);
   const linkedProposal = activeProject?.linkedProposal ?? standaloneProposal;
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
     urlProjectId ??
@@ -303,13 +310,15 @@ const TradeAxonometricWorkspace = () => {
     setScopedBrief((prev) => resolveBriefAfterSourceChange(prev, activeProject.state.floorPlanUrl || null));
   }, [activeProject?.state.floorPlanUrl]);
   useEffect(() => {
-    if (!proposalId || activeProject?.linkedProposal || !rolesLoaded || !isAdmin) return;
+    const effectiveId = proposalId || activeProject?.linkedProposal?.proposalId;
+    if (!effectiveId || !rolesLoaded || !isAdmin) return;
     let cancelled = false;
     void (async () => {
-      const payload = await loadProposal({ data: { proposalId } });
+      const payload = await loadProposal({ data: { proposalId: effectiveId } });
       if (cancelled) return;
       const staged = buildVisualiserProposalStaging(payload);
       setStandaloneProposal(staged.linkedProposal);
+      setLockedProposalItems(payload.items);
       if (staged.floorPlanUrl) {
         setSourceImage(staged.floorPlanUrl);
         setScopedBrief(EMPTY_SCOPED_BRIEF);
@@ -319,7 +328,7 @@ const TradeAxonometricWorkspace = () => {
     });
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [proposalId, activeProject?.linkedProposal, rolesLoaded, isAdmin]);
+  }, [proposalId, activeProject?.linkedProposal?.proposalId, rolesLoaded, isAdmin]);
   const [mode, setMode] = useState<Mode>(savedDraftRef.current?.mode || "elevation_to_axo");
   const [style, setStyle] = useState(savedDraftRef.current?.style || STYLE_PRESETS[0].value);
   const [overlayImages, setOverlayImages] = useState<string[]>(Array.isArray(savedDraftRef.current?.overlayImages) ? savedDraftRef.current.overlayImages : []);
@@ -366,6 +375,15 @@ const TradeAxonometricWorkspace = () => {
   const [emptyRoomSourceUrl, setEmptyRoomSourceUrl] = useState<string | null>(savedDraftRef.current?.emptyRoomSourceUrl || null);
   const [emptyRoomGenerating, setEmptyRoomGenerating] = useState(false);
   const [emptyRoomError, setEmptyRoomError] = useState<string | null>(null);
+  const [proposalDraft, setProposalDraft] = useState<ProposalRenderDraft | null>(savedDraftRef.current?.proposalDraft ?? null);
+  const proposalSourceKey = JSON.stringify([user?.id, linkedProposal?.proposalId ?? selectedProjectId, result?.storedUrl || result?.imageUrl]);
+  const restoredProposalDraft = restoreProposalRenderDraft(proposalDraft, proposalSourceKey);
+  const lockedProposalProducts = useMemo<ProposalProduct[] | undefined>(() => linkedProposal && lockedProposalItems.length ? lockedProposalItems.map(item => ({
+    id: item.slot_id, product_id: item.product_id, product_name: item.product_name,
+    brand_name: item.brand_name ?? "", image_url: item.image_url ?? "",
+    ...(item.dimensions ? { dimensions: item.dimensions } : {}),
+    selected_finishes: proposalSelectedFinishes(item).map(finish => ({ axis: finish.label, name: finish.name, image_url: finish.image_url })),
+  })) : undefined, [linkedProposal?.proposalId, lockedProposalItems]);
   const [savingRefStyle, setSavingRefStyle] = useState(false);
   const [deletingRefStyle, setDeletingRefStyle] = useState(false);
   const [useLockedRefStyle, setUseLockedRefStyle] = useState(DEFAULT_USE_LOCKED_REF_STYLE);
@@ -438,6 +456,7 @@ const TradeAxonometricWorkspace = () => {
         history: history.slice(0, 8),
         emptyRoomUrl,
         emptyRoomSourceUrl,
+        proposalDraft,
         activeRequestId,
         adminNotes,
         activeBrief,
@@ -460,7 +479,7 @@ const TradeAxonometricWorkspace = () => {
     } catch {
       // If storage quota is full, keep the UI running rather than interrupting the render.
     }
-  }, [selectedProjectId, sourceImage, mode, style, overlayImages, cadBlocks, technicalDrawingUrl, selectedProduct, result, history, emptyRoomUrl, emptyRoomSourceUrl, activeRequestId, adminNotes, activeBrief, scopedBrief.sourceUrl, scopedBrief.origin, galleryTitle, galleryDesc, model3dUrl, model3dProjectName, model3dNotes, qualityTier, preloadedFavoriteProductIds, lockedLayoutUrl, lightingStrength, brightness, contrast, saturation, warmth]);
+  }, [selectedProjectId, sourceImage, mode, style, overlayImages, cadBlocks, technicalDrawingUrl, selectedProduct, result, history, emptyRoomUrl, emptyRoomSourceUrl, proposalDraft, activeRequestId, adminNotes, activeBrief, scopedBrief.sourceUrl, scopedBrief.origin, galleryTitle, galleryDesc, model3dUrl, model3dProjectName, model3dNotes, qualityTier, preloadedFavoriteProductIds, lockedLayoutUrl, lightingStrength, brightness, contrast, saturation, warmth]);
 
   useEffect(() => {
     if (draftRestoredRef.current) return;
@@ -786,6 +805,9 @@ const TradeAxonometricWorkspace = () => {
       sourceImageUrl?: string | null;
       sourceProduct?: SelectedProduct | null;
       text?: string;
+      proposalDraft?: ProposalRenderDraft;
+      proposalLayoutUrl?: string;
+      proposalEmptyRoomUrl?: string;
     }) => {
       try {
         const userId = (await supabase.auth.getUser()).data.user?.id;
@@ -837,6 +859,7 @@ const TradeAxonometricWorkspace = () => {
             lockedLayoutUrl,
             lightingStrength,
             text: opts.text || "",
+            ...(opts.proposalDraft ? { proposalDraft: opts.proposalDraft, proposalLayoutUrl: opts.proposalLayoutUrl, proposalEmptyRoomUrl: opts.proposalEmptyRoomUrl } : {}),
           } as any,
         });
         if (error) throw error;
@@ -872,6 +895,8 @@ const TradeAxonometricWorkspace = () => {
   const handleReopenHistoryEntry = useCallback(
     (entry: AiRenderHistoryEntry) => {
       const restored = extractRestorePayload(entry, STYLE_PRESETS[0].value);
+      const proposalMeta = parseRenderMetadata(entry.metadata);
+      const layoutUrl = proposalMeta.proposalDraft && proposalMeta.proposalLayoutUrl ? proposalMeta.proposalLayoutUrl : null;
       setSourceImage(restored.sourceImage);
       setMode(restored.mode);
       setStyle(restored.stylePrompt);
@@ -883,13 +908,19 @@ const TradeAxonometricWorkspace = () => {
       setLockedLayoutUrl(restored.lockedLayoutUrl);
       setLightingStrength(restored.lightingStrength);
       const reopened: GenerationResult = {
-        imageUrl: restored.resultImageUrl,
-        storedUrl: restored.resultImageUrl,
+        imageUrl: layoutUrl || restored.resultImageUrl,
+        storedUrl: layoutUrl || restored.resultImageUrl,
         text: restored.text,
         sourceProduct: restored.sourceProduct,
         mode: restored.mode,
       };
       setResult(reopened);
+      if (layoutUrl && proposalMeta.proposalDraft) {
+        setProposalDraft({ ...proposalMeta.proposalDraft, sourceKey: JSON.stringify([user?.id, linkedProposal?.proposalId ?? restored.projectId ?? selectedProjectId, layoutUrl]) });
+        setEmptyRoomUrl(proposalMeta.proposalEmptyRoomUrl ?? null);
+        setEmptyRoomSourceUrl(layoutUrl);
+        setShowProposal(true);
+      }
       setHistory((prev) => [reopened, ...prev.filter((h) => (h.storedUrl || h.imageUrl) !== restored.resultImageUrl)].slice(0, 12));
       setHistoryIndex(-1);
       if (restored.projectId && restored.projectId !== selectedProjectId) {
@@ -901,7 +932,7 @@ const TradeAxonometricWorkspace = () => {
         description: entry.project_name ? `Loaded from ${entry.project_name}.` : "Previous render and settings restored.",
       });
     },
-    [selectedProjectId, handleProjectChange, toast],
+    [selectedProjectId, handleProjectChange, toast, user?.id, linkedProposal?.proposalId],
   );
 
   const handleDeleteHistoryEntry = useCallback(
@@ -1440,7 +1471,7 @@ const TradeAxonometricWorkspace = () => {
         <SectionHero
           section="axonometric"
           title="AI Render Studio"
-          subtitle="Transform 2D elevations and sections into stylised 3D axonometric views using AI"
+          subtitle="Axonometric plans and camera-directed eye-level interiors with your selected furniture"
         >
           <div className="flex flex-wrap items-center gap-2">
             {activeRequestId && (
@@ -2816,6 +2847,12 @@ const TradeAxonometricWorkspace = () => {
           <div className="w-full min-w-0 max-w-7xl mx-auto px-6 py-8">
             <Suspense fallback={<div className="py-16 text-center font-body text-sm text-muted-foreground">Loading Proposal Builder…</div>}>
               <ProposalBuilder
+                key={proposalSourceKey}
+                sourceKey={proposalSourceKey}
+                initialDraft={restoredProposalDraft}
+                onDraftChange={setProposalDraft}
+                lockedProducts={lockedProposalProducts}
+                sourcePlanUrl={sourceImage}
                 furnishedImageUrl={result.storedUrl || result.imageUrl}
                 emptyRoomUrl={emptyRoomSourceUrl === (result.storedUrl || result.imageUrl) ? emptyRoomUrl : null}
                 emptyRoomGenerating={emptyRoomGenerating}
@@ -2827,7 +2864,26 @@ const TradeAxonometricWorkspace = () => {
                 onResult={(res) => {
                   // Proposal stays in the builder's side-by-side view;
                   // don't overwrite the main studio result.
-                  toast({ title: "Proposal generated", description: "Your proposal is shown side-by-side with the client's original." });
+                  void persistRenderHistoryEntry({ resultImageUrl: res.imageUrl, storedUrl: res.storedUrl, mode: res.renderView === "eye-level" ? "eye_level_proposal" : "proposal_render", kind: "scene_edit", text: res.text, proposalDraft: res.draft, proposalLayoutUrl: result.storedUrl || result.imageUrl, ...(emptyRoomUrl ? { proposalEmptyRoomUrl: emptyRoomUrl } : {}) });
+                }}
+                onExportPageTwo={async imageUrl => {
+                  if (/^(data:|blob:)/.test(imageUrl)) throw new Error("This image has not been saved yet. Save it before exporting.");
+                  const { downloadViewingRoomProposal } = await import("@/lib/viewingRoomProposal");
+                  if (linkedProposal) {
+                    if (!lockedProposalProducts || proposalDraft?.products.length !== lockedProposalProducts.length || proposalDraft.products.some((p, i) => p.id !== lockedProposalProducts[i]?.id || p.material_override)) throw new Error("The client proposal requires its complete locked collection and finishes.");
+                    const published = await publishToProposal({ data: { proposalId: linkedProposal.proposalId, axonometricRenderUrl: imageUrl } });
+                    activeProject?.setLinkedProposal(current => current ? { ...current, axonometricRenderUrl: published.axonometricRenderUrl, visualiserPublishedAt: published.visualiserPublishedAt } : current);
+                    setStandaloneProposal(current => current ? { ...current, axonometricRenderUrl: published.axonometricRenderUrl, visualiserPublishedAt: published.visualiserPublishedAt } : current);
+                    const shared = await loadSharedProposal({ data: { shareToken: published.shareToken } });
+                    if (!shared || shared.axonometric_render_url !== imageUrl) throw new Error("Render saved to Page 2, but the proposal could not be read back. Retry the PDF download.");
+                    await downloadViewingRoomProposal(shared.snapshot, shared.residence.name, shared.developer.name, { hero: shared.developer.hero, logo: shared.developer.logo, floorplan: shared.residence.floorplan_url, specs: shared.residence.specs_label, axonometricRenderUrl: imageUrl, walkthroughUrl: shared.walkthrough_url });
+                  } else {
+                    const products = proposalDraft?.products ?? [];
+                    if (!products.length) throw new Error("Select furniture before exporting.");
+                    const items: ViewingRoomChoice[] = products.map(p => ({ id: p.id, product_name: p.product_name, brand_name: p.brand_name, category: null, subcategory: null, image_url: p.image_url, dimensions: p.dimensions ?? null, width_mm: null, depth_mm: null, height_mm: null, glb_url: null, lead_time: null, retail_price: null, retail_price_from: false, finish_options: [], size_options: [], materials: Object.fromEntries((p.selected_finishes ?? []).map(f => [f.axis, { id: f.name, name: f.name, category: f.axis, brand_name: p.brand_name, image_url: f.image_url ?? null, material_type: null, color_family: null }])) }));
+                    await downloadViewingRoomProposal({ package: "Selected", currency: exportCurrency.currency, total: 0, items }, selectedProject?.name || "Private Residence", "Maison Affluency", { hero: imageUrl, floorplan: sourceImage, axonometricRenderUrl: imageUrl });
+                  }
+                  toast({ title: "Client Proposal PDF downloaded", description: "The selected render appears on Page 2." });
                 }}
               />
             </Suspense>
