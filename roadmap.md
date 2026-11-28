@@ -1,5 +1,10 @@
 # Roadmap
 
+## Seamless full-frame furniture editing
+- [x] Remove rectangular patch compositing; retain complete generated image bytes with review/apply/undo. No inpainting mask is used; marked bounds locate the target only.
+- [x] Send all active room photos/finishes with strict non-target and Rift locks; refinements edit the current furnished image, not the empty shell. Main Studio attached-product swaps also carry the saved active-room references.
+- [x] 39 focused regressions, function boot/deployment/live checks and preview build pass. Real signed-in four-piece Frenchmen correction returned without a rectangular seam and retained the existing Rift top/stone-base design; complete uploaded bytes match model output, Apply/Undo and phone controls verified. Live refinement transport sends the current furnished image and all four references, retains original on failure. The model still changed framing (1168×912 source → 1024×1024 output) and scale; final preservation instructions now override quality/style, but exact architecture/non-target pixel identity remains an AI limitation, not guaranteed or claimed fixed.
+
 ## Eye-level furniture proportion safeguards
 - [x] Inject recorded metric dimensions and individual footprint/silhouette locks, low coffee-table/seat relative scale and natural 30mm shell framing; preserve uploaded shell cameras and selected variants. User confirmed the saved Rift 108 × 108 × 28 cm; catalogue data unchanged and CAD conversions no longer round away millimetre precision.
 - [x] 43 focused regressions, function boot/deployment/live checks and preview build pass. Signed-in real four-piece staging sent every recorded size, returned an image and reopened successfully with no page errors; camera label shows 30mm. Visual inspection still shows an elongated, inaccurate Rift tabletop/base: prompt safeguards do not guarantee faithful geometry. Uploaded shell framing remains unchanged; no claim of 100% proportion accuracy.

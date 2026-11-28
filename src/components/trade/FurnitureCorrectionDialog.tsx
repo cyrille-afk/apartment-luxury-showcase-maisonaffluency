@@ -7,7 +7,7 @@ import { RefreshCw, Check, X, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { prepareAiRenderImages } from "@/lib/aiRenderImages";
 import { planPoint, type ProposalProduct } from "@/lib/proposalRenderDraft";
-import { compositeFurnitureCorrection, furnitureCorrectionRequest, type CorrectionArea } from "@/lib/furnitureCorrection";
+import { fullFrameCorrectionImage, furnitureCorrectionRequest, type CorrectionArea } from "@/lib/furnitureCorrection";
 import { uploadPrivateTradeAsset } from "@/lib/privateTradeUpload";
 import { useAuth } from "@/hooks/useAuth";
 import BeforeAfterSplit from "./BeforeAfterSplit";
@@ -25,12 +25,13 @@ export default function FurnitureCorrectionDialog({ imageUrl, products, onClose,
     if (!piece || !area || !user || busy) return;
     setBusy(true); setError(null); setCandidate(null);
     try {
-      const { data, error: failure } = await supabase.functions.invoke("axonometric-generate", { body: await prepareAiRenderImages({ ...furnitureCorrectionRequest(imageUrl, piece, area), qualityTier: "standard" }) });
+      const { data, error: failure } = await supabase.functions.invoke("axonometric-generate", { body: await prepareAiRenderImages({ ...furnitureCorrectionRequest(imageUrl, piece, area, products), qualityTier: "standard" }) });
       if (failure || data?.error) throw new Error(data?.error || failure?.message || "Correction failed.");
       const editedUrl = data?.storedUrl || data?.imageUrl;
       if (!editedUrl) throw new Error("No corrected image returned.");
-      const blob = await compositeFurnitureCorrection(imageUrl, editedUrl, area);
-      const url = await uploadPrivateTradeAsset(`axonometric-sources/${user.id}/correction-${crypto.randomUUID()}.png`, blob, "image/png");
+      const blob = await fullFrameCorrectionImage(editedUrl);
+      const extension = blob.type === "image/jpeg" ? "jpg" : blob.type === "image/webp" ? "webp" : "png";
+      const url = await uploadPrivateTradeAsset(`axonometric-sources/${user.id}/correction-${crypto.randomUUID()}.${extension}`, blob, blob.type);
       setCandidate(url);
     } catch (failure) { setError(failure instanceof Error ? failure.message : "The piece could not be corrected. Your current render is unchanged."); }
     finally { setBusy(false); }

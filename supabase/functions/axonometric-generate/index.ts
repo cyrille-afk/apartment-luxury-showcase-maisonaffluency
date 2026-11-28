@@ -5,6 +5,7 @@ import { withCache } from "../_shared/aiCache.ts";
 import { eyeLevelShellPrompt, eyeLevelStagingPrompt } from "../_shared/eyeLevelPrompt.ts";
 import { requireEyeLevelTargets } from "../_shared/eyeLevelPlacement.ts";
 import { ROOM_TYPES, type RoomType } from "../_shared/roomZone.ts";
+import { fullFrameFurnitureLock, requireRoomFurnitureReferences, roomFurnitureReferenceImages, roomFurnitureReferenceText } from "../_shared/roomFurnitureEditing.ts";
 import {
   AXO_CUTAWAY_CAMERA_GUARD,
   buildAxoStyleText,
@@ -70,6 +71,10 @@ serve(async (req) => {
     const useDepthMap = body.useDepthMap !== false; // default ON
 
     if (!imageUrl) throw new Error("imageUrl is required");
+    if (body.fullFrameFurnitureEdit) {
+      if (mode !== "product_swap" || maskDataUrl) throw new Error("Full-frame furniture correction requires a product swap without a mask.");
+      requireRoomFurnitureReferences(placements);
+    }
     if (body.roomType && !Object.hasOwn(ROOM_TYPES, body.roomType)) throw new Error("Choose a supported room type.");
     if (mode === "eye_level_shell" && body.roomType && referenceImageUrl) throw new Error("Room shells accept only the cropped room image, not the full apartment.");
     if (mode === "eye_level_proposal" && !privateRoomRequest) {
@@ -270,6 +275,7 @@ CRITICAL: Do not crop, rotate, or re-frame the scene relative to the source. The
         .join("\n");
 
       prompt = `You are given an interior architectural render. The user wants to swap ${swapList.length === 1 ? "a specific piece" : "multiple pieces"} of furniture/products in the scene. For each swap instruction below, remove the specified item and replace it IN THE EXACT SAME POSITION with the corresponding replacement product image (provided in order after the scene image). Match scale, perspective, lighting, and shadows perfectly so each replacement looks naturally integrated.\n\nCRITICAL: You MUST preserve EVERY other element in the scene EXACTLY as they are — all other furniture, walls, flooring, decorations, lighting fixtures, plants, artwork, windows, rugs, and architectural details must remain completely unchanged. Do NOT remove, move, or alter anything that is not explicitly mentioned in the swap instructions. The output image should be pixel-identical to the input except for the swapped items.\n\nSwap instructions:\n${swapInstructions}\n\nStyle: ${defaultStyle}.`;
+      prompt += `\n\n${fullFrameFurnitureLock(Array.isArray(placements) ? placements : [])}`;
     } else if (mode === "freeform") {
       const userPrompt = body.userPrompt;
       if (!userPrompt?.trim()) throw new Error("userPrompt is required for freeform mode");
@@ -512,15 +518,7 @@ ABSOLUTE PROHIBITIONS:
 
 Style: ${defaultStyle}.`;
     } else if (mode === "proposal_refine") {
-      const productList = (placements || [])
-        .map((p: any, i: number) => {
-          const dimNote = p.dimensions ? ` [Dimensions: ${p.dimensions}]` : "";
-          const rotNote = typeof p.rotation === "number" && p.rotation !== 0
-            ? ` [Target rotation: ${p.rotation}°]`
-            : "";
-          return `${i + 1}. "${p.product_name}" by ${p.brand_name}${dimNote}${rotNote}`;
-        })
-        .join("\n");
+      const productList = roomFurnitureReferenceText(placements || []);
 
       const removeHintLines = (markerHints?.remove_points || [])
         .map((m: any, i: number) => `${i + 1}. (${m.x_percent}%, ${m.y_percent}%)${m.label ? ` — ${m.label}` : ""}`)
@@ -536,8 +534,7 @@ Style: ${defaultStyle}.`;
 
 IMAGE ORDER:
 1. CURRENT PROPOSAL (base image to preserve)
-2. ORIGINAL CLIENT LAYOUT (for room geometry and furniture zones only)
-3+ PRODUCT REFERENCE IMAGES (exact products that must appear)
+${referenceImageUrl ? "2. ORIGINAL CLIENT LAYOUT (for room geometry and furniture zones only)\n3+ PRODUCT REFERENCE IMAGES (exact products that must appear)" : "2+ PRODUCT REFERENCE IMAGES (exact products that must appear); no layout is supplied"}
 
 PRODUCT REFERENCES:
 ${productList || "No explicit product list provided."}
@@ -557,7 +554,8 @@ STRICT EDIT RULES:
 - If remove markers are provided, remove objects at those coordinates and inpaint naturally with surrounding surfaces.
 - Do not introduce new furniture or alter unrelated objects.
 
-Style: ${defaultStyle}. Output one cohesive render with minimal collateral changes.`;
+Style: ${defaultStyle}. Output one cohesive render with minimal collateral changes.
+${fullFrameFurnitureLock(placements || [])}`;
     } else if (mode === "apply_texture") {
       const wallDescription = body.wallDescription || "the most prominent wall";
       prompt = `You are given an interior architectural render AND a texture/wallpaper swatch image. Apply the provided texture/wallpaper to ${wallDescription} in the scene. The texture should be applied realistically — matching the wall's perspective, lighting, and scale. Tile or repeat the pattern naturally as a real wallpaper installation would look.
@@ -718,12 +716,13 @@ Style: ${buildStyle()}. The output must look like the SAME render session as the
       const swapList = swaps && swaps.length > 0
         ? swaps
         : singleImage ? [{ prompt: "", imageUrl: singleImage }] : [];
-      for (const s of swapList.slice(0, 5)) {
+      for (const s of swapList.slice(0, 10)) {
         content.push({
           type: "image_url",
           image_url: { url: s.imageUrl },
         });
       }
+      if (Array.isArray(placements) && placements.length) content.push(...roomFurnitureReferenceImages(placements));
     }
 
     // Add overlay product images for composite mode
@@ -833,11 +832,11 @@ Style: ${buildStyle()}. The output must look like the SAME render session as the
     }
 
     // Label exact selected finish swatches after product photos in both proposal views/edits.
-    if (["proposal_render", "eye_level_proposal", "proposal_refine"].includes(mode)) {
+    if (["proposal_render", "eye_level_proposal", "proposal_refine", "product_swap"].includes(mode)) {
       for (const [index, p] of (placements || []).entries()) {
         for (const finish of (p.selected_finishes || []).slice(0, 8)) {
           if (!finish.image_url) continue;
-          content.push({ type: "text", text: `Selected finish for product ${index + 1} (${p.product_name}), axis ${finish.axis}: ${finish.name}. Apply only to this axis.` });
+          content.push({ type: "text", text: `Selected finish for product ${index + 1} (${p.product_name}), axis ${finish.axis}: ${finish.name}. ${mode === "product_swap" || mode === "proposal_refine" ? "Visual ground truth only; preserve existing appearance unless this product/axis is explicitly targeted." : "Apply only to this axis."}` });
           content.push({ type: "image_url", image_url: { url: finish.image_url } });
         }
       }
@@ -901,6 +900,7 @@ The final output must be indistinguishable from a professional Corona Renderer 1
 
     console.log(`[axo-gen] mode=${mode}, tier=${tier}, model=${selectedModel}, images=${content.filter((c: any) => c.type === "image_url").length}`);
     if (mode === "eye_level_proposal") content.push({ type: "text", text: "Final priority: immutable IMAGE 1 architecture and the assigned product pins override ALL style/quality/refinement suggestions. Keep original daylight, wall/window/floor lines and existing built-ins. Never invent a kitchen island or place a console against glass or in a kitchen work zone." });
+    if (mode === "product_swap" || mode === "proposal_refine") content.push({ type: "text", text: "FINAL EDIT PRIORITY overrides style and premium quality suggestions: preserve the COMPLETE IMAGE 1 framing, aspect ratio, lens, daylight, colour, architectural edges and all non-target furniture exactly. Do not zoom, pan, crop, widen, relight or redesign the room. Return one seamless full-frame image; no patches, inset images, overlays or annotations. Change ONLY explicitly requested furniture and necessary contact shadows/reflections." });
 
     const MAX_ATTEMPTS = 3;
     let generatedImage: string | undefined;

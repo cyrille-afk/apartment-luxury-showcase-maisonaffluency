@@ -14,6 +14,7 @@ import { prepareAiRenderImages } from "@/lib/aiRenderImages";
 import { AI_RENDER_DRAFT_KEY, compactAiRenderDraft, saveAiRenderDraft } from "@/lib/aiRenderDraft";
 import { restoreProposalRenderDraft, type ProposalRenderDraft, type ProposalProduct } from "@/lib/proposalRenderDraft";
 import { proposalSelectedFinishes } from "@/lib/viewingRoomProposalData";
+import { ROOM_TYPES } from "@/lib/roomZone";
 import type { ViewingRoomChoice } from "@/lib/viewingRoom";
 import { useExportCurrency } from "@/lib/displayMoney";
 
@@ -1361,6 +1362,16 @@ const TradeAxonometricWorkspace = () => {
 
         body.mode = "product_swap";
         body.swaps = [{ prompt: userMsg, imageUrl: replacementUrl }];
+        const activeDraft = proposalDraft;
+        if (activeDraft?.products.length) {
+          const zone = activeDraft.roomZone;
+          const roomPieces = zone && activeDraft.view === "eye-level" ? activeDraft.products.filter(p => {
+            const name = (p.room_section ?? "").trim().toLowerCase();
+            return name === zone.room_name.trim().toLowerCase() || name === ROOM_TYPES[zone.room_type].toLowerCase() || (zone.room_type === "primary_bedroom" && name === "bedroom");
+          }) : activeDraft.products;
+          body.placements = roomPieces;
+          body.fullFrameFurnitureEdit = true;
+        }
       } else {
         body.mode = "freeform";
         body.userPrompt = userMsg;

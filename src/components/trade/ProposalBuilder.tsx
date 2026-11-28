@@ -481,10 +481,9 @@ export default function ProposalBuilder({
 
       const { data, error } = await supabase.functions.invoke("axonometric-generate", {
         body: await prepareAiRenderImages({
-          imageUrl: toAbsoluteUrl(renderView === "eye-level" ? proposalBaseUrl : proposalResult),
+          imageUrl: toAbsoluteUrl(proposalResult),
           referenceImageUrl: renderView === "eye-level" ? null : toAbsoluteUrl(furnishedImageUrl),
-          mode: renderView === "eye-level" ? "eye_level_proposal" : "proposal_refine",
-          requirePlacementPins: renderView === "eye-level",
+          mode: "proposal_refine",
           ...(renderView === "eye-level" && roomZone ? { roomType: roomZone.room_type } : {}),
           style,
           qualityTier,
