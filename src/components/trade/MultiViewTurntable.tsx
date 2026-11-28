@@ -14,7 +14,7 @@ import { prepareProductReferenceImages } from "@/lib/productReferenceImages";
 import { cropRoomPlan, ROOM_TYPES, type RoomZone, type RoomType } from "@/lib/roomZone";
 import { ROOM_CORNER_VIEWS, moveRoomRig, requireRoomTurntable, roomCropDataUrl, publishableRoomAngles } from "@/lib/roomTurntable";
 import { listResidenceShellLayouts } from "@/lib/residenceShells.functions";
-import { listResidenceRoomPackages, saveResidenceRoom } from "@/lib/residenceRooms.functions";
+import { listResidenceRoomPackages, listMatchingResidenceRooms, saveResidenceRoom } from "@/lib/residenceRooms.functions";
 import type { ProposalProduct } from "@/lib/proposalRenderDraft";
 import { toast } from "@/hooks/use-toast";
 
@@ -39,11 +39,20 @@ export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View"
   const [feedback,setFeedback] = useState("");
   const [layoutId,setLayoutId] = useState(""),[packageId,setPackageId] = useState("");
   const [angles,setAngles] = useState<{ label: string; url: string }[]|null>(null);
+  const [savedRoomId,setSavedRoomId] = useState("");
   const plan = useRef<HTMLDivElement>(null);
   const drag = useRef(false);
-  const list = useServerFn(listResidenceShellLayouts),listPackages = useServerFn(listResidenceRoomPackages),save = useServerFn(saveResidenceRoom);
+  const list = useServerFn(listResidenceShellLayouts),listPackages = useServerFn(listResidenceRoomPackages),matchRooms = useServerFn(listMatchingResidenceRooms),save = useServerFn(saveResidenceRoom);
   const layouts = useQuery({ queryKey: ["residence-shell-layouts"],queryFn: () => list(),enabled: open,retry: false });
   const packages = useQuery({ queryKey: ["residence-room-packages",layoutId],queryFn: () => listPackages({ data: { layoutId } }),enabled: open && !!layoutId,retry: false });
+  const publicationPieces = result?.pieces.map(p => ({ product_id: p.product_id ?? p.id,product_name: p.product_name,brand_name: p.brand_name })) ?? [];
+  const matchingRooms = useQuery({ queryKey: ["matching-residence-rooms",result?.zone.room_name,publicationPieces],queryFn: () => matchRooms({ data: { roomName: result?.zone.room_name ?? "",pieces: publicationPieces } }),enabled: open && !!result && publicationPieces.length > 0,retry: false });
+  const savedRoom = matchingRooms.data?.find(room => room.id === savedRoomId);
+  useEffect(() => {
+    const onlyRoom = matchingRooms.data?.length === 1 ? matchingRooms.data[0] : undefined;
+    setSavedRoomId(onlyRoom?.id ?? "");
+    if (onlyRoom) { setLayoutId(onlyRoom.residence_layout_id);setPackageId(onlyRoom.furniture_package_id); }
+  },[matchingRooms.data]);
   const busy = loading || publishing;
   const views = ROOM_CORNER_VIEWS.map(v => ({ ...v,elevation }));
   const selected = pieces.filter(p => !omitted.includes(p.id) && (!p.room_section || p.room_section === zone.room_name));
@@ -69,7 +78,7 @@ export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View"
       const { data,error } = await supabase.functions.invoke("axonometric-generate",{ body: await prepareAiRenderImages({ mode: "multi_view",imageUrl: crop,roomZone: zone,roomType: zone.room_type,views,gridLayout: "2x2",qualityTier: "standard",...(prepared ? { placements: prepared.pieces,browserReferenceImages: true } : {}),...(sameRoom && lockedRoomUrl ? { lockedRoomUrl } : {}) }) });
       if (error) throw error;if (data?.error) throw new Error(data.error);
       const url = data?.storedUrl || data?.imageUrl;if (!url) throw new Error("No room gallery returned.");
-      setResult({ url,zone: { ...zone },pieces: selected.map(p => ({ ...p })),shellUrl: sameRoom ? shellUrl : null });setAngles(null);
+      setResult({ url,zone: { ...zone },pieces: selected.map(p => ({ ...p })),shellUrl: sameRoom ? shellUrl : null });setAngles(null);setSavedRoomId("");
     } catch(e) { const message = e instanceof Error ? e.message : "Try again.";setFeedback(message);toast({ title: "Room generation stopped",description: message,variant: "destructive" }); }
     finally { setLoading(false); }
   }
@@ -79,7 +88,7 @@ export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View"
     try {
       if (!result.pieces.length) throw new Error("Attach this room's package pieces before generating and publishing.");
       const gallery = angles ?? await publishableRoomAngles(result.url);setAngles(gallery);
-      await save({ data: { layoutId,packageId,roomName: result.zone.room_name,roomType: result.zone.room_type,shellUrl: result.shellUrl,renderUrl: gallery[0]?.url ?? null,galleryViews: gallery,pieces: result.pieces.map(p => ({ product_id: p.product_id ?? p.id,product_name: p.product_name,brand_name: p.brand_name,...(p.target ? { target: p.target } : {}),...(p.selected_finishes ? { selected_finishes: p.selected_finishes } : {}),...(p.material_override ? { material_override: p.material_override } : {}) })) } });
+      await save({ data: { layoutId: savedRoom?.residence_layout_id ?? layoutId,packageId: savedRoom?.furniture_package_id ?? packageId,roomName: result.zone.room_name,roomType: result.zone.room_type,...(savedRoom ? { savedRoomId: savedRoom.id,expectedSignature: savedRoom.selection_signature } : {}),shellUrl: result.shellUrl,renderUrl: gallery[0]?.url ?? null,galleryViews: gallery,pieces: result.pieces.map(p => ({ product_id: p.product_id ?? p.id,product_name: p.product_name,brand_name: p.brand_name,...(p.target ? { target: p.target } : {}),...(p.selected_finishes ? { selected_finishes: p.selected_finishes } : {}),...(p.material_override ? { material_override: p.material_override } : {}) })) } });
       setFeedback(`Published all four ${result.zone.room_name} angles to the Private Viewing Room.`);
     } catch(e) { setFeedback(e instanceof Error ? e.message : "The gallery could not be published."); }
     finally { setPublishing(false); }
@@ -110,7 +119,12 @@ export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View"
         <fieldset className="space-y-2"><legend className="text-sm font-medium">Locked catalogue references · {selected.length}</legend><div className="grid grid-cols-1 gap-2 sm:grid-cols-2">{pieces.map(p => <label key={p.id} className="flex min-w-0 items-center gap-3"><Checkbox checked={!omitted.includes(p.id)} disabled={busy} onCheckedChange={checked => setOmitted(ids => checked ? ids.filter(id => id !== p.id) : [...ids,p.id])} /><img src={p.image_url} alt={p.product_name} className="size-12 object-contain" /><span className="min-w-0 text-sm">{p.product_name}{p.room_section && p.room_section !== zone.room_name && <span className="block text-xs text-muted-foreground">{p.room_section} · excluded from this room</span>}</span></label>)}</div></fieldset>
         <div className="flex flex-wrap items-center justify-between gap-3"><span className="text-xs text-muted-foreground">{zone.room_name} · 4 corners · {elevation}°</span><Button onClick={() => void generate()} disabled={busy || !sourceImageUrl || !placed}>{loading ? <Loader2 className="size-4 animate-spin" /> : <Orbit className="size-4" />}{loading ? "Rendering…" : "Generate 4 Room Angles"}</Button></div>
         {result && <><div className="grid grid-cols-2 gap-2">{ROOM_CORNER_VIEWS.map((v,i) => <figure key={v.label}><div className="relative aspect-square overflow-hidden"><img src={result.url} alt={`${result.zone.room_name} — ${v.label}`} className={`absolute h-[200%] w-[200%] max-w-none ${i%2 ? 'right-0' : 'left-0'} ${i<2 ? 'top-0' : 'bottom-0'}`} /></div><figcaption className="py-2 text-xs">{v.label}</figcaption></figure>)}</div><Button variant="outline" onClick={() => void download()}><Download className="size-4" />Download</Button>
-          <div className="space-y-3 border-t border-border pt-4"><Label>Publish {result.zone.room_name}</Label><div className="grid gap-3 sm:grid-cols-2"><Select value={layoutId} disabled={busy} onValueChange={value => { setLayoutId(value);setPackageId(""); }}><SelectTrigger aria-label="Residence"><SelectValue placeholder="Select residence" /></SelectTrigger><SelectContent>{layouts.data?.map(l => <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>)}</SelectContent></Select><Select value={packageId} disabled={busy || !layoutId} onValueChange={setPackageId}><SelectTrigger aria-label="Furniture package"><SelectValue placeholder="Select furniture package" /></SelectTrigger><SelectContent>{packages.data?.map(p => <SelectItem key={p.id} value={p.id}>{p.tier_name}</SelectItem>)}</SelectContent></Select></div>{(layouts.isError || packages.isError) && <Button variant="outline" onClick={() => { void layouts.refetch();void packages.refetch(); }}>Retry residences</Button>}<Button disabled={busy || !packageId || !result.pieces.length} onClick={() => void publish()}>{publishing ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}{publishing ? "Publishing…" : "Publish 4-Angle Room Gallery"}</Button></div></>}
+          <div className="space-y-3 border-t border-border pt-4"><Label>Publish {result.zone.room_name}</Label>
+            {matchingRooms.isFetching && <p className="text-sm text-muted-foreground">Checking saved room packages…</p>}
+            {!!matchingRooms.data?.length && <Select value={savedRoomId} disabled={busy} onValueChange={value => { setSavedRoomId(value);const room = matchingRooms.data?.find(r => r.id === value);if (room) { setLayoutId(room.residence_layout_id);setPackageId(room.furniture_package_id); } }}><SelectTrigger aria-label="Matching saved room package"><SelectValue placeholder="Select matching saved room package" /></SelectTrigger><SelectContent>{matchingRooms.data.map(room => <SelectItem key={room.id} value={room.id}>{room.residence_name} · {room.tier_name} · {room.room_name}</SelectItem>)}</SelectContent></Select>}
+            {matchingRooms.isError && <Button variant="outline" onClick={() => void matchingRooms.refetch()}>Retry saved rooms</Button>}
+            {!matchingRooms.isFetching && matchingRooms.data?.length === 0 && <p role="status" className="text-sm text-muted-foreground">No saved {result.zone.room_name} matches these {result.pieces.length} pieces. Save this room with its matching residence package first.</p>}
+            <div className="grid gap-3 sm:grid-cols-2"><Select value={layoutId} disabled={busy || !!savedRoom} onValueChange={value => { setLayoutId(value);setPackageId(""); }}><SelectTrigger aria-label="Residence"><SelectValue placeholder="Select residence" /></SelectTrigger><SelectContent>{layouts.data?.map(l => <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>)}</SelectContent></Select><Select value={packageId} disabled={busy || !layoutId || !!savedRoom} onValueChange={setPackageId}><SelectTrigger aria-label="Furniture package"><SelectValue placeholder="Select furniture package" /></SelectTrigger><SelectContent>{packages.data?.map(p => <SelectItem key={p.id} value={p.id}>{p.tier_name}</SelectItem>)}</SelectContent></Select></div>{(layouts.isError || packages.isError) && <Button variant="outline" onClick={() => { void layouts.refetch();void packages.refetch(); }}>Retry residences</Button>}<Button disabled={busy || matchingRooms.isFetching || matchingRooms.isError || !packageId || !result.pieces.length || (!!matchingRooms.data?.length && !savedRoom)} onClick={() => void publish()}>{publishing ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}{publishing ? "Publishing…" : "Publish 4-Angle Room Gallery"}</Button></div></>}
         {feedback && <p role="status" className="text-sm">{feedback}</p>}
       </div>
     </DialogContent></Dialog>;

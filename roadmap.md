@@ -1038,4 +1038,7 @@
 - [x] Four-corner eye-level rig, tight room crop and browser-prepared furniture references.
 - [x] Atomic four-angle publishing and token-scoped buyer toggles; package/signature regressions pass.
 - [x] Live signed-in five-piece generation, desktop/mobile crop dragging, deployment/startup checks and regressions pass. Output remains in one room, but furniture instance/silhouette accuracy is not guaranteed.
-- [ ] Verify publishing through the buyer page with a matching saved room package: no residence_room_renders exist and the saved five-piece draft differs from the three-piece packages; do not fabricate or overwrite package contents for testing.
+- [x] Connect galleries to exact saved-room package matches; revalidate current finishes/signature and preserve saved shell, pins and slot identities when publishing.
+- [x] Clarify that three pieces means the saved package list, not a staging limit: Bespoke contains Rift CTS, one GUM and Yoma; the render adds Mono STS and a second GUM.
+- [x] 18 matching/publishing/buyer-toggle regressions pass; preview build OK and signed-in restored five-piece turntable visually checked. Real buyer publication remains blocked on a matching saved package.
+- [ ] Verify publishing through the buyer page: awaiting the user's residence/tier choice for the five-piece room; no saved room rows exist and existing packages contain three pieces. Do not overwrite package contents without that choice.
