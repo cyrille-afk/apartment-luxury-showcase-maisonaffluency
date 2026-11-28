@@ -4,7 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { viewingRoomSlotSchema } from "./viewingRoom";
 import { visualizationChoices } from "./residenceVisualization";
 import { roomSelectionKey, roomTypeSchema } from "./residenceRooms";
-import { ROOM_CORNER_VIEWS } from "../../supabase/functions/_shared/roomTurntable";
+import { ROOM_CORNER_VIEWS, ROOM_MASTER_VIEWS } from "../../supabase/functions/_shared/roomTurntable";
 import { validEyeLevelTarget } from "./proposalRenderDraft";
 
 export const listResidenceRoomPackages = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).inputValidator(z.object({ layoutId: z.string().uuid() })).handler(async ({ data,context }) => {
@@ -38,7 +38,7 @@ export const listMatchingResidenceRooms = createServerFn({ method: "POST" }).mid
   }));
   return matches.filter((room): room is NonNullable<typeof room> => room !== null);
 });
-export const saveResidenceRoom = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).inputValidator(z.object({ layoutId: z.string().uuid(),packageId: z.string().uuid(),roomName: z.string().trim().min(1).max(120),roomType: roomTypeSchema,savedRoomId: z.string().uuid().optional(),expectedSignature: z.string().max(20000).optional(),shellUrl: z.string().url().startsWith("https://").max(4096).nullable(),galleryViews: z.array(z.object({ label: z.string(),url: z.string().url().startsWith("https://").max(4096) })).length(4).optional(),renderUrl: z.string().url().startsWith("https://").max(4096).nullable(),pieces: z.array(pieceSchema).min(1).max(10) })).handler(async ({ data,context }) => {
+export const saveResidenceRoom = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).inputValidator(z.object({ layoutId: z.string().uuid(),packageId: z.string().uuid(),roomName: z.string().trim().min(1).max(120),roomType: roomTypeSchema,savedRoomId: z.string().uuid().optional(),expectedSignature: z.string().max(20000).optional(),shellUrl: z.string().url().startsWith("https://").max(4096).nullable(),galleryViews: z.array(z.object({ label: z.string(),url: z.string().url().startsWith("https://").max(4096) })).min(3).max(4).optional(),renderUrl: z.string().url().startsWith("https://").max(4096).nullable(),pieces: z.array(pieceSchema).min(1).max(10) })).handler(async ({ data,context }) => {
   const role = await context.supabase.rpc("has_role",{ _user_id: context.userId,_role: "admin" });
   if (role.error || !role.data) throw new Error("Admin access required.");
   const pkg = await context.supabase.from("furniture_packages").select("moodboard_id,residence_layout_id").eq("id",data.packageId).eq("residence_layout_id",data.layoutId).single();
@@ -56,7 +56,10 @@ export const saveResidenceRoom = createServerFn({ method: "POST" }).middleware([
   if (data.savedRoomId && (!existing.data || existing.data.id !== data.savedRoomId || existing.data.residence_layout_id !== data.layoutId || existing.data.room_type !== data.roomType || existing.data.selection_signature !== data.expectedSignature)) throw new Error("The saved room changed. Reload its matching package before publishing.");
   const shellUrl = data.shellUrl ?? existing.data?.shell_url;
   if (!shellUrl) throw new Error("Save an empty eye-level shell for this room first.");
-  if (data.galleryViews && data.galleryViews.some((v,i) => v.label !== ROOM_CORNER_VIEWS[i]?.label)) throw new Error("Publish all four room corners in their original order.");
+  if (data.galleryViews) {
+    const expected = data.galleryViews.length === 3 ? ROOM_MASTER_VIEWS : ROOM_CORNER_VIEWS;
+    if (data.galleryViews.some((v,i) => v.label !== expected[i]?.label)) throw new Error("Publish the complete room gallery in its original order.");
+  }
   const savedTargets = existing.data?.placement_targets as Record<string,{ x: number;y: number;instruction: string }> | undefined;
   const targets: Record<string,{ x: number;y: number;instruction: string }> = {};
   const slots = data.pieces.map(piece => {

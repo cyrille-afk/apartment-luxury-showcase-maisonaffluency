@@ -34,6 +34,12 @@ it("refuses publishing angles for a piece outside the chosen package",async () =
   await expect((saveResidenceRoom as unknown as Handler)({ data,context: { supabase: mocks,userId: "admin" } })).rejects.toThrow("Each room piece must match");
   expect(upsert).not.toHaveBeenCalled();
 });
+it("saves the unchanged master followed by both nearby architectural angles",async () => {
+  const { data,upsert } = galleryContext();
+  data.galleryViews = ["01 · Master Perspective","02 · Terrace Side Angle","03 · Living Wall Angle"].map((label,i) => ({ label,url: `https://example.com/view-${i}.png` }));
+  await (saveResidenceRoom as unknown as Handler)({ data,context: { supabase: mocks,userId: "admin" } });
+  expect(upsert).toHaveBeenCalledWith(expect.objectContaining({ gallery_views: data.galleryViews }));
+});
 it("publishes four angles to the matching saved room without rewriting its shell, slots or pins",async () => {
   const { data,room,update,upsert } = galleryContext(true);
   await (saveResidenceRoom as unknown as Handler)({ data: { ...data,savedRoomId: room.id,expectedSignature: room.selection_signature },context: { supabase: mocks,userId: "admin" } });

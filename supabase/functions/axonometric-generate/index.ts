@@ -610,8 +610,9 @@ Style: ${defaultStyle}. Produce a single cohesive professional architectural ren
         throw new Error("Scene edit requires either a mask (erase areas) or product placements");
       }
     } else if (mode === "multi_view") {
-      prompt = roomTurntablePrompt(body.roomZone, body.views);
-      if (referenceImageUrl || styleReferenceUrl) throw new Error("Room turntables accept only the cropped room and its locked room references.");
+      prompt = roomTurntablePrompt(body.roomZone, body.views, imageUrl, body.masterVerified === true, placements ?? []);
+      if (!body.masterVerified || body.lockedRoomUrl !== imageUrl) throw new Error("The verified master proposal must be IMAGE 1.");
+      if (referenceImageUrl || styleReferenceUrl) throw new Error("Room angles use only the verified master and catalogue references.");
       if (Array.isArray(placements) && placements.length) {
         requireBrowserReferences(placements);
         if (!browserReferences) throw new Error("Attach browser-prepared photos for every room piece.");
@@ -879,10 +880,10 @@ Style: ${buildStyle()}. The output must look like the SAME render session as the
 
     if (mode === "multi_view") {
       if (Array.isArray(placements) && placements.length) {
-        content.push({ type: "text", text: multimodalConditioningClause(placements, "the selected room crop (IMAGE 1)") });
-        content.push(...await studioFurnitureInputs(placements, (url, init) => safeFetch(String(url), init)));
+        content.push({ type: "text", text: multimodalConditioningClause(placements, "the verified master proposal (IMAGE 1)") });
+        content.push(...await studioFurnitureInputs(placements, (url, init) => safeFetch(String(url), init), true));
       }
-      if (body.lockedRoomUrl) {
+      if (body.lockedRoomUrl && mode !== "multi_view") {
         content.push({ type: "text", text: "LOCKED SAME-ROOM RENDER: furniture arrangement and finishes only. IMAGE 1 defines the single room footprint. Never copy this camera into all four angles." });
         content.push({ type: "image_url", image_url: { url: body.lockedRoomUrl } });
       }
@@ -1021,7 +1022,7 @@ The final output must be indistinguishable from a professional Corona Renderer 1
       }
 
       if (preparedFrame || mode === "multi_view") {
-        const request = { messages: [{ role: "user" as const, content }], modalities: ["image", "text"] as ["image", "text"], temperature: 0, image_config: { aspect_ratio: preparedFrame ? preparedFrame.frame.aspect : "1:1" as const } };
+        const request = { messages: [{ role: "user" as const, content }], modalities: ["image", "text"] as ["image", "text"], temperature: 0, image_config: { aspect_ratio: preparedFrame ? preparedFrame.frame.aspect : "16:9" as const } };
         // Canonical SDK names for the same existing Flash/Pro models, not a model change.
         const result = tier === "draft"
           ? await generateChatCompletion({ ...request, model: "google/gemini-3.1-flash-image" }, { maxRetries: 0 })

@@ -1043,3 +1043,9 @@
 - [x] 18 matching/publishing/buyer-toggle regressions pass; preview build OK and signed-in restored five-piece turntable visually checked. Real buyer publication remains blocked on a matching saved package.
 - [x] Add the confirmed Mono STS and second GUM to the shared Bespoke list, preserving existing pieces and finishes; database readback and signed-in folder show all five pieces and matching GUM finishes.
 - [ ] Verify publishing through the buyer page once the matching room shell/pins are saved; no saved room rows exist yet.
+
+## Master-anchored room gallery
+- [x] Require verified furnished master as Image 1; replace reverse cameras with unchanged master and −25°/+25° requests, exact furniture inventory and solid-left-wall prompt lock.
+- [x] Support three-angle publishing through the existing private room path, retaining compatibility for saved four-angle galleries; regression verified. Actual buyer publication still awaits saved shell/pins.
+- [x] Real signed-in generation HTTP 200 with five inline photos and unchanged master URL; desktop/phone inspected, no phone overflow, 19 tests pass, generator boot/deploy/live checks and preview build OK.
+- [ ] Reliable AI count/camera preservation: live right panel still added a third chair and shifted beyond the requested nearby angle despite explicit constraints. The model does not enforce these instructions; do not claim this hallucination is fixed.
