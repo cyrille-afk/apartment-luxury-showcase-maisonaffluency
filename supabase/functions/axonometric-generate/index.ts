@@ -8,7 +8,8 @@ import { ROOM_TYPES, type RoomType } from "../_shared/roomZone.ts";
 import { prepareEyeLevelFrame, restoreEyeLevelFrame } from "../_shared/eyeLevelFrameImage.ts";
 import { generateChatCompletion } from "npm:@lovable.dev/ai-gateway@0.1.15";
 import { fullFrameFurnitureLock, proposalRefinementLock, requireRoomFurnitureReferences, roomFurnitureReferenceImages, roomFurnitureReferenceText, selectSecondaryReferencePhotos } from "../_shared/roomFurnitureEditing.ts";
-import { proposalRefinementInputs, studioFurnitureInputs } from "../_shared/studioFurnitureReferences.ts";
+import { multimodalConditioningClause, proposalRefinementInputs, studioFurnitureInputs } from "../_shared/studioFurnitureReferences.ts";
+import { buildReferenceManifest, requireBrowserReferences, type ProductReferenceManifestEntry } from "../_shared/productReferenceManifest.ts";
 import { safeFetch } from "../_shared/safeFetch.ts";
 import { surfaceEditPrompt } from "../_shared/eyeLevelSurfaces.ts";
 import {
@@ -77,6 +78,14 @@ serve(async (req) => {
 
     if (!imageUrl) throw new Error("imageUrl is required");
     if (mode === "proposal_refine") requireRoomFurnitureReferences(placements);
+    // Browser-prepared product photos are mandatory once requested: never degrade to text-only staging.
+    const browserReferences = body.browserReferenceImages === true;
+    let referenceManifest: ProductReferenceManifestEntry[] | null = null;
+    if (browserReferences) {
+      if (mode !== "eye_level_proposal" && mode !== "proposal_refine") throw new Error("Prepared product photos are only accepted for proposal staging and refinement.");
+      requireBrowserReferences(placements);
+      referenceManifest = await buildReferenceManifest(placements);
+    }
     if (body.surfaceStagingId) {
       if (mode !== "proposal_refine" || !Array.isArray(placements) || placements[0]?.id !== body.surfaceStagingId || placements.filter((p: any) => p.id === body.surfaceStagingId).length !== 1) throw new Error("Choose exactly one rug or artwork to stage.");
       surfaceEditPrompt(placements[0]);
@@ -895,6 +904,7 @@ Style: ${buildStyle()}. The output must look like the SAME render session as the
         extraBudget -= extras.length;
         return { ...p, secondary_image_urls: extras };
       });
+      content.push({ type: "text", text: multimodalConditioningClause(references, "the empty room shell (IMAGE 1)") });
       content.push(...await studioFurnitureInputs(references, (url, init) => safeFetch(String(url), init)));
       if (referenceImageUrl) {
         content.push({ type: "text", text: "SECONDARY TOP-DOWN LAYOUT: furniture zones only; not a studio product reference. IMAGE 1 remains the camera and architecture authority." });
@@ -914,6 +924,7 @@ Style: ${buildStyle()}. The output must look like the SAME render session as the
         });
         if (references.length) {
           content.splice(1, content.length - 1, ...await proposalRefinementInputs(imageUrl, references, (url, init) => safeFetch(String(url), init)));
+          content.push({ type: "text", text: multimodalConditioningClause(references, "the current active render (IMAGE 1)") });
           content.push({ type: "text", text: "Refinement references are identity checks only: preserve every non-target item and its current finish exactly as IMAGE 1 shows. Apply studio geometry/swatches ONLY to an explicitly requested change; never restage the other furniture." });
           if (body.surfaceStagingId) content.push({ type: "text", text: surfaceEditPrompt(placements[0]) });
         }
@@ -1103,7 +1114,7 @@ The final output must be indistinguishable from a professional Corona Renderer 1
       console.error("Upload error:", uploadErr);
       // Still return the base64 image even if upload fails
       return new Response(
-        JSON.stringify({ imageUrl: generatedImage, storedUrl: null, text: textResponse, cadQa: qaRowsForResponse }),
+        JSON.stringify({ imageUrl: generatedImage, storedUrl: null, text: textResponse, cadQa: qaRowsForResponse, referenceManifest }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -1116,6 +1127,7 @@ The final output must be indistinguishable from a professional Corona Renderer 1
         storedUrl: urlData.publicUrl,
         text: textResponse,
         cadQa: qaRowsForResponse,
+        referenceManifest,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

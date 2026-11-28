@@ -4,6 +4,8 @@ export type RoomFurnitureReference = {
   id?: string; category_role?: string; width_m?: number; depth_m?: number; height_m?: number;
   product_id?: string | null; product_name: string; brand_name?: string; image_url: string;
   secondary_image_urls?: string[];
+  /** Browser-resized studio photo (data URL); preferred over image_url when present. */
+  reference_image_data?: string | null;
   dimensions?: string | null; materials?: string | null; material_override?: string | null;
   selected_finishes?: { axis: string; name: string; image_url?: string | null }[];
 };

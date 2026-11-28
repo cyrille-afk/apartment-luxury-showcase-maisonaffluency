@@ -59,8 +59,8 @@ export async function studioFurnitureInputs(pieces: RoomFurnitureReference[], fe
     return pending;
   };
   const primary: FurnitureImageInput[][] = await Promise.all(pieces.map(async (piece, index) => [
-    { type: "text", text: `IMAGE ${index + 2}: PRODUCT ${index + 1} — ${piece.product_name} by ${piece.brand_name || "recorded maker"}. Original studio photograph: exact visual replica, not a style suggestion. Match silhouette, proportions, legs, joinery and materials; no generic substitute or redesign.` },
-    { type: "image_url", image_url: { url: await photo(piece.image_url, piece.product_name) } },
+    { type: "text", text: `REFERENCE IMAGE ${index + 2} (IMAGE ${index + 2}): PRODUCT ${index + 1} — ${piece.product_name} by ${piece.brand_name || "recorded maker"}. Original studio photograph: exact visual replica, not a style suggestion. Match silhouette, proportions, base, legs, joinery and materials; no generic substitute or redesign.` },
+    { type: "image_url", image_url: { url: piece.reference_image_data ? await fetchStudioPhoto(piece.reference_image_data, piece.product_name) : await photo(piece.image_url, piece.product_name) } },
   ]));
   const supplements: FurnitureImageInput[] = [];
   for (const [index, piece] of pieces.entries()) {
@@ -84,4 +84,14 @@ export async function proposalRefinementInputs(baseImage: string, pieces: RoomFu
     { type: "image_url", image_url: { url: baseImage } },
     ...await studioFurnitureInputs(pieces, fetcher, true),
   ];
+}
+/** Explicit image-to-image conditioning: names each reference number and forbids generic substitutes. */
+export function multimodalConditioningClause(pieces: RoomFurnitureReference[], baseLabel: string): string {
+  const last = pieces.length + 1;
+  const map = pieces.map((p, i) => `Reference Image ${i + 2} = ${p.product_name}`).join("; ");
+  const named: string[] = [];
+  if (pieces.some(p => /\b[OG]UM\b/i.test(p.product_name) && /arm\s*chair|lounge|chair/i.test(`${p.product_name} ${p.category_role ?? ""}`))) named.push("the exact low-slung wrap-around curved shell of the armchair shown in its photo");
+  if (pieces.some(p => /\brift\s+cts\b/i.test(p.product_name))) named.push("the carved stone slab of the Rift CTS shown in its photo (in its selected stone finish)");
+  return `MULTIMODAL REFERENCE MAP: Reference Image 1 = ${baseLabel}; ${map}.
+You MUST reproduce the exact sculptural silhouettes, bases, legs, and materials shown in Reference Images 2–${last}. Do NOT substitute generic wooden armchairs or plain rectangular tables${named.length ? `—replicate ${named.join(" and ")}` : ""}. Each product appears exactly once, copied from its own reference photo; text names only identify which photo to copy.`;
 }

@@ -29,6 +29,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { useExportCurrency } from "@/lib/displayMoney";
 import PrivateTradeImage from "@/components/trade/PrivateTradeImage";
 import { prepareAiRenderImages } from "@/lib/aiRenderImages";
+import { prepareProductReferenceImages, ProductReferenceError } from "@/lib/productReferenceImages";
+import { verifyReferenceManifest } from "../../../supabase/functions/_shared/productReferenceManifest";
+import ReferenceInputsStrip, { type ReferenceStrip } from "./ReferenceInputsStrip";
 import { EyeLevelCameraPlan } from "./EyeLevelCameraPlan";
 import SaveResidenceShell from "./SaveResidenceShell";
 import EyeLevelPlacementShell from "./EyeLevelPlacementShell";
@@ -126,6 +129,8 @@ export default function ProposalBuilder({
   const [generating, setGenerating] = useState(false);
   const [proposalResult, setProposalResult] = useState<string | null>(initialDraft?.view === "eye-level" ? initialDraft.eyeLevelResult : initialDraft?.axonometricResult ?? null);
   const [proposalHistory, setProposalHistory] = useState<string[]>([]);
+  // Memory-only: thumbnails of the exact photos sent with each render; bytes never enter drafts.
+  const [referenceStrips, setReferenceStrips] = useState<Record<string, ReferenceStrip>>({});
   const [refinementPrompt, setRefinementPrompt] = useState("");
   const [refining, setRefining] = useState(false);
   const [lockedIteration, setLockedIteration] = useState<number | null>(null);
@@ -444,9 +449,12 @@ export default function ProposalBuilder({
         selected_finishes: p.selected_finishes || [],
         ...(renderView === "eye-level" ? { target: p.target } : {}),
       }));
+      const eyeLevel = renderView === "eye-level";
+      const prepared = eyeLevel ? await prepareProductReferenceImages(placements) : null;
 
       const { data, error } = await supabase.functions.invoke("axonometric-generate", {
         body: await prepareAiRenderImages({
+          ...(prepared ? { browserReferenceImages: true } : {}),
           imageUrl: toAbsoluteUrl(proposalBaseUrl),
           referenceImageUrl: renderView === "eye-level" ? null : toAbsoluteUrl(furnishedImageUrl),
           requirePlacementPins: renderView === "eye-level",
@@ -454,7 +462,7 @@ export default function ProposalBuilder({
           mode: renderView === "eye-level" ? "eye_level_proposal" : "proposal_render",
           style,
           qualityTier,
-          placements,
+          placements: prepared?.pieces ?? placements,
         }),
         headers: { Authorization: `Bearer ${accessToken}` },
       });
@@ -464,6 +472,7 @@ export default function ProposalBuilder({
 
       const resultUrl = data.storedUrl || data.imageUrl;
       if (!resultUrl) throw new Error("No proposal image returned.");
+      if (prepared) recordReferenceStrip(resultUrl, proposalBaseUrl, "Empty room shell", prepared.inputs, data.referenceManifest);
       const nextResults = { ...viewResults, [renderView]: resultUrl };
       setViewResults(nextResults);
       setLockedIteration(null);
@@ -473,10 +482,15 @@ export default function ProposalBuilder({
       toast({ title: "Proposal generated successfully" });
     } catch (e: any) {
       setRenderError(e?.message || "Proposal generation failed. Your shell and furniture selections are unchanged.");
-      toast({ title: "Proposal generation failed", description: e?.message || "Unknown error", variant: "destructive" });
+      toast({ title: e instanceof ProductReferenceError ? "Product photo failed to load" : "Proposal generation failed", description: e?.message || "Unknown error", variant: "destructive" });
     } finally {
       setGenerating(false);
     }
+  };
+
+  const recordReferenceStrip = (resultUrl: string, baseUrl: string, baseLabel: string, inputs: Awaited<ReturnType<typeof prepareProductReferenceImages>>["inputs"], manifest: unknown) => {
+    const verified = verifyReferenceManifest(inputs, manifest);
+    setReferenceStrips(previous => ({ ...previous, [resultUrl]: { baseUrl, baseLabel, inputs: inputs.map((input, index) => ({ ...input, verified: verified[index] === true })) } }));
   };
 
   const refineProposal = async () => {
@@ -511,15 +525,18 @@ export default function ProposalBuilder({
         })),
       };
 
+      const prepared = await prepareProductReferenceImages(placements);
+      const baseUrl = proposalResult;
       const { data, error } = await supabase.functions.invoke("axonometric-generate", {
         body: await prepareAiRenderImages({
+          browserReferenceImages: true,
           imageUrl: toAbsoluteUrl(proposalResult),
           referenceImageUrl: null,
           mode: "proposal_refine",
           ...(renderView === "eye-level" && roomZone ? { roomType: roomZone.room_type } : {}),
           style,
           qualityTier,
-          placements,
+          placements: prepared.pieces,
           refinementPrompt: refinementPrompt.trim(),
           markerHints,
         }),
@@ -531,6 +548,7 @@ export default function ProposalBuilder({
 
       const resultUrl = data.storedUrl || data.imageUrl;
       if (!resultUrl) throw new Error("No proposal image returned.");
+      recordReferenceStrip(resultUrl, baseUrl, "Current render", prepared.inputs, data.referenceManifest);
       const nextResults = { ...viewResults, [renderView]: resultUrl };
       setViewResults(nextResults);
       setLockedIteration(null);
@@ -541,7 +559,7 @@ export default function ProposalBuilder({
       toast({ title: "Proposal refined successfully" });
       clearMarkers();
     } catch (e: any) {
-      toast({ title: "Refinement failed", description: e?.message || "Unknown error", variant: "destructive" });
+      toast({ title: e instanceof ProductReferenceError ? "Product photo failed to load" : "Refinement failed", description: e?.message || "Unknown error", variant: "destructive" });
     } finally {
       setRefining(false);
     }
@@ -1426,6 +1444,7 @@ export default function ProposalBuilder({
         </div>
         )}
         <div className="p-4 border-t border-border">
+          {referenceStrips[proposalResult] && <div className="max-w-2xl mx-auto mb-2"><ReferenceInputsStrip strip={referenceStrips[proposalResult]} /></div>}
           <div className="max-w-2xl mx-auto flex gap-2">
             <Input
               value={refinementPrompt}
@@ -1648,6 +1667,7 @@ export default function ProposalBuilder({
                   <Maximize2 className="w-6 h-6 text-foreground/0 group-hover:text-foreground/50 transition-colors" />
                 </div>
               </div>
+              {referenceStrips[proposalResult] && <ReferenceInputsStrip strip={referenceStrips[proposalResult]} />}
               {proposalHistory.length > 1 && (
                 <p className="font-body text-[10px] text-muted-foreground text-right">
                   Iteration {proposalHistory.length}
