@@ -1,6 +1,7 @@
 # src/lib rules
 - AI render callers use prepareAiRenderImages for transient local/preview photo bytes; cloud links remain unchanged and bytes never enter drafts — external models cannot fetch protected preview assets.
 - Eye-level proposals key compact camera/shell/results by account/project/source and camera/target; snapshot finishes stage locked pieces, history reopens the original plan, and explicit Page 2 export reuses its selected perspective field — avoids stale shells and implicit publishing.
+- Residence eye-level shells append atomically through an admin-checked RPC; buyer staging revalidates scoped room cookies, all slots and recorded finishes before service-only single-use jobs. PDF attachment matches credential/package and the locked selection signature, never caller image URLs — prevents guest spending replay, cross-residence renders and stale finish attachments.
 - Private-room proposals use validated retail line sums and selected axis materials, embedded editorial/body fonts and exact A4 page capture through appPdfDownload; two-item pages prevent splitting and supplier defaults never become selected finishes.
 - Customer saves: owner deltas; clear on logout.
 - Editorial drawer framing uses model-viewer's recomputed bounds and public orientation/target API with category-scoped Z-up detection and known exporter corrections — keeps shared material handling and other viewers unchanged.

@@ -25,6 +25,7 @@ import { useExportCurrency } from "@/lib/displayMoney";
 import PrivateTradeImage from "@/components/trade/PrivateTradeImage";
 import { prepareAiRenderImages } from "@/lib/aiRenderImages";
 import { EyeLevelCameraPlan } from "./EyeLevelCameraPlan";
+import SaveResidenceShell from "./SaveResidenceShell";
 import { eyeLevelCameraKey, validEyeLevelCamera, type ProposalProduct, type ProposalRenderDraft } from "@/lib/proposalRenderDraft";
 
 const toAbsoluteUrl = (url: string | null | undefined): string | null => {
@@ -87,7 +88,7 @@ export default function ProposalBuilder({
   onResult,
 }: ProposalBuilderProps) {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, isAdmin, rolesLoaded } = useAuth();
   // Proposal figures follow the member's declared base preference currency.
   const exportCurrency = useExportCurrency();
   const externalFileRef = useRef<HTMLInputElement>(null);
@@ -1447,6 +1448,7 @@ export default function ProposalBuilder({
           <h3 className="font-display text-xs text-muted-foreground uppercase">Empty Eye-Level Shell</h3>
           {eyeLevelShell ? <img src={eyeLevelShell} alt="Empty eye-level interior shell" className="w-full rounded-md border border-border" /> : <div className="min-h-48 flex items-center justify-center border border-dashed border-border text-sm text-muted-foreground">{shellGenerating ? "Generating interior…" : "Eye-level shell pending"}</div>}
           {eyeLevelShell && !shellReady && <p className="text-xs text-muted-foreground">Camera or plan changed · shell needs regeneration.</p>}
+          {eyeLevelShell && shellReady && isAdmin && rolesLoaded && <SaveResidenceShell url={eyeLevelShell} disabled={busy} />}
         </div>
       </div>}
 

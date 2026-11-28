@@ -2395,6 +2395,20 @@
       "when": 1795745089845,
       "tag": "0341_stop_ineligible_instagram_retries",
       "breakpoints": true
+    },
+    {
+      "idx": 342,
+      "version": "7",
+      "when": 1795828958646,
+      "tag": "0342_residence_eye_level_shells_and_private_renders",
+      "breakpoints": true
+    },
+    {
+      "idx": 343,
+      "version": "7",
+      "when": 1795829001808,
+      "tag": "0343_append_residence_eye_level_shell",
+      "breakpoints": true
     }
   ]
 }

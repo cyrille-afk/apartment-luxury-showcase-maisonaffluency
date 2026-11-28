@@ -1,5 +1,10 @@
 # Roadmap
 
+## Residence eye-level visualization
+- [x] Save named empty eye-level shells to residence layouts through admin-only atomic append; real admin save/readback verified on an isolated residence. No shells were assigned to live residences without a specific selection.
+- [x] Stage all buyer-selected, server-validated furniture and recorded finishes through scoped private-room access and service-only single-use jobs; angle tabs and explicit PDF attachment match the current selection. Missing views show an unavailable state; invalid/ended access and non-admin saves are rejected.
+- [x] Real signed-out buyer → code redemption → three-piece staging → attachment → four-page A4 PDF passes with the render visibly on Page 2. Desktop/390px phone inspected, no page errors; 45 regressions and build pass, function boot/live checks pass. Temporary residence/package/proposal/jobs removed. AI product likeness and architecture still require visual approval.
+
 ## Eye-level client furniture renders
 - [x] Add draggable plan camera and sightline, with a separate 1.5m / 24mm eye-level shell mode; camera changes invalidate stale shells.
 - [x] Stage selected or locked furniture with recorded finish names/swatches; source/account/project-scoped compact drafts retain separate perspectives and history reopens the original plan. Real Praia da Granja staging, refresh, history reopen and phone dragging pass with no page errors.

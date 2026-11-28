@@ -5,7 +5,7 @@ import ViewingRoomExperience from "./ViewingRoomExperience";
 import { VIEWING_ROOM_SWAP_NOTICE_BODY, VIEWING_ROOM_SWAP_NOTICE_TITLE } from "./ViewingRoomSwapNotice";
 
 const { readChoices, lock } = vi.hoisted(() => ({ readChoices: vi.fn(), lock: vi.fn() }));
-vi.mock("@/lib/viewingRoom.functions", () => ({ getViewingRoomChoices: readChoices, lockViewingRoomProposal: lock }));
+vi.mock("@/lib/viewingRoom.functions", () => ({ getViewingRoomChoices: readChoices, lockViewingRoomProposal: lock, getResidenceVisualizationShells: vi.fn(), generateResidenceVisualization: vi.fn() }));
 vi.mock("@/lib/viewingRoomBlenderScene.functions", () => ({ exportViewingRoomBlenderScene: vi.fn() }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
 vi.mock("../Product3DViewer", () => ({ default: () => null }));

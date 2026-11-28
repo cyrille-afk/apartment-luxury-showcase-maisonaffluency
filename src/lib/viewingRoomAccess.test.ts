@@ -4,7 +4,7 @@ vi.mock("@/integrations/supabase/client.server", () => ({ supabaseAdmin: { rpc: 
 vi.mock("@tanstack/react-start", () => ({ createServerFn: () => ({ inputValidator: () => ({ handler: (fn: unknown) => fn }) }) }));
 vi.mock("@tanstack/react-start/server", () => ({ getRequestHeader: vi.fn(), getCookie: mocks.getCookie, setCookie: mocks.setCookie, setResponseHeader: vi.fn(), getRequestUrl: () => new URL("https://www.maisonaffluency.com") }));
 vi.mock("@supabase/supabase-js", () => ({ createClient: () => ({ rpc: mocks.rpc }) }));
-import { checkViewingRoomAccess, getViewingRoom, getViewingRoomPackage, getViewingRoomChoices, lockViewingRoomProposal, redeemViewingRoomAccess } from "./viewingRoom.functions";
+import { checkViewingRoomAccess, getViewingRoom, getViewingRoomPackage, getViewingRoomChoices, lockViewingRoomProposal, redeemViewingRoomAccess, getResidenceVisualizationShells, generateResidenceVisualization } from "./viewingRoom.functions";
 type Handler = (args: { data: Record<string, unknown> }) => Promise<unknown>;
 const call = (fn: unknown, data: Record<string, unknown>) => (fn as Handler)({ data });
 const room = { name: "Cipriani Residences Miami", project_name: "Cipriani Miami", logo: null, hero: null, layouts: [] };
@@ -27,6 +27,8 @@ it("a branded address alone grants no room, package, choices or proposal access"
   const data = { token: "cipriani-residences-miami", packageId: "package" };
   for (const fn of [getViewingRoom, getViewingRoomPackage, getViewingRoomChoices]) expect(await call(fn, data)).toBeNull();
   await expect(call(lockViewingRoomProposal, data)).rejects.toThrow("private access code");
+  await expect(call(getResidenceVisualizationShells, data)).rejects.toThrow("private access code");
+  await expect(call(generateResidenceVisualization, data)).rejects.toThrow("private access code");
   expect(mocks.rpc).not.toHaveBeenCalled();
 });
 it("valid code redemption returns only the branded path and sets secure HttpOnly access", async () => {
@@ -55,6 +57,8 @@ it.each(["expired", "revoked"])("%s codes reject redemption and all already-open
   const data = { token: "cipriani-residences-miami", packageId: "package", requestKey: "request", choices: [] };
   for (const fn of [getViewingRoom, getViewingRoomPackage, getViewingRoomChoices]) expect(await call(fn, data)).toBeNull();
   await expect(call(lockViewingRoomProposal, data)).rejects.toThrow("private access code");
+  await expect(call(getResidenceVisualizationShells, data)).rejects.toThrow("private access code");
+  await expect(call(generateResidenceVisualization, data)).rejects.toThrow("private access code");
   expect(mocks.rpc.mock.calls.every(([name]) => name === "get_developer_viewing_room")).toBe(true);
 });
 it.each(["expired", "revoked"])("access status reports %s codes so clients see the ended-access page", async status => {

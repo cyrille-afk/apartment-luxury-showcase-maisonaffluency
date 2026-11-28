@@ -9047,6 +9047,7 @@ export type Database = {
         Row: {
           created_at: string
           developer_project_id: string
+          eye_level_shell_urls: Json
           floorplan_url: string | null
           id: string
           name: string
@@ -9056,6 +9057,7 @@ export type Database = {
         Insert: {
           created_at?: string
           developer_project_id: string
+          eye_level_shell_urls?: Json
           floorplan_url?: string | null
           id?: string
           name: string
@@ -9065,6 +9067,7 @@ export type Database = {
         Update: {
           created_at?: string
           developer_project_id?: string
+          eye_level_shell_urls?: Json
           floorplan_url?: string | null
           id?: string
           name?: string
@@ -13837,6 +13840,47 @@ export type Database = {
           },
         ]
       }
+      viewing_room_visualizations: {
+        Row: {
+          created_at: string
+          credential_hash: string
+          id: string
+          image_url: string | null
+          package_id: string
+          payload: Json
+          selection_signature: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          credential_hash: string
+          id?: string
+          image_url?: string | null
+          package_id: string
+          payload: Json
+          selection_signature: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          credential_hash?: string
+          id?: string
+          image_url?: string | null
+          package_id?: string
+          payload?: Json
+          selection_signature?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "viewing_room_visualizations_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "furniture_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       webhook_events: {
         Row: {
           ack_ms: number | null
@@ -14448,6 +14492,10 @@ export type Database = {
           occurred_at: string
           role: Database["public"]["Enums"]["studio_role"]
         }[]
+      }
+      append_residence_eye_level_shell: {
+        Args: { _layout_id: string; _shell: Json }
+        Returns: undefined
       }
       apply_available_credit_to_quote: {
         Args: { _quote_id: string }
@@ -15411,6 +15459,15 @@ export type Database = {
         Returns: undefined
       }
       purge_stale_concierge_streams: { Args: never; Returns: undefined }
+      queue_viewing_room_visualization: {
+        Args: {
+          _credential_hash: string
+          _package_id: string
+          _payload: Json
+          _selection_signature: string
+        }
+        Returns: string
+      }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {

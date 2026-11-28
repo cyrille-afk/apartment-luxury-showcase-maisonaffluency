@@ -34,14 +34,27 @@ serve(async (req) => {
     });
 
     const token = authHeader.replace(/^Bearer\s+/i, "");
-    const { data: claimsData, error: authErr } = await sb.auth.getClaims(token);
+    let body = await req.json();
+    const privateRoomRequest = Boolean(body.viewingRoomRenderId);
+    let privateJobUser: { id: string; email: string | null } | null = null;
+    if (privateRoomRequest) {
+      const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+      if (!serviceKey || token !== serviceKey || !/^[0-9a-f-]{36}$/i.test(body.viewingRoomRenderId)) throw new Error("Unauthorized");
+      const svc = createClient(supabaseUrl, serviceKey);
+      const claimed = await svc.from("viewing_room_visualizations").update({ status: "running" }).eq("id",body.viewingRoomRenderId).eq("status","pending").gt("created_at",new Date(Date.now()-300000).toISOString()).select("payload,package_id").single();
+      if (claimed.error || !claimed.data || claimed.data.payload?.mode !== "eye_level_proposal") throw new Error("Visualization unavailable");
+      body = claimed.data.payload;
+      // A validated, single-use server job is the only guest pathway; caller payloads are ignored.
+      privateJobUser = { id: claimed.data.package_id, email: null };
+    }
+    const { data: claimsData, error: authErr } = privateRoomRequest ? { data: null, error: null } : await sb.auth.getClaims(token);
     const claims = claimsData?.claims as { sub?: string; email?: string } | undefined;
-    const user = claims?.sub ? { id: claims.sub, email: claims.email ?? null } : null;
+    const user = privateJobUser ?? (claims?.sub ? { id: claims.sub, email: claims.email ?? null } : null);
     if (authErr || !user) throw new Error("Unauthorized");
 
     // Check admin role
-    const { data: roles } = await sb.from("user_roles").select("role").eq("user_id", user.id);
-    const isAdmin = roles?.some(
+    const { data: roles } = privateRoomRequest ? { data: [] } : await sb.from("user_roles").select("role").eq("user_id", user.id);
+    const isAdmin = privateRoomRequest || roles?.some(
       (r: any) => r.role === "admin" || r.role === "super_admin"
     );
     if (!isAdmin) throw new Error("Admin access required");
@@ -50,7 +63,6 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
     const REPLICATE_API_KEY = Deno.env.get("REPLICATE_API_KEY");
 
-    const body = await req.json();
     const { imageUrl, mode, style, overlayImages, technicalDrawingUrl, maskDataUrl, placements, referenceImageUrl, refinementPrompt, styleReferenceUrl, skipStyleReference, markerHints, qualityTier, lightingStrength } = body;
     // mode: "elevation_to_axo" | "section_to_axo" | "stylize" | "composite" | "3d_to_cad" | "cad_overlay" | "cad_dimension_overlay" | "product_swap" | "scene_edit" | "freeform" | "turntable_angle"
     const useDepthMap = body.useDepthMap !== false; // default ON

@@ -11,7 +11,7 @@ const { readChoices, lock, download, exportBlender, downloadBlender } = vi.hoist
   exportBlender: vi.fn(),
   downloadBlender: vi.fn(),
 }));
-vi.mock("@/lib/viewingRoom.functions", () => ({ getViewingRoomChoices: readChoices, lockViewingRoomProposal: lock }));
+vi.mock("@/lib/viewingRoom.functions", () => ({ getViewingRoomChoices: readChoices, lockViewingRoomProposal: lock, getResidenceVisualizationShells: vi.fn(), generateResidenceVisualization: vi.fn() }));
 vi.mock("@/lib/viewingRoomBlenderScene.functions", () => ({ exportViewingRoomBlenderScene: exportBlender }));
 vi.mock("@/lib/viewingRoomBlenderScene", () => ({ downloadBlenderSceneManifest: downloadBlender }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
