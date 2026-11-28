@@ -1,5 +1,8 @@
 # Roadmap
 
+## Session version duplicates and deletion
+- [x] Deduplicated unchanged layout thumbnails on restore/reopen and added local session deletion. Three real reopens retain one thumbnail; deletion survives refresh while the source/current render and cloud history remain available. Distinct generated images retain undo versions.
+
 ## Single-piece render correction
 - [x] Added marked-area correction with before/after review, explicit apply and undo. Real Frenchmen Street replacement, private image upload and phone controls verified; decoded pixel comparison confirms zero changes outside the marked area. Inner edges blend; AI changes inside the area still require visual review.
 

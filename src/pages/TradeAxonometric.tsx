@@ -71,6 +71,7 @@ import { MultiViewTurntable } from "@/components/trade/MultiViewTurntable";
 import { AxonometricTearSheet } from "@/components/trade/AxonometricTearSheet";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
+import { uniqueSessionVersions, removeSessionVersion, sessionImageKey } from "@/lib/aiRenderSessionHistory";
 
 type Mode = "elevation_to_axo" | "section_to_axo" | "stylize" | "composite" | "3d_to_cad" | "cad_overlay";
 
@@ -343,7 +344,7 @@ const TradeAxonometricWorkspace = () => {
   const [selectedProduct, setSelectedProduct] = useState<SelectedProduct | null>(savedDraftRef.current?.selectedProduct || null);
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<GenerationResult | null>(savedDraftRef.current?.result || null);
-  const [history, setHistory] = useState<GenerationResult[]>(Array.isArray(savedDraftRef.current?.history) ? savedDraftRef.current.history : []);
+  const [history, setHistory] = useState<GenerationResult[]>(uniqueSessionVersions(Array.isArray(savedDraftRef.current?.history) ? savedDraftRef.current.history : []));
   const [historyIndex, setHistoryIndex] = useState(-1); // -1 = no history navigated
   const [activeRequestId, setActiveRequestId] = useState<string | null>(savedDraftRef.current?.activeRequestId || null);
   const [adminNotes, setAdminNotes] = useState(savedDraftRef.current?.adminNotes || "");
@@ -617,7 +618,7 @@ const TradeAxonometricWorkspace = () => {
   const pushResult = useCallback((gen: GenerationResult) => {
     // If we've undone some steps, trim the history before pushing
     const trimmed = historyIndex > 0 ? history.slice(historyIndex) : history;
-    setHistory([gen, ...trimmed]);
+    setHistory(uniqueSessionVersions([gen, ...trimmed]));
     setHistoryIndex(-1);
     setResult(gen);
   }, [history, historyIndex]);
@@ -921,7 +922,7 @@ const TradeAxonometricWorkspace = () => {
         setEmptyRoomSourceUrl(layoutUrl);
         setShowProposal(true);
       }
-      setHistory((prev) => [reopened, ...prev.filter((h) => (h.storedUrl || h.imageUrl) !== restored.resultImageUrl)].slice(0, 12));
+      setHistory((prev) => uniqueSessionVersions([reopened, ...prev]).slice(0, 12));
       setHistoryIndex(-1);
       if (restored.projectId && restored.projectId !== selectedProjectId) {
         handleProjectChange(restored.projectId);
@@ -2752,16 +2753,17 @@ const TradeAxonometricWorkspace = () => {
             )}
 
             {/* History */}
-            {history.length > 1 && (
+            {history.length > 0 && (
               <div className="border border-border rounded-lg p-5 space-y-3">
                 <h2 className="font-display text-sm text-foreground">Session Versions</h2>
                 <div className="grid grid-cols-4 gap-2">
                   {history.map((h, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setResult(h)}
-                      className={`border rounded overflow-hidden transition-all ${
-                        result === h ? "border-foreground ring-1 ring-foreground" : "border-border hover:border-foreground/30"
+                    <div key={sessionImageKey(h)} className="relative">
+                    <Button variant="ghost"
+                      aria-label={`Open session version ${i + 1}`}
+                      onClick={() => { setResult(h); setHistoryIndex(i === 0 ? -1 : i); }}
+                      className={`h-auto w-full p-0 border rounded overflow-hidden transition-all ${
+                        result && sessionImageKey(result) === sessionImageKey(h) ? "border-foreground ring-1 ring-foreground" : "border-border hover:border-foreground/30"
                       }`}
                     >
                       <img
@@ -2769,7 +2771,9 @@ const TradeAxonometricWorkspace = () => {
                         alt=""
                         className="w-full aspect-square object-cover"
                       />
-                    </button>
+                    </Button>
+                    <Button variant="outline" size="icon" className="absolute top-1 right-1 size-7 bg-background" aria-label={`Delete session version ${i + 1}`} title="Delete session version" onClick={() => { setHistory(previous => removeSessionVersion(previous, h)); setHistoryIndex(-1); }}><Trash2 className="size-3.5" /></Button>
+                    </div>
                   ))}
                 </div>
               </div>
