@@ -1,5 +1,11 @@
 # Roadmap
 
+## Exact catalogue furniture references
+- [x] Original studio photo bytes and selected pictured finish swatches are fetched for every eye-level piece; primary references follow the shell, with exact replica instructions and no text-only fallback. Selected swatch crops are preserved; failed reference fetches stop inference.
+- [x] Correct one piece sends only the selected item's studio photos/swatches, retaining all room identities as preservation metadata and full-frame review/apply/undo. Real signed-in Rift correction returned 200, Apply displayed the result and Undo restored the original; design likeness remains imperfect.
+- [x] 38 regressions and boot/deploy/live checks pass. Real five-piece staging sent 12 images and returned/displayed the furnished room at 200 after native base64 encoding and source decode reuse resolved the observed processing-limit failure. All five pieces appeared, but the model still approximates some silhouettes; exact visual replication is not guaranteed or claimed fixed.
+- [x] Rule: selected furniture must be grounded in its own studio photos, never text names alone. Read Studio catalogue/preloaded/imported/locked selection and draft/history reopening; generation/refinement/correction/removal; buyer room/angle controls and validated queue/RPC/claimed job. Shared generator now fetches original references for staging/refinement across admin and buyer paths; focused corrections suppress non-target images. Removal preserves remaining references. Save/attach/PDF reuse reviewed images without new generation. Existing records, access, prices, models and settings unchanged.
+
 ## Eye-level framing and camera guide
 - [x] Native-ratio matte keeps all source pixels; only temporary matte is removed, restoring exact source dimensions. Wrong-ratio outputs and substantial upper-room changes in furniture edits are rejected before storage/application.
 - [x] Draw the camera direction on the cropped room image and send the same guide with shell generation; desktop and 390px phone inspected.

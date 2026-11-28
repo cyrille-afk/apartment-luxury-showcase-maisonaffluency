@@ -1,6 +1,7 @@
 import { Image } from "https://deno.land/x/imagescript@1.2.17/mod.ts";
 import { eyeLevelFrame, eyeLevelOutputBounds, requireStableRoomFrame } from "./eyeLevelFraming.ts";
 import { safeFetch } from "./safeFetch.ts";
+import { Buffer } from "node:buffer";
 
 async function decode(url: string) {
   const response = url.startsWith("data:image/") ? await fetch(url) : await safeFetch(url);
@@ -9,9 +10,7 @@ async function decode(url: string) {
 }
 async function dataUrl(image: Image) {
   const bytes = await image.encode();
-  let binary = "";
-  for (let i = 0; i < bytes.length; i += 8192) binary += String.fromCharCode(...bytes.subarray(i, i + 8192));
-  return `data:image/png;base64,${btoa(binary)}`;
+  return `data:image/png;base64,${Buffer.from(bytes).toString("base64")}`;
 }
 export async function prepareEyeLevelFrame(url: string) {
   const source = await decode(url);
@@ -19,16 +18,16 @@ export async function prepareEyeLevelFrame(url: string) {
   const frame = eyeLevelFrame(source.width, source.height);
   const canvas = new Image(frame.canvasWidth, frame.canvasHeight).fill(0x808080ff);
   canvas.composite(source, frame.x, frame.y);
-  return { frame, imageUrl: await dataUrl(canvas) };
+  return { frame, imageUrl: await dataUrl(canvas), source };
 }
-export async function restoreEyeLevelFrame(url: string, frame: ReturnType<typeof eyeLevelFrame>, sourceUrl?: string) {
+export async function restoreEyeLevelFrame(url: string, frame: ReturnType<typeof eyeLevelFrame>, sourceUrl?: string, preparedSource?: Image) {
   const output = await decode(url);
   const bounds = eyeLevelOutputBounds(frame, output.width, output.height);
   // Remove only our temporary matte, never any part of the original room.
   output.crop(bounds.x, bounds.y, bounds.width, bounds.height);
   output.resize(frame.width, frame.height);
   if (sourceUrl) {
-    const source = await decode(sourceUrl);
+    const source = preparedSource ?? await decode(sourceUrl);
     const strip = (image: Image) => {
       const bytes: number[] = [];
       // Compare the unobstructed upper 20% at a fixed grid, excluding alpha.

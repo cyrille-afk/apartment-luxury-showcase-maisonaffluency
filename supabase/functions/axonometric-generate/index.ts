@@ -8,6 +8,8 @@ import { ROOM_TYPES, type RoomType } from "../_shared/roomZone.ts";
 import { prepareEyeLevelFrame, restoreEyeLevelFrame } from "../_shared/eyeLevelFrameImage.ts";
 import { generateChatCompletion } from "npm:@lovable.dev/ai-gateway@0.1.15";
 import { fullFrameFurnitureLock, requireRoomFurnitureReferences, roomFurnitureReferenceImages, roomFurnitureReferenceText, selectSecondaryReferencePhotos } from "../_shared/roomFurnitureEditing.ts";
+import { studioFurnitureInputs } from "../_shared/studioFurnitureReferences.ts";
+import { safeFetch } from "../_shared/safeFetch.ts";
 import {
   AXO_CUTAWAY_CAMERA_GUARD,
   buildAxoStyleText,
@@ -76,6 +78,9 @@ serve(async (req) => {
     if (body.fullFrameFurnitureEdit) {
       if (mode !== "product_swap" || maskDataUrl) throw new Error("Full-frame furniture correction requires a product swap without a mask.");
       requireRoomFurnitureReferences(placements);
+    }
+    if (body.singleItemReferenceReplacement === true && (!body.fullFrameFurnitureEdit || mode !== "product_swap" || !Array.isArray(body.swaps) || body.swaps.length !== 1)) {
+      throw new Error("Choose exactly one active furniture piece to correct.");
     }
     if (body.roomType && !Object.hasOwn(ROOM_TYPES, body.roomType)) throw new Error("Choose a supported room type.");
     if (mode === "eye_level_shell" && body.roomType && referenceImageUrl) throw new Error("Room shells accept only the cropped room image, not the full apartment.");
@@ -771,7 +776,13 @@ Style: ${buildStyle()}. The output must look like the SAME render session as the
       const swapTargetNames = swapList
         .map((s) => ("productName" in s && typeof s.productName === "string" ? s.productName : ""))
         .filter(Boolean);
-      for (const s of swapList.slice(0, 10)) {
+      if (body.singleItemReferenceReplacement === true) {
+        const swap = swapList[0];
+        const target = swap && placements.find((p: any) => swap.productId ? p.product_id === swap.productId : p.product_name === swap.productName);
+        if (!target || !swap?.imageUrl) throw new Error("Choose an active room piece with a studio photo to correct.");
+        content.push(...await studioFurnitureInputs([{ ...target, image_url: swap.imageUrl, secondary_image_urls: getSecondaryPhotos(swap.productId, swap.productName, swap.imageUrl) }], (url, init) => safeFetch(String(url), init)));
+        content.push({ type: "text", text: "SINGLE-ITEM REFERENCE REPLACEMENT: IMAGE 2 and its labelled swatches/angles belong ONLY to the selected target. Make an EXACT visual replica of its sculptural silhouette, proportions, legs, joinery and materials. All other items are locked by IMAGE 1 and the active-room preservation list; do not regenerate or restage them. Replace only the marked instance, even when another instance has the same product name. No generic substitute or redesigned furniture." });
+      } else for (const s of swapList.slice(0, 10)) {
         content.push({
           type: "image_url",
           image_url: { url: s.imageUrl },
@@ -785,7 +796,7 @@ Style: ${buildStyle()}. The output must look like the SAME render session as the
           content.push({ type: "image_url", image_url: { url: extraUrl } });
         }
       }
-      if (Array.isArray(placements) && placements.length) content.push(...roomFurnitureReferenceImages(placements, swapTargetNames));
+      if (body.singleItemReferenceReplacement !== true && Array.isArray(placements) && placements.length) content.push(...roomFurnitureReferenceImages(placements, swapTargetNames));
     }
 
     // Add overlay product images for composite mode
@@ -872,50 +883,42 @@ Style: ${buildStyle()}. The output must look like the SAME render session as the
       content.push({ type: "image_url", image_url: { url: referenceImageUrl } });
     }
     if (mode === "eye_level_proposal") {
-      if (referenceImageUrl) content.push({ type: "image_url", image_url: { url: referenceImageUrl } });
-      for (const p of placements) content.push({ type: "image_url", image_url: { url: p.image_url } });
       let extraBudget = 6;
-      for (const [index, p] of placements.entries()) {
-        if (extraBudget <= 0) break;
+      const references = placements.map((p: any) => {
         const extras = getSecondaryPhotos(p.product_id, p.product_name, p.image_url).slice(0, Math.min(2, extraBudget));
-        for (const extraUrl of extras) {
-          content.push({ type: "text", text: `Additional angle reference for product ${index + 1} (${p.product_name}): shows true 3D footprint, corners and side geometry.` });
-          content.push({ type: "image_url", image_url: { url: extraUrl } });
-          extraBudget--;
-        }
+        extraBudget -= extras.length;
+        return { ...p, secondary_image_urls: extras };
+      });
+      content.push(...await studioFurnitureInputs(references, (url, init) => safeFetch(String(url), init)));
+      if (referenceImageUrl) {
+        content.push({ type: "text", text: "SECONDARY TOP-DOWN LAYOUT: furniture zones only; not a studio product reference. IMAGE 1 remains the camera and architecture authority." });
+        content.push({ type: "image_url", image_url: { url: referenceImageUrl } });
       }
     }
 
     // Proposal refine: keep current proposal as base image, then provide layout + product refs
     if (mode === "proposal_refine") {
       // content already has [text_prompt, current_proposal_image]
-      if (referenceImageUrl) {
-        content.push({ type: "image_url", image_url: { url: referenceImageUrl } });
-      }
       if (placements && Array.isArray(placements)) {
-        for (const p of placements.slice(0, 10)) {
-          if (p.image_url) {
-            content.push({
-              type: "image_url",
-              image_url: { url: p.image_url },
-            });
-          }
-        }
         let extraBudget = 6;
-        for (const [index, p] of placements.slice(0, 10).entries()) {
-          if (extraBudget <= 0) break;
+        const references = placements.map((p: any) => {
           const extras = getSecondaryPhotos(p.product_id, p.product_name, p.image_url).slice(0, Math.min(2, extraBudget));
-          for (const extraUrl of extras) {
-            content.push({ type: "text", text: `Additional angle reference for product ${index + 1} (${p.product_name}): shows true 3D footprint, corners and side geometry.` });
-            content.push({ type: "image_url", image_url: { url: extraUrl } });
-            extraBudget--;
-          }
+          extraBudget -= extras.length;
+          return { ...p, secondary_image_urls: extras };
+        });
+        if (references.length) {
+          content.push(...await studioFurnitureInputs(references, (url, init) => safeFetch(String(url), init)));
+          content.push({ type: "text", text: "Refinement references are identity checks only: preserve every non-target item and its current finish exactly as IMAGE 1 shows. Apply studio geometry/swatches ONLY to an explicitly requested change; never restage the other furniture." });
         }
+      }
+      if (referenceImageUrl) {
+        content.push({ type: "text", text: "Secondary layout only; preserve IMAGE 1's camera and room. Never copy furniture designs from this layout." });
+        content.push({ type: "image_url", image_url: { url: referenceImageUrl } });
       }
     }
 
     // Label exact selected finish swatches after product photos in both proposal views/edits.
-    if (["proposal_render", "eye_level_proposal", "proposal_refine", "product_swap"].includes(mode)) {
+    if (["proposal_render", "product_swap"].includes(mode) && body.singleItemReferenceReplacement !== true) {
       for (const [index, p] of (placements || []).entries()) {
         for (const finish of (p.selected_finishes || []).slice(0, 8)) {
           if (!finish.image_url) continue;
@@ -1079,7 +1082,7 @@ The final output must be indistinguishable from a professional Corona Renderer 1
     if (!generatedImage) {
       throw new Error("No image was generated. The AI may not have understood the input.");
     }
-    if (preparedFrame) generatedImage = await restoreEyeLevelFrame(generatedImage, preparedFrame.frame, mode === "eye_level_shell" ? undefined : imageUrl);
+    if (preparedFrame) generatedImage = await restoreEyeLevelFrame(generatedImage, preparedFrame.frame, mode === "eye_level_shell" ? undefined : imageUrl, preparedFrame.source);
 
     // Upload the generated image to storage
     const base64Data = generatedImage.replace(/^data:image\/\w+;base64,/, "");

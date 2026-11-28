@@ -18,11 +18,12 @@ describe("single-piece correction", () => {
   it("allows removing the final piece without adding a replacement reference", () => {
     expect(furnitureRemovalRequest("current.png", chair, { x: 10, y: 30, width: 20, height: 40 }, [chair]).placements).toEqual([]);
   });
-  it("sends the full current image and every active room photo/finish, not only the target", () => {
+  it("uses one replacement reference with all active-room identities retained as preservation metadata", () => {
     const request = furnitureCorrectionRequest("https://example.com/current.png", chair, { x: 50, y: 40, width: 30, height: 50 }, [chair, rift]);
     expect(request.mode).toBe("product_swap");
     expect(request.imageUrl).toBe("https://example.com/current.png");
     expect(request.fullFrameFurnitureEdit).toBe(true);
+    expect(request.singleItemReferenceReplacement).toBe(true);
     expect(request.swaps).toHaveLength(1);
     expect(request.swaps[0]?.imageUrl).toBe("https://example.com/frenchmen.jpg");
     expect(request.referenceImageUrl).toBeNull();
