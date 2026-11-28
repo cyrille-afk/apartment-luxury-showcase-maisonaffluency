@@ -11,6 +11,7 @@
 - Password-setup resends reuse the review drawer and retain attempt keys on retry; never change approval. Verified activation links the account; the queue reads user_id for setup status.
 - Felix Collection bounds its upper-right card without page reflow (trade/AGENTS.md); greeting tracks tour; tiers stay EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Eye-level prompts normalize recorded W/D/H units to centimetres and derive per-piece footprint ratios; shared camera framing governs new shells while supplied shells keep their perspective — avoids fabricated sizes and architectural reprojection.
 - AI Studio session thumbnails deduplicate by displayed image identity (ignoring private signing tokens); reopening proposals never appends their unchanged layout, and local deletion preserves the active render and cloud history — source/layout reuse must not create duplicate session versions.
 - Single-piece corrections edit the current render with one product reference, then composite only the selected rectangle into original decoded pixels before private upload; review/apply and undo reuse proposal persistence — protects all pixels outside the correction area from AI drift.
 - Eye-level staging requires valid placement coordinates but treats written pin notes as optional in shared client/server validation; drafts retain blank-note pins and the prompt keeps pin authority and interior safety — placing furniture must not require extra prose.

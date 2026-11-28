@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Camera, Crosshair, Trash2 } from "lucide-react";
 import { planPoint, type EyeLevelCamera, type PlanPoint } from "@/lib/proposalRenderDraft";
 import type { RoomZone } from "@/lib/roomZone";
+import { EYE_LEVEL_HEIGHT_M, EYE_LEVEL_LENS_MM } from "../../../supabase/functions/_shared/eyeLevelCamera";
 
 export function EyeLevelCameraPlan({ imageUrl, camera, onChange, disabled, zone, onZoneChange }: { imageUrl: string; camera: EyeLevelCamera | null; onChange: (camera: EyeLevelCamera | null) => void; disabled: boolean; zone?: RoomZone | null; onZoneChange?: (box: Pick<RoomZone,"x"|"y"|"width"|"height">) => void }) {
   const [mode,setMode] = useState<"camera"|"crop">("camera");
@@ -30,7 +31,7 @@ export function EyeLevelCameraPlan({ imageUrl, camera, onChange, disabled, zone,
       </svg>
     </div>
     <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-      <span className="inline-flex items-center gap-1"><Camera className="size-3.5" />1.5 m · 24 mm</span>
+      <span className="inline-flex items-center gap-1"><Camera className="size-3.5" />{EYE_LEVEL_HEIGHT_M} m · {EYE_LEVEL_LENS_MM} mm</span>
       <span className="inline-flex items-center gap-1"><Crosshair className="size-3.5" />{camera ? `${Math.round(camera.position.x)}%, ${Math.round(camera.position.y)}% → ${Math.round(camera.target.x)}%, ${Math.round(camera.target.y)}%` : "Camera not placed"}</span>
       {camera && <Button variant="ghost" size="icon" aria-label="Remove camera pin" title="Remove camera pin" disabled={disabled} onClick={() => onChange(null)}><Trash2 className="size-3.5" /></Button>}
     </div>

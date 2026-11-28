@@ -336,9 +336,9 @@ CRITICAL: Do not crop, rotate, or re-frame the scene relative to the source. The
               expected_bbox_mm = latest.bbox_mm ?? null;
             } else {
               const bb = latest.bbox_mm as { w: number; d: number; h?: number };
-              const wCm = Math.round(bb.w / 10);
-              const dCm = Math.round(bb.d / 10);
-              const hCm = bb.h ? Math.round(bb.h / 10) : 0;
+              const wCm = bb.w / 10;
+              const dCm = bb.d / 10;
+              const hCm = bb.h ? bb.h / 10 : 0;
               expected_bbox_mm = { w: bb.w, d: bb.d, h: bb.h || 0 };
               expected_dim_text = hCm
                 ? `W${wCm} × D${dCm} × H${hCm} cm (from CAD)`

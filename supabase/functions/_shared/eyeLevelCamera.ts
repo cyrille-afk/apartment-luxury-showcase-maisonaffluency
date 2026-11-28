@@ -1,7 +1,7 @@
 export type PlanPoint = { x: number; y: number };
 export type EyeLevelCamera = { position: PlanPoint; target: PlanPoint };
 export const EYE_LEVEL_HEIGHT_M = 1.5;
-export const EYE_LEVEL_LENS_MM = 24;
+export const EYE_LEVEL_LENS_MM = 30;
 
 export function validEyeLevelCamera(value: unknown): value is EyeLevelCamera {
   if (!value || typeof value !== "object") return false;
