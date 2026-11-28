@@ -49,7 +49,7 @@ export async function fetchStudioPhoto(value: string, label: string, fetcher: ty
 }
 
 /** Shell is IMAGE 1; primary studio photos are always IMAGE 2 onward, before any swatches/layout. */
-export async function studioFurnitureInputs(pieces: RoomFurnitureReference[], fetcher: typeof fetch = fetch): Promise<FurnitureImageInput[]> {
+export async function studioFurnitureInputs(pieces: RoomFurnitureReference[], fetcher: typeof fetch = fetch, preserveAppearance = false): Promise<FurnitureImageInput[]> {
   requireRoomFurnitureReferences(pieces);
   const cache = new Map<string, Promise<string>>();
   const photo = (url: string, label: string, originalSize = true) => {
@@ -66,7 +66,7 @@ export async function studioFurnitureInputs(pieces: RoomFurnitureReference[], fe
   for (const [index, piece] of pieces.entries()) {
     for (const finish of piece.selected_finishes ?? []) {
       if (!finish.image_url) continue; // Unpictured finishes stay explicitly unpictured, never invented.
-      supplements.push({ type: "text", text: `PRODUCT ${index + 1} (${piece.product_name}), selected ${finish.axis}: ${finish.name}. Apply this swatch ONLY to this product's named axis; preserve its studio-photo geometry and all other materials.` });
+      supplements.push({ type: "text", text: `PRODUCT ${index + 1} (${piece.product_name}), selected ${finish.axis}: ${finish.name}. ${preserveAppearance ? "Identity reference ONLY: retain the existing finish in IMAGE 1 unless this exact axis is explicitly requested to change. Moving or removing a piece never authorizes a finish change." : "Apply this swatch ONLY to this product's named axis; preserve its studio-photo geometry and all other materials."}` });
       supplements.push({ type: "image_url", image_url: { url: await photo(finish.image_url, `${piece.product_name} ${finish.axis}`, false) } });
     }
     for (const extra of piece.secondary_image_urls ?? []) {
@@ -75,4 +75,13 @@ export async function studioFurnitureInputs(pieces: RoomFurnitureReference[], fe
     }
   }
   return [...primary.flat(), ...supplements];
+}
+
+/** Active render is always first; every placed instance keeps its original visual references. */
+export async function proposalRefinementInputs(baseImage: string, pieces: RoomFurnitureReference[], fetcher: typeof fetch = fetch): Promise<FurnitureImageInput[]> {
+  if (!baseImage) throw new Error("The active proposal image is required. Your room is unchanged.");
+  return [
+    { type: "image_url", image_url: { url: baseImage } },
+    ...await studioFurnitureInputs(pieces, fetcher, true),
+  ];
 }

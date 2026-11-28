@@ -29,10 +29,10 @@ describe("full-frame room furniture reference routing", () => {
     expect(targeted).toContain("Rift CTS IS the explicit target");
     expect(targeted).toContain("COMPLETELY ERASE");
     expect(targeted).toContain("1:1 rounded-square (squircle)");
-    expect(targeted).not.toContain("keep the exact silhouette, carved stone base, and wood top of the center Rift CTS Coffee Table unchanged");
+    expect(targeted).not.toContain("keep the exact silhouette, carved stone slab and wood legs");
     const keptImages = roomFurnitureReferenceImages([rift, chair], ["Rift CTS"]).filter(p => p.image_url).map(p => p.image_url?.url);
     expect(keptImages).toEqual(["https://example.com/rua.jpg"]);
     const untouched = fullFrameFurnitureLock([rift], ["Rua Leblon"]);
-    expect(untouched).toContain("keep the exact silhouette, carved stone base, and wood top of the center Rift CTS Coffee Table unchanged");
+    expect(untouched).toContain("keep the exact silhouette, carved stone slab and wood legs");
   });
 });

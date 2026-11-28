@@ -50,11 +50,22 @@ export function fullFrameFurnitureLock(pieces: RoomFurnitureReference[], targetP
   const riftTargeted = targetProductNames.some(name => /\brift\s+cts\b/i.test(name));
   const riftClause = !riftPiece ? "" : riftTargeted
     ? ` Rift CTS IS the explicit target of this correction: the center table currently in IMAGE 1 is WRONG (it is stretched into an elongated oval). COMPLETELY ERASE that elongated oval table and its shadow down to clean marble floor, then rebuild a brand-new 1:1 rounded-square (squircle) Rift CTS table from scratch matching ${eyeLevelShapeGuardrail(riftPiece)} and the provided angle photos — with four distinct softly bowed sides and four broad rounded corners, equal width and depth in floor perspective — while keeping every surrounding chair, window, kitchen and the exact aspect ratio of IMAGE 1 100% unchanged.`
-    : " Specifically keep the exact silhouette, carved stone base, and wood top of the center Rift CTS Coffee Table unchanged unless Rift CTS itself is the explicit target. Never replace it with a generic table, change its top/base materials or stretch its footprint.";
+    : " Specifically keep the exact silhouette, carved stone slab and wood legs of the Rift CTS Coffee Table unchanged. Moving it changes its position ONLY, never its geometry, slab, legs, proportions or materials. Never replace it with a generic table or stretch its footprint.";
   return `FULL-FRAME SEAMLESS EDIT: IMAGE 1 is the entire current room image, not a cropped patch. Return ONE complete image at the identical framing and aspect ratio. Never crop a rectangular region, paste a patch, create a rectangular cutout, or leave a seam across windows, adjacent pieces or reflections. No inpainting mask is supplied; the marked coordinates identify the target only, not a rectangular edit boundary.
 Keep the entire architectural shell, window mullions, bay view, marble floor reflections, and all other furniture pieces 100% identical; replace ONLY the explicitly specified target item with the specified new item and selected finish, matching the exact natural daylight direction and floor shadows.
 Preserve 100% of the architecture, window mullions, flooring, and all non-swapped furniture pieces exactly as they appear. Modify ONLY the target item specified and its physically necessary contact shadow/reflection. Keep the original camera, lens, positions, sizes, occlusions, colour balance and exposure. Product references are visual ground truth, NEVER permission to restage non-target pieces or reapply their finishes.${riftClause}
 ALL ACTIVE ROOM PRODUCTS (labelled reference images follow; preserve every non-target design, silhouette and existing finish):
+${roomFurnitureReferenceText(pieces)}`;
+}
+
+export function proposalRefinementLock(pieces: RoomFurnitureReference[]) {
+  return `IMMUTABLE BASE RENDER & PRODUCT REFERENCE LOCK: IMAGE 1 is the CURRENT ACTIVE furnished render and the sole architectural/camera authority, not a new room to generate. IMAGE 2 onward are the original high-resolution studio photographs of EVERY placed catalogue instance, followed by labelled selected swatches and angles. These are identity checks, never permission to restage the room.
+Preserve 100% of the walls, windows, terrace door, kitchen opening, flooring, and all non-moved furniture pieces pixel-for-pixel. Apply ONLY the requested position/refinement change without redesigning any furniture silhouette.
+MOVE: relocate ONLY the marked instance from source to destination. Retain its exact sculptural silhouette, proportions, carved details, legs, joinery and current materials; do not replace, rebuild or reinterpret it. Other instances of the same product stay untouched.
+REMOVE: erase ONLY each marked instance and its necessary contact shadow/reflection. Reveal the immediately surrounding existing background naturally. A removed product reference identifies what to erase, NOT a piece to reinsert elsewhere. Preserve every remaining instance.
+REFINE: apply ONLY the explicit request to the target, preserving its authentic catalogue geometry. Never turn Rift CTS into an oval bowl, pedestal or generic table: retain its carved stone slab and wood legs. Retain the original armchair frames/upholstery and Yoma Console joinery. Unspecified finishes and non-target pieces stay exactly as IMAGE 1 shows.
+Keep the exact full-frame crop, aspect ratio, camera, daylight, exposure, window/door edges and kitchen opening. Do not copy architecture from a plan, relight, add décor or reinterpret materials. Change only the target and physically necessary shadows/reflections; return one seamless complete image without overlays or pasted rectangular patches.
+PLACED CATALOGUE IDENTITIES:
 ${roomFurnitureReferenceText(pieces)}`;
 }
 

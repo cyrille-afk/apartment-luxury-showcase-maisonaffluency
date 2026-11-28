@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { fetchStudioPhoto, fullResolutionStudioUrl, studioFurnitureInputs } from "../../supabase/functions/_shared/studioFurnitureReferences";
+import { fetchStudioPhoto, fullResolutionStudioUrl, proposalRefinementInputs, studioFurnitureInputs } from "../../supabase/functions/_shared/studioFurnitureReferences";
 import type { RoomFurnitureReference } from "../../supabase/functions/_shared/roomFurnitureEditing";
 
 const bytes = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10, 20, 30, 40, 50]);
@@ -7,6 +7,20 @@ const response = () => new Response(bytes, { headers: { "content-type": "image/p
 const pieces: RoomFurnitureReference[] = ["Yoma CLW Console", "Rift CTS", "Mono STS", "GUM left", "GUM right"].map((product_name, i) => ({ product_name, image_url: `https://res.cloudinary.com/studio/image/upload/c_fill,w_200,h_200,q_auto/v1/piece-${i}.png` }));
 
 describe("original studio photo references", () => {
+  for (const action of ["Move Furniture", "Remove Furniture", "Refine"]) {
+    it(`${action} keeps the active render first and all five original product references including both chairs`, async () => {
+      const fetcher = vi.fn<typeof fetch>().mockImplementation(async () => response());
+      const activeRender = "data:image/png;base64,aWNvbg==";
+      const inputs = await proposalRefinementInputs(activeRender, pieces, fetcher);
+      expect(inputs.filter(p => p.type === "image_url")[0]).toEqual({ type: "image_url", image_url: { url: activeRender } });
+      expect(inputs.filter(p => p.type === "image_url")).toHaveLength(6);
+      expect(fetcher.mock.calls.map(call => call[0])).toEqual(pieces.map(p => fullResolutionStudioUrl(p.image_url)));
+    });
+  }
+  it("refinement stops before inference when any placed reference or the active render is missing", async () => {
+    await expect(proposalRefinementInputs("", pieces)).rejects.toThrow("active proposal image");
+    await expect(proposalRefinementInputs("active.png", [{ product_name: "Rift CTS", image_url: "" }])).rejects.toThrow("reference photo");
+  });
   it("removes thumbnail delivery transforms without changing the asset, version or material edits", () => {
     expect(fullResolutionStudioUrl(pieces[0]?.image_url ?? "")).toBe("https://res.cloudinary.com/studio/image/upload/v1/piece-0.png");
     expect(fullResolutionStudioUrl("https://res.cloudinary.com/studio/image/upload/c_fill,w_200/e_grayscale/v7/chairs/gum.png")).toBe("https://res.cloudinary.com/studio/image/upload/e_grayscale/v7/chairs/gum.png");

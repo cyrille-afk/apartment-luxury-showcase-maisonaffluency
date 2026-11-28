@@ -1022,3 +1022,8 @@
 ## Rift CTS finishes
 - [x] Client/project board drawer offers wood × stone choices for size-priced pieces.
 - [ ] Private viewing room still shows Rift swatches as "being curated" (needs server-side finish projection + lock validation).
+
+## Expanded proposal furniture edit lock
+- [x] Use the active render plus every placed original studio reference for move/remove/refine; remove conflicting layout/material/replacement instructions.
+- [x] 27 reference/removal/framing regressions pass; function boot/deployment/live-start check pass; preview build OK. Expanded and inline proposal edits and removal dialog were read and share the updated request handler.
+- [ ] Verify actual generated furniture/architecture visually: the available signed-in account shows “No studio yet” instead of this project's editor, so the real expanded edit flow is blocked; pixel-perfect preservation is not verified.

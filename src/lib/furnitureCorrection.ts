@@ -22,11 +22,10 @@ export function furnitureCorrectionRequest(imageUrl: string, piece: ProposalProd
 export function furnitureRemovalRequest(imageUrl: string, piece: ProposalProduct, area: CorrectionArea, products: ProposalProduct[]) {
   correctionBounds(area, 100, 100);
   if (!products.some(p => p.id === piece.id)) throw new Error("Choose an active room piece to remove.");
-  const remaining = products.filter(p => p.id !== piece.id);
-  if (remaining.length) requireRoomFurnitureReferences(remaining);
+  requireRoomFurnitureReferences(products);
   return {
     mode: "proposal_refine", imageUrl, referenceImageUrl: null,
-    placements: remaining.map(p => ({ product_id: p.product_id ?? null, product_name: p.product_name, brand_name: p.brand_name, image_url: p.image_url, dimensions: p.dimensions ?? null, materials: p.materials ?? null, material_override: p.material_override ?? null, selected_finishes: p.selected_finishes ?? [] })),
+    placements: products.map(p => ({ product_id: p.product_id ?? null, product_name: p.product_name, brand_name: p.brand_name, image_url: p.image_url, dimensions: p.dimensions ?? null, materials: p.materials ?? null, material_override: p.material_override ?? null, selected_finishes: p.selected_finishes ?? [] })),
     markerHints: { remove_points: [{ x_percent: area.x + area.width / 2, y_percent: area.y + area.height / 2, label: piece.product_name }] },
     refinementPrompt: `REMOVE ONLY ONE INSTANCE of ${piece.product_name} by ${piece.brand_name} inside x=${area.x}% to ${area.x + area.width}%, y=${area.y}% to ${area.y + area.height}% (origin top-left). Erase the complete object and its own contact shadow/reflection; reconstruct the previously hidden floor/wall naturally. Do not add a replacement. If an identical piece exists elsewhere, KEEP that other instance exactly unchanged. These bounds identify the object, NOT a rectangular patch or crop. Preserve all other furniture, materials, architecture, camera, lens, framing, daylight, exposure and the exact image aspect ratio. Return one seamless FULL-FRAME room image.`,
   };

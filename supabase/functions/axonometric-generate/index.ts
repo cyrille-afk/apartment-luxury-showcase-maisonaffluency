@@ -7,8 +7,8 @@ import { requireEyeLevelTargets } from "../_shared/eyeLevelPlacement.ts";
 import { ROOM_TYPES, type RoomType } from "../_shared/roomZone.ts";
 import { prepareEyeLevelFrame, restoreEyeLevelFrame } from "../_shared/eyeLevelFrameImage.ts";
 import { generateChatCompletion } from "npm:@lovable.dev/ai-gateway@0.1.15";
-import { fullFrameFurnitureLock, requireRoomFurnitureReferences, roomFurnitureReferenceImages, roomFurnitureReferenceText, selectSecondaryReferencePhotos } from "../_shared/roomFurnitureEditing.ts";
-import { studioFurnitureInputs } from "../_shared/studioFurnitureReferences.ts";
+import { fullFrameFurnitureLock, proposalRefinementLock, requireRoomFurnitureReferences, roomFurnitureReferenceImages, roomFurnitureReferenceText, selectSecondaryReferencePhotos } from "../_shared/roomFurnitureEditing.ts";
+import { proposalRefinementInputs, studioFurnitureInputs } from "../_shared/studioFurnitureReferences.ts";
 import { safeFetch } from "../_shared/safeFetch.ts";
 import {
   AXO_CUTAWAY_CAMERA_GUARD,
@@ -75,6 +75,7 @@ serve(async (req) => {
     const useDepthMap = body.useDepthMap !== false; // default ON
 
     if (!imageUrl) throw new Error("imageUrl is required");
+    if (mode === "proposal_refine") requireRoomFurnitureReferences(placements);
     if (body.fullFrameFurnitureEdit) {
       if (mode !== "product_swap" || maskDataUrl) throw new Error("Full-frame furniture correction requires a product swap without a mask.");
       requireRoomFurnitureReferences(placements);
@@ -547,7 +548,7 @@ Style: ${defaultStyle}.`;
 
 IMAGE ORDER:
 1. CURRENT PROPOSAL (base image to preserve)
-${referenceImageUrl ? "2. ORIGINAL CLIENT LAYOUT (for room geometry and furniture zones only)\n3+ PRODUCT REFERENCE IMAGES (exact products that must appear)" : "2+ PRODUCT REFERENCE IMAGES (exact products that must appear); no layout is supplied"}
+2+ ORIGINAL STUDIO PRODUCT PHOTOS (one per placed instance), then labelled swatches/angles. No original layout or empty shell is supplied; IMAGE 1 alone governs architecture and positioning.
 
 PRODUCT REFERENCES:
 ${productList || "No explicit product list provided."}
@@ -562,13 +563,13 @@ STRICT EDIT RULES:
 - Start from IMAGE 1 (CURRENT PROPOSAL) and keep it as the visual baseline.
 - Only change what the admin explicitly asked for.
 - Keep all untouched areas pixel-consistent with IMAGE 1 (same walls, floor, lighting, décor, and camera framing).
-- Do NOT copy furniture appearance from IMAGE 2; use IMAGE 2 only for spatial guidance.
+- IMAGE 2 onward show authentic catalogue pieces, not a layout. Use each only to preserve its own product identity.
 - For swaps/replacements, match products to the PRODUCT REFERENCE IMAGES exactly (shape, color, material, silhouette, and scale).
 - If remove markers are provided, remove objects at those coordinates and inpaint naturally with surrounding surfaces.
 - Do not introduce new furniture or alter unrelated objects.
 
 Style: ${defaultStyle}. Output one cohesive render with minimal collateral changes.
-${fullFrameFurnitureLock(placements || [])}`;
+${proposalRefinementLock(placements)}`;
     } else if (mode === "apply_texture") {
       const wallDescription = body.wallDescription || "the most prominent wall";
       prompt = `You are given an interior architectural render AND a texture/wallpaper swatch image. Apply the provided texture/wallpaper to ${wallDescription} in the scene. The texture should be applied realistically — matching the wall's perspective, lighting, and scale. Tile or repeat the pattern naturally as a real wallpaper installation would look.
@@ -896,7 +897,7 @@ Style: ${buildStyle()}. The output must look like the SAME render session as the
       }
     }
 
-    // Proposal refine: keep current proposal as base image, then provide layout + product refs
+    // Move/remove/refine share one immutable active render, then ALL original product references.
     if (mode === "proposal_refine") {
       // content already has [text_prompt, current_proposal_image]
       if (placements && Array.isArray(placements)) {
@@ -907,13 +908,9 @@ Style: ${buildStyle()}. The output must look like the SAME render session as the
           return { ...p, secondary_image_urls: extras };
         });
         if (references.length) {
-          content.push(...await studioFurnitureInputs(references, (url, init) => safeFetch(String(url), init)));
+          content.splice(1, content.length - 1, ...await proposalRefinementInputs(imageUrl, references, (url, init) => safeFetch(String(url), init)));
           content.push({ type: "text", text: "Refinement references are identity checks only: preserve every non-target item and its current finish exactly as IMAGE 1 shows. Apply studio geometry/swatches ONLY to an explicitly requested change; never restage the other furniture." });
         }
-      }
-      if (referenceImageUrl) {
-        content.push({ type: "text", text: "Secondary layout only; preserve IMAGE 1's camera and room. Never copy furniture designs from this layout." });
-        content.push({ type: "image_url", image_url: { url: referenceImageUrl } });
       }
     }
 
@@ -929,7 +926,7 @@ Style: ${buildStyle()}. The output must look like the SAME render session as the
     }
 
     // Append style reference image as the LAST image so the AI sees it after all other inputs
-    if (styleReferenceUrl) {
+    if (styleReferenceUrl && mode !== "proposal_refine") {
       content.push({
         type: "image_url",
         image_url: { url: styleReferenceUrl },

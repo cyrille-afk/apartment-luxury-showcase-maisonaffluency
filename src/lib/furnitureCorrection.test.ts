@@ -10,13 +10,13 @@ describe("single-piece correction", () => {
     const request = furnitureRemovalRequest("current.png", chair, { x: 10, y: 30, width: 20, height: 40 }, [chair, duplicate, rift]);
     expect(request.mode).toBe("proposal_refine");
     expect(request.imageUrl).toBe("current.png");
-    expect(request.placements).toHaveLength(2);
-    expect(request.placements.map(p => p.product_name)).toEqual([duplicate.product_name, rift.product_name]);
+    expect(request.placements).toHaveLength(3);
+    expect(request.placements.map(p => p.product_name)).toEqual([chair.product_name, duplicate.product_name, rift.product_name]);
     expect(request.markerHints.remove_points[0]).toEqual({ x_percent: 20, y_percent: 50, label: chair.product_name });
     expect([chair, duplicate, rift].filter(p => p.id !== chair.id).map(p => p.id)).toEqual(["second-chair", "rift"]);
   });
-  it("allows removing the final piece without adding a replacement reference", () => {
-    expect(furnitureRemovalRequest("current.png", chair, { x: 10, y: 30, width: 20, height: 40 }, [chair]).placements).toEqual([]);
+  it("keeps the final piece's identification reference when removing it without a replacement", () => {
+    expect(furnitureRemovalRequest("current.png", chair, { x: 10, y: 30, width: 20, height: 40 }, [chair]).placements.map(p => p.image_url)).toEqual([chair.image_url]);
   });
   it("uses one replacement reference with all active-room identities retained as preservation metadata", () => {
     const request = furnitureCorrectionRequest("https://example.com/current.png", chair, { x: 50, y: 40, width: 30, height: 50 }, [chair, rift]);

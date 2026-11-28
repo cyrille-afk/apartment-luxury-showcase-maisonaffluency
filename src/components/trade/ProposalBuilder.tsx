@@ -473,7 +473,6 @@ export default function ProposalBuilder({
 
   const refineProposal = async () => {
     if (!proposalResult || !refinementPrompt.trim()) return;
-    if (renderView === "eye-level") { try { requireEyeLevelTargets(stagingProducts); } catch (error) { setRenderError(error instanceof Error ? error.message : "Assign every furniture pin."); return; } }
     setRefining(true);
     try {
       const { data: sessionData } = await supabase.auth.getSession();
@@ -506,7 +505,7 @@ export default function ProposalBuilder({
       const { data, error } = await supabase.functions.invoke("axonometric-generate", {
         body: await prepareAiRenderImages({
           imageUrl: toAbsoluteUrl(proposalResult),
-          referenceImageUrl: renderView === "eye-level" ? null : toAbsoluteUrl(furnishedImageUrl),
+          referenceImageUrl: null,
           mode: "proposal_refine",
           ...(renderView === "eye-level" && roomZone ? { roomType: roomZone.room_type } : {}),
           style,
@@ -531,6 +530,7 @@ export default function ProposalBuilder({
       setRefinementPrompt("");
       onResult?.({ imageUrl: data.imageUrl, storedUrl: data.storedUrl, text: data.text, pinnedProducts: selectedProducts, renderView, draft: { ...draft, axonometricResult: nextResults.axonometric, eyeLevelResult: nextResults["eye-level"] } });
       toast({ title: "Proposal refined successfully" });
+      clearMarkers();
     } catch (e: any) {
       toast({ title: "Refinement failed", description: e?.message || "Unknown error", variant: "destructive" });
     } finally {
@@ -1415,7 +1415,7 @@ export default function ProposalBuilder({
             <Button
               size="sm"
               variant="outline"
-              onClick={() => { refineProposal(); clearMarkers(); }}
+              onClick={() => { void refineProposal(); }}
               disabled={refining || !refinementPrompt.trim()}
             >
               {refining ? <DotCircleLoader size="sm" className="w-3.5 h-3.5" /> : <Send className="w-3.5 h-3.5" />}
