@@ -5,6 +5,8 @@ import { withCache } from "../_shared/aiCache.ts";
 import { eyeLevelShellPrompt, eyeLevelStagingPrompt } from "../_shared/eyeLevelPrompt.ts";
 import { requireEyeLevelTargets } from "../_shared/eyeLevelPlacement.ts";
 import { ROOM_TYPES, type RoomType } from "../_shared/roomZone.ts";
+import { prepareEyeLevelFrame, restoreEyeLevelFrame } from "../_shared/eyeLevelFrameImage.ts";
+import { generateChatCompletion } from "npm:@lovable.dev/ai-gateway@0.1.15";
 import { fullFrameFurnitureLock, requireRoomFurnitureReferences, roomFurnitureReferenceImages, roomFurnitureReferenceText, selectSecondaryReferencePhotos } from "../_shared/roomFurnitureEditing.ts";
 import {
   AXO_CUTAWAY_CAMERA_GUARD,
@@ -81,6 +83,9 @@ serve(async (req) => {
       if (!Array.isArray(placements) || placements.length === 0 || placements.length > 10) throw new Error("Select between 1 and 10 products.");
       requireEyeLevelTargets(placements);
     }
+    // Shared by admin staging, private-room jobs and subsequent full-frame edits.
+    const preserveFrame = mode === "eye_level_shell" || mode === "eye_level_proposal" || mode === "proposal_refine" || (mode === "product_swap" && body.fullFrameFurnitureEdit === true);
+    const preparedFrame = preserveFrame ? await prepareEyeLevelFrame(imageUrl) : null;
 
     // ---- Depth map helper (Replicate Depth Anything V2 via Lovable gateway) ----
     // Returns a public depth-map URL for the given input image, or null on failure.
@@ -979,18 +984,40 @@ The final output must be indistinguishable from a professional Corona Renderer 1
     console.log(`[axo-gen] mode=${mode}, tier=${tier}, model=${selectedModel}, images=${content.filter((c: any) => c.type === "image_url").length}`);
     if (mode === "eye_level_proposal") content.push({ type: "text", text: "Final priority: immutable IMAGE 1 architecture and the assigned product pins override ALL style/quality/refinement suggestions. Keep original daylight, wall/window/floor lines and existing built-ins. Never invent a kitchen island or place a console against glass or in a kitchen work zone." });
     if (mode === "product_swap" || mode === "proposal_refine") content.push({ type: "text", text: "FINAL EDIT PRIORITY overrides style and premium quality suggestions: preserve the COMPLETE IMAGE 1 framing, aspect ratio, lens, daylight, colour, architectural edges and all non-target furniture exactly. Do not zoom, pan, crop, widen, relight or redesign the room. Return one seamless full-frame image; no patches, inset images, overlays or annotations. Change ONLY explicitly requested furniture and necessary contact shadows/reflections." });
+    if (preparedFrame) {
+      const f = preparedFrame.frame;
+      content[1] = { type: "image_url", image_url: { url: preparedFrame.imageUrl } };
+      content.push({ type: "text", text: `EXACT CANVAS LOCK: output ${f.aspect} canvas, matching IMAGE 1 edge to edge. IMAGE 1 contains the COMPLETE original ${f.width} × ${f.height} room inside a temporary neutral matte. Room bounds on this canvas: left ${(100*f.x/f.canvasWidth).toFixed(4)}%, top ${(100*f.y/f.canvasHeight).toFixed(4)}%, width ${(100*f.width/f.canvasWidth).toFixed(4)}%, height ${(100*f.height/f.canvasHeight).toFixed(4)}%. ALL earlier camera/pin/target/removal percentages refer to this INNER ROOM rectangle, NOT the outer padded canvas. Preserve the matte and room boundaries exactly: never expand the room into the matte, crop, zoom, pan, stretch, change lens or recompose the base. ${mode === "eye_level_shell" ? "Project only the supplied cropped room into the requested eye-level direction; no additional rooms." : "Keep every source room edge and architectural landmark at its identical normalized position; furniture insertion/edits must not reframe the room."} The matte is removed after generation, restoring the exact original room crop and aspect ratio.` });
+    }
+    if (mode === "eye_level_shell" && typeof body.cameraGuideImageUrl === "string") {
+      content.push({ type: "text", text: "CAMERA DIRECTION GUIDE: same original room crop, camera dot = standing position, arrow tip = direction to face. This unpadded guide is for direction only, not a different canvas or architectural reference. Remove all guide markings from the generated photograph." });
+      content.push({ type: "image_url", image_url: { url: body.cameraGuideImageUrl } });
+    }
 
     const MAX_ATTEMPTS = 3;
     let generatedImage: string | undefined;
     let textResponse = "";
 
-    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    for (let attempt = 1; attempt <= (preparedFrame ? 1 : MAX_ATTEMPTS); attempt++) {
       // On final attempt, always escalate to Pro model as fallback
       const attemptModel = (attempt === MAX_ATTEMPTS && tier === "draft") ? "google/gemini-3-pro-image-preview" : selectedModel;
       if (attempt > 1) {
         console.log(`[axo-gen] Retry attempt ${attempt} with model=${attemptModel}`);
       }
 
+      if (preparedFrame) {
+        const request = { messages: [{ role: "user" as const, content }], modalities: ["image", "text"] as ["image", "text"], temperature: 0, image_config: { aspect_ratio: preparedFrame.frame.aspect } };
+        // Canonical SDK names for the same existing Flash/Pro models, not a model change.
+        const result = tier === "draft"
+          ? await generateChatCompletion({ ...request, model: "google/gemini-3.1-flash-image" }, { maxRetries: 0 })
+          : await generateChatCompletion({ ...request, model: "google/gemini-3-pro-image" }, { maxRetries: 0 });
+        logAiUsage({ feature: "axonometric-generate", model: attemptModel, usage: result.usage }).catch(() => {});
+        generatedImage = result.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+        const responseText = result.choices?.[0]?.message?.content;
+        textResponse = typeof responseText === "string" ? responseText : "";
+        if (!generatedImage) throw new Error("No room image was returned. Your shell and furniture are unchanged.");
+        break;
+      }
       const aiResponse = await fetch(
         "https://ai.gateway.lovable.dev/v1/chat/completions",
         {
@@ -1052,6 +1079,7 @@ The final output must be indistinguishable from a professional Corona Renderer 1
     if (!generatedImage) {
       throw new Error("No image was generated. The AI may not have understood the input.");
     }
+    if (preparedFrame) generatedImage = await restoreEyeLevelFrame(generatedImage, preparedFrame.frame, mode === "eye_level_shell" ? undefined : imageUrl);
 
     // Upload the generated image to storage
     const base64Data = generatedImage.replace(/^data:image\/\w+;base64,/, "");

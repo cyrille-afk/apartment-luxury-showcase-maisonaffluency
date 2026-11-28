@@ -198,8 +198,10 @@ export default function ProposalBuilder({
       if (!roomZone || !validRoomZone(roomZone) || !user) throw new Error("Draw a crop around one room before generating its shell.");
       const localCamera = roomCropCamera(camera,roomZone);
       const crop = await cropRoomPlan(cameraPlanUrl,roomZone);
+      const cameraGuide = await cropRoomPlan(cameraPlanUrl,roomZone,localCamera);
+      const cameraGuideImageUrl = await new Promise<string>((resolve, reject) => { const reader = new FileReader(); reader.onload = () => typeof reader.result === "string" ? resolve(reader.result) : reject(new Error("Could not prepare the camera guide.")); reader.onerror = () => reject(new Error("Could not prepare the camera guide.")); reader.readAsDataURL(cameraGuide); });
       const croppedUrl = await uploadPrivateTradeAsset(`axonometric-sources/${user.id}/room-crop-${crypto.randomUUID()}.png`,crop,"image/png");
-      const { data, error } = await supabase.functions.invoke("axonometric-generate", { body: await prepareAiRenderImages({ mode: "eye_level_shell", imageUrl: croppedUrl, referenceImageUrl: null, camera: localCamera, roomType: roomZone.room_type, qualityTier }) });
+      const { data, error } = await supabase.functions.invoke("axonometric-generate", { body: await prepareAiRenderImages({ mode: "eye_level_shell", imageUrl: croppedUrl, cameraGuideImageUrl, referenceImageUrl: null, camera: localCamera, roomType: roomZone.room_type, qualityTier }) });
       if (error || data?.error) throw new Error(data?.error || error?.message || "Eye-level shell generation failed.");
       const url = data.storedUrl || data.imageUrl;
       if (!url) throw new Error("No eye-level image returned.");

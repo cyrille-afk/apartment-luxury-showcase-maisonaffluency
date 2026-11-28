@@ -1,5 +1,11 @@
 # Roadmap
 
+## Eye-level framing and camera guide
+- [x] Native-ratio matte keeps all source pixels; only temporary matte is removed, restoring exact source dimensions. Wrong-ratio outputs and substantial upper-room changes in furniture edits are rejected before storage/application.
+- [x] Draw the camera direction on the cropped room image and send the same guide with shell generation; desktop and 390px phone inspected.
+- [x] Real shell returned 1328×817; real five-piece proposal returned the source shell's exact 1312×800. That proposal still redesigned architecture; the final safeguard rejects that observed output and accepts an unchanged source. 25 regressions, boot/live checks and preview pass. AI architecture fidelity is not guaranteed; a rejected render preserves the original.
+- [x] Read all shared touchpoints: builder shell/staging/refinement, correction/removal requests, private-room server job and queue RPC, room/angle buyer displays, save dialogs and proposal PDF images. All generation paths use the central frame guard; displays/PDFs use contain without cropping. No settled records or access rules changed.
+
 ## Placement and furniture removal
 - [x] Stale shells no longer disable pins/notes. Explicit Keep this room view preserves its image and targets; pin edits retain the reviewed render. Verified pin movement, preflight enablement and refresh persistence in the correct signed-in account.
 - [x] Remove piece opens marked-area full-frame removal, preserves remaining references, commits image and selection after review and restores both via Undo. Real five-piece GUM removal returned 200, visually removed only the left chair, Apply changed 5→4 and Undo restored the original five/image. Cancel kept both unchanged; 31 regressions and preview build pass. Original open draft untouched; AI positioning remains approximate.
